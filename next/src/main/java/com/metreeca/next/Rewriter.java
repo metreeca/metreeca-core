@@ -19,7 +19,7 @@
 
 package com.metreeca.next;
 
-import com.metreeca.jeep.IO;
+import com.metreeca.tray.IO;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;

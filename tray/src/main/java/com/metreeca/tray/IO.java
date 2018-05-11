@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep;
+package com.metreeca.tray;
 
 import java.io.*;
 import java.net.URL;
@@ -127,7 +127,7 @@ public final class IO {
 	/**
 	 * Retrieves the text of a class resource.
 	 *
-	 * @param master    the target class or an instance of the target class  for the resource to be read
+	 * @param master   the target class or an instance of the target class  for the resource to be read
 	 * @param resource the path of the resource to be read, relative to the target class
 	 *
 	 * @return the textual content of the given {@code resource}

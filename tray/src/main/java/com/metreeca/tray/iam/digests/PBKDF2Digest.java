@@ -19,7 +19,7 @@
 
 package com.metreeca.tray.iam.digests;
 
-import com.metreeca.jeep.IO;
+import com.metreeca.tray.IO;
 import com.metreeca.tray.iam.Digest;
 
 import java.security.NoSuchAlgorithmException;

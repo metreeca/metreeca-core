@@ -29,6 +29,7 @@ import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.*;
@@ -39,8 +40,6 @@ import java.time.temporal.TemporalQueries;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static com.metreeca.jeep.IO.UTF8Set;
-
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
@@ -50,6 +49,7 @@ import static java.util.stream.Collectors.toList;
 
 public final class Values {
 
+	public static final Charset UTF8=Charset.forName("UTF-8");
 	public static final Pattern IRIPattern=Pattern.compile("\\w+:.*");
 
 
@@ -371,7 +371,7 @@ public final class Values {
 			throw new NullPointerException("null text");
 		}
 
-		return literal(nameUUIDFromBytes(text.getBytes(UTF8Set)).toString());
+		return literal(nameUUIDFromBytes(text.getBytes(UTF8)).toString());
 	}
 
 

@@ -19,7 +19,7 @@
 
 package com.metreeca.link;
 
-import com.metreeca.jeep.IO;
+import com.metreeca.tray.IO;
 
 import java.io.*;
 import java.util.function.Consumer;

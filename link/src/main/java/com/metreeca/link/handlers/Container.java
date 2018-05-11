@@ -19,7 +19,6 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.jeep.IO;
 import com.metreeca.jeep.rdf.Cell;
 import com.metreeca.link.*;
 import com.metreeca.spec.*;
@@ -30,6 +29,7 @@ import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Outliner;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;

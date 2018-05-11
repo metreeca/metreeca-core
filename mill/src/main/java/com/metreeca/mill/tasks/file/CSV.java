@@ -41,9 +41,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.metreeca.jeep.IO.reader;
 import static com.metreeca.jeep.rdf.Values.*;
 import static com.metreeca.mill._Cell.cell;
+import static com.metreeca.tray.IO.reader;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.Math.max;

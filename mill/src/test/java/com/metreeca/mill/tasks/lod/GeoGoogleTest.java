@@ -19,12 +19,12 @@
 
 package com.metreeca.mill.tasks.lod;
 
-import com.metreeca.jeep.IO;
 import com.metreeca.mill.Mill;
 import com.metreeca.mill.tasks.Item;
 import com.metreeca.mill.tasks.Peek;
 import com.metreeca.mill.tasks.Pipe;
 import com.metreeca.mill.tasks.xml.XSLT;
+import com.metreeca.tray.IO;
 
 import org.junit.Test;
 

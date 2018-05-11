@@ -19,7 +19,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.jeep.IO;
+import com.metreeca.tray.IO;
 
 import org.junit.Rule;
 import org.junit.Test;

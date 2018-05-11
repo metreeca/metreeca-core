@@ -19,8 +19,8 @@
 
 package com.metreeca.tray.xml;
 
-import com.metreeca.jeep.IO;
 import com.metreeca.jeep.rdf.Values;
+import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
 
 import net.sf.saxon.lib.ExtensionFunctionDefinition;

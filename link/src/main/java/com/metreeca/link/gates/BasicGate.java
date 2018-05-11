@@ -19,8 +19,8 @@
 
 package com.metreeca.link.gates;
 
-import com.metreeca.jeep.IO;
 import com.metreeca.link.*;
+import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Setup;
 

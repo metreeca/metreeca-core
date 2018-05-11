@@ -19,8 +19,8 @@
 
 package com.metreeca.next.wrappers;
 
-import com.metreeca.jeep.IO;
 import com.metreeca.next.*;
+import com.metreeca.tray.IO;
 import com.metreeca.tray.sys.Loader;
 
 import java.util.NoSuchElementException;

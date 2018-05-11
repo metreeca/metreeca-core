@@ -19,7 +19,7 @@
 
 package com.metreeca.link;
 
-import com.metreeca.jeep.IO;
+import com.metreeca.tray.IO;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -31,8 +31,8 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import static com.metreeca.jeep.IO.data;
-import static com.metreeca.jeep.IO.input;
+import static com.metreeca.tray.IO.data;
+import static com.metreeca.tray.IO.input;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
