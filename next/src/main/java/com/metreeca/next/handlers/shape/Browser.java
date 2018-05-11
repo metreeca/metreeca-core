@@ -21,7 +21,6 @@ package com.metreeca.next.handlers.shape;
 
 
 import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.jeep.rdf.LDP;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
 import com.metreeca.spec.Shape;
@@ -31,6 +30,7 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;

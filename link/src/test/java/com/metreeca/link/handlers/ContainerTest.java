@@ -19,7 +19,6 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.jeep.rdf.LDP;
 import com.metreeca.link.*;
 import com.metreeca.mill.tasks.file.JSON;
 import com.metreeca.spec.Shape;
@@ -30,6 +29,7 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.Ignore;
@@ -40,6 +40,7 @@ import static com.metreeca.jeep.rdf.Values.literal;
 import static com.metreeca.jeep.rdf.Values.statement;
 import static com.metreeca.jeep.rdf.ValuesTest.*;
 import static com.metreeca.link.HandlerTest.*;
+import static com.metreeca.spec.Shape.only;
 import static com.metreeca.spec.Shape.update;
 import static com.metreeca.spec.Shape.verify;
 import static com.metreeca.spec.shapes.All.all;
@@ -79,7 +80,7 @@ public final class ContainerTest {
 					tools,
 
 					new Container(tools, and(
-							trait(RDFS.LABEL, verify(Shape.only(literal("Test Catalog")))),
+							trait(RDFS.LABEL, verify(only(literal("Test Catalog")))),
 							trait(LDP.CONTAINS, and(
 									trait(RDF.TYPE, all(term("Item"))),
 									trait(RDF.VALUE)
@@ -132,7 +133,7 @@ public final class ContainerTest {
 					tools,
 
 					new Container(tools, and(
-							trait(RDFS.LABEL, verify(Shape.only(literal("Test Catalog")))),
+							trait(RDFS.LABEL, verify(only(literal("Test Catalog")))),
 							trait(LDP.CONTAINS, and(
 									trait(RDF.TYPE, all(term("Item"))),
 									trait(RDF.VALUE)

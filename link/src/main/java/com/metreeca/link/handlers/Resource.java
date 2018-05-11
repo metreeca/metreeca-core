@@ -21,7 +21,6 @@ package com.metreeca.link.handlers;
 
 import com.metreeca.jeep.IO;
 import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.jeep.rdf.LDP;
 import com.metreeca.link.*;
 import com.metreeca.spec.Issue.Level;
 import com.metreeca.spec.*;
@@ -36,6 +35,7 @@ import com.metreeca.tray.sys.Setup;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -99,7 +99,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 				_response.addHeader("Link", format(Link.ShapedResource)+"; rel=\"type\"")
 						.addHeader("Link", "<http://www.w3.org/ns/ldp#RDFResource>; rel=\"type\"")
 						.addHeader("Link", "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"")
-						.addHeader("Link", String.format("<%s?specs>; rel=\"%s\"", _request.getTarget(), LDP.CONSTRAINEDBY));
+						.addHeader("Link", String.format("<%s?specs>; rel=\"%s\"", _request.getTarget(), LDP.CONSTRAINED_BY));
 			}
 
 			sink.accept(_request, _response);
@@ -136,7 +136,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 			final IRI iri=iri(target+"?"+query);
 			final Collection<Statement> model=new ArrayList<>();
 
-			model.add(statement(target, LDP.CONSTRAINEDBY, iri));
+			model.add(statement(target, LDP.CONSTRAINED_BY, iri));
 
 			final Shape shape=this.shape
 					.accept(role(request.getRoles()))

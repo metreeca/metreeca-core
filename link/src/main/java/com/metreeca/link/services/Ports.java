@@ -20,7 +20,6 @@
 package com.metreeca.link.services;
 
 import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.jeep.rdf.LDP;
 import com.metreeca.jeep.rdf.Values;
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Container;
@@ -33,9 +32,7 @@ import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.*;
 
 import java.util.function.BiConsumer;
 
@@ -94,7 +91,7 @@ public final class Ports implements Service {
 
 	private static final Shape ContainerShape=verify(
 
-			trait(RDF.TYPE, and(required(), only(LDP.BASICCONTAINER))),
+			trait(RDF.TYPE, and(required(), only(LDP.BASIC_CONTAINER))),
 			trait(RDFS.LABEL, and(required(), only(literal(ContainerLabel)))),
 
 			trait(LDP.CONTAINS, ResourceShape));

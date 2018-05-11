@@ -19,10 +19,11 @@
 
 package com.metreeca.next.handlers.ldp;
 
-import com.metreeca.jeep.rdf.LDP;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
+
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.regex.Pattern;
 
