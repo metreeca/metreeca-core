@@ -50,18 +50,16 @@
 		</license>
 	</licenses>
 
-	<!-- update after creating github repo
 		<scm>
-			<connection>scm:git:git@github.com:metreeca/platform.git</connection>
-			<developerConnection>scm:git:git@github.com:metreeca/platform.git</developerConnection>
-			<url>https://github.com/metreeca/platform</url>
+			<connection>scm:git:git@github.com:metreeca/metreeca-core.git</connection>
+			<developerConnection>scm:git:git@github.com:metreeca/metreeca-core.git</developerConnection>
+			<url>https://github.com/metreeca/metreeca-core</url>
 		</scm>
 
 		<issueManagement>
 			<system>GitHub</system>
-			<url>https://github.com/metreeca/platform/issues</url>
+			<url>https://github.com/metreeca/metreeca-core/issues</url>
 		</issueManagement>
-	-->
 
 	<modules>
 		<module>j2ee</module>
