@@ -36,7 +36,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
-import static com.metreeca.jeep.Jeep.union;
+import static com.metreeca.jeep.Sets.union;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;

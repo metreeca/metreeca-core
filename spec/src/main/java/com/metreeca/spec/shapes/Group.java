@@ -23,7 +23,7 @@ import com.metreeca.spec.Shape;
 
 import java.util.Collection;
 
-import static com.metreeca.jeep.Jeep.list;
+import static com.metreeca.jeep.Lists.list;
 
 
 /**

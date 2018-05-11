@@ -24,9 +24,9 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.list;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Lists.list;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 
 import static org.junit.Assert.assertEquals;
 

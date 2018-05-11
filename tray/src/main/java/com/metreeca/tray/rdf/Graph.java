@@ -41,7 +41,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.metreeca.jeep.Jeep.concat;
+import static com.metreeca.jeep.Lists.concat;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
 import static com.metreeca.spec.shapes.And.and;

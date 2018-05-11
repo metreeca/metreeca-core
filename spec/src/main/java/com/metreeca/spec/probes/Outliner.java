@@ -32,8 +32,8 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static com.metreeca.jeep.Jeep.set;
-import static com.metreeca.jeep.Jeep.union;
+import static com.metreeca.jeep.Sets.set;
+import static com.metreeca.jeep.Sets.union;
 import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.All.all;
 

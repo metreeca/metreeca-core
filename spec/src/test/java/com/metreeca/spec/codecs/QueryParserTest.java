@@ -19,7 +19,7 @@
 
 package com.metreeca.spec.codecs;
 
-import com.metreeca.jeep.Jeep;
+import com.metreeca.jeep.Lists;
 import com.metreeca.spec.Query;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.queries.Graph;
@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 
 import javax.json.JsonException;
 
-import static com.metreeca.jeep.Jeep.list;
+import static com.metreeca.jeep.Lists.list;
 import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
@@ -127,22 +127,22 @@ public class QueryParserTest {
 	@org.junit.Test public void testParseSortingCriteria() {
 
 		graph("{ \"order\": \"\" }", shape, edges ->
-				assertEquals("empty path", Jeep.list(Query.increasing()), edges.getOrders()));
+				assertEquals("empty path", Lists.list(Query.increasing()), edges.getOrders()));
 
 		graph("{ \"order\": \"+\" }", shape, edges ->
-				assertEquals("empty path increasing", Jeep.list(Query.increasing()), edges.getOrders()));
+				assertEquals("empty path increasing", Lists.list(Query.increasing()), edges.getOrders()));
 
 		graph("{ \"order\": \"-\" }", shape, edges ->
-				assertEquals("empty path decreasing", Jeep.list(Query.decreasing()), edges.getOrders()));
+				assertEquals("empty path decreasing", Lists.list(Query.decreasing()), edges.getOrders()));
 
 		graph("{ \"order\": \"first.rest\" }", shape, edges ->
-				assertEquals("path", Jeep.list(Query.increasing(first, rest)), edges.getOrders()));
+				assertEquals("path", Lists.list(Query.increasing(first, rest)), edges.getOrders()));
 
 		graph("{ \"order\": \"+first.rest\" }", shape, edges ->
-				assertEquals("path increasing", Jeep.list(Query.increasing(first, rest)), edges.getOrders()));
+				assertEquals("path increasing", Lists.list(Query.increasing(first, rest)), edges.getOrders()));
 
 		graph("{ \"order\": \"-first.rest\" }", shape, edges ->
-				assertEquals("path decreasing", Jeep.list(Query.decreasing(first, rest)), edges.getOrders()));
+				assertEquals("path decreasing", Lists.list(Query.decreasing(first, rest)), edges.getOrders()));
 
 		graph("{ \"order\": [] }", shape, edges ->
 				assertEquals("empty list", list(), edges.getOrders()));

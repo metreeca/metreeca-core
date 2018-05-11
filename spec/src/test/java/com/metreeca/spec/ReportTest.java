@@ -19,7 +19,7 @@
 
 package com.metreeca.spec;
 
-import com.metreeca.jeep.Jeep;
+import com.metreeca.jeep.Sets;
 import com.metreeca.spec.shapes.And;
 import com.metreeca.spec.shifts.Step;
 
@@ -27,8 +27,8 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
-import static com.metreeca.jeep.Jeep.list;
-import static com.metreeca.jeep.Jeep.set;
+import static com.metreeca.jeep.Lists.list;
+import static com.metreeca.jeep.Sets.set;
 import static com.metreeca.spec.Frame.frame;
 import static com.metreeca.spec.Frame.slot;
 import static com.metreeca.spec.Values.literal;
@@ -135,7 +135,7 @@ public class ReportTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@SafeVarargs private final Report trace(final Frame<Report>... traces) {
-		return Report.trace(set(), Jeep.set(traces));
+		return Report.trace(set(), Sets.set(traces));
 	}
 
 }

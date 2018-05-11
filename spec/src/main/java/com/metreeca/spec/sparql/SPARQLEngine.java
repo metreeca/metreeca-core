@@ -30,7 +30,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 
-import static com.metreeca.jeep.Jeep.concat;
+import static com.metreeca.jeep.Lists.concat;
 import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;

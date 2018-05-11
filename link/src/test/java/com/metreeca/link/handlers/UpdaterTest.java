@@ -26,8 +26,8 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.HandlerTest.model;
 import static com.metreeca.link.HandlerTest.response;
 import static com.metreeca.link.HandlerTest.tools;

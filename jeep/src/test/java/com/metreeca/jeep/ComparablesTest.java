@@ -21,17 +21,17 @@ package com.metreeca.jeep;
 
 import org.junit.Test;
 
-import static com.metreeca.jeep.Jeep.compare;
+import static com.metreeca.jeep.Comparables.compare;
 
 import static org.junit.Assert.assertEquals;
 
 
-public class JeepTest {
+public class ComparablesTest {
 
 	private enum Ordered {Lower, Upper}
 
 
-	//// Comparables ///////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test public void testCompare() {
 

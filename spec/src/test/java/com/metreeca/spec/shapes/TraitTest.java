@@ -24,8 +24,8 @@ import com.metreeca.spec.shifts.Step;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.Trait.traits;
 import static com.metreeca.spec.shapes.Virtual.virtual;

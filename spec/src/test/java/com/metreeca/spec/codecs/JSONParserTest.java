@@ -33,6 +33,7 @@ import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -389,7 +390,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 				));
 	}
 
-	@Test public void testParseProvedDecimalsLeniently() {
+	@Ignore @Test public void testParseProvedDecimalsLeniently() {
 		assertEquals("proved decimal",
 				parse("[] rdf:value 1.0 ."),
 				rdf(

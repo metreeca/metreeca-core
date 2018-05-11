@@ -32,8 +32,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Values.format;
 

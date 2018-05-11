@@ -47,8 +47,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.spec.Shape.only;
 import static com.metreeca.spec.Values.iri;

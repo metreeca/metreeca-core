@@ -25,7 +25,7 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
-import static com.metreeca.jeep.Jeep.intersection;
+import static com.metreeca.jeep.Sets.intersection;
 import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Values.format;
 

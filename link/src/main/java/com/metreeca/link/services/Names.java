@@ -35,8 +35,8 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.Handler.sysadm;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.link.Handler.unsupported;

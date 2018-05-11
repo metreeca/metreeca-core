@@ -33,8 +33,8 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.Handler.sysadm;
 import static com.metreeca.spec.Shape.*;
 import static com.metreeca.spec.Values.iri;

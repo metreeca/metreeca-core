@@ -19,7 +19,7 @@
 
 package com.metreeca.spec.shapes;
 
-import com.metreeca.jeep.Jeep;
+import com.metreeca.jeep.Sets;
 import com.metreeca.spec.Shape;
 
 import org.eclipse.rdf4j.model.Value;
@@ -122,7 +122,7 @@ public final class All implements Shape {
 		@Override public Set<Value> visit(final And and) {
 			return and.getShapes().stream()
 					.map(shape -> shape.accept(this))
-					.reduce(null, (x, y) -> x == null ? y : y == null ? x : Jeep.union(x, y));
+					.reduce(null, (x, y) -> x == null ? y : y == null ? x : Sets.union(x, y));
 		}
 
 	}

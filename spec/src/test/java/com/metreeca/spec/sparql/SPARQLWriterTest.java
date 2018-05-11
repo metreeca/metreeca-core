@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.jeep.Jeep.set;
+import static com.metreeca.jeep.Sets.set;
 import static com.metreeca.spec.Values.bnode;
 import static com.metreeca.spec.Values.iri;
 import static com.metreeca.spec.Values.literal;

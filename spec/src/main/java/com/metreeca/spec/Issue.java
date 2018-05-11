@@ -23,7 +23,7 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
-import static com.metreeca.jeep.Jeep.set;
+import static com.metreeca.jeep.Sets.set;
 import static com.metreeca.spec.Values.format;
 
 import static java.util.Collections.unmodifiableSet;

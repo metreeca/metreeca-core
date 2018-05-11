@@ -39,8 +39,8 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Set;
 
-import static com.metreeca.jeep.Jeep.list;
-import static com.metreeca.jeep.Jeep.set;
+import static com.metreeca.jeep.Lists.list;
+import static com.metreeca.jeep.Sets.set;
 import static com.metreeca.spec.Query.decreasing;
 import static com.metreeca.spec.Query.increasing;
 import static com.metreeca.spec.Shape.filter;

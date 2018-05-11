@@ -41,7 +41,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.jeep.Jeep.list;
+import static com.metreeca.jeep.Lists.list;
 import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Values.bnode;

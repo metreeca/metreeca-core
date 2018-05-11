@@ -25,8 +25,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.spec.Values.iri;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Group.group;

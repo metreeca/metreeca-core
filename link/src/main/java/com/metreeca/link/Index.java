@@ -40,8 +40,8 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.spec.Cell.Missing;
 import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Shape.*;

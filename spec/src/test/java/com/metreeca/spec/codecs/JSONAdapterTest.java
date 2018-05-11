@@ -19,6 +19,9 @@
 
 package com.metreeca.spec.codecs;
 
+import com.metreeca.jeep.Lists;
+import com.metreeca.jeep.Maps;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -26,7 +29,6 @@ import java.util.Map;
 
 import javax.json.*;
 
-import static com.metreeca.jeep.Jeep.*;
 import static com.metreeca.spec.Values.bnode;
 import static com.metreeca.spec.Values.format;
 
@@ -39,11 +41,11 @@ public abstract class JSONAdapterTest {
 	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected static List<Object> array(final Object... items) {
-		return list(items);
+		return Lists.list(items);
 	}
 
 	@SafeVarargs protected static Map<String, Object> object(final Map.Entry<String, Object>... fields) {
-		return map(fields);
+		return Maps.map(fields);
 	}
 
 	protected static Map<String, Object> object(final Map<String, Object> fields) {
@@ -51,7 +53,7 @@ public abstract class JSONAdapterTest {
 	}
 
 	protected static Map.Entry<String, Object> field(final String label, final Object value) {
-		return entry(label, value);
+		return Maps.entry(label, value);
 	}
 
 
@@ -130,9 +132,9 @@ public abstract class JSONAdapterTest {
 
 
 	@SafeVarargs protected final Map<String, Object> blank(final Map.Entry<String, Object>... fields) {
-		return object(union(
-				map(field("this", format(bnode()))),
-				map(fields)
+		return object(Maps.union(
+				Maps.map(field("this", format(bnode()))),
+				Maps.map(fields)
 		));
 	}
 

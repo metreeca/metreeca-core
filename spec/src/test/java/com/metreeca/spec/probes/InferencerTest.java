@@ -30,8 +30,8 @@ import org.junit.Ignore;
 
 import java.util.function.BiFunction;
 
-import static com.metreeca.jeep.Jeep.concat;
-import static com.metreeca.jeep.Jeep.list;
+import static com.metreeca.jeep.Lists.concat;
+import static com.metreeca.jeep.Lists.list;
 import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.Trait.trait;

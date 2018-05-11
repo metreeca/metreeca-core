@@ -21,7 +21,7 @@ package com.metreeca.spec.shapes;
 
 import org.junit.Test;
 
-import static com.metreeca.jeep.Jeep.intersection;
+import static com.metreeca.jeep.Sets.intersection;
 import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;

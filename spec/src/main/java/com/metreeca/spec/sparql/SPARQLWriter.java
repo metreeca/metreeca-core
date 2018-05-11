@@ -19,7 +19,8 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.jeep.Strings;
+import com.metreeca.jeep.Lists;
+import com.metreeca.jeep.Sets;
 import com.metreeca.spec.*;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
@@ -37,7 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
-import static com.metreeca.jeep.Jeep.*;
+import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Frame.frame;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
@@ -94,8 +95,8 @@ public final class SPARQLWriter { // !!! package-local
 
 	private Report merge(final Report x, final Report y) {
 
-		final Set<Issue> issues=union(x.getIssues(), y.getIssues());
-		final Collection<Frame<Report>> frames=Frame.frames(union(x.getFrames(), y.getFrames()), reducing(trace(), this::merge));
+		final Set<Issue> issues=Sets.union(x.getIssues(), y.getIssues());
+		final Collection<Frame<Report>> frames=Frame.frames(Sets.union(x.getFrames(), y.getFrames()), reducing(trace(), this::merge));
 
 		return trace(issues, frames);
 	}
@@ -106,7 +107,7 @@ public final class SPARQLWriter { // !!! package-local
 		final String query=sparql.compile();
 
 		if ( logger.isLoggable(Level.FINE) ) {
-			logger.fine("evaluating SPARQL query "+Strings.indent(query, true)+(query.endsWith("\n") ? "" : "\n"));
+			logger.fine("evaluating SPARQL query "+indent(query, true)+(query.endsWith("\n") ? "" : "\n"));
 		}
 
 		return query;
@@ -201,7 +202,7 @@ public final class SPARQLWriter { // !!! package-local
 				connection.prepareTupleQuery(compile(new SPARQL() {
 
 					@Override public Object code() {
-						return list(
+						return Lists.list(
 
 								"# clazz constraint\f",
 
@@ -330,32 +331,32 @@ public final class SPARQLWriter { // !!! package-local
 						final Matcher valuesMatcher=ValuesPattern.matcher(query);
 						final Matcher tailMatcher=TailPattern.matcher(query);
 
-						final List<Object> values=list(
+						final List<Object> values=Lists.list(
 								"values ?this {\f",
 								items(focus.stream().map(this::term), "\n"),
 								"\f}"
 						);
 
-						return list(
+						return Lists.list(
 
 								"# custom constraint (", custom.getMessage(), ")\f",
 
 								prefixes(),
 
-								valuesMatcher.matches() ? list(
+								valuesMatcher.matches() ? Lists.list(
 
 										// values placeholder found: replace
 
 										valuesMatcher.group(1), " ", values, " ", valuesMatcher.group(2)
 
-								) : tailMatcher.matches() ? list(
+								) : tailMatcher.matches() ? Lists.list(
 
 										// no placeholder: insert inside select
 										// ;( widespread issues with filter not/exists clauses and external values
 
 										tailMatcher.group(1), "\f", values, "\f", tailMatcher.group(2)
 
-								) : list()
+								) : Lists.list()
 
 						);
 					}
@@ -372,7 +373,7 @@ public final class SPARQLWriter { // !!! package-local
 					}
 
 					private Collection<Value> focus(final Value value) {
-						return value != null ? set(value) : focus;
+						return value != null ? Sets.set(value) : focus;
 					}
 
 				});
@@ -388,7 +389,7 @@ public final class SPARQLWriter { // !!! package-local
 			final Step step=trait.getStep();
 			final Shape shape=trait.getShape();
 
-			return trace(set(), focus.stream().map(value -> { // for each focus value
+			return trace(Sets.set(), focus.stream().map(value -> { // for each focus value
 
 				// compute the new focus set expanding the trait shift from the focus value
 
@@ -409,13 +410,13 @@ public final class SPARQLWriter { // !!! package-local
 
 				// create an empty frame for each unreferenced value to support statement outlining
 
-				final List<Frame<Report>> placeholders=complement(focus, referenced).stream()
+				final List<Frame<Report>> placeholders=Sets.complement(focus, referenced).stream()
 						.map(v -> Frame.<Report>frame(v))
 						.collect(toList());
 
 				// return trait validation results
 
-				return frame(value, Frame.slot(step, trace(issues, concat(frames, placeholders))));
+				return frame(value, Frame.slot(step, trace(issues, Lists.concat(frames, placeholders))));
 
 			}).collect(toList()));
 

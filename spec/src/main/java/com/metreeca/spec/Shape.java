@@ -30,9 +30,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
-import static com.metreeca.jeep.Jeep.set;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
+import static com.metreeca.jeep.Sets.set;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.In.in;

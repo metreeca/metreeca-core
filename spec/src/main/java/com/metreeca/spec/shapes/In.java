@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static com.metreeca.jeep.Jeep.list;
+import static com.metreeca.jeep.Lists.list;
 import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Values.format;
 

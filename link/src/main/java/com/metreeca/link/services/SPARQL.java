@@ -38,8 +38,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.entry;
+import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.spec.Values.literal;
 

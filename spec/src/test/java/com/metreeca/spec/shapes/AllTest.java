@@ -21,7 +21,7 @@ package com.metreeca.spec.shapes;
 
 import org.junit.Test;
 
-import static com.metreeca.jeep.Jeep.union;
+import static com.metreeca.jeep.Sets.union;
 import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.All.all;
 

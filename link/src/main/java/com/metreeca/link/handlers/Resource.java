@@ -19,6 +19,9 @@
 
 package com.metreeca.link.handlers;
 
+import com.metreeca.jeep.Lists;
+import com.metreeca.jeep.Maps;
+import com.metreeca.jeep.Sets;
 import com.metreeca.link.*;
 import com.metreeca.spec.*;
 import com.metreeca.spec.Issue.Level;
@@ -40,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Jeep.*;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.link.Handler.unsupported;
 import static com.metreeca.spec.Cell.cell;
@@ -64,10 +66,10 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 	private final Shape shape;
 
-	private final Handler dispatcher=new Dispatcher(map(
-			entry(Request.GET, this::get),
-			entry(Request.PUT, Handler.sysadm(this::put)), // !!! remove after testing shape-based authorization
-			entry(Request.DELETE, Handler.sysadm(this::delete)) // !!! remove after testing shape-based authorization
+	private final Handler dispatcher=new Dispatcher(Maps.map(
+			Maps.entry(Request.GET, this::get),
+			Maps.entry(Request.PUT, Handler.sysadm(this::put)), // !!! remove after testing shape-based authorization
+			Maps.entry(Request.DELETE, Handler.sysadm(this::delete)) // !!! remove after testing shape-based authorization
 	));
 
 
@@ -145,7 +147,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 			final ShapeCodec codec=new ShapeCodec();
 
-			for (final IRI task : list(Spec.relate, Spec.update, Spec.delete)) {
+			for (final IRI task : Lists.list(Spec.relate, Spec.update, Spec.delete)) {
 
 				final Shape spec=shape.accept(task(task));
 
@@ -177,11 +179,12 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 				// construct and process configured query, merging constraints from the query string
 
-				final Query filter=guard(() -> new QueryParser(shape).parse(IO.decode(query)), e -> {
-
+				final Query filter;
+				try {
+					filter=new QueryParser(shape).parse(IO.decode(query));
+				} catch ( final RuntimeException e ) {
 					throw new LinkException(Response.BadRequest, "malformed query: "+e.getMessage(), e);
-
-				});
+				}
 
 				final Cell cell=graph.get(filter);
 
@@ -197,7 +200,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 								// base resource: convert its shape to RDF and merge into results
 
-								? union(cell.model(), shape.accept(mode(Spec.verify)).accept(new Outliner()))
+								? Sets.union(cell.model(), shape.accept(mode(Spec.verify)).accept(new Outliner()))
 
 								// filtered resource: return selected data
 

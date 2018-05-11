@@ -32,7 +32,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.Jeep.list;
+import static com.metreeca.jeep.Lists.list;
 import static com.metreeca.spec.Values.bnode;
 import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.All.all;

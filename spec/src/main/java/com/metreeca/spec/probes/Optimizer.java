@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.Jeep.entry;
+import static com.metreeca.jeep.Maps.entry;
 import static com.metreeca.spec.Values.iri;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Group.group;

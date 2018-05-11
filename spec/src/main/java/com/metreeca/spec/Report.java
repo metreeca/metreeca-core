@@ -19,6 +19,9 @@
 
 package com.metreeca.spec;
 
+import com.metreeca.jeep.Comparables;
+import com.metreeca.jeep.Maps;
+import com.metreeca.jeep.Sets;
 import com.metreeca.spec.shifts.Step;
 
 import org.eclipse.rdf4j.model.*;
@@ -26,7 +29,6 @@ import org.eclipse.rdf4j.model.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.Jeep.*;
 import static com.metreeca.spec.Values.statement;
 
 import static java.util.Collections.unmodifiableSet;
@@ -40,7 +42,7 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Report {
 
-	private static final Report empty=new Report(set(), set());
+	private static final Report empty=new Report(Sets.set(), Sets.set());
 
 
 	public static Report trace() {
@@ -48,11 +50,11 @@ public final class Report {
 	}
 
 	public static Report trace(final Issue... issues) {
-		return new Report(set(issues), set());
+		return new Report(Sets.set(issues), Sets.set());
 	}
 
 	@SafeVarargs public static Report trace(final Collection<Issue> issues, final Frame<Report>... frames) {
-		return new Report(issues, set(frames));
+		return new Report(issues, Sets.set(frames));
 	}
 
 	public static Report trace(final Collection<Issue> issues, final Collection<Frame<Report>> frames) {
@@ -110,7 +112,7 @@ public final class Report {
 		}
 
 		return issues.stream()
-				.anyMatch(issue -> gte(issue.getLevel(), limit))
+				.anyMatch(issue -> Comparables.gte(issue.getLevel(), limit))
 
 				|| frames.stream()
 				.flatMap(frame -> frame.getSlots().values().stream())
@@ -132,7 +134,7 @@ public final class Report {
 		}
 
 		final Set<Issue> issues=this.issues.stream()
-				.filter(issue -> gte(issue.getLevel(), limit))
+				.filter(issue -> Comparables.gte(issue.getLevel(), limit))
 				.collect(toCollection(LinkedHashSet::new));
 
 		final Set<Frame<Report>> frames=this.frames.stream()
@@ -179,11 +181,11 @@ public final class Report {
 		final Value value=frame.getValue();
 
 		final List<Map.Entry<Step, Report>> slots=frame.getSlots().entrySet().stream()
-				.map(slot -> slot.getValue().prune(limit).map(trace -> entry(slot.getKey(), trace)))
+				.map(slot -> slot.getValue().prune(limit).map(trace -> Maps.entry(slot.getKey(), trace)))
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toList());
 
-		return slots.isEmpty() ? Optional.empty() : Optional.of(new Frame<>(value, map(slots)));
+		return slots.isEmpty() ? Optional.empty() : Optional.of(new Frame<>(value, Maps.map(slots)));
 	}
 
 	private Stream<Statement> outline(final Frame<Report> frame) {

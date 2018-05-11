@@ -25,7 +25,7 @@ import com.metreeca.spec.shapes.Trait;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.metreeca.jeep.Jeep.map;
+import static com.metreeca.jeep.Maps.map;
 
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;

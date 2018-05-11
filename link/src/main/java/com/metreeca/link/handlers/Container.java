@@ -19,6 +19,8 @@
 
 package com.metreeca.link.handlers;
 
+import com.metreeca.jeep.Maps;
+import com.metreeca.jeep.Sets;
 import com.metreeca.link.*;
 import com.metreeca.spec.*;
 import com.metreeca.spec.codecs.QueryParser;
@@ -47,7 +49,6 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.jeep.Jeep.*;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.link.Handler.unsupported;
 import static com.metreeca.spec.Cell.cell;
@@ -110,9 +111,9 @@ public final class Container implements Handler {
 
 	private final Shape shape;
 
-	private final Handler dispatcher=new Dispatcher(map(
-			entry(Request.GET, this::get),
-			entry(Request.POST, Handler.sysadm(this::post)) // !!! remove after testing shape-based authorization
+	private final Handler dispatcher=new Dispatcher(Maps.map(
+			Maps.entry(Request.GET, this::get),
+			Maps.entry(Request.POST, Handler.sysadm(this::post)) // !!! remove after testing shape-based authorization
 	));
 
 
@@ -257,11 +258,13 @@ public final class Container implements Handler {
 
 			// construct and process configured query, merging constraints from the query string
 
-			final Query filter=guard(() -> new QueryParser(resource).parse(IO.decode(query)), e -> { // !!! factor
+			final Query filter;
 
+			try {
+				filter=new QueryParser(resource).parse(IO.decode(query));
+			} catch ( final RuntimeException e ) {
 				throw new LinkException(Response.BadRequest, "malformed query: "+e.getMessage(), e);
-
-			});
+			}
 
 			// retrieve filtered content from repository
 
@@ -281,7 +284,7 @@ public final class Container implements Handler {
 
 							// base container: convert its shape to RDF and merge into results
 
-							? union(cell.model(), container.accept(Shape.mode(Spec.verify)).accept(new Outliner()))
+							? Sets.union(cell.model(), container.accept(Shape.mode(Spec.verify)).accept(new Outliner()))
 
 							// filtered container: return selected data
 
