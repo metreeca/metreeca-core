@@ -24,8 +24,6 @@ import com.metreeca.spec.Shape;
 import java.util.Optional;
 import java.util.function.BinaryOperator;
 
-import static com.metreeca.jeep.Jeep.nullable;
-
 
 /**
  * Minimum set size constraint.
@@ -89,10 +87,10 @@ public final class MinCount implements Shape {
 
 	private static final class MinCountProbe extends Probe<Integer> {
 
-		// ;(jdk) replacing nullable with local lambdas causes a NullPointerException during Integer unboxing
+		// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
 
-		private static final BinaryOperator<Integer> min=nullable(Math::min);
-		private static final BinaryOperator<Integer> max=nullable(Math::max);
+		private static final BinaryOperator<Integer> min=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) <= 0 ? x : y;
+		private static final BinaryOperator<Integer> max=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) >= 0 ? x : y;
 
 
 		@Override public Integer visit(final Group group) {
