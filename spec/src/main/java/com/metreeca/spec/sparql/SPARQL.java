@@ -20,7 +20,6 @@
 package com.metreeca.spec.sparql;
 
 import com.metreeca.jeep.rdf.Values;
-import com.metreeca.jeep.txt.Formatter;
 import com.metreeca.spec.Query;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Shift;
@@ -54,7 +53,7 @@ abstract class SPARQL { // ! refactor
 
 	public abstract Object code();
 
-	public String compile() { return new Formatter().text(code()).text(); }
+	public String compile() { return new SPARQLBuilder().text(code()).text(); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

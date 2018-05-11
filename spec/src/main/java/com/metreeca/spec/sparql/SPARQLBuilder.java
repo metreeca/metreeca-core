@@ -17,18 +17,18 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep.txt;
+package com.metreeca.spec.sparql;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
 /**
- * Code generation tool.
+ * SPARQL generation tool.
  *
- * <p>Converts structured objects into properly indented and spaced source code.</p>
+ * <p>Converts structured objects into properly indented and spaced SPARQL source code.</p>
  */
-public final class Formatter {
+final class SPARQLBuilder {
 
 	private int indent;
 
@@ -50,7 +50,7 @@ public final class Formatter {
 	}
 
 
-	public Formatter text(final Object object) {
+	public SPARQLBuilder text(final Object object) {
 		return object == null ? this
 				: object instanceof Object[] ? text((Object[])object)
 				: object instanceof Iterable ? text((Iterable<?>)object)
@@ -59,7 +59,7 @@ public final class Formatter {
 				: text(String.valueOf(object));
 	}
 
-	public Formatter text(final Object... array) {
+	public SPARQLBuilder text(final Object... array) {
 
 		if ( array != null ) {
 			for (final Object object : array) { text(object); }
@@ -68,7 +68,7 @@ public final class Formatter {
 		return this;
 	}
 
-	public Formatter text(final Iterable<?> iterable) {
+	public SPARQLBuilder text(final Iterable<?> iterable) {
 
 		if ( iterable != null ) {
 			for (final Object object : iterable) { text(object); }
@@ -77,7 +77,7 @@ public final class Formatter {
 		return this;
 	}
 
-	public Formatter text(final Stream<?> stream) {
+	public SPARQLBuilder text(final Stream<?> stream) {
 
 		if ( stream != null ) {
 			stream.forEach(this::text);
@@ -86,7 +86,7 @@ public final class Formatter {
 		return this;
 	}
 
-	public Formatter text(final Supplier<?> supplier) {
+	public SPARQLBuilder text(final Supplier<?> supplier) {
 
 		if ( supplier != null ) {
 			text(supplier.get());
@@ -95,7 +95,7 @@ public final class Formatter {
 		return this;
 	}
 
-	public Formatter text(final CharSequence chars) {
+	public SPARQLBuilder text(final CharSequence chars) {
 
 		if ( chars != null ) {
 			for (int i=0, length=chars.length(); i < length; ++i) { text(chars.charAt(i)); }
@@ -104,7 +104,7 @@ public final class Formatter {
 		return this;
 	}
 
-	public Formatter text(final char c) {
+	public SPARQLBuilder text(final char c) {
 
 		if ( c == '\t' ) {
 

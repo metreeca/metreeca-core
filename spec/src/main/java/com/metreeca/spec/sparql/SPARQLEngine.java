@@ -42,7 +42,7 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 
 
-public final class SPARQLEngine { // migrate from utility class to processor (new SPARQLEngine(connection))
+public final class SPARQLEngine { // !!! migrate from utility class to processor (new SPARQLEngine(connection))
 
 	public static boolean transactional(final RepositoryConnection connection) {
 		return !connection.getIsolationLevel().equals(IsolationLevels.NONE);

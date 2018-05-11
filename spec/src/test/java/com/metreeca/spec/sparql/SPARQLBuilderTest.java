@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep.txt;
+package com.metreeca.spec.sparql;
 
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static java.util.Arrays.asList;
 
 
-public final class FormatterTest {
+public final class SPARQLBuilderTest {
 
 	@Test public void testIgnoreNullArguments() {
 
@@ -105,7 +105,7 @@ public final class FormatterTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String write(final Object object) {
-		return new Formatter().text(object).text();
+		return new SPARQLBuilder().text(object).text();
 	}
 
 }
