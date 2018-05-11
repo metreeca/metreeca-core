@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="j2ee" />
         <module name="jeep" />
         <module name="link" />
         <module name="mill" />
@@ -17,6 +18,7 @@
     <bytecodeTargetLevel>
       <module name="back" target="1.8" />
       <module name="core" target="1.8" />
+      <module name="j2ee" target="1.8" />
       <module name="jeep" target="1.8" />
       <module name="link" target="1.8" />
       <module name="mill" target="1.8" />

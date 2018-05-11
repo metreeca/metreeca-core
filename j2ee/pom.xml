@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright © 2018 Metreeca srl. All rights reserved.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.metreeca</groupId>
+		<artifactId>core</artifactId>
+		<version>0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>j2ee</artifactId>
+	<version>0.0-SNAPSHOT</version>
+	<packaging>war</packaging>
+
+	<name>Metreeca J2EE Adapter</name>
+	<description>A baseline Metreeca linked data hub packaged as a WAR app.</description>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>next</artifactId>
+			<version>0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency> <!-- !!! replace with custom implementation  -->
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3.3</version>
+		</dependency>
+
+	</dependencies>
+
+</project>

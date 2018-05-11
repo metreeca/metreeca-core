@@ -61,12 +61,6 @@
 			<version>4.0</version>
 		</dependency>
 
-		<!--<dependency>
-			<groupId>com.complexible.stardog.rdf4j</groupId>
-			<artifactId>stardog-rdf4j</artifactId>
-			<version>5.0.4</version>
-		</dependency>-->
-
 		<dependency> <!-- !!! factor (inserting as dependency in back module creates a cyclic dependency -->
 			<groupId>com.metreeca</groupId>
 			<artifactId>jeep</artifactId>
@@ -76,13 +70,6 @@
 		</dependency>
 
 	</dependencies>
-
-	<!--<repositories>
-		<repository>
-			<id>stardog-public</id>
-			<url>http://maven.stardog.com</url>
-		</repository>
-	</repositories>-->
 
 	<build>
 		<plugins>

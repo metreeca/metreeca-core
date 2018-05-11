@@ -1,0 +1,58 @@
+<!--
+  ~ Copyright © 2013-2018 Metreeca srl. All rights reserved.
+  ~
+  ~ This file is part of Metreeca.
+  ~
+  ~ Metreeca is free software: you can redistribute it and/or modify it
+  ~ under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Metreeca is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty
+  ~ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  ~ See the GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="3.0">
+
+	<!--~~ CORS Support / !!! migrate to custom implementation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<filter>
+
+		<filter-name>cors</filter-name>
+		<filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+
+		<init-param>
+			<param-name>cors.exposedHeaders</param-name>
+			<param-value>Link, Location</param-value>
+		</init-param>
+
+	</filter>
+
+	<filter-mapping>
+		<filter-name>cors</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<listener>
+		<listener-class>com.metreeca.j2ee.Gateway</listener-class>
+	</listener>
+
+	<filter>
+		<filter-name>data</filter-name>
+		<filter-class>com.metreeca.j2ee.Gateway</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>data</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+</web-app>

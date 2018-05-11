@@ -64,12 +64,15 @@
 	-->
 
 	<modules>
+		<module>j2ee</module>
+
 		<module>next</module>
 		<module>link</module>
 		<module>mill</module>
 		<module>tray</module>
 		<module>spec</module>
 		<module>jeep</module>
+
 	</modules>
 
 	<properties>
@@ -176,28 +179,16 @@
 				</configuration>
 
 				<executions>
-
-					<execution>
-
-						<id>package main jar</id>
-						<phase>package</phase>
-
-						<goals>
-							<goal>jar</goal>
-						</goals>
-
-					</execution>
-
 					<execution>
 
 						<id>package test jar</id>
 						<phase>package</phase>
+
 						<goals>
 							<goal>test-jar</goal>
 						</goals>
 
 					</execution>
-
 				</executions>
 
 			</plugin>
@@ -212,6 +203,7 @@
 					<execution>
 
 						<id>attach-sources</id>
+						<phase>package</phase>
 
 						<goals>
 							<goal>jar</goal>
@@ -232,6 +224,7 @@
 					<execution>
 
 						<id>generate javadocs</id>
+						<phase>package</phase>
 
 						<goals>
 							<goal>jar</goal>
