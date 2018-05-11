@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Copyright © 2013-2018 Metreeca srl. All rights reserved.
+
+  This file is part of Metreeca.
+
+  Metreeca is free software: you can redistribute it and/or modify it
+  under the terms of the GNU Affero General Public License as published
+  by the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Metreeca is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty
+  of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.metreeca</groupId>
+		<artifactId>back</artifactId>
+		<version>0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>tray</artifactId>
+
+	<name>Metreeca Tooling Framework</name>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>spec</artifactId>
+			<version>0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.saxon</groupId>
+			<artifactId>Saxon-HE</artifactId>
+			<version>9.7.0-15</version>
+		</dependency>
+
+		<dependency>
+			<groupId>virtuoso.openlinksw.com</groupId>
+			<artifactId>rdf4j-provider</artifactId>
+			<version>2.2-20171221</version>
+		</dependency>
+
+		<dependency>
+			<groupId>virtuoso.openlinksw.com</groupId>
+			<artifactId>jdbc-driver</artifactId>
+			<version>4.0</version>
+		</dependency>
+
+		<!--<dependency>
+			<groupId>com.complexible.stardog.rdf4j</groupId>
+			<artifactId>stardog-rdf4j</artifactId>
+			<version>5.0.4</version>
+		</dependency>-->
+
+		<dependency> <!-- !!! factor (inserting as dependency in back module creates a cyclic dependency -->
+			<groupId>com.metreeca</groupId>
+			<artifactId>jeep</artifactId>
+			<version>0.0-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<!--<repositories>
+		<repository>
+			<id>stardog-public</id>
+			<url>http://maven.stardog.com</url>
+		</repository>
+	</repositories>-->
+
+	<build>
+		<plugins>
+			<plugin> <!-- http://maven.apache.org/plugins/maven-install-plugin/install-file-mojo.html -->
+
+				<!-- install virtuoso RDF4J provider in the local maven repository -->
+				<!-- download jars from http://vos.openlinksw.com/owiki/wiki/VOS/VOSDownload#For%20RDF4J%202.x -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.1</version>
+
+				<executions>
+
+					<execution>
+
+						<id>install-virtuoso-rdf4j-provider</id>
+						<phase>validate</phase>
+
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+
+						<configuration>
+
+							<file>lib/virtuoso-rdf4j-2.2-20171221.jar</file>
+							<pomFile>lib/virtuoso-rdf4j-2.2-20171221.pom.xml</pomFile>
+
+						</configuration>
+
+					</execution>
+
+					<execution>
+
+						<id>install-virtuoso-jdbc-driver</id>
+						<phase>validate</phase>
+
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+
+						<configuration>
+
+							<file>lib/virtuoso-jdbc-4.0.jar</file>
+							<pomFile>lib/virtuoso-jdbc-4.0.pom.xml</pomFile>
+
+						</configuration>
+
+					</execution>
+
+				</executions>
+
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
