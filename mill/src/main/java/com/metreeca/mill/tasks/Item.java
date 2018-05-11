@@ -21,9 +21,9 @@ package com.metreeca.mill.tasks;
 
 
 import com.metreeca.jeep.rdf.Values;
-import com.metreeca.jeep.txt.Template;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
+import com.metreeca.mill._Template;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
@@ -76,12 +76,12 @@ public final class Item implements Task {
 
 	// !!! document parameter expression syntax / semantics
 
-	private static final Template Empty=new Template("");
+	private static final _Template Empty=new _Template("");
 
-	private Template iri=Empty;
-	private Template text=Empty;
+	private _Template iri=Empty;
+	private _Template text=Empty;
 
-	private final Map<String, Template> expressions=new LinkedHashMap<>();
+	private final Map<String, _Template> expressions=new LinkedHashMap<>();
 	private final Map<String, String> fallbacks=new LinkedHashMap<>();
 
 
@@ -94,7 +94,7 @@ public final class Item implements Task {
 			throw new NullPointerException("null iri");
 		}
 
-		this.iri=iri.isEmpty() ? Empty : new Template(iri);
+		this.iri=iri.isEmpty() ? Empty : new _Template(iri);
 
 		return this;
 	}
@@ -108,7 +108,7 @@ public final class Item implements Task {
 			throw new NullPointerException("null text");
 		}
 
-		this.text=text.isEmpty() ? Empty : new Template(text);
+		this.text=text.isEmpty() ? Empty : new _Template(text);
 
 		return this;
 	}
@@ -150,7 +150,7 @@ public final class Item implements Task {
 			throw new NullPointerException("null fallback");
 		}
 
-		expressions.put(name, new Template(expression));
+		expressions.put(name, new _Template(expression));
 		fallbacks.put(name, fallback);
 
 		return this;
@@ -203,10 +203,10 @@ public final class Item implements Task {
 
 		final Map<String, String> values=new LinkedHashMap<>();
 
-		for (final Map.Entry<String, Template> entry : expressions.entrySet()) {
+		for (final Map.Entry<String, _Template> entry : expressions.entrySet()) {
 
 			final String name=entry.getKey();
-			final Template expression=entry.getValue();
+			final _Template expression=entry.getValue();
 
 			final String value=expression.fill(placeholder -> {
 

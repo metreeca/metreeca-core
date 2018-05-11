@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep.txt;
+package com.metreeca.mill;
 
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 /**
  * Simple textual template.
  */
-public final class Template {
+public final class _Template {
 
 	// !!! parametrize text only if actually containing placeholders
 	// !!! improve efficiency by splitting the template in advance
@@ -46,7 +46,7 @@ public final class Template {
 	private final boolean iri;
 
 
-	public Template(final String template) {
+	public _Template(final String template) {
 
 		if ( template == null ) {
 			throw new NullPointerException("null template");

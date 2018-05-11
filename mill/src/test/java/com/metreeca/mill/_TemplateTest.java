@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep.txt;
+package com.metreeca.mill;
 
 import org.junit.Test;
 
@@ -30,7 +30,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 
 
-public class TemplateTest {
+public class _TemplateTest {
 
 	@Test public void testPlainVariables() {
 
@@ -61,7 +61,7 @@ public class TemplateTest {
 
 
 	private Collection<String> cast(final String template, final Map<String, String> parameters) {
-		return singleton(new Template(template).fill(parameters::get));
+		return singleton(new _Template(template).fill(parameters::get));
 	}
 
 }
