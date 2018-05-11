@@ -68,7 +68,7 @@ public final class BasicGate implements Gate {
 			if ( matcher.matches() ) {
 
 				final String token=new String(Base64.getDecoder()
-						.decode(matcher.group("token")), IO.UTF8Set);
+						.decode(matcher.group("token")), IO.UTF8);
 
 				final int colon=max(token.indexOf(':'), 0);
 

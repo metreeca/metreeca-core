@@ -19,29 +19,28 @@
 
 package com.metreeca.tray.iam;
 
-import com.metreeca.tray.iam.digests.PBKDF2Digest;
-
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 
 public abstract class DigestTest {
 
-	protected abstract PBKDF2Digest digest();
+	protected abstract Digest digest();
 
 
 	@Test public void testRandomize() {
-		assertFalse("randomized", ((Digest)digest()).digest("secret").equals(((Digest)digest()).digest("secret")));
+		assertNotEquals("randomized", digest().digest("secret"), digest().digest("secret"));
 	}
 
 	@Test public void testRecognize() {
-		assertTrue("recognized", digest().verify("secret", ((Digest)digest()).digest("secret")));
+		assertTrue("recognized", digest().verify("secret", digest().digest("secret")));
 	}
 
 	@Test public void testReject() {
-		assertFalse("rejected", digest().verify("public", ((Digest)digest()).digest("secret")));
+		assertFalse("rejected", digest().verify("public", digest().digest("secret")));
 	}
 
 	@Test(expected=IllegalArgumentException.class) public void testMalformed() {

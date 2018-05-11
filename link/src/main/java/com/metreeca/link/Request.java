@@ -322,7 +322,7 @@ public final class Request extends Message<Request> {
 
 
 	public String getText() {
-		return new String(getData(), IO.UTF8Set); // !!! use request encoding
+		return new String(getData(), IO.UTF8); // !!! use request encoding
 	}
 
 	public Request setText(final String text) {

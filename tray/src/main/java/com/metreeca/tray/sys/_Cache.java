@@ -41,7 +41,7 @@ import static java.util.Collections.unmodifiableList;
 /**
  * Network cache (legacy).
  */
-public final class _Cache {
+public final class _Cache { // !!! remove
 
 	/**
 	 * Cache factory.

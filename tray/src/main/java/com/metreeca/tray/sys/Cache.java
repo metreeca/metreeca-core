@@ -284,7 +284,7 @@ public final class Cache {
 					connection.connect();
 
 					final int code=connection.getResponseCode();
-					final String encoding=Optional.ofNullable(connection.getContentEncoding()).orElse(IO.UTF8Enc);
+					final String encoding=Optional.ofNullable(connection.getContentEncoding()).orElse(IO.UTF8.name());
 
 					if ( code/100 == 2 ) {
 

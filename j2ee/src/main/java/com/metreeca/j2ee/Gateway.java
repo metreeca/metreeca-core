@@ -316,7 +316,7 @@ public final class Gateway implements ServletContextListener, Filter {
 						}
 
 						try {
-							updated.add(item.getString(IO.UTF8Enc));
+							updated.add(item.getString(IO.UTF8.name()));
 						} catch ( final UnsupportedEncodingException unexpected ) {
 							throw new UncheckedIOException(unexpected);
 						}

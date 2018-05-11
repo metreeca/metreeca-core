@@ -107,7 +107,7 @@ public final class Store {
 
 		synchronized ( storage ) {
 
-			final File file=new File(storage, nameUUIDFromBytes(id.getBytes(IO.UTF8Set)).toString());
+			final File file=new File(storage, nameUUIDFromBytes(id.getBytes(IO.UTF8)).toString());
 
 			// acquire inter-process lock
 

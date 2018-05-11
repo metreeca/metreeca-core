@@ -134,7 +134,7 @@ public final class HandlerTest {
 		final byte[] body=response.getData();
 
 		tools.get(Trace.Tool).info(null, String.format("HTTP Response Code %d\n%s\n%s\n---------------------------",
-				response.getStatus(), headers, new String(body, IO.UTF8Set)));
+				response.getStatus(), headers, new String(body, IO.UTF8)));
 
 		response.setBody(out -> {
 			try {

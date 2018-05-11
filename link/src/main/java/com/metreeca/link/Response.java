@@ -149,7 +149,7 @@ public final class Response extends Message<Response> {
 
 
 	public String getText() {
-		return new String(getData(), IO.UTF8Set); // !!! use response encoding
+		return new String(getData(), IO.UTF8); // !!! use response encoding
 	}
 
 	public Response setText(final String text) {
@@ -162,7 +162,7 @@ public final class Response extends Message<Response> {
 			setHeader(ContentType, "text/plain");
 		}
 
-		return setData(text.getBytes(IO.UTF8Set)); // !!! use response encoding
+		return setData(text.getBytes(IO.UTF8)); // !!! use response encoding
 	}
 
 }

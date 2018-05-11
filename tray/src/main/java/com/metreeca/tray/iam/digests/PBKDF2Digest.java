@@ -42,7 +42,7 @@ public final class PBKDF2Digest extends Digest {
 	/**
 	 * Opaque digest algorithm identifying tag.
 	 */
-	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(IO.UTF8Set));
+	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(IO.UTF8));
 
 	private static final int Length=24; // salt length
 	private static final int Rounds=1000; // encryption rounds

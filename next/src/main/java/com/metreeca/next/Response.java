@@ -389,7 +389,7 @@ public final class Response {
 				// !!! user request accept encoding with quality values
 				// !!! response.request.header("Accept-Charset");
 
-				response.writer.accept(IO.writer(output, IO.UTF8Enc));
+				response.writer.accept(IO.writer(output, IO.UTF8.name()));
 
 			}
 
@@ -411,7 +411,7 @@ public final class Response {
 				// !!! user request accept encoding with quality values
 				// !!! response.request.header("Accept-Charset");
 
-				response.output.accept(IO.output(writer, IO.UTF8Enc)); // !!! user request accept encoding
+				response.output.accept(IO.output(writer, IO.UTF8.name())); // !!! user request accept encoding
 
 			}
 

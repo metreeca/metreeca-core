@@ -37,21 +37,13 @@ import static java.lang.String.format;
 public final class IO {
 
 	/**
-	 * The default encoding for I/O operations ({@value}).
+	 * The default charset for I/O operations.
 	 */
-	public static final String UTF8Enc="UTF-8";
-
-	/**
-	 * The default charset for I/O operations ({@value UTF8Enc}).
-	 */
-	public static final Charset UTF8Set=Charset.forName(UTF8Enc);
+	public static final Charset UTF8=Charset.forName("UTF-8");
 
 
 	private static final byte[] EmptyData={};
 	private static final String EmptyText="";
-
-
-	private IO() {} // a utility class
 
 
 	//// URL Codecs ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +55,7 @@ public final class IO {
 		}
 
 		try {
-			return URLEncoder.encode(text, UTF8Enc);
+			return URLEncoder.encode(text, UTF8.name());
 		} catch ( final UnsupportedEncodingException unexpected ) {
 			throw new UncheckedIOException(unexpected);
 		}
@@ -76,7 +68,7 @@ public final class IO {
 		}
 
 		try {
-			return URLDecoder.decode(text, UTF8Enc);
+			return URLDecoder.decode(text, UTF8.name());
 		} catch ( final UnsupportedEncodingException unexpected ) {
 			throw new UncheckedIOException(unexpected);
 		}
@@ -160,7 +152,7 @@ public final class IO {
 			throw new NullPointerException("null reader");
 		}
 
-		return input(reader, UTF8Enc);
+		return input(reader, UTF8.name());
 	}
 
 	public static InputStream input(final Reader reader, final String encoding) {
@@ -187,7 +179,7 @@ public final class IO {
 			throw new NullPointerException("null input");
 		}
 
-		return reader(input, UTF8Enc);
+		return reader(input, UTF8.name());
 	}
 
 	public static Reader reader(final InputStream input, final String encoding) {
@@ -238,7 +230,7 @@ public final class IO {
 	//// Output Utilities //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static OutputStream output(final Writer writer) {
-		return output(writer, UTF8Enc);
+		return output(writer, UTF8.name());
 	}
 
 	public static OutputStream output(final Writer writer, final String encoding) {
@@ -256,7 +248,7 @@ public final class IO {
 
 
 	public static Writer writer(final OutputStream output) {
-		return writer(output, UTF8Enc);
+		return writer(output, UTF8.name());
 	}
 
 	public static Writer writer(final OutputStream output, final String encoding) {
@@ -361,6 +353,11 @@ public final class IO {
 			throw new UncheckedIOException(e);
 		}
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private IO() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
