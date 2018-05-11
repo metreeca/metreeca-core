@@ -40,6 +40,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.*;
 
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

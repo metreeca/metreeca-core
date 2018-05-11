@@ -46,12 +46,12 @@
 	</listener>
 
 	<filter>
-		<filter-name>data</filter-name>
+		<filter-name>gateway</filter-name>
 		<filter-class>com.metreeca.j2ee.Gateway</filter-class>
 	</filter>
 
 	<filter-mapping>
-		<filter-name>data</filter-name>
+		<filter-name>gateway</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
