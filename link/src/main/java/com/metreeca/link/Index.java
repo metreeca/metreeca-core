@@ -22,8 +22,11 @@ package com.metreeca.link;
 import com.metreeca.link.handlers.Container;
 import com.metreeca.link.handlers.Resource;
 import com.metreeca.link.handlers.Updater;
-import com.metreeca.spec.*;
+import com.metreeca.spec.Shape;
+import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.ShapeCodec;
+import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 
@@ -40,16 +43,16 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
-import static com.metreeca.spec.Cell.Missing;
-import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Shape.*;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things._Cell.Missing;
+import static com.metreeca.spec.things._Cell.cell;
 import static com.metreeca.tray.Tool.Loader;
 
 import static java.util.Collections.emptyMap;
@@ -132,7 +135,7 @@ public final class Index {
 	/**
 	 * Inserts a soft port.
 	 */
-	public Index insert(final Cell specs) {
+	public Index insert(final _Cell specs) {
 
 		if ( specs == null ) {
 			throw new NullPointerException("null specs");
@@ -233,7 +236,7 @@ public final class Index {
 	/**
 	 * Removes a soft port.
 	 */
-	public Index remove(final Cell specs) {
+	public Index remove(final _Cell specs) {
 
 		if ( specs == null ) {
 			throw new NullPointerException("null specs");

@@ -21,6 +21,7 @@ package com.metreeca.spec.sparql;
 
 import com.metreeca.spec.*;
 import com.metreeca.spec.queries.Graph;
+import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
@@ -30,12 +31,12 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 
-import static com.metreeca.jeep.Lists.concat;
-import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
+import static com.metreeca.spec.things.Lists.concat;
+import static com.metreeca.spec.things._Cell.cell;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -68,7 +69,7 @@ public final class SPARQLEngine { // !!! migrate from utility class to processor
 				.model();
 	}
 
-	public static Cell _browse(final RepositoryConnection connection, final Query query) { // !!! merge
+	public static _Cell _browse(final RepositoryConnection connection, final Query query) { // !!! merge
 		return new SPARQLReader(connection)
 				.process(query);
 	}
@@ -85,7 +86,7 @@ public final class SPARQLEngine { // !!! migrate from utility class to processor
 			final RepositoryConnection connection, final IRI focus, final Shape shape, final Collection<Statement> model) {
 
 		final boolean transactional=transactional(connection);
-		final Cell cell=cell(model).insert(focus);
+		final _Cell cell=cell(model).insert(focus);
 
 		// upload statements to repository and validate against shape
 		// disable shape-driven validation if not transactional // !!! just downgrade

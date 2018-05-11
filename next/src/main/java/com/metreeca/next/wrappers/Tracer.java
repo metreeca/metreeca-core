@@ -32,9 +32,9 @@ import java.util.function.Predicate;
 
 import static com.metreeca.next.Binder.binder;
 import static com.metreeca.next.wrappers.Transactor.transactor;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.statement;
-import static com.metreeca.spec.Values.timestamp;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things.Values.timestamp;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;

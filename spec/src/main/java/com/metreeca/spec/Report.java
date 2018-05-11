@@ -19,17 +19,16 @@
 
 package com.metreeca.spec;
 
-import com.metreeca.jeep.Comparables;
-import com.metreeca.jeep.Maps;
-import com.metreeca.jeep.Sets;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Maps;
+import com.metreeca.spec.things.Sets;
 
 import org.eclipse.rdf4j.model.*;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.things.Values.statement;
 
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
@@ -112,9 +111,7 @@ public final class Report {
 		}
 
 		return issues.stream()
-				.anyMatch(issue -> Comparables.gte(issue.getLevel(), limit))
-
-				|| frames.stream()
+				.anyMatch(issue -> issue.getLevel().compareTo(limit) >= 0) || frames.stream()
 				.flatMap(frame -> frame.getSlots().values().stream())
 				.anyMatch(trace -> trace.assess(limit));
 	}
@@ -134,7 +131,7 @@ public final class Report {
 		}
 
 		final Set<Issue> issues=this.issues.stream()
-				.filter(issue -> Comparables.gte(issue.getLevel(), limit))
+				.filter(issue -> issue.getLevel().compareTo(limit) >= 0)
 				.collect(toCollection(LinkedHashSet::new));
 
 		final Set<Frame<Report>> frames=this.frames.stream()

@@ -21,8 +21,11 @@ package com.metreeca.link.services;
 
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Dispatcher;
-import com.metreeca.spec.*;
+import com.metreeca.spec.Shape;
+import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Outliner;
+import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -35,19 +38,19 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.Handler.sysadm;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.link.Handler.unsupported;
 import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.required;
-import static com.metreeca.spec.Values.*;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Pattern.pattern;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.Values.*;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -147,7 +150,7 @@ public final class Names implements Service {
 			model.addAll(new Transfer(request, response).model(shape)); // add user-submitted statements
 			model.addAll(shape.accept(Shape.mode(Spec.verify)).accept(new Outliner())); // add implied statements
 
-			final Map<String, String> namespaces=new TreeMap<>(Cell.cell(model, target)
+			final Map<String, String> namespaces=new TreeMap<>(_Cell.cell(model, target)
 
 					.forward(Link.Entry)
 					.cells()

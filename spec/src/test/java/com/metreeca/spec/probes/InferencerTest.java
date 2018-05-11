@@ -20,9 +20,9 @@
 package com.metreeca.spec.probes;
 
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -30,11 +30,11 @@ import org.junit.Ignore;
 
 import java.util.function.BiFunction;
 
-import static com.metreeca.jeep.Lists.concat;
-import static com.metreeca.jeep.Lists.list;
-import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Lists.concat;
+import static com.metreeca.spec.things.Lists.list;
+import static com.metreeca.spec.things.Values.literal;
 
 import static org.junit.Assert.assertEquals;
 

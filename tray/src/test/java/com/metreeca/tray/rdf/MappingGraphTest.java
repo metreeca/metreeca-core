@@ -19,10 +19,10 @@
 
 package com.metreeca.tray.rdf;
 
-import com.metreeca.spec.Cell;
 import com.metreeca.spec.Spec;
-import com.metreeca.spec.ValuesTest;
 import com.metreeca.spec.queries.Items;
+import com.metreeca.spec.things.ValuesTest;
+import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.IsolationLevels;
@@ -49,11 +49,11 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.statement;
-import static com.metreeca.spec.ValuesTest.*;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shifts.Step.step;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;
@@ -89,7 +89,7 @@ public final class MappingGraphTest {
 	@Test public void testShapeGetter() {
 		mapping(BIRT, graph -> {
 
-			final Cell cell=graph.get(new Items(all(Employee1370), singletonList(step(Account))));
+			final _Cell cell=graph.get(new Items(all(Employee1370), singletonList(step(Account))));
 
 			final Collection<Value> values=cell.forward(Spec.items).forward(Spec.value).values();
 

@@ -21,9 +21,9 @@ package com.metreeca.spec.probes;
 
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Shift;
-import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -31,14 +31,14 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.spec.Values.iri;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Group.group;
 import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.Virtual.virtual;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Values.iri;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;

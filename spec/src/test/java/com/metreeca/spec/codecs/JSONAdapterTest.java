@@ -19,8 +19,8 @@
 
 package com.metreeca.spec.codecs;
 
-import com.metreeca.jeep.Lists;
-import com.metreeca.jeep.Maps;
+import com.metreeca.spec.things.Lists;
+import com.metreeca.spec.things.Maps;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -29,8 +29,8 @@ import java.util.Map;
 
 import javax.json.*;
 
-import static com.metreeca.spec.Values.bnode;
-import static com.metreeca.spec.Values.format;
+import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.spec.things.Values.format;
 
 
 public abstract class JSONAdapterTest {

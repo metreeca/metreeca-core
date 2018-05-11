@@ -36,11 +36,9 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
-import static com.metreeca.jeep.Sets.union;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
-import static com.metreeca.spec.Values.rewrite;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.All.all;
@@ -48,6 +46,8 @@ import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.sparql.SPARQLEngine.browse;
 import static com.metreeca.spec.sparql.SPARQLEngine.contains;
+import static com.metreeca.spec.things.Sets.union;
+import static com.metreeca.spec.things.Values.rewrite;
 import static com.metreeca.tray.Tray.tool;
 
 

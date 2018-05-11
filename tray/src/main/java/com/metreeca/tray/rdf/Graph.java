@@ -19,10 +19,13 @@
 
 package com.metreeca.tray.rdf;
 
-import com.metreeca.spec.*;
 import com.metreeca.spec.Issue.Level;
+import com.metreeca.spec.Query;
+import com.metreeca.spec.Report;
+import com.metreeca.spec.Shape;
 import com.metreeca.spec.sparql.SPARQLEngine;
 import com.metreeca.spec.sparql.SPARQLWriter;
+import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.graphs.*;
 import com.metreeca.tray.sys.Setup;
@@ -41,10 +44,10 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.metreeca.jeep.Lists.concat;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
 import static com.metreeca.spec.shapes.And.and;
+import static com.metreeca.spec.things.Lists.concat;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -220,7 +223,7 @@ public abstract class Graph implements AutoCloseable {
 		return browse(connection -> SPARQLEngine.contains(connection, resource));
 	}
 
-	public Cell get(final Shape shape) {
+	public _Cell get(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -229,7 +232,7 @@ public abstract class Graph implements AutoCloseable {
 		return get(new com.metreeca.spec.queries.Graph(shape));
 	}
 
-	public Cell get(final Query query) {
+	public _Cell get(final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
@@ -239,7 +242,7 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 
-	public Report set(final Shape shape, final Cell cell) {
+	public Report set(final Shape shape, final _Cell cell) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

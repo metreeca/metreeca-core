@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.String.format;

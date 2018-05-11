@@ -32,7 +32,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.Alias.alias;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
@@ -54,6 +53,7 @@ import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.Virtual.virtual;
 import static com.metreeca.spec.shapes.When.when;
+import static com.metreeca.spec.things.Values.literal;
 
 import static org.junit.Assert.assertEquals;
 

@@ -20,9 +20,9 @@
 package com.metreeca.spec.codecs;
 
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.ValuesTest;
 import com.metreeca.spec.shapes.Alias;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -42,13 +42,13 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static com.metreeca.spec.Values.*;
-import static com.metreeca.spec.ValuesTest.parse;
-import static com.metreeca.spec.ValuesTest.term;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Values.*;
+import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.term;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

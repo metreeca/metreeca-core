@@ -17,32 +17,8 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep;
+/**
+ * RDF/Java utilities.
+ */
 
-import org.junit.Test;
-
-import static com.metreeca.jeep.Comparables.compare;
-
-import static org.junit.Assert.assertEquals;
-
-
-public class ComparablesTest {
-
-	private enum Ordered {Lower, Upper}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test public void testCompare() {
-
-		assertEquals("=", 0, compare(Ordered.Upper, Ordered.Upper));
-		assertEquals("<", -1, compare(Ordered.Lower, Ordered.Upper));
-		assertEquals(">", +1, compare(Ordered.Upper, Ordered.Lower));
-
-		assertEquals("=/null", 0, compare(null, null));
-		assertEquals("</null", -1, compare(null, Ordered.Upper));
-		assertEquals(">/null", +1, compare(Ordered.Upper, null));
-
-	}
-
-}
+package com.metreeca.spec.things;

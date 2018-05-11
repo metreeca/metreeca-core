@@ -23,7 +23,7 @@ import com.metreeca.spec.Shape;
 
 import org.eclipse.rdf4j.model.Value;
 
-import static com.metreeca.spec.Values.format;
+import static com.metreeca.spec.things.Values.format;
 
 
 /**

@@ -30,9 +30,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
-import static com.metreeca.jeep.Sets.set;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.In.in;
@@ -41,6 +38,9 @@ import static com.metreeca.spec.shapes.MinCount.minCount;
 import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.When.when;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.Sets.set;
 
 import static java.util.Arrays.asList;
 

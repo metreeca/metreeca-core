@@ -32,10 +32,10 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-import static com.metreeca.jeep.JSON.field;
-import static com.metreeca.jeep.JSON.object;
 import static com.metreeca.next.Wrapper.wrapper;
 import static com.metreeca.next.handlers.Router.router;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;

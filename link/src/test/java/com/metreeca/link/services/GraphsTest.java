@@ -38,11 +38,11 @@ import static com.metreeca.link.HandlerTest.model;
 import static com.metreeca.link.HandlerTest.response;
 import static com.metreeca.link.HandlerTest.tools;
 import static com.metreeca.link.Link.SysAdm;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.statement;
-import static com.metreeca.spec.ValuesTest.assertIsomorphic;
-import static com.metreeca.spec.ValuesTest.parse;
-import static com.metreeca.spec.ValuesTest.write;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.write;
 
 import static org.junit.Assert.assertTrue;
 

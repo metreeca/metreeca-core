@@ -41,7 +41,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.Values.bnode;
+import static com.metreeca.spec.things.Values.bnode;
 import static com.metreeca.tray.sys.Trace.clip;
 
 

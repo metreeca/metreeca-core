@@ -20,14 +20,14 @@
 package com.metreeca.spec.codecs;
 
 
-import com.metreeca.jeep.JSON;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
-import com.metreeca.spec.Values;
 import com.metreeca.spec.probes.Inferencer;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.shapes.Alias;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things._JSON;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -122,7 +122,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 		try {
 
-			parse(JSON.decode(reader), baseURI, focus, driver).count(); // consume values
+			parse(_JSON.decode(reader), baseURI, focus, driver).count(); // consume values
 
 		} catch ( final JsonParsingException e ) {
 

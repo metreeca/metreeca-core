@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep;
+package com.metreeca.spec.things;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -39,7 +39,7 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
  *
  * @see "https://javaee.github.io/jsonp/"
  */
-public final class JSON {
+public final class _JSON {
 
 	private static final JsonParserFactory parsers=Json
 			.createParserFactory(null);
@@ -261,6 +261,6 @@ public final class JSON {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSON() {}
+	private _JSON() {}
 
 }

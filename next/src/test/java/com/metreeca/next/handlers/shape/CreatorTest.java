@@ -39,18 +39,18 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.metreeca.jeep.JSON.field;
-import static com.metreeca.jeep.JSON.object;
 import static com.metreeca.next.LinkTest.Employee;
 import static com.metreeca.next.LinkTest.testbed;
 import static com.metreeca.next.Server.server;
 import static com.metreeca.next.handlers.shape.Creator.auto;
 import static com.metreeca.next.handlers.shape.Creator.creator;
 import static com.metreeca.next.wrappers.Processor.processor;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.Values.statement;
-import static com.metreeca.spec.ValuesTest.*;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things.ValuesTest.*;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;

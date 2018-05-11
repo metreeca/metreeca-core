@@ -19,8 +19,11 @@
 
 package com.metreeca.spec.queries;
 
-import com.metreeca.spec.*;
+import com.metreeca.spec.Query;
+import com.metreeca.spec.Shape;
+import com.metreeca.spec.Spec;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 

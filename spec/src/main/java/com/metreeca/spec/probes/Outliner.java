@@ -32,10 +32,10 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static com.metreeca.jeep.Sets.set;
-import static com.metreeca.jeep.Sets.union;
-import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.All.all;
+import static com.metreeca.spec.things.Sets.set;
+import static com.metreeca.spec.things.Sets.union;
+import static com.metreeca.spec.things.Values.statement;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toCollection;

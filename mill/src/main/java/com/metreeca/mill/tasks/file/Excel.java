@@ -21,7 +21,7 @@ package com.metreeca.mill.tasks.file;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
 
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
@@ -45,8 +45,8 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.Strings.normalize;
-import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.things.Strings.normalize;
+import static com.metreeca.spec.things.Values.literal;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;

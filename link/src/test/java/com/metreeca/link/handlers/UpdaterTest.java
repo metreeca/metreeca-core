@@ -26,13 +26,13 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.HandlerTest.model;
 import static com.metreeca.link.HandlerTest.response;
 import static com.metreeca.link.HandlerTest.tools;
-import static com.metreeca.spec.ValuesTest.assertIsomorphic;
-import static com.metreeca.spec.ValuesTest.parse;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.things.ValuesTest.parse;
 
 
 public class UpdaterTest {

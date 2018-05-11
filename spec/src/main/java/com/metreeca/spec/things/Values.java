@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.spec;
+package com.metreeca.spec.things;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
@@ -219,7 +219,6 @@ public final class Values {
 
 		return iri(Internal, name);
 	}
-
 
 
 	public static Literal literal(final Object value) {

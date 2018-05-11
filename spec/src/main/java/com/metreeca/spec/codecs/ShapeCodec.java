@@ -19,10 +19,14 @@
 
 package com.metreeca.spec.codecs;
 
-import com.metreeca.spec.*;
+import com.metreeca.spec.Shape;
+import com.metreeca.spec.Shift;
+import com.metreeca.spec.Spec;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Count;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -40,9 +44,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.spec.Values.bnode;
-import static com.metreeca.spec.Values.integer;
-import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.spec.things.Values.integer;
+import static com.metreeca.spec.things.Values.statement;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -91,7 +95,7 @@ public final class ShapeCodec {
 
 			final Resource root=model.subjects().stream()
 					.filter(subject -> !model.contains(null, null, subject))
-					.findFirst().orElseThrow(Cell.Missing);
+					.findFirst().orElseThrow(_Cell.Missing);
 
 			return decode(root, model);
 

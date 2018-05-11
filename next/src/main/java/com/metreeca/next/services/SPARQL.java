@@ -20,8 +20,8 @@
 package com.metreeca.next.services;
 
 import com.metreeca.next.*;
-import com.metreeca.spec.Formats;
 import com.metreeca.spec.Spec;
+import com.metreeca.spec.things.Formats;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -36,10 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.metreeca.jeep.JSON.field;
-import static com.metreeca.jeep.JSON.object;
 import static com.metreeca.next.Handler.refused;
 import static com.metreeca.next.handlers.Dispatcher.dispatcher;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;

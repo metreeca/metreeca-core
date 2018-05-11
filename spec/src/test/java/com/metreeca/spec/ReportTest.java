@@ -19,22 +19,22 @@
 
 package com.metreeca.spec;
 
-import com.metreeca.jeep.Sets;
 import com.metreeca.spec.shapes.And;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Sets;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
-import static com.metreeca.jeep.Lists.list;
-import static com.metreeca.jeep.Sets.set;
 import static com.metreeca.spec.Frame.frame;
 import static com.metreeca.spec.Frame.slot;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.ValuesTest.assertIsomorphic;
-import static com.metreeca.spec.ValuesTest.item;
-import static com.metreeca.spec.ValuesTest.parse;
+import static com.metreeca.spec.things.Lists.list;
+import static com.metreeca.spec.things.Sets.set;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.things.ValuesTest.item;
+import static com.metreeca.spec.things.ValuesTest.parse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

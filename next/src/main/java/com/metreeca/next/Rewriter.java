@@ -27,7 +27,7 @@ import org.eclipse.rdf4j.model.Value;
 import java.io.*;
 import java.util.regex.Pattern;
 
-import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.things.Values.iri;
 
 
 /**

@@ -33,8 +33,8 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.Test;
 
 import static com.metreeca.next.handlers.shape.Relator.relator;
-import static com.metreeca.spec.Values.statement;
-import static com.metreeca.spec.ValuesTest.*;
+import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;

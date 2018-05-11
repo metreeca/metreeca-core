@@ -28,8 +28,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.metreeca.jeep.Strings.indent;
-import static com.metreeca.spec.Values.format;
+import static com.metreeca.spec.things.Strings.indent;
+import static com.metreeca.spec.things.Values.format;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;

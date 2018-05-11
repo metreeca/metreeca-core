@@ -24,11 +24,11 @@ import com.metreeca.spec.shifts.Step;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.Trait.traits;
 import static com.metreeca.spec.shapes.Virtual.virtual;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

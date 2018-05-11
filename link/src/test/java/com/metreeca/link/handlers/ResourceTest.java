@@ -37,13 +37,13 @@ import org.junit.Test;
 import static com.metreeca.link.HandlerTest.*;
 import static com.metreeca.spec.Shape.delete;
 import static com.metreeca.spec.Shape.relate;
-import static com.metreeca.spec.ValuesTest.item;
-import static com.metreeca.spec.ValuesTest.parse;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.When.when;
+import static com.metreeca.spec.things.ValuesTest.item;
+import static com.metreeca.spec.things.ValuesTest.parse;
 
 import static org.eclipse.rdf4j.model.util.Models.isomorphic;
 import static org.junit.Assert.assertEquals;

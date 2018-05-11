@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashSet;
 
-import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.things.Values.iri;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;

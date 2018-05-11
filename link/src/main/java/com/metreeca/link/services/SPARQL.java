@@ -21,7 +21,7 @@ package com.metreeca.link.services;
 
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Dispatcher;
-import com.metreeca.spec.Formats;
+import com.metreeca.spec.things.Formats;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -38,10 +38,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.Handler.unauthorized;
-import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.Values.literal;
 
 import static java.lang.Boolean.parseBoolean;
 

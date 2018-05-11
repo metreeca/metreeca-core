@@ -19,7 +19,6 @@
 
 package com.metreeca.spec.codecs;
 
-import com.metreeca.jeep.Lists;
 import com.metreeca.spec.Query;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.queries.Graph;
@@ -27,6 +26,7 @@ import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shapes.Test;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Lists;
 
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -35,8 +35,6 @@ import java.util.function.Consumer;
 
 import javax.json.JsonException;
 
-import static com.metreeca.jeep.Lists.list;
-import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;
@@ -53,6 +51,8 @@ import static com.metreeca.spec.shapes.MinInclusive.minInclusive;
 import static com.metreeca.spec.shapes.MinLength.minLength;
 import static com.metreeca.spec.shapes.Pattern.pattern;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Lists.list;
+import static com.metreeca.spec.things.Values.literal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

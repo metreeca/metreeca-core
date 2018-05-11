@@ -20,8 +20,8 @@
 package com.metreeca.spec.codecs;
 
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.Or;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -39,16 +39,16 @@ import java.util.Map;
 import javax.json.*;
 
 import static com.metreeca.spec.Shape.required;
-import static com.metreeca.spec.Values.bnode;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.ValuesTest.parse;
-import static com.metreeca.spec.ValuesTest.term;
 import static com.metreeca.spec.shapes.Alias.alias;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shifts.Step.step;
+import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.term;
 
 import static org.junit.Assert.assertEquals;
 

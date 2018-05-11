@@ -22,7 +22,7 @@ package com.metreeca.link.services;
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Dispatcher;
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -33,15 +33,15 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.spec.Shape.optional;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.Values.statement;
 
 import static java.util.Arrays.asList;
 

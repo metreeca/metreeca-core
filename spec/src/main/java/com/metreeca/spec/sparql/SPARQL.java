@@ -19,12 +19,15 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.spec.*;
+import com.metreeca.spec.Query;
+import com.metreeca.spec.Shape;
+import com.metreeca.spec.Shift;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Pruner;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Count;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -32,12 +35,12 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.Lists.list;
-import static com.metreeca.spec.Values.bnode;
-import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Or.or;
+import static com.metreeca.spec.things.Lists.list;
+import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.spec.things.Values.statement;
 
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;

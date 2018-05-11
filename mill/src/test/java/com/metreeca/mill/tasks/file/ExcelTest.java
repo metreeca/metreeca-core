@@ -33,8 +33,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static com.metreeca.mill.tasks.file.Excel.*;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.ValuesTest.term;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.ValuesTest.term;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

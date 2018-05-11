@@ -33,9 +33,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
-import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.Values.literal;
 
 import static java.util.Arrays.asList;
 

@@ -17,12 +17,12 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep;
+package com.metreeca.spec.things;
 
 import org.junit.Test;
 
-import static com.metreeca.jeep.Strings.normalize;
-import static com.metreeca.jeep.Strings.title;
+import static com.metreeca.spec.things.Strings.normalize;
+import static com.metreeca.spec.things.Strings.title;
 
 import static org.junit.Assert.assertEquals;
 

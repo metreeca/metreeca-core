@@ -19,7 +19,7 @@
 
 package com.metreeca.next;
 
-import com.metreeca.jeep.JSON;
+import com.metreeca.spec.things._JSON;
 import com.metreeca.tray.IO;
 
 import java.io.*;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 import javax.json.JsonException;
 
-import static com.metreeca.jeep.Strings.title;
+import static com.metreeca.spec.things.Strings.title;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -114,7 +114,7 @@ public final class Part { // !!! factor to Message
 
 
 	public Object json() throws JsonException {
-		return JSON.decode(text());
+		return _JSON.decode(text());
 	}
 
 
@@ -239,7 +239,7 @@ public final class Part { // !!! factor to Message
 				throw new NullPointerException("null json");
 			}
 
-			return header("Content-Type", "application/json").text(JSON.encode(json));
+			return header("Content-Type", "application/json").text(_JSON.encode(json));
 		}
 
 

@@ -19,13 +19,16 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.spec.*;
+import com.metreeca.spec.Query;
+import com.metreeca.spec.Shape;
+import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Pruner;
 import com.metreeca.spec.queries.Graph;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -41,11 +44,11 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.jeep.Lists.list;
-import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Shape.mode;
-import static com.metreeca.spec.Values.bnode;
-import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.things.Lists.list;
+import static com.metreeca.spec.things.Strings.indent;
+import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.spec.things.Values.literal;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
@@ -70,19 +73,19 @@ final class SPARQLReader {
 	}
 
 
-	public Cell process(final Query query) {
+	public _Cell process(final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
 		}
 
-		return query.accept(new Query.Probe<Cell>() {
+		return query.accept(new Query.Probe<_Cell>() {
 
-			@Override public Cell visit(final Graph graph) { return graph(graph); }
+			@Override public _Cell visit(final Graph graph) { return graph(graph); }
 
-			@Override public Cell visit(final Stats stats) { return stats(stats); }
+			@Override public _Cell visit(final Stats stats) { return stats(stats); }
 
-			@Override public Cell visit(final Items items) { return items(items); }
+			@Override public _Cell visit(final Items items) { return items(items); }
 
 		});
 	}
@@ -90,7 +93,7 @@ final class SPARQLReader {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Cell graph(final Graph graph) {
+	private _Cell graph(final Graph graph) {
 
 		final Shape shape=graph.getShape();
 		final List<Query.Order> orders=graph.getOrders();
@@ -164,10 +167,10 @@ final class SPARQLReader {
 
 		});
 
-		return Cell.cell(model).insert(focus);
+		return _Cell.cell(model).insert(focus);
 	}
 
-	private Cell stats(final Stats stats) {
+	private _Cell stats(final Stats stats) {
 
 		final Shape shape=stats.getShape();
 		final List<Step> path=stats.getPath();
@@ -253,10 +256,10 @@ final class SPARQLReader {
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
 				.ifPresent(max -> model.add(Spec.meta, Spec.max, max));
 
-		return Cell.cell(model).insert(Spec.meta);
+		return _Cell.cell(model).insert(Spec.meta);
 	}
 
-	private Cell items(final Items items) {
+	private _Cell items(final Items items) {
 
 		final Shape shape=items.getShape();
 		final List<Step> path=items.getPath();
@@ -319,7 +322,7 @@ final class SPARQLReader {
 			}
 		});
 
-		return Cell.cell(model).insert(Spec.meta);
+		return _Cell.cell(model).insert(Spec.meta);
 	}
 
 

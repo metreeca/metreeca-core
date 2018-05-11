@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.Values.*;
+import static com.metreeca.spec.things.Values.*;
 import static com.metreeca.tray.IO.reader;
 import static com.metreeca.tray.sys.Trace.clip;
 

@@ -19,7 +19,7 @@
 
 package com.metreeca.tray.xml;
 
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
 

@@ -21,8 +21,8 @@ package com.metreeca.link.services;
 
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Dispatcher;
-import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.And;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -40,14 +40,14 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.spec.Shape.required;
-import static com.metreeca.spec.Values.*;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Pattern.pattern;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.Values.*;
 
 
 /**

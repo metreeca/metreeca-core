@@ -26,8 +26,8 @@ import org.eclipse.rdf4j.model.IRI;
 
 import java.util.*;
 
-import static com.metreeca.jeep.Lists.list;
-import static com.metreeca.jeep.Maps.map;
+import static com.metreeca.spec.things.Lists.list;
+import static com.metreeca.spec.things.Maps.map;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;

@@ -19,7 +19,6 @@
 
 package com.metreeca.spec.codecs;
 
-import com.metreeca.jeep.JSON;
 import com.metreeca.spec.Query;
 import com.metreeca.spec.Query.Order;
 import com.metreeca.spec.Shape;
@@ -28,6 +27,7 @@ import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things._JSON;
 
 import org.eclipse.rdf4j.model.Value;
 
@@ -38,8 +38,6 @@ import java.util.regex.Matcher;
 
 import javax.json.JsonException;
 
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.Alias.aliases;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
@@ -55,6 +53,8 @@ import static com.metreeca.spec.shapes.MinInclusive.minInclusive;
 import static com.metreeca.spec.shapes.MinLength.minLength;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.Trait.traits;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.literal;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
@@ -111,9 +111,9 @@ public final class QueryParser {
 		return Optional
 				.of(json)
 				.filter(v -> !v.isEmpty())
-				.map(JSON::decode)
+				.map(_JSON::decode)
 				.map(v -> v instanceof Map ? (Map<String, Object>)v : error("query is not a json object"))
-				.orElseGet(JSON::object);
+				.orElseGet(_JSON::object);
 	}
 
 

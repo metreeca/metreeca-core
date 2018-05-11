@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep;
+package com.metreeca.spec.things;
 
 import java.util.*;
 
@@ -61,6 +61,7 @@ public final class Maps {
 
 		return unmodifiableMap(map);
 	}
+
 
 	public static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
 		return new AbstractMap.SimpleImmutableEntry<>(key, value);

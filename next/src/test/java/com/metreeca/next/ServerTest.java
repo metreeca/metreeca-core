@@ -19,9 +19,9 @@
 
 package com.metreeca.next;
 
-import com.metreeca.jeep.JSON;
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things._JSON;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Setup;
 
@@ -35,12 +35,12 @@ import static com.metreeca.next.LinkTest.testbed;
 import static com.metreeca.next.RewriterTest.*;
 import static com.metreeca.next.Server.server;
 import static com.metreeca.spec.Shape.required;
-import static com.metreeca.spec.Values.statement;
-import static com.metreeca.spec.ValuesTest.assertIsomorphic;
-import static com.metreeca.spec.ValuesTest.write;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.things.ValuesTest.write;
 
 import static org.junit.Assert.assertEquals;
 
@@ -188,7 +188,7 @@ public class ServerTest {
 				.response(response -> {
 
 					assertEquals("response json rewritten",
-							JSON.decode(json("{ 'this': '"+external("s")+"', 'p': '"+external("o")+"' }")),
+							_JSON.decode(json("{ 'this': '"+external("s")+"', 'p': '"+external("o")+"' }")),
 							response.json());
 
 				});

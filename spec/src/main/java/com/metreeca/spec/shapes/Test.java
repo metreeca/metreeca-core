@@ -19,8 +19,8 @@
 
 package com.metreeca.spec.shapes;
 
-import com.metreeca.jeep.Strings;
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.things.Strings;
 
 import static com.metreeca.spec.shapes.And.and;
 

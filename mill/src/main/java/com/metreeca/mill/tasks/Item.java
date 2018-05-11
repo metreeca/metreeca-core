@@ -23,7 +23,7 @@ package com.metreeca.mill.tasks;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.mill._Template;
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.Values.statement;
 
 import static java.util.stream.Collectors.toList;
 

@@ -19,11 +19,12 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.jeep.Lists;
-import com.metreeca.jeep.Sets;
 import com.metreeca.spec.*;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Lists;
+import com.metreeca.spec.things.Sets;
+import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -38,13 +39,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
-import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Frame.frame;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
-import static com.metreeca.spec.Values.compare;
-import static com.metreeca.spec.Values.is;
-import static com.metreeca.spec.Values.text;
+import static com.metreeca.spec.things.Strings.indent;
+import static com.metreeca.spec.things.Values.compare;
+import static com.metreeca.spec.things.Values.is;
+import static com.metreeca.spec.things.Values.text;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.reducing;
@@ -70,7 +71,7 @@ public final class SPARQLWriter { // !!! package-local
 	}
 
 
-	public Report process(final Shape shape, final Cell cell) {
+	public Report process(final Shape shape, final _Cell cell) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

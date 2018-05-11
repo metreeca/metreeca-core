@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static com.metreeca.next.LinkTest.*;
 import static com.metreeca.next.handlers.shape.Browser.browser;
-import static com.metreeca.spec.ValuesTest.*;
+import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;

@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.things.Values.iri;
 
 
 /**

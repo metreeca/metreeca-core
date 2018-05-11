@@ -16,20 +16,18 @@
           <element id="archive" name="spec-0.0-SNAPSHOT.jar">
             <element id="module-output" name="spec" />
           </element>
-          <element id="archive" name="jeep-0.0-SNAPSHOT.jar">
-            <element id="module-output" name="jeep" />
-          </element>
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-runtime:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-config:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-console:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-client:2.3.2" />
+          <element id="library" level="project" name="Maven: com.metreeca:jeep:0.0-SNAPSHOT" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-runtime:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-config:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-console:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-client:2.3.1" />
           <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpcore:4.4.4" />
           <element id="library" level="project" name="Maven: commons-codec:commons-codec:1.10" />
           <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.3.2" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.8.8" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.8.8" />
           <element id="library" level="project" name="Maven: org.slf4j:jcl-over-slf4j:1.7.10" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-storage:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-storage:2.3.1" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-backward-codecs:5.5.4" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-memory:5.5.4" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-suggest:5.5.4" />
@@ -57,8 +55,8 @@
           <element id="library" level="project" name="Maven: org.noggit:noggit:0.6" />
           <element id="library" level="project" name="Maven: org.jline:jline:3.5.1" />
           <element id="library" level="project" name="Maven: commons-cli:commons-cli:1.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-http-protocol:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-http-server-spring:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-http-protocol:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-http-server-spring:2.3.1" />
           <element id="library" level="project" name="Maven: javax.servlet:jstl:1.1.2" />
           <element id="library" level="project" name="Maven: taglibs:standard:1.1.2" />
           <element id="library" level="project" name="Maven: org.springframework:spring-aop:4.2.1.RELEASE" />
@@ -72,74 +70,74 @@
           <element id="library" level="project" name="Maven: cglib:cglib:3.1" />
           <element id="library" level="project" name="Maven: org.ow2.asm:asm:4.2" />
           <element id="library" level="project" name="Maven: com.google.guava:guava:18.0" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-model:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-query:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryalgebra-evaluation:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-http-client:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-model:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-query:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryalgebra-evaluation:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-http-client:2.3.1" />
           <element id="library" level="project" name="Maven: org.mapdb:mapdb:1.0.8" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryalgebra-model:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryalgebra-geosparql:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryalgebra-model:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryalgebra-geosparql:2.3.1" />
           <element id="library" level="project" name="Maven: com.spatial4j:spatial4j:0.4.1" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryparser-api:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryparser-serql:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryparser-sparql:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryrender:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-api:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-binary:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-sparqljson:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryparser-api:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryparser-serql:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryparser-sparql:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryrender:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-api:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-binary:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-sparqljson:2.3.1" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.8.8" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-sparqlxml:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-text:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-sparqlxml:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-queryresultio-text:2.3.1" />
           <element id="library" level="project" name="Maven: com.opencsv:opencsv:3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-api:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-contextaware:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-dataset:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-event:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-http:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-manager:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-sail:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-sparql:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-api:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-binary:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-datatypes:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-jsonld:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-api:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-contextaware:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-dataset:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-event:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-http:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-manager:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-sail:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-repository-sparql:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-api:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-binary:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-datatypes:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-jsonld:2.3.1" />
           <element id="library" level="project" name="Maven: com.github.jsonld-java:jsonld-java:0.11.1" />
           <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpclient:4.5.2" />
           <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpclient-cache:4.5.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-languages:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-n3:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-nquads:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-ntriples:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-rdfjson:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-rdfxml:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-trig:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-trix:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-turtle:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-api:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-base:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-federation:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-elasticsearch:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-languages:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-n3:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-nquads:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-ntriples:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-rdfjson:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-rdfxml:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-trig:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-trix:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-turtle:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-api:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-base:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-federation:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-elasticsearch:2.3.1" />
           <element id="library" level="project" name="Maven: org.elasticsearch:elasticsearch:2.4.6" />
           <element id="library" level="project" name="Maven: org.elasticsearch.plugin:delete-by-query:2.4.6" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-lucene:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-lucene:2.3.1" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-core:5.5.4" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-queries:5.5.4" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-highlighter:5.5.4" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-analyzers-common:5.5.4" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-queryparser:5.5.4" />
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-spatial:5.5.4" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-lucene-api:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-solr:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-lucene-api:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-solr:2.3.1" />
           <element id="library" level="project" name="Maven: org.apache.solr:solr-solrj:5.5.4" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-inferencer:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-memory:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-model:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-spin:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-lucene-spin:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-spin:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-inferencer:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-memory:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-model:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-spin:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-lucene-spin:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-spin:2.3.1" />
           <element id="library" level="project" name="Maven: commons-lang:commons-lang:2.6" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-util:2.3.2" />
-          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-nativerdf:2.3.2" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-util:2.3.1" />
+          <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-sail-nativerdf:2.3.1" />
           <element id="library" level="project" name="Maven: org.glassfish:javax.json:1.0.4" />
           <element id="library" level="project" name="Maven: net.sf.saxon:Saxon-HE:9.7.0-15" />
           <element id="library" level="project" name="Maven: virtuoso.openlinksw.com:rdf4j-provider:2.2-20171221" />

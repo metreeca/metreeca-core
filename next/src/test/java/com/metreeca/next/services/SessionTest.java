@@ -31,9 +31,9 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 
-import static com.metreeca.jeep.JSON.field;
-import static com.metreeca.jeep.JSON.object;
 import static com.metreeca.next.LinkTest.testbed;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.iam.Roster.CredentialsRejected;
 import static com.metreeca.tray.iam.RosterTest.That;

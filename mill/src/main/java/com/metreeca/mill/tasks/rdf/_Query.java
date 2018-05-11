@@ -21,7 +21,7 @@ package com.metreeca.mill.tasks.rdf;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -35,9 +35,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.metreeca.spec.Values.bnode;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.statement;
 
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;

@@ -27,8 +27,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.jeep.Lists.list;
-import static com.metreeca.jeep.Maps.map;
+import static com.metreeca.spec.things.Lists.list;
+import static com.metreeca.spec.things.Maps.map;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;

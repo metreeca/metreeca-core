@@ -22,7 +22,7 @@ package com.metreeca.mill.tasks.rdf;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.Model;

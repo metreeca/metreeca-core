@@ -31,9 +31,9 @@ import org.junit.Test;
 
 import static com.metreeca.next.LinkTest.testbed;
 import static com.metreeca.next.handlers.shape.Builder.builder;
-import static com.metreeca.spec.ValuesTest.assertIsomorphic;
-import static com.metreeca.spec.ValuesTest.parse;
-import static com.metreeca.spec.ValuesTest.sparql;
+import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.sparql;
 
 import static org.junit.Assert.assertEquals;
 

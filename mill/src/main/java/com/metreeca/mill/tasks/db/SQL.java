@@ -22,7 +22,7 @@ package com.metreeca.mill.tasks.db;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 
@@ -35,9 +35,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.Math.max;

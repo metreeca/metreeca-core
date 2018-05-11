@@ -20,9 +20,9 @@
 package com.metreeca.spec.probes;
 
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -31,9 +31,9 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.Set;
 
-import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Values.literal;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;

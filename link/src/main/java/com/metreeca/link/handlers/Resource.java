@@ -19,17 +19,15 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.jeep.Lists;
-import com.metreeca.jeep.Maps;
-import com.metreeca.jeep.Sets;
 import com.metreeca.link.*;
-import com.metreeca.spec.*;
 import com.metreeca.spec.Issue.Level;
+import com.metreeca.spec.*;
 import com.metreeca.spec.codecs.QueryParser;
 import com.metreeca.spec.codecs.ShapeCodec;
 import com.metreeca.spec.probes.Inferencer;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Outliner;
+import com.metreeca.spec.things.*;
 import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
@@ -45,14 +43,14 @@ import java.util.function.BiConsumer;
 
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.link.Handler.unsupported;
-import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Shape.*;
-import static com.metreeca.spec.Values.*;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Or.or;
+import static com.metreeca.spec.things.Values.*;
+import static com.metreeca.spec.things._Cell.cell;
 
 
 /**
@@ -186,7 +184,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 					throw new LinkException(Response.BadRequest, "malformed query: "+e.getMessage(), e);
 				}
 
-				final Cell cell=graph.get(filter);
+				final _Cell cell=graph.get(filter);
 
 				if ( cell.values().isEmpty() ) { // resource known but empty envelope for the current user
 					throw new LinkException(Response.Forbidden); // !!! return 404 under strict security

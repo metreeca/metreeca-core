@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.spec;
+package com.metreeca.spec.things;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Literals;
@@ -27,7 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.things.Values.statement;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -37,24 +37,24 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 
-public final class Cell { // !!! immutable
+public final class _Cell { // !!! immutable
 
 	public static final Supplier<IllegalStateException> Missing=() -> new IllegalStateException("missing cell value");
 
 
-	public static Cell cell(final Value... values) {
+	public static _Cell cell(final Value... values) {
 		return cell(new LinkedHashSet<>(asList(values)));
 	}
 
-	public static Cell cell(final Collection<Value> values) {
+	public static _Cell cell(final Collection<Value> values) {
 		return cell(new LinkedHashSet<>(), values);
 	}
 
-	public static Cell cell(final Collection<Statement> model, final Value... values) {
+	public static _Cell cell(final Collection<Statement> model, final Value... values) {
 		return cell(model, new LinkedHashSet<>(asList(values)));
 	}
 
-	public static Cell cell(final Collection<Statement> model, final Collection<Value> values) {
+	public static _Cell cell(final Collection<Statement> model, final Collection<Value> values) {
 
 		if ( model == null ) {
 			throw new NullPointerException("null model");
@@ -72,7 +72,7 @@ public final class Cell { // !!! immutable
 			throw new NullPointerException("null value");
 		}
 
-		return new Cell(values, model, new Context() {});
+		return new _Cell(values, model, new Context() {});
 	}
 
 
@@ -82,7 +82,7 @@ public final class Cell { // !!! immutable
 	private final Context context;
 
 
-	private Cell(final Collection<Value> values, final Collection<Statement> model, final Context context) {
+	private _Cell(final Collection<Value> values, final Collection<Statement> model, final Context context) {
 
 		this.values=values;
 		this.model=model;
@@ -91,8 +91,8 @@ public final class Cell { // !!! immutable
 	}
 
 
-	public Collection<Cell> cells() {
-		return values.stream().map(value -> new Cell(singleton(value), model, context)).collect(toList());
+	public Collection<_Cell> cells() {
+		return values.stream().map(value -> new _Cell(singleton(value), model, context)).collect(toList());
 	}
 
 
@@ -126,7 +126,7 @@ public final class Cell { // !!! immutable
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Cell follow(final IRI predicate, final boolean reverse) {
+	public _Cell follow(final IRI predicate, final boolean reverse) {
 
 		if ( predicate == null ) {
 			throw new NullPointerException("null predicate");
@@ -135,7 +135,7 @@ public final class Cell { // !!! immutable
 		return reverse ? reverse(predicate) : forward(predicate);
 	}
 
-	public Cell forward(final IRI predicate) {
+	public _Cell forward(final IRI predicate) {
 
 		if ( predicate == null ) {
 			throw new NullPointerException("null predicate");
@@ -147,7 +147,7 @@ public final class Cell { // !!! immutable
 				.map(Statement::getObject)
 				.collect(toCollection(LinkedHashSet::new));
 
-		return new Cell(target, model, new Context() {
+		return new _Cell(target, model, new Context() {
 
 			@Override public void insert(final Value value) {
 				source.forEach(subject -> {
@@ -164,7 +164,7 @@ public final class Cell { // !!! immutable
 		});
 	}
 
-	public Cell reverse(final IRI predicate) {
+	public _Cell reverse(final IRI predicate) {
 
 		if ( predicate == null ) {
 			throw new NullPointerException("null predicate");
@@ -176,7 +176,7 @@ public final class Cell { // !!! immutable
 				.map(Statement::getSubject)
 				.collect(toCollection(LinkedHashSet::new));
 
-		return new Cell(target, model, new Context() {
+		return new _Cell(target, model, new Context() {
 
 			@Override public void insert(final Value value) {
 				source.forEach(object -> {
@@ -194,11 +194,11 @@ public final class Cell { // !!! immutable
 	}
 
 
-	public Cell insert(final Value... values) {
+	public _Cell insert(final Value... values) {
 		return insert(asList(values));
 	}
 
-	public Cell insert(final Iterable<Value> values) {
+	public _Cell insert(final Iterable<Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -212,11 +212,11 @@ public final class Cell { // !!! immutable
 	}
 
 
-	public Cell remove(final Value... values) {
+	public _Cell remove(final Value... values) {
 		return remove(asList(values));
 	}
 
-	public Cell remove(final Iterable<Value> values) {
+	public _Cell remove(final Iterable<Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -233,9 +233,9 @@ public final class Cell { // !!! immutable
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Cell
-				&& values.equals(((Cell)object).values)
-				&& model.equals(((Cell)object).model);
+		return this == object || object instanceof _Cell
+				&& values.equals(((_Cell)object).values)
+				&& model.equals(((_Cell)object).model);
 	}
 
 	@Override public int hashCode() {

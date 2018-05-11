@@ -17,10 +17,11 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.spec;
+package com.metreeca.spec.things;
 
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.charset.Charset;
@@ -44,7 +45,7 @@ public final class FormatsTest {
 
 	@Test public void testTypesParseStrings() {
 
-		assertEquals("empty", emptyList(), Formats.types(""));
+		Assert.assertEquals("empty", emptyList(), Formats.types(""));
 		assertEquals("single", singletonList("text/turtle"), Formats.types("text/turtle"));
 		assertEquals("multiple", asList("text/turtle", "text/plain"), Formats.types("text/turtle, text/plain"));
 

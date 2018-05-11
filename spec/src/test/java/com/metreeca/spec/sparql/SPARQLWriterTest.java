@@ -19,8 +19,13 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.spec.*;
+import com.metreeca.spec.Issue;
+import com.metreeca.spec.Report;
+import com.metreeca.spec.Shape;
 import com.metreeca.spec.shapes.*;
+import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things.ValuesTest;
+import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Models;
@@ -31,11 +36,6 @@ import org.junit.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.jeep.Sets.set;
-import static com.metreeca.spec.Values.bnode;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.ValuesTest.parse;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;
@@ -49,6 +49,11 @@ import static com.metreeca.spec.shapes.MinExclusive.minExclusive;
 import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shifts.Step.step;
+import static com.metreeca.spec.things.Sets.set;
+import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.ValuesTest.parse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -498,7 +503,7 @@ public class SPARQLWriterTest {
 
 			connection.add(statements);
 
-			return new SPARQLWriter(connection).process(shape, Cell.cell(focus));
+			return new SPARQLWriter(connection).process(shape, _Cell.cell(focus));
 
 		});
 	}

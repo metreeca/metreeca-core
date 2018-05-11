@@ -24,8 +24,8 @@ import com.metreeca.spec.Spec;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static com.metreeca.jeep.JSON.field;
-import static com.metreeca.jeep.JSON.object;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
 
 
 @FunctionalInterface public interface Handler {

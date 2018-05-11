@@ -29,7 +29,7 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.things.Values.iri;
 
 import static java.lang.Math.max;
 import static java.util.Collections.singleton;

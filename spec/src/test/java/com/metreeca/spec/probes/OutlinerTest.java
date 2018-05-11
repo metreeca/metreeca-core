@@ -29,11 +29,11 @@ import org.junit.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.spec.ValuesTest.parse;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Clazz.clazz;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.ValuesTest.parse;
 
 import static org.junit.Assert.assertEquals;
 

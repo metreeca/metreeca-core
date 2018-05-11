@@ -21,7 +21,7 @@ package com.metreeca.spec;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.things.Values.iri;
 
 
 /**

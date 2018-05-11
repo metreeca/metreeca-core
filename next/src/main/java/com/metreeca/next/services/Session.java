@@ -32,10 +32,10 @@ import java.util.Map;
 
 import javax.json.JsonException;
 
-import static com.metreeca.jeep.JSON.field;
-import static com.metreeca.jeep.JSON.object;
 import static com.metreeca.next.Handler.error;
 import static com.metreeca.next.handlers.Dispatcher.dispatcher;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.System.currentTimeMillis;

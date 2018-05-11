@@ -19,11 +19,11 @@
 
 package com.metreeca.next;
 
-import com.metreeca.jeep.JSON;
-import com.metreeca.spec.Formats;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.JSONAdapter;
+import com.metreeca.spec.things.Formats;
+import com.metreeca.spec.things._JSON;
 import com.metreeca.tray.IO;
 
 import org.eclipse.rdf4j.model.*;
@@ -40,9 +40,9 @@ import java.util.stream.Stream;
 
 import javax.json.JsonException;
 
-import static com.metreeca.jeep.Strings.title;
-import static com.metreeca.jeep.Strings.upper;
-import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.things.Strings.title;
+import static com.metreeca.spec.things.Strings.upper;
+import static com.metreeca.spec.things.Values.iri;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
@@ -256,7 +256,7 @@ public final class Request {
 
 
 	public Object json() throws JsonException {
-		return JSON.decode(text());
+		return _JSON.decode(text());
 	}
 
 
@@ -625,7 +625,7 @@ public final class Request {
 				throw new NullPointerException("null json");
 			}
 
-			return header("Content-Type", "application/json").text(JSON.encode(json));
+			return header("Content-Type", "application/json").text(_JSON.encode(json));
 		}
 
 

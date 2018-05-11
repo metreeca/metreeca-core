@@ -22,10 +22,10 @@ package com.metreeca.next.handlers.shape;
 
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
-import com.metreeca.spec.Cell;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Outliner;
+import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -35,16 +35,16 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 
-import static com.metreeca.jeep.Sets.union;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
-import static com.metreeca.spec.Values.rewrite;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.sparql.SPARQLEngine._browse;
+import static com.metreeca.spec.things.Sets.union;
+import static com.metreeca.spec.things.Values.rewrite;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -92,7 +92,7 @@ public final class Browser extends Shaper {
 
 				// retrieve filtered content from repository
 
-				final Cell cell=_browse(connection, filter); // !!! remove Cell
+				final _Cell cell=_browse(connection, filter); // !!! remove Cell
 				final Collection<Statement> model=cell.model();
 
 				if ( filter instanceof com.metreeca.spec.queries.Graph ) {

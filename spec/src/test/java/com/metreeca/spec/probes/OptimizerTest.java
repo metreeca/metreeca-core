@@ -20,10 +20,10 @@
 package com.metreeca.spec.probes;
 
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.Datatype;
 import com.metreeca.spec.shapes.MinCount;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;

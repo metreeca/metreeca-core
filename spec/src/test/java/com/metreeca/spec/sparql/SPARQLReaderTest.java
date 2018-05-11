@@ -19,7 +19,9 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.spec.*;
+import com.metreeca.spec.Query;
+import com.metreeca.spec.Shape;
+import com.metreeca.spec.Spec;
 import com.metreeca.spec.queries.Graph;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
@@ -27,6 +29,7 @@ import com.metreeca.spec.shapes.MaxLength;
 import com.metreeca.spec.shapes.MinLength;
 import com.metreeca.spec.shifts.Count;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -39,14 +42,9 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Set;
 
-import static com.metreeca.jeep.Lists.list;
-import static com.metreeca.jeep.Sets.set;
 import static com.metreeca.spec.Query.decreasing;
 import static com.metreeca.spec.Query.increasing;
 import static com.metreeca.spec.Shape.filter;
-import static com.metreeca.spec.Values.integer;
-import static com.metreeca.spec.Values.literal;
-import static com.metreeca.spec.ValuesTest.*;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;
@@ -61,6 +59,11 @@ import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.Virtual.virtual;
 import static com.metreeca.spec.shifts.Step.step;
+import static com.metreeca.spec.things.Lists.list;
+import static com.metreeca.spec.things.Sets.set;
+import static com.metreeca.spec.things.Values.integer;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.ValuesTest.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -74,7 +77,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testGraphEmptyShape() {
 
-		final Cell cell=graph(and());
+		final _Cell cell=graph(and());
 
 		assertTrue("empty focus", cell.values().isEmpty());
 		assertTrue("empty model", cell.model().isEmpty());
@@ -83,7 +86,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testGraphEmptyResultSet() {
 
-		final Cell cell=graph(trait(RDF.TYPE, all(RDF.NIL)));
+		final _Cell cell=graph(trait(RDF.TYPE, all(RDF.NIL)));
 
 		assertTrue("empty focus", cell.values().isEmpty());
 		assertTrue("empty model", cell.model().isEmpty());
@@ -92,7 +95,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testGraphEmptyProjection() {
 
-		final Cell cell=graph(clazz(term("Product")));
+		final _Cell cell=graph(clazz(term("Product")));
 
 		assertEquals("matching focus", focus(
 
@@ -106,7 +109,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testGraphMatching() {
 
-		final Cell cell=graph(trait(RDF.TYPE, all(term("Product"))));
+		final _Cell cell=graph(trait(RDF.TYPE, all(term("Product"))));
 
 		assertEquals("matching focus", focus(
 
@@ -163,7 +166,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testStatsEmptyResultSet() {
 
-		final Cell cell=stats(trait(RDF.TYPE, all(RDF.NIL)));
+		final _Cell cell=stats(trait(RDF.TYPE, all(RDF.NIL)));
 
 		assertEquals("meta focus", set(Spec.meta), set(cell.values()));
 
@@ -176,7 +179,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testStatsEmptyProjection() {
 
-		final Cell cell=stats(clazz(term("Product")));
+		final _Cell cell=stats(clazz(term("Product")));
 
 		assertIsomorphic(
 
@@ -207,7 +210,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testStatsRootConstraints() {
 
-		final Cell cell=stats(all(item("employees/1370")), step(term("account")));
+		final _Cell cell=stats(all(item("employees/1370")), step(term("account")));
 
 		assertIsomorphic(
 
@@ -241,7 +244,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testItemsEmptyResultSet() {
 
-		final Cell cell=items(trait(RDF.TYPE, all(RDF.NIL)));
+		final _Cell cell=items(trait(RDF.TYPE, all(RDF.NIL)));
 
 		assertEquals(set(Spec.meta), set(cell.values()));
 
@@ -254,7 +257,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testItemsEmptyProjection() {
 
-		final Cell cell=items(clazz(term("Product")));
+		final _Cell cell=items(clazz(term("Product")));
 
 		assertIsomorphic(
 
@@ -281,7 +284,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testItemsRootConstraints() {
 
-		final Cell cell=items(all(item("employees/1370")), step(term("account")));
+		final _Cell cell=items(all(item("employees/1370")), step(term("account")));
 
 		assertIsomorphic(
 
@@ -710,22 +713,22 @@ public class SPARQLReaderTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Cell graph(final Shape shape, final Query.Order... orders) {
+	private _Cell graph(final Shape shape, final Query.Order... orders) {
 		return process(new Graph(shape, list(orders), 0, 0));
 	}
 
-	private Cell stats(final Shape shape, final Step... path) {
+	private _Cell stats(final Shape shape, final Step... path) {
 		return process(new Stats(shape, list(path)));
 	}
 
-	private Cell items(final Shape shape, final Step... path) {
+	private _Cell items(final Shape shape, final Step... path) {
 		return process(new Items(shape, list(path)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Cell process(final Query query) {
+	private _Cell process(final Query query) {
 		return connection(BIRT, connection -> new SPARQLReader(connection).process(query));
 	}
 

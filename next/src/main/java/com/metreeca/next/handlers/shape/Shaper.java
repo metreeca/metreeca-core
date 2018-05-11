@@ -26,6 +26,7 @@ import com.metreeca.spec.*;
 import com.metreeca.spec.codecs.QueryParser;
 import com.metreeca.spec.probes.Outliner;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
@@ -40,13 +41,13 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.next.Handler.error;
 import static com.metreeca.next.Handler.forbidden;
 import static com.metreeca.next.Handler.refused;
 import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.role;
+import static com.metreeca.spec.things.Strings.indent;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.stream.Collectors.toList;

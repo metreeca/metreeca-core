@@ -23,7 +23,10 @@ import com.metreeca.link.*;
 import com.metreeca.link.handlers.Container;
 import com.metreeca.link.handlers.Dispatcher;
 import com.metreeca.link.handlers.Resource;
-import com.metreeca.spec.*;
+import com.metreeca.spec.Shape;
+import com.metreeca.spec.Spec;
+import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -33,17 +36,17 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 
 import java.util.function.BiConsumer;
 
-import static com.metreeca.jeep.Maps.entry;
-import static com.metreeca.jeep.Maps.map;
 import static com.metreeca.link.Handler.sysadm;
 import static com.metreeca.spec.Shape.*;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Pattern.pattern;
 import static com.metreeca.spec.shapes.Trait.trait;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.literal;
 
 
 /**
@@ -242,13 +245,13 @@ public final class Ports implements Service {
 
 			index.exec(_index -> graph.update(connection -> { // inside index/graph transactions
 
-				final Cell current=graph.get(shape); // retrieve current port specs
+				final _Cell current=graph.get(shape); // retrieve current port specs
 
 				resource.handle(tools, request, response, (_request, _response) -> {
 
 					if ( _response.getStatus()/100 == 2 ) {
 
-						final Cell updated=graph.get(shape); // retrieve updated port specs
+						final _Cell updated=graph.get(shape); // retrieve updated port specs
 
 						index.remove(current);
 
@@ -291,7 +294,7 @@ public final class Ports implements Service {
 
 			index.exec(_index -> graph.update(connection -> { // inside index/graph transactions
 
-				final Cell current=graph.get(shape); // retrieve current port specs
+				final _Cell current=graph.get(shape); // retrieve current port specs
 
 				if ( !current.forward(Link.soft).bool().orElse(false) ) { // prevent hard-wired port deletion
 

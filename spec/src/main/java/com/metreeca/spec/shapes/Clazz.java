@@ -20,7 +20,7 @@
 package com.metreeca.spec.shapes;
 
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 

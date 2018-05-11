@@ -38,7 +38,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.things.Values.literal;
 
 
 public final class SPARQL extends Graph {

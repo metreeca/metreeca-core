@@ -21,10 +21,10 @@ package com.metreeca.spec.codecs;
 
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
-import com.metreeca.spec.Values;
 import com.metreeca.spec.probes.Inferencer;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -42,13 +42,13 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static com.metreeca.jeep.JSON.encode;
-import static com.metreeca.jeep.JSON.field;
-import static com.metreeca.jeep.JSON.object;
 import static com.metreeca.spec.shapes.Alias.aliases;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.Trait.traits;
+import static com.metreeca.spec.things._JSON.encode;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
 
 import static java.util.stream.Collectors.toList;
 

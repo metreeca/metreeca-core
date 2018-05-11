@@ -19,7 +19,7 @@
 
 package com.metreeca.next;
 
-import com.metreeca.spec.ValuesTest;
+import com.metreeca.spec.things.ValuesTest;
 import com.metreeca.tray.IO;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,8 +29,8 @@ import org.junit.Test;
 import java.io.*;
 
 import static com.metreeca.next.Rewriter.rewriter;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.statement;
 
 import static org.junit.Assert.assertEquals;
 

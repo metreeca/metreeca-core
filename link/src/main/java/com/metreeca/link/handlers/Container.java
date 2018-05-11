@@ -19,8 +19,6 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.jeep.Maps;
-import com.metreeca.jeep.Sets;
 import com.metreeca.link.*;
 import com.metreeca.spec.*;
 import com.metreeca.spec.codecs.QueryParser;
@@ -30,6 +28,9 @@ import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Outliner;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
+import com.metreeca.spec.things.Maps;
+import com.metreeca.spec.things.Sets;
+import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
@@ -51,11 +52,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.link.Handler.unsupported;
-import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Shape.empty;
-import static com.metreeca.spec.Values.iri;
-import static com.metreeca.spec.Values.rewrite;
-import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.All.all;
@@ -65,6 +62,10 @@ import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.Trait.traits;
 import static com.metreeca.spec.shifts.Step.step;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.rewrite;
+import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things._Cell.cell;
 
 import static java.util.stream.Collectors.toList;
 
@@ -268,7 +269,7 @@ public final class Container implements Handler {
 
 			// retrieve filtered content from repository
 
-			final Cell cell=request.map(graph).get(filter);
+			final _Cell cell=request.map(graph).get(filter);
 
 			if ( filter instanceof com.metreeca.spec.queries.Graph ) {
 				cell.reverse(LDP.CONTAINS).insert(target);

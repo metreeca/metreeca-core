@@ -19,7 +19,7 @@
 
 package com.metreeca.mill.fn;
 
-import com.metreeca.spec.Values;
+import com.metreeca.spec.things.Values;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ExtensionFunctionCall;
