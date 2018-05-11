@@ -20,7 +20,7 @@
 package com.metreeca.mill.fn;
 
 
-import com.metreeca.jeep.rdf.Values;
+import com.metreeca.spec.Values;
 
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;

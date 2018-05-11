@@ -40,8 +40,8 @@ import java.util.stream.StreamSupport;
 
 import static com.metreeca.jeep.Jeep.entry;
 import static com.metreeca.jeep.Jeep.map;
-import static com.metreeca.jeep.rdf.Values.format;
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.format;
+import static com.metreeca.spec.Values.iri;
 
 import static java.util.Arrays.asList;
 

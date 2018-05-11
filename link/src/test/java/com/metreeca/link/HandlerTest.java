@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static com.metreeca.jeep.rdf.ValuesTest.repository;
+import static com.metreeca.spec.ValuesTest.repository;
 
 
 public final class HandlerTest {

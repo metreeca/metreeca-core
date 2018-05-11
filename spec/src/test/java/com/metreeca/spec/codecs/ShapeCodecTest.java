@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.metreeca.jeep.rdf.Values.literal;
+import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.Alias.alias;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;

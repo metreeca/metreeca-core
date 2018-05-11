@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2018 Metreeca srl. All rights reserved.
-
-  This file is part of Metreeca.
-
-  Metreeca is free software: you can redistribute it and/or modify it
-  under the terms of the GNU Affero General Public License as published
-  by the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  Metreeca is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty
-  of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the GNU Affero General Public License for more details.
-
-  You should have received a copy of the GNU Affero General Public License
-  along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<!--
+  ~ Copyright © 2013-2018 Metreeca srl. All rights reserved.
+  ~
+  ~ This file is part of Metreeca.
+  ~
+  ~ Metreeca is free software: you can redistribute it and/or modify it
+  ~ under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Metreeca is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty
+  ~ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  ~ See the GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+  -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -61,20 +61,12 @@
 			<version>1.2.1</version>
 		</dependency>
 
-		<!-- !!! review/remove (licensing issues with GPL 2)
-				<dependency> &lt;!&ndash; MySQL JDBC Driver &ndash;&gt;
-					<groupId>mysql</groupId>
-					<artifactId>mysql-connector-java</artifactId>
-					<version>6.0.6</version>
-				</dependency>
-		-->
-
 
 		<!-- testing -->
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>jeep</artifactId>
+			<artifactId>spec</artifactId>
 			<version>0.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>

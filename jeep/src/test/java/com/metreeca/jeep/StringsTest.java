@@ -17,8 +17,31 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Shared utilities.
- */
-
 package com.metreeca.jeep;
+
+import org.junit.Test;
+
+import static com.metreeca.jeep.Strings.normalize;
+import static com.metreeca.jeep.Strings.title;
+
+import static org.junit.Assert.assertEquals;
+
+
+public final class StringsTest {
+
+	@Test public void testTitle() {
+
+		assertEquals("words capitalized", "One-Two", title("one-two"));
+		assertEquals("acronyms preserved", "WWW-Two", title("WWW-two"));
+
+	}
+
+	@Test public void testNormalize() {
+
+		assertEquals("leading whitespaces trimmed", "head", normalize("\t \nhead"));
+		assertEquals("trailing whitespaces trimmed", "tail", normalize("tail\t \n"));
+		assertEquals("embedded whitespaces compacted", "head tail", normalize("head\t \ntail"));
+
+	}
+
+}

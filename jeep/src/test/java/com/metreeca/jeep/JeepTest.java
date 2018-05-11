@@ -22,8 +22,6 @@ package com.metreeca.jeep;
 import org.junit.Test;
 
 import static com.metreeca.jeep.Jeep.compare;
-import static com.metreeca.jeep.Jeep.normalize;
-import static com.metreeca.jeep.Jeep.title;
 
 import static org.junit.Assert.assertEquals;
 
@@ -44,24 +42,6 @@ public class JeepTest {
 		assertEquals("=/null", 0, compare(null, null));
 		assertEquals("</null", -1, compare(null, Ordered.Upper));
 		assertEquals(">/null", +1, compare(Ordered.Upper, null));
-
-	}
-
-	//// Strings ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	@Test public void testTitle() {
-
-		assertEquals("words capitalized", "One-Two", title("one-two"));
-		assertEquals("acronyms preserved", "WWW-Two", title("WWW-two"));
-
-	}
-
-	@Test public void testNormalize() {
-
-		assertEquals("leading whitespaces trimmed", "head", normalize("\t \nhead"));
-		assertEquals("trailing whitespaces trimmed", "tail", normalize("tail\t \n"));
-		assertEquals("embedded whitespaces compacted", "head tail", normalize("head\t \ntail"));
 
 	}
 

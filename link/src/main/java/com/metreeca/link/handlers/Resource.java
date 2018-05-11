@@ -19,10 +19,9 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.jeep.rdf.Cell;
 import com.metreeca.link.*;
-import com.metreeca.spec.Issue.Level;
 import com.metreeca.spec.*;
+import com.metreeca.spec.Issue.Level;
 import com.metreeca.spec.codecs.QueryParser;
 import com.metreeca.spec.codecs.ShapeCodec;
 import com.metreeca.spec.probes.Inferencer;
@@ -42,11 +41,11 @@ import java.util.Collection;
 import java.util.function.BiConsumer;
 
 import static com.metreeca.jeep.Jeep.*;
-import static com.metreeca.jeep.rdf.Cell.cell;
-import static com.metreeca.jeep.rdf.Values.*;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.link.Handler.unsupported;
+import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Shape.*;
+import static com.metreeca.spec.Values.*;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.All.all;

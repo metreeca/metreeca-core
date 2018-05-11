@@ -19,10 +19,7 @@
 
 package com.metreeca.next;
 
-import com.metreeca.jeep.rdf.Values;
-import com.metreeca.jeep.rdf.ValuesTest;
-import com.metreeca.spec.Shape;
-import com.metreeca.spec.Spec;
+import com.metreeca.spec.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
@@ -40,11 +37,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-import static com.metreeca.jeep.Jeep.indent;
-import static com.metreeca.jeep.rdf.Values.integer;
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.ValuesTest.term;
+import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Shape.*;
+import static com.metreeca.spec.Values.integer;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.ValuesTest.term;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Clazz.clazz;
 import static com.metreeca.spec.shapes.Datatype.datatype;

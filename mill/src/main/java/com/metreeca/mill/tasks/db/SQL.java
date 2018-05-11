@@ -20,9 +20,9 @@
 package com.metreeca.mill.tasks.db;
 
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
+import com.metreeca.spec.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 
@@ -34,10 +34,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.Values.statement;
 import static com.metreeca.mill._Cell.cell;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.Values.statement;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.Math.max;

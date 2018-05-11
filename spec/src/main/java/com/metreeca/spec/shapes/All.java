@@ -26,8 +26,8 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
-import static com.metreeca.jeep.Jeep.indent;
-import static com.metreeca.jeep.rdf.Values.format;
+import static com.metreeca.jeep.Strings.indent;
+import static com.metreeca.spec.Values.format;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;

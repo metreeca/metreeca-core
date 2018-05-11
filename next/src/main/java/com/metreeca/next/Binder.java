@@ -19,7 +19,7 @@
 
 package com.metreeca.next;
 
-import com.metreeca.jeep.rdf.Values;
+import com.metreeca.spec.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -28,8 +28,8 @@ import org.eclipse.rdf4j.query.Operation;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.literal;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.literal;
 
 
 public final class Binder {

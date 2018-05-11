@@ -19,12 +19,7 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.jeep.rdf.Values;
-import com.metreeca.jeep.rdf.ValuesTest;
-import com.metreeca.spec.Issue;
-import com.metreeca.spec.Report;
-import com.metreeca.spec.Shape;
+import com.metreeca.spec.*;
 import com.metreeca.spec.shapes.*;
 
 import org.eclipse.rdf4j.model.*;
@@ -37,10 +32,10 @@ import org.junit.Test;
 import java.util.Collection;
 
 import static com.metreeca.jeep.Jeep.set;
-import static com.metreeca.jeep.rdf.Values.bnode;
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.ValuesTest.parse;
+import static com.metreeca.spec.Values.bnode;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.ValuesTest.parse;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;

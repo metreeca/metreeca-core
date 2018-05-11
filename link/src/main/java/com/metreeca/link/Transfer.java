@@ -19,7 +19,7 @@
 
 package com.metreeca.link;
 
-import com.metreeca.jeep.rdf.Formats;
+import com.metreeca.spec.Formats;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.codecs.JSONAdapter;
 
@@ -34,7 +34,7 @@ import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.List;
 
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 
 import static java.util.stream.Collectors.joining;
 

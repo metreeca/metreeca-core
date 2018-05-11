@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 import javax.json.JsonException;
 
-import static com.metreeca.jeep.Jeep.title;
+import static com.metreeca.jeep.Strings.title;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;

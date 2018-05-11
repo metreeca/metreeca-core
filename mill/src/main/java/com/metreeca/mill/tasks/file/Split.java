@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.rdf.Values.iri;
 import static com.metreeca.mill._Cell.decode;
 import static com.metreeca.mill._Cell.encode;
+import static com.metreeca.spec.Values.iri;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.String.format;

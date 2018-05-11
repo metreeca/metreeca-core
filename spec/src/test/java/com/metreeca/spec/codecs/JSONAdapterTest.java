@@ -27,8 +27,8 @@ import java.util.Map;
 import javax.json.*;
 
 import static com.metreeca.jeep.Jeep.*;
-import static com.metreeca.jeep.rdf.Values.bnode;
-import static com.metreeca.jeep.rdf.Values.format;
+import static com.metreeca.spec.Values.bnode;
+import static com.metreeca.spec.Values.format;
 
 
 public abstract class JSONAdapterTest {

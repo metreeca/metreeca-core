@@ -19,10 +19,7 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.jeep.rdf.Values;
-import com.metreeca.spec.Query;
-import com.metreeca.spec.Shape;
-import com.metreeca.spec.Shift;
+import com.metreeca.spec.*;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Pruner;
 import com.metreeca.spec.shapes.*;
@@ -36,8 +33,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.jeep.Jeep.list;
-import static com.metreeca.jeep.rdf.Values.bnode;
-import static com.metreeca.jeep.rdf.Values.statement;
+import static com.metreeca.spec.Values.bnode;
+import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Or.or;

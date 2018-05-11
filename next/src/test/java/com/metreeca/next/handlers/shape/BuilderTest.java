@@ -29,11 +29,11 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
-import static com.metreeca.jeep.rdf.ValuesTest.assertIsomorphic;
-import static com.metreeca.jeep.rdf.ValuesTest.parse;
-import static com.metreeca.jeep.rdf.ValuesTest.sparql;
 import static com.metreeca.next.LinkTest.testbed;
 import static com.metreeca.next.handlers.shape.Builder.builder;
+import static com.metreeca.spec.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.ValuesTest.parse;
+import static com.metreeca.spec.ValuesTest.sparql;
 
 import static org.junit.Assert.assertEquals;
 

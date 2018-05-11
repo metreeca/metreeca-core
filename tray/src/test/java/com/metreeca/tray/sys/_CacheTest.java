@@ -28,7 +28,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.IOException;
 import java.io.StringReader;
 
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 
 import static org.junit.Assert.assertEquals;
 

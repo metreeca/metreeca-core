@@ -19,8 +19,8 @@
 
 package com.metreeca.spec.shapes;
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;

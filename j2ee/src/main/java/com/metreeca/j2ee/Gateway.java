@@ -44,7 +44,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.metreeca.jeep.Jeep.upper;
+import static com.metreeca.jeep.Strings.upper;
 import static com.metreeca.next.Part.part;
 import static com.metreeca.tray.Tray.tool;
 

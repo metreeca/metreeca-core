@@ -37,10 +37,10 @@ import java.util.Collection;
 import java.util.function.BiFunction;
 
 import static com.metreeca.jeep.Jeep.union;
-import static com.metreeca.jeep.rdf.Values.rewrite;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
+import static com.metreeca.spec.Values.rewrite;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.All.all;

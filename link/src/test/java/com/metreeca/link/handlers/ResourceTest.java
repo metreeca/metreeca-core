@@ -34,11 +34,11 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import org.junit.Test;
 
-import static com.metreeca.jeep.rdf.ValuesTest.item;
-import static com.metreeca.jeep.rdf.ValuesTest.parse;
 import static com.metreeca.link.HandlerTest.*;
 import static com.metreeca.spec.Shape.delete;
 import static com.metreeca.spec.Shape.relate;
+import static com.metreeca.spec.ValuesTest.item;
+import static com.metreeca.spec.ValuesTest.parse;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;

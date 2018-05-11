@@ -19,10 +19,7 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.spec.Query;
-import com.metreeca.spec.Shape;
-import com.metreeca.spec.Spec;
+import com.metreeca.spec.*;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Pruner;
 import com.metreeca.spec.queries.Graph;
@@ -44,11 +41,11 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.jeep.Jeep.indent;
 import static com.metreeca.jeep.Jeep.list;
-import static com.metreeca.jeep.rdf.Values.bnode;
-import static com.metreeca.jeep.rdf.Values.literal;
+import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.spec.Shape.mode;
+import static com.metreeca.spec.Values.bnode;
+import static com.metreeca.spec.Values.literal;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 

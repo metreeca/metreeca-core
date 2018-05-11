@@ -19,8 +19,8 @@
 
 package com.metreeca.spec.codecs;
 
-import com.metreeca.jeep.rdf.ValuesTest;
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.ValuesTest;
 import com.metreeca.spec.shapes.Alias;
 import com.metreeca.spec.shifts.Step;
 
@@ -41,9 +41,9 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static com.metreeca.jeep.rdf.Values.*;
-import static com.metreeca.jeep.rdf.ValuesTest.parse;
-import static com.metreeca.jeep.rdf.ValuesTest.term;
+import static com.metreeca.spec.Values.*;
+import static com.metreeca.spec.ValuesTest.parse;
+import static com.metreeca.spec.ValuesTest.term;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;

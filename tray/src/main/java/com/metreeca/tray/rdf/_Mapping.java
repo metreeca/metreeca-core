@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-import static com.metreeca.jeep.rdf.Values.statement;
+import static com.metreeca.spec.Values.statement;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;

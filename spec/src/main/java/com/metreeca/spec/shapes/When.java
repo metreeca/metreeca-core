@@ -19,7 +19,6 @@
 
 package com.metreeca.spec.shapes;
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.spec.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,7 +28,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.metreeca.jeep.Jeep.indent;
+import static com.metreeca.jeep.Strings.indent;
+import static com.metreeca.spec.Values.format;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -112,8 +112,8 @@ public final class When implements Shape {
 	}
 
 	@Override public String toString() {
-		return "when("+Values.format(iri)+",\n"
-				+values.stream().map(v -> indent(Values.format(v))).collect(joining(",\n"))+"\n)";
+		return "when("+format(iri)+",\n"
+				+values.stream().map(v -> indent(format(v))).collect(joining(",\n"))+"\n)";
 	}
 
 }

@@ -19,7 +19,6 @@
 
 package com.metreeca.next.handlers.shape;
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.next.Handler;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
@@ -41,7 +40,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import static com.metreeca.jeep.Jeep.indent;
+import static com.metreeca.jeep.Strings.indent;
 import static com.metreeca.next.Handler.error;
 import static com.metreeca.next.Handler.forbidden;
 import static com.metreeca.next.Handler.refused;

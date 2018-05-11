@@ -19,7 +19,6 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.jeep.rdf.Cell;
 import com.metreeca.spec.*;
 import com.metreeca.spec.queries.Graph;
 
@@ -32,7 +31,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 
 import static com.metreeca.jeep.Jeep.concat;
-import static com.metreeca.jeep.rdf.Cell.cell;
+import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
 import static com.metreeca.spec.shapes.All.all;

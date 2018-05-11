@@ -19,7 +19,7 @@
 
 package com.metreeca.spec.shapes;
 
-import com.metreeca.jeep.Jeep;
+import com.metreeca.jeep.Strings;
 import com.metreeca.spec.Shape;
 
 import static com.metreeca.spec.shapes.And.and;
@@ -103,9 +103,9 @@ public final class Test implements Shape {
 
 	@Override public String toString() {
 		return "test(\n"
-				+Jeep.indent(test.toString())+",\n"
-				+Jeep.indent(pass.toString())
-				+(fail.equals(and()) ? "" : ",\n"+Jeep.indent(fail.toString()))
+				+Strings.indent(test.toString())+",\n"
+				+Strings.indent(pass.toString())
+				+(fail.equals(and()) ? "" : ",\n"+Strings.indent(fail.toString()))
 				+"\n)";
 	}
 

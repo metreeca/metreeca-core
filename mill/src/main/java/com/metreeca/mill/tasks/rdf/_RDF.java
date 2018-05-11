@@ -20,9 +20,9 @@
 package com.metreeca.mill.tasks.rdf;
 
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
+import com.metreeca.spec.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
@@ -36,8 +36,8 @@ import java.io.InputStream;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
-import static com.metreeca.jeep.rdf.Values.iri;
 import static com.metreeca.mill._Cell.cell;
+import static com.metreeca.spec.Values.iri;
 import static com.metreeca.tray.sys.Trace.clip;
 
 

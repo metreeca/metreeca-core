@@ -19,14 +19,11 @@
 
 package com.metreeca.link.services;
 
-import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Container;
 import com.metreeca.link.handlers.Dispatcher;
 import com.metreeca.link.handlers.Resource;
-import com.metreeca.spec.Shape;
-import com.metreeca.spec.Spec;
+import com.metreeca.spec.*;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -38,10 +35,10 @@ import java.util.function.BiConsumer;
 
 import static com.metreeca.jeep.Jeep.entry;
 import static com.metreeca.jeep.Jeep.map;
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.literal;
 import static com.metreeca.link.Handler.sysadm;
 import static com.metreeca.spec.Shape.*;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;

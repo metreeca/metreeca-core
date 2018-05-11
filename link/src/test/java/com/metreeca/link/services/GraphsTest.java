@@ -34,15 +34,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.statement;
-import static com.metreeca.jeep.rdf.ValuesTest.assertIsomorphic;
-import static com.metreeca.jeep.rdf.ValuesTest.parse;
-import static com.metreeca.jeep.rdf.ValuesTest.write;
 import static com.metreeca.link.HandlerTest.model;
 import static com.metreeca.link.HandlerTest.response;
 import static com.metreeca.link.HandlerTest.tools;
 import static com.metreeca.link.Link.SysAdm;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.ValuesTest.parse;
+import static com.metreeca.spec.ValuesTest.write;
 
 import static org.junit.Assert.assertTrue;
 

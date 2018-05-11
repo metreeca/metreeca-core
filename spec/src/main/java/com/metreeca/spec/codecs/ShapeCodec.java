@@ -19,10 +19,7 @@
 
 package com.metreeca.spec.codecs;
 
-import com.metreeca.jeep.rdf.Values;
-import com.metreeca.spec.Shape;
-import com.metreeca.spec.Shift;
-import com.metreeca.spec.Spec;
+import com.metreeca.spec.*;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Count;
 import com.metreeca.spec.shifts.Step;
@@ -43,10 +40,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.rdf.Cell.Missing;
-import static com.metreeca.jeep.rdf.Values.bnode;
-import static com.metreeca.jeep.rdf.Values.integer;
-import static com.metreeca.jeep.rdf.Values.statement;
+import static com.metreeca.spec.Values.bnode;
+import static com.metreeca.spec.Values.integer;
+import static com.metreeca.spec.Values.statement;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -95,7 +91,7 @@ public final class ShapeCodec {
 
 			final Resource root=model.subjects().stream()
 					.filter(subject -> !model.contains(null, null, subject))
-					.findFirst().orElseThrow(Missing);
+					.findFirst().orElseThrow(Cell.Missing);
 
 			return decode(root, model);
 

@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import static com.metreeca.jeep.Jeep.entry;
 import static com.metreeca.jeep.Jeep.map;
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Group.group;
 import static com.metreeca.spec.shapes.Trait.trait;

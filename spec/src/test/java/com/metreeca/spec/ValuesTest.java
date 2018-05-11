@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep.rdf;
+package com.metreeca.spec;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
@@ -43,7 +43,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 
 import static java.util.stream.Collectors.joining;
 

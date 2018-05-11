@@ -30,9 +30,9 @@ import org.eclipse.rdf4j.model.Statement;
 import java.util.LinkedHashSet;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.rdf.Values.bnode;
-import static com.metreeca.jeep.rdf.Values.statement;
 import static com.metreeca.mill._Cell.cell;
+import static com.metreeca.spec.Values.bnode;
+import static com.metreeca.spec.Values.statement;
 
 import static java.util.stream.Collectors.toCollection;
 

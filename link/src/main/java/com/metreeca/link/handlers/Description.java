@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
 
 import static com.metreeca.jeep.Jeep.entry;
 import static com.metreeca.jeep.Jeep.map;
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 
 import static java.util.Collections.singleton;
 

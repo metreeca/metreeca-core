@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep.rdf;
+package com.metreeca.spec;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Literals;
@@ -27,7 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.metreeca.jeep.rdf.Values.statement;
+import static com.metreeca.spec.Values.statement;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;

@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.jeep.Jeep.*;
-import static com.metreeca.jeep.rdf.Values.statement;
+import static com.metreeca.spec.Values.statement;
 
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;

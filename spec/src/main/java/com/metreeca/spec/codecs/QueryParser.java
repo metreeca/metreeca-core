@@ -38,8 +38,8 @@ import java.util.regex.Matcher;
 
 import javax.json.JsonException;
 
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.literal;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.Alias.aliases;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;

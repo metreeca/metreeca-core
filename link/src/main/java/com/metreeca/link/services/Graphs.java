@@ -19,9 +19,9 @@
 
 package com.metreeca.link.services;
 
-import com.metreeca.jeep.rdf.Formats;
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Dispatcher;
+import com.metreeca.spec.Formats;
 import com.metreeca.spec.Shape;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
@@ -49,11 +49,11 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.jeep.Jeep.entry;
 import static com.metreeca.jeep.Jeep.map;
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.Values.statement;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.spec.Shape.only;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Trait.trait;
 

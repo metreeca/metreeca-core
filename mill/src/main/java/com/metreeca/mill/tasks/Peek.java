@@ -34,7 +34,7 @@ import java.io.StringWriter;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.rdf.Values.format;
+import static com.metreeca.spec.Values.format;
 
 
 /**

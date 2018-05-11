@@ -19,8 +19,8 @@
 
 package com.metreeca.spec.probes;
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
 
@@ -31,7 +31,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.Set;
 
-import static com.metreeca.jeep.rdf.Values.literal;
+import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.Trait.trait;
 

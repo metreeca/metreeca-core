@@ -20,7 +20,7 @@
 package com.metreeca.next;
 
 import com.metreeca.jeep.JSON;
-import com.metreeca.jeep.rdf.Formats;
+import com.metreeca.spec.Formats;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.JSONAdapter;
@@ -40,9 +40,9 @@ import java.util.stream.Stream;
 
 import javax.json.JsonException;
 
-import static com.metreeca.jeep.Jeep.title;
-import static com.metreeca.jeep.Jeep.upper;
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.jeep.Strings.title;
+import static com.metreeca.jeep.Strings.upper;
+import static com.metreeca.spec.Values.iri;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;

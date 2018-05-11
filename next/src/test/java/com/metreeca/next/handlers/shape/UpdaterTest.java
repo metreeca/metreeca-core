@@ -38,12 +38,12 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.ValuesTest.*;
 import static com.metreeca.next.LinkTest.*;
 import static com.metreeca.next.Server.server;
 import static com.metreeca.next.handlers.shape.Updater.updater;
 import static com.metreeca.next.wrappers.Processor.processor;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;

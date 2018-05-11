@@ -25,7 +25,7 @@ import com.metreeca.tray.sys.Trace;
 
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.rdf.Values.bnode;
+import static com.metreeca.spec.Values.bnode;
 import static com.metreeca.tray.sys.Trace.time;
 
 import static java.lang.String.format;

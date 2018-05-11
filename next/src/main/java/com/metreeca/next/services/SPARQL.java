@@ -19,8 +19,8 @@
 
 package com.metreeca.next.services;
 
-import com.metreeca.jeep.rdf.Formats;
 import com.metreeca.next.*;
+import com.metreeca.spec.Formats;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;

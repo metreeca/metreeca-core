@@ -19,9 +19,9 @@
 
 package com.metreeca.tray.rdf;
 
-import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.jeep.rdf.ValuesTest;
+import com.metreeca.spec.Cell;
 import com.metreeca.spec.Spec;
+import com.metreeca.spec.ValuesTest;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.tray.Tray;
 
@@ -49,9 +49,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.statement;
-import static com.metreeca.jeep.rdf.ValuesTest.*;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.ValuesTest.*;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shifts.Step.step;
 import static com.metreeca.tray.Tray.tool;

@@ -19,13 +19,10 @@
 
 package com.metreeca.link;
 
-import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.link.handlers.Container;
 import com.metreeca.link.handlers.Resource;
 import com.metreeca.link.handlers.Updater;
-import com.metreeca.spec.Shape;
-import com.metreeca.spec.Spec;
+import com.metreeca.spec.*;
 import com.metreeca.spec.codecs.ShapeCodec;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
@@ -45,12 +42,12 @@ import java.util.function.Function;
 
 import static com.metreeca.jeep.Jeep.entry;
 import static com.metreeca.jeep.Jeep.map;
-import static com.metreeca.jeep.rdf.Cell.Missing;
-import static com.metreeca.jeep.rdf.Cell.cell;
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.Values.statement;
+import static com.metreeca.spec.Cell.Missing;
+import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Shape.*;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.tray.Tool.Loader;

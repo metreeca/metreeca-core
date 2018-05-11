@@ -32,9 +32,9 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.ValuesTest.term;
 import static com.metreeca.mill.tasks.file.Excel.*;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.ValuesTest.term;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

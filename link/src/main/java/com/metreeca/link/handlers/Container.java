@@ -19,7 +19,6 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.jeep.rdf.Cell;
 import com.metreeca.link.*;
 import com.metreeca.spec.*;
 import com.metreeca.spec.codecs.QueryParser;
@@ -49,13 +48,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.jeep.Jeep.*;
-import static com.metreeca.jeep.rdf.Cell.cell;
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.rewrite;
-import static com.metreeca.jeep.rdf.Values.statement;
 import static com.metreeca.link.Handler.unauthorized;
 import static com.metreeca.link.Handler.unsupported;
+import static com.metreeca.spec.Cell.cell;
 import static com.metreeca.spec.Shape.empty;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.rewrite;
+import static com.metreeca.spec.Values.statement;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.All.all;

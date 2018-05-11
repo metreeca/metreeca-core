@@ -24,7 +24,7 @@ import org.eclipse.rdf4j.model.IRI;
 import java.io.*;
 import java.util.Properties;
 
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 
 
 /**

@@ -19,10 +19,7 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.jeep.rdf.Cell;
-import com.metreeca.spec.Query;
-import com.metreeca.spec.Shape;
-import com.metreeca.spec.Spec;
+import com.metreeca.spec.*;
 import com.metreeca.spec.queries.Graph;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
@@ -44,12 +41,12 @@ import java.util.Set;
 
 import static com.metreeca.jeep.Jeep.list;
 import static com.metreeca.jeep.Jeep.set;
-import static com.metreeca.jeep.rdf.Values.integer;
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.ValuesTest.*;
 import static com.metreeca.spec.Query.decreasing;
 import static com.metreeca.spec.Query.increasing;
 import static com.metreeca.spec.Shape.filter;
+import static com.metreeca.spec.Values.integer;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.ValuesTest.*;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;

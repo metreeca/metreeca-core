@@ -21,9 +21,9 @@ package com.metreeca.spec.codecs;
 
 
 import com.metreeca.jeep.JSON;
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
+import com.metreeca.spec.Values;
 import com.metreeca.spec.probes.Inferencer;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.shapes.Alias;

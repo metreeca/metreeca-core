@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.String.format;

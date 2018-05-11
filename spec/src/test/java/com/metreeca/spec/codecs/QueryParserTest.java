@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 import javax.json.JsonException;
 
 import static com.metreeca.jeep.Jeep.list;
-import static com.metreeca.jeep.rdf.Values.literal;
+import static com.metreeca.spec.Values.literal;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;

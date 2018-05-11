@@ -19,8 +19,8 @@
 
 package com.metreeca.spec.probes;
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.Datatype;
 import com.metreeca.spec.shapes.MinCount;
 import com.metreeca.spec.shifts.Step;

@@ -29,12 +29,12 @@ import org.junit.Test;
 
 import static com.metreeca.jeep.Jeep.list;
 import static com.metreeca.jeep.Jeep.set;
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.ValuesTest.assertIsomorphic;
-import static com.metreeca.jeep.rdf.ValuesTest.item;
-import static com.metreeca.jeep.rdf.ValuesTest.parse;
 import static com.metreeca.spec.Frame.frame;
 import static com.metreeca.spec.Frame.slot;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.ValuesTest.item;
+import static com.metreeca.spec.ValuesTest.parse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

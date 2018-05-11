@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep.rdf;
+package com.metreeca.spec;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;

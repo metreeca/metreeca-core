@@ -19,7 +19,7 @@
 
 package com.metreeca.spec.sparql;
 
-import com.metreeca.jeep.rdf.Cell;
+import com.metreeca.jeep.Strings;
 import com.metreeca.spec.*;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
@@ -38,12 +38,12 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
 import static com.metreeca.jeep.Jeep.*;
-import static com.metreeca.jeep.rdf.Values.compare;
-import static com.metreeca.jeep.rdf.Values.is;
-import static com.metreeca.jeep.rdf.Values.text;
 import static com.metreeca.spec.Frame.frame;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
+import static com.metreeca.spec.Values.compare;
+import static com.metreeca.spec.Values.is;
+import static com.metreeca.spec.Values.text;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.reducing;
@@ -106,7 +106,7 @@ public final class SPARQLWriter { // !!! package-local
 		final String query=sparql.compile();
 
 		if ( logger.isLoggable(Level.FINE) ) {
-			logger.fine("evaluating SPARQL query "+indent(query, true)+(query.endsWith("\n") ? "" : "\n"));
+			logger.fine("evaluating SPARQL query "+Strings.indent(query, true)+(query.endsWith("\n") ? "" : "\n"));
 		}
 
 		return query;

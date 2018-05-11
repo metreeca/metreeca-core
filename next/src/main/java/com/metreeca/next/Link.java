@@ -25,7 +25,7 @@ import java.io.*;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 
 
 /**

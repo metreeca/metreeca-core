@@ -20,8 +20,8 @@
 package com.metreeca.next;
 
 import com.metreeca.jeep.JSON;
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Setup;
 
@@ -30,14 +30,14 @@ import org.junit.Test;
 
 import java.util.Properties;
 
-import static com.metreeca.jeep.rdf.Values.statement;
-import static com.metreeca.jeep.rdf.ValuesTest.assertIsomorphic;
-import static com.metreeca.jeep.rdf.ValuesTest.write;
 import static com.metreeca.next.LinkTest.json;
 import static com.metreeca.next.LinkTest.testbed;
 import static com.metreeca.next.RewriterTest.*;
 import static com.metreeca.next.Server.server;
 import static com.metreeca.spec.Shape.required;
+import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.ValuesTest.write;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Trait.trait;

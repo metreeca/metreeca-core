@@ -17,7 +17,7 @@
  * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.jeep.rdf;
+package com.metreeca.spec;
 
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.eclipse.rdf4j.rio.RDFFormat;

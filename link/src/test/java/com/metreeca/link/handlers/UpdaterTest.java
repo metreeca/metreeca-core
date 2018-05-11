@@ -28,11 +28,11 @@ import org.junit.Test;
 
 import static com.metreeca.jeep.Jeep.entry;
 import static com.metreeca.jeep.Jeep.map;
-import static com.metreeca.jeep.rdf.ValuesTest.assertIsomorphic;
-import static com.metreeca.jeep.rdf.ValuesTest.parse;
 import static com.metreeca.link.HandlerTest.model;
 import static com.metreeca.link.HandlerTest.response;
 import static com.metreeca.link.HandlerTest.tools;
+import static com.metreeca.spec.ValuesTest.assertIsomorphic;
+import static com.metreeca.spec.ValuesTest.parse;
 
 
 public class UpdaterTest {

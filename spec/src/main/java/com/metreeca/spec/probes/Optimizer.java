@@ -19,9 +19,9 @@
 
 package com.metreeca.spec.probes;
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Shift;
+import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
 
@@ -32,7 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.jeep.Jeep.entry;
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Group.group;
 import static com.metreeca.spec.shapes.Or.or;

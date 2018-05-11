@@ -35,14 +35,14 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.Values.literal;
-import static com.metreeca.jeep.rdf.Values.statement;
-import static com.metreeca.jeep.rdf.ValuesTest.*;
 import static com.metreeca.link.HandlerTest.*;
 import static com.metreeca.spec.Shape.only;
 import static com.metreeca.spec.Shape.update;
 import static com.metreeca.spec.Shape.verify;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.Values.literal;
+import static com.metreeca.spec.Values.statement;
+import static com.metreeca.spec.ValuesTest.*;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Any.any;

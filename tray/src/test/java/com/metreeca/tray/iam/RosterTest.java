@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.metreeca.jeep.rdf.ValuesTest.item;
+import static com.metreeca.spec.ValuesTest.item;
 import static com.metreeca.tray.iam.Roster.permit;
 
 
@@ -32,9 +32,6 @@ public final class RosterTest {
 
 	public static final String This="this";
 	public static final String That="that";
-
-
-	private RosterTest() {}
 
 
 	public static final class MockRoster implements Roster {
@@ -111,4 +108,5 @@ public final class RosterTest {
 		}
 
 	}
+
 }

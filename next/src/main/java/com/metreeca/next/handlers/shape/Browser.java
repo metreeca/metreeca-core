@@ -20,9 +20,9 @@
 package com.metreeca.next.handlers.shape;
 
 
-import com.metreeca.jeep.rdf.Cell;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
+import com.metreeca.spec.Cell;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Outliner;
@@ -36,10 +36,10 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 
 import static com.metreeca.jeep.Jeep.union;
-import static com.metreeca.jeep.rdf.Values.rewrite;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
+import static com.metreeca.spec.Values.rewrite;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.Or.or;

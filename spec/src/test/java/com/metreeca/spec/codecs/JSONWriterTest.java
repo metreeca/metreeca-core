@@ -19,8 +19,8 @@
 
 package com.metreeca.spec.codecs;
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.Values;
 import com.metreeca.spec.shapes.Or;
 
 import org.eclipse.rdf4j.model.Resource;
@@ -38,11 +38,11 @@ import java.util.Map;
 
 import javax.json.*;
 
-import static com.metreeca.jeep.rdf.Values.bnode;
-import static com.metreeca.jeep.rdf.Values.iri;
-import static com.metreeca.jeep.rdf.ValuesTest.parse;
-import static com.metreeca.jeep.rdf.ValuesTest.term;
 import static com.metreeca.spec.Shape.required;
+import static com.metreeca.spec.Values.bnode;
+import static com.metreeca.spec.Values.iri;
+import static com.metreeca.spec.ValuesTest.parse;
+import static com.metreeca.spec.ValuesTest.term;
 import static com.metreeca.spec.shapes.Alias.alias;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;

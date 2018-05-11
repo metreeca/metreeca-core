@@ -20,12 +20,12 @@
 package com.metreeca.mill.tasks.lod;
 
 
-import com.metreeca.jeep.rdf.Values;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.mill.tasks.Link;
 import com.metreeca.mill.tasks.Pipe;
 import com.metreeca.mill.tasks.Slice;
+import com.metreeca.spec.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 
@@ -33,7 +33,7 @@ import org.eclipse.rdf4j.model.IRI;
 
 import java.util.stream.Stream;
 
-import static com.metreeca.jeep.rdf.Values.iri;
+import static com.metreeca.spec.Values.iri;
 
 import static java.util.stream.Collectors.joining;
 

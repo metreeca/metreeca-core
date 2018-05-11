@@ -19,11 +19,8 @@
 
 package com.metreeca.tray.rdf;
 
-import com.metreeca.jeep.rdf.Cell;
+import com.metreeca.spec.*;
 import com.metreeca.spec.Issue.Level;
-import com.metreeca.spec.Query;
-import com.metreeca.spec.Report;
-import com.metreeca.spec.Shape;
 import com.metreeca.spec.sparql.SPARQLEngine;
 import com.metreeca.spec.sparql.SPARQLWriter;
 import com.metreeca.tray.Tool;
