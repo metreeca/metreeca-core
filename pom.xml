@@ -64,11 +64,12 @@
 	<modules>
 		<module>j2ee</module>
 
-		<module>next</module>
 		<module>link</module>
 		<module>mill</module>
 		<module>tray</module>
 		<module>spec</module>
+
+		<module>next</module>
 
 	</modules>
 

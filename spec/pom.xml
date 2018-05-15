@@ -35,12 +35,37 @@
 
 	<name>Metreeca Shapes Engine</name>
 
+	<dependencyManagement>
+		<dependencies>
+
+			<dependency>
+				<groupId>org.eclipse.rdf4j</groupId>
+				<artifactId>rdf4j-bom</artifactId>
+				<version>${rdf4j.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 
+		<dependency> <!-- version set by bom  -->
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-runtime</artifactId>
+		</dependency>
+
+		<dependency> <!-- expose to compile scope / version set by bom  -->
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-sail-nativerdf</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
 		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>jeep</artifactId>
-			<version>0.0-SNAPSHOT</version>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>1.0.4</version>
 		</dependency>
 
 	</dependencies>
