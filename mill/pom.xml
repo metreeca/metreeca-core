@@ -33,7 +33,7 @@
 	<artifactId>mill</artifactId>
 	<version>0.0-SNAPSHOT</version>
 
-	<name>Metreeca Data Integration Engine</name>
+	<name>Metreeca Integration Engine</name>
 
 	<dependencies>
 
