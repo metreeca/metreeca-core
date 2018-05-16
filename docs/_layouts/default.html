@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<!-- Copyright © 2013-2018 Metreeca srl. All Rights Reserved. -->
+
+<html>
+
+    <head>
+
+        {% include head.html %}
+
+    </head>
+
+    <body>
+
+        <input id="toggle" type="checkbox">
+
+        <nav>
+
+            {% include side.html %}
+
+            <div class="path">
+
+                <a href="/">Documentation</a>
+
+                {% if page.module %}
+
+                <a href="/#version={{ page.version | uri_escape }}">Version {{ page.version }}</a>
+                <a href="/#version={{ page.version | uri_escape }}&module={{ page.module | remove: 'Metreeca ' | uri_escape }}">{{
+                    page.module | remove: 'Metreeca ' }}</a>
+
+                {% endif %}
+
+                {% if page.title %}
+
+                <span onclick="document.querySelector('main > header').scrollIntoView()">{{ page.title | remove: 'Metreeca ' }}</span>
+
+                {% endif %}
+
+            </div>
+
+            <div class="toc">
+                {% include toc.liquid html=content %}
+            </div>
+
+        </nav>
+
+        {% include main.html %}
+
+    </body>
+
+</html>

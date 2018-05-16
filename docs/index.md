@@ -1,7 +1,6 @@
 ---
-Title: Metreeca/Core
+layout: index
+title: Platform Documentation
+excerpt:  Metreeca platform documentation
+tags: Index
 ---
-
-```
-Work in progress…
-```

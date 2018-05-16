@@ -1,0 +1,7 @@
+include: [_]
+exclude: [_config.yml, Gemfile, Gemfile.lock]
+
+github: [metadata] # see https://github.com/github/pages-gem/issues/399#issuecomment-301827749
+
+plugins:
+  - jekyll-redirect-from

@@ -83,6 +83,10 @@
 		<maven.deploy.skip>true</maven.deploy.skip> <!-- !!! no public artifact deployment -->
 		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 
+		<version.major>${project.artifact.selectedVersion.majorVersion}</version.major>
+		<version.minor>${project.artifact.selectedVersion.minorVersion}</version.minor>
+		<version.label>v${version.major}.${version.minor}</version.label>
+
 	</properties>
 
 	<dependencies> <!-- shared testing dependencies -->
@@ -127,10 +131,37 @@
 
 		<plugins>
 
+			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
 
-			<!--~~ compile ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
 
-			<plugin> <!-- java compiler / https://maven.apache.org/plugins/maven-compiler-plugin -->
+				<executions>
+					<execution>
+
+						<id>clean version docs</id>
+						<phase>clean</phase>
+						<inherited>false</inherited>
+
+						<goals>
+							<goal>clean</goal>
+						</goals>
+
+						<configuration>
+							<filesets>
+								<fileset>
+									<directory>docs/${version.label}</directory>
+								</fileset>
+							</filesets>
+						</configuration>
+
+					</execution>
+				</executions>
+
+			</plugin>
+
+			<plugin> <!-- https://maven.apache.org/plugins/maven-compiler-plugin -->
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -141,17 +172,11 @@
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 
-					<!-- ;(https://issues.apache.org/jira/browse/MCOMPILER-209) -->
-					<useIncrementalCompilation>false</useIncrementalCompilation>
-
 				</configuration>
 
 			</plugin>
 
-
-			<!--~~ package ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-			<plugin> <!-- jar packaging / https://maven.apache.org/plugins/maven-jar-plugin/ -->
+			<plugin> <!-- https://maven.apache.org/plugins/maven-jar-plugin/ -->
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -192,7 +217,7 @@
 
 			</plugin>
 
-			<plugin> <!-- source jar packaging / https://maven.apache.org/plugins/maven-source-plugin -->
+			<plugin> <!-- https://maven.apache.org/plugins/maven-source-plugin -->
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -213,41 +238,51 @@
 
 			</plugin>
 
-			<plugin> <!-- javadocs packaging / https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
+			<plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.0.0</version>
 
+				<configuration>
+
+					<outputDirectory>${project.build.directory}/site/javadocs</outputDirectory>
+
+					<links>
+						<link>http://docs.rdf4j.org/javadoc/latest/</link>
+					</links>
+
+				</configuration>
+
 				<executions>
+
 					<execution>
 
-						<id>generate javadocs</id>
+						<id>package javadocs</id>
 						<phase>package</phase>
 
 						<goals>
 							<goal>jar</goal>
 						</goals>
 
-						<configuration>
+					</execution>
 
-							<outputDirectory>${project.build.directory}/site/javadocs</outputDirectory>
+					<execution>
 
-							<links>
-								<link>http://docs.rdf4j.org/javadoc/latest/</link>
-							</links>
+						<id>generate javadocs</id>
+						<phase>site</phase>
 
-						</configuration>
+						<goals>
+							<goal>javadoc</goal>
+						</goals>
 
 					</execution>
+
 				</executions>
 
 			</plugin>
 
-
-			<!--~~ site ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-			<plugin> <!-- site generator / https://maven.apache.org/plugins/maven-site-plugin -->
+			<plugin> <!-- https://maven.apache.org/plugins/maven-site-plugin -->
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
@@ -260,25 +295,85 @@
 
 				</configuration>
 
-			</plugin>
+			<!--</plugin>
 
-			<plugin> <!-- report generator / https://maven.apache.org/plugins/maven-project-info-reports-plugin/-->
+						<plugin> &lt;!&ndash; report generator / https://maven.apache.org/plugins/maven-project-info-reports-plugin/&ndash;&gt;
+
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-project-info-reports-plugin</artifactId>
+							<version>2.9</version>
+
+							<executions>
+								<execution>
+
+									<id>generate dependency reports</id>
+									<phase>site</phase>
+
+									<goals>
+										<goal>dependencies</goal>
+									</goals>
+
+								</execution>
+							</executions>
+
+						</plugin>-->
+
+			<plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
 
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.9</version>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
 
 				<executions>
 					<execution>
 
-						<id>generate dependency reports</id>
-						<phase>site</phase>
+						<id>generate module docs</id>
+						<phase>pre-site</phase>
 
 						<goals>
-							<goal>dependencies</goal>
+							<goal>copy-resources</goal>
 						</goals>
 
+						<configuration>
+
+							<outputDirectory>${basedir}/target/site</outputDirectory>
+
+							<resources>
+								<resource>
+									<directory>${basedir}/src/docs</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+
+						</configuration>
+
 					</execution>
+
+					<execution>
+
+						<id>collect module docs</id>
+						<phase>post-site</phase>
+
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+
+						<configuration>
+
+							<outputDirectory>
+								${maven.multiModuleProjectDirectory}/docs/${version.label}/${project.artifactId}
+							</outputDirectory>
+
+							<resources>
+								<resource>
+									<directory>${basedir}/target/site</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+
+						</configuration>
+					</execution>
+
 				</executions>
 
 			</plugin>
