@@ -85,7 +85,9 @@
 
 		<version.major>${project.artifact.selectedVersion.majorVersion}</version.major>
 		<version.minor>${project.artifact.selectedVersion.minorVersion}</version.minor>
-		<version.label>v${version.major}.${version.minor}</version.label>
+		<version.label>${version.major}.${version.minor}</version.label>
+
+		<docs>${maven.multiModuleProjectDirectory}/docs/core/${version.label}</docs>
 
 	</properties>
 
@@ -151,7 +153,7 @@
 						<configuration>
 							<filesets>
 								<fileset>
-									<directory>docs/${version.label}</directory>
+									<directory>${docs}</directory>
 								</fileset>
 							</filesets>
 						</configuration>
@@ -295,28 +297,29 @@
 
 				</configuration>
 
-			<!--</plugin>
+			</plugin>
 
-						<plugin> &lt;!&ndash; report generator / https://maven.apache.org/plugins/maven-project-info-reports-plugin/&ndash;&gt;
+			<plugin> <!-- report generator / https://maven.apache.org/plugins/maven-project-info-reports-plugin/ -->
 
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-project-info-reports-plugin</artifactId>
-							<version>2.9</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.9</version>
 
-							<executions>
-								<execution>
+				<executions>
+					<execution>
 
-									<id>generate dependency reports</id>
-									<phase>site</phase>
+						<id>generate dependency reports</id>
+						<phase>site</phase>
+						<inherited>false</inherited>
 
-									<goals>
-										<goal>dependencies</goal>
-									</goals>
+						<goals>
+							<goal>dependencies</goal>
+						</goals>
 
-								</execution>
-							</executions>
+					</execution>
+				</executions>
 
-						</plugin>-->
+			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
 
@@ -360,9 +363,7 @@
 
 						<configuration>
 
-							<outputDirectory>
-								${maven.multiModuleProjectDirectory}/docs/${version.label}/${project.artifactId}
-							</outputDirectory>
+							<outputDirectory>${docs}/${project.artifactId}</outputDirectory>
 
 							<resources>
 								<resource>
