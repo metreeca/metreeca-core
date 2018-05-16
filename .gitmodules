@@ -1,0 +1,4 @@
+[submodule "docs"]
+	path = docs
+	url = https://knoan@github.com/metreeca/metreeca-core.git
+	branch = gh-pages
