@@ -15,13 +15,35 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="_bean" target="1.8" />
+      <module name="_info" target="1.8" />
+      <module name="_jeep" target="1.8" />
+      <module name="_tile" target="1.8" />
+      <module name="_tool" target="1.8" />
+      <module name="apps" target="1.8" />
+      <module name="back" target="1.8" />
       <module name="Core" target="1.8" />
+      <module name="core" target="1.8" />
+      <module name="core (1)" target="1.8" />
+      <module name="data" target="1.8" />
+      <module name="deck" target="1.8" />
+      <module name="demo" target="1.8" />
+      <module name="fore" target="1.8" />
       <module name="j2ee" target="1.8" />
+      <module name="jeep" target="1.8" />
       <module name="link" target="1.8" />
+      <module name="link (1)" target="1.8" />
+      <module name="mesh" target="1.8" />
       <module name="mill" target="1.8" />
+      <module name="mill (1)" target="1.8" />
       <module name="next" target="1.8" />
+      <module name="node" target="1.8" />
+      <module name="self" target="1.8" />
       <module name="spec" target="1.8" />
+      <module name="spec (1)" target="1.8" />
+      <module name="tool" target="1.8" />
       <module name="tray" target="1.8" />
+      <module name="tray (1)" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
