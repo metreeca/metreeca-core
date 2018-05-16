@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/_bean" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/_info" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/_jeep" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/_tile" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/_tool" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/deck" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/mesh" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/node" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/self" />
+    <file type="gwt" url="file://$PROJECT_DIR$/../Data/fore/tool" />
+    <file type="web" url="file://$PROJECT_DIR$/j2ee" />
+    <file type="web" url="file://$PROJECT_DIR$/../Data/apps/data" />
+    <file type="web" url="file://$PROJECT_DIR$/../Data/apps/demo" />
+  </component>
+  <component name="JavaScriptSettings">
+    <option name="languageLevel" value="ES6" />
+  </component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK" />
+</project>
