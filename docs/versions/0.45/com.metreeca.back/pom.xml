@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Copyright © 2013-2018 Metreeca srl. All rights reserved.
+
+  This file is part of Metreeca.
+
+  Metreeca is free software: you can redistribute it and/or modify it
+  under the terms of the GNU Affero General Public License as published
+  by the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Metreeca is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty
+  of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.metreeca</groupId>
+		<artifactId>core</artifactId>
+		<version>0.45</version>
+	</parent>
+
+	<artifactId>back</artifactId>
+	<version>0.45</version>
+	<packaging>pom</packaging>
+
+	<name>Metreeca Back-End</name>
+	<description>Metreeca back-end components.</description>
+
+	<modules>
+		<module>link</module>
+		<module>mill</module>
+		<module>tray</module>
+		<module>spec</module>
+		<module>jeep</module>
+	</modules>
+
+	<build>
+		<plugins>
+
+			<plugin> <!-- javadocs generation / https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.0</version>
+
+				<executions>
+					<execution>
+
+						<id>generate javadocs</id>
+						<phase>site</phase>
+
+						<goals>
+							<goal>jar</goal>
+						</goals>
+
+						<configuration>
+
+							<outputDirectory>${project.build.directory}/site/javadocs</outputDirectory>
+
+							<stylesheetfile>stylesheet.css</stylesheetfile>
+
+							<links>
+								<link>http://docs.rdf4j.org/javadoc/latest/</link>
+							</links>
+
+						</configuration>
+
+					</execution>
+				</executions>
+
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
