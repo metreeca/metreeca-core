@@ -25,10 +25,10 @@ Default document sidebar
         <a href="/#version={{ page.version | uri_escape }}&module={{ page.module | remove: 'Metreeca ' | uri_escape }}">{{
             page.module | remove: 'Metreeca ' }}</a>
 
-        {% elsif page.title != page.subject %} <!-- regular document -->
+        {% elsif page.title != page.subject and page.project %} <!-- regular document -->
 
-        <a href="/modules/{{ page.project }}/{{ page.version }}">{{ page.subject | remove: 'Metreeca ' }}</a>
-        <a href="/modules/{{ page.project }}/{{ page.version }}">Version {{ page.version }}</a>
+        <a href="/modules/{{ page.project }}/">{{ page.subject | remove: 'Metreeca ' }}</a>
+        <a href="/modules/{{ page.project }}/{{ page.version }}/">Version {{ page.version }}</a>
 
         {% endif %}
 
