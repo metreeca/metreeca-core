@@ -1,9 +1,9 @@
 ---
 title:     Idiomatic JSON Reference
 excerpt:    "Idiomatic RDF JSON serialization format codecs and grammar"
-tags:       Reference
-module:     "${docs.module}"
-version:    "${docs.version}"
+subject:    "${module.subject}"
+project:    "${module.project}"
+version:    "${module.version}"
 ---
 
 Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the platform supports a simpler idiomatic JSON-based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language#shapes).

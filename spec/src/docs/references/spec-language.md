@@ -1,9 +1,9 @@
 ---
 title:      Specification Language Reference
 excerpt:    Linked data model specification language semantics and components
-tags:       Reference
-module:     "${docs.module}"
-version:    "${docs.version}"
+subject:    "${module.subject}"
+project:    "${module.project}"
+version:    "${module.version}"
 ---
 
 Most platform services are driven by declarative linked data models defined using a [SHACL](https://www.w3.org/TR/shacl/)-based [shape](#shapes) specification language.

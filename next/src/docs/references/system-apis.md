@@ -1,9 +1,9 @@
 ---
 title:		System APIs Reference 
 excerpt:	Standard system-provided REST APIs
-tags:		Reference
-module:     "${docs.module}"
-version:    "${docs.version}"
+subject:    "${module.subject}"
+project:    "${module.project}"
+version:    "${module.version}"
 ---
 
 Standard system-managed services are exposed as REST APIs, enabling third-party apps and agents to programmaticaly interact with the platform.

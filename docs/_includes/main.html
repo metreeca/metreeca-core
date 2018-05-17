@@ -8,7 +8,7 @@ Default document contents
 
 <main>
 
-    <header>{{ page.title | default: "" }}</header>
+    <header>{{ page.title | remove: "Metreeca " | default: "" }}</header>
 
     <article>{{ content }}</article>
 

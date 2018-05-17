@@ -85,9 +85,12 @@
 
 		<version.major>${project.artifact.selectedVersion.majorVersion}</version.major>
 		<version.minor>${project.artifact.selectedVersion.minorVersion}</version.minor>
-		<version.label>${version.major}.${version.minor}</version.label>
 
-		<docs>${maven.multiModuleProjectDirectory}/docs/core/${version.label}</docs>
+		<module.subject>${project.name}</module.subject>
+		<module.project>${project.groupId}:${project.artifactId}</module.project>
+		<module.version>${version.major}.${version.minor}</module.version>
+
+		<docs>${maven.multiModuleProjectDirectory}/docs/modules/${module.project}/${module.version}/</docs>
 
 	</properties>
 
@@ -142,9 +145,8 @@
 				<executions>
 					<execution>
 
-						<id>clean version docs</id>
-						<phase>clean</phase>
-						<inherited>false</inherited>
+						<id>clean docs folder</id>
+						<phase>pre-site</phase>
 
 						<goals>
 							<goal>clean</goal>
@@ -331,7 +333,7 @@
 					<execution>
 
 						<id>generate module docs</id>
-						<phase>pre-site</phase>
+						<phase>site</phase>
 
 						<goals>
 							<goal>copy-resources</goal>
@@ -345,6 +347,10 @@
 								<resource>
 									<directory>${basedir}/src/docs</directory>
 									<filtering>true</filtering>
+									<excludes>
+										<exclude>**/_*</exclude>
+										<exclude>**/*.graffle</exclude>
+									</excludes>
 								</resource>
 							</resources>
 
@@ -363,7 +369,7 @@
 
 						<configuration>
 
-							<outputDirectory>${docs}/${project.artifactId}</outputDirectory>
+							<outputDirectory>${docs}</outputDirectory>
 
 							<resources>
 								<resource>

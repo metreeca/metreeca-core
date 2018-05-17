@@ -1,9 +1,9 @@
 ---
 title:      Faceted Search Reference
 excerpt:    "Faceted search support and query serializations"
-tags:       Reference
-module:     "${docs.module}"
-version:    "${docs.version}"
+subject:    "${module.subject}"
+project:    "${module.project}"
+version:    "${module.version}"
 ---
 
 REST APIs publishing LDP Containers support system-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.

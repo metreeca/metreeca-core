@@ -6,7 +6,46 @@ Default document sidebar
 
 <!-- Copyright © 2013-2018 Metreeca srl. All Rights Reserved. -->
 
-<header>
-    <a class="metreeca" href="https://www.metreeca.com/"></a>
-    <label for="toggle" class="icon fa-bars"></label> <!-- icon dynamically managed by default.css -->
-</header>
+<input id="toggle" type="checkbox"> <!-- hidden menu toggle for mobile view -->
+
+<nav>
+
+    <header>
+        <a class="metreeca" href="https://www.metreeca.com/"></a>
+        <label for="toggle" class="icon fa-bars"></label> <!-- icon dynamically managed by default.css -->
+    </header>
+
+    <div class="path">
+
+        <a href="/">Documentation</a>
+
+        {% if page.module %} <!-- legacy navigation / to be removed -->
+
+        <a href="/#version={{ page.version | uri_escape }}">Version {{ page.version }}</a>
+        <a href="/#version={{ page.version | uri_escape }}&module={{ page.module | remove: 'Metreeca ' | uri_escape }}">{{
+            page.module | remove: 'Metreeca ' }}</a>
+
+        {% elsif page.title != page.subject %} <!-- regular document -->
+
+        <a href="/modules/{{ page.project }}/{{ page.version }}">{{ page.subject | remove: 'Metreeca ' }}</a>
+        <a href="/modules/{{ page.project }}/{{ page.version }}">Version {{ page.version }}</a>
+
+        {% endif %}
+
+        {% if page.title %}
+
+        <span onclick="document.querySelector('main > header').scrollIntoView()">{{ page.title | remove: 'Metreeca ' }}</span>
+
+        {% endif %}
+
+    </div>
+
+    {% if page.title == page.subject %} <!-- module index -->
+    <div class="versions"></div>
+    {% endif %}
+
+    <div class="toc">
+        {% include toc.liquid html=content %}
+    </div>
+
+</nav>

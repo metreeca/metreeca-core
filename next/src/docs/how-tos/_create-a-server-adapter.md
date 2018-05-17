@@ -1,9 +1,9 @@
 ---
 title: 		How To Create a Server Adapter
 excerpt:	Usability guidelines and other configuration tips
-tags:		How-To
-module:     "${docs.module}"
-version:    "${docs.version}"
+subject:    "${module.subject}"
+project:    "${module.project}"
+version:    "${module.version}"
 ---
 
 - the framework
