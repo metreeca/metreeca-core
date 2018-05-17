@@ -16,14 +16,14 @@ Codecs for this serialization make heavy use of reasoning over linked data shape
 
 # RDF4J Codecs
 
-The [shapes engine](/#module=Shapes%20Engine) library automatically [registers](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/common/lang/service/ServiceRegistry.html)  idiomatic JSON codecs with the RDF4J framework, using the `application/json` MIME type and the [JSON](../javadocs/com/metreeca/spec/codecs/JSONAdapter.html) RDF4J [RDF format](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFFormat.html).
+The [shapes engine](/#module=Shapes%20Engine) library automatically [registers](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/common/lang/service/ServiceRegistry.html)  idiomatic JSON codecs with the RDF4J framework, using the `application/json` MIME type and the [JSON](../apidocs/com/metreeca/spec/codecs/JSONAdapter.html) RDF4J [RDF format](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFFormat.html).
 
 Codec behaviour is controlled through the following  RDF4J [RioSetting](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RioSetting.html) [parser](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFParser.html#set-org.eclipse.rdf4j.rio.RioSetting-T-)/[writer](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFWriter.html#set-org.eclipse.rdf4j.rio.RioSetting-T-) configuration properties.
 
 | setting                                  | type                                     | value                                    | default                             |
 | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------- |
-| [Shape](../javadocs/com/metreeca/spec/codecs/JSONAdapter.html#Shape) | [Shape](../javadocs/com/metreeca/spec/shape) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
-| [Focus](../javadocs/com/metreeca/spec/codecs/JSONAdapter.html#Focus) | [Resource](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Resource.html) | the entry point for the de/serializaton process | `null` (will be inferred from data) |
+| [Shape](../apidocs/com/metreeca/spec/codecs/JSONAdapter.html#Shape) | [Shape](../apidocs/com/metreeca/spec/shape) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
+| [Focus](../apidocs/com/metreeca/spec/codecs/JSONAdapter.html#Focus) | [Resource](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Resource.html) | the entry point for the de/serializaton process | `null` (will be inferred from data) |
 
 # JSON Serialization
 

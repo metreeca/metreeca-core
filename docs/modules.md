@@ -1,6 +1,6 @@
 ---
-title: Platform Documentation
-excerpt:  Metreeca platform documentation
+title: Platform Components
+excerpt:  Metreeca platform components
 ---
 
 <dl>
