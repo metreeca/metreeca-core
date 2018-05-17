@@ -17,7 +17,15 @@ Default document sidebar
 
     <div class="path">
 
+        {% if page.module %} <!-- legacy navigation / to be removed -->
+
         <a href="/">Documentation</a>
+
+        {% else %}
+
+        <a href="/modules">Documentation</a>
+
+        {% endif %}
 
         {% if page.module %} <!-- legacy navigation / to be removed -->
 
@@ -41,11 +49,15 @@ Default document sidebar
     </div>
 
     {% if page.title == page.subject %} <!-- module index -->
+
     <div class="versions"></div>
+
     {% endif %}
 
     <div class="toc">
+
         {% include toc.liquid html=content %}
+
     </div>
 
 </nav>
