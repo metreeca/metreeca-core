@@ -31,7 +31,7 @@
 
 	<name>Metreeca Core</name>
 	<description>Metreeca core back-end modules</description>
-	<url>https://www.metreeca.com/</url>
+	<url>https://github.com/metreeca/metreeca-core</url>
 	<inceptionYear>2013</inceptionYear>
 
 	<organization>
@@ -60,6 +60,15 @@
 		<system>GitHub</system>
 		<url>https://github.com/metreeca/metreeca-core/issues</url>
 	</issueManagement>
+
+	<developers>
+		<developer>
+			<name>Metreeca</name>
+			<email>info@metreeca.com</email>
+			<organization>Metreeca</organization>
+			<organizationUrl>https://www.metreeca.com/</organizationUrl>
+		</developer>
+	</developers>
 
 	<modules>
 		<module>j2ee</module>
