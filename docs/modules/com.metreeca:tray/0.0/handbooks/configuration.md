@@ -1,9 +1,9 @@
 ---
 title:      Configuration Handbook
 excerpt:    Platform configuration procedures and configuration options
-tags:       Handbook
-module:     "${docs.module}"
-version:    "${docs.version}"
+subject:    "Metreeca Tooling Framework"
+project:    "com.metreeca:tray"
+version:    "0.0"
 ---
 
 The platform and its components may be configured using the configuration properties defined in the following sections.

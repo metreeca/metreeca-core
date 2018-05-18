@@ -1,9 +1,9 @@
 ---
-title:      Configuration Handbook
-excerpt:    Platform configuration procedures and configuration options
-tags:       Handbook
-module:     "${docs.module}"
-version:    "${docs.version}"
+title:      Configuration Reference
+excerpt:    Platform configuration options
+subject:    "${module.subject}"
+project:    "${module.project}"
+version:    "${module.version}"
 ---
 
 The platform and its components may be configured using the configuration properties defined in the following sections.

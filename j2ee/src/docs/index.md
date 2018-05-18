@@ -26,18 +26,14 @@ adding Metreeca J2EE gateway to `WEB-INF/web.xml` like:
 
 ```xml
 <web-app>
-
-	<listener>
-		<listener-class>com.metreeca.j2ee.Gateway</listener-class>
-	</listener>
-
+    
 	<filter>
-		<filter-name>gateway</filter-name>
+		<filter-name>metreeca</filter-name>
 		<filter-class>com.metreeca.j2ee.Gateway</filter-class>
 	</filter>
 
 	<filter-mapping>
-		<filter-name>gateway</filter-name>
+		<filter-name>metreeca</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
@@ -52,8 +48,6 @@ graph=native
 ```
 
 Toolkits/Services 
-
-
 
 ```xml
 <plugin>
