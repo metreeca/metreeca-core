@@ -71,10 +71,6 @@
 	</issueManagement>
 
 	<distributionManagement>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
 		<snapshotRepository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -82,6 +78,7 @@
 	</distributionManagement>
 
 	<modules>
+
 		<module>j2ee</module>
 
 		<module>link</module>
@@ -165,7 +162,7 @@
 				<executions>
 					<execution>
 
-						<id>clean docs folder</id>
+						<id>clean-docs-folder</id>
 						<phase>pre-site</phase>
 
 						<goals>
@@ -229,32 +226,11 @@
 				<executions>
 					<execution>
 
-						<id>package test jar</id>
+						<id>package-test-jar</id>
 						<phase>package</phase>
 
 						<goals>
 							<goal>test-jar</goal>
-						</goals>
-
-					</execution>
-				</executions>
-
-			</plugin>
-
-			<plugin> <!-- https://maven.apache.org/plugins/maven-source-plugin -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
-
-				<executions>
-					<execution>
-
-						<id>attach-sources</id>
-						<phase>package</phase>
-
-						<goals>
-							<goal>jar</goal>
 						</goals>
 
 					</execution>
@@ -282,18 +258,7 @@
 
 					<execution>
 
-						<id>package javadocs</id>
-						<phase>package</phase>
-
-						<goals>
-							<goal>jar</goal>
-						</goals>
-
-					</execution>
-
-					<execution>
-
-						<id>generate javadocs</id>
+						<id>generate-site-javadocs</id>
 						<phase>site</phase>
 
 						<goals>
@@ -330,7 +295,7 @@
 				<executions>
 					<execution>
 
-						<id>generate dependency reports</id>
+						<id>generate-dependency-report</id>
 						<phase>site</phase>
 						<inherited>false</inherited>
 
@@ -352,7 +317,7 @@
 				<executions>
 					<execution>
 
-						<id>generate module docs</id>
+						<id>generate-module-docs</id>
 						<phase>site</phase>
 
 						<goals>
@@ -380,7 +345,7 @@
 
 					<execution>
 
-						<id>collect module docs</id>
+						<id>collect-module-docs</id>
 						<phase>post-site</phase>
 
 						<goals>
@@ -405,45 +370,102 @@
 
 			</plugin>
 
-			<plugin> <!-- http://maven.apache.org/plugins/maven-gpg-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.6</version>
-
-				<executions>
-					<execution>
-
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-
-						<goals>
-							<goal>sign</goal>
-						</goals>
-
-					</execution>
-				</executions>
-
-			</plugin>
-
-			<plugin> <!-- https://github.com/sonatype/nexus-maven-plugins -->
-
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.8</version>
-
-				<extensions>true</extensions>
-
-				<configuration>
-					<serverId>ossrh</serverId>
-					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-					<autoReleaseAfterClose>true</autoReleaseAfterClose>
-				</configuration>
-
-			</plugin>
-
 		</plugins>
 
 	</build>
+
+	<profiles>
+		<profile>
+
+			<id>release</id>
+
+			<build>
+				<plugins>
+
+					<plugin> <!-- https://maven.apache.org/plugins/maven-source-plugin -->
+
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.0.1</version>
+
+						<executions>
+							<execution>
+
+								<id>attach-sources</id>
+								<phase>package</phase>
+
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+
+							</execution>
+						</executions>
+
+					</plugin>
+
+					<plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
+
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+
+						<executions>
+
+							<execution>
+
+								<id>attach-javadocs</id>
+								<phase>package</phase>
+
+								<goals>
+									<goal>jar</goal>
+								</goals>
+
+							</execution>
+
+						</executions>
+
+					</plugin>
+
+					<plugin> <!-- http://maven.apache.org/plugins/maven-gpg-plugin/ -->
+
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+
+						<executions>
+							<execution>
+
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+
+								<goals>
+									<goal>sign</goal>
+								</goals>
+
+							</execution>
+						</executions>
+
+					</plugin>
+
+					<plugin> <!-- https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin -->
+
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.8</version>
+
+						<extensions>true</extensions>
+
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
+
+					</plugin>
+
+				</plugins>
+			</build>
+
+		</profile>
+	</profiles>
 
 </project>
