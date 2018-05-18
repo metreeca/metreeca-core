@@ -58,7 +58,8 @@
             let version=documents.filter(function(document) {return document.version === "{{ page.version }}" });
 
          	let tutorials=version.filter(function(document) { return document.path.includes("/tutorials/")});
-         	let howtos=version.filter(function(document) { return document.path.includes("/howtos/")});
+            let handbooks=version.filter(function(document) { return document.path.includes("/handbooks/")});
+	        let howtos=version.filter(function(document) { return document.path.includes("/howtos/")});
          	let references=version.filter(function(document) { return document.path.includes("/references/")});
 
 
@@ -70,9 +71,10 @@
         	            })
             }
 
-        	if( tutorials.length || howtos.length || references.length) {
+        	if( tutorials.length || handbooks.length || howtos.length || references.length) {
         		$('main > article').prepend($("<dl>")
                         .append(tutorials.length? [$("<dt>").text("Tutorials"), $("<dd>").append(links(tutorials))]: [])
+                        .append(handbooks.length? [$("<dt>").text("Handbooks"), $("<dd>").append(links(handbooks))]: [])
                         .append(howtos.length? [$("<dt>").text("How-Tos"), $("<dd>").append(links(howtos))]: [])
                         .append(references.length? [$("<dt>").text("References"), $("<dd>").append(links(references))]: []));
             }
