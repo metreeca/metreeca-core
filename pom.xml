@@ -50,6 +50,15 @@
 		</license>
 	</licenses>
 
+	<developers>
+		<developer>
+			<name>Metreeca</name>
+			<email>info@metreeca.com</email>
+			<organization>Metreeca</organization>
+			<organizationUrl>https://www.metreeca.com/</organizationUrl>
+		</developer>
+	</developers>
+
 	<scm>
 		<connection>scm:git:git@github.com:metreeca/metreeca-core.git</connection>
 		<developerConnection>scm:git:git@github.com:metreeca/metreeca-core.git</developerConnection>
@@ -61,14 +70,16 @@
 		<url>https://github.com/metreeca/metreeca-core/issues</url>
 	</issueManagement>
 
-	<developers>
-		<developer>
-			<name>Metreeca</name>
-			<email>info@metreeca.com</email>
-			<organization>Metreeca</organization>
-			<organizationUrl>https://www.metreeca.com/</organizationUrl>
-		</developer>
-	</developers>
+	<distributionManagement>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<modules>
 		<module>j2ee</module>
@@ -412,6 +423,22 @@
 
 					</execution>
 				</executions>
+
+			</plugin>
+
+			<plugin> <!-- https://github.com/sonatype/nexus-maven-plugins -->
+
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.8</version>
+
+				<extensions>true</extensions>
+
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
 
 			</plugin>
 
