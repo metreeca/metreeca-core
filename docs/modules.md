@@ -5,13 +5,13 @@ excerpt:  Metreeca platform components
 
 <dl>
 
-  <!-- <dt>Server Adapters</dt>
+  <dt>Server Adapters</dt>
   
   <dd>
     <ul>
       <li><a href="/modules/com.metreeca:j2ee">J2EE Adapter</a></li>
      </ul>
-  </dd> -->
+  </dd>
 
   <dt>Back-End Modules</dt>
   
