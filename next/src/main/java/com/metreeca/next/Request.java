@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.next;
@@ -29,6 +27,7 @@ import com.metreeca.tray.IO;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
+import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
 import java.io.*;
@@ -277,6 +276,12 @@ public final class Request {
 
 		parser.set(JSONAdapter.Shape, shape);
 		parser.set(JSONAdapter.Focus, focus);
+
+		parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
+		parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
+
+		parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
+		parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
 
 		final ParseErrorCollector errorCollector=new ParseErrorCollector();
 
