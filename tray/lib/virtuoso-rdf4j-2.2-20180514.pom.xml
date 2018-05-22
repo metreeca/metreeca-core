@@ -1,0 +1,56 @@
+<!--
+  ~ Copyright © 2013-2018 Metreeca srl. All rights reserved.
+  ~
+  ~ This file is part of Metreeca.
+  ~
+  ~ Metreeca is free software: you can redistribute it and/or modify it
+  ~ under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Metreeca is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty
+  ~ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  ~ See the GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>virtuoso.openlinksw.com</groupId>
+	<artifactId>rdf4j-provider</artifactId>
+	<version>2.2-20180514</version>
+	<packaging>jar</packaging>
+
+	<url>https://github.com/openlink/virtuoso-opensource/tree/develop/7/binsrc/rdf4j</url>
+
+	<description>
+
+		Virtuoso Open-Source v7 RDF4J Driver; preview version patched for:
+
+		- https://github.com/openlink/virtuoso-opensource/issues/701
+
+		- https://github.com/openlink/virtuoso-opensource/issues/702
+
+		- https://github.com/openlink/virtuoso-opensource/issues/738
+
+	</description>
+
+	<licenses>
+		<license>
+			<name>GNU General Public License Version 2 with Client Protocol Driver exemptions</name>
+			<url>https://github.com/openlink/virtuoso-opensource/blob/develop/7/LICENSE</url>
+			<distribution>manual</distribution>
+			<comments>
+				Metreeca usage of OpenLink Software's Virtuoso Open-Source components falls under the Client Protocol
+				Driver exemption.
+			</comments>
+		</license>
+	</licenses>
+
+</project>

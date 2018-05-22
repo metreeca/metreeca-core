@@ -25,7 +25,9 @@ import com.metreeca.tray.sys.Setup;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
@@ -72,13 +74,6 @@ public final class Virtuoso extends Graph {
 
 			return new VirtuosoRepository(url, usr, pwd, dflt) {
 
-				// ;(virtuoso) explicitly add base (will break if relative base is already specified…)
-				// https://github.com/openlink/virtuoso-opensource/issues/738
-
-				private String rebase(final String sparql, final String baseURI) {
-					return baseURI == null ? sparql : "base <"+baseURI+">\n\n"+sparql;
-				}
-
 				// ;(virtuoso) define default update graph in the preamble
 				// https://github.com/openlink/virtuoso-opensource/issues/417
 
@@ -89,21 +84,6 @@ public final class Virtuoso extends Graph {
 
 				@Override public RepositoryConnection getConnection() throws RepositoryException {
 					return new RepositoryConnectionWrapper(this, super.getConnection()) {
-
-						@Override public BooleanQuery prepareBooleanQuery(final QueryLanguage ql, final String query, final String baseURI)
-								throws MalformedQueryException, RepositoryException {
-							return super.prepareBooleanQuery(ql, rebase(query, baseURI), null);
-						}
-
-						@Override public TupleQuery prepareTupleQuery(final QueryLanguage ql, final String query, final String baseURI)
-								throws MalformedQueryException, RepositoryException {
-							return super.prepareTupleQuery(ql, rebase(query, baseURI), null);
-						}
-
-						@Override public GraphQuery prepareGraphQuery(final QueryLanguage ql, final String query, final String baseURI)
-								throws MalformedQueryException, RepositoryException {
-							return super.prepareGraphQuery(ql, rebase(query, baseURI), null);
-						}
 
 						@Override public Update prepareUpdate(final String update)
 								throws RepositoryException, MalformedQueryException {
@@ -117,7 +97,7 @@ public final class Virtuoso extends Graph {
 
 						@Override public Update prepareUpdate(final QueryLanguage ql, final String update, final String baseURI)
 								throws MalformedQueryException, RepositoryException {
-							return super.prepareUpdate(ql, rewrite(rebase(update, baseURI)), null);
+							return super.prepareUpdate(ql, rewrite(update), baseURI);
 						}
 
 					};
