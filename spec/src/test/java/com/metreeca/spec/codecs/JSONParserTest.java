@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.spec.codecs;
@@ -33,7 +31,6 @@ import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -134,10 +131,6 @@ public final class JSONParserTest extends JSONAdapterTest {
 		assertEquals("tagged",
 				parse("[] rdf:value 'text'@en ."),
 				rdf(blanks(object(field("text", "text"), field("lang", "en")))));
-
-		assertEquals("malformed",
-				parse("[] rdf:value 'malformed'^^xsd:boolean ."),
-				rdf(blanks(object(field("text", "malformed"), field("type", XMLSchema.BOOLEAN.stringValue())))));
 
 	}
 
@@ -390,7 +383,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 				));
 	}
 
-	@Ignore @Test public void testParseProvedDecimalsLeniently() {
+	@Test public void testParseProvedDecimalsLeniently() {
 		assertEquals("proved decimal",
 				parse("[] rdf:value 1.0 ."),
 				rdf(
@@ -408,6 +401,10 @@ public final class JSONParserTest extends JSONAdapterTest {
 						null,
 						trait(RDF.VALUE, datatype(XMLSchema.DOUBLE))
 				));
+	}
+
+	@Test(expected=RDFParseException.class) public void testRejectMalformedLiterals() {
+		rdf(blanks("22/5/2018"), null, trait(RDF.VALUE, datatype(XMLSchema.DATETIME)));
 	}
 
 
@@ -430,7 +427,14 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 			parser.set(JSONAdapter.Focus, focus);
 			parser.set(JSONAdapter.Shape, shape);
+
 			parser.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
+
+			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
+			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
+
+			parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
+			parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
 
 			parser.setRDFHandler(collector);
 
