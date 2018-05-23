@@ -25,6 +25,25 @@ import java.util.function.Function;
 
 /**
  * Linked data handlers index {thread-safe}.
+ *
+ * <p>Maps linked data resource path patterns to delegated resource {@linkplain Handler handlers}.</p>
+ *
+ * <p>Linked data {@linkplain Server servers} delegate HTTP requests to handlers selected according to the following
+ * rules on the basis of the server-relative {@linkplain Request#path() path} of the requested resource:</p>
+ *
+ * <ul>
+ *
+ * <li>paths with a trailing wildcard (e.g. {@code /container/*}) match any resource path sharing the same prefix
+ * (e.g {@code /container}, {@code /container/resource});</li>
+ *
+ * <li>paths with no trailing wildcard (e.g. {@code /resource}) match resource path exactly (e.g {@code
+ * /resource});</li>
+ *
+ * <li>lexicographically longer and preceding paths take precedence over shorter and following ones.</li>
+ *
+ * </ul>
+ *
+ * <p>Trailing slashes and question marks in resource paths are ignored.</p>
  */
 public class Index {
 
@@ -41,12 +60,21 @@ public class Index {
 
 
 	private final Map<String, Handler> handlers=new TreeMap<>(Comparator.comparingInt(String::length).reversed() // longest paths first
-			.thenComparing(String::compareTo)); // then alphabetically
+			.thenComparing(String::compareTo) // then alphabetically
+	);
 
 
 	private Index() {}
 
 
+	/**
+	 * Retrieves a handler from this index.
+	 *
+	 * @param path the path pattern the required handler is bound to; the value is normalized before use
+	 *
+	 * @return an optional value containing the handler bound to {@code path}, if one is present; an empty optional
+	 * value otherwise
+	 */
 	public Optional<Handler> lookup(final String path) {
 
 		if ( path == null ) {
@@ -62,6 +90,14 @@ public class Index {
 		});
 	}
 
+	/**
+	 * Inserts a handler into this index.
+	 *
+	 * @param path    the path pattern the handler to be inserted will be bound to; the value is normalized before use
+	 * @param handler the handler to be inserted into this index
+	 *
+	 * @return this index
+	 */
 	public Index insert(final String path, final Handler handler) {
 
 		if ( path == null ) {
@@ -91,6 +127,13 @@ public class Index {
 		});
 	}
 
+	/**
+	 * Removes a handler from this index.
+	 *
+	 * @param path the path pattern the handler to be removed is bound to; the value is normalized before use
+	 *
+	 * @return this index
+	 */
 	public Index remove(final String path) {
 
 		if ( path == null ) {
@@ -108,7 +151,7 @@ public class Index {
 
 
 	/**
-	 * Executes a task within an isolated transaction.
+	 * Executes a task within an isolated index transaction.
 	 *
 	 * @param task the task to be executed
 	 * @param <R>  the type of the value returned by {@code task}

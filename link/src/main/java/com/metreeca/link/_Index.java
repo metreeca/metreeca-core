@@ -59,7 +59,7 @@ import static java.util.stream.Collectors.toMap;
 
 
 /**
- * Port index {thread-safe}.
+ * Legacy index with soft-port support // !!! don't remove
  */
 public final class _Index {
 
