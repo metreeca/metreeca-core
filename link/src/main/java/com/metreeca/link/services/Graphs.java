@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.services;
@@ -47,7 +45,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 
-import static com.metreeca.link.Handler.unauthorized;
+import static com.metreeca.link._Handler.unauthorized;
 import static com.metreeca.spec.Shape.only;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Trait.trait;
@@ -63,7 +61,7 @@ import static com.metreeca.spec.things.Values.statement;
  *
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public final class Graphs implements Service {
+public final class Graphs implements _Service {
 
 	private static final Shape GraphsShape=trait(RDF.VALUE, and(
 			trait(RDF.TYPE, only(VOID.DATASET))
@@ -80,7 +78,7 @@ public final class Graphs implements Service {
 	@Override public void load(final Tool.Loader tools) {
 
 		final Setup setup=tools.get(Setup.Tool);
-		final Index index=tools.get(Index.Tool);
+		final _Index index=tools.get(_Index.Tool);
 
 		publik=setup.get("graphs.public", false);
 
@@ -88,10 +86,7 @@ public final class Graphs implements Service {
 
 		index.insert("/graphs", new Dispatcher(map(
 
-				entry(Request.GET, this::get),
-				entry(Request.PUT, this::put),
-				entry(Request.DELETE, this::delete),
-				entry(Request.POST, this::post)
+				entry(_Request.GET, this::get), entry(_Request.PUT, this::put), entry(_Request.DELETE, this::delete), entry(_Request.POST, this::post)
 
 		)), map(
 
@@ -104,7 +99,7 @@ public final class Graphs implements Service {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private void get(final Tool.Loader tools, // https://www.w3.org/TR/sparql11-http-rdf-update/#http-get
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+			final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
 			request.map(graph).browse(connection -> {
@@ -116,7 +111,7 @@ public final class Graphs implements Service {
 
 				if ( target == null && !catalog ) {
 
-					throw new LinkException(Response.BadRequest, "malformed request");
+					throw new _LinkException(_Response.BadRequest, "malformed request");
 
 				} else if ( !publik && !request.isSysAdm() ) {
 
@@ -138,9 +133,9 @@ public final class Graphs implements Service {
 						}
 					}
 
-					response.setStatus(Response.OK);
+					response.setStatus(_Response.OK);
 
-					new Transfer(request, response).model(model, GraphsShape);
+					new _Transfer(request, response).model(model, GraphsShape);
 
 				} else {
 
@@ -151,7 +146,7 @@ public final class Graphs implements Service {
 
 					final Resource context=target.isEmpty() ? null : iri(target);
 
-					response.setStatus(Response.OK);
+					response.setStatus(_Response.OK);
 					response.setHeader("Content-Type", format.getDefaultMIMEType());
 					response.setHeader("Content-Disposition", "attachment; filename=\"%s.%s\"",
 							target.isEmpty() ? "default" : target, format.getDefaultFileExtension());
@@ -169,7 +164,7 @@ public final class Graphs implements Service {
 	}
 
 	private void put(final Tool.Loader tools, // https://www.w3.org/TR/sparql11-http-rdf-update/#http-put
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+			final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
 
@@ -177,7 +172,7 @@ public final class Graphs implements Service {
 
 			if ( target == null ) {
 
-				throw new LinkException(Response.BadRequest, "malformed request");
+				throw new _LinkException(_Response.BadRequest, "malformed request");
 
 			} else if ( !request.isSysAdm() ) {
 
@@ -205,7 +200,7 @@ public final class Graphs implements Service {
 							connection.clear(context);
 							connection.add(request.getBody().get(), request.getBase(), factory.getRDFFormat(), context);
 
-							response.setStatus(exists ? Response.NoContent : Response.Created);
+							response.setStatus(exists ? _Response.NoContent : _Response.Created);
 
 							return null;
 
@@ -219,20 +214,20 @@ public final class Graphs implements Service {
 
 					tools.get(Trace.Tool).warning(this, "unable to read RDF payload", e);
 
-					response.setStatus(Response.InternalServerError).setText(e.getMessage());
+					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
 
 				} catch ( final RDFParseException e ) {
 
 					tools.get(Trace.Tool).warning(this, "malformed RDF payload", e);
 
-					response.setStatus(Response.BadRequest)
+					response.setStatus(_Response.BadRequest)
 							.setText("("+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage());
 
 				} catch ( final RepositoryException e ) {
 
 					tools.get(Trace.Tool).warning(this, "unable to update graph "+context, e);
 
-					response.setStatus(Response.InternalServerError).setText(e.getMessage());
+					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
 
 				}
 
@@ -245,7 +240,7 @@ public final class Graphs implements Service {
 	}
 
 	private void delete(final Tool.Loader tools, // https://www.w3.org/TR/sparql11-http-rdf-update/#http-delete
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+			final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
 
@@ -253,7 +248,7 @@ public final class Graphs implements Service {
 
 			if ( target == null ) {
 
-				throw new LinkException(Response.BadRequest, "malformed request");
+				throw new _LinkException(_Response.BadRequest, "malformed request");
 
 			} else if ( !request.isSysAdm() ) {
 
@@ -271,7 +266,7 @@ public final class Graphs implements Service {
 
 						connection.clear(context);
 
-						response.setStatus(exists ? Response.NoContent : Response.NotFound);
+						response.setStatus(exists ? _Response.NoContent : _Response.NotFound);
 
 						return null;
 
@@ -281,7 +276,7 @@ public final class Graphs implements Service {
 
 					tools.get(Trace.Tool).warning(this, "unable to update graph "+context, e);
 
-					response.setStatus(Response.InternalServerError).setText(e.getMessage());
+					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
 
 				}
 
@@ -293,7 +288,7 @@ public final class Graphs implements Service {
 	}
 
 	private void post(final Tool.Loader tools, // https://www.w3.org/TR/sparql11-http-rdf-update/#http-post
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+			final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		// !!! support  "multipart/form-data"
 		// !!! support graph creation with IRI identifying the underlying Graph Store
@@ -304,7 +299,7 @@ public final class Graphs implements Service {
 
 			if ( target == null ) {
 
-				throw new LinkException(Response.BadRequest, "malformed request");
+				throw new _LinkException(_Response.BadRequest, "malformed request");
 
 			} else if ( !request.isSysAdm() ) {
 
@@ -333,7 +328,7 @@ public final class Graphs implements Service {
 							throw new UncheckedIOException(e);
 						}
 
-						response.setStatus(exists ? Response.NoContent : Response.Created);
+						response.setStatus(exists ? _Response.NoContent : _Response.Created);
 
 						return null;
 
@@ -343,20 +338,20 @@ public final class Graphs implements Service {
 
 					tools.get(Trace.Tool).warning(this, "unable to read RDF payload", e);
 
-					response.setStatus(Response.InternalServerError).setText(e.getMessage());
+					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
 
 				} catch ( final RDFParseException e ) {
 
 					tools.get(Trace.Tool).warning(this, "malformed RDF payload", e);
 
-					response.setStatus(Response.BadRequest)
+					response.setStatus(_Response.BadRequest)
 							.setText("("+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage());
 
 				} catch ( final RepositoryException e ) {
 
 					tools.get(Trace.Tool).warning(this, "unable to update graph "+context, e);
 
-					response.setStatus(Response.InternalServerError).setText(e.getMessage());
+					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
 
 				}
 
@@ -370,7 +365,7 @@ public final class Graphs implements Service {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String graph(final Request request) {
+	private String graph(final _Request request) {
 
 		final List<String> defaults=request.getParameters("default");
 		final List<String> nameds=request.getParameters("graph");

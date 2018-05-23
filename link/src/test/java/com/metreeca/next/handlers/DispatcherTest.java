@@ -17,8 +17,8 @@
 
 package com.metreeca.next.handlers;
 
-import com.metreeca.next.Request;
-import com.metreeca.next.Response;
+import com.metreeca.link.Request;
+import com.metreeca.link.Response;
 
 import org.junit.Test;
 

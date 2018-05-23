@@ -3,21 +3,19 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next;
+package com.metreeca.link;
 
 import com.metreeca.spec.things._JSON;
 import com.metreeca.tray.IO;
@@ -37,6 +35,9 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 
 
+/**
+ * HTTP message part.
+ */
 public final class Part { // !!! factor to Message
 
 	public static Writer part() {
@@ -84,15 +85,11 @@ public final class Part { // !!! factor to Message
 
 
 	public InputStream input() {
-		return input != null ? input.get()
-				: reader != null ? IO.input(reader.get())
-				: IO.input();
+		return input != null ? input.get() : reader != null ? IO.input(reader.get()) : IO.input();
 	}
 
 	public Reader reader() {
-		return reader != null ? reader.get()
-				: input != null ? IO.reader(input.get())
-				: IO.reader();
+		return reader != null ? reader.get() : input != null ? IO.reader(input.get()) : IO.reader();
 	}
 
 
@@ -164,9 +161,7 @@ public final class Part { // !!! factor to Message
 				throw new NullPointerException("null value");
 			}
 
-			headers.compute(title(name), (key, current) -> unmodifiableList(values.stream().flatMap(
-					value -> value.isEmpty() ? current == null ? Stream.empty() : current.stream() : Stream.of(value)
-			).distinct().collect(toList())));
+			headers.compute(title(name), (key, current) -> unmodifiableList(values.stream().flatMap(value -> value.isEmpty() ? current == null ? Stream.empty() : current.stream() : Stream.of(value)).distinct().collect(toList())));
 
 			return this;
 		}

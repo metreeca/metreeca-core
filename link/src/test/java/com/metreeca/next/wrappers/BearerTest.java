@@ -17,10 +17,10 @@
 
 package com.metreeca.next.wrappers;
 
-import com.metreeca.next.Handler;
+import com.metreeca.link.Handler;
 import com.metreeca.link.LinkTest.Testbed;
-import com.metreeca.next.Request;
-import com.metreeca.next.Response;
+import com.metreeca.link.Request;
+import com.metreeca.link.Response;
 import com.metreeca.tray.iam.Roster;
 import com.metreeca.tray.iam.RosterTest;
 import com.metreeca.tray.iam.RosterTest.MockRoster;

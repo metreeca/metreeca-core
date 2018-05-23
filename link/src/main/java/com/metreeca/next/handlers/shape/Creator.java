@@ -3,24 +3,22 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.next.handlers.shape;
 
 
-import com.metreeca.next.*;
+import com.metreeca.link.*;
 import com.metreeca.spec.*;
 import com.metreeca.spec.sparql.SPARQLEngine;
 import com.metreeca.tray.Tool;
@@ -35,8 +33,8 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
-import static com.metreeca.next.Handler.error;
-import static com.metreeca.next.Wrapper.wrapper;
+import static com.metreeca.link.Handler.error;
+import static com.metreeca.link.Wrapper.wrapper;
 import static com.metreeca.next.wrappers.Transactor.transactor;
 import static com.metreeca.spec.Shape.role;
 import static com.metreeca.spec.Shape.task;

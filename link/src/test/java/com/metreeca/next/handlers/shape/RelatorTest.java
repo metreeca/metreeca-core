@@ -20,8 +20,8 @@ package com.metreeca.next.handlers.shape;
 
 import com.metreeca.link.LinkTest;
 import com.metreeca.link.LinkTest.Testbed;
-import com.metreeca.next.Request;
-import com.metreeca.next.Response;
+import com.metreeca.link.Request;
+import com.metreeca.link.Response;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.rdf.Graph;
 

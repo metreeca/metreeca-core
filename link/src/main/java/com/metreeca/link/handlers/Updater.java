@@ -3,25 +3,23 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.link.Handler;
-import com.metreeca.link.Request;
-import com.metreeca.link.Response;
+import com.metreeca.link._Handler;
+import com.metreeca.link._Request;
+import com.metreeca.link._Response;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 
@@ -38,15 +36,15 @@ import static com.metreeca.spec.things.Values.iri;
 /**
  * SPARQL post-processor.
  */
-public final class Updater implements Handler {
+public final class Updater implements _Handler {
 
 	private final Graph graph;
 
-	private final Handler handler;
+	private final _Handler handler;
 	private final Map<String, String> updates;
 
 
-	public Updater(final Tool.Loader tools, final Handler handler, final Map<String, String> updates) {
+	public Updater(final Tool.Loader tools, final _Handler handler, final Map<String, String> updates) {
 
 		if ( tools == null ) {
 			throw new NullPointerException("null tools");
@@ -75,12 +73,10 @@ public final class Updater implements Handler {
 	}
 
 
-	@Override public void handle(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	@Override public void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
-		final Handler chain=handler
-				.chain(handler(updates.get(request.getMethod())))
-				.chain(request.isSafe() ? Handler.Empty : handler(updates.get(Request.ANY)));
+		final _Handler chain=handler
+				.chain(handler(updates.get(request.getMethod()))).chain(request.isSafe() ? _Handler.Empty : handler(updates.get(_Request.ANY)));
 
 		if ( chain.equals(handler) ) { handler.handle(tools, request, response, sink); } else {
 
@@ -96,8 +92,8 @@ public final class Updater implements Handler {
 	}
 
 
-	private Handler handler(final String sparql) {
-		return sparql == null ? Handler.Empty : (tools, request, response, sink) -> {
+	private _Handler handler(final String sparql) {
+		return sparql == null ? _Handler.Empty : (tools, request, response, sink) -> {
 			if ( response.getStatus()/100 != 2 ) { sink.accept(request, response); } else {
 				try {
 
@@ -120,14 +116,14 @@ public final class Updater implements Handler {
 
 				} catch ( final MalformedQueryException e ) { // !!! abort/rollback wrapping graph transaction
 
-					sink.accept(request, new Response().setStatus(Response.InternalServerError)
+					sink.accept(request, new _Response().setStatus(_Response.InternalServerError)
 							.setHeader("Content-Type", "text-plain")
 							.setText("syntax error in update script")
 							.setCause(e));
 
 				} catch ( final UpdateExecutionException e ) { // !!! abort/rollback wrapping graph transaction
 
-					sink.accept(request, new Response().setStatus(Response.InternalServerError)
+					sink.accept(request, new _Response().setStatus(_Response.InternalServerError)
 							.setHeader("Content-Type", "text-plain")
 							.setText("failed update script")
 							.setCause(e));

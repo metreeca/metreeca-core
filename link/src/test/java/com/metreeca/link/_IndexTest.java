@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link;
@@ -30,14 +28,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 
-public class IndexTest {
+public class _IndexTest {
 
 	@Test public void testMatchExactPathIgnoringTrailingSlashes() {
 
-		final Index index=new Index(Tray.tray());
+		final _Index index=new _Index(Tray.tray());
 
-		final Handler one=handler("1");
-		final Handler two=handler("2");
+		final _Handler one=handler("1");
+		final _Handler two=handler("2");
 
 		index.insert("/one", one);
 		index.insert("/two/", two); // trailing slash
@@ -54,10 +52,10 @@ public class IndexTest {
 
 	@Test public void testMatchLongestPrefix() {
 
-		final Index index=new Index(Tray.tray());
+		final _Index index=new _Index(Tray.tray());
 
-		final Handler one=handler("1");
-		final Handler two=handler("1.2");
+		final _Handler one=handler("1");
+		final _Handler two=handler("1.2");
 
 		index.insert("/one/*", one);
 		index.insert("/one/two/*", two);
@@ -68,10 +66,10 @@ public class IndexTest {
 
 	@Test public void testManagesPrefixesOfEqualLength() {
 
-		final Index index=new Index(Tray.tray());
+		final _Index index=new _Index(Tray.tray());
 
-		final Handler one=handler("1");
-		final Handler two=handler("2");
+		final _Handler one=handler("1");
+		final _Handler two=handler("2");
 
 		index.insert("/one/*", one);
 		index.insert("/two/*", two);
@@ -83,10 +81,10 @@ public class IndexTest {
 
 	@Test public void testNormalizePaths() {
 
-		final Index index=new Index(Tray.tray());
+		final _Index index=new _Index(Tray.tray());
 
-		final Handler collection=handler("collection");
-		final Handler resource=handler("resource");
+		final _Handler collection=handler("collection");
+		final _Handler resource=handler("resource");
 
 		index.insert("/uno/", collection);
 		index.insert("/uno/*", resource);
@@ -101,11 +99,10 @@ public class IndexTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Handler handler(final String id) {
-		return new Handler() {
+	private _Handler handler(final String id) {
+		return new _Handler() {
 
-			@Override public void handle(final Tool.Loader tools,
-					final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+			@Override public void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 				sink.accept(request, response.setText(id));
 			}
 

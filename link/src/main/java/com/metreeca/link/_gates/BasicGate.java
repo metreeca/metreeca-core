@@ -3,23 +3,23 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link.gates;
+package com.metreeca.link._gates;
 
-import com.metreeca.link.*;
+import com.metreeca.link._Gate;
+import com.metreeca.link._Request;
+import com.metreeca.link._Response;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
@@ -36,7 +36,7 @@ import static java.lang.Math.max;
 import static java.util.Collections.singleton;
 
 
-public final class BasicGate implements Gate {
+public final class BasicGate implements _Gate {
 
 	private static final String SysAdm="admin"; // !!! configurable?
 
@@ -58,8 +58,7 @@ public final class BasicGate implements Gate {
 	}
 
 
-	@Override public void authorize(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	@Override public void authorize(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
 			final String authorization=request.getHeader("Authorization").orElse("");
@@ -79,21 +78,20 @@ public final class BasicGate implements Gate {
 				if ( usr.equals(SysAdm) && !key.isEmpty() && pwd.equals(key) ) {
 					request.setUser(iri(request.getBase())).setRoles(singleton(Spec.root)); // !!! review usr name/iri
 				} else if ( !usr.equals("-") || !pwd.equals("-") ) { // ignore fake sign out credentials
-					response.setStatus(Response.Unauthorized);
+					response.setStatus(_Response.Unauthorized);
 				}
 
 			} else if ( !authorization.isEmpty() ) {
-				response.setStatus(Response.Unauthorized).setText("unsupported authorization method");
+				response.setStatus(_Response.Unauthorized).setText("unsupported authorization method");
 			}
 
 			sink.accept(request, response);
 		}
 	}
 
-	@Override public void authenticate(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	@Override public void authenticate(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
-		if ( response.getStatus() == Response.Unauthorized ) {
+		if ( response.getStatus() == _Response.Unauthorized ) {
 
 			sink.accept(request, response.addHeader("WWW-Authenticate", "Basic realm=\"metreeca\""));
 

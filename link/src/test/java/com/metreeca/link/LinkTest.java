@@ -17,13 +17,6 @@
 
 package com.metreeca.link;
 
-import com.metreeca.next.*;
-import com.metreeca.next.Handler;
-import com.metreeca.next.Request;
-import com.metreeca.next.Response;
-import com.metreeca.next.Server;
-import com.metreeca.next.Service;
-import com.metreeca.next.Toolkit;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.things.Values;
@@ -128,9 +121,9 @@ public final class LinkTest {
 
 		private final Tray tray=Tray.tray();
 
-		private Supplier<com.metreeca.next.Handler> handler=() -> tool(Server.Tool);
+		private Supplier<Handler> handler=() -> tool(Server.Tool);
 
-		private Consumer<com.metreeca.next.Request.Writer> request;
+		private Consumer<Request.Writer> request;
 
 
 		public Testbed toolkit(final Toolkit toolkit) {
@@ -169,15 +162,15 @@ public final class LinkTest {
 		}
 
 
-		public Testbed handler(final Supplier<com.metreeca.next.Handler> handler) {
+		public Testbed handler(final Supplier<Handler> handler) {
 
 			if ( handler == null ) {
 				throw new NullPointerException("null handler");
 			}
 
-			this.handler=new Supplier<com.metreeca.next.Handler>() {
+			this.handler=new Supplier<Handler>() {
 
-				private com.metreeca.next.Handler cache;
+				private Handler cache;
 
 				@Override public Handler get() {
 					return cache != null ? cache : (cache=handler.get());
@@ -189,7 +182,7 @@ public final class LinkTest {
 		}
 
 
-		public Testbed request(final Consumer<com.metreeca.next.Request.Writer> request) {
+		public Testbed request(final Consumer<Request.Writer> request) {
 
 			if ( request == null ) {
 				throw new NullPointerException("null request");
@@ -206,7 +199,7 @@ public final class LinkTest {
 
 		}
 
-		public Testbed response(final Consumer<com.metreeca.next.Response.Reader> response) {
+		public Testbed response(final Consumer<Response.Reader> response) {
 
 			if ( response == null ) {
 				throw new NullPointerException("null response");

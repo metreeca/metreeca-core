@@ -3,149 +3,139 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link;
 
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.Test;
 
-import com.metreeca.tray.IO;
-import com.metreeca.tray.Tool;
-import com.metreeca.tray.Tray;
-import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Trace;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import static com.metreeca.link.Request.GET;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import static com.metreeca.spec.things.ValuesTest.repository;
+import static java.util.Arrays.asList;
 
 
-public final class HandlerTest {
+public class HandlerTest {
 
-	private HandlerTest() {} // a utility class
+	@Test public void testExecute() {
 
+		final AtomicBoolean committed=new AtomicBoolean();
 
-	public static void tools(final Consumer<Tool.Loader> task) {
-		repository(repository -> {
-
-			final Tray manager=Tray.tray().set(Graph.Tool, tools ->
-					new Graph("Test Repository", IsolationLevels.SERIALIZABLE, () -> repository) {});
-
+		final Handler handler=(request, response) -> {
 			try {
-
-				task.accept(manager);
-
-				return null;
-
+				response.status(Response.OK).done();
 			} finally {
-				manager.clear();
+				committed.set(true);
 			}
+		};
 
-		});
+		handler.exec(writer -> writer.method(GET).done(), reader -> assertEquals("request/response paired", GET, reader.request().method()));
+
+		assertTrue("target invoked", committed.get());
+
 	}
 
+	@Test public void testBefore() {
 
-	public static void response(final Tool.Loader tools, final Handler handler,
-			final Request request, final BiConsumer<Request, Response> sink) {
+		final AtomicBoolean committed=new AtomicBoolean();
 
-		final Response response=new Response();
-
-		final int delivered=599; // the last valid response code
-
-		handler.chain(HandlerTest::sniff).handle(tools, request, response, (_request, _response) -> {
-			try { sink.accept(_request, _response); } finally { _response.setStatus(delivered); }
-		});
-
-		if ( response.getStatus() != delivered ) {
-			throw new AssertionError("response not delivered");
-		}
-	}
-
-	public static void exception(final Tool.Loader tools, final Handler handler,
-			final Request request, final BiConsumer<Request, LinkException> sink) {
-		try {
-
-			handler.handle(tools, request, new Response(),
-					(_request, _response) -> sink.accept(_request, new LinkException(0)));
-
-		} catch ( final LinkException e ) {
-
-			sink.accept(request, e);
-
-		}
-	}
-
-
-	public static Collection<Statement> model(final Graph graph, final Resource... contexts) {
-		return graph.browse(connection -> {
-
-			final StatementCollector collector=new StatementCollector();
-
-			connection.export(collector, contexts);
-
-			return collector.getStatements();
-
-		});
-	}
-
-	public static Graph model(final Graph graph, final Iterable<Statement> model, final Resource... contexts) {
-		return graph.update(connection -> {
-
-			connection.add(model, contexts);
-
-			return graph;
-
-		});
-	}
-
-
-	private static void sniff(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
-
-		final StringBuilder headers=new StringBuilder(100);
-
-		for (final Map.Entry<String, Collection<String>> entry : response.getHeaders().entrySet()) {
-			for (final String value : entry.getValue()) {
-				headers.append(String.format("%s: %s\n", entry.getKey(), value));
-			}
-		}
-
-		final byte[] body=response.getData();
-
-		tools.get(Trace.Tool).info(null, String.format("HTTP Response Code %d\n%s\n%s\n---------------------------",
-				response.getStatus(), headers, new String(body, IO.UTF8)));
-
-		response.setBody(out -> {
+		final Handler handler=(request, response) -> {
 			try {
-				out.write(body);
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
+				response.status(Response.OK).text("handler/"+request.text());
+			} finally {
+				committed.set(true);
 			}
-		});
+		};
 
-		sink.accept(request, response);
+		handler
 
+				.wrap(wrapped -> (request, response) -> wrapped.exec(writer -> writer.copy(request).text("before/"+request.text()), reader -> response.copy(reader).done()))
+
+				.exec(writer -> writer.method(GET).text("text"), reader -> assertEquals("wrapped", "handler/before/text", reader.text()));
+
+		assertTrue("target invoked", committed.get());
+
+	}
+
+	@Test public void testAfter() {
+
+		final AtomicBoolean committed=new AtomicBoolean();
+
+		final Handler handler=(request, response) -> {
+			try {
+				response.status(Response.OK).text("handler/"+request.text());
+			} finally {
+				committed.set(true);
+			}
+		};
+
+		handler
+
+				.wrap(wrapped -> (request, response) -> wrapped.exec(writer -> writer.copy(request).done(), reader -> response.copy(reader).text("after/"+reader.text())))
+
+				.exec(writer -> writer.method(GET).text("text"), reader -> assertEquals("wrapped", "after/handler/text", reader.text()));
+
+		assertTrue("target invoked", committed.get());
+
+	}
+
+	@Test public void testReaderPairing() {
+
+		final Handler handler=(request, response) -> response.status(Response.OK).done();
+
+		handler
+
+				.wrap(wrapped -> (request, response) -> wrapped.exec(
+
+						writer -> writer.copy(request).user(RDF.REST).done(),
+
+						reader -> {
+
+							assertEquals("paired with wrapped request", RDF.REST, reader.request().user());
+
+							response.copy(reader).done();
+
+						}
+
+				))
+
+				.exec(writer -> writer.method(GET).user(RDF.FIRST).done(), reader -> assertEquals("paired with original request", RDF.FIRST, reader.request().user()));
+	}
+
+	@Test public void testResultStreaming() {
+
+		final List<String> transaction=new ArrayList<>();
+
+		final Handler handler=(request, response) -> {
+
+			transaction.add("begin");
+
+			response.status(Response.OK).text("inside");
+
+			transaction.add("commit");
+
+		};
+
+		handler.exec(writer -> writer.method(GET).done(), reader -> transaction.add(reader.text()));
+
+		assertEquals("", asList("begin", "inside", "commit"), transaction);
 	}
 
 }

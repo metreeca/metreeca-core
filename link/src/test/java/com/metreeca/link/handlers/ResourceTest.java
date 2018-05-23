@@ -3,23 +3,23 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.link.*;
+import com.metreeca.link._Handler;
+import com.metreeca.link._Request;
+import com.metreeca.link._Response;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.Tool;
@@ -33,7 +33,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import org.junit.Test;
 
-import static com.metreeca.link.HandlerTest.*;
+import static com.metreeca.link._HandlerTest.*;
 import static com.metreeca.spec.Shape.delete;
 import static com.metreeca.spec.Shape.relate;
 import static com.metreeca.spec.shapes.All.all;
@@ -67,8 +67,7 @@ public final class ResourceTest {
 
 			response(catalog, handler(catalog),
 
-					new Request()
-							.setMethod(Request.GET)
+					new _Request().setMethod(_Request.GET)
 							.setTarget(target.stringValue())
 							.setHeader("Accept", accept),
 
@@ -79,8 +78,7 @@ public final class ResourceTest {
 								.getFileFormatForMIMEType(accept)
 								.orElseThrow(UnsupportedOperationException::new);
 
-						assertEquals("resource related",
-								Response.OK, response.getStatus());
+						assertEquals("resource related", _Response.OK, response.getStatus());
 
 						assertEquals("content-type header set as required in the request",
 								accept, response.getHeader("Content-Type").orElse(""));
@@ -101,14 +99,14 @@ public final class ResourceTest {
 
 					tools, new Resource(tools, and()),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.GET)
+							.setMethod(_Request.GET)
 							.setTarget(target.stringValue()),
 
 					(request, response) -> {
-						assertEquals("unsupported method", Response.MethodNotAllowed, response.getStatus());
+						assertEquals("unsupported method", _Response.MethodNotAllowed, response.getStatus());
 					}
 
 			);
@@ -130,14 +128,13 @@ public final class ResourceTest {
 
 					)),
 
-					new Request()
-							.setMethod(Request.GET)
+					new _Request().setMethod(_Request.GET)
 							.setTarget(target.stringValue())
 							.setHeader("Accept", accept),
 
 					(request, e) -> {
 
-						assertEquals("unsupported method", Response.NotFound, e.getStatus());
+						assertEquals("unsupported method", _Response.NotFound, e.getStatus());
 
 					}
 
@@ -163,15 +160,15 @@ public final class ResourceTest {
 							trait(RDF.TYPE)
 					)),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.GET)
+							.setMethod(_Request.GET)
 							.setTarget(target.stringValue()),
 
 					(request, response) -> {
 
-						assertEquals("unauthorized", Response.Unauthorized, response.getStatus());
+						assertEquals("unauthorized", _Response.Unauthorized, response.getStatus());
 						assertTrue("repository not modified", isomorphic(model, model(graph)));
 
 					}
@@ -198,10 +195,10 @@ public final class ResourceTest {
 
 			response(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.PUT)
+							.setMethod(_Request.PUT)
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", mime)
 							.setHeader("Accept", mime)
@@ -211,8 +208,7 @@ public final class ResourceTest {
 
 						final Model model=new LinkedHashModel(model(graph));
 
-						assertEquals("resource updated",
-								Response.NoContent, response.getStatus());
+						assertEquals("resource updated", _Response.NoContent, response.getStatus());
 
 						assertTrue("no content",
 								response.getText().isEmpty());
@@ -242,10 +238,10 @@ public final class ResourceTest {
 
 			response(tools, handler(tools),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.PUT)
+							.setMethod(_Request.PUT)
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", "application/json")
 							.setHeader("Accept", mime)
@@ -255,8 +251,7 @@ public final class ResourceTest {
 
 						final Model model=new LinkedHashModel(model(graph));
 
-						assertEquals("resource updated",
-								Response.NoContent, response.getStatus());
+						assertEquals("resource updated", _Response.NoContent, response.getStatus());
 
 						assertTrue("repository is updated",
 								model.contains(target, RDF.VALUE, RDF.REST)
@@ -278,16 +273,15 @@ public final class ResourceTest {
 
 					tools, new Resource(tools, relate(and())),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.PUT)
+							.setMethod(_Request.PUT)
 							.setTarget(target.stringValue()),
 
 					(request, response) -> {
 
-						assertEquals("unsupported method",
-								Response.MethodNotAllowed, response.getStatus());
+						assertEquals("unsupported method", _Response.MethodNotAllowed, response.getStatus());
 
 					});
 
@@ -304,10 +298,10 @@ public final class ResourceTest {
 
 			exception(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.PUT)
+							.setMethod(_Request.PUT)
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", mime)
 							.setHeader("Accept", mime)
@@ -315,8 +309,7 @@ public final class ResourceTest {
 
 					(request, e) -> {
 
-						assertEquals("resource not found",
-								Response.NotFound, e.getStatus());
+						assertEquals("resource not found", _Response.NotFound, e.getStatus());
 
 						assertTrue("repository not modified",
 								model(graph).isEmpty());
@@ -344,16 +337,15 @@ public final class ResourceTest {
 							trait(RDF.TYPE)
 					)),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.PUT)
+							.setMethod(_Request.PUT)
 							.setTarget(target.stringValue()),
 
 					(request, response) -> {
 
-						assertEquals("unauthorized",
-								Response.Unauthorized, response.getStatus());
+						assertEquals("unauthorized", _Response.Unauthorized, response.getStatus());
 
 						assertTrue("repository not modified",
 								isomorphic(model, model(graph)));
@@ -377,19 +369,17 @@ public final class ResourceTest {
 
 			exception(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setTarget(target.stringValue())
-							.setMethod(Request.PUT)
+							.setTarget(target.stringValue()).setMethod(_Request.PUT)
 							.setHeader("Content-Type", mime)
 							.setHeader("Accept", mime)
 							.setText("<> rdf:value rdf:nil."),
 
 					(request, exception) -> {
 
-						assertEquals("invalid data",
-								Response.UnprocessableEntity, exception.getStatus());
+						assertEquals("invalid data", _Response.UnprocessableEntity, exception.getStatus());
 
 						assertTrue("repository not modified",
 								isomorphic(model, model(graph)));
@@ -411,18 +401,16 @@ public final class ResourceTest {
 			final IRI target=item("target");
 			final String mime="text/turtle";
 
-			exception(catalog, handler(catalog), new Request()
+			exception(catalog, handler(catalog), new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", mime)
-							.setHeader("Accept", mime)
-							.setText("<> rdf:value rdf:first. <x> rdf:value 'x'.").setMethod(Request.PUT),
+							.setHeader("Accept", mime).setText("<> rdf:value rdf:first. <x> rdf:value 'x'.").setMethod(_Request.PUT),
 
 					(request, exception) -> {
 
-						assertEquals("reachability error",
-								Response.UnprocessableEntity, exception.getStatus());
+						assertEquals("reachability error", _Response.UnprocessableEntity, exception.getStatus());
 
 						assertTrue("repository not modified",
 								isomorphic(model, model(graph)));
@@ -446,18 +434,16 @@ public final class ResourceTest {
 
 			exception(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", mime)
-							.setHeader("Accept", mime)
-							.setText("<> rdf:type ''; rdf:value rdf:first.").setMethod(Request.PUT),
+							.setHeader("Accept", mime).setText("<> rdf:type ''; rdf:value rdf:first.").setMethod(_Request.PUT),
 
 					(request, exception) -> {
 
-						assertEquals("envelope error",
-								Response.UnprocessableEntity, exception.getStatus());
+						assertEquals("envelope error", _Response.UnprocessableEntity, exception.getStatus());
 
 						assertTrue("repository not modified",
 								isomorphic(model, model(graph)));
@@ -489,18 +475,17 @@ public final class ResourceTest {
 
 					)),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.DELETE)
+							.setMethod(_Request.DELETE)
 							.setTarget(target.stringValue()),
 
 					(request, response) -> {
 
 						final Model model=new LinkedHashModel(model(graph));
 
-						assertEquals("resource delete",
-								Response.NoContent, response.getStatus());
+						assertEquals("resource delete", _Response.NoContent, response.getStatus());
 
 						assertTrue("repository is updated",
 								!model.contains(target, RDF.VALUE, RDF.FIRST));
@@ -520,14 +505,12 @@ public final class ResourceTest {
 
 				new Resource(tools, relate(and())),
 
-				new Request()
+				new _Request()
 
 						.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-						.setTarget(item("target").stringValue())
-						.setMethod(Request.DELETE),
+						.setTarget(item("target").stringValue()).setMethod(_Request.DELETE),
 
-				(request, response) -> assertEquals("unsupported method",
-						Response.MethodNotAllowed, response.getStatus())));
+				(request, response) -> assertEquals("unsupported method", _Response.MethodNotAllowed, response.getStatus())));
 	}
 
 	@Test public void testDeleteRejectUnknownResource() {
@@ -541,16 +524,14 @@ public final class ResourceTest {
 
 					catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setTarget(target.stringValue())
-							.setMethod(Request.DELETE),
+							.setTarget(target.stringValue()).setMethod(_Request.DELETE),
 
 					(request, response) -> {
 
-						assertEquals("resource not found",
-								Response.NotFound, response.getStatus());
+						assertEquals("resource not found", _Response.NotFound, response.getStatus());
 
 						assertTrue("repository not modified",
 								model(graph).isEmpty());
@@ -578,15 +559,13 @@ public final class ResourceTest {
 							trait(RDF.TYPE)
 					)),
 
-					new Request()
+					new _Request()
 
-							.setTarget(target.stringValue())
-							.setMethod(Request.DELETE),
+							.setTarget(target.stringValue()).setMethod(_Request.DELETE),
 
 					(request, response) -> {
 
-						assertEquals("unauthorized",
-								Response.Unauthorized, response.getStatus());
+						assertEquals("unauthorized", _Response.Unauthorized, response.getStatus());
 
 						assertTrue("repository not modified",
 								isomorphic(model, model(graph)));
@@ -599,7 +578,7 @@ public final class ResourceTest {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Handler handler(final Tool.Loader tools) {
+	private _Handler handler(final Tool.Loader tools) {
 		return new Resource(tools, and(
 
 				relate(trait(RDF.TYPE)), // not updatable/deletable

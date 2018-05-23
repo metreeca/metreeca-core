@@ -17,8 +17,7 @@
 
 package com.metreeca.next.wrappers;
 
-import com.metreeca.link.Link;
-import com.metreeca.next.*;
+import com.metreeca.link.*;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;

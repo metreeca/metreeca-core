@@ -17,25 +17,19 @@
 
 package com.metreeca.link;
 
+import com.metreeca.link._gates.BasicGate;
+import com.metreeca.tray.Tool;
 
-import com.metreeca.tray.Tray;
-
-import java.util.ServiceLoader;
+import java.util.function.BiConsumer;
 
 
-/**
- * Linked data service.
- *
- * <p>Services enable linked data applications to configure the {@linkplain _Server server} or other shared tools
- * managed by a tool {@linkplain Tray tray}; the most common use case is binding a custom resource {@linkplain Handler
- * handler} to the server {@linkplain _Index index}.</p>
- *
- * <p>Custom services listed in the {@code com.metreeca.link.Service} {@linkplain ServiceLoader service loader}
- * provider configuration file in the {@code META-INF/services/} resource directory of an application will be
- * automatically {@linkplain #load() loaded} by server adapters.</p>
- */
-@FunctionalInterface public interface Service {
+public interface _Gate {
 
-	public void load();
+	public static Tool<_Gate> Tool=BasicGate::new; // !!! configurable
+
+
+	public void authorize(Tool.Loader tools, _Request request, _Response response, BiConsumer<_Request, _Response> sink);
+
+	public void authenticate(Tool.Loader tools, _Request request, _Response response, BiConsumer<_Request, _Response> sink);
 
 }

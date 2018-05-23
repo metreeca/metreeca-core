@@ -15,24 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link;
+/**
+ * Standard security gates.
+ */
 
-import org.junit.Test;
-
-
-public class RequestTest {
-
-	@Test(expected=IllegalStateException.class) public void testWriterPreventCommitWithoutMethod() {
-		new Request.Writer(request -> {}).done();
-	}
-
-	@Test(expected=IllegalStateException.class) public void testWriterPreventDoubleCommit() {
-
-		final Request.Writer writer=new Request.Writer(request -> {});
-
-		writer.method(Request.GET).done();
-		writer.done();
-
-	}
-
-}
+package com.metreeca.link._gates;

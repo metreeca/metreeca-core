@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.services;
@@ -38,9 +36,9 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.link.Handler.sysadm;
-import static com.metreeca.link.Handler.unauthorized;
-import static com.metreeca.link.Handler.unsupported;
+import static com.metreeca.link._Handler.sysadm;
+import static com.metreeca.link._Handler.unauthorized;
+import static com.metreeca.link._Handler.unsupported;
 import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.required;
 import static com.metreeca.spec.shapes.All.all;
@@ -58,7 +56,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * RDF namespace catalog.
  */
-public final class Names implements Service {
+public final class Names implements _Service {
 
 	private static final Shape NamesShape=and(trait(Link.Entry, and(datatype(Values.BNodeType),
 			trait(Link.Key, and(required(), datatype(XMLSchema.STRING), pattern("\\w*"))),
@@ -75,10 +73,9 @@ public final class Names implements Service {
 
 		this.graph=tools.get(Graph.Tool);
 
-		tools.get(Index.Tool).insert("/!/names", new Dispatcher(map(
+		tools.get(_Index.Tool).insert("/!/names", new Dispatcher(map(
 
-				entry(Request.GET, sysadm(this::get)),
-				entry(Request.PUT, sysadm(this::put))
+				entry(_Request.GET, sysadm(this::get)), entry(_Request.PUT, sysadm(this::put))
 
 		)), map(
 
@@ -91,8 +88,7 @@ public final class Names implements Service {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void get(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void get(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		request.map(graph).browse(connection -> {
 
@@ -114,9 +110,9 @@ public final class Names implements Service {
 				}
 			}
 
-			response.setStatus(Response.OK);
+			response.setStatus(_Response.OK);
 
-			new Transfer(request, response).model(model, NamesShape);
+			new _Transfer(request, response).model(model, NamesShape);
 
 			sink.accept(request, response);
 
@@ -126,8 +122,7 @@ public final class Names implements Service {
 
 	}
 
-	private void put(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void put(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		final Shape updating=NamesShape.accept(Shape.task(Spec.update));
 		final Shape authorized=updating.accept(Shape.role(request.getRoles()));
@@ -147,7 +142,7 @@ public final class Names implements Service {
 
 			final Collection<Statement> model=new ArrayList<>();
 
-			model.addAll(new Transfer(request, response).model(shape)); // add user-submitted statements
+			model.addAll(new _Transfer(request, response).model(shape)); // add user-submitted statements
 			model.addAll(shape.accept(Shape.mode(Spec.verify)).accept(new Outliner())); // add implied statements
 
 			final Map<String, String> namespaces=new TreeMap<>(_Cell.cell(model, target)

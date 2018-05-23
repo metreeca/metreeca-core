@@ -19,8 +19,8 @@ package com.metreeca.next.handlers.shape;
 
 
 import com.metreeca.link.LinkTest;
-import com.metreeca.next.Request;
-import com.metreeca.next.Response;
+import com.metreeca.link.Request;
+import com.metreeca.link.Response;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
@@ -32,7 +32,7 @@ import java.util.Map;
 
 import static com.metreeca.link.LinkTest.Employee;
 import static com.metreeca.link.LinkTest.testbed;
-import static com.metreeca.next.Server.server;
+import static com.metreeca.link.Server.server;
 import static com.metreeca.next.handlers.shape.Deleter.deleter;
 import static com.metreeca.next.wrappers.Processor.processor;
 import static com.metreeca.spec.things.ValuesTest.*;

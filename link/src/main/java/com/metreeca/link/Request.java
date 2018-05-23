@@ -3,50 +3,61 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link;
 
+import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
+import com.metreeca.spec.codecs.JSONAdapter;
+import com.metreeca.spec.things.Formats;
+import com.metreeca.spec.things._JSON;
 import com.metreeca.tray.IO;
-import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
+import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
+import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
-import static com.metreeca.tray.IO.data;
-import static com.metreeca.tray.IO.input;
+import javax.json.JsonException;
+
+import static com.metreeca.spec.things.Strings.title;
+import static com.metreeca.spec.things.Strings.upper;
+import static com.metreeca.spec.things.Values.iri;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.unmodifiableSet;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 
 /**
  * HTTP request.
  */
-public final class Request extends _Message<Request> {
+public final class Request {
 
-	public static final String ANY="*"; // wildcard method name
+	/**
+	 * The name of the part containing the main body payload in multipart/form-data requests ({@code {@value}}).
+	 */
+	public static final String BodyPart="body";
 
 	public static final String GET="GET"; // https://tools.ietf.org/html/rfc7231#section-4.3.1
 	public static final String HEAD="HEAD"; // https://tools.ietf.org/html/rfc7231#section-4.3.2
@@ -56,308 +67,579 @@ public final class Request extends _Message<Request> {
 	public static final String CONNECT="CONNECT"; // https://tools.ietf.org/html/rfc7231#section-4.3.6
 	public static final String OPTIONS="OPTIONS"; // https://tools.ietf.org/html/rfc7231#section-4.3.7
 	public static final String TRACE="TRACE"; // https://tools.ietf.org/html/rfc7231#section-4.3.8
+	public static final String PATCH="PATCH"; // https://tools.ietf.org/html/rfc5789#section-2
 
-	private static final Collection<String> Safe=new HashSet<>(asList(
-			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
+	private static final Collection<String> Safe=new HashSet<>(asList(GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
 	));
 
 
-	private static final String URLEncodedForm="application/x-www-form-urlencoded";
-
-
-	private IRI user=RDF.NIL;
-	private Set<IRI> roles=emptySet();
-
+	private IRI user=Spec.none;
+	private Set<Value> roles=singleton(Spec.none);
 
 	private String method="";
-
-	private String base="";
-	private String target="";
+	private String base="app:/";
+	private String path="/";
 	private String query="";
 
-	// !!! support multipart/form-data (e.g. https://stackoverflow.com/a/3337115/739773)
+	private Map<String, List<String>> parameters=new LinkedHashMap<>();
+	private Map<String, List<String>> headers=new LinkedHashMap<>();
+	private Map<String, List<Part>> parts=new LinkedHashMap<>();
 
-	private Supplier<Map<String, List<String>>> parameters=() -> parameters(method.equals(POST)
-			&& getHeader("Content-Type").orElse("").startsWith(URLEncodedForm) // ignore charset parameter
-			? getText() : query);
-
-	private Supplier<InputStream> body=() -> new InputStream() {
-		@Override public int read() { return -1; }
-	};
+	private Supplier<InputStream> input;
+	private Supplier<Reader> reader;
 
 
-	@Override protected Request self() { return this; }
+	private Request() {}
 
 
-	public boolean isSafe() {
+	public boolean safe() {
 		return Safe.contains(method);
 	}
 
-	public boolean isInteractive() {
-		return method.equals(GET) && getHeaders("Accept").stream().anyMatch(h -> h.contains("text/html"));
+	public boolean interactive() {
+		return method.equals(GET) && headers("Accept").stream().anyMatch(Message::interactive);
 	}
 
-	public boolean isSysAdm() {
-		return roles.contains(Spec.root);
+
+	public boolean role(final IRI... roles) {
+		return role(asList(roles));
+	}
+
+	public boolean role(final Collection<IRI> roles) {
+
+		if ( roles == null ) {
+			throw new NullPointerException("null roles");
+		}
+
+		return !disjoint(this.roles, roles);
 	}
 
 
 	/**
 	 * Retrieves the identifier of the request user.
 	 *
-	 * @return an IRI uniquely associated with the user or {@link RDF#NIL} if no user is authenticated
+	 * @return an IRI uniquely associated with the user or {@link Spec#none} if no user is authenticated
 	 */
-	public IRI getUser() {
-		return user;
-	}
-
-	public Request setUser(final IRI user) {
-
-		if ( user == null ) {
-			throw new NullPointerException("null user");
-		}
-
-		this.user=user;
-
-		return this;
-	}
+	public IRI user() { return user; }
 
 
 	/**
 	 * Retrieves the roles attributed to the request user.
 	 *
-	 * @return a set of IRI uniquely identifying the roles attributed to the {@linkplain #getUser() user}
+	 * @return a set of values uniquely identifying the roles attributed to the {@linkplain #user() user}
 	 */
-	public Set<IRI> getRoles() {
-		return unmodifiableSet(roles);
-	}
+	public Set<Value> roles() { return unmodifiableSet(roles); }
 
-	public Request setRoles(final Collection<IRI> roles) {
 
-		if ( roles == null ) {
-			throw new NullPointerException("null roles");
-		}
-
-		if ( roles.contains(null) ) {
-			throw new NullPointerException("null role");
-		}
-
-		this.roles=new LinkedHashSet<>(roles);
-
-		return this;
+	public IRI focus() {
+		return iri(base+path.substring(1));
 	}
 
 
-	public String getMethod() { // !!! § idempotent /	not null / valid HTTP request method  // https://tools.ietf.org/html/rfc7231#section-4
-		return method;
-	}
-
-	public Request setMethod(final String method) {
-
-		if ( method == null ) {
-			throw new NullPointerException("null method");
-		}
-
-		this.method=method.toUpperCase(Locale.ROOT);
-
-		return this;
+	public String stem() {
+		return base+path.substring(1)+(path.endsWith("/") ? "" : "/");
 	}
 
 
-	/**
-	 * Retrieves the absolute base IRI of the LDP server handling this request.
-	 *
-	 * @return an absolute IRI including a trailing slash
-	 */
-	public String getBase() { // !!! § idempotent / not null
-		return base;
-	}
+	public String method() { return method; }
 
-	public Request setBase(final String base) {
+	public String base() { return base; }
 
-		if ( base == null ) {
-			throw new NullPointerException("null base");
-		}
+	public String path() { return path; }
 
-		this.base=base.endsWith("/") ? base : base+"/";
-
-		return this;
-	}
-
-
-	/**
-	 * Retrieves the absolute IRI of the target resource of this request.
-	 *
-	 * @return an absolute IRI under the {@code #getRoot() root} IRI
-	 */
-	public String getTarget() { // !!! § idempotent / not null
-		return target;
-	}
-
-	public Request setTarget(final String target) {    // !!! enforce target.startsWith(root)
-
-		if ( target == null ) {
-			throw new NullPointerException("null target");
-		}
-
-		this.target=target;
-
-		return this;
-	}
-
-
-	public String getQuery() { // !!! § idempotent / not {@code null}
+	public String query() {
 		return query;
 	}
 
-	public Request setQuery(final String query) {
 
-		if ( query == null ) {
-			throw new NullPointerException("null query");
+	public Stream<Entry<String, List<String>>> parameters() {
+		return parameters.entrySet().stream();
+	}
+
+	public List<String> parameters(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
 		}
 
-		if ( !query.equals(this.query) ) {
-			this.query=query;
-			this.parameters=() -> parameters(query); // clear cached value
+		return parameters.getOrDefault(name, emptyList());
+	}
+
+	public Optional<String> parameter(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
 		}
 
-		return this;
+		return parameters(name).stream().findFirst();
 	}
 
 
-	public Map<String, List<String>> getParameters() {
-
-		final Map<String, List<String>> parameters=this.parameters.get();
-
-		this.parameters=() -> parameters; // cache values
-
-		return parameters;
+	public Stream<Entry<String, List<String>>> headers() {
+		return headers.entrySet().stream();
 	}
 
-	public List<String> getParameters(final String name) {
-		return getParameters().getOrDefault(name, emptyList());
+	public List<String> headers(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return headers.getOrDefault(title(name), emptyList());
 	}
 
-	public Optional<String> getParameter(final String name) {
-		return getParameters(name).stream().findFirst();
+	public Optional<String> header(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return headers(name).stream().findFirst();
 	}
 
 
-	private Map<String, List<String>> parameters(final String query) {
+	public List<Part> parts(final String name) {
 
-		final Map<String, List<String>> parameters=new LinkedHashMap<>();
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
 
-		final int length=query.length();
+		return parts.getOrDefault(name, emptyList());
+	}
 
-		for (int head=0, tail; head < length; head=tail+1) {
-			try {
+	public Optional<Part> part(final String name) {
 
-				final int equal=query.indexOf('=', head);
-				final int ampersand=query.indexOf('&', head);
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
 
-				tail=(ampersand >= 0) ? ampersand : length;
+		return parts(name).stream().findFirst();
+	}
 
-				final boolean split=equal >= 0 && equal < tail;
 
-				final String label=URLDecoder.decode(query.substring(head, split ? equal : tail), "UTF-8");
-				final String value=URLDecoder.decode(query.substring(split ? equal+1 : tail, tail), "UTF-8");
+	private String content() {
+		return part(BodyPart).map(p -> p.header("Content-Type").orElse("")).orElseGet(() -> header("Content-Type").orElse(""));
+	}
 
-				parameters.compute(label, (name, values) -> {
 
-					final List<String> strings=(values != null) ? values : new ArrayList<>();
+	public InputStream input() {
+		return part(BodyPart).map(Part::input).orElseGet(() -> input != null ? input.get() : reader != null ? IO.input(reader.get()) : IO.input());
+	}
 
-					strings.add(value);
+	public Reader reader() {
+		return part(BodyPart).map(Part::reader).orElseGet(() -> reader != null ? reader.get() : input != null ? IO.reader(input.get()) : IO.reader());
+	}
 
-					return strings;
 
-				});
+	public byte[] data() {
+		try (final InputStream input=input()) {
+			return IO.data(input);
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
 
-			} catch ( final UnsupportedEncodingException unexpected ) {
-				throw new UncheckedIOException(unexpected);
+	public String text() {
+		try (final Reader reader=reader()) {
+			return IO.text(reader);
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+
+	public Object json() throws JsonException {
+		return _JSON.decode(text());
+	}
+
+
+	public Collection<Statement> rdf() throws RDFParseException {
+		return rdf(null);
+	}
+
+	public Collection<Statement> rdf(final Shape shape) throws RDFParseException {
+		return rdf(shape, focus());
+	}
+
+	public Collection<Statement> rdf(final Shape shape, final Resource focus) throws RDFParseException {
+
+		final String content=content();
+
+		final RDFParserFactory factory=Formats.service(RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
+		final RDFParser parser=factory.getParser();
+
+		parser.set(JSONAdapter.Shape, shape);
+		parser.set(JSONAdapter.Focus, focus);
+
+		parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
+		parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
+
+		parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
+		parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
+
+		final ParseErrorCollector errorCollector=new ParseErrorCollector();
+
+		parser.setParseErrorListener(errorCollector);
+
+		final Collection<Statement> model=new ArrayList<>();
+
+		parser.setRDFHandler(new AbstractRDFHandler() {
+			@Override public void handleStatement(final Statement statement) {
+				model.add(statement);
 			}
+		});
+
+		try (final Reader reader=reader()) { // use reader to activate IRI rewriting
+
+			parser.parse(reader, focus.stringValue()); // resolve relative IRIs wrt the focus
+
+		} catch ( final RDFParseException e ) {
+
+			if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
+				errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
+			}
+
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
 		}
 
-		return Collections.unmodifiableMap(parameters);
+		// !!! log warnings/error/fatals
+
+		final List<String> fatals=errorCollector.getFatalErrors();
+		final List<String> errors=errorCollector.getErrors();
+		final List<String> warnings=errorCollector.getWarnings();
+
+		if ( fatals.isEmpty() ) {
+
+			return model;
+
+		} else {
+
+			throw new RDFParseException("errors parsing content as "+parser.getRDFFormat().getDefaultMIMEType()+":\n\n"+fatals.stream().collect(joining("\n"))+errors.stream().collect(joining("\n"))+warnings.stream().collect(joining("\n")));
+
+		}
 	}
 
 
-	public Supplier<InputStream> getBody() { // !!! § not null / once > possible IllegalStateException
-		return body;
-	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Request setBody(final Supplier<InputStream> body) {
+	public static final class Writer {
 
-		if ( body == null ) {
-			throw new NullPointerException("null body");
+		private final Request request=new Request();
+
+		private Consumer<Request> source;
+
+
+		Writer(final Consumer<Request> source) {
+			this.source=source;
 		}
 
-		this.body=body;
 
-		return this;
-	}
+		public Writer copy(final Request request) {
 
-	public Request mapBody(final UnaryOperator<Supplier<InputStream>> mapper) {
+			if ( request == null ) {
+				throw new NullPointerException("null request");
+			}
 
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
+			final Request target=this.request;
+
+			target.user=request.user;
+			target.roles=new LinkedHashSet<>(request.roles);
+
+			target.method=request.method;
+			target.base=request.base;
+			target.path=request.path;
+			target.query=request.query;
+
+			target.parameters=new LinkedHashMap<>(request.parameters);
+			target.headers=new LinkedHashMap<>(request.headers);
+			target.parts=new LinkedHashMap<>(request.parts);
+
+			target.input=request.input;
+			target.reader=request.reader;
+
+			return this;
 		}
 
-		this.body=mapper.apply(body);
 
-		return this;
-	}
+		public Writer user(final IRI user) {
 
+			if ( user == null ) {
+				throw new NullPointerException("null user");
+			}
 
-	public byte[] getData() {
-		return data(body.get());
-	}
+			request.user=user;
 
-	public Request setData(final byte... data) {
-
-		if ( data == null ) {
-			throw new NullPointerException("null data");
+			return this;
 		}
 
-		return setBody(() -> new ByteArrayInputStream(data));
-	}
-
-
-	public String getText() {
-		return new String(getData(), IO.UTF8); // !!! use request encoding
-	}
-
-	public Request setText(final String text) {
-
-		if ( text == null ) {
-			throw new NullPointerException("null text");
+		public Writer roles(final Value... roles) {
+			return roles(asList(roles));
 		}
 
-		return setBody(() -> input(new StringReader(text))); // !!! encoding
-	}
+		public Writer roles(final Collection<? extends Value> roles) {
 
+			if ( roles == null ) {
+				throw new NullPointerException("null roles");
+			}
 
-	public Graph map(final Graph graph) { // !!! generalize
+			if ( roles.contains(null) ) {
+				throw new NullPointerException("null role");
+			}
 
-		if ( graph == null ) {
-			throw new NullPointerException("null graph");
+			request.roles=new LinkedHashSet<>(roles);
+
+			return this;
 		}
 
-		return graph.map(base, stem);
-	}
 
-	//// !!! canonical base: remove after migrating to context-based tool injection ////////////////////////////////////
+		public Writer method(final String method) {
 
-	private String stem="";
+			if ( method == null ) {
+				throw new NullPointerException("null method");
+			}
 
-	public Request setStem(final String stem) {
+			request.method=upper(method);
 
-		if ( stem == null ) {
-			throw new NullPointerException("null stem");
+			return this;
 		}
 
-		this.stem=stem;
+		public Writer base(final String base) {
 
-		return this;
+			if ( base == null ) {
+				throw new NullPointerException("null base");
+			}
+
+			if ( !base.matches("^\\w+:.*") ) {
+				throw new IllegalArgumentException("not an absolute IRI base");
+			}
+
+			if ( !base.endsWith("/") ) {
+				throw new IllegalArgumentException("missing trailing / in base");
+			}
+
+			request.base=base;
+
+			return this;
+		}
+
+		public Writer path(final String path) {
+
+			if ( path == null ) {
+				throw new NullPointerException("null path");
+			}
+
+			if ( !path.startsWith("/") ) {
+				throw new IllegalArgumentException("missing leading / in path");
+			}
+
+			request.path=path;
+
+			return this;
+		}
+
+		public Writer query(final String query) {
+
+			if ( query == null ) {
+				throw new NullPointerException("null query");
+			}
+
+			request.query=query;
+
+			return this;
+		}
+
+
+		public Writer parameters(final Stream<Entry<String, List<String>>> parameters) {
+
+			if ( parameters == null ) {
+				throw new NullPointerException("null parameters");
+			}
+
+			parameters.forEachOrdered(parameter -> parameter(parameter.getKey(), parameter.getValue()));
+
+			return this;
+		}
+
+		public Writer parameter(final String name, final String... values) {
+			return parameter(name, asList(values));
+		}
+
+		public Writer parameter(final String name, final Collection<String> values) {
+
+			if ( name == null ) {
+				throw new NullPointerException("null name");
+			}
+
+			if ( values == null ) {
+				throw new NullPointerException("null values");
+			}
+
+			if ( values.contains(null) ) {
+				throw new NullPointerException("null value");
+			}
+
+			request.parameters.compute(name, (key, current) -> unmodifiableList(values.stream().flatMap(value -> value.isEmpty() ? current == null ? Stream.empty() : current.stream() : Stream.of(value)).collect(toList())));
+
+			return this;
+		}
+
+
+		public Writer headers(final Stream<Entry<String, Collection<String>>> headers) {
+
+			if ( headers == null ) {
+				throw new NullPointerException("null headers");
+			}
+
+			headers.forEachOrdered(header -> header(header.getKey(), header.getValue()));
+
+			return this;
+		}
+
+		public Writer header(final String name, final String... values) {
+			return header(name, asList(values));
+		}
+
+		public Writer header(final String name, final Collection<String> values) {
+
+			if ( name == null ) {
+				throw new NullPointerException("null name");
+			}
+
+			if ( values == null ) {
+				throw new NullPointerException("null values");
+			}
+
+			if ( values.contains(null) ) {
+				throw new NullPointerException("null value");
+			}
+
+			request.headers.compute(title(name), (key, current) -> unmodifiableList(values.stream().flatMap(value -> value.isEmpty() ? current == null ? Stream.empty() : current.stream() : Stream.of(value)).distinct().collect(toList())));
+
+			return this;
+		}
+
+
+		public Writer part(final String name, final Part... parts) {
+			return part(name, asList(parts));
+		}
+
+		public Writer part(final String name, final Collection<Part> parts) {
+
+			if ( name == null ) {
+				throw new NullPointerException("null name");
+			}
+
+			if ( parts == null ) {
+				throw new NullPointerException("null parts");
+			}
+
+			if ( parts.contains(null) ) {
+				throw new NullPointerException("null part");
+			}
+
+			request.parts.put(name, unmodifiableList(new ArrayList<>(parts)));
+
+			return this;
+		}
+
+
+		public Writer input(final Supplier<InputStream> input) {
+
+			if ( input == null ) {
+				throw new NullPointerException("null input");
+			}
+
+			request.input=input;
+			request.reader=null;
+
+			return this;
+		}
+
+		public Writer reader(final Supplier<Reader> reader) {
+
+			if ( reader == null ) {
+				throw new NullPointerException("null reader");
+			}
+
+			request.input=null;
+			request.reader=reader;
+
+			return done();
+		}
+
+
+		public Writer body() {
+			return body(IO::input, IO::reader); // empty body
+		}
+
+		public Writer body(final Supplier<InputStream> data, final Supplier<Reader> text) {
+
+			if ( data == null ) {
+				throw new NullPointerException("null data");
+			}
+
+			if ( text == null ) {
+				throw new NullPointerException("null text");
+			}
+
+			request.input=data;
+			request.reader=text;
+
+			return done();
+		}
+
+
+		public Writer data(final byte... data) {
+
+			if ( data == null ) {
+				throw new NullPointerException("null data");
+			}
+
+			return input(() -> new ByteArrayInputStream(data));
+		}
+
+		public Writer text(final String text) {
+
+			if ( text == null ) {
+				throw new NullPointerException("null text");
+			}
+
+			return reader(() -> new StringReader(text));
+		}
+
+
+		public Writer json(final Object json) throws JsonException {
+
+			if ( json == null ) {
+				throw new NullPointerException("null json");
+			}
+
+			return header("Content-Type", "application/json").text(_JSON.encode(json));
+		}
+
+
+		public Writer done() {
+
+			if ( source == null ) {
+				throw new IllegalStateException("already committed");
+			}
+
+			if ( request.method.isEmpty() ) {
+				throw new IllegalStateException("undefined method");
+			}
+
+			try {
+				source.accept(request);
+			} finally {
+				source=null;
+			}
+
+			return this;
+		}
+
 	}
 
 }

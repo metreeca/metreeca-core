@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.handlers;
@@ -50,8 +48,8 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.link.Handler.unauthorized;
-import static com.metreeca.link.Handler.unsupported;
+import static com.metreeca.link._Handler.unauthorized;
+import static com.metreeca.link._Handler.unsupported;
 import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
@@ -75,7 +73,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @see "http://www.w3.org/TR/ldp/"
  */
-public final class Container implements Handler {
+public final class Container implements _Handler {
 
 	private static final Step Contains=step(LDP.CONTAINS);
 
@@ -112,9 +110,7 @@ public final class Container implements Handler {
 
 	private final Shape shape;
 
-	private final Handler dispatcher=new Dispatcher(Maps.map(
-			Maps.entry(Request.GET, this::get),
-			Maps.entry(Request.POST, Handler.sysadm(this::post)) // !!! remove after testing shape-based authorization
+	private final _Handler dispatcher=new Dispatcher(Maps.map(Maps.entry(_Request.GET, this::get), Maps.entry(_Request.POST, _Handler.sysadm(this::post)) // !!! remove after testing shape-based authorization
 	));
 
 
@@ -136,12 +132,11 @@ public final class Container implements Handler {
 	}
 
 
-	@Override public void handle(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	@Override public void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		dispatcher.handle(tools, request, response, (_request, _response) -> {
 
-			if ( _response.getStatus() == Response.OK ) {
+			if ( _response.getStatus() == _Response.OK ) {
 				_response
 
 						.addHeader("Link", "<"+Link.ShapedContainer.stringValue()+">; rel=\"type\"")
@@ -162,8 +157,7 @@ public final class Container implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void get(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void get(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		final String representation=request.getHeaders("Prefer")
 				.stream()
@@ -223,9 +217,9 @@ public final class Container implements Handler {
 				model.add(statement(iri, Spec.create, codec.encode(create, model)));
 			}
 
-			response.setStatus(Response.OK);
+			response.setStatus(_Response.OK);
 
-			new Transfer(request, response).model(model, and() /* !!! SpecsShape*/);
+			new _Transfer(request, response).model(model, and() /* !!! SpecsShape*/);
 
 			sink.accept(request, response);
 
@@ -240,9 +234,9 @@ public final class Container implements Handler {
 
 			final Shape container=and(all(target), authorized.accept(trimmer));
 
-			response.setStatus(Response.OK);
+			response.setStatus(_Response.OK);
 
-			new Transfer(request, response).model( // !!! re/factor
+			new _Transfer(request, response).model( // !!! re/factor
 
 					container.accept(Shape.mode(Spec.verify)).accept(new Outliner()), container
 
@@ -264,7 +258,7 @@ public final class Container implements Handler {
 			try {
 				filter=new QueryParser(resource).parse(IO.decode(query));
 			} catch ( final RuntimeException e ) {
-				throw new LinkException(Response.BadRequest, "malformed query: "+e.getMessage(), e);
+				throw new _LinkException(_Response.BadRequest, "malformed query: "+e.getMessage(), e);
 			}
 
 			// retrieve filtered content from repository
@@ -277,9 +271,9 @@ public final class Container implements Handler {
 
 			// signal successful retrieval of the filtered container
 
-			response.setStatus(Response.OK);
+			response.setStatus(_Response.OK);
 
-			new Transfer(request, response).model( // !!! re/factor
+			new _Transfer(request, response).model( // !!! re/factor
 
 					query.isEmpty()
 
@@ -307,8 +301,7 @@ public final class Container implements Handler {
 
 	}
 
-	private void post(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void post(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		final Graph graph=request.map(this.graph);
 
@@ -333,7 +326,7 @@ public final class Container implements Handler {
 
 			final Collection<Statement> model=new ArrayList<>();
 
-			model.addAll(new Transfer(request, response).model(resource)); // add user-submitted statements (use target with trailing /)
+			model.addAll(new _Transfer(request, response).model(resource)); // add user-submitted statements (use target with trailing /)
 			model.addAll(resource.accept(Shape.mode(Spec.verify)).accept(new Outliner())); // add implied statements
 
 			// !!! move static operations outside transaction (how to generate short incremental ids?)
@@ -364,7 +357,7 @@ public final class Container implements Handler {
 
 					// !!! rewrite report value references to original target iri
 
-					throw new LinkException(Response.UnprocessableEntity, report // !!! convert to status code outside update txn
+					throw new _LinkException(_Response.UnprocessableEntity, report // !!! convert to status code outside update txn
 							.prune(Issue.Level.Warning).map(Report::toString).orElse("") // prune for readability
 					);
 
@@ -377,8 +370,7 @@ public final class Container implements Handler {
 
 			// signal successful creation of the new resource
 
-			sink.accept(request, response
-					.setStatus(Response.Created)
+			sink.accept(request, response.setStatus(_Response.Created)
 					.addHeader("Location", iri.stringValue()));
 		}
 

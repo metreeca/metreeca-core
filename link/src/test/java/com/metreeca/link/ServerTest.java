@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next;
+package com.metreeca.link;
 
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.things.Values;
@@ -30,8 +30,8 @@ import java.util.Properties;
 
 import static com.metreeca.link.LinkTest.json;
 import static com.metreeca.link.LinkTest.testbed;
+import static com.metreeca.link.Server.server;
 import static com.metreeca.next.RewriterTest.*;
-import static com.metreeca.next.Server.server;
 import static com.metreeca.spec.Shape.required;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;

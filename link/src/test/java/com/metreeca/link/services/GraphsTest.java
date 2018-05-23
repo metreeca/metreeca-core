@@ -3,24 +3,22 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.services;
 
-import com.metreeca.link.Index;
-import com.metreeca.link.Request;
+import com.metreeca.link._Index;
+import com.metreeca.link._Request;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.rdf.Graph;
 
@@ -35,9 +33,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.metreeca.link.HandlerTest.model;
-import static com.metreeca.link.HandlerTest.response;
-import static com.metreeca.link.HandlerTest.tools;
+import static com.metreeca.link._HandlerTest.model;
+import static com.metreeca.link._HandlerTest.response;
+import static com.metreeca.link._HandlerTest.tools;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
@@ -69,12 +67,11 @@ public final class GraphsTest {
 
 			response(tools,
 
-					tools.get(Index.Tool).get(GraphsPath),
+					tools.get(_Index.Tool).get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.GET)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.GET)
 							.setTarget(GraphsTarget),
 
 					(request, response) -> assertIsomorphic(asList(
@@ -98,12 +95,11 @@ public final class GraphsTest {
 
 			response(tools,
 
-					tools.get(Index.Tool).get(GraphsPath),
+					tools.get(_Index.Tool).get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.GET)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.GET)
 							.setTarget(GraphsTarget)
 							.setQuery("default"),
 
@@ -122,12 +118,11 @@ public final class GraphsTest {
 
 			response(tools,
 
-					tools.get(Index.Tool).get(GraphsPath),
+					tools.get(_Index.Tool).get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.GET)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.GET)
 							.setTarget(GraphsTarget)
 							.setQuery("graph="+RDF.NIL),
 
@@ -142,7 +137,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+			final _Index index=tools.get(_Index.Tool);
 
 			model(graph, First, (Resource)null);
 
@@ -150,10 +145,9 @@ public final class GraphsTest {
 
 					index.get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.PUT)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.PUT)
 							.setTarget(GraphsTarget)
 							.setQuery("default")
 							.setText(write(Rest)),
@@ -168,7 +162,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+			final _Index index=tools.get(_Index.Tool);
 
 			model(graph, First, RDF.NIL);
 
@@ -176,10 +170,9 @@ public final class GraphsTest {
 
 					index.get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.PUT)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.PUT)
 							.setTarget(GraphsTarget)
 							.setQuery("graph="+RDF.NIL)
 							.setText(write(Rest)),
@@ -195,7 +188,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+			final _Index index=tools.get(_Index.Tool);
 
 			model(graph, First, (Resource)null);
 
@@ -203,10 +196,9 @@ public final class GraphsTest {
 
 					index.get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.POST)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.POST)
 							.setTarget(GraphsTarget)
 							.setQuery("default")
 							.setText(write(Rest)),
@@ -221,7 +213,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+			final _Index index=tools.get(_Index.Tool);
 
 			model(graph, First, RDF.NIL);
 
@@ -229,10 +221,9 @@ public final class GraphsTest {
 
 					index.get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.POST)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.POST)
 							.setTarget(GraphsTarget)
 							.setQuery("graph="+RDF.NIL)
 							.setText(write(Rest)),
@@ -248,7 +239,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+			final _Index index=tools.get(_Index.Tool);
 
 			model(graph, First, (Resource)null);
 
@@ -256,10 +247,9 @@ public final class GraphsTest {
 
 					index.get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.DELETE)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.DELETE)
 							.setTarget(GraphsTarget)
 							.setQuery("default"),
 
@@ -275,7 +265,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+			final _Index index=tools.get(_Index.Tool);
 
 			model(graph, First, RDF.NIL);
 
@@ -283,10 +273,9 @@ public final class GraphsTest {
 
 					index.get(GraphsPath),
 
-					new Request()
+					new _Request()
 
-							.setRoles(singleton(Spec.root))
-							.setMethod(Request.DELETE)
+							.setRoles(singleton(Spec.root)).setMethod(_Request.DELETE)
 							.setTarget(GraphsTarget)
 							.setQuery("graph="+RDF.NIL),
 

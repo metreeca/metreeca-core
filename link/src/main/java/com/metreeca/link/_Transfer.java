@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link;
@@ -39,13 +37,13 @@ import static com.metreeca.spec.things.Values.iri;
 import static java.util.stream.Collectors.joining;
 
 
-public final class Transfer {
+public final class _Transfer {
 
-	private final Request request;
-	private final Response response;
+	private final _Request request;
+	private final _Response response;
 
 
-	public Transfer(final Request request, final Response response) {
+	public _Transfer(final _Request request, final _Response response) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");
@@ -118,7 +116,7 @@ public final class Transfer {
 
 		} else {
 
-			throw new LinkException(Response.BadRequest,
+			throw new _LinkException(_Response.BadRequest,
 					"errors parsing content as "+parser.getRDFFormat().getDefaultMIMEType()+":\n\n"
 							+fatals.stream().collect(joining("\n"))
 							+errors.stream().collect(joining("\n"))
@@ -128,15 +126,15 @@ public final class Transfer {
 	}
 
 
-	public Transfer model(final Iterable<Statement> model) {
+	public _Transfer model(final Iterable<Statement> model) {
 		return model(model, null);
 	}
 
-	public Transfer model(final Iterable<Statement> model, final Shape shape) {
+	public _Transfer model(final Iterable<Statement> model, final Shape shape) {
 		return model(model, shape, iri(request.getTarget()));
 	}
 
-	public Transfer model(final Iterable<Statement> model, final Shape shape, final Resource focus) {
+	public _Transfer model(final Iterable<Statement> model, final Shape shape, final Resource focus) {
 
 		if ( model == null ) {
 			throw new NullPointerException("null model");
@@ -147,7 +145,7 @@ public final class Transfer {
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
 		final RDFWriterFactory factory=Formats.service(registry, RDFFormat.TURTLE, types);
 
-		response.setStatus(Response.OK)
+		response.setStatus(_Response.OK)
 
 				// try to set content type to the actual type requested even if it's not the default one
 

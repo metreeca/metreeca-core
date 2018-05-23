@@ -18,8 +18,8 @@
 package com.metreeca.next.handlers.shape;
 
 import com.metreeca.link.LinkTest;
-import com.metreeca.next.Request;
-import com.metreeca.next.Response;
+import com.metreeca.link.Request;
+import com.metreeca.link.Response;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.rdf.Graph;
 
@@ -39,7 +39,7 @@ import java.util.function.Function;
 
 import static com.metreeca.link.LinkTest.Employee;
 import static com.metreeca.link.LinkTest.testbed;
-import static com.metreeca.next.Server.server;
+import static com.metreeca.link.Server.server;
 import static com.metreeca.next.handlers.shape.Creator.auto;
 import static com.metreeca.next.handlers.shape.Creator.creator;
 import static com.metreeca.next.wrappers.Processor.processor;

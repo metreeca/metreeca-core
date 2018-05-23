@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.handlers;
@@ -41,8 +39,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.link.Handler.unauthorized;
-import static com.metreeca.link.Handler.unsupported;
+import static com.metreeca.link._Handler.unauthorized;
+import static com.metreeca.link._Handler.unsupported;
 import static com.metreeca.spec.Shape.*;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
@@ -58,16 +56,14 @@ import static com.metreeca.spec.things._Cell.cell;
  *
  * @see "http://www.w3.org/TR/ldp/"
  */
-public final class Resource implements Handler { // !!! rename to avoid clashes with RDF4J
+public final class Resource implements _Handler { // !!! rename to avoid clashes with RDF4J
 
 	private final Graph graph;
 
 	private final Shape shape;
 
-	private final Handler dispatcher=new Dispatcher(Maps.map(
-			Maps.entry(Request.GET, this::get),
-			Maps.entry(Request.PUT, Handler.sysadm(this::put)), // !!! remove after testing shape-based authorization
-			Maps.entry(Request.DELETE, Handler.sysadm(this::delete)) // !!! remove after testing shape-based authorization
+	private final _Handler dispatcher=new Dispatcher(Maps.map(Maps.entry(_Request.GET, this::get), Maps.entry(_Request.PUT, _Handler.sysadm(this::put)), // !!! remove after testing shape-based authorization
+			Maps.entry(_Request.DELETE, _Handler.sysadm(this::delete)) // !!! remove after testing shape-based authorization
 	));
 
 
@@ -89,12 +85,11 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 	}
 
 
-	@Override public void handle(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	@Override public void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		dispatcher.handle(tools, request, response, (_request, _response) -> {
 
-			if ( _response.getStatus() == Response.OK ) {
+			if ( _response.getStatus() == _Response.OK ) {
 				_response.addHeader("Link", format(Link.ShapedResource)+"; rel=\"type\"")
 						.addHeader("Link", "<http://www.w3.org/ns/ldp#RDFResource>; rel=\"type\"")
 						.addHeader("Link", "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"")
@@ -110,8 +105,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void get(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void get(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		final IRI target=iri(request.getTarget());
 		final String query=request.getQuery();
@@ -155,9 +149,9 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 			}
 
-			response.setStatus(Response.OK);
+			response.setStatus(_Response.OK);
 
-			new Transfer(request, response).model(model, and() /* !!! SpecsShape*/);
+			new _Transfer(request, response).model(model, and() /* !!! SpecsShape*/);
 
 			sink.accept(request, response);
 
@@ -171,7 +165,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 			if ( !graph.contains(target) ) {
 
-				throw new LinkException(Response.NotFound);
+				throw new _LinkException(_Response.NotFound);
 
 			} else {
 
@@ -181,18 +175,18 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 				try {
 					filter=new QueryParser(shape).parse(IO.decode(query));
 				} catch ( final RuntimeException e ) {
-					throw new LinkException(Response.BadRequest, "malformed query: "+e.getMessage(), e);
+					throw new _LinkException(_Response.BadRequest, "malformed query: "+e.getMessage(), e);
 				}
 
 				final _Cell cell=graph.get(filter);
 
 				if ( cell.values().isEmpty() ) { // resource known but empty envelope for the current user
-					throw new LinkException(Response.Forbidden); // !!! return 404 under strict security
+					throw new _LinkException(_Response.Forbidden); // !!! return 404 under strict security
 				}
 
-				response.setStatus(Response.OK);
+				response.setStatus(_Response.OK);
 
-				new Transfer(request, response).model( // !!! re/factor
+				new _Transfer(request, response).model( // !!! re/factor
 
 						query.isEmpty()
 
@@ -220,8 +214,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 		}
 	}
 
-	private void put(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void put(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		final Graph graph=request.map(this.graph);
 
@@ -243,7 +236,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 			final Collection<Statement> model=new ArrayList<>();
 
-			model.addAll(new Transfer(request, response).model(shape)); // add user-submitted statements
+			model.addAll(new _Transfer(request, response).model(shape)); // add user-submitted statements
 			model.addAll(shape.accept(mode(Spec.verify)).accept(new Outliner())); // add implied statements
 
 			graph.update(connection -> {
@@ -254,7 +247,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 					// !!! 410 Gone if the resource is known to have existed (how to test?)
 
-					throw new LinkException(Response.NotFound);  // !!! convert to status code outside update txn
+					throw new _LinkException(_Response.NotFound);  // !!! convert to status code outside update txn
 
 				} else {
 
@@ -268,7 +261,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 					if ( report.assess(Level.Error) ) { // shape violations
 
-						throw new LinkException(Response.UnprocessableEntity, report // !!! convert to status code outside update txn
+						throw new _LinkException(_Response.UnprocessableEntity, report // !!! convert to status code outside update txn
 								.prune(Level.Warning).map(Report::toString).orElse("") // prune for readability
 						);
 
@@ -282,7 +275,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 						// signal successful update of the resource (updated description included by server postprocessing)
 
-						sink.accept(request, response.setStatus(Response.NoContent));
+						sink.accept(request, response.setStatus(_Response.NoContent));
 
 						return this;
 
@@ -296,8 +289,7 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 	}
 
-	private void delete(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void delete(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		final Graph graph=request.map(this.graph);
 
@@ -323,14 +315,14 @@ public final class Resource implements Handler { // !!! rename to avoid clashes 
 
 					// !!! 410 Gone if the resource is known to have existed (how to test?)
 
-					response.setStatus(Response.NotFound);  // !!! convert to status code outside update txn
+					response.setStatus(_Response.NotFound);  // !!! convert to status code outside update txn
 
 				} else { // !!! merge remove operations
 
 					connection.remove(graph.get(shape).model()); // identify and remove deletable cell
 					connection.remove(shape.accept(mode(Spec.verify)).accept(new Outliner())); // remove implied statements
 
-					response.setStatus(Response.NoContent); // signal successful deletion of the resource
+					response.setStatus(_Response.NoContent); // signal successful deletion of the resource
 
 				}
 

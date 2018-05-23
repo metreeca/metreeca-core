@@ -16,15 +16,15 @@ To deploy a linked data apps as a web application, package it as a `war` archive
 - a runtime dependency from the J2EE module;
 - a provided dependency from the Servlet 3.1 API.
 
-Using maven:
+Using maven: 
 
 ```xml
 <project>
 
-	<groupId>com.example</groupId>
-	<artifactId>app</artifactId>
-	<version>1.0</version>
-	<packaging>war</packaging>
+    <groupId>com.example</groupId>
+    <artifactId>app</artifactId>
+    <version>1.0</version>
+    <packaging>war</packaging>
 	    
     <dependency>
         <groupId>com.metreeca</groupId>

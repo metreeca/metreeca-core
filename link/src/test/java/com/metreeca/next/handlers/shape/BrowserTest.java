@@ -18,9 +18,9 @@
 package com.metreeca.next.handlers.shape;
 
 
-import com.metreeca.next.Request;
-import com.metreeca.next.Request.Writer;
-import com.metreeca.next.Response;
+import com.metreeca.link.Request;
+import com.metreeca.link.Request.Writer;
+import com.metreeca.link.Response;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.rdf.Graph;
 

@@ -3,23 +3,23 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.link.*;
+import com.metreeca.link._Handler;
+import com.metreeca.link._Request;
+import com.metreeca.link._Response;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.Tool;
@@ -34,7 +34,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static com.metreeca.link.HandlerTest.*;
+import static com.metreeca.link._HandlerTest.*;
 import static com.metreeca.spec.Shape.only;
 import static com.metreeca.spec.Shape.update;
 import static com.metreeca.spec.Shape.verify;
@@ -86,8 +86,7 @@ public final class ContainerTest {
 							))
 					)),
 
-					new Request()
-							.setMethod(Request.GET)
+					new _Request().setMethod(_Request.GET)
 							.setTarget(target.stringValue())
 							.setHeader("Accept", accept),
 
@@ -95,8 +94,7 @@ public final class ContainerTest {
 
 						final Model model=parse(response.getText());
 
-						assertEquals("resource related",
-								Response.OK, response.getStatus());
+						assertEquals("resource related", _Response.OK, response.getStatus());
 
 						assertEquals("content-type header set as required in the request",
 								accept, response.getHeader("Content-Type").orElse(""));
@@ -139,8 +137,7 @@ public final class ContainerTest {
 							))
 					)),
 
-					new Request()
-							.setMethod(Request.GET)
+					new _Request().setMethod(_Request.GET)
 							.setTarget(target.stringValue())
 							.setHeader("Prefer", "return=representation; include=\"http://www.w3.org/ns/ldp#PreferMinimalContainer\"")
 							.setHeader("Accept", accept),
@@ -149,8 +146,7 @@ public final class ContainerTest {
 
 						final Model model=parse(response.getText());
 
-						assertEquals("resource related",
-								Response.OK, response.getStatus());
+						assertEquals("resource related", _Response.OK, response.getStatus());
 
 						assertEquals("content-type header set as required in the request",
 								accept, response.getHeader("Content-Type").orElse(""));
@@ -177,14 +173,13 @@ public final class ContainerTest {
 
 					tools, new Container(tools, update(trait(LDP.CONTAINS))), // not relatable
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.GET)
+							.setMethod(_Request.GET)
 							.setTarget(target.stringValue()),
 
-					(request, response) -> assertEquals("unsupported method",
-							Response.MethodNotAllowed, response.getStatus()));
+					(request, response) -> assertEquals("unsupported method", _Response.MethodNotAllowed, response.getStatus()));
 
 		});
 	}
@@ -204,16 +199,15 @@ public final class ContainerTest {
 							trait(RDF.TYPE)
 					))),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.GET)
+							.setMethod(_Request.GET)
 							.setTarget(target.stringValue()),
 
 					(request, response) -> {
 
-						assertEquals("unauthorized",
-								Response.Unauthorized, response.getStatus());
+						assertEquals("unauthorized", _Response.Unauthorized, response.getStatus());
 
 						assertTrue("repository not modified",
 								Models.isomorphic(model, model(graph)));
@@ -230,13 +224,11 @@ public final class ContainerTest {
 
 			exception(catalog, handler(catalog),
 
-					new Request()
-							.setMethod(Request.GET)
+					new _Request().setMethod(_Request.GET)
 							.setTarget(target.stringValue())
 							.setQuery("{ \"filter\": { \"unknown\": [] }}"),
 
-					(request, exception) -> assertEquals("resource related",
-							Response.BadRequest, exception.getStatus()));
+					(request, exception) -> assertEquals("resource related", _Response.BadRequest, exception.getStatus()));
 
 		});
 	}
@@ -255,10 +247,10 @@ public final class ContainerTest {
 
 			response(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.POST)
+							.setMethod(_Request.POST)
 							.setTarget(target.stringValue())
 							.setHeader("Accept", accept)
 							.setHeader("Content-Type", "text/turtle")
@@ -271,8 +263,7 @@ public final class ContainerTest {
 						final IRI iri=iri(location);
 						final IRI base=iri(Base);
 
-						assertEquals("resource created",
-								Response.Created, response.getStatus());
+						assertEquals("resource created", _Response.Created, response.getStatus());
 
 						assertTrue("location header set to a target-derived iri",
 								location.startsWith(target.stringValue()));
@@ -303,10 +294,10 @@ public final class ContainerTest {
 
 			response(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.POST)
+							.setMethod(_Request.POST)
 							.setTarget(target.stringValue())
 							.setHeader("Accept", accept)
 							.setHeader("Content-Type", accept)
@@ -319,8 +310,7 @@ public final class ContainerTest {
 						final IRI iri=iri(location);
 						final IRI base=iri(Base);
 
-						assertEquals("resource created",
-								Response.Created, response.getStatus());
+						assertEquals("resource created", _Response.Created, response.getStatus());
 
 						assertTrue("location header set to a target-derived iri",
 								location.startsWith(target.stringValue()));
@@ -339,14 +329,13 @@ public final class ContainerTest {
 
 					tools, new Container(tools, update(trait(LDP.CONTAINS))), // not creatable
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.POST)
+							.setMethod(_Request.POST)
 							.setTarget(target.stringValue()),
 
-					(request, response) -> assertEquals("unsupported method",
-							Response.MethodNotAllowed, response.getStatus()));
+					(request, response) -> assertEquals("unsupported method", _Response.MethodNotAllowed, response.getStatus()));
 
 		});
 	}
@@ -368,16 +357,15 @@ public final class ContainerTest {
 							trait(RDF.TYPE)
 					))),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.POST)
+							.setMethod(_Request.POST)
 							.setTarget(target.stringValue()),
 
 					(request, response) -> {
 
-						assertEquals("unauthorized",
-								Response.Unauthorized, response.getStatus());
+						assertEquals("unauthorized", _Response.Unauthorized, response.getStatus());
 
 						assertTrue("repository not modified",
 								Models.isomorphic(model, model(graph)));
@@ -396,17 +384,16 @@ public final class ContainerTest {
 
 			exception(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.POST)
+							.setMethod(_Request.POST)
 							.setTarget(target.stringValue())
 							.setText("<target> rdf:value rdf:nil."),
 
 					(request, exception) -> {
 
-						assertEquals("invalid data",
-								Response.UnprocessableEntity, exception.getStatus());
+						assertEquals("invalid data", _Response.UnprocessableEntity, exception.getStatus());
 
 						//assertNull("location header not set",
 						//		exception.getHeader("Location"));
@@ -428,17 +415,16 @@ public final class ContainerTest {
 
 			exception(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.POST)
+							.setMethod(_Request.POST)
 							.setTarget(target.stringValue())
 							.setText("<x> a <y>."),
 
 					(request, exception) -> {
 
-						assertEquals("reachability error",
-								Response.UnprocessableEntity, exception.getStatus());
+						assertEquals("reachability error", _Response.UnprocessableEntity, exception.getStatus());
 
 						//assertNull("location header not set",
 						//		exception.getHeader("Location"));
@@ -460,17 +446,16 @@ public final class ContainerTest {
 
 			exception(catalog, handler(catalog),
 
-					new Request()
+					new _Request()
 
 							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
-							.setMethod(Request.POST)
+							.setMethod(_Request.POST)
 							.setTarget(target.stringValue())
 							.setText("<> a <y>."),
 
 					(request, exception) -> {
 
-						assertEquals("envelope error",
-								Response.UnprocessableEntity, exception.getStatus());
+						assertEquals("envelope error", _Response.UnprocessableEntity, exception.getStatus());
 
 						// !!! assertNull("location header not set",
 						//		exception.getHeader("Location"));
@@ -486,7 +471,7 @@ public final class ContainerTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Handler handler(final Tool.Loader tools) {
+	private _Handler handler(final Tool.Loader tools) {
 		return new Container(tools, trait(LDP.CONTAINS, trait(RDF.VALUE, any(RDF.FIRST, RDF.REST))));
 	}
 

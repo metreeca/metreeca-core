@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.services;
@@ -36,7 +34,7 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 
 import java.util.function.BiConsumer;
 
-import static com.metreeca.link.Handler.sysadm;
+import static com.metreeca.link._Handler.sysadm;
 import static com.metreeca.spec.Shape.*;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
@@ -52,7 +50,7 @@ import static com.metreeca.spec.things.Values.literal;
 /**
  * LDP port catalog.
  */
-public final class Ports implements Service {
+public final class Ports implements _Service {
 
 	private static final String ContainerLabel="Linked Data Ports";
 
@@ -100,14 +98,13 @@ public final class Ports implements Service {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public void load(final Tool.Loader tools) {
-		tools.get(Index.Tool).exec(index -> index
+		tools.get(_Index.Tool).exec(index -> index
 
 				.insert("/!/ports/", new ContainerHandler(tools), map(
 						entry(RDFS.LABEL, literal(ContainerLabel))
 				))
 
-				.insert("/!/ports/*", new ResourceHandler(tools), map(
-						entry(RDFS.LABEL, literal(ContainerLabel+Index.ResourcesSuffix))
+				.insert("/!/ports/*", new ResourceHandler(tools), map(entry(RDFS.LABEL, literal(ContainerLabel+_Index.ResourcesSuffix))
 				))
 		);
 	}
@@ -115,16 +112,14 @@ public final class Ports implements Service {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class ContainerHandler implements Handler {
+	private static final class ContainerHandler implements _Handler {
 
-		private final Index index;
+		private final _Index index;
 		private final Graph graph;
 
-		private final Handler container; // shaped delegate
+		private final _Handler container; // shaped delegate
 
-		private final Handler dispatcher=new Dispatcher(map(
-				entry(Request.GET, sysadm(this::get)),
-				entry(Request.POST, sysadm(this::post))
+		private final _Handler dispatcher=new Dispatcher(map(entry(_Request.GET, sysadm(this::get)), entry(_Request.POST, sysadm(this::post))
 		));
 
 
@@ -133,30 +128,27 @@ public final class Ports implements Service {
 			final Setup setup=tools.get(Setup.Tool);
 
 
-			this.index=tools.get(Index.Tool);
+			this.index=tools.get(_Index.Tool);
 			this.graph=tools.get(Graph.Tool);
 
 			this.container=new Container(tools, ContainerShape);
 		}
 
 
-		@Override public void handle(final Tool.Loader tools,
-				final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+		@Override public void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 			dispatcher.handle(tools, request, response, sink);
 
 		}
 
 
-		private void get(final Tool.Loader tools,
-				final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+		private void get(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 			container.handle(tools, request, response, sink);
 
 		}
 
-		private void post(final Tool.Loader tools,
-				final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+		private void post(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 			final Graph graph=request.map(this.graph);
 
@@ -192,17 +184,14 @@ public final class Ports implements Service {
 
 	}
 
-	private static final class ResourceHandler implements Handler {
+	private static final class ResourceHandler implements _Handler {
 
-		private final Index index;
+		private final _Index index;
 		private final Graph graph;
 
-		private final Handler resource; // shaped delegate
+		private final _Handler resource; // shaped delegate
 
-		private final Handler dispatcher=new Dispatcher(map(
-				entry(Request.GET, sysadm(this::get)),
-				entry(Request.PUT, sysadm(this::put)),
-				entry(Request.DELETE, sysadm(this::delete))
+		private final _Handler dispatcher=new Dispatcher(map(entry(_Request.GET, sysadm(this::get)), entry(_Request.PUT, sysadm(this::put)), entry(_Request.DELETE, sysadm(this::delete))
 		));
 
 
@@ -210,30 +199,27 @@ public final class Ports implements Service {
 
 			final Setup setup=tools.get(Setup.Tool);
 
-			this.index=tools.get(Index.Tool);
+			this.index=tools.get(_Index.Tool);
 			this.graph=tools.get(Graph.Tool);
 
 			this.resource=new Resource(tools, ResourceShape);
 		}
 
 
-		@Override public void handle(final Tool.Loader tools,
-				final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+		@Override public void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 			dispatcher.handle(tools, request, response, sink);
 
 		}
 
 
-		private void get(final Tool.Loader tools,
-				final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+		private void get(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 			resource.handle(tools, request, response, sink);
 
 		}
 
-		private void put(final Tool.Loader tools,
-				final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+		private void put(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 			// !!! prevent hard-wired port updating
 
@@ -265,7 +251,7 @@ public final class Ports implements Service {
 
 							try { // !!! convert to status code outside update txn
 
-								throw new LinkException(Response.UnprocessableEntity, t.getMessage(), t);
+								throw new _LinkException(_Response.UnprocessableEntity, t.getMessage(), t);
 
 							} finally {
 								index.insert(current); // try to restore the current configuration
@@ -283,8 +269,7 @@ public final class Ports implements Service {
 
 		}
 
-		private void delete(final Tool.Loader tools,
-				final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+		private void delete(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 			final Graph graph=request.map(this.graph);
 
@@ -298,7 +283,7 @@ public final class Ports implements Service {
 
 				if ( !current.forward(Link.soft).bool().orElse(false) ) { // prevent hard-wired port deletion
 
-					sink.accept(request, response.setStatus(Response.Forbidden)); // !!! convert to status code outside update txn
+					sink.accept(request, response.setStatus(_Response.Forbidden)); // !!! convert to status code outside update txn
 
 				} else {
 

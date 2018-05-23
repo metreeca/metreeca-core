@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.services;
@@ -43,7 +41,7 @@ import static java.util.Arrays.asList;
 /**
  * SPARQL proxy endpoint.
  */
-public class Proxy implements Service {
+public class Proxy implements _Service {
 
 	private int timeoutConnect; // [s]
 	private int timeoutRead; // [s]
@@ -56,10 +54,9 @@ public class Proxy implements Service {
 		timeoutConnect=setup.get("proxy.timeout.connect", 30);
 		timeoutRead=setup.get("proxy.timeout.read", 60);
 
-		tools.get(Index.Tool).insert("/proxy", new Dispatcher(map(
+		tools.get(_Index.Tool).insert("/proxy", new Dispatcher(map(
 
-				entry(Request.GET, this::handle),
-				entry(Request.POST, this::handle)
+				entry(_Request.GET, this::handle), entry(_Request.POST, this::handle)
 
 		)), map(
 
@@ -69,8 +66,7 @@ public class Proxy implements Service {
 	}
 
 
-	private void handle(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 		try {
 
 			sink.accept(request, out(response, in(request)));
@@ -81,9 +77,8 @@ public class Proxy implements Service {
 
 			sink.accept(request, response
 
-					.setStatus(e instanceof IllegalArgumentException ? Response.BadRequest // !!! review
-							: e instanceof IOException ? Response.BadGateway
-							: Response.InternalServerError)
+					.setStatus(e instanceof IllegalArgumentException ? _Response.BadRequest // !!! review
+							: e instanceof IOException ? _Response.BadGateway : _Response.InternalServerError)
 
 					.setHeader("Content-Type", "application/text")
 					.setText(e.getMessage()+"\n"));
@@ -92,7 +87,7 @@ public class Proxy implements Service {
 	}
 
 
-	private HttpURLConnection in(final Request request) throws IOException {
+	private HttpURLConnection in(final _Request request) throws IOException {
 
 		final String endpoint=request.getParameter("endpoint").orElse("");
 		final String query=request.getParameter("query").orElse("");
@@ -146,12 +141,12 @@ public class Proxy implements Service {
 		return connection;
 	}
 
-	private Response out(final Response response, final HttpURLConnection connection) throws IOException {
+	private _Response out(final _Response response, final HttpURLConnection connection) throws IOException {
 
 		final int code=connection.getResponseCode();
 		final String message=connection.getResponseMessage();
 
-		response.setStatus(code/100 == 5 ? Response.BadGateway : code); // !!! relay code/message on BadGateway error
+		response.setStatus(code/100 == 5 ? _Response.BadGateway : code); // !!! relay code/message on BadGateway error
 
 		// transfer server-controlled headers to the browser
 		// ;( if switching to connection.getHeaderFields(), be aware that header name are case-sensitive…

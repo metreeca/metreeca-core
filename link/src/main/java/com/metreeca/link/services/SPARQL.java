@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.services;
@@ -38,7 +36,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.link.Handler.unauthorized;
+import static com.metreeca.link._Handler.unauthorized;
 import static com.metreeca.spec.things.Maps.entry;
 import static com.metreeca.spec.things.Maps.map;
 import static com.metreeca.spec.things.Values.literal;
@@ -51,7 +49,7 @@ import static java.lang.Boolean.parseBoolean;
  *
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
-public class SPARQL implements Service {
+public class SPARQL implements _Service {
 
 	private int timeout; // [s]
 	private boolean publik; // public availability of the endpoint
@@ -62,7 +60,7 @@ public class SPARQL implements Service {
 	@Override public void load(final Tool.Loader tools) {
 
 		final Setup setup=tools.get(Setup.Tool);
-		final Index index=tools.get(Index.Tool);
+		final _Index index=tools.get(_Index.Tool);
 
 		timeout=setup.get("sparql.timeout", 60);
 		publik=setup.get("sparql.public", false);
@@ -71,8 +69,7 @@ public class SPARQL implements Service {
 
 		index.insert("/sparql", new Dispatcher(map(
 
-				entry(Request.GET, this::handle),
-				entry(Request.POST, this::handle)
+				entry(_Request.GET, this::handle), entry(_Request.POST, this::handle)
 
 		)), map(
 
@@ -84,8 +81,7 @@ public class SPARQL implements Service {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void handle(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
 		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
 			graph.browse(connection -> {
@@ -97,7 +93,7 @@ public class SPARQL implements Service {
 
 					if ( operation == null ) { // !!! return void description for GET
 
-						throw new LinkException(Response.BadRequest, "missing query/update parameter");
+						throw new _LinkException(_Response.BadRequest, "missing query/update parameter");
 
 					} else if ( !(publik && operation instanceof Query || request.isSysAdm()) ) {
 
@@ -110,7 +106,7 @@ public class SPARQL implements Service {
 						final BooleanQueryResultWriterFactory factory=Formats.service(
 								BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
 
-						response.setStatus(Response.OK);
+						response.setStatus(_Response.OK);
 						response.setHeader("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType());
 						response.setBody(stream -> factory.getWriter(stream).handleBoolean(result));
 
@@ -123,7 +119,7 @@ public class SPARQL implements Service {
 						final TupleQueryResultWriterFactory factory=Formats.service(
 								TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
 
-						response.setStatus(Response.OK);
+						response.setStatus(_Response.OK);
 						response.setHeader("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType());
 						response.setBody(stream -> {
 
@@ -151,7 +147,7 @@ public class SPARQL implements Service {
 						final RDFWriterFactory factory=Formats.service(
 								RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
 
-						response.setStatus(Response.OK);
+						response.setStatus(_Response.OK);
 						response.setHeader("Content-Type", factory.getRDFFormat().getDefaultMIMEType());
 						response.setBody(stream -> {
 
@@ -185,50 +181,50 @@ public class SPARQL implements Service {
 						final BooleanQueryResultWriterFactory factory=Formats.service(
 								BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
 
-						response.setStatus(Response.OK);
+						response.setStatus(_Response.OK);
 						response.setHeader("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType());
 						response.setBody(stream -> factory.getWriter(stream).handleBoolean(true));
 
 					} else {
 
-						throw new LinkException(Response.NotImplemented,
+						throw new _LinkException(_Response.NotImplemented,
 								"unsupported operation ["+operation.getClass().getName()+"]");
 
 					}
 
 					sink.accept(request, response);
 
-				} catch ( final LinkException e ) {
+				} catch ( final _LinkException e ) {
 
 					throw e;
 
 				} catch ( final MalformedQueryException e ) {
 
-					throw new LinkException(Response.BadRequest, "malformed query: "+e.getMessage(), e);
+					throw new _LinkException(_Response.BadRequest, "malformed query: "+e.getMessage(), e);
 
 				} catch ( final IllegalArgumentException e ) {
 
-					throw new LinkException(Response.BadRequest, "malformed request", e);
+					throw new _LinkException(_Response.BadRequest, "malformed request", e);
 
 				} catch ( final UnsupportedOperationException e ) {
 
-					throw new LinkException(Response.NotImplemented, "unsupported operation", e);
+					throw new _LinkException(_Response.NotImplemented, "unsupported operation", e);
 
 				} catch ( final QueryEvaluationException e ) {
 
-					throw new LinkException(Response.InternalServerError, "query evaluation error", e);
+					throw new _LinkException(_Response.InternalServerError, "query evaluation error", e);
 
 				} catch ( final UpdateExecutionException e ) {
 
-					throw new LinkException(Response.InternalServerError, "update execution error", e);
+					throw new _LinkException(_Response.InternalServerError, "update execution error", e);
 
 				} catch ( final TupleQueryResultHandlerException e ) {
 
-					throw new LinkException(Response.InternalServerError, "response I/O error", e);
+					throw new _LinkException(_Response.InternalServerError, "response I/O error", e);
 
 				} catch ( final RuntimeException e ) {
 
-					throw new LinkException(Response.InternalServerError, "repository error", e);
+					throw new _LinkException(_Response.InternalServerError, "repository error", e);
 
 				}
 
@@ -239,7 +235,7 @@ public class SPARQL implements Service {
 	}
 
 
-	private Operation operation(final Request request, final RepositoryConnection connection) {
+	private Operation operation(final _Request request, final RepositoryConnection connection) {
 
 		final String query=request.getParameter("query").orElse("");
 		final String update=request.getParameter("update").orElse("");

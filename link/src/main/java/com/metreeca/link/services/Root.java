@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.services;
@@ -49,7 +47,7 @@ import static java.util.Arrays.asList;
 /**
  * System metadata.
  */
-public final class Root implements Service { // !!! migrate to Builder
+public final class Root implements _Service { // !!! migrate to Builder
 
 	private static final String Label="System";
 
@@ -63,13 +61,12 @@ public final class Root implements Service { // !!! migrate to Builder
 	private static final List<IRI> RootProperties=asList(RDFS.LABEL, RDFS.COMMENT); // !! derive from shape
 
 
-	private Index index;
+	private _Index index;
 
 
 	@Override public void load(final Tool.Loader tools) { // !!! in constructor
 
-		index=tools.get(Index.Tool).insert("/", new Dispatcher(map(
-				entry(Request.GET, this::get)
+		index=tools.get(_Index.Tool).insert("/", new Dispatcher(map(entry(_Request.GET, this::get)
 
 		)), map(
 
@@ -79,10 +76,9 @@ public final class Root implements Service { // !!! migrate to Builder
 	}
 
 
-	private void get(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) {
+	private void get(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
 
-		response.setStatus(Response.OK);
+		response.setStatus(_Response.OK);
 
 		final IRI target=iri(request.getTarget());
 
@@ -112,7 +108,7 @@ public final class Root implements Service { // !!! migrate to Builder
 
 				});
 
-		new Transfer(request, response).model(model, shape);
+		new _Transfer(request, response).model(model, shape);
 
 		sink.accept(request, response);
 	}

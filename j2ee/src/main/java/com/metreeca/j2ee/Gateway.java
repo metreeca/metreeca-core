@@ -17,7 +17,7 @@
 
 package com.metreeca.j2ee;
 
-import com.metreeca.next.*;
+import com.metreeca.link.*;
 import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.Tray;
@@ -43,7 +43,7 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.metreeca.next.Part.part;
+import static com.metreeca.link.Part.part;
 import static com.metreeca.spec.things.Strings.upper;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.Tray.tray;

@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link.services;
@@ -53,7 +51,7 @@ import static com.metreeca.spec.things.Values.*;
 /**
  * System status and configuration.
  */
-public final class Status implements Service {
+public final class Status implements _Service {
 
 	private static final String Label="System Status";
 
@@ -107,9 +105,9 @@ public final class Status implements Service {
 
 		this.graph=tools.get(Graph.Tool);
 
-		tools.get(Index.Tool).insert("/!/", new Dispatcher(map(
+		tools.get(_Index.Tool).insert("/!/", new Dispatcher(map(
 
-				entry(Request.GET, Handler.sysadm(this::get))
+				entry(_Request.GET, _Handler.sysadm(this::get))
 
 		)), map(
 
@@ -118,10 +116,9 @@ public final class Status implements Service {
 		));
 	}
 
-	private void get(final Tool.Loader tools,
-			final Request request, final Response response, final BiConsumer<Request, Response> sink) { // !!! refactor
+	private void get(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) { // !!! refactor
 
-		response.setStatus(Response.OK);
+		response.setStatus(_Response.OK);
 
 		final IRI target=iri(request.getTarget());
 
@@ -187,7 +184,7 @@ public final class Status implements Service {
 			model.add(statement(entry, Link.Value, literal(properties.getProperty(property))));
 		}
 
-		new Transfer(request, response).model(model, StatusShape);
+		new _Transfer(request, response).model(model, StatusShape);
 
 		sink.accept(request, response);
 	}
