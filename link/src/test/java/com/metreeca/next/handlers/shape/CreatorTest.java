@@ -3,23 +3,21 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.next.handlers.shape;
 
-import com.metreeca.next.LinkTest;
+import com.metreeca.link.LinkTest;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
 import com.metreeca.spec.Spec;
@@ -39,8 +37,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.metreeca.next.LinkTest.Employee;
-import static com.metreeca.next.LinkTest.testbed;
+import static com.metreeca.link.LinkTest.Employee;
+import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.next.Server.server;
 import static com.metreeca.next.handlers.shape.Creator.auto;
 import static com.metreeca.next.handlers.shape.Creator.creator;

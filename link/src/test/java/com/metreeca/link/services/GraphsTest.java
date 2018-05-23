@@ -21,6 +21,7 @@ package com.metreeca.link.services;
 
 import com.metreeca.link.Index;
 import com.metreeca.link.Request;
+import com.metreeca.spec.Spec;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Resource;
@@ -37,7 +38,6 @@ import java.util.stream.Collectors;
 import static com.metreeca.link.HandlerTest.model;
 import static com.metreeca.link.HandlerTest.response;
 import static com.metreeca.link.HandlerTest.tools;
-import static com.metreeca.link.Link.SysAdm;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
@@ -73,7 +73,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.GET)
 							.setTarget(GraphsTarget),
 
@@ -102,7 +102,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.GET)
 							.setTarget(GraphsTarget)
 							.setQuery("default"),
@@ -126,7 +126,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.GET)
 							.setTarget(GraphsTarget)
 							.setQuery("graph="+RDF.NIL),
@@ -152,7 +152,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.PUT)
 							.setTarget(GraphsTarget)
 							.setQuery("default")
@@ -178,7 +178,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.PUT)
 							.setTarget(GraphsTarget)
 							.setQuery("graph="+RDF.NIL)
@@ -205,7 +205,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.POST)
 							.setTarget(GraphsTarget)
 							.setQuery("default")
@@ -231,7 +231,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.POST)
 							.setTarget(GraphsTarget)
 							.setQuery("graph="+RDF.NIL)
@@ -258,7 +258,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.DELETE)
 							.setTarget(GraphsTarget)
 							.setQuery("default"),
@@ -285,7 +285,7 @@ public final class GraphsTest {
 
 					new Request()
 
-							.setRoles(singleton(SysAdm))
+							.setRoles(singleton(Spec.root))
 							.setMethod(Request.DELETE)
 							.setTarget(GraphsTarget)
 							.setQuery("graph="+RDF.NIL),

@@ -18,7 +18,7 @@
 package com.metreeca.next.wrappers;
 
 import com.metreeca.next.Handler;
-import com.metreeca.next.LinkTest.Testbed;
+import com.metreeca.link.LinkTest.Testbed;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
 import com.metreeca.tray.iam.Roster;
@@ -27,7 +27,7 @@ import com.metreeca.tray.iam.RosterTest.MockRoster;
 
 import org.junit.Test;
 
-import static com.metreeca.next.LinkTest.testbed;
+import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.next.wrappers.Bearer.bearer;
 import static com.metreeca.tray.Tray.tool;
 

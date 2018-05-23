@@ -29,7 +29,7 @@ import java.util.function.UnaryOperator;
 /**
  * HTTP response.
  */
-public final class Response extends Message<Response> {
+public final class Response extends _Message<Response> {
 
 	public static final int OK=200; // https://tools.ietf.org/html/rfc7231#section-6.3.1
 	public static final int Created=201; // https://tools.ietf.org/html/rfc7231#section-6.3.2

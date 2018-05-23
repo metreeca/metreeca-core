@@ -17,7 +17,7 @@
 
 package com.metreeca.next.services;
 
-import com.metreeca.next.LinkTest.Testbed;
+import com.metreeca.link.LinkTest.Testbed;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
 import com.metreeca.tray.iam.Roster;
@@ -31,7 +31,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 
-import static com.metreeca.next.LinkTest.testbed;
+import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.spec.things._JSON.field;
 import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;

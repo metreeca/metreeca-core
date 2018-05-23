@@ -20,6 +20,7 @@
 package com.metreeca.link.gates;
 
 import com.metreeca.link.*;
+import com.metreeca.spec.Spec;
 import com.metreeca.tray.IO;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Setup;
@@ -76,7 +77,7 @@ public final class BasicGate implements Gate {
 				final String pwd=token.isEmpty() ? token : token.substring(colon+1);
 
 				if ( usr.equals(SysAdm) && !key.isEmpty() && pwd.equals(key) ) {
-					request.setUser(iri(request.getBase())).setRoles(singleton(Link.SysAdm)); // !!! review usr name/iri
+					request.setUser(iri(request.getBase())).setRoles(singleton(Spec.root)); // !!! review usr name/iri
 				} else if ( !usr.equals("-") || !pwd.equals("-") ) { // ignore fake sign out credentials
 					response.setStatus(Response.Unauthorized);
 				}

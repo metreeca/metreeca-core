@@ -179,7 +179,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.GET)
 							.setTarget(target.stringValue()),
 
@@ -206,7 +206,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.GET)
 							.setTarget(target.stringValue()),
 
@@ -257,7 +257,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.POST)
 							.setTarget(target.stringValue())
 							.setHeader("Accept", accept)
@@ -305,7 +305,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.POST)
 							.setTarget(target.stringValue())
 							.setHeader("Accept", accept)
@@ -341,7 +341,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.POST)
 							.setTarget(target.stringValue()),
 
@@ -370,7 +370,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.POST)
 							.setTarget(target.stringValue()),
 
@@ -398,7 +398,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.POST)
 							.setTarget(target.stringValue())
 							.setText("<target> rdf:value rdf:nil."),
@@ -430,7 +430,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.POST)
 							.setTarget(target.stringValue())
 							.setText("<x> a <y>."),
@@ -462,7 +462,7 @@ public final class ContainerTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.POST)
 							.setTarget(target.stringValue())
 							.setText("<> a <y>."),

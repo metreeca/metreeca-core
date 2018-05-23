@@ -103,7 +103,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.GET)
 							.setTarget(target.stringValue()),
 
@@ -165,7 +165,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.GET)
 							.setTarget(target.stringValue()),
 
@@ -200,7 +200,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.PUT)
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", mime)
@@ -244,7 +244,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.PUT)
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", "application/json")
@@ -280,7 +280,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.PUT)
 							.setTarget(target.stringValue()),
 
@@ -306,7 +306,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.PUT)
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", mime)
@@ -346,7 +346,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.PUT)
 							.setTarget(target.stringValue()),
 
@@ -379,7 +379,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setTarget(target.stringValue())
 							.setMethod(Request.PUT)
 							.setHeader("Content-Type", mime)
@@ -413,7 +413,7 @@ public final class ResourceTest {
 
 			exception(catalog, handler(catalog), new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", mime)
 							.setHeader("Accept", mime)
@@ -448,7 +448,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setTarget(target.stringValue())
 							.setHeader("Content-Type", mime)
 							.setHeader("Accept", mime)
@@ -491,7 +491,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.DELETE)
 							.setTarget(target.stringValue()),
 
@@ -522,7 +522,7 @@ public final class ResourceTest {
 
 				new Request()
 
-						.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+						.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 						.setTarget(item("target").stringValue())
 						.setMethod(Request.DELETE),
 
@@ -543,7 +543,7 @@ public final class ResourceTest {
 
 					new Request()
 
-							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
+							.setRoles(singleton(Spec.root)) // !!! remove after testing shape-based authorization
 							.setTarget(target.stringValue())
 							.setMethod(Request.DELETE),
 
@@ -574,7 +574,7 @@ public final class ResourceTest {
 			response(tools,
 
 					new Resource(tools, and(
-							delete(when(Spec.role, Link.SysAdm)), // not deletable by anonymous users
+							delete(when(Spec.role, Spec.root)), // not deletable by anonymous users
 							trait(RDF.TYPE)
 					)),
 

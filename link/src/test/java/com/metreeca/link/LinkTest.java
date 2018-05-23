@@ -3,22 +3,27 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next;
+package com.metreeca.link;
 
+import com.metreeca.next.*;
+import com.metreeca.next.Handler;
+import com.metreeca.next.Request;
+import com.metreeca.next.Response;
+import com.metreeca.next.Server;
+import com.metreeca.next.Service;
+import com.metreeca.next.Toolkit;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.things.Values;
@@ -123,9 +128,9 @@ public final class LinkTest {
 
 		private final Tray tray=Tray.tray();
 
-		private Supplier<Handler> handler=() -> tool(Server.Tool);
+		private Supplier<com.metreeca.next.Handler> handler=() -> tool(Server.Tool);
 
-		private Consumer<Request.Writer> request;
+		private Consumer<com.metreeca.next.Request.Writer> request;
 
 
 		public Testbed toolkit(final Toolkit toolkit) {
@@ -164,15 +169,15 @@ public final class LinkTest {
 		}
 
 
-		public Testbed handler(final Supplier<Handler> handler) {
+		public Testbed handler(final Supplier<com.metreeca.next.Handler> handler) {
 
 			if ( handler == null ) {
 				throw new NullPointerException("null handler");
 			}
 
-			this.handler=new Supplier<Handler>() {
+			this.handler=new Supplier<com.metreeca.next.Handler>() {
 
-				private Handler cache;
+				private com.metreeca.next.Handler cache;
 
 				@Override public Handler get() {
 					return cache != null ? cache : (cache=handler.get());
@@ -184,7 +189,7 @@ public final class LinkTest {
 		}
 
 
-		public Testbed request(final Consumer<Request.Writer> request) {
+		public Testbed request(final Consumer<com.metreeca.next.Request.Writer> request) {
 
 			if ( request == null ) {
 				throw new NullPointerException("null request");
@@ -201,7 +206,7 @@ public final class LinkTest {
 
 		}
 
-		public Testbed response(final Consumer<Response.Reader> response) {
+		public Testbed response(final Consumer<com.metreeca.next.Response.Reader> response) {
 
 			if ( response == null ) {
 				throw new NullPointerException("null response");

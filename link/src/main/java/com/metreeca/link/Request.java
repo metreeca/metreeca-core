@@ -19,6 +19,7 @@
 
 package com.metreeca.link;
 
+import com.metreeca.spec.Spec;
 import com.metreeca.tray.IO;
 import com.metreeca.tray.rdf.Graph;
 
@@ -43,7 +44,7 @@ import static java.util.Collections.unmodifiableSet;
 /**
  * HTTP request.
  */
-public final class Request extends Message<Request> {
+public final class Request extends _Message<Request> {
 
 	public static final String ANY="*"; // wildcard method name
 
@@ -97,7 +98,7 @@ public final class Request extends Message<Request> {
 	}
 
 	public boolean isSysAdm() {
-		return roles.contains(Link.SysAdm);
+		return roles.contains(Spec.root);
 	}
 
 

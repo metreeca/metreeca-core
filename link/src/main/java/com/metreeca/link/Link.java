@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.link;
@@ -28,17 +26,17 @@ import static com.metreeca.spec.things.Values.iri;
 
 
 /**
- * Server configuration RDF vocabulary.
+ * Linked data server configuration RDF vocabulary.
  */
 public final class Link {
 
 	/**
-	 * Server build number.
+	 * Linked data framework build number.
 	 */
 	public static final String Build;
 
 	/**
-	 * Server identification token.
+	 * Linked data framework identification token.
 	 *
 	 * A semantically versioned identification token suitable for inclusion in HTTP {@code Server} headers.
 	 *
@@ -69,15 +67,7 @@ public final class Link {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final String Namespace="tag:com.metreeca,2016:link/terms#"; // keep aligned with client // !!! review / relative to Server.Base?
-
-
-	//// User Roles ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * System administration user role.
-	 */
-	public static final IRI SysAdm=iri(Namespace, "sysadm"); // !!! review/rename
+	public static final String Namespace="app://link.metreeca.com/terms#"; // keep aligned with client
 
 
 	//// Port Specs ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,6 +82,7 @@ public final class Link {
 	public static final IRI soft=iri(Namespace, "soft"); // port soft management flag
 
 	public static final IRI create=iri(Namespace, "create"); // port create SPARQL post-processing hook
+	public static final IRI relate=iri(Namespace, "relate"); // port relate SPARQL post-processing hook
 	public static final IRI update=iri(Namespace, "update"); // port update SPARQL post-processing hook
 	public static final IRI delete=iri(Namespace, "delete"); // port delete SPARQL post-processing hook
 	public static final IRI mutate=iri(Namespace, "mutate"); // port mutate SPARQL post-processing hook
@@ -134,6 +125,16 @@ public final class Link {
 	public static final IRI Entry=iri(Namespace, "entry");
 	public static final IRI Key=iri(Namespace, "key");
 	public static final IRI Value=iri(Namespace, "value");
+
+
+	//// Audit Trail Records ///////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final IRI Trace=iri(Namespace, "Trace"); // marker RDF class
+
+	public static final IRI Item=iri(Namespace, "item"); // operation target resource (IRI)
+	public static final IRI Task=iri(Namespace, "task"); // operation type tag (Value)
+	public static final IRI User=iri(Namespace, "user"); // operation actor (IRI)
+	public static final IRI Time=iri(Namespace, "time"); // operation ms-precision timestamp (xsd:dataTime)
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

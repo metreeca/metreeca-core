@@ -5,7 +5,7 @@
  *
  * Metreeca is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * either version 3 of the License, or(at your option) any later version.
  *
  * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -17,6 +17,7 @@
 
 package com.metreeca.next;
 
+import com.metreeca.link.Message;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.JSONAdapter;
@@ -95,7 +96,7 @@ public final class Request {
 	}
 
 	public boolean interactive() {
-		return method.equals(GET) && headers("Accept").stream().anyMatch(Link::interactive);
+		return method.equals(GET) && headers("Accept").stream().anyMatch(Message::interactive);
 	}
 
 
