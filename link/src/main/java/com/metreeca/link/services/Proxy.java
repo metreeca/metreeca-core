@@ -17,7 +17,10 @@
 
 package com.metreeca.link.services;
 
-import com.metreeca.link.*;
+import com.metreeca.link._Request;
+import com.metreeca.link._Response;
+import com.metreeca.link._Service;
+import com.metreeca.link._meta.Index;
 import com.metreeca.link.handlers.Dispatcher;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Setup;
@@ -54,7 +57,7 @@ public class Proxy implements _Service {
 		timeoutConnect=setup.get("proxy.timeout.connect", 30);
 		timeoutRead=setup.get("proxy.timeout.read", 60);
 
-		tools.get(_Index.Tool).insert("/proxy", new Dispatcher(map(
+		tools.get(Index.Tool).insert("/proxy", new Dispatcher(map(
 
 				entry(_Request.GET, this::handle), entry(_Request.POST, this::handle)
 

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link.services;
+package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Dispatcher;
@@ -61,12 +61,12 @@ public final class Root implements _Service { // !!! migrate to Builder
 	private static final List<IRI> RootProperties=asList(RDFS.LABEL, RDFS.COMMENT); // !! derive from shape
 
 
-	private _Index index;
+	private Index index;
 
 
 	@Override public void load(final Tool.Loader tools) { // !!! in constructor
 
-		index=tools.get(_Index.Tool).insert("/", new Dispatcher(map(entry(_Request.GET, this::get)
+		index=tools.get(Index.Tool).insert("/", new Dispatcher(map(entry(_Request.GET, this::get)
 
 		)), map(
 

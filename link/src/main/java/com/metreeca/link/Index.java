@@ -45,7 +45,7 @@ import java.util.function.Function;
  *
  * <p>Trailing slashes and question marks in resource paths are ignored.</p>
  */
-public class Index {
+public final class Index {
 
 	public static final Tool<Index> Tool=loader -> new Index();
 
@@ -59,7 +59,8 @@ public class Index {
 	}
 
 
-	private final Map<String, Handler> handlers=new TreeMap<>(Comparator.comparingInt(String::length).reversed() // longest paths first
+	private final Map<String, Handler> handlers=new TreeMap<>(Comparator
+			.comparingInt(String::length).reversed() // longest paths first
 			.thenComparing(String::compareTo) // then alphabetically
 	);
 

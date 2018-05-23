@@ -18,6 +18,7 @@
 package com.metreeca.link.services;
 
 import com.metreeca.link.*;
+import com.metreeca.link._meta.Index;
 import com.metreeca.link.handlers.Dispatcher;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.things.Formats;
@@ -78,7 +79,7 @@ public final class Graphs implements _Service {
 	@Override public void load(final Tool.Loader tools) {
 
 		final Setup setup=tools.get(Setup.Tool);
-		final _Index index=tools.get(_Index.Tool);
+		final Index index=tools.get(Index.Tool);
 
 		publik=setup.get("graphs.public", false);
 

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link.services;
+package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Dispatcher;
@@ -105,7 +105,7 @@ public final class Status implements _Service {
 
 		this.graph=tools.get(Graph.Tool);
 
-		tools.get(_Index.Tool).insert("/!/", new Dispatcher(map(
+		tools.get(Index.Tool).insert("/!/", new Dispatcher(map(
 
 				entry(_Request.GET, _Handler.sysadm(this::get))
 

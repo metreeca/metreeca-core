@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link.services;
+package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Container;
@@ -98,13 +98,13 @@ public final class Ports implements _Service {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public void load(final Tool.Loader tools) {
-		tools.get(_Index.Tool).exec(index -> index
+		tools.get(Index.Tool).exec(index -> index
 
 				.insert("/!/ports/", new ContainerHandler(tools), map(
 						entry(RDFS.LABEL, literal(ContainerLabel))
 				))
 
-				.insert("/!/ports/*", new ResourceHandler(tools), map(entry(RDFS.LABEL, literal(ContainerLabel+_Index.ResourcesSuffix))
+				.insert("/!/ports/*", new ResourceHandler(tools), map(entry(RDFS.LABEL, literal(ContainerLabel+Index.ResourcesSuffix))
 				))
 		);
 	}
@@ -114,7 +114,7 @@ public final class Ports implements _Service {
 
 	private static final class ContainerHandler implements _Handler {
 
-		private final _Index index;
+		private final Index index;
 		private final Graph graph;
 
 		private final _Handler container; // shaped delegate
@@ -128,7 +128,7 @@ public final class Ports implements _Service {
 			final Setup setup=tools.get(Setup.Tool);
 
 
-			this.index=tools.get(_Index.Tool);
+			this.index=tools.get(Index.Tool);
 			this.graph=tools.get(Graph.Tool);
 
 			this.container=new Container(tools, ContainerShape);
@@ -186,7 +186,7 @@ public final class Ports implements _Service {
 
 	private static final class ResourceHandler implements _Handler {
 
-		private final _Index index;
+		private final Index index;
 		private final Graph graph;
 
 		private final _Handler resource; // shaped delegate
@@ -199,7 +199,7 @@ public final class Ports implements _Service {
 
 			final Setup setup=tools.get(Setup.Tool);
 
-			this.index=tools.get(_Index.Tool);
+			this.index=tools.get(Index.Tool);
 			this.graph=tools.get(Graph.Tool);
 
 			this.resource=new Resource(tools, ResourceShape);

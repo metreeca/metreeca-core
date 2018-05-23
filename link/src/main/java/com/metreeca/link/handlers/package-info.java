@@ -16,7 +16,7 @@
  */
 
 /**
- * Standard com.metreeca.next.handlers.
+ * Standard handlers.
  */
 
 package com.metreeca.link.handlers;

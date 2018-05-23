@@ -17,8 +17,8 @@
 
 package com.metreeca.link.services;
 
-import com.metreeca.link._Index;
 import com.metreeca.link._Request;
+import com.metreeca.link._meta.Index;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.rdf.Graph;
 
@@ -67,7 +67,7 @@ public final class GraphsTest {
 
 			response(tools,
 
-					tools.get(_Index.Tool).get(GraphsPath),
+					tools.get(Index.Tool).get(GraphsPath),
 
 					new _Request()
 
@@ -95,7 +95,7 @@ public final class GraphsTest {
 
 			response(tools,
 
-					tools.get(_Index.Tool).get(GraphsPath),
+					tools.get(Index.Tool).get(GraphsPath),
 
 					new _Request()
 
@@ -118,7 +118,7 @@ public final class GraphsTest {
 
 			response(tools,
 
-					tools.get(_Index.Tool).get(GraphsPath),
+					tools.get(Index.Tool).get(GraphsPath),
 
 					new _Request()
 
@@ -137,7 +137,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final _Index index=tools.get(_Index.Tool);
+			final Index index=tools.get(Index.Tool);
 
 			model(graph, First, (Resource)null);
 
@@ -162,7 +162,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final _Index index=tools.get(_Index.Tool);
+			final Index index=tools.get(Index.Tool);
 
 			model(graph, First, RDF.NIL);
 
@@ -188,7 +188,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final _Index index=tools.get(_Index.Tool);
+			final Index index=tools.get(Index.Tool);
 
 			model(graph, First, (Resource)null);
 
@@ -213,7 +213,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final _Index index=tools.get(_Index.Tool);
+			final Index index=tools.get(Index.Tool);
 
 			model(graph, First, RDF.NIL);
 
@@ -239,7 +239,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final _Index index=tools.get(_Index.Tool);
+			final Index index=tools.get(Index.Tool);
 
 			model(graph, First, (Resource)null);
 
@@ -265,7 +265,7 @@ public final class GraphsTest {
 			new Graphs().load(tools);
 
 			final Graph graph=tools.get(Graph.Tool);
-			final _Index index=tools.get(_Index.Tool);
+			final Index index=tools.get(Index.Tool);
 
 			model(graph, First, RDF.NIL);
 

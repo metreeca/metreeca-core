@@ -18,28 +18,26 @@
 package com.metreeca.link.services;
 
 import com.metreeca.link.*;
-import com.metreeca.link.handlers.Dispatcher;
+import com.metreeca.spec.Spec;
 import com.metreeca.spec.things.Formats;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.*;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
-import static com.metreeca.link._Handler.unauthorized;
-import static com.metreeca.spec.things.Maps.entry;
-import static com.metreeca.spec.things.Maps.map;
-import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.link.Handler.refused;
+import static com.metreeca.next.handlers.Dispatcher.dispatcher;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
+import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;
 
@@ -47,81 +45,82 @@ import static java.lang.Boolean.parseBoolean;
 /**
  * SPARQL 1.1 Query/Update endpoint.
  *
+ * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
+ * Graph#Tool graph database} at the server-relative {@value #Path} path.</p>
+ *
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
-public class SPARQL implements _Service {
+public class SPARQL implements Service {
 
-	private int timeout; // [s]
-	private boolean publik; // public availability of the endpoint
-
-	private Graph graph;
+	private static final String Path="/sparql";
 
 
-	@Override public void load(final Tool.Loader tools) {
+	private final Setup setup=tool(Setup.Tool);
+	private final Index index=tool(Index.Tool);
+	private final Graph graph=tool(Graph.Tool);
 
-		final Setup setup=tools.get(Setup.Tool);
-		final _Index index=tools.get(_Index.Tool);
+	private final int timeout=setup.get("sparql.timeout", 60); // [s]
+	private final boolean publik=setup.get("sparql.public", false); // public availability of the endpoint
 
-		timeout=setup.get("sparql.timeout", 60);
-		publik=setup.get("sparql.public", false);
 
-		graph=tools.get(Graph.Tool);
+	@Override public void load() {
 
-		index.insert("/sparql", new Dispatcher(map(
+		index.insert(Path, dispatcher()
 
-				entry(_Request.GET, this::handle), entry(_Request.POST, this::handle)
+				.get(this::handle)
+				.post(this::handle));
 
-		)), map(
-
-				entry(RDFS.LABEL, literal("SPARQL 1.1 Query/Update Endpoint"))
-
-		));
+		// !!! port metadata
+		//), map(
+		//
+		//		entry(RDFS.LABEL, literal("SPARQL 1.1 Query/Update Endpoint"))
+		//
+		//));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
+	private void handle(final Request request, final Response response) {
+		try (final RepositoryConnection connection1=graph.connect()) {
 
-		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
-			graph.browse(connection -> {
+			final Operation operation=operation(request, connection1);
+			final String accept=request.header("Accept").orElse("");
 
-				try {
+			if ( operation == null ) { // !!! return void description for GET
 
-					final Operation operation=operation(request, connection);
-					final Iterable<String> accept=request.getHeaders("Accept");
+				response.status(Response.BadRequest).json(object(
+						field("cause", "parameter-missing"),
+						field("notes", "missing query/update parameter")
+				));
 
-					if ( operation == null ) { // !!! return void description for GET
+			} else if ( !(publik && operation instanceof Query || request.role(Spec.root)) ) {
 
-						throw new _LinkException(_Response.BadRequest, "missing query/update parameter");
+				refused(request, response);
 
-					} else if ( !(publik && operation instanceof Query || request.isSysAdm()) ) {
+			} else if ( operation instanceof BooleanQuery ) {
 
-						unauthorized(tools, request, response, sink);
+				final boolean result=((BooleanQuery)operation).evaluate();
 
-					} else if ( operation instanceof BooleanQuery ) {
+				final BooleanQueryResultWriterFactory factory=Formats.service(
+						BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
 
-						final boolean result=((BooleanQuery)operation).evaluate();
+				response.status(Response.OK)
+						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
+						.output(stream -> factory.getWriter(stream).handleBoolean(result));
 
-						final BooleanQueryResultWriterFactory factory=Formats.service(
-								BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+			} else if ( operation instanceof TupleQuery ) {
 
-						response.setStatus(_Response.OK);
-						response.setHeader("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType());
-						response.setBody(stream -> factory.getWriter(stream).handleBoolean(result));
+				// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
 
-					} else if ( operation instanceof TupleQuery ) {
+				final TupleQueryResult result=((TupleQuery)operation).evaluate();
 
-						// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
+				final TupleQueryResultWriterFactory factory=Formats.service(
+						TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
 
-						final TupleQueryResult result=((TupleQuery)operation).evaluate();
-
-						final TupleQueryResultWriterFactory factory=Formats.service(
-								TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
-
-						response.setStatus(_Response.OK);
-						response.setHeader("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType());
-						response.setBody(stream -> {
+				response.status(Response.OK)
+						.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
+						.output(stream -> {
 
 							final TupleQueryResultWriter writer=factory.getWriter(stream);
 
@@ -138,18 +137,18 @@ public class SPARQL implements _Service {
 
 						});
 
-					} else if ( operation instanceof GraphQuery ) {
+			} else if ( operation instanceof GraphQuery ) {
 
-						// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
+				// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
 
-						final GraphQueryResult result=((GraphQuery)operation).evaluate();
+				final GraphQueryResult result=((GraphQuery)operation).evaluate();
 
-						final RDFWriterFactory factory=Formats.service(
-								RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
+				final RDFWriterFactory factory=Formats.service(
+						RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
 
-						response.setStatus(_Response.OK);
-						response.setHeader("Content-Type", factory.getRDFFormat().getDefaultMIMEType());
-						response.setBody(stream -> {
+				response.status(Response.OK)
+						.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
+						.output(stream -> {
 
 							final RDFWriter writer=factory.getWriter(stream);
 
@@ -166,83 +165,96 @@ public class SPARQL implements _Service {
 							}
 
 							writer.endRDF();
-						});
-
-					} else if ( operation instanceof Update ) {
-
-						graph.update(_connection -> {
-
-							((Update)operation).execute();
-
-							return null;
 
 						});
 
-						final BooleanQueryResultWriterFactory factory=Formats.service(
-								BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+			} else if ( operation instanceof Update ) {
 
-						response.setStatus(_Response.OK);
-						response.setHeader("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType());
-						response.setBody(stream -> factory.getWriter(stream).handleBoolean(true));
+				graph.update(_connection -> {
 
-					} else {
+					((Update)operation).execute();
 
-						throw new _LinkException(_Response.NotImplemented,
-								"unsupported operation ["+operation.getClass().getName()+"]");
+					return null;
 
-					}
+				});
 
-					sink.accept(request, response);
+				final BooleanQueryResultWriterFactory factory=Formats.service(
+						BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
 
-				} catch ( final _LinkException e ) {
+				response.status(Response.OK)
+						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
+						.output(stream -> factory.getWriter(stream).handleBoolean(true));
 
-					throw e;
+			} else {
 
-				} catch ( final MalformedQueryException e ) {
+				response.status(Response.NotImplemented).json(Handler.error("operation-unsupported", operation.getClass().getName()));
 
-					throw new _LinkException(_Response.BadRequest, "malformed query: "+e.getMessage(), e);
+			}
 
-				} catch ( final IllegalArgumentException e ) {
+		} catch ( final MalformedQueryException e ) {
 
-					throw new _LinkException(_Response.BadRequest, "malformed request", e);
+			response.status(Response.BadRequest).cause(e).json(object(
+					field("cause", "query-malformed"),
+					field("notes", e.getMessage())
+			));
 
-				} catch ( final UnsupportedOperationException e ) {
+		} catch ( final IllegalArgumentException e ) {
 
-					throw new _LinkException(_Response.NotImplemented, "unsupported operation", e);
+			response.status(Response.BadRequest).cause(e).json(object(
+					field("cause", "request-malformed"),
+					field("notes", e.getMessage())
+			));
 
-				} catch ( final QueryEvaluationException e ) {
+		} catch ( final UnsupportedOperationException e ) {
 
-					throw new _LinkException(_Response.InternalServerError, "query evaluation error", e);
+			response.status(Response.NotImplemented).cause(e).json(object(
+					field("cause", "operation-unsupported"),
+					field("notes", e.getMessage())
+			));
 
-				} catch ( final UpdateExecutionException e ) {
+		} catch ( final QueryEvaluationException e ) {
 
-					throw new _LinkException(_Response.InternalServerError, "update execution error", e);
+			// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
 
-				} catch ( final TupleQueryResultHandlerException e ) {
+			response.status(Response.InternalServerError).cause(e).json(object(
+					field("cause", "query-evaluation"),
+					field("notes", e.getMessage())
+			));
 
-					throw new _LinkException(_Response.InternalServerError, "response I/O error", e);
+		} catch ( final UpdateExecutionException e ) {
 
-				} catch ( final RuntimeException e ) {
+			response.status(Response.InternalServerError).cause(e).json(object(
+					field("cause", "update-evaluation"),
+					field("notes", e.getMessage())
+			));
 
-					throw new _LinkException(_Response.InternalServerError, "repository error", e);
+		} catch ( final TupleQueryResultHandlerException e ) {
 
-				}
+			response.status(Response.InternalServerError).cause(e).json(object(
+					field("cause", "response-error"),
+					field("notes", e.getMessage())
+			));
 
-				return this;
+		} catch ( final RuntimeException e ) {
 
-			});
+			response.status(Response.InternalServerError).cause(e).json(object(
+					field("cause", "repository-error"),
+					field("notes", e.getMessage())
+			));
+
 		}
+
 	}
 
 
-	private Operation operation(final _Request request, final RepositoryConnection connection) {
+	private Operation operation(final Request request, final RepositoryConnection connection) {
 
-		final String query=request.getParameter("query").orElse("");
-		final String update=request.getParameter("update").orElse("");
-		final String infer=request.getParameter("infer").orElse("");
+		final String query=request.parameter("query").orElse("");
+		final String update=request.parameter("update").orElse("");
+		final String infer=request.parameter("infer").orElse("");
 
-		final Iterable<String> basics=new HashSet<>(request.getParameters("default-graph-uri"));
-		final Iterable<String> nameds=new HashSet<>(request.getParameters("named-graph-uri"));
+		final List<String> basics=request.parameters("default-graph-uri");
+		final List<String> nameds=request.parameters("named-graph-uri");
 
 		final Operation operation=!query.isEmpty() ? connection.prepareQuery(query)
 				: !update.isEmpty() ? connection.prepareUpdate(update)
@@ -253,13 +265,8 @@ public class SPARQL implements _Service {
 			final ValueFactory factory=connection.getValueFactory();
 			final SimpleDataset dataset=new SimpleDataset();
 
-			for (final String basic : basics) {
-				dataset.addDefaultGraph(factory.createIRI(basic));
-			}
-
-			for (final String named : nameds) {
-				dataset.addNamedGraph(factory.createIRI(named));
-			}
+			basics.stream().distinct().forEachOrdered(basic -> dataset.addDefaultGraph(factory.createIRI(basic)));
+			nameds.stream().distinct().forEachOrdered(named -> dataset.addNamedGraph(factory.createIRI(named)));
 
 			operation.setDataset(dataset);
 			operation.setMaxExecutionTime(timeout);

@@ -17,7 +17,10 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.link.*;
+import com.metreeca.link._Handler;
+import com.metreeca.link._Request;
+import com.metreeca.link._Response;
+import com.metreeca.link._meta.Index;
 import com.metreeca.tray.Tool;
 
 import java.util.function.BiConsumer;
@@ -34,7 +37,7 @@ public final class Router implements _Handler {
 
 		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else { // conditional processing
 
-			final _Index index=tools.get(_Index.Tool); // !!! to constructor
+			final Index index=tools.get(Index.Tool); // !!! to constructor
 
 			final String base=request.getBase();
 			final String target=request.getTarget();

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link.services;
+package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
 import com.metreeca.link.handlers.Dispatcher;
@@ -73,7 +73,7 @@ public final class Names implements _Service {
 
 		this.graph=tools.get(Graph.Tool);
 
-		tools.get(_Index.Tool).insert("/!/names", new Dispatcher(map(
+		tools.get(Index.Tool).insert("/!/names", new Dispatcher(map(
 
 				entry(_Request.GET, sysadm(this::get)), entry(_Request.PUT, sysadm(this::put))
 
@@ -152,8 +152,8 @@ public final class Names implements _Service {
 					.stream()
 
 					.collect(toMap(
-							item -> item.forward(Link.Key).value().map(org.eclipse.rdf4j.model.Value::stringValue).orElse(""),
-							item -> item.forward(Link.Value).value().map(org.eclipse.rdf4j.model.Value::stringValue).orElse("")
+							item -> item.forward(Link.Key).value().map(Value::stringValue).orElse(""),
+							item -> item.forward(Link.Value).value().map(Value::stringValue).orElse("")
 					)));
 
 			request.map(graph).update(connection -> {

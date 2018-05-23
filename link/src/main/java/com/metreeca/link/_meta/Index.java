@@ -15,8 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link;
+package com.metreeca.link._meta;
 
+import com.metreeca.link.*;
 import com.metreeca.link.handlers.Container;
 import com.metreeca.link.handlers.Resource;
 import com.metreeca.link.handlers.Updater;
@@ -61,14 +62,14 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Legacy index with soft-port support // !!! don't remove
  */
-public final class _Index {
+public final class Index {
 
 	public static final String ResourcesSuffix=" / Items"; // !!! remove/migrate
 
 
-	public static final Tool<_Index> Tool=tools -> {
+	public static final Tool<Index> Tool=tools -> {
 
-		final _Index index=new _Index(tools);
+		final Index index=new Index(tools);
 
 		tools.get(_Server.Tool).hook(index::load);
 
@@ -104,7 +105,7 @@ public final class _Index {
 	}
 
 
-	public _Index(final Loader tools) {
+	public Index(final Loader tools) {
 		this.tools=tools;
 		this.server=tools.get(_Server.Tool);
 		this.graph=tools.get(Graph.Tool);
@@ -133,7 +134,7 @@ public final class _Index {
 	/**
 	 * Inserts a soft port.
 	 */
-	public _Index insert(final _Cell specs) {
+	public Index insert(final _Cell specs) {
 
 		if ( specs == null ) {
 			throw new NullPointerException("null specs");
@@ -234,7 +235,7 @@ public final class _Index {
 	/**
 	 * Removes a soft port.
 	 */
-	public _Index remove(final _Cell specs) {
+	public Index remove(final _Cell specs) {
 
 		if ( specs == null ) {
 			throw new NullPointerException("null specs");
@@ -256,11 +257,11 @@ public final class _Index {
 	}
 
 
-	public _Index insert(final String path, final _Handler handler) {
+	public Index insert(final String path, final _Handler handler) {
 		return insert(path, handler, emptyMap());
 	}
 
-	public _Index insert(final String path, final _Handler handler, final Map<IRI, Value> properties) {
+	public Index insert(final String path, final _Handler handler, final Map<IRI, Value> properties) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
@@ -301,7 +302,7 @@ public final class _Index {
 		});
 	}
 
-	public _Index remove(final String path) {
+	public Index remove(final String path) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
@@ -332,7 +333,7 @@ public final class _Index {
 	 *
 	 * @return the value returned by {@code task}
 	 */
-	public <R> R exec(final Function<_Index, R> task) {
+	public <R> R exec(final Function<Index, R> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -344,7 +345,7 @@ public final class _Index {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Index load(final String alternate, final String canonical) { // load soft ports
+	private Index load(final String alternate, final String canonical) { // load soft ports
 		return exec(_index -> graph.map(alternate, canonical).browse(connection -> { // !!! notify observers only at end of index txn
 
 			final StatementCollector collector=new StatementCollector(); // retrieve soft port specs from repository
@@ -368,7 +369,7 @@ public final class _Index {
 		}));
 	}
 
-	private _Index sync(final String alternate, final String canonical) { // update cached port properties
+	private Index sync(final String alternate, final String canonical) { // update cached port properties
 		return exec(_index -> graph.map(alternate, canonical).update(connection -> {
 
 			connection.prepareUpdate( // purge cache
