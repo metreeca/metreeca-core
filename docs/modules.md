@@ -19,7 +19,7 @@ excerpt:  Metreeca platform components
     <ul>
       <li><a href="/modules/com.metreeca:link">Linked Data Framework</a></li>
       <li><a href="/modules/com.metreeca:tray">Tooling Framework</a></li>
-      <li><a href="/modules/com.metreeca:mill">Integration Engine</a></li>
+      <!-- <li><a href="/modules/com.metreeca:mill">Integration Engine</a></li> -->
       <li><a href="/modules/com.metreeca:spec">Shapes Engine</a></li>
     </ul>
   </dd>
