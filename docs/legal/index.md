@@ -16,7 +16,7 @@ tags:		Legal
 
 This License Agreement governs your use of the Metreeca platform (“Platform”) and any associated resources of Metreeca s.r.l. ("Metreeca"). By using the Platform you are agreeing to abide by the terms and conditions described below.
 
-Metreeca may update this License Agreement from time to time, for example to address new licensing options or to clarify a provision. You can review at any time the most current version of the License Agreement at <https://docs.metreeca.com/legal#license-agreement>. Before substantive changes, we will notify you by email, by posting a notice on our site ([www.metreeca.com](https://www.metreeca.com/)) or through usual channels for such announcements such as blog posts and forums. Your continued use of the Platform after the effective date of such changes constitutes your acceptance of such changes.
+Metreeca may update this License Agreement from time to time, for example to address new licensing options or to clarify a provision. You can review at any time the most current version of the License Agreement at <http://docs.metreeca.com/legal#license-agreement>. Before substantive changes, we will notify you by email, by posting a notice on our site ([www.metreeca.com](https://www.metreeca.com/)) or through usual channels for such announcements such as blog posts and forums. Your continued use of the Platform after the effective date of such changes constitutes your acceptance of such changes.
 
 Questions, comments and requests about the License Agreement should be sent to [](#@info?subject=terms%20of%20service).
 
@@ -38,7 +38,7 @@ The Platform utilizes or includes third party software and copyrighted material 
 
 ### Java Libraries
 
-Full dependency report including licensing information available at <https://docs.metreeca.com/legal/dependencies>.
+Full dependency report including licensing information available at <http://docs.metreeca.com/legal/dependencies>.
 
 ### JavaScript Libraries
 
@@ -60,7 +60,7 @@ Full dependency report including licensing information available at <https://doc
 
 These Terms of Service govern your use of Metreeca cloud services (“Service”) and any associated resources of Metreeca s.r.l. ("Metreeca"). By using the Service you are agreeing to abide by the terms and conditions described below.
 
-Metreeca may update these Terms of Service from time to time, for example to address new features of the Service or to clarify a provision. You can review at any time the most current version of the Terms of Service at <https://docs.metreeca.com/legal#terms-of-service>. Before substantive changes, we will notify you by email, by posting a notice on our site ([www.metreeca.com](https://www.metreeca.com/)) or through usual channels for such announcements such as blog posts and forums. Your continued use of the Service after the effective date of such changes constitutes your acceptance of such changes.
+Metreeca may update these Terms of Service from time to time, for example to address new features of the Service or to clarify a provision. You can review at any time the most current version of the Terms of Service at <http://docs.metreeca.com/legal#terms-of-service>. Before substantive changes, we will notify you by email, by posting a notice on our site ([www.metreeca.com](https://www.metreeca.com/)) or through usual channels for such announcements such as blog posts and forums. Your continued use of the Service after the effective date of such changes constitutes your acceptance of such changes.
 
 Questions, comments and requests about the Terms of Service should be sent to [](#@info?subject=terms%20of%20service).
 
@@ -127,7 +127,7 @@ These terms are governed by the laws of Italy. Any action or litigation concerni
 
 This Privacy Policy regulates the use of personal information collected in connection with your use of Metreeca cloud services (“Service”) and any associated resources of Metreeca s.r.l. ("Metreeca"). By using the Service you are you are accepting and consenting to the practices described below.
 
-Metreeca may update this Privacy Policy from time to time, for example to address new features of the Service or to clarify a provision. You can review at any time the most current version of the Privacy Policy at <https://docs.metreeca.com/legal#privacy-policy>. Before substantive changes, we will notify you by email, by posting a notice on our site ([www.metreeca.com](https://www.metreeca.com/)) or through usual channels for such announcements such as blog posts and forums. Your continued use of the Service after the effective date of such changes constitutes your acceptance of such changes.
+Metreeca may update this Privacy Policy from time to time, for example to address new features of the Service or to clarify a provision. You can review at any time the most current version of the Privacy Policy at <http://docs.metreeca.com/legal#privacy-policy>. Before substantive changes, we will notify you by email, by posting a notice on our site ([www.metreeca.com](https://www.metreeca.com/)) or through usual channels for such announcements such as blog posts and forums. Your continued use of the Service after the effective date of such changes constitutes your acceptance of such changes.
 
 Questions, comments and requests about the Privacy Policy should be sent to [](#@info?subject=privacy%20policy).
 

@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletResponse;
 import static com.metreeca.next.Part.part;
 import static com.metreeca.spec.things.Strings.upper;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.Tray.tray;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
 
@@ -56,7 +57,25 @@ import static java.util.Collections.list;
 
 
 /**
- * J2EE servlet filter.
+ * J2EE/Metreeca gateway.
+ *
+ * <p>Provides a gateway between a web application managed by Servlet 3.1 container and linked data resource handlers
+ * based on the Metreeca {@linkplain com.metreeca.next linked data framework}:</p>
+ *
+ * <ul>
+ *
+ * <li>initializes and destroys the shared {@linkplain Tool tool tray} managing platform components required by
+ * resource
+ * handlers;</li>
+ *
+ * <li>intercepts HTTP requests and handles them using the {@linkplain Server server} tool provided by the shared tool
+ * tray;</li>
+ *
+ * <li>forwards HTTP requests to the enclosing web application if no response is {@linkplain Response#committed()
+ * committed} by
+ * the linked data server.</li>
+ *
+ * </ul>
  */
 @WebListener public final class Gateway implements ServletContextListener, Filter {
 
@@ -72,13 +91,11 @@ import static java.util.Collections.list;
 
 		final ServletContext context=event.getServletContext();
 
-		final Tray tray=Tray.tray();
+		final Tray tray=tray();
 
 		try {
 
-			tray.set(Setup.Tool, tools -> setup(context))
-					.set(Loader.Tool, tools -> loader(context))
-					.set(Upload, tools -> upload(context));
+			tray.set(Setup.Tool, tools -> setup(context)).set(Loader.Tool, tools -> loader(context)).set(Upload, tools -> upload(context));
 
 			for (final Toolkit toolkit : ServiceLoader.load(Toolkit.class)) { toolkit.load(tray); }
 
@@ -192,9 +209,7 @@ import static java.util.Collections.list;
 	@Override public void destroy() {}
 
 
-	@Override public void doFilter(
-			final ServletRequest request, final ServletResponse response, final FilterChain chain
-	) throws ServletException, IOException {
+	@Override public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws ServletException, IOException {
 
 		final Tray tray=(Tray)request.getServletContext().getAttribute(TrayAttribute);
 
@@ -218,13 +233,11 @@ import static java.util.Collections.list;
 			try { // ;( request.getParts() is not available to filters…
 
 
-				final List<FileItem> items=isMultipartContent(request) ?
-						tool(Upload).parseRequest(request) : emptyList();
+				final List<FileItem> items=isMultipartContent(request) ? tool(Upload).parseRequest(request) : emptyList();
 
 				tool(Server.Tool).exec(
 
-						writer -> request(writer, request, items),
-						reader -> response(reader, response)
+						writer -> request(writer, request, items), reader -> response(reader, response)
 
 				);
 
@@ -381,9 +394,7 @@ import static java.util.Collections.list;
 
 		response.setStatus(reader.status());
 
-		reader.headers().forEachOrdered(header ->
-				header.getValue().forEach(value ->
-						response.addHeader(header.getKey(), value)));
+		reader.headers().forEachOrdered(header -> header.getValue().forEach(value -> response.addHeader(header.getKey(), value)));
 
 		if ( reader.binary() ) {
 

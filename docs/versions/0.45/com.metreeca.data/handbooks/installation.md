@@ -14,7 +14,7 @@ version:    "0.45"
 # Docker Image
 
 <!-- align Installation Handbook / Docker README -->
-<!-- use absolute links to https://docs.metreeca.com/quick-start/ -->
+<!-- use absolute links to http://docs.metreeca.com/quick-start/ -->
 
 | system | requirements                             |
 | ------ | ---------------------------------------- |
@@ -43,7 +43,7 @@ Docker [images](https://hub.docker.com/r/metreeca/metreeca/) are the easiest way
 
 - get started going through the tutorials at https://www.metreeca.com/quick-start
 
-- delve deeper with the documentation at https://docs.metreeca.com/
+- delve deeper with the documentation at http://docs.metreeca.com/
 
 **Warning** / *The current version of the Docker image contains a preview release of the platform with limited user authentication and authorization capabilities: administration tools,  unsafe HTTP methods on linked data REST APIs (POST/PUT/DELETE) and SPARQL endpoints are restricted to system administrators, but fine-grained access control and user-dependent views aren't yet supported. More to come in the next release…*
 
@@ -58,7 +58,7 @@ docker run --env <name>=<value> …
 | name  | value                                    |
 | :---- | :--------------------------------------- |
 | JAVA  | space separated command line options for the Java virtual machine |
-| SETUP | space separated [configuration](https://docs.metreeca.com/quick-start/configure) properties (`<property>=<value>`) |
+| SETUP | space separated [configuration](http://docs.metreeca.com/quick-start/configure) properties (`<property>=<value>`) |
 | KEY   | the password for the system administrator user (*admin*) |
 
 ## Host Volumes
@@ -88,7 +88,7 @@ Append to *{size}* the letter `k` or `K` to indicate KB, `m` or `M` to indicate 
 
 ## Custom Configuration
 
-To define a [custom configuration](https://docs.metreeca.com/quick-start/configure) for the platform either define the relevant properties as Java system properties in the `JAVA` [environment variable](#environment-variables), like:
+To define a [custom configuration](http://docs.metreeca.com/quick-start/configure) for the platform either define the relevant properties as Java system properties in the `JAVA` [environment variable](#environment-variables), like:
 
 ```sh
 docker run --env 'JAVA=-D<property>=<value> ' …
@@ -98,18 +98,18 @@ or create and edit a custom configuration file named `setup.properties` in the r
 
 ## Bulk Data Management
 
-Bulk data management is supported through the following standard SPARQL 1.1 [endpoints](https://docs.metreeca.com/quick-start/manage#sparql-endpoints).
+Bulk data management is supported through the following standard SPARQL 1.1 [endpoints](http://docs.metreeca.com/quick-start/manage#sparql-endpoints).
 
 | endpoint                                 | URL                          |
 | ---------------------------------------- | ---------------------------- |
 | [SPARQL 1.1 Update](http://www.w3.org/TR/sparql11-protocol) | http://localhost:8080/sparql |
 | [SPARQL 1.1 Graph Store](http://www.w3.org/TR/sparql11-http-rdf-update) | http://localhost:8080/graphs |
 
-Update operations on all endpoints are always restricted to system administrators; retrieval operations are restricted to system administrators unless otherwise [configured](https://docs.metreeca.com/quick-start/configure#sparql-endpoints).
+Update operations on all endpoints are always restricted to system administrators; retrieval operations are restricted to system administrators unless otherwise [configured](http://docs.metreeca.com/quick-start/configure#sparql-endpoints).
 
 ## Bulk Data Upload
 
-Bulk data upload is also supported through the automated RDF [spooling](https://docs.metreeca.com/quick-start/manage#rdf-spooler) folder at `/opt/metreeca/data/spool`/. To upload an RDF file just copy it to the spooling folder and wait for the spooler process to pick it up:
+Bulk data upload is also supported through the automated RDF [spooling](http://docs.metreeca.com/quick-start/manage#rdf-spooler) folder at `/opt/metreeca/data/spool`/. To upload an RDF file just copy it to the spooling folder and wait for the spooler process to pick it up:
 
 ```sh
 docker cp <rdf-file> <container-name>:/opt/metreeca/data/spool/
@@ -129,7 +129,7 @@ After the file is uploaded, it's automatically removed from the spooling folder.
 
 ## External Graph Database
 
-A wide range of third-party RDF graph databases, supporting the extended  [RDF4J Server REST API](http://docs.rdf4j.org/rest-api/) or other proprietary wire protocols, can be [configured](https://docs.metreeca.com/quick-start/configure#graph-backend]) as embedded or external graph storage backends.
+A wide range of third-party RDF graph databases, supporting the extended  [RDF4J Server REST API](http://docs.rdf4j.org/rest-api/) or other proprietary wire protocols, can be [configured](http://docs.metreeca.com/quick-start/configure#graph-backend]) as embedded or external graph storage backends.
 
 # Web Application
 

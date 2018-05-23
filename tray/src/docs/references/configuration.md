@@ -6,13 +6,13 @@ project:    "${module.project}"
 version:    "${module.version}"
 ---
 
-The platform and its components may be configured using the configuration properties defined in the following sections.
+Standard platform-provided components may be configured using the configuration properties defined in the following sections.
 
 Configuration properties may be defined either as **system properties** using Java  command line options (`-D<property>=<value>`) or included in a **configuration file** using the standard format for Java [property files](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-). 
 
 Configuration properties defined as system properties take precedence over properties defined in configuration files.
 
-Java system properties and configuration files are defined and loaded from system-specific sources varying according to the selected [deployment option](installation#deployment-options).
+Java system properties and configuration files are defined and loaded from system-specific sources varying according to the deployment option.
 
 | property type | notes                                    |
 | :------------ | :--------------------------------------- |
@@ -22,15 +22,15 @@ Java system properties and configuration files are defined and loaded from syste
 
 # Platform
 
-| property         | type      | value                                    | default                                  |
-| :--------------- | --------- | :--------------------------------------- | :--------------------------------------- |
+| property         | type      | value                                                        | default                                                    |
+| :--------------- | --------- | :----------------------------------------------------------- | :--------------------------------------------------------- |
 | setup.properties | file path | the path of the configuration properties file; this property is intended to be defined as a system property, e.g. through a java command-line flag as `-Dsetup.properties=<path>` | empty (setup is loaded from a deployment dependent source) |
-| setup.storage    | file path | the path of the default storage folder   | the current working directory            |
-| setup.base       | URL       | the absolute canonical server base URL   | the server base URL of the current HTTP request |
+| setup.storage    | file path | the path of the default storage folder                       | the current working directory                              |
+| setup.base       | URL       | the absolute canonical linked data base URL                  | the server base URL of the current HTTP request            |
 
 Linked data resources published by the platform may be accessed using a number of different URLs pointing to the same server: if the *canonical* base URL is defined using the `setup.base` property (and it's actually different from the *alternate* base URL used to access the resource), the rewriting engine dynamically replaces/restores the *alternate* base URL with/from the *canonical* base URL in the target linked data URL and incoming/outgoing RDF payloads.
 
-<p class="warning">Dynamic URL rewriting is mainly intended to enable data portability among test/staging and production instances: the process may be quite expensive, so make sure that the canonical URL matches the expected base URL of the production instance.</p>
+<p class="warning">Dynamic URL rewriting is mainly intended to enable data portability among test/staging and production instances: the process may be quite expensive, so make sure that the canonical URL matches the expected server base URL of the production instance.</p>
 
 <p class="warning">Modifying the <code>setup.base</code> property in the configuration file won't automatically migrate to the new canonical base URL existing linked data resources in the graph backend.</p>
 

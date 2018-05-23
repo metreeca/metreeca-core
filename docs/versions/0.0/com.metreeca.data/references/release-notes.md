@@ -7,7 +7,7 @@ version:    "0.0"
 redirect_to:   "https://github.com/metreeca/metreeca/releases/tag/v0.0"
 ---
 
-<!-- use absolute liks to https://docs.metreeca.com/ -->
+<!-- use absolute liks to http://docs.metreeca.com/ -->
 
 # ???
 
@@ -27,8 +27,8 @@ This is a minor beta release focusing on better interoperability and usability.
 
 # New Features and Improvements
 
-- automated RDF [spooling](https://docs.metreeca.com/quick-start/manage#rdf-spooler) folder for bulk data upload
-- dynamic linked data URL [rewriting](https://docs.metreeca.com/quick-start/configure#platform)
+- automated RDF [spooling](http://docs.metreeca.com/quick-start/manage#rdf-spooler) folder for bulk data upload
+- dynamic linked data URL [rewriting](http://docs.metreeca.com/quick-start/configure#platform)
 - support for Virtuoso remote graph stores
 - limited support for remote vanilla SPARQL 1.1 graph stores
 
