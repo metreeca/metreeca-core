@@ -1,7 +1,7 @@
 ---
 title:     Idiomatic JSON Reference
 excerpt:    "Idiomatic RDF JSON serialization format codecs and grammar"
-subject:    "${module.subject}"
+caption:    "${module.caption}"
 project:    "${module.project}"
 version:    "${module.version}"
 ---

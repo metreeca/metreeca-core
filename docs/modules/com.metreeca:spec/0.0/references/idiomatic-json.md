@@ -1,7 +1,7 @@
 ---
 title:     Idiomatic JSON Reference
 excerpt:    "Idiomatic RDF JSON serialization format codecs and grammar"
-subject:    "Metreeca Shapes Engine"
+caption:    "Metreeca Shapes Engine"
 project:    "com.metreeca:spec"
 version:    "0.0"
 ---

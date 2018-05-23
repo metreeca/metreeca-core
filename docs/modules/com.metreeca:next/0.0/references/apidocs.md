@@ -1,6 +1,6 @@
 ---
 title:          "Java API Reference"
-subject:        "Metreeca Linked Data Framework (Next)"
+caption:        "Metreeca Linked Data Framework (Next)"
 project:        "com.metreeca:next"
 version:        "0.0"
 redirect_to:    "/modules/com.metreeca:next/0.0/apidocs/"

@@ -1,7 +1,7 @@
 ---
 title:      Faceted Search Reference
 excerpt:    "Faceted search support and query serializations"
-subject:    "${module.subject}"
+caption:    "${module.caption}"
 project:    "${module.project}"
 version:    "${module.version}"
 ---

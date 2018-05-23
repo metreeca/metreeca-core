@@ -1,7 +1,7 @@
 ---
 title:      Configuration Reference
 excerpt:    Platform configuration options
-subject:    "${module.subject}"
+caption:    "${module.caption}"
 project:    "${module.project}"
 version:    "${module.version}"
 ---

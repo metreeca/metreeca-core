@@ -1,7 +1,7 @@
 ---
 title:      Specification Language Reference
 excerpt:    Linked data model specification language semantics and components
-subject:    "${module.subject}"
+caption:    "${module.caption}"
 project:    "${module.project}"
 version:    "${module.version}"
 ---

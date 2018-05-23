@@ -1,7 +1,7 @@
 ---
 title:      Specification Language Reference
 excerpt:    Linked data model specification language semantics and components
-subject:    "Metreeca Shapes Engine"
+caption:    "Metreeca Shapes Engine"
 project:    "com.metreeca:spec"
 version:    "0.0"
 ---

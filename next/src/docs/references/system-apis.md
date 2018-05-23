@@ -1,7 +1,7 @@
 ---
 title:		System APIs Reference 
 excerpt:	Standard system-provided REST APIs
-subject:    "${module.subject}"
+caption:    "${module.caption}"
 project:    "${module.project}"
 version:    "${module.version}"
 ---

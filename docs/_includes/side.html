@@ -4,7 +4,22 @@ Default document sidebar
 
 {% endcomment %}
 
-<!-- Copyright © 2013-2018 Metreeca srl. All Rights Reserved. -->
+<!--
+  ~ Copyright © 2013-2018 Metreeca srl. All rights reserved.
+  ~
+  ~ This file is part of Metreeca.
+  ~
+  ~ Metreeca is free software: you can redistribute it and/or modify it under the terms
+  ~ of the GNU Affero General Public License as published by the Free Software Foundation,
+  ~ either version 3 of the License, or(at your option) any later version.
+  ~
+  ~ Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  ~ without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  ~ See the GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with Metreeca.
+  ~ If not, see <http://www.gnu.org/licenses/>.
+  -->
 
 <input id="toggle" type="checkbox"> <!-- hidden menu toggle for mobile view -->
 
@@ -35,14 +50,14 @@ Default document sidebar
 
         {% elsif page.layout != 'module' and page.project %} <!-- regular document -->
 
-        <a href="/modules/{{ page.project }}/">{{ page.subject | remove: 'Metreeca ' }}</a>
+        <a href="/modules/{{ page.project }}/">{{ page.caption | remove: 'Metreeca ' }}</a>
         <a href="/modules/{{ page.project }}/{{ page.version }}/">Version {{ page.version }}</a>
 
         {% endif %}
 
-        {% if page.title %}
+        {% if page.title or page.caption %}
 
-        <span onclick="document.querySelector('main > header').scrollIntoView()">{{ page.title | remove: 'Metreeca ' }}</span>
+        <span onclick="document.querySelector('main > header').scrollIntoView()">{{ page.title | default: page.caption | remove: 'Metreeca ' }}</span>
 
         {% endif %}
 

@@ -1,7 +1,7 @@
 ---
 title:      Faceted Search Reference
 excerpt:    "Faceted search support and query serializations"
-subject:    "Metreeca Shapes Engine"
+caption:    "Metreeca Shapes Engine"
 project:    "com.metreeca:spec"
 version:    "0.0"
 ---

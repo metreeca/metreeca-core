@@ -1,15 +1,14 @@
 ---
-title:      "${module.subject}"
-subject:    "${module.subject}"
+caption:    "${module.caption}"
 project:    "${module.project}"
 version:    "${module.version}"
 layout:     module
 ---
 
 The J2EE module provides an adapter for deploying apps based on the Metreeca [linked data framework](/modules/com.metreeca:link/${module.version}/) as web 
-applications managed by a Servlet 3.0 container.
+applications managed by a Servlet 3.1 container.
 
-To deploy a linked data apps as a web application, package it as a `war` archive, e.g. using maven:
+To deploy a linked data apps as a web application, package it as a `war` archive adding a dependency from the J2EE module, e.g. using maven:
 
 ```xml
 <project>
@@ -19,8 +18,24 @@ To deploy a linked data apps as a web application, package it as a `war` archive
 	<version>1.0</version>
 	<packaging>war</packaging>
 	
+    <dependency>
+        <groupId>com.metreeca</groupId>
+        <artifactId>j2ee</artifactId>
+        <version>${module.version}</version>
+    </dependency>
+    
+	<dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.1.0</version>
+        <scope>provided</scope>
+    </dependency>
+
 </project>
 ```
+
+
+
 
 adding Metreeca J2EE gateway to `WEB-INF/web.xml` like:
 

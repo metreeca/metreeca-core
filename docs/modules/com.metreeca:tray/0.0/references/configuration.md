@@ -1,7 +1,7 @@
 ---
-title:      Configuration Handbook
-excerpt:    Platform configuration procedures and configuration options
-subject:    "Metreeca Tooling Framework"
+title:      Configuration Reference
+excerpt:    Platform configuration options
+caption:    "Metreeca Tooling Framework"
 project:    "com.metreeca:tray"
 version:    "0.0"
 ---
