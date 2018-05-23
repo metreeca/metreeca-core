@@ -20,7 +20,6 @@
 package com.metreeca.link.handlers;
 
 import com.metreeca.link.*;
-import com.metreeca.mill.tasks.file.JSON;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.Tool;
@@ -248,7 +247,7 @@ public final class ResourceTest {
 							.setRoles(singleton(Link.SysAdm)) // !!! remove after testing shape-based authorization
 							.setMethod(Request.PUT)
 							.setTarget(target.stringValue())
-							.setHeader("Content-Type", JSON.MIME)
+							.setHeader("Content-Type", "application/json")
 							.setHeader("Accept", mime)
 							.setText("{ \"value\": { \"this\" : \"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest\" }}"),
 

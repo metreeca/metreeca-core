@@ -20,7 +20,6 @@
 package com.metreeca.link.handlers;
 
 import com.metreeca.link.*;
-import com.metreeca.mill.tasks.file.JSON;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.Tool;
@@ -299,7 +298,7 @@ public final class ContainerTest {
 		tools(catalog -> {
 
 			final IRI target=item("target/");
-			final String accept=JSON.MIME;
+			final String accept="application/json";
 			final String body="{ \"value\": { \"this\" : \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" }}";
 
 			response(catalog, handler(catalog),
