@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.next.wrappers;
@@ -24,6 +22,7 @@ import com.metreeca.next.LinkTest.Testbed;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
 import com.metreeca.tray.iam.Roster;
+import com.metreeca.tray.iam.RosterTest;
 import com.metreeca.tray.iam.RosterTest.MockRoster;
 
 import org.junit.Test;
@@ -31,7 +30,6 @@ import org.junit.Test;
 import static com.metreeca.next.LinkTest.testbed;
 import static com.metreeca.next.wrappers.Bearer.bearer;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.iam.RosterTest.This;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -113,7 +111,7 @@ public final class BearerTest {
 	@Test public void testAuthorizationGranted() {
 		harness(handler(Response.OK))
 
-				.exec(() -> tool(Roster.Tool).acquire(This, This)) // acquire token
+				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)
@@ -135,7 +133,7 @@ public final class BearerTest {
 	@Test public void testAuthorizationBadCredentials() {
 		harness(handler(Response.OK))
 
-				.exec(() -> tool(Roster.Tool).acquire(This, This)) // acquire token
+				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)
@@ -156,7 +154,7 @@ public final class BearerTest {
 	@Test public void testAuthorizationForbidden() {
 		harness(handler(Response.Forbidden))
 
-				.exec(() -> tool(Roster.Tool).acquire(This, This)) // acquire token
+				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)
@@ -177,7 +175,7 @@ public final class BearerTest {
 	@Test public void testAuthorizationUnauthorized() {
 		harness(handler(Response.Unauthorized))
 
-				.exec(() -> tool(Roster.Tool).acquire(This, This)) // acquire token
+				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)
@@ -207,7 +205,7 @@ public final class BearerTest {
 
 		)))
 
-				.exec(() -> tool(Roster.Tool).acquire(This, This)) // acquire token
+				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)

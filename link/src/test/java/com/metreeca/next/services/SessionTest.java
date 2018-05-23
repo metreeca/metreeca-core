@@ -3,18 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Metreeca. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.next.services;
@@ -23,9 +21,11 @@ import com.metreeca.next.LinkTest.Testbed;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
 import com.metreeca.tray.iam.Roster;
+import com.metreeca.tray.iam.RosterTest;
 import com.metreeca.tray.iam.RosterTest.MockRoster;
 import com.metreeca.tray.sys.Trace;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
@@ -36,8 +36,6 @@ import static com.metreeca.spec.things._JSON.field;
 import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.iam.Roster.CredentialsRejected;
-import static com.metreeca.tray.iam.RosterTest.That;
-import static com.metreeca.tray.iam.RosterTest.This;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -64,7 +62,7 @@ public final class SessionTest {
 
 	private Request.Writer authenticated(final Request.Writer request) {
 		return anonymous(request)
-				.user(tool(Roster.Tool).refresh(This).user());
+				.user(tool(Roster.Tool).refresh(RosterTest.This).user());
 	}
 
 
@@ -135,7 +133,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> anonymous(request)
-						.json(login(This, This)))
+						.json(login(RosterTest.This, RosterTest.This)))
 
 				.response(response -> {
 
@@ -151,7 +149,7 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(This);
+					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 
@@ -165,7 +163,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> anonymous(request)
-						.json(login(This, "qwertyuiop")))
+						.json(login(RosterTest.This, "qwertyuiop")))
 
 				.response(response -> {
 
@@ -188,7 +186,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> anonymous(request)
-						.json(login(This, This, "qwertyuiop")))
+						.json(login(RosterTest.This, RosterTest.This, "qwertyuiop")))
 
 				.response(response -> {
 
@@ -204,7 +202,7 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(This);
+					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
 
 					assertTrue("new user logged in", permit.valid(currentTimeMillis()));
 					assertEquals("password updated", "qwertyuiop", permit.token());
@@ -219,7 +217,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> anonymous(request)
-						.json(login(This, "qwertyuiop", "asdfghjkl")))
+						.json(login(RosterTest.This, "qwertyuiop", "asdfghjkl")))
 
 				.response(response -> {
 
@@ -261,7 +259,7 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(This);
+					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 
@@ -282,7 +280,7 @@ public final class SessionTest {
 					assertEquals("success reported", Response.OK, response.status());
 					assertEquals("empty ticket", object(), response.json());
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(This);
+					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
 
 					assertFalse("user logged out", permit.valid(currentTimeMillis()));
 
@@ -296,7 +294,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> authenticated(request)
-						.json(login(This, This)))
+						.json(login(RosterTest.This, RosterTest.This)))
 
 				.response(response -> {
 
@@ -312,7 +310,7 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(This);
+					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 
@@ -326,7 +324,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> authenticated(request)
-						.json(login(This, "qwertyuiop")))
+						.json(login(RosterTest.This, "qwertyuiop")))
 
 				.response(response -> {
 
@@ -339,7 +337,7 @@ public final class SessionTest {
 
 					assertEquals("error defined", CredentialsRejected, report.get("error"));
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(This);
+					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 
@@ -353,7 +351,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> authenticated(request)
-						.json(login(This, This, "qwertyuiop")))
+						.json(login(RosterTest.This, RosterTest.This, "qwertyuiop")))
 
 				.response(response -> {
 
@@ -369,7 +367,7 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(This);
+					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 					assertEquals("password updated", "qwertyuiop", permit.token());
@@ -384,7 +382,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> authenticated(request)
-						.json(login(This, "qwertyuiop", "asdfghjkl")))
+						.json(login(RosterTest.This, "qwertyuiop", "asdfghjkl")))
 
 				.response(response -> {
 
@@ -397,10 +395,10 @@ public final class SessionTest {
 
 					assertEquals("error defined", CredentialsRejected, report.get("error"));
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(This);
+					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
-					assertEquals("password not updated", This, permit.token());
+					Assert.assertEquals("password not updated", RosterTest.This, permit.token());
 
 					tool(Trace.Tool).info("sample request", response.request().text());
 					tool(Trace.Tool).info("sample response", response.text());
@@ -415,7 +413,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> authenticated(request)
-						.json(login(That, That)))
+						.json(login(RosterTest.That, RosterTest.That)))
 
 				.response(response -> {
 
@@ -431,8 +429,8 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit original=tool(Roster.Tool).profile(This);
-					final Roster.Permit switched=tool(Roster.Tool).profile(That);
+					final Roster.Permit original=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit switched=tool(Roster.Tool).profile(RosterTest.That);
 
 					assertFalse("old user logged out", original.valid(currentTimeMillis()));
 					assertTrue("new user logged in", switched.valid(currentTimeMillis()));
@@ -447,7 +445,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> anonymous(request)
-						.json(login(That, "qwertyuiop")))
+						.json(login(RosterTest.That, "qwertyuiop")))
 
 				.response(response -> {
 
@@ -470,7 +468,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> anonymous(request)
-						.json(login(That, That, "qwertyuiop")))
+						.json(login(RosterTest.That, RosterTest.That, "qwertyuiop")))
 
 				.response(response -> {
 
@@ -486,8 +484,8 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit original=tool(Roster.Tool).profile(This);
-					final Roster.Permit switched=tool(Roster.Tool).profile(That);
+					final Roster.Permit original=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit switched=tool(Roster.Tool).profile(RosterTest.That);
 
 					assertFalse("old user logged out", original.valid(currentTimeMillis()));
 					assertTrue("new user logged in", switched.valid(currentTimeMillis()));
@@ -504,7 +502,7 @@ public final class SessionTest {
 		harness()
 
 				.request(request -> anonymous(request)
-						.json(login(This, "qwertyuiop", "asdfghjkl")))
+						.json(login(RosterTest.This, "qwertyuiop", "asdfghjkl")))
 
 				.response(response -> {
 

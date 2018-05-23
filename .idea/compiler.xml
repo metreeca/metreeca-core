@@ -9,7 +9,6 @@
         <module name="j2ee" />
         <module name="link" />
         <module name="mill" />
-        <module name="next" />
         <module name="spec" />
         <module name="tray" />
       </profile>

@@ -84,8 +84,6 @@
 		<module>tray</module>
 		<module>spec</module>
 
-		<module>next</module>
-
 	</modules>
 
 	<properties>
@@ -250,7 +248,6 @@
 
 						<link>http://docs.metreeca.com/modules/com.metreeca:j2ee/${module.version}/apidocs/</link>
 						<link>http://docs.metreeca.com/modules/com.metreeca:link/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:next/${module.version}/apidocs/</link>
 						<link>http://docs.metreeca.com/modules/com.metreeca:mill/${module.version}/apidocs/</link>
 						<link>http://docs.metreeca.com/modules/com.metreeca:tray/${module.version}/apidocs/</link>
 						<link>http://docs.metreeca.com/modules/com.metreeca:spec/${module.version}/apidocs/</link>
