@@ -243,6 +243,7 @@
 				<configuration>
 
 					<outputDirectory>${project.build.directory}/site/javadocs</outputDirectory>
+					<notimestamp>true</notimestamp> <!-- avoid immaterial VCS visible changes -->
 
 					<links>
 
