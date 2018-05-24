@@ -18,10 +18,10 @@
 package com.metreeca.link.services;
 
 import com.metreeca.link.*;
-import com.metreeca.link._meta.Index;
-import com.metreeca.link.handlers.Dispatcher;
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.Spec;
 import com.metreeca.spec.things.Formats;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -31,7 +31,6 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -39,326 +38,332 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.regex.Pattern;
 
-import static com.metreeca.link._Handler.unauthorized;
+import static com.metreeca.link.Handler.refused;
+import static com.metreeca.next.handlers.Dispatcher.dispatcher;
 import static com.metreeca.spec.Shape.only;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Trait.trait;
-import static com.metreeca.spec.things.Maps.entry;
-import static com.metreeca.spec.things.Maps.map;
 import static com.metreeca.spec.things.Values.iri;
-import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.spec.things._JSON.field;
+import static com.metreeca.spec.things._JSON.object;
+import static com.metreeca.tray.Tray.tool;
 
 
 /**
  * SPARQL 1.1 Graph Store endpoint.
  *
+ * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain
+ * Graph#Tool graph database} at the server-relative <code>{@value #Path}</code> path.</p>
+ *
+ * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/${module.version}/references/configuration#queryupdate>configuration
+ * properties</a>.</p>
+ *
+ * <p>Query operations are restricted to users in the {@linkplain Spec#root root} {@linkplain Request#roles()
+ * role} , unless otherwise specified through configuration properties; update operations are restricted to users in the
+ * root role.</p>
+ *
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
 public final class Graphs implements _Service {
+
+	private static final String Path="/graphs";
+
 
 	private static final Shape GraphsShape=trait(RDF.VALUE, and(
 			trait(RDF.TYPE, only(VOID.DATASET))
 	));
 
-	private static final Pattern AbsoluteIRIPattern=Pattern.compile("^\\w+:\\S+$");
 
+	private final Setup setup=tool(Setup.Tool);
+	private final Index index=tool(Index.Tool);
+	private final Graph graph=tool(Graph.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
-	private boolean publik; // public availability of the endpoint
-
-	private Graph graph;
+	private final boolean publik=setup.get("graphs.public", false); // public availability of the endpoint
 
 
 	@Override public void load(final Tool.Loader tools) {
+		index.insert(Path, dispatcher()
 
-		final Setup setup=tools.get(Setup.Tool);
-		final Index index=tools.get(Index.Tool);
+				.get(this::get)
+				.put(this::put)
+				.delete(this::delete)
+				.post(this::post));
 
-		publik=setup.get("graphs.public", false);
+		// !!! port metadata
 
-		graph=tools.get(Graph.Tool);
-
-		index.insert("/graphs", new Dispatcher(map(
-
-				entry(_Request.GET, this::get), entry(_Request.PUT, this::put), entry(_Request.DELETE, this::delete), entry(_Request.POST, this::post)
-
-		)), map(
-
-				entry(RDFS.LABEL, literal("SPARQL 1.1 Graph Store Endpoint"))
-
-		));
+		//map(
+		//
+		//		entry(RDFS.LABEL, literal("SPARQL 1.1 Graph Store Endpoint"))
+		//
+		//)
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void get(final Tool.Loader tools, // https://www.w3.org/TR/sparql11-http-rdf-update/#http-get
-			final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
+	/*
+	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-get
+	 */
+	private void get(final Request request, final Response response) {
+		final boolean catalog=request.query().isEmpty();
 
-		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
-			request.map(graph).browse(connection -> {
+		final String target=graph(request);
+		final Iterable<String> accept=request.headers("Accept");
 
-				final boolean catalog=request.getQuery().isEmpty();
+		if ( target == null && !catalog ) {
 
-				final String target=graph(request);
-				final Iterable<String> accept=request.getHeaders("Accept");
+			response.status(Response.BadRequest).json(object(
+					field("cause", "parameter-missing"),
+					field("notes", "missing target graph parameter")
+			));
 
-				if ( target == null && !catalog ) {
+		} else if ( !publik && !request.role(Spec.root) ) {
 
-					throw new _LinkException(_Response.BadRequest, "malformed request");
+			refused(request, response);
 
-				} else if ( !publik && !request.isSysAdm() ) {
+		} else if ( catalog ) { // graph catalog
 
-					unauthorized(tools, request, response, sink);
+			final IRI focus=request.focus();
+			final Collection<Statement> model=new ArrayList<>();
 
-				} else if ( catalog ) { // graph catalog
+			try (
+					final RepositoryConnection connection=graph.connect();
+					final RepositoryResult<Resource> contexts=connection.getContextIDs()
+			) {
+				while ( contexts.hasNext() ) {
 
-					final IRI focus=iri(request.getTarget());
-					final Collection<Statement> model=new ArrayList<>();
+					final Resource context=contexts.next();
 
-					try (final RepositoryResult<Resource> contexts=connection.getContextIDs()) {
-						while ( contexts.hasNext() ) {
-
-							final Resource context=contexts.next();
-
-							model.add(statement(focus, RDF.VALUE, context));
-							model.add(statement(context, RDF.TYPE, VOID.DATASET));
-
-						}
-					}
-
-					response.setStatus(_Response.OK);
-
-					new _Transfer(request, response).model(model, GraphsShape);
-
-				} else {
-
-					final RDFWriterFactory factory=Formats.service(
-							RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, accept);
-
-					final RDFFormat format=factory.getRDFFormat();
-
-					final Resource context=target.isEmpty() ? null : iri(target);
-
-					response.setStatus(_Response.OK);
-					response.setHeader("Content-Type", format.getDefaultMIMEType());
-					response.setHeader("Content-Disposition", "attachment; filename=\"%s.%s\"",
-							target.isEmpty() ? "default" : target, format.getDefaultFileExtension());
-
-					response.setBody(stream -> connection.export(factory.getWriter(stream), context));
+					model.add(statement(focus, RDF.VALUE, context));
+					model.add(statement(context, RDF.TYPE, VOID.DATASET));
 
 				}
+			}
 
-				sink.accept(request, response);
+			response.status(Response.OK).rdf(model, GraphsShape);
 
-				return null;
+		} else {
 
-			});
+			final RDFWriterFactory factory=Formats.service(
+					RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, accept);
+
+			final RDFFormat format=factory.getRDFFormat();
+
+			final Resource context=target.isEmpty() ? null : iri(target);
+
+			try (final RepositoryConnection connection=graph.connect()) {
+				response.status(_Response.OK)
+
+						.header("Content-Type", format.getDefaultMIMEType())
+						.header("Content-Disposition", "attachment; filename=\"%s.%s\"",
+								target.isEmpty() ? "default" : target, format.getDefaultFileExtension())
+
+						.output(stream -> connection.export(factory.getWriter(stream), context));
+
+			}
 		}
 	}
 
-	private void put(final Tool.Loader tools, // https://www.w3.org/TR/sparql11-http-rdf-update/#http-put
-			final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
+	/*
+	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-put
+	 */
+	private void put(final Request request, final Response response) {
 
-		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
+		final String target=graph(request);
 
-			final String target=graph(request);
+		if ( target == null ) {
 
-			if ( target == null ) {
+			response.status(Response.BadRequest).json(object(
+					field("cause", "parameter-missing"),
+					field("notes", "missing target graph parameter")
+			));
 
-				throw new _LinkException(_Response.BadRequest, "malformed request");
+		} else if ( !request.role(Spec.root) ) {
 
-			} else if ( !request.isSysAdm() ) {
+			refused(request, response);
 
-				unauthorized(tools, request, response, sink);
+		} else {
 
-			} else {
+			final Resource context=target.isEmpty() ? null : iri(target);
+			final Iterable<String> content=request.headers("Content-Type");
 
-				final Resource context=target.isEmpty() ? null : iri(target);
-				final Iterable<String> content=request.getHeaders("Content-Type");
+			// !!! If a clients issues a POST or PUT with a content type that is not understood by the
+			// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
-				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
-				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
+			final RDFParserFactory factory=Formats.service( // !!! review fallback handling
+					RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
-				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
+			try (
+					final RepositoryConnection connection=graph.connect();
+					final InputStream input=request.input();
+			) {
 
-				try {
+				final boolean exists=exists(connection, context);
 
-					request.map(graph).update(connection -> {
+				connection.clear(context);
+				connection.add(input, request.base(), factory.getRDFFormat(), context);
 
-						try {
+				response.status(exists ? _Response.NoContent : _Response.Created);
 
-							final boolean exists=exists(connection, context);
+			} catch ( final IOException e ) {
 
-							connection.clear(context);
-							connection.add(request.getBody().get(), request.getBase(), factory.getRDFFormat(), context);
+				trace.warning(this, "unable to read RDF payload", e);
 
-							response.setStatus(exists ? _Response.NoContent : _Response.Created);
+				response.status(Response.InternalServerError).json(object(
+						field("cause", "payload-unreadable"),
+						field("notes", "I/O while reading RDF payload: see server logs for more detail")
+				));
 
-							return null;
+			} catch ( final RDFParseException e ) {
 
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
+				trace.warning(this, "malformed RDF payload", e);
 
-					});
+				response.status(Response.BadRequest).json(object(
+						field("cause", "payload-malformed"),
+						field("notes", "malformed RDF payload: "
+								+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
+				));
 
-				} catch ( final UncheckedIOException e ) {
+			} catch ( final RepositoryException e ) {
 
-					tools.get(Trace.Tool).warning(this, "unable to read RDF payload", e);
+				trace.warning(this, "unable to update graph "+context, e);
 
-					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
-
-				} catch ( final RDFParseException e ) {
-
-					tools.get(Trace.Tool).warning(this, "malformed RDF payload", e);
-
-					response.setStatus(_Response.BadRequest)
-							.setText("("+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage());
-
-				} catch ( final RepositoryException e ) {
-
-					tools.get(Trace.Tool).warning(this, "unable to update graph "+context, e);
-
-					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
-
-				}
+				response.status(Response.InternalServerError).json(object(
+						field("cause", "update-aborted"),
+						field("notes", "unable to update graph: see server logs for more detail")
+				));
 
 			}
 
-			sink.accept(request, response);
-
 		}
-
 	}
 
-	private void delete(final Tool.Loader tools, // https://www.w3.org/TR/sparql11-http-rdf-update/#http-delete
-			final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
+	/*
+	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-delete
+	 */
+	private void delete(final Request request, final Response response) {
 
-		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
+		final String target=graph(request);
 
-			final String target=graph(request);
+		if ( target == null ) {
 
-			if ( target == null ) {
+			response.status(Response.BadRequest).json(object(
+					field("cause", "parameter-missing"),
+					field("notes", "missing target graph parameter")
+			));
 
-				throw new _LinkException(_Response.BadRequest, "malformed request");
+		} else if ( !request.role(Spec.root) ) {
 
-			} else if ( !request.isSysAdm() ) {
+			refused(request, response);
 
-				unauthorized(tools, request, response, sink);
+		} else {
 
-			} else {
+			final Resource context=target.isEmpty() ? null : iri(target);
 
-				final Resource context=target.isEmpty() ? null : iri(target);
+			try (final RepositoryConnection connection=graph.connect()) {
 
-				try {
+				final boolean exists=exists(connection, context);
 
-					request.map(graph).update(connection -> {
+				connection.clear(context);
 
-						final boolean exists=exists(connection, context);
+				response.status(exists ? Response.NoContent : Response.NotFound).done();
 
-						connection.clear(context);
+			} catch ( final RepositoryException e ) {
 
-						response.setStatus(exists ? _Response.NoContent : _Response.NotFound);
+				trace.warning(this, "unable to update graph "+context, e);
 
-						return null;
-
-					});
-
-				} catch ( final RepositoryException e ) {
-
-					tools.get(Trace.Tool).warning(this, "unable to update graph "+context, e);
-
-					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
-
-				}
+				response.status(Response.InternalServerError).json(object(
+						field("cause", "update-aborted"),
+						field("notes", "unable to delete graph: see server logs for more detail")
+				));
 
 			}
 
-			sink.accept(request, response);
 		}
 
 	}
 
-	private void post(final Tool.Loader tools, // https://www.w3.org/TR/sparql11-http-rdf-update/#http-post
-			final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
+	/*
+	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-post
+	 */
+	private void post(final Request request, final Response response) {
 
 		// !!! support  "multipart/form-data"
 		// !!! support graph creation with IRI identifying the underlying Graph Store
 
-		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else {
+		final String target=graph(request);
 
-			final String target=graph(request);
+		if ( target == null ) {
 
-			if ( target == null ) {
+			response.status(Response.BadRequest).json(object(
+					field("cause", "parameter-missing"),
+					field("notes", "missing target graph parameter")
+			));
 
-				throw new _LinkException(_Response.BadRequest, "malformed request");
+		} else if ( !request.role(Spec.root) ) {
 
-			} else if ( !request.isSysAdm() ) {
+			refused(request, response);
 
-				unauthorized(tools, request, response, sink);
+		} else {
 
-			} else {
+			final Resource context=target.isEmpty() ? null : iri(target);
+			final Iterable<String> content=request.headers("Content-Type");
 
-				final Resource context=target.isEmpty() ? null : iri(target);
-				final Iterable<String> content=request.getHeaders("Content-Type");
+			// !!! If a clients issues a POST or PUT with a content type that is not understood by the
+			// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
-				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
-				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
+			final RDFParserFactory factory=Formats.service( // !!! review fallback handling
+					RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
-				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
+			try (
+					final RepositoryConnection connection=graph.connect();
+					final InputStream input=request.input()
+			) {
 
-				try {
+				final boolean exists=exists(connection, context);
 
-					request.map(graph).update(connection -> {
+				connection.add(input, request.base(), factory.getRDFFormat(), context);
 
-						final boolean exists=exists(connection, context);
 
-						try {
-							connection.add(request.getBody().get(), request.getBase(), factory.getRDFFormat(), context);
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
+				response.status(exists ? Response.NoContent : Response.Created).done();
 
-						response.setStatus(exists ? _Response.NoContent : _Response.Created);
+			} catch ( final IOException e ) {
 
-						return null;
+				trace.warning(this, "unable to read RDF payload", e);
 
-					});
+				response.status(Response.InternalServerError).json(object(
+						field("cause", "payload-unreadable"),
+						field("notes", "I/O while reading RDF payload: see server logs for more detail")
+				));
 
-				} catch ( final UncheckedIOException e ) {
+			} catch ( final RDFParseException e ) {
 
-					tools.get(Trace.Tool).warning(this, "unable to read RDF payload", e);
+				trace.warning(this, "malformed RDF payload", e);
 
-					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
+				response.status(Response.BadRequest).json(object(
+						field("cause", "payload-malformed"),
+						field("notes", "malformed RDF payload: "
+								+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
+				));
 
-				} catch ( final RDFParseException e ) {
+			} catch ( final RepositoryException e ) {
 
-					tools.get(Trace.Tool).warning(this, "malformed RDF payload", e);
+				trace.warning(this, "unable to update graph "+context, e);
 
-					response.setStatus(_Response.BadRequest)
-							.setText("("+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage());
-
-				} catch ( final RepositoryException e ) {
-
-					tools.get(Trace.Tool).warning(this, "unable to update graph "+context, e);
-
-					response.setStatus(_Response.InternalServerError).setText(e.getMessage());
-
-				}
-
-				sink.accept(request, response);
+				response.status(Response.InternalServerError).json(object(
+						field("cause", "update-aborted"),
+						field("notes", "unable to update graph: see server logs for more detail")
+				));
 
 			}
+
 		}
 
 	}
@@ -366,13 +371,13 @@ public final class Graphs implements _Service {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String graph(final _Request request) {
+	private String graph(final Request request) {
 
-		final List<String> defaults=request.getParameters("default");
-		final List<String> nameds=request.getParameters("graph");
+		final List<String> defaults=request.parameters("default");
+		final List<String> nameds=request.parameters("graph");
 
 		final boolean dflt=defaults.size() == 1 && defaults.get(0).isEmpty();
-		final boolean named=nameds.size() == 1 && AbsoluteIRIPattern.matcher(nameds.get(0)).matches();
+		final boolean named=nameds.size() == 1 && Values.AbsoluteIRIPattern.matcher(nameds.get(0)).matches();
 
 		return dflt && named ? null : dflt ? "" : named ? nameds.get(0) : null;
 	}

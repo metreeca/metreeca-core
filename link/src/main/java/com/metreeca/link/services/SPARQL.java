@@ -46,7 +46,14 @@ import static java.lang.Boolean.parseBoolean;
  * SPARQL 1.1 Query/Update endpoint.
  *
  * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
- * Graph#Tool graph database} at the server-relative {@value #Path} path.</p>
+ * Graph#Tool graph database} at the server-relative <code>{@value #Path}</code> path.</p>
+ *
+ * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/${module.version}/references/configuration#queryupdate>configuration
+ * properties</a>.</p>
+ *
+ * <p>Query operations are restricted to users in the {@linkplain Spec#root root} {@linkplain Request#roles()
+ * role} , unless otherwise specified through configuration properties; update operations are restricted to users in the
+ * root role.</p>
  *
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
@@ -82,9 +89,9 @@ public class SPARQL implements Service {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private void handle(final Request request, final Response response) {
-		try (final RepositoryConnection connection1=graph.connect()) {
+		try (final RepositoryConnection connection=graph.connect()) {
 
-			final Operation operation=operation(request, connection1);
+			final Operation operation=operation(request, connection);
 			final String accept=request.header("Accept").orElse("");
 
 			if ( operation == null ) { // !!! return void description for GET

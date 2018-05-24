@@ -47,8 +47,12 @@ import static java.util.stream.Collectors.toList;
 
 public final class Values {
 
-	public static final Charset UTF8=Charset.forName("UTF-8");
-	public static final Pattern IRIPattern=Pattern.compile("\\w+:.*");
+	public static final Charset UTF8=Charset.forName("UTF-8"); // !!! share with IO
+
+	/**
+	 * A pattern matching absolute IRIs.
+	 */
+	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^\\w+:\\S+$");
 
 
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
@@ -72,12 +76,10 @@ public final class Values {
 	/**
 	 * Internal namespace for local user references and predicates (<code>{@value}</code>).
 	 */
-	public static final String User="usr:"; // !!! migrate to app:/
-
-	/**
-	 * Internal namespace for local user references and predicates (<code>{@value}</code>).
-	 */
 	public static final String Internal="app:/";
+
+
+	public static final String User=Internal;
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
