@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Handler.refused;
 import static com.metreeca.next.handlers.Dispatcher.dispatcher;
 import static com.metreeca.spec.Shape.only;
@@ -50,8 +51,6 @@ import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
-import static com.metreeca.spec.things._JSON.field;
-import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -119,9 +118,9 @@ public final class Graphs implements _Service {
 
 		if ( target == null && !catalog ) {
 
-			response.status(Response.BadRequest).json(object(
-					field("cause", "parameter-missing"),
-					field("notes", "missing target graph parameter")
+			response.status(Response.BadRequest).json(error(
+					"parameter-missing",
+					"missing target graph parameter"
 			));
 
 		} else if ( !publik && !request.role(Spec.root) ) {
@@ -159,7 +158,7 @@ public final class Graphs implements _Service {
 			final Resource context=target.isEmpty() ? null : iri(target);
 
 			try (final RepositoryConnection connection=graph.connect()) {
-				response.status(_Response.OK)
+				response.status(Response.OK)
 
 						.header("Content-Type", format.getDefaultMIMEType())
 						.header("Content-Disposition", "attachment; filename=\"%s.%s\"",
@@ -180,10 +179,7 @@ public final class Graphs implements _Service {
 
 		if ( target == null ) {
 
-			response.status(Response.BadRequest).json(object(
-					field("cause", "parameter-missing"),
-					field("notes", "missing target graph parameter")
-			));
+			response.status(Response.BadRequest).json(error("parameter-missing", "missing target graph parameter"));
 
 		} else if ( !request.role(Spec.root) ) {
 
@@ -210,35 +206,29 @@ public final class Graphs implements _Service {
 				connection.clear(context);
 				connection.add(input, request.base(), factory.getRDFFormat(), context);
 
-				response.status(exists ? _Response.NoContent : _Response.Created);
+				response.status(exists ? Response.NoContent : Response.Created);
 
 			} catch ( final IOException e ) {
 
 				trace.warning(this, "unable to read RDF payload", e);
 
-				response.status(Response.InternalServerError).json(object(
-						field("cause", "payload-unreadable"),
-						field("notes", "I/O while reading RDF payload: see server logs for more detail")
+				response.status(Response.InternalServerError).cause(e).json(error(
+						"payload-unreadable", "I/O while reading RDF payload: see server logs for more detail"
 				));
 
 			} catch ( final RDFParseException e ) {
 
 				trace.warning(this, "malformed RDF payload", e);
 
-				response.status(Response.BadRequest).json(object(
-						field("cause", "payload-malformed"),
-						field("notes", "malformed RDF payload: "
-								+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
-				));
+				response.status(Response.BadRequest).cause(e).json(error("payload-malformed",
+						"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()));
 
 			} catch ( final RepositoryException e ) {
 
 				trace.warning(this, "unable to update graph "+context, e);
 
-				response.status(Response.InternalServerError).json(object(
-						field("cause", "update-aborted"),
-						field("notes", "unable to update graph: see server logs for more detail")
-				));
+				response.status(Response.InternalServerError).cause(e).json(error(
+						"update-aborted", "unable to update graph: see server logs for more detail"));
 
 			}
 
@@ -254,10 +244,7 @@ public final class Graphs implements _Service {
 
 		if ( target == null ) {
 
-			response.status(Response.BadRequest).json(object(
-					field("cause", "parameter-missing"),
-					field("notes", "missing target graph parameter")
-			));
+			response.status(Response.BadRequest).json(error("parameter-missing", "missing target graph parameter"));
 
 		} else if ( !request.role(Spec.root) ) {
 
@@ -279,9 +266,8 @@ public final class Graphs implements _Service {
 
 				trace.warning(this, "unable to update graph "+context, e);
 
-				response.status(Response.InternalServerError).json(object(
-						field("cause", "update-aborted"),
-						field("notes", "unable to delete graph: see server logs for more detail")
+				response.status(Response.InternalServerError).json(error(
+						"update-aborted", "unable to delete graph: see server logs for more detail"
 				));
 
 			}
@@ -302,10 +288,7 @@ public final class Graphs implements _Service {
 
 		if ( target == null ) {
 
-			response.status(Response.BadRequest).json(object(
-					field("cause", "parameter-missing"),
-					field("notes", "missing target graph parameter")
-			));
+			response.status(Response.BadRequest).json(error("parameter-missing", "missing target graph parameter"));
 
 		} else if ( !request.role(Spec.root) ) {
 
@@ -338,29 +321,20 @@ public final class Graphs implements _Service {
 
 				trace.warning(this, "unable to read RDF payload", e);
 
-				response.status(Response.InternalServerError).json(object(
-						field("cause", "payload-unreadable"),
-						field("notes", "I/O while reading RDF payload: see server logs for more detail")
-				));
+				response.status(Response.InternalServerError).json(error("payload-unreadable", "I/O while reading RDF payload: see server logs for more detail"));
 
 			} catch ( final RDFParseException e ) {
 
 				trace.warning(this, "malformed RDF payload", e);
 
-				response.status(Response.BadRequest).json(object(
-						field("cause", "payload-malformed"),
-						field("notes", "malformed RDF payload: "
-								+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
-				));
+				response.status(Response.BadRequest).json(error("payload-malformed", "malformed RDF payload: "
+						+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()));
 
 			} catch ( final RepositoryException e ) {
 
 				trace.warning(this, "unable to update graph "+context, e);
 
-				response.status(Response.InternalServerError).json(object(
-						field("cause", "update-aborted"),
-						field("notes", "unable to update graph: see server logs for more detail")
-				));
+				response.status(Response.InternalServerError).json(error("update-aborted", "unable to update graph: see server logs for more detail"));
 
 			}
 

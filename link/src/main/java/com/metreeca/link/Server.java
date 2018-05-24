@@ -31,10 +31,9 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Wrapper.wrapper;
 import static com.metreeca.next.handlers.Router.router;
-import static com.metreeca.spec.things._JSON.field;
-import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
@@ -131,7 +130,10 @@ public final class Server implements Handler {
 			trace.error(this, format("%s %s > internal error", request.method(), request.focus()), e);
 
 			if ( !response.committed() ) {
-				response.status(Response.InternalServerError).cause(e).json(object(field("notes", "unable to process request: see server logs for details")));
+				response.status(Response.InternalServerError).cause(e).json(error(
+						"exception-untrapped",
+						"unable to process request: see server logs for details"
+				));
 			}
 
 		}
@@ -160,13 +162,17 @@ public final class Server implements Handler {
 					final int status=reader.status();
 					final Throwable cause=reader.cause();
 
-					trace.entry(status < 400 ? Level.Info : status < 500 ? Level.Warning : Level.Error, this, format("%s %s > %d", request.method(), request.focus(), status), cause);
+					trace.entry(status < 400 ? Level.Info : status < 500 ? Level.Warning : Level.Error,
+							this, format("%s %s > %d", request.method(), request.focus(), status), cause);
 
 					response.copy(reader);
 
 					// if no charset is specified, add a default one to prevent the container from adding its own…
 
-					reader.header("Content-Type").filter(type -> !CharsetPattern.matcher(type).find()).filter(type -> type.startsWith("text/") || type.equals("application/json")).ifPresent(type -> response.header("Content-Type", type+";charset=UTF-8"));
+					reader.header("Content-Type")
+							.filter(type -> !CharsetPattern.matcher(type).find())
+							.filter(type -> type.startsWith("text/") || type.equals("application/json"))
+							.ifPresent(type -> response.header("Content-Type", type+";charset=UTF-8"));
 
 					if ( status == Response.OK ) {
 						response.header("Vary", "Accept", "Prefer", "");

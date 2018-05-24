@@ -33,10 +33,9 @@ import org.eclipse.rdf4j.rio.*;
 import java.util.List;
 import java.util.Map;
 
+import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Handler.refused;
 import static com.metreeca.next.handlers.Dispatcher.dispatcher;
-import static com.metreeca.spec.things._JSON.field;
-import static com.metreeca.spec.things._JSON.object;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;
@@ -96,9 +95,9 @@ public class SPARQL implements Service {
 
 			if ( operation == null ) { // !!! return void description for GET
 
-				response.status(Response.BadRequest).json(object(
-						field("cause", "parameter-missing"),
-						field("notes", "missing query/update parameter")
+				response.status(Response.BadRequest).json(error(
+						"parameter-missing",
+						"missing query/update parameter"
 				));
 
 			} else if ( !(publik && operation instanceof Query || request.role(Spec.root)) ) {
@@ -194,59 +193,59 @@ public class SPARQL implements Service {
 
 			} else {
 
-				response.status(Response.NotImplemented).json(Handler.error("operation-unsupported", operation.getClass().getName()));
+				response.status(Response.NotImplemented).json(error("operation-unsupported", operation.getClass().getName()));
 
 			}
 
 		} catch ( final MalformedQueryException e ) {
 
-			response.status(Response.BadRequest).cause(e).json(object(
-					field("cause", "query-malformed"),
-					field("notes", e.getMessage())
+			response.status(Response.BadRequest).cause(e).json(error(
+					"query-malformed",
+					e.getMessage()
 			));
 
 		} catch ( final IllegalArgumentException e ) {
 
-			response.status(Response.BadRequest).cause(e).json(object(
-					field("cause", "request-malformed"),
-					field("notes", e.getMessage())
+			response.status(Response.BadRequest).cause(e).json(error(
+					"request-malformed",
+					e.getMessage()
 			));
 
 		} catch ( final UnsupportedOperationException e ) {
 
-			response.status(Response.NotImplemented).cause(e).json(object(
-					field("cause", "operation-unsupported"),
-					field("notes", e.getMessage())
+			response.status(Response.NotImplemented).cause(e).json(error(
+					"operation-unsupported",
+					e.getMessage()
 			));
 
 		} catch ( final QueryEvaluationException e ) {
 
 			// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
 
-			response.status(Response.InternalServerError).cause(e).json(object(
-					field("cause", "query-evaluation"),
-					field("notes", e.getMessage())
+			response.status(Response.InternalServerError).cause(e).json(error(
+					"query-evaluation",
+					e.getMessage()
 			));
 
 		} catch ( final UpdateExecutionException e ) {
 
-			response.status(Response.InternalServerError).cause(e).json(object(
-					field("cause", "update-evaluation"),
-					field("notes", e.getMessage())
+			response.status(Response.InternalServerError).cause(e).json(error(
+					"update-evaluation",
+					e.getMessage()
 			));
 
 		} catch ( final TupleQueryResultHandlerException e ) {
 
-			response.status(Response.InternalServerError).cause(e).json(object(
-					field("cause", "response-error"),
-					field("notes", e.getMessage())
+			response.status(Response.InternalServerError).cause(e).json(error(
+					"response-error",
+					e.getMessage()
 			));
 
 		} catch ( final RuntimeException e ) {
 
-			response.status(Response.InternalServerError).cause(e).json(object(
-					field("cause", "repository-error"),
-					field("notes", e.getMessage())
+			response.status(Response.InternalServerError).cause(e).json(error(
+					"repository-error",
+					e.getMessage()
 			));
 
 		}
