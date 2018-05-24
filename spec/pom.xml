@@ -50,8 +50,17 @@
 	<dependencies>
 
 		<dependency> <!-- version set by bom  -->
+
 			<groupId>org.eclipse.rdf4j</groupId>
 			<artifactId>rdf4j-runtime</artifactId>
+
+			<exclusions>
+				<exclusion> <!-- prevent issues with multiple SLF4J bindings -->
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
+
 		</dependency>
 
 		<dependency> <!-- expose to compile scope / version set by bom  -->
