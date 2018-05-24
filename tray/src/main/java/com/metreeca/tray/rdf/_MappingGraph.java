@@ -23,13 +23,13 @@ import org.eclipse.rdf4j.repository.Repository;
 import java.util.function.Supplier;
 
 
-final class MappingGraph extends Graph {
+final class _MappingGraph extends Graph {
 
 	private final String external;
 	private final String internal;
 
 
-	MappingGraph(final String external, final String internal,
+	_MappingGraph(final String external, final String internal,
 			final String description, final IsolationLevel isolation, final Supplier<Repository> connector) {
 
 		super(description, isolation, () -> {

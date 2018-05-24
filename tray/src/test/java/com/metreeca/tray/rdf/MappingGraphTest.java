@@ -24,6 +24,7 @@ import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.IsolationLevels;
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -160,7 +161,7 @@ public final class MappingGraphTest {
 
 			query.evaluate(collector);
 
-			assertEquals("evaluate results", expected, list(query.evaluate()));
+			assertEquals("evaluate results", expected, Iterations.asList(query.evaluate()));
 			assertEquals("evaluate handler", expected, collector.getBindingSets());
 
 			return null;
@@ -180,7 +181,7 @@ public final class MappingGraphTest {
 
 			query.evaluate(collector);
 
-			assertEquals("evaluate results", expected, list(query.evaluate()));
+			assertEquals("evaluate results", expected, Iterations.asList(query.evaluate()));
 			assertEquals("evaluate handler", expected, collector.getStatements());
 
 			return null;
@@ -206,7 +207,7 @@ public final class MappingGraphTest {
 	@Test public void testGetContextIDs() {
 		mapping(BIRT, graph -> graph.browse(connection -> {
 
-			assertEquals("mapped context IRIs", singleton(Context), set(connection.getContextIDs()));
+			assertEquals("mapped context IRIs", singleton(Context), Iterations.asSet(connection.getContextIDs()));
 
 			return null;
 
@@ -234,11 +235,11 @@ public final class MappingGraphTest {
 
 			assertEquals("mapped inferred",
 					singleton(statement(Employee1370, Account, Customer103, Context)),
-					set(connection.getStatements(Employee1370, Account, Customer103, true, Context)));
+					Iterations.asSet(connection.getStatements(Employee1370, Account, Customer103, true, Context)));
 
 			assertEquals("mapped default",
 					singleton(statement(Employee1370, Account, Customer103, Context)),
-					set(connection.getStatements(Employee1370, Account, Customer103, Context)));
+					Iterations.asSet(connection.getStatements(Employee1370, Account, Customer103, Context)));
 
 			return null;
 
@@ -273,7 +274,7 @@ public final class MappingGraphTest {
 			try (final RepositoryConnection direct=repository.getConnection()) {
 				assertIsomorphic(
 						singleton(statement(internal("s"), internal("p"), internal("o"))),
-						list(direct.getStatements(null, null, null))
+						Iterations.asList(direct.getStatements(null, null, null))
 				);
 			}
 
@@ -310,7 +311,7 @@ public final class MappingGraphTest {
 		mapping(BIRT, graph -> graph.browse(connection -> {
 
 			final Set<Namespace> expected=singleton(new SimpleNamespace("", External+"terms#"));
-			final Set<Namespace> actual=set(connection.getNamespaces());
+			final Set<Namespace> actual=Iterations.asSet(connection.getNamespaces());
 
 			assertTrue("evaluate results", actual.containsAll(expected));
 

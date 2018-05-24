@@ -18,8 +18,6 @@
 package com.metreeca.spec.things;
 
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
-import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
@@ -300,17 +298,6 @@ public final class ValuesTest {
 		connection.export(new StatementCollector(model), contexts);
 
 		return model;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static <R, X extends RuntimeException> Set<R> set(final CloseableIteration<R, X> results) {
-		return Iterations.asSet(results);
-	}
-
-	public static <R, X extends RuntimeException> List<R> list(final CloseableIteration<R, X> result) {
-		return Iterations.asList(result);
 	}
 
 

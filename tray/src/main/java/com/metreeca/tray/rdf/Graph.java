@@ -206,7 +206,7 @@ public abstract class Graph implements AutoCloseable {
 			throw new NullPointerException("null internal");
 		}
 
-		return external.isEmpty() || internal.isEmpty() || external.equals(internal) ? this : new MappingGraph(
+		return external.isEmpty() || internal.isEmpty() || external.equals(internal) ? this : new _MappingGraph(
 				external, internal, info, isolation, () -> repository
 		);
 	}
