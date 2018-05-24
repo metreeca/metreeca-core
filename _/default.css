@@ -1,5 +1,18 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All Rights Reserved.
+ * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca.
+ *
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 @import url(//fonts.googleapis.com/css?family=Roboto:100,300|Roboto+Condensed:300,700);
 @import url(//fonts.googleapis.com/css?family=Roboto+Mono:400,700);
@@ -164,7 +177,7 @@ body > input:checked ~ nav > header ~ * {
 	display: block;
 }
 
-/**** Navigation/Facets ***********************************************************************************************/
+/* !!! to be removed *** Navigation/Facets ***********************************************************************************************/
 
 body > nav > div > select {
 	width: 100%;
@@ -236,6 +249,14 @@ body > nav > .path > a {
 	color: #999;
 }
 
+/**** Navigation/Versions *********************************************************************************************/
+
+body > nav > .versions > select {
+	width: 100%;
+	border-style: solid;
+	padding: 0.5em 0.5em;
+}
+
 /**** Navigation/TOC **************************************************************************************************/
 
 body > nav > .toc > h1,
@@ -301,8 +322,15 @@ body > main > article {
 	max-width: 45rem;
 }
 
-body > main > article > dl:only-child {
-	margin-top: 1em;
+body > main > article > dl:first-child {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+body > main > article > dl:first-child:not(:only-child) {
+	padding-bottom: 1em;
+	margin-bottom: 1em;
+	border-bottom-style: solid;
 }
 
 body > main > article > dl:only-child:empty::before { /* document catalog */
@@ -543,7 +571,8 @@ abbr {
 
 code {
 	white-space: pre;
-	font-size: 93%;
+	letter-spacing: -0.01em;
+	font-size: 90%;
 }
 
 /**** Panels **********************************************************************************************************/

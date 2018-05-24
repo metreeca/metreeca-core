@@ -10,7 +10,7 @@ Standard system-managed services are exposed as REST APIs, enabling third-party 
 
 System REST APIs return and accept RDF payloads as defined by associated payload [shapes](../../com.metreeca.spec/references/spec-language), with full support for HTTP content negotiation over available RDF formats, including [idiomatic JSON](../../com.metreeca.spec/references/idiomatic-json) serialization.
 
-The default system configuration includes all the standard services documented in the following sections. Custom configuration may selectively enable required system services by including the fully qualified name of the relevant [service](../javadocs/com/metreeca/link/services/package-summary.html) class in the dedicated [service loader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) configuration file at `META-INF/services/com.metreeca.link.Service`.
+The default system configuration includes all the standard services documented in the following sections. Custom configuration may selectively enable required system services by including the fully qualified name of the relevant [service](../apidocs/com/metreeca/link/services/package-summary.html) class in the dedicated [service loader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) configuration file at `META-INF/services/com.metreeca.link.Service`.
 
 # Root
 

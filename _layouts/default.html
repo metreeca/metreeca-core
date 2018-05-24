@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 
-<!-- Copyright © 2013-2018 Metreeca srl. All Rights Reserved. -->
+<!--
+  ~ Copyright © 2013-2018 Metreeca srl. All rights reserved.
+  ~
+  ~ This file is part of Metreeca.
+  ~
+  ~ Metreeca is free software: you can redistribute it and/or modify it under the terms
+  ~ of the GNU Affero General Public License as published by the Free Software Foundation,
+  ~ either version 3 of the License, or(at your option) any later version.
+  ~
+  ~ Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  ~ without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  ~ See the GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with Metreeca.
+  ~ If not, see <http://www.gnu.org/licenses/>.
+  -->
 
 <html>
 
@@ -12,36 +27,7 @@
 
     <body>
 
-        <input id="toggle" type="checkbox">
-
-        <nav>
-
-            {% include side.html %}
-
-            <div class="path">
-
-                <a href="/">Documentation</a>
-
-                {% if page.module %}
-
-                <a href="/#version={{ page.version | uri_escape }}">Version {{ page.version }}</a>
-                <a href="/#version={{ page.version | uri_escape }}&module={{ page.module | remove: 'Metreeca ' | uri_escape }}">{{ page.module | remove: 'Metreeca ' }}</a>
-
-                {% endif %}
-
-                {% if page.title %}
-
-                <span onclick="document.querySelector('main > header').scrollIntoView()">{{ page.title | remove: 'Metreeca ' }}</span>
-
-                {% endif %}
-
-            </div>
-
-            <div class="toc">
-                {% include toc.liquid html=content %}
-            </div>
-
-        </nav>
+        {% include side.html %}
 
         {% include main.html %}
 
