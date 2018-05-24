@@ -209,7 +209,7 @@ public abstract class XML<T extends XML<T>> implements Task {
 					.set(XMLParserSettings.CUSTOM_XML_READER, reader)
 					.set(XMLParserSettings.PARSE_STANDALONE_DOCUMENTS, true)
 					.setRDFHandler(collector)
-					.parse(new StringReader(""), Values.User);
+					.parse(new StringReader(""), Values.Internal);
 
 		} catch ( final IOException unexpected ) {
 			throw new UncheckedIOException(unexpected);
@@ -245,7 +245,7 @@ public abstract class XML<T extends XML<T>> implements Task {
 
 			// migrate elements from the default namespace to the work namespace
 
-			super.startElement(uri.isEmpty() ? Values.User : uri, name, qname, attributes);
+			super.startElement(uri.isEmpty() ? Values.Internal : uri, name, qname, attributes);
 		}
 
 

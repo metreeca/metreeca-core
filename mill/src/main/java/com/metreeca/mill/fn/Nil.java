@@ -31,7 +31,7 @@ import org.eclipse.rdf4j.query.algebra.evaluation.function.Function;
  */
 public class Nil implements Function {
 
-	private static final String Space=Values.User;
+	private static final String Space=Values.Internal;
 	private static final String Name="nil";
 
 

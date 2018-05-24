@@ -62,7 +62,7 @@ public final class Saxon {
 
 		xquery.setLanguageVersion("3.1");
 
-		xquery.declareNamespace("usr", Values.User);
+		xquery.declareNamespace("usr", Values.Internal);
 		xquery.declareNamespace("html", "http://www.w3.org/1999/xhtml");
 		xquery.declareNamespace("rdf", RDF.NAMESPACE);
 		xquery.declareNamespace("rdfs", RDFS.NAMESPACE);

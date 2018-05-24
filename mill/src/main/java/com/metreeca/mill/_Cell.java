@@ -92,7 +92,7 @@ public final class _Cell { // !!! migrate/merge to jeep
 				}
 			}
 
-		}).parse(reader, Values.User);
+		}).parse(reader, Values.Internal);
 
 		return items.entrySet().stream()
 				.map(entry -> cell(entry.getKey(), entry.getValue()))

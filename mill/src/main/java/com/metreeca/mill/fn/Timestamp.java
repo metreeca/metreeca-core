@@ -36,7 +36,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class Timestamp implements Function {
 
-	private static final String Space=Values.User;
+	private static final String Space=Values.Internal;
 	private static final String Name="timestamp";
 
 

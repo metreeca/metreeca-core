@@ -39,7 +39,7 @@ import static java.lang.Character.toLowerCase;
 public final class Downcase extends ExtensionFunctionDefinition implements Function {
 
 	private static final String Prefix="usr";
-	private static final String Space=Values.User;
+	private static final String Space=Values.Internal;
 	private static final String Name="downcase";
 
 

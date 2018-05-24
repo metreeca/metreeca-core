@@ -190,7 +190,7 @@ public final class Item implements Task {
 
 			return Stream.of(cell(iri, values.entrySet().stream()
 					.filter(e -> !e.getValue().isEmpty())
-					.map(e -> statement(iri, Values.iri(Values.User, e.getKey()), literal(e.getValue())))
+					.map(e -> statement(iri, Values.iri(Values.Internal, e.getKey()), literal(e.getValue())))
 					.collect(toList())));
 
 		});
@@ -211,7 +211,7 @@ public final class Item implements Task {
 				final Resource focus=item.focus();
 				final Collection<Statement> model=item.model();
 
-				final IRI link=Values.iri(Values.User, placeholder);
+				final IRI link=Values.iri(Values.Internal, placeholder);
 
 				return model.stream()
 						.filter(s -> s.getSubject().equals(focus) && s.getPredicate().equals(link))

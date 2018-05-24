@@ -35,7 +35,7 @@ import org.eclipse.rdf4j.query.algebra.evaluation.function.Function;
 public final class Format extends ExtensionFunctionDefinition implements Function {
 
 	private static final String Prefix="usr";
-	private static final String Space=Values.User;
+	private static final String Space=Values.Internal;
 	private static final String Name="format";
 
 

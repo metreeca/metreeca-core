@@ -46,7 +46,7 @@ public class Template implements Task { // !!! merge into RDF
 
 		try {
 
-			this.template=Rio.parse(new StringReader(template), Values.User, RDFFormat.TURTLE);
+			this.template=Rio.parse(new StringReader(template), Values.Internal, RDFFormat.TURTLE);
 
 		} catch ( final IOException unexpected ) {
 			throw new UncheckedIOException(unexpected);

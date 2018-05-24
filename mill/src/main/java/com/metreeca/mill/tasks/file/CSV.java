@@ -53,7 +53,7 @@ import static java.lang.String.format;
  */
 public final class CSV implements Task {
 
-	private static final IRI Record=iri(User, "Record");
+	private static final IRI Record=iri(Internal, "Record");
 
 
 	// !!! escape
@@ -128,7 +128,7 @@ public final class CSV implements Task {
 				// !!! excel-style links if no header is present/defined
 
 				for (final Map.Entry<String, Integer> field : fields.entrySet()) {
-					links[field.getValue()]=iri(User, field.getKey().trim());
+					links[field.getValue()]=iri(Internal, field.getKey().trim());
 				}
 
 				return StreamSupport.stream(records.spliterator(), true).map(record -> {

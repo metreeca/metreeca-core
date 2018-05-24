@@ -60,7 +60,7 @@ import static com.metreeca.tray.sys.Trace.clip;
  */
 public final class _RDF implements Task { // !!! rename to avoid clashed with RDF vocabulary
 
-	private String base=Values.User;
+	private String base=Values.Internal;
 	private RDFFormat format;
 
 	private final ParserConfig config=new ParserConfig();

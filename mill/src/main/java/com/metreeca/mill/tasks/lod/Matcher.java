@@ -45,7 +45,7 @@ public abstract class Matcher<T extends Matcher<T>> implements Task {
 	private static final int ReadTimeout=5*1000;
 
 
-	private static final IRI Match=iri(Values.User, "match");
+	private static final IRI Match=iri(Values.Internal, "match");
 
 
 	private Task preprocessor;
@@ -69,7 +69,7 @@ public abstract class Matcher<T extends Matcher<T>> implements Task {
 
 	public T link(final String link) {
 
-		this.link=link == null ? null : iri(Values.User, link);
+		this.link=link == null ? null : iri(Values.Internal, link);
 
 		return self();
 	}

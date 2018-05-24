@@ -116,7 +116,7 @@ public final class _Query implements Task { // !!! merge into SPARQL?
 							final Value value=binding.getValue();
 
 							if ( !name.equals("this") ) {
-								model.add(statement(focus, iri(Values.User, name), value));
+								model.add(statement(focus, iri(Values.Internal, name), value));
 							}
 						}
 

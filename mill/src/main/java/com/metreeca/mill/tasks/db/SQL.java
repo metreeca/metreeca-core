@@ -51,7 +51,7 @@ import static java.lang.String.format;
  * <p>Each record in the result set is converted to a cell according to the following template:</p>
  *
  * <pre><code>
- *     [] &lt;{@value Values#User}<em>field-name</em>&gt; <em>value</em>;
+ *     [] &lt;{@value Values#Internal}<em>field-name</em>&gt; <em>value</em>;
  *          … .
  *  </code></pre>
  *
@@ -132,7 +132,7 @@ public final class SQL implements Task {
 										final Object object=set.getObject(i);
 
 										if ( object != null ) {
-											model.add(statement(focus, iri(Values.User, name), literal(object)));
+											model.add(statement(focus, iri(Values.Internal, name), literal(object)));
 										}
 
 									} catch ( final SQLException e ) {

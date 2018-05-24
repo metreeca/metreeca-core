@@ -74,12 +74,9 @@ public final class Values {
 
 
 	/**
-	 * Internal namespace for local user references and predicates (<code>{@value}</code>).
+	 * Internal namespace for local references and predicates (<code>{@value}</code>).
 	 */
-	public static final String Internal="app:/";
-
-
-	public static final String User=Internal;
+	public static final String Internal="app://local/";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
