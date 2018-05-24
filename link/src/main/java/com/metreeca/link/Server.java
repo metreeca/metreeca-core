@@ -200,13 +200,18 @@ public final class Server implements Handler {
 
 					writer.copy(request)
 
-							.user(rewriter.internal(request.user())).roles(request.roles().stream().map(rewriter::internal).collect(toSet())).base(rewriter.internal(request.base()))
+							.user(rewriter.internal(request.user()))
+							.roles(request.roles().stream().map(rewriter::internal).collect(toSet()))
+
+							.base(rewriter.internal(request.base()))
 
 							.query(rewriter.internal(request.query()))
 
-							.parameters(request.parameters().map(h -> new SimpleImmutableEntry<>(h.getKey(), h.getValue().stream().map(rewriter::internal).collect(toList()))))
+							.parameters(request.parameters().map(h -> new SimpleImmutableEntry<>(h.getKey(),
+									h.getValue().stream().map(rewriter::internal).collect(toList()))))
 
-							.headers(request.headers().map(h -> new SimpleImmutableEntry<>(h.getKey(), h.getValue().stream().map(rewriter::internal).collect(toList()))))
+							.headers(request.headers().map(h -> new SimpleImmutableEntry<>(h.getKey(),
+									h.getValue().stream().map(rewriter::internal).collect(toList()))))
 
 							.body(() -> rewriter.internal(request.input()), () -> rewriter.internal(request.reader()));
 				},
@@ -217,7 +222,8 @@ public final class Server implements Handler {
 
 					response.copy(reader)
 
-							.headers(reader.headers().map(h -> new SimpleImmutableEntry<>(h.getKey(), h.getValue().stream().map(rewriter::external).collect(toList()))));
+							.headers(reader.headers().map(h -> new SimpleImmutableEntry<>(h.getKey(),
+									h.getValue().stream().map(rewriter::external).collect(toList()))));
 
 					if ( reader.binary() ) {
 

@@ -21,6 +21,7 @@ import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.JSONAdapter;
 import com.metreeca.spec.things.Formats;
+import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things._JSON;
 import com.metreeca.tray.IO;
 
@@ -412,7 +413,7 @@ public final class Request {
 				throw new NullPointerException("null base");
 			}
 
-			if ( !base.matches("^\\w+:.*") ) {
+			if ( !Values.AbsoluteIRIPattern.matcher(base).matches() ) {
 				throw new IllegalArgumentException("not an absolute IRI base");
 			}
 
@@ -463,6 +464,8 @@ public final class Request {
 			return this;
 		}
 
+		// !!! null value -> expand current value >>> review/document/remove
+
 		public Writer parameter(final String name, final String... values) {
 			return parameter(name, asList(values));
 		}
@@ -477,11 +480,10 @@ public final class Request {
 				throw new NullPointerException("null values");
 			}
 
-			if ( values.contains(null) ) {
-				throw new NullPointerException("null value");
-			}
-
-			request.parameters.compute(name, (key, current) -> unmodifiableList(values.stream().flatMap(value -> value.isEmpty() ? current == null ? Stream.empty() : current.stream() : Stream.of(value)).collect(toList())));
+			request.parameters.compute(name, (key, current) -> unmodifiableList(values.stream()
+					.flatMap(value -> value != null ? Stream.of(value) : current != null ? current.stream() : Stream.empty())
+					.collect(toList())
+			));
 
 			return this;
 		}
@@ -516,7 +518,11 @@ public final class Request {
 				throw new NullPointerException("null value");
 			}
 
-			request.headers.compute(title(name), (key, current) -> unmodifiableList(values.stream().flatMap(value -> value.isEmpty() ? current == null ? Stream.empty() : current.stream() : Stream.of(value)).distinct().collect(toList())));
+			request.headers.compute(title(name), (key, current) -> unmodifiableList(values.stream()
+					.flatMap(value -> value.isEmpty() ? current == null ? Stream.empty() : current.stream() : Stream.of(value))
+					.distinct()
+					.collect(toList())
+			));
 
 			return this;
 		}

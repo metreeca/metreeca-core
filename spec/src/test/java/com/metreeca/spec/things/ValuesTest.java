@@ -19,6 +19,7 @@ package com.metreeca.spec.things;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
@@ -292,11 +293,11 @@ public final class ValuesTest {
 	}
 
 
-	public static Model export(final RepositoryConnection connection) {
+	public static Model export(final RepositoryConnection connection, final Resource... contexts) {
 
 		final Model model=new TreeModel();
 
-		connection.export(new StatementCollector(model));
+		connection.export(new StatementCollector(model), contexts);
 
 		return model;
 	}
@@ -305,20 +306,11 @@ public final class ValuesTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static <R, X extends RuntimeException> Set<R> set(final CloseableIteration<R, X> results) {
-		return new LinkedHashSet<>(list(results));
+		return Iterations.asSet(results);
 	}
 
 	public static <R, X extends RuntimeException> List<R> list(final CloseableIteration<R, X> result) {
-
-		final List<R> actual=new ArrayList<>();
-
-		try {
-			while ( result.hasNext() ) { actual.add(result.next()); }
-		} finally {
-			result.close();
-		}
-
-		return actual;
+		return Iterations.asList(result);
 	}
 
 
@@ -442,18 +434,10 @@ public final class ValuesTest {
 	};
 
 
-	public static List<Map<String, Value>> select(final String query) {
-		return select(Sandbox, query);
-	}
-
 	public static List<Map<String, Value>> select(final Supplier<Repository> supplier, final String query) {
 		return connection(supplier, connection -> select(connection, query));
 	}
 
-
-	public static Model construct(final String query) {
-		return construct(Sandbox, query);
-	}
 
 	public static Model construct(final Supplier<Repository> supplier, final String query) {
 		return connection(supplier, connection -> construct(connection, query));

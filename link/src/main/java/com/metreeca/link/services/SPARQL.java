@@ -47,8 +47,7 @@ import static java.lang.Boolean.parseBoolean;
  * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
  * Graph#Tool graph database} at the server-relative <code>{@value #Path}</code> path.</p>
  *
- * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/${module.version}/references/configuration#queryupdate>configuration
- * properties</a>.</p>
+ * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/0.0/references/configuration#queryupdate">configuration properties</a>.</p>
  *
  * <p>Query operations are restricted to users in the {@linkplain Spec#root root} {@linkplain Request#roles()
  * role} , unless otherwise specified through configuration properties; update operations are restricted to users in the

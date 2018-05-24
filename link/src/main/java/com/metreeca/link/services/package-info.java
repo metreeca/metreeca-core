@@ -16,7 +16,7 @@
  */
 
 /**
- * Standard services.
+ * Standard linked data services.
  */
 
 package com.metreeca.link.services;

@@ -22,7 +22,6 @@ import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.things.Formats;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 import com.metreeca.tray.sys.Trace;
@@ -60,7 +59,7 @@ import static com.metreeca.tray.Tray.tool;
  * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain
  * Graph#Tool graph database} at the server-relative <code>{@value #Path}</code> path.</p>
  *
- * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/${module.version}/references/configuration#queryupdate>configuration
+ * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/0.0/references/configuration#queryupdate">configuration
  * properties</a>.</p>
  *
  * <p>Query operations are restricted to users in the {@linkplain Spec#root root} {@linkplain Request#roles()
@@ -69,9 +68,9 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public final class Graphs implements _Service {
+public final class Graphs implements Service {
 
-	private static final String Path="/graphs";
+	public static final String Path="/graphs";
 
 
 	private static final Shape GraphsShape=trait(RDF.VALUE, and(
@@ -87,7 +86,7 @@ public final class Graphs implements _Service {
 	private final boolean publik=setup.get("graphs.public", false); // public availability of the endpoint
 
 
-	@Override public void load(final Tool.Loader tools) {
+	@Override public void load() {
 		index.insert(Path, dispatcher()
 
 				.get(this::get)
@@ -206,7 +205,7 @@ public final class Graphs implements _Service {
 				connection.clear(context);
 				connection.add(input, request.base(), factory.getRDFFormat(), context);
 
-				response.status(exists ? Response.NoContent : Response.Created);
+				response.status(exists ? Response.NoContent : Response.Created).done();
 
 			} catch ( final IOException e ) {
 

@@ -17,15 +17,16 @@
 
 package com.metreeca.link.services;
 
-import com.metreeca.link._Request;
-import com.metreeca.link._meta.Index;
+import com.metreeca.link.Request;
 import com.metreeca.spec.Spec;
+import com.metreeca.spec.things.ValuesTest;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -33,14 +34,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.metreeca.link._HandlerTest.model;
-import static com.metreeca.link._HandlerTest.response;
-import static com.metreeca.link._HandlerTest.tools;
+import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
-import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.export;
 import static com.metreeca.spec.things.ValuesTest.write;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertTrue;
 
@@ -50,238 +50,195 @@ import static java.util.Collections.singleton;
 
 public final class GraphsTest {
 
-	private static final String GraphsPath="/graphs";
-	private static final String GraphsTarget="http://example.org"+GraphsPath;
-
 	private static final Set<Statement> First=singleton(statement(RDF.NIL, RDF.VALUE, RDF.FIRST));
 	private static final Set<Statement> Rest=singleton(statement(RDF.NIL, RDF.VALUE, RDF.REST));
 
 
 	@Test public void testGetGraphCatalog() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, (Resource)null)
+				.dataset(Rest, RDF.NIL)
 
-			model(tools.get(Graph.Tool), First, (Resource)null);
-			model(tools.get(Graph.Tool), Rest, RDF.NIL);
+				.request(request -> request
 
-			response(tools,
+						.roles(singleton(Spec.root))
+						.method(Request.GET)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.done())
 
-					tools.get(Index.Tool).get(GraphsPath),
+				.response(response -> assertIsomorphic(asList(
 
-					new _Request()
+						statement(iri(ValuesTest.Base, Graphs.Path), RDF.VALUE, RDF.NIL),
+						statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
 
-							.setRoles(singleton(Spec.root)).setMethod(_Request.GET)
-							.setTarget(GraphsTarget),
-
-					(request, response) -> assertIsomorphic(asList(
-
-							statement(iri(GraphsTarget), RDF.VALUE, RDF.NIL),
-							statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
-
-					), parse(response.getText())));
-		});
+				), response.rdf()));
 	}
 
 
 	@Test public void testGetDefaultGraph() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, (Resource)null)
 
-			final Collection<Statement> model=First;
+				.request(request -> request
 
-			model(tools.get(Graph.Tool), model, (Resource)null);
+						.roles(singleton(Spec.root))
+						.method(Request.GET)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.query("default")
+						.done())
 
-			response(tools,
-
-					tools.get(Index.Tool).get(GraphsPath),
-
-					new _Request()
-
-							.setRoles(singleton(Spec.root)).setMethod(_Request.GET)
-							.setTarget(GraphsTarget)
-							.setQuery("default"),
-
-					(request, response) -> assertIsomorphic(model, parse(response.getText())));
-		});
+				.response(response -> assertIsomorphic(First, response.rdf()));
 	}
 
 	@Test public void testGetNamedGraph() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, RDF.NIL)
 
-			final Collection<Statement> model=First;
+				.request(request -> request
 
-			model(tools.get(Graph.Tool), model, RDF.NIL);
+						.roles(singleton(Spec.root))
+						.method(Request.GET)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.query("graph="+RDF.NIL)
+						.done())
 
-			response(tools,
-
-					tools.get(Index.Tool).get(GraphsPath),
-
-					new _Request()
-
-							.setRoles(singleton(Spec.root)).setMethod(_Request.GET)
-							.setTarget(GraphsTarget)
-							.setQuery("graph="+RDF.NIL),
-
-					(request, response) -> assertIsomorphic(model, parse(response.getText())));
-		});
+				.response(response -> assertIsomorphic(First, response.rdf()));
 	}
 
 
 	@Test public void testPutDefaultGraph() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, (Resource)null)
 
-			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+				.request(request -> request
 
-			model(graph, First, (Resource)null);
+						.roles(singleton(Spec.root))
+						.method(Request.PUT)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.query("default")
+						.text(write(Rest)))
 
-			response(tools,
-
-					index.get(GraphsPath),
-
-					new _Request()
-
-							.setRoles(singleton(Spec.root)).setMethod(_Request.PUT)
-							.setTarget(GraphsTarget)
-							.setQuery("default")
-							.setText(write(Rest)),
-
-					(request, response) -> assertIsomorphic(Rest, model(graph, (Resource)null)));
-		});
+				.response(response -> {
+					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+						assertIsomorphic(Rest, export(connection, (Resource)null));
+					}
+				});
 	}
 
 	@Test public void testPutNamedGraph() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, RDF.NIL)
 
-			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+				.request(request -> request
 
-			model(graph, First, RDF.NIL);
+						.roles(singleton(Spec.root))
+						.method(Request.PUT)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.query("graph="+RDF.NIL)
+						.text(write(Rest)))
 
-			response(tools,
-
-					index.get(GraphsPath),
-
-					new _Request()
-
-							.setRoles(singleton(Spec.root)).setMethod(_Request.PUT)
-							.setTarget(GraphsTarget)
-							.setQuery("graph="+RDF.NIL)
-							.setText(write(Rest)),
-
-					(request, response) -> assertIsomorphic(Rest, strip(model(graph, RDF.NIL))));
-		});
+				.response(response -> {
+					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+						assertIsomorphic(Rest, strip(export(connection, RDF.NIL)));
+					}
+				});
 	}
 
 
 	@Test public void testPostDefaultGraph() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, (Resource)null)
 
-			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+				.request(request -> request
 
-			model(graph, First, (Resource)null);
+						.roles(singleton(Spec.root))
+						.method(Request.POST)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.query("default")
+						.text(write(Rest)))
 
-			response(tools,
-
-					index.get(GraphsPath),
-
-					new _Request()
-
-							.setRoles(singleton(Spec.root)).setMethod(_Request.POST)
-							.setTarget(GraphsTarget)
-							.setQuery("default")
-							.setText(write(Rest)),
-
-					(request, response) -> assertIsomorphic(merge(First, Rest), model(graph, (Resource)null)));
-		});
+				.response(response -> {
+					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+						assertIsomorphic(merge(First, Rest), export(connection, (Resource)null));
+					}
+				});
 	}
 
 	@Test public void testPostNamedGraph() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, RDF.NIL)
 
-			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+				.request(request -> request
 
-			model(graph, First, RDF.NIL);
+						.roles(singleton(Spec.root))
+						.method(Request.POST)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.query("graph="+RDF.NIL)
+						.text(write(Rest)))
 
-			response(tools,
-
-					index.get(GraphsPath),
-
-					new _Request()
-
-							.setRoles(singleton(Spec.root)).setMethod(_Request.POST)
-							.setTarget(GraphsTarget)
-							.setQuery("graph="+RDF.NIL)
-							.setText(write(Rest)),
-
-					(request, response) -> assertIsomorphic(merge(First, Rest), strip(model(graph, RDF.NIL))));
-		});
+				.response(response -> {
+					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+						assertIsomorphic(merge(First, Rest), strip(export(connection, RDF.NIL)));
+					}
+				});
 	}
 
 
 	@Test public void testDeleteDefaultGraph() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, (Resource)null)
 
-			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+				.request(request -> request
 
-			model(graph, First, (Resource)null);
+						.roles(singleton(Spec.root))
+						.method(Request.DELETE)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.query("default")
+						.done())
 
-			response(tools,
-
-					index.get(GraphsPath),
-
-					new _Request()
-
-							.setRoles(singleton(Spec.root)).setMethod(_Request.DELETE)
-							.setTarget(GraphsTarget)
-							.setQuery("default"),
-
-					(request, response) ->
-							assertTrue("empty default graph", model(graph, (Resource)null).isEmpty()));
-		});
+				.response(response -> {
+					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+						assertTrue("empty default graph", export(connection, (Resource)null).isEmpty());
+					}
+				});
 	}
 
 
 	@Test public void testDeleteNamedGraph() {
-		tools(tools -> {
+		testbed().service(Graphs::new)
 
-			new Graphs().load(tools);
+				.dataset(First, RDF.NIL)
 
-			final Graph graph=tools.get(Graph.Tool);
-			final Index index=tools.get(Index.Tool);
+				.request(request -> request
 
-			model(graph, First, RDF.NIL);
+						.roles(singleton(Spec.root))
+						.method(Request.DELETE)
+						.base(ValuesTest.Base)
+						.path(Graphs.Path)
+						.query("graph="+RDF.NIL)
+						.done())
 
-			response(tools,
-
-					index.get(GraphsPath),
-
-					new _Request()
-
-							.setRoles(singleton(Spec.root)).setMethod(_Request.DELETE)
-							.setTarget(GraphsTarget)
-							.setQuery("graph="+RDF.NIL),
-
-					(request, response) ->
-							assertTrue("empty default graph", model(graph, RDF.NIL).isEmpty()));
-		});
+				.response(response -> {
+					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+						assertTrue("empty default graph", export(connection, RDF.NIL).isEmpty());
+					}
+				});
 	}
 
 

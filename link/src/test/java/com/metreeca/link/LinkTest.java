@@ -25,14 +25,16 @@ import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
+import java.io.*;
+import java.net.URLDecoder;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -138,14 +140,20 @@ public final class LinkTest {
 			return this;
 		}
 
-		public Testbed dataset(final Iterable<Statement> model) {
+		public Testbed dataset(final Iterable<Statement> model, final Resource... contexts) {
 
 			if ( model == null ) {
 				throw new NullPointerException("null model");
 			}
 
+			if ( contexts == null ) {
+				throw new NullPointerException("null contexts");
+			}
+
 			tray.exec(() -> {
-				try (final RepositoryConnection connection=tool(Graph.Tool).connect()) { connection.add(model); }
+				try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					connection.add(model, contexts);
+				}
 			});
 
 			return this;
@@ -228,6 +236,7 @@ public final class LinkTest {
 
 			exec(() -> handler.get()
 
+					.wrap(parser()) // parse query string
 					.wrap(persistor()) // make response body getters idempotent
 
 					.exec(
@@ -293,6 +302,27 @@ public final class LinkTest {
 		}
 
 
+		private Wrapper parser() {
+			return handler -> (request, response) -> handler.exec(
+
+					writer -> {
+
+						writer.copy(request);
+
+						if ( !request.query().isEmpty() && request.parameters().noneMatch(entry -> true) ) {
+							parameters(request.query()).forEach(writer::parameter);
+						}
+
+						writer.done();
+					},
+
+					reader ->
+
+							response.copy(reader).done()
+
+			);
+		}
+
 		private Wrapper persistor() {
 			return handler -> (request, response) -> handler.exec(
 
@@ -318,5 +348,51 @@ public final class LinkTest {
 		}
 
 	}
+
+
+	//// !!! factor to request ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//private Supplier<Map<String, List<String>>> parameters=() -> parameters(method.equals(POST)
+	//		&& getHeader("Content-Type").orElse("").startsWith(URLEncodedForm) // ignore charset parameter
+	//		? getText() : query);
+
+
+	private static Map<String, List<String>> parameters(final String query) {
+
+		final Map<String, List<String>> parameters=new LinkedHashMap<>();
+
+		final int length=query.length();
+
+		for (int head=0, tail; head < length; head=tail+1) {
+			try {
+
+				final int equal=query.indexOf('=', head);
+				final int ampersand=query.indexOf('&', head);
+
+				tail=(ampersand >= 0) ? ampersand : length;
+
+				final boolean split=equal >= 0 && equal < tail;
+
+				final String label=URLDecoder.decode(query.substring(head, split ? equal : tail), "UTF-8");
+				final String value=URLDecoder.decode(query.substring(split ? equal+1 : tail, tail), "UTF-8");
+
+				parameters.compute(label, (name, values) -> {
+
+					final List<String> strings=(values != null) ? values : new ArrayList<>();
+
+					strings.add(value);
+
+					return strings;
+
+				});
+
+			} catch ( final UnsupportedEncodingException unexpected ) {
+				throw new UncheckedIOException(unexpected);
+			}
+		}
+
+		return Collections.unmodifiableMap(parameters);
+	}
+
 
 }
