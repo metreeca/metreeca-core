@@ -60,7 +60,7 @@ import static java.util.Collections.list;
  * J2EE/Metreeca gateway.
  *
  * <p>Provides a gateway between a web application managed by Servlet 3.1 container and linked data resource handlers
- * based on the Metreeca {@linkplain com.metreeca.next linked data framework}:</p>
+ * based on the Metreeca {@linkplain com.metreeca.link linked data framework}:</p>
  *
  * <ul>
  *

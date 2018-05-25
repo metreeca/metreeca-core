@@ -17,57 +17,88 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.link._Handler;
-import com.metreeca.link._Request;
-import com.metreeca.link._Response;
-import com.metreeca.tray.Tool;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
+import com.metreeca.link.Handler;
+import com.metreeca.link.Request;
+import com.metreeca.link.Response;
 
-import static java.util.Collections.unmodifiableMap;
+import java.util.*;
 
 
-public class Dispatcher implements _Handler {
+/**
+ * Method-based request dispatcher.
+ *
+ * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#method()
+ * method}.</p>
+ */
+public final class Dispatcher implements Handler {
 
-	private final Map<String, _Handler> handlers;
-	private final _Handler fallback;
+	public static Dispatcher dispatcher() { return new Dispatcher(); }
 
 
-	public Dispatcher(final Map<String, _Handler> handlers) {
+	private final Map<String, Handler> mappings=new LinkedHashMap<>();
 
-		if ( handlers == null ) {
-			throw new NullPointerException("null com.metreeca.next.handlers");
-		}
 
-		if ( handlers.containsKey(null) ) {
+	private Dispatcher() {
+		mappings.put(Request.OPTIONS, this::options);
+	}
+
+
+	public Dispatcher get(final Handler handler) {
+		return method(Request.GET, handler);
+	}
+
+	public Dispatcher post(final Handler handler) {
+		return method(Request.POST, handler);
+	}
+
+	public Dispatcher put(final Handler handler) {
+		return method(Request.PUT, handler);
+	}
+
+	public Dispatcher delete(final Handler handler) {
+		return method(Request.DELETE, handler);
+	}
+
+
+	public Dispatcher method(final String method, final Handler handler) {
+
+		if ( method == null ) {
 			throw new NullPointerException("null method");
 		}
 
-		if ( handlers.containsValue(null) ) {
+		if ( handler == null ) {
 			throw new NullPointerException("null handler");
 		}
 
-		// !!! provide default implementation for OPTIONS (see Handler.unsupported())
+		mappings.put(normalize(method), handler);
 
-		this.handlers=new LinkedHashMap<>(handlers);
-		this.fallback=handlers.getOrDefault(_Request.ANY, _Handler::unimplemented);
+		return this;
 	}
 
 
-	public Map<String, _Handler> getHandlers() {
-		return unmodifiableMap(handlers);
+	@Override public void handle(final Request request, final Response response) {
+		Optional.ofNullable(mappings.get(normalize(request.method())))
+				.orElse(this::unsupported)
+				.handle(request, response);
 	}
 
 
-	@Override public void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
+	private String normalize(final String method) {
+		return method.toUpperCase(Locale.ROOT);
+	}
 
-		Optional.ofNullable(handlers.get(request.getMethod()))
-				.orElse(fallback)
-				.handle(tools, request, response, sink);
 
+	private void options(final Request request, final Response response) {
+		response.status(Response.OK)
+				.header("Allow", mappings.keySet())
+				.done();
+	}
+
+	private void unsupported(final Request request, final Response response) {
+		response.status(Response.MethodNotAllowed)
+				.header("Allow", mappings.keySet())
+				.done();
 	}
 
 }

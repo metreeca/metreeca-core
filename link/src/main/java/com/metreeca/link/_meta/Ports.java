@@ -18,9 +18,9 @@
 package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
-import com.metreeca.link.handlers.Container;
-import com.metreeca.link.handlers.Dispatcher;
-import com.metreeca.link.handlers.Resource;
+import com.metreeca.link.handlers.ldp._Container;
+import com.metreeca.link.handlers._Dispatcher;
+import com.metreeca.link.handlers.ldp._Resource;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.things.Values;
@@ -119,7 +119,7 @@ public final class Ports implements _Service {
 
 		private final _Handler container; // shaped delegate
 
-		private final _Handler dispatcher=new Dispatcher(map(entry(_Request.GET, sysadm(this::get)), entry(_Request.POST, sysadm(this::post))
+		private final _Handler dispatcher=new _Dispatcher(map(entry(_Request.GET, sysadm(this::get)), entry(_Request.POST, sysadm(this::post))
 		));
 
 
@@ -131,7 +131,7 @@ public final class Ports implements _Service {
 			this.index=tools.get(Index.Tool);
 			this.graph=tools.get(Graph.Tool);
 
-			this.container=new Container(tools, ContainerShape);
+			this.container=new _Container(tools, ContainerShape);
 		}
 
 
@@ -191,7 +191,7 @@ public final class Ports implements _Service {
 
 		private final _Handler resource; // shaped delegate
 
-		private final _Handler dispatcher=new Dispatcher(map(entry(_Request.GET, sysadm(this::get)), entry(_Request.PUT, sysadm(this::put)), entry(_Request.DELETE, sysadm(this::delete))
+		private final _Handler dispatcher=new _Dispatcher(map(entry(_Request.GET, sysadm(this::get)), entry(_Request.PUT, sysadm(this::put)), entry(_Request.DELETE, sysadm(this::delete))
 		));
 
 
@@ -202,7 +202,7 @@ public final class Ports implements _Service {
 			this.index=tools.get(Index.Tool);
 			this.graph=tools.get(Graph.Tool);
 
-			this.resource=new Resource(tools, ResourceShape);
+			this.resource=new _Resource(tools, ResourceShape);
 		}
 
 

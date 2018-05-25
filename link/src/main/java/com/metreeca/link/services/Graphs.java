@@ -44,7 +44,7 @@ import java.util.List;
 
 import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Handler.refused;
-import static com.metreeca.next.handlers.Dispatcher.dispatcher;
+import static com.metreeca.link.handlers.Dispatcher.dispatcher;
 import static com.metreeca.spec.Shape.only;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Trait.trait;

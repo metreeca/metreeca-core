@@ -26,7 +26,7 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * CORS request manager.
+ * CORS request manager (work in progress…).
  *
  * <p>Manages CORS HTTP requests.</p>
  *

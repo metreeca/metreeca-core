@@ -31,7 +31,7 @@ import java.util.Properties;
 import static com.metreeca.link.LinkTest.json;
 import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.Server.server;
-import static com.metreeca.next.RewriterTest.*;
+import static com.metreeca.link._work.RewriterTest.*;
 import static com.metreeca.spec.Shape.required;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;

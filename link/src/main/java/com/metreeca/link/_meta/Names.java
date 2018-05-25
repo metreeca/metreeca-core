@@ -18,7 +18,7 @@
 package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
-import com.metreeca.link.handlers.Dispatcher;
+import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Outliner;
@@ -73,7 +73,7 @@ public final class Names implements _Service {
 
 		this.graph=tools.get(Graph.Tool);
 
-		tools.get(Index.Tool).insert("/!/names", new Dispatcher(map(
+		tools.get(Index.Tool).insert("/!/names", new _Dispatcher(map(
 
 				entry(_Request.GET, sysadm(this::get)), entry(_Request.PUT, sysadm(this::put))
 

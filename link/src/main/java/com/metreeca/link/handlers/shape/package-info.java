@@ -15,34 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link;
-
-
 /**
- * Linked data resource handler wrapper.
+ * Model-driven LDP resource handlers.
  */
-@FunctionalInterface public interface Wrapper {
 
-	public static Wrapper wrapper() { // identity wrapper
-		return new Wrapper() {
-
-			@Override public Wrapper wrap(final Wrapper wrapper) { return wrapper; }
-
-			@Override public Handler wrap(final Handler handler) { return handler; }
-
-		};
-	}
-
-
-	public Handler wrap(final Handler handler);
-
-	public default Wrapper wrap(final Wrapper wrapper) {
-
-		if ( wrapper == null ) {
-			throw new NullPointerException("null wrapper");
-		}
-
-		return handler -> wrap(wrapper.wrap(handler));
-	}
-
-}
+package com.metreeca.link.handlers.shape;

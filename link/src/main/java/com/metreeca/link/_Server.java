@@ -17,8 +17,8 @@
 
 package com.metreeca.link;
 
-import com.metreeca.link.handlers.Dispatcher;
-import com.metreeca.link.handlers.Router;
+import com.metreeca.link.handlers._Dispatcher;
+import com.metreeca.link.handlers._Router;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -76,7 +76,7 @@ public final class _Server {
 
 
 	public _Server(final Tool.Loader tools) {
-		this(tools, new Router());
+		this(tools, new _Router());
 	}
 
 	public _Server(final Tool.Loader tools, final _Handler... handlers) {
@@ -105,7 +105,7 @@ public final class _Server {
 
 				.stream(handlers.spliterator(), false).reduce(gate::authorize, _Handler::chain)
 
-				.chain(new Dispatcher(map( // default method post-processors
+				.chain(new _Dispatcher(map( // default method post-processors
 
 						entry(_Request.DELETE, this::delete), entry(_Request.ANY, _Handler.Empty)
 

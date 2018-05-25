@@ -17,44 +17,34 @@
 
 package com.metreeca.link.handlers;
 
-import com.metreeca.link._Handler;
-import com.metreeca.link._Request;
-import com.metreeca.link._Response;
-import com.metreeca.link._meta.Index;
-import com.metreeca.tray.Tool;
 
-import java.util.function.BiConsumer;
+import com.metreeca.link.*;
+
+import static com.metreeca.tray.Tray.tool;
 
 
-public final class Router implements _Handler {
+/**
+ * Path-based request router.
+ *
+ * <p>Delegates request processing to a handler selected from the shared {@linkplain Index#Tool index} tool on the
+ * basis of the request HTTP {@linkplain Request#path() path}.</p>
+ *
+ * <p>If the index doesn't contain a matchinh handler, no action is performed giving the system adapter a afall-back
+ * opportunity to handle the request.</p>
+ */
+public final class Router implements Handler {
 
-	public static Router router() {
-		return new Router();
+	public static Router router() { return new Router(); }
+
+
+	private final Index index=tool(Index.Tool);
+
+
+	private Router() {}
+
+
+	@Override public void handle(final Request request, final Response response) {
+		index.lookup(request.path()).ifPresent(handler -> handler.handle(request, response));
 	}
 
-
-	@Override public void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
-
-		if ( response.getStatus() != 0 ) { sink.accept(request, response); } else { // conditional processing
-
-			final Index index=tools.get(Index.Tool); // !!! to constructor
-
-			final String base=request.getBase();
-			final String target=request.getTarget();
-			final String path=target.substring(base.length()-1);
-
-			final _Handler handler=index.get(path);
-
-			if ( handler != null ) { // matched: process with handler
-
-				handler.handle(tools, request, response, sink);
-
-			} else { // not matched: forward to the pipeline and let the server adapter eventually handle it
-
-				sink.accept(request, response);
-
-			}
-
-		}
-	}
 }

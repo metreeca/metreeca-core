@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import static com.metreeca.next.Binder.binder;
+import static com.metreeca.link._work.Binder.binder;
 import static com.metreeca.link.wrappers.Transactor.transactor;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
@@ -40,6 +40,9 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 /**
  * Activity tracer.
+ *
+ * <p>Creates an audit trail record in the shared {@linkplain Graph#Tool graph} tool on successful request processing by
+ * the wrapped handler.</p>
  */
 public final class Tracer implements Wrapper {
 

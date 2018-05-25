@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Handler.refused;
-import static com.metreeca.next.handlers.Dispatcher.dispatcher;
+import static com.metreeca.link.handlers.Dispatcher.dispatcher;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;

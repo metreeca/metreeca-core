@@ -18,7 +18,7 @@
 package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
-import com.metreeca.link.handlers.Dispatcher;
+import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.spec.shapes.And;
 import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
@@ -105,7 +105,7 @@ public final class Status implements _Service {
 
 		this.graph=tools.get(Graph.Tool);
 
-		tools.get(Index.Tool).insert("/!/", new Dispatcher(map(
+		tools.get(Index.Tool).insert("/!/", new _Dispatcher(map(
 
 				entry(_Request.GET, _Handler.sysadm(this::get))
 

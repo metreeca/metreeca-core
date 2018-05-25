@@ -18,7 +18,7 @@
 package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
-import com.metreeca.link.handlers.Dispatcher;
+import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
@@ -66,7 +66,7 @@ public final class Root implements _Service { // !!! migrate to Builder
 
 	@Override public void load(final Tool.Loader tools) { // !!! in constructor
 
-		index=tools.get(Index.Tool).insert("/", new Dispatcher(map(entry(_Request.GET, this::get)
+		index=tools.get(Index.Tool).insert("/", new _Dispatcher(map(entry(_Request.GET, this::get)
 
 		)), map(
 

@@ -18,7 +18,7 @@
 package com.metreeca.link;
 
 
-import com.metreeca.next.Rewriter;
+import com.metreeca.link._work.Rewriter;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Wrapper.wrapper;
-import static com.metreeca.next.handlers.Router.router;
+import static com.metreeca.link.handlers.Router.router;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;

@@ -18,9 +18,9 @@
 package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
-import com.metreeca.link.handlers.Container;
-import com.metreeca.link.handlers.Resource;
-import com.metreeca.link.handlers.Updater;
+import com.metreeca.link.wrappers._Processor;
+import com.metreeca.link.handlers.ldp._Container;
+import com.metreeca.link.handlers.ldp._Resource;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.ShapeCodec;
@@ -168,7 +168,7 @@ public final class Index {
 
 			if ( collection || container ) {
 
-				final Container handler=new Container(tools, and(
+				final _Container handler=new _Container(tools, and(
 						trait(RDFS.LABEL, verify(required(), only(label))),
 						trait(RDFS.COMMENT, verify(optional(), notes != null ? only(notes) : and())),
 						trait(LDP.CONTAINS, digest)
@@ -179,7 +179,7 @@ public final class Index {
 				create.ifPresent(hook -> hooks.put(_Request.POST, hook));
 				mutate.ifPresent(hook -> hooks.put(_Request.ANY, hook));
 
-				insert(path, hooks.isEmpty() ? handler : new Updater(tools, handler, hooks), map(
+				insert(path, hooks.isEmpty() ? handler : new _Processor(tools, handler, hooks), map(
 						entry(RDFS.LABEL, label),
 						entry(RDFS.COMMENT, notes),
 						entry(Link.uuid, literal(uuid)),
@@ -191,7 +191,7 @@ public final class Index {
 
 			if ( collection ) { // ancillary resource port
 
-				final _Handler handler=new Resource(tools, detail);
+				final _Handler handler=new _Resource(tools, detail);
 
 				final Map<String, String> hooks=new HashMap<>();
 
@@ -199,7 +199,7 @@ public final class Index {
 				delete.ifPresent(hook -> hooks.put(_Request.DELETE, hook));
 				mutate.ifPresent(hook -> hooks.put(_Request.ANY, hook));
 
-				insert(path+"*", hooks.isEmpty() ? handler : new Updater(tools, handler, hooks), map(
+				insert(path+"*", hooks.isEmpty() ? handler : new _Processor(tools, handler, hooks), map(
 						entry(RDFS.LABEL, Values.literal(label.stringValue()+ResourcesSuffix)),
 						entry(RDFS.ISDEFINEDBY, specs.value().orElseThrow(Missing)),
 						entry(Link.soft, Values.False),
@@ -208,7 +208,7 @@ public final class Index {
 
 			} else if ( !container ) { // real resource port
 
-				final _Handler handler=new Resource(tools, detail);
+				final _Handler handler=new _Resource(tools, detail);
 
 				final Map<String, String> hooks=new HashMap<>();
 
@@ -217,7 +217,7 @@ public final class Index {
 				delete.ifPresent(hook -> hooks.put(_Request.DELETE, hook));
 				mutate.ifPresent(hook -> hooks.put(_Request.ANY, hook));
 
-				insert(path, hooks.isEmpty() ? handler : new Updater(tools, handler, hooks), map(
+				insert(path, hooks.isEmpty() ? handler : new _Processor(tools, handler, hooks), map(
 						entry(RDFS.LABEL, label),
 						entry(RDFS.COMMENT, notes),
 						entry(Link.uuid, literal(uuid)),

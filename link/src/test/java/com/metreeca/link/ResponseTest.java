@@ -22,7 +22,7 @@ import org.junit.Test;
 import java.util.function.Consumer;
 
 import static com.metreeca.link.Response.OK;
-import static com.metreeca.next.RewriterTest.External;
+import static com.metreeca.link._work.RewriterTest.External;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

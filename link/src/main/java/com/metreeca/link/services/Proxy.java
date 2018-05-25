@@ -27,7 +27,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import static com.metreeca.link.Handler.error;
-import static com.metreeca.next.handlers.Dispatcher.dispatcher;
+import static com.metreeca.link.handlers.Dispatcher.dispatcher;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
