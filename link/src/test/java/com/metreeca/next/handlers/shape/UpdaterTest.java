@@ -39,7 +39,7 @@ import java.util.function.Function;
 import static com.metreeca.link.LinkTest.*;
 import static com.metreeca.link.Server.server;
 import static com.metreeca.next.handlers.shape.Updater.updater;
-import static com.metreeca.next.wrappers.Processor.processor;
+import static com.metreeca.link.wrappers.Processor.processor;
 import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;

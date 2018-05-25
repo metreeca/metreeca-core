@@ -15,11 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.wrappers;
+package com.metreeca.link.wrappers;
 
 import com.metreeca.link.Handler;
 import com.metreeca.link.Wrapper;
 import com.metreeca.spec.Spec;
+import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -27,6 +28,12 @@ import static com.metreeca.link.Handler.refused;
 import static com.metreeca.spec.sparql.SPARQLEngine.transactional;
 
 
+/**
+ * SPARQL transaction manager
+ *
+ * <p>Executes the wrapped handler inside a SPARQL transaction on the connection provided by the shared {@link Graph}
+ * tool.</p>
+ */
 public final class Transactor implements Wrapper {
 
 	public static Transactor transactor(final RepositoryConnection connection) {

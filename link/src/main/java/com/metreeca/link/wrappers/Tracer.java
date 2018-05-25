@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.wrappers;
+package com.metreeca.link.wrappers;
 
 import com.metreeca.link.*;
 import com.metreeca.tray.rdf.Graph;
@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.function.Predicate;
 
 import static com.metreeca.next.Binder.binder;
-import static com.metreeca.next.wrappers.Transactor.transactor;
+import static com.metreeca.link.wrappers.Transactor.transactor;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.spec.things.Values.timestamp;
@@ -78,7 +78,6 @@ public final class Tracer implements Wrapper {
 
 		return this;
 	}
-
 
 	public Tracer test(final Predicate<Response.Reader> test) {
 

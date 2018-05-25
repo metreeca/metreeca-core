@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.wrappers;
+package com.metreeca.link.wrappers;
 
 
 import com.metreeca.link.Handler;
@@ -29,6 +29,11 @@ import static com.metreeca.next.Binder.binder;
 import static com.metreeca.tray.Tray.tool;
 
 
+/**
+ * SPARQL Update post-processor.
+ *
+ * <p>Executes a SPARQL Update post-processing script on successful request processing by the wrapped handler.</p>
+ */
 public final class Processor implements Wrapper {
 
 	public static Processor processor(final String sparql) {

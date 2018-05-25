@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.wrappers;
+package com.metreeca.link.wrappers;
 
 import com.metreeca.link.*;
 import com.metreeca.spec.Spec;
@@ -37,6 +37,8 @@ import static java.util.Collections.singleton;
 
 /**
  * Bearer token authenticator.
+ *
+ * <p>Manages bearer token authentication using tokens issued by the shared {@link Roster} tool.</p>
  *
  * @see <a href="https://tools.ietf.org/html/rfc6750">The OAuth 2.0 Authorization Framework: Bearer Token Usage</a>
  */

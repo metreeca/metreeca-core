@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.wrappers;
+package com.metreeca.link.wrappers;
 
 import com.metreeca.link.Handler;
 import com.metreeca.link.LinkTest.Testbed;
@@ -28,7 +28,7 @@ import com.metreeca.tray.iam.RosterTest.MockRoster;
 import org.junit.Test;
 
 import static com.metreeca.link.LinkTest.testbed;
-import static com.metreeca.next.wrappers.Bearer.bearer;
+import static com.metreeca.link.wrappers.Bearer.bearer;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;

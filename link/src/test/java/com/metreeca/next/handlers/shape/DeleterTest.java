@@ -34,7 +34,7 @@ import static com.metreeca.link.LinkTest.Employee;
 import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.Server.server;
 import static com.metreeca.next.handlers.shape.Deleter.deleter;
-import static com.metreeca.next.wrappers.Processor.processor;
+import static com.metreeca.link.wrappers.Processor.processor;
 import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
 

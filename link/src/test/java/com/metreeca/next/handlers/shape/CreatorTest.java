@@ -42,7 +42,7 @@ import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.Server.server;
 import static com.metreeca.next.handlers.shape.Creator.auto;
 import static com.metreeca.next.handlers.shape.Creator.creator;
-import static com.metreeca.next.wrappers.Processor.processor;
+import static com.metreeca.link.wrappers.Processor.processor;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.Values.statement;

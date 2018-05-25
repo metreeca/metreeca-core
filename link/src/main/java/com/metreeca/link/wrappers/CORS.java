@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.wrappers;
+package com.metreeca.link.wrappers;
 
 import com.metreeca.link.Handler;
 import com.metreeca.link.Wrapper;
@@ -28,6 +28,8 @@ import static com.metreeca.tray.Tray.tool;
 /**
  * CORS request manager.
  *
+ * <p>Manages CORS HTTP requests.</p>
+ *
  * @see <a href="https://fetch.spec.whatwg.org/#cors-protocol">Fetch - § 3.2 CORS protocol</a>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) @ MDN</a>
  */
@@ -38,9 +40,10 @@ public final class CORS implements Wrapper {
 	public static CORS cors() { return new CORS(); }
 
 
-	private final boolean enabled=tool(Setup.Tool).get("cors", false);
-
+	private final Setup setup=tool(Setup.Tool);
 	private final Trace trace=tool(Trace.Tool);
+
+	private final boolean enabled=setup.get("cors", false);
 
 
 	private CORS() {}

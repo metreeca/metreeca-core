@@ -35,7 +35,7 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Wrapper.wrapper;
-import static com.metreeca.next.wrappers.Transactor.transactor;
+import static com.metreeca.link.wrappers.Transactor.transactor;
 import static com.metreeca.spec.Shape.role;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
