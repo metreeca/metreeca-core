@@ -17,8 +17,7 @@
 
 package com.metreeca.link.services;
 
-import com.metreeca.link._Service;
-import com.metreeca.tray.Tool;
+import com.metreeca.link.Service;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 import com.metreeca.tray.sys.Trace;
@@ -31,6 +30,7 @@ import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import java.io.*;
 import java.nio.file.*;
 
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Setup.storage;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
@@ -42,7 +42,7 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
 /**
  * RDF spool service
  */
-public final class Spool implements _Service {
+public final class Spool implements Service {
 
 	// !!! default format
 	// !!! default context
@@ -56,60 +56,43 @@ public final class Spool implements _Service {
 	}
 
 
-	private File storage;
-
-	private String base;
-
-	private Graph graph;
-	private Trace trace;
-
-	private WatchService watcher;
+	private final Setup setup=tool(Setup.Tool);
+	private final Graph graph=tool(Graph.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
 
-	private void init(final Tool.Loader tools) { // !!! as constructor
+	private final File storage=setup.get("spool.storage", new File(storage(setup), "spool"));
 
-		final Setup setup=tools.get(Setup.Tool);
+	private final String base=setup.get("spool.base", setup.get(Setup.BaseProperty, ""));
 
-		storage=setup.get("spool.storage", new File(storage(setup), "spool"));
 
-		base=setup.get("spool.base", setup.get(Setup.BaseProperty, ""));
+	// !!! breaks on GAE even if excluded with a conditional test
 
-		graph=tools.get(Graph.Tool);
-		trace=tools.get(Trace.Tool);
+	private final WatchService watcher=tool(_tools -> { // from tools to have it closed on system shutdown
 
-		// !!! breaks on GAE even if excluded with a conditional test
+		try {
 
-		watcher=tools.get(_tools -> { // from tools to have it closed on system shutdown
+			final WatchService service=FileSystems.getDefault().newWatchService();
 
-			try {
-
-				final WatchService service=FileSystems.getDefault().newWatchService();
-
-				if ( storage.mkdirs() ) {
-					trace.info(this, "created spooling folder at "+storage);
-				}
-
-				Paths.get(storage.toURI()).register(service, ENTRY_CREATE, ENTRY_MODIFY);
-
-				return service;
-
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException("unable to start file watch service at "+storage, e);
+			if ( storage.mkdirs() ) {
+				trace.info(this, "created spooling folder at "+storage);
 			}
 
-		});
-	}
+			Paths.get(storage.toURI()).register(service, ENTRY_CREATE, ENTRY_MODIFY);
+
+			return service;
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException("unable to start file watch service at "+storage, e);
+		}
+
+	});
 
 
-	@SuppressWarnings("unchecked") @Override public void load(final Tool.Loader tools) {
-
-		init(tools);
+	@SuppressWarnings("unchecked") @Override public void load() {
 
 		newSingleThreadExecutor().execute(() -> {
-			try {
-
-				final FileSystemManager manager=VFS.getManager();
-				final FileObject spool=manager.resolveFile(storage.toURI());
+			try (final FileObject spool=VFS.getManager().resolveFile(storage.toURI())) {
 
 				for (final FileObject object : spool.getChildren()) { // process initial content
 					process(object);
