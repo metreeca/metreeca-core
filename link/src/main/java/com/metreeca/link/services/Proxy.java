@@ -17,26 +17,18 @@
 
 package com.metreeca.link.services;
 
-import com.metreeca.link._Request;
-import com.metreeca.link._Response;
-import com.metreeca.link._Service;
-import com.metreeca.link._meta.Index;
-import com.metreeca.link.handlers.Dispatcher;
-import com.metreeca.tray.Tool;
+import com.metreeca.link.*;
 import com.metreeca.tray.sys.Setup;
 import com.metreeca.tray.sys.Trace;
-
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.function.BiConsumer;
 
-import static com.metreeca.spec.things.Maps.entry;
-import static com.metreeca.spec.things.Maps.map;
-import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.link.Handler.error;
+import static com.metreeca.next.handlers.Dispatcher.dispatcher;
+import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
 
@@ -44,56 +36,60 @@ import static java.util.Arrays.asList;
 /**
  * SPARQL proxy endpoint.
  */
-public class Proxy implements _Service {
+public class Proxy implements Service {
 
-	private int timeoutConnect; // [s]
-	private int timeoutRead; // [s]
+	private static final String Path="/proxy";
 
 
-	@Override public void load(final Tool.Loader tools) {
+	private final Setup setup=tool(Setup.Tool);
+	private final Index index=tool(Index.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
-		final Setup setup=tools.get(Setup.Tool);
 
-		timeoutConnect=setup.get("proxy.timeout.connect", 30);
-		timeoutRead=setup.get("proxy.timeout.read", 60);
+	private final int timeoutConnect=setup.get("proxy.timeout.connect", 30); // [s]
+	private final int timeoutRead=setup.get("proxy.timeout.read", 60); // [s]
 
-		tools.get(Index.Tool).insert("/proxy", new Dispatcher(map(
 
-				entry(_Request.GET, this::handle), entry(_Request.POST, this::handle)
+	@Override public void load() {
+		index.insert(Path, dispatcher()
 
-		)), map(
+				.get(this::handle)
+				.post(this::handle));
 
-				entry(RDFS.LABEL, literal("SPARQL Proxy Endpoint"))
 
-		));
+		// !!! port metadata
+		//map(
+		//
+		//		entry(RDFS.LABEL, literal("SPARQL Proxy Endpoint"))
+		//
+		//)
 	}
 
 
-	private void handle(final Tool.Loader tools, final _Request request, final _Response response, final BiConsumer<_Request, _Response> sink) {
+	private void handle(final Request request, final Response response) {
 		try {
 
-			sink.accept(request, out(response, in(request)));
+			out(response, in(request));
 
 		} catch ( final IOException|RuntimeException e ) {
 
-			tools.get(Trace.Tool).warning(this, "failed proxy request", e);
+			trace.warning(this, "failed proxy request", e);
 
-			sink.accept(request, response
+			response.status(e instanceof IllegalArgumentException ? Response.BadRequest // !!! review
+							: e instanceof IOException ? Response.BadGateway
+							: Response.InternalServerError)
 
-					.setStatus(e instanceof IllegalArgumentException ? _Response.BadRequest // !!! review
-							: e instanceof IOException ? _Response.BadGateway : _Response.InternalServerError)
-
-					.setHeader("Content-Type", "application/text")
-					.setText(e.getMessage()+"\n"));
+					.cause(e)
+					.json(error("request-failed", e));
 
 		}
 	}
 
 
-	private HttpURLConnection in(final _Request request) throws IOException {
+	private HttpURLConnection in(final Request request) throws IOException {
 
-		final String endpoint=request.getParameter("endpoint").orElse("");
-		final String query=request.getParameter("query").orElse("");
+		final String endpoint=request.parameter("endpoint").orElse("");
+		final String query=request.parameter("query").orElse("");
 
 		if ( endpoint.isEmpty() ) {
 			throw new IllegalArgumentException("missing endpoint parameter");
@@ -123,7 +119,7 @@ public class Proxy implements _Service {
 				"Authorization"
 		)) {
 
-			request.getHeader(header).ifPresent(value -> connection.setRequestProperty(header, value));
+			request.header(header).ifPresent(value -> connection.setRequestProperty(header, value));
 
 		}
 
@@ -144,12 +140,12 @@ public class Proxy implements _Service {
 		return connection;
 	}
 
-	private _Response out(final _Response response, final HttpURLConnection connection) throws IOException {
+	private Response out(final Response response, final HttpURLConnection connection) throws IOException {
 
 		final int code=connection.getResponseCode();
 		final String message=connection.getResponseMessage();
 
-		response.setStatus(code/100 == 5 ? _Response.BadGateway : code); // !!! relay code/message on BadGateway error
+		response.status(code/100 == 5 ? _Response.BadGateway : code); // !!! relay code/message on BadGateway error
 
 		// transfer server-controlled headers to the browser
 		// ;( if switching to connection.getHeaderFields(), be aware that header name are case-sensitive…
@@ -163,21 +159,21 @@ public class Proxy implements _Service {
 			final String value=connection.getHeaderField(header);
 
 
-			if ( value != null ) { response.addHeader(header, value); }
+			if ( value != null ) { response.header(header, value); }
 
 		}
 
-		return response.setBody(out -> {
+		return response.output(output -> {
 
 			try (final InputStream in=connect(connection)) {
 
 				final byte[] buffer=new byte[1024];
 
 				for (int i; (i=in.read(buffer)) >= 0; ) {
-					out.write(buffer, 0, i);
+					output.write(buffer, 0, i);
 				}
 
-				out.flush();
+				output.flush();
 
 			} catch ( IOException e ) {
 				throw new UncheckedIOException(e);
