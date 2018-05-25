@@ -17,7 +17,7 @@
 
 package com.metreeca.link;
 
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import java.io.*;
 import java.util.function.Consumer;
@@ -147,7 +147,7 @@ public final class _Response extends _Message<_Response> {
 
 
 	public String getText() {
-		return new String(getData(), IO.UTF8); // !!! use response encoding
+		return new String(getData(), Transputs.UTF8); // !!! use response encoding
 	}
 
 	public _Response setText(final String text) {
@@ -160,7 +160,7 @@ public final class _Response extends _Message<_Response> {
 			setHeader(ContentType, "text/plain");
 		}
 
-		return setData(text.getBytes(IO.UTF8)); // !!! use response encoding
+		return setData(text.getBytes(Transputs.UTF8)); // !!! use response encoding
 	}
 
 }

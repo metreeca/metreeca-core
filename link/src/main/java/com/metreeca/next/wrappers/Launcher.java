@@ -18,7 +18,7 @@
 package com.metreeca.next.wrappers;
 
 import com.metreeca.link.*;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.sys.Loader;
 
 import java.util.NoSuchElementException;
@@ -93,8 +93,8 @@ public final class Launcher implements Wrapper {
 
 		this.text=tool(Loader.Tool)
 				.load(path)
-				.map(IO::reader)
-				.map(IO::text)
+				.map(Transputs::reader)
+				.map(Transputs::text)
 				.orElseThrow(() -> new NoSuchElementException("missing app page ["+path+"]"));
 
 	}

@@ -18,7 +18,7 @@
 package com.metreeca.next;
 
 import com.metreeca.spec.things.ValuesTest;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -64,7 +64,7 @@ public final class RewriterTest {
 		final Reader external=new StringReader("<"+external("test")+">");
 		final Reader internal=rewriter(External, Internal).internal(external);
 
-		assertEquals("reader rewritten", "<"+internal("test")+">", IO.text(internal));
+		assertEquals("reader rewritten", "<"+internal("test")+">", Transputs.text(internal));
 	}
 
 	@Test public void testRewriteWriter() throws IOException {

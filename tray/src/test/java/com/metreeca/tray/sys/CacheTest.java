@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,7 +66,7 @@ public final class CacheTest {
 
 				final String create="created!";
 
-				IO.text(new FileWriter(file), create);
+				Transputs.text(new FileWriter(file), create);
 
 				cache.exec(url, blob -> {
 
@@ -90,7 +90,7 @@ public final class CacheTest {
 
 				final String update="updated!";
 
-				IO.text(new FileWriter(file), update);
+				Transputs.text(new FileWriter(file), update);
 
 				cache.exec(url, blob -> {
 

@@ -20,10 +20,8 @@ package com.metreeca.link;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.JSONAdapter;
-import com.metreeca.spec.things.Formats;
-import com.metreeca.spec.things.Values;
-import com.metreeca.spec.things._JSON;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.*;
+import com.metreeca.spec.things.Transputs;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.rio.*;
@@ -224,17 +222,17 @@ public final class Request {
 
 
 	public InputStream input() {
-		return part(BodyPart).map(Part::input).orElseGet(() -> input != null ? input.get() : reader != null ? IO.input(reader.get()) : IO.input());
+		return part(BodyPart).map(Part::input).orElseGet(() -> input != null ? input.get() : reader != null ? Transputs.input(reader.get()) : Transputs.input());
 	}
 
 	public Reader reader() {
-		return part(BodyPart).map(Part::reader).orElseGet(() -> reader != null ? reader.get() : input != null ? IO.reader(input.get()) : IO.reader());
+		return part(BodyPart).map(Part::reader).orElseGet(() -> reader != null ? reader.get() : input != null ? Transputs.reader(input.get()) : Transputs.reader());
 	}
 
 
 	public byte[] data() {
 		try (final InputStream input=input()) {
-			return IO.data(input);
+			return Transputs.data(input);
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}
@@ -242,7 +240,7 @@ public final class Request {
 
 	public String text() {
 		try (final Reader reader=reader()) {
-			return IO.text(reader);
+			return Transputs.text(reader);
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}
@@ -578,7 +576,7 @@ public final class Request {
 
 
 		public Writer body() {
-			return body(IO::input, IO::reader); // empty body
+			return body(Transputs::input, Transputs::reader); // empty body
 		}
 
 		public Writer body(final Supplier<InputStream> data, final Supplier<Reader> text) {

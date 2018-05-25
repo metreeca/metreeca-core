@@ -18,7 +18,7 @@
 package com.metreeca.link;
 
 import com.metreeca.spec.Spec;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -30,8 +30,8 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import static com.metreeca.tray.IO.data;
-import static com.metreeca.tray.IO.input;
+import static com.metreeca.spec.things.Transputs.data;
+import static com.metreeca.spec.things.Transputs.input;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -321,7 +321,7 @@ public final class _Request extends _Message<_Request> {
 
 
 	public String getText() {
-		return new String(getData(), IO.UTF8); // !!! use request encoding
+		return new String(getData(), Transputs.UTF8); // !!! use request encoding
 	}
 
 	public _Request setText(final String text) {

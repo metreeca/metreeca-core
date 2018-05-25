@@ -37,7 +37,7 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
  *
  * @see "https://javaee.github.io/jsonp/"
  */
-public final class _JSON {
+public final class _JSON { // !!! review/remove
 
 	private static final JsonParserFactory parsers=Json
 			.createParserFactory(null);

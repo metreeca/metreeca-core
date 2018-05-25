@@ -20,7 +20,7 @@ package com.metreeca.mill.tasks.lod;
 import com.metreeca.mill.Task;
 import com.metreeca.mill.tasks.Item;
 import com.metreeca.mill.tasks.xml.XSLT;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 
 /**
@@ -114,6 +114,6 @@ public final class GeoGoogle extends Matcher<GeoGoogle> {
 
 		return new XSLT()
 
-				.transform(IO.text(GeoNames.class, "GeoGoogle.xsl"));
+				.transform(Transputs.text(GeoNames.class, "GeoGoogle.xsl"));
 	}
 }

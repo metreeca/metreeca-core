@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,7 +52,7 @@ public final class _CacheTest {
 
 		cache.set(url, new StringReader(expected));
 
-		final String actual=IO.text(cache.get(url).reader());
+		final String actual=Transputs.text(cache.get(url).reader());
 
 		assertEquals("", expected, actual);
 	}

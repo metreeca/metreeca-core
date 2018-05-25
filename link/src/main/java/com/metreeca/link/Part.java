@@ -17,8 +17,8 @@
 
 package com.metreeca.link;
 
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.spec.things._JSON;
-import com.metreeca.tray.IO;
 
 import java.io.*;
 import java.util.*;
@@ -85,17 +85,17 @@ public final class Part { // !!! factor to Message
 
 
 	public InputStream input() {
-		return input != null ? input.get() : reader != null ? IO.input(reader.get()) : IO.input();
+		return input != null ? input.get() : reader != null ? Transputs.input(reader.get()) : Transputs.input();
 	}
 
 	public Reader reader() {
-		return reader != null ? reader.get() : input != null ? IO.reader(input.get()) : IO.reader();
+		return reader != null ? reader.get() : input != null ? Transputs.reader(input.get()) : Transputs.reader();
 	}
 
 
 	public byte[] data() {
 		try (final InputStream input=input()) {
-			return IO.data(input);
+			return Transputs.data(input);
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}
@@ -103,7 +103,7 @@ public final class Part { // !!! factor to Message
 
 	public String text() {
 		try (final Reader reader=reader()) {
-			return IO.text(reader);
+			return Transputs.text(reader);
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}

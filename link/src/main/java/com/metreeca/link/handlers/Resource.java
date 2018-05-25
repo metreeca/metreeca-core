@@ -26,7 +26,7 @@ import com.metreeca.spec.probes.Inferencer;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Outliner;
 import com.metreeca.spec.things.*;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -173,7 +173,7 @@ public final class Resource implements _Handler { // !!! rename to avoid clashes
 
 				final Query filter;
 				try {
-					filter=new QueryParser(shape).parse(IO.decode(query));
+					filter=new QueryParser(shape).parse(Transputs.decode(query));
 				} catch ( final RuntimeException e ) {
 					throw new _LinkException(_Response.BadRequest, "malformed query: "+e.getMessage(), e);
 				}

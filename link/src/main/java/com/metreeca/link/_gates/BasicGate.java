@@ -21,7 +21,7 @@ import com.metreeca.link._Gate;
 import com.metreeca.link._Request;
 import com.metreeca.link._Response;
 import com.metreeca.spec.Spec;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Setup;
 
@@ -68,7 +68,7 @@ public final class BasicGate implements _Gate {
 			if ( matcher.matches() ) {
 
 				final String token=new String(Base64.getDecoder()
-						.decode(matcher.group("token")), IO.UTF8);
+						.decode(matcher.group("token")), Transputs.UTF8);
 
 				final int colon=max(token.indexOf(':'), 0);
 

@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tool;
 
 import java.io.*;
@@ -100,7 +100,7 @@ public final class _Cache { // !!! remove
 				@Override public Map<String, String> meta() { return emptyMap(); } // !!! metadata?
 
 				@Override public Reader reader() throws FileNotFoundException {
-					return IO.reader(input()); // !!! encoding?
+					return Transputs.reader(input()); // !!! encoding?
 				}
 
 				@Override public InputStream input() throws FileNotFoundException {
@@ -176,7 +176,7 @@ public final class _Cache { // !!! remove
 		}
 
 		try (final OutputStream output=new FileOutputStream(blob(entry.url()))) { // !!! factor
-			IO.data(output, entry.input());
+			Transputs.data(output, entry.input());
 		}
 
 		return this;
@@ -207,7 +207,7 @@ public final class _Cache { // !!! remove
 			@Override public Map<String, String> meta() { return emptyMap(); }
 
 			@Override public Reader reader() throws FileNotFoundException {
-				return IO.reader(input());
+				return Transputs.reader(input());
 			}
 
 			@Override public InputStream input() throws FileNotFoundException {
@@ -225,7 +225,7 @@ public final class _Cache { // !!! remove
 			@Override public Map<String, String> meta() { return emptyMap(); }
 
 			@Override public Reader reader() throws IOException {
-				return IO.reader(input()); // !!! encode according to headers
+				return Transputs.reader(input()); // !!! encode according to headers
 			}
 
 			@Override public InputStream input() throws IOException {
@@ -248,7 +248,7 @@ public final class _Cache { // !!! remove
 					// !!! headers
 
 					try (final OutputStream output=new FileOutputStream(blob)) { // !!! factor
-						IO.data(output, connection.getInputStream());
+						Transputs.data(output, connection.getInputStream());
 					}
 				}
 
@@ -267,7 +267,7 @@ public final class _Cache { // !!! remove
 			@Override public Map<String, String> meta() { return emptyMap(); }
 
 			@Override public Reader reader() throws FileNotFoundException {
-				return IO.reader(input());
+				return Transputs.reader(input());
 			}
 
 			@Override public InputStream input() throws FileNotFoundException {
@@ -290,9 +290,9 @@ public final class _Cache { // !!! remove
 		public default Collection<String> dependencies() { return emptySet(); }
 
 
-		public default Reader reader() throws IOException { return IO.reader(input()); }
+		public default Reader reader() throws IOException { return Transputs.reader(input()); }
 
-		public default InputStream input() throws IOException { return IO.input(reader()); }
+		public default InputStream input() throws IOException { return Transputs.input(reader()); }
 
 	}
 

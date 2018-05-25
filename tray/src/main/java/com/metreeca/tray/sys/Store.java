@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -105,7 +105,7 @@ public final class Store {
 
 		synchronized ( storage ) {
 
-			final File file=new File(storage, nameUUIDFromBytes(id.getBytes(IO.UTF8)).toString());
+			final File file=new File(storage, nameUUIDFromBytes(id.getBytes(Transputs.UTF8)).toString());
 
 			// acquire inter-process lock
 
@@ -180,7 +180,7 @@ public final class Store {
 
 		public byte[] data() {
 			try (final InputStream input=input();) {
-				return IO.data(input);
+				return Transputs.data(input);
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
@@ -189,7 +189,7 @@ public final class Store {
 		public Blob data(final byte... data) {
 			try (final OutputStream output=output()) {
 
-				IO.data(output, data);
+				Transputs.data(output, data);
 
 				return this;
 
@@ -201,7 +201,7 @@ public final class Store {
 
 		public String text() {
 			try (final Reader reader=reader();) {
-				return IO.text(reader);
+				return Transputs.text(reader);
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
@@ -210,7 +210,7 @@ public final class Store {
 		public Blob text(final String text) {
 			try (final Writer writer=writer()) {
 
-				IO.text(writer, text);
+				Transputs.text(writer, text);
 
 				return this;
 
@@ -223,7 +223,7 @@ public final class Store {
 		public InputStream input() {
 			try {
 
-				return file.exists() ? new FileInputStream(file) : IO.input();
+				return file.exists() ? new FileInputStream(file) : Transputs.input();
 
 			} catch ( FileNotFoundException e ) {
 
@@ -247,11 +247,11 @@ public final class Store {
 
 
 		public Reader reader() {
-			return IO.reader(input());
+			return Transputs.reader(input());
 		}
 
 		public Writer writer() {
-			return IO.writer(output());
+			return Transputs.writer(output());
 		}
 
 	}

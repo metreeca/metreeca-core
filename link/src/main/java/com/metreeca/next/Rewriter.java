@@ -17,7 +17,7 @@
 
 package com.metreeca.next;
 
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -96,7 +96,7 @@ public final class Rewriter {
 
 	public Reader internal(final Reader reader) { // !!! streaming replacement
 		return identity || reader == null ? reader : new FilterReader(
-				new StringReader(IO.text(reader).replace(external, internal))) {
+				new StringReader(Transputs.text(reader).replace(external, internal))) {
 
 			@Override public void close() throws IOException { reader.close(); }
 

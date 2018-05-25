@@ -18,7 +18,7 @@
 package com.metreeca.j2ee;
 
 import com.metreeca.link.*;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
@@ -278,7 +278,7 @@ import static java.util.Collections.list;
 
 		writer.base(base);
 		writer.path(path);
-		writer.query(query != null ? IO.decode(query) : "");
+		writer.query(query != null ? Transputs.decode(query) : "");
 
 		for (final Map.Entry<String, String[]> parameter : request.getParameterMap().entrySet()) {
 			writer.parameter(parameter.getKey(), asList(parameter.getValue()));
@@ -328,7 +328,7 @@ import static java.util.Collections.list;
 						}
 
 						try {
-							updated.add(item.getString(IO.UTF8.name()));
+							updated.add(item.getString(Transputs.UTF8.name()));
 						} catch ( final UnsupportedEncodingException unexpected ) {
 							throw new UncheckedIOException(unexpected);
 						}

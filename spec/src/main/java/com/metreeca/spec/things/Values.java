@@ -27,7 +27,6 @@ import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.*;
@@ -46,8 +45,6 @@ import static java.util.stream.Collectors.toList;
 
 
 public final class Values {
-
-	public static final Charset UTF8=Charset.forName("UTF-8"); // !!! share with IO
 
 	/**
 	 * A pattern matching absolute IRIs.
@@ -367,7 +364,7 @@ public final class Values {
 			throw new NullPointerException("null text");
 		}
 
-		return literal(nameUUIDFromBytes(text.getBytes(UTF8)).toString());
+		return literal(nameUUIDFromBytes(text.getBytes(Transputs.UTF8)).toString());
 	}
 
 

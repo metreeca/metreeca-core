@@ -18,7 +18,7 @@
 package com.metreeca.link;
 
 
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
@@ -128,7 +128,7 @@ public final class _HandlerTest {
 		final byte[] body=response.getData();
 
 		tools.get(Trace.Tool).info(null, String.format("HTTP Response Code %d\n%s\n%s\n---------------------------",
-				response.getStatus(), headers, new String(body, IO.UTF8)));
+				response.getStatus(), headers, new String(body, Transputs.UTF8)));
 
 		response.setBody(out -> {
 			try {

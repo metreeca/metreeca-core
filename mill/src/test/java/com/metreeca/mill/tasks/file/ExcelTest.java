@@ -17,7 +17,7 @@
 
 package com.metreeca.mill.tasks.file;
 
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -74,7 +74,7 @@ public final class ExcelTest {
 
 
 	private void exec(final String name, final Consumer<Sheet> task) {
-		try (final Workbook workbook=new XSSFWorkbook(IO.input(this, ".xlsx"))) {
+		try (final Workbook workbook=new XSSFWorkbook(Transputs.input(this, ".xlsx"))) {
 
 			task.accept(workbook.getSheet(name));
 

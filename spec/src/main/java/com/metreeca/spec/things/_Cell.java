@@ -35,7 +35,7 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 
-public final class _Cell { // !!! immutable
+public final class _Cell { // !!! remove
 
 	public static final Supplier<IllegalStateException> Missing=() -> new IllegalStateException("missing cell value");
 

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.tray;
+package com.metreeca.spec.things;
 
 import java.io.*;
 import java.net.URL;
@@ -32,7 +32,7 @@ import static java.lang.String.format;
 /**
  * I/O utilities.
  */
-public final class IO {
+public final class Transputs {
 
 	/**
 	 * The default charset for I/O operations.
@@ -355,7 +355,7 @@ public final class IO {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private IO() {}
+	private Transputs() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

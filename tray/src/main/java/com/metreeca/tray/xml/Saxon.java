@@ -18,7 +18,7 @@
 package com.metreeca.tray.xml;
 
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tool;
 
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
@@ -41,7 +41,7 @@ public final class Saxon {
 	public static final Tool<Saxon> Tool=tools -> new Saxon();
 
 
-	private static final String identity=IO.text(Saxon.class, ".xsl");
+	private static final String identity=Transputs.text(Saxon.class, ".xsl");
 
 
 	private final XQueryCompiler xquery; // thread-safe if not modified once initialized

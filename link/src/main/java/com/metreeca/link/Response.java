@@ -22,7 +22,7 @@ import com.metreeca.spec.codecs.JSONAdapter;
 import com.metreeca.spec.things.Formats;
 import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things._JSON;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.TreeModel;
@@ -383,7 +383,7 @@ public final class Response {
 				// !!! user request accept encoding with quality values
 				// !!! response.request.header("Accept-Charset");
 
-				response.writer.accept(IO.writer(output, IO.UTF8.name()));
+				response.writer.accept(Transputs.writer(output, Transputs.UTF8.name()));
 
 			}
 
@@ -405,7 +405,7 @@ public final class Response {
 				// !!! user request accept encoding with quality values
 				// !!! response.request.header("Accept-Charset");
 
-				response.output.accept(IO.output(writer, IO.UTF8.name())); // !!! user request accept encoding
+				response.output.accept(Transputs.output(writer, Transputs.UTF8.name())); // !!! user request accept encoding
 
 			}
 

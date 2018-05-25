@@ -22,7 +22,7 @@ import com.metreeca.mill.tasks.Item;
 import com.metreeca.mill.tasks.Peek;
 import com.metreeca.mill.tasks.Pipe;
 import com.metreeca.mill.tasks.xml.XSLT;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import org.junit.Test;
 
@@ -33,11 +33,11 @@ public final class GeoGoogleTest {
 
 		new Mill().execute(new Pipe(
 
-				new Item().text(IO.text(GeoGoogle.class, "GeoGoogle.xml")),
+				new Item().text(Transputs.text(GeoGoogle.class, "GeoGoogle.xml")),
 
 				new XSLT()
 
-						.transform(IO.text(GeoGoogle.class, "GeoGoogle.xsl")),
+						.transform(Transputs.text(GeoGoogle.class, "GeoGoogle.xsl")),
 
 
 				new Peek()

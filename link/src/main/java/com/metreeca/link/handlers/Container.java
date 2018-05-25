@@ -26,10 +26,8 @@ import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Outliner;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
-import com.metreeca.spec.things.Maps;
-import com.metreeca.spec.things.Sets;
-import com.metreeca.spec.things._Cell;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.*;
+import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -256,7 +254,7 @@ public final class Container implements _Handler {
 			final Query filter;
 
 			try {
-				filter=new QueryParser(resource).parse(IO.decode(query));
+				filter=new QueryParser(resource).parse(Transputs.decode(query));
 			} catch ( final RuntimeException e ) {
 				throw new _LinkException(_Response.BadRequest, "malformed query: "+e.getMessage(), e);
 			}

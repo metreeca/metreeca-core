@@ -20,7 +20,7 @@ package com.metreeca.mill.tasks.lod;
 import com.metreeca.mill.Task;
 import com.metreeca.mill.tasks.Item;
 import com.metreeca.mill.tasks.xml.XSLT;
-import com.metreeca.tray.IO;
+import com.metreeca.spec.things.Transputs;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -191,7 +191,7 @@ public final class GeoNames extends Matcher<GeoNames> {
 
 		return new XSLT()
 
-				.transform(IO.text(GeoNames.class, "GeoNames.xsl"));
+				.transform(Transputs.text(GeoNames.class, "GeoNames.xsl"));
 	}
 
 }

@@ -41,7 +41,7 @@ import java.util.stream.StreamSupport;
 
 import static com.metreeca.mill._Cell.cell;
 import static com.metreeca.spec.things.Values.*;
-import static com.metreeca.tray.IO.reader;
+import static com.metreeca.spec.things.Transputs.reader;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.Math.max;
