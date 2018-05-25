@@ -16,7 +16,7 @@
  */
 
 /**
- * Shared RDF-related tools.
+ * RDF tools.
  */
 
 package com.metreeca.tray.rdf;

@@ -34,7 +34,6 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.StreamSupport;
 
 import static com.metreeca.spec.things.Maps.entry;
 import static com.metreeca.spec.things.Maps.map;
@@ -99,11 +98,12 @@ public final class _Server {
 
 		this.graph=tools.get(Graph.Tool);
 
-		final _Gate gate=tools.get(_Gate.Tool);
+		//final _Gate gate=tools.get(_Gate.Tool);
 
-		this.handler=StreamSupport
+		this.handler=_Handler.Empty
 
-				.stream(handlers.spliterator(), false).reduce(gate::authorize, _Handler::chain)
+				//.chain(gate::authorize)
+
 
 				.chain(new _Dispatcher(map( // default method post-processors
 
@@ -112,7 +112,9 @@ public final class _Server {
 				)))
 
 				.chain(this::defaults) // default interaction post-processor
-				.chain(gate::authenticate);
+
+				//.chain(gate::authenticate)
+		;
 	}
 
 

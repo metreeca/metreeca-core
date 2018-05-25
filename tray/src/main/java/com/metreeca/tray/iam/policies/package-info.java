@@ -16,7 +16,7 @@
  */
 
 /**
- * System tools.
+ * Password policies.
  */
 
-package com.metreeca.tray.sys;
+package com.metreeca.tray.iam.policies;

@@ -33,6 +33,9 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.unmodifiableSet;
 
 
+/**
+ * User roster.
+ */
 public interface Roster {
 
 	public static Tool<Roster> Tool=tools -> new KeyRoster();

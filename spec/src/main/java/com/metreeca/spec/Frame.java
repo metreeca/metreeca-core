@@ -40,9 +40,9 @@ import static java.util.stream.Collectors.*;
 
 
 /**
- * Value property map.
+ * Value-property map.
  *
- * @param <T>
+ * @param <T> the type of the mapped properties
  */
 public final class Frame<T> {
 

@@ -21,7 +21,7 @@ import com.metreeca.tray.iam.digests.PBKDF2Digest;
 
 
 /**
- * Password digest.
+ * Secret digest.
  */
 public abstract class Digest {
 

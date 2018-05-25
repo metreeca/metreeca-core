@@ -15,21 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link;
+/**
+ * User rosters.
+ */
 
-import com.metreeca.link._gates.BasicGate;
-import com.metreeca.tray.Tool;
-
-import java.util.function.BiConsumer;
-
-
-public interface _Gate {
-
-	public static Tool<_Gate> Tool=BasicGate::new; // !!! configurable
-
-
-	public void authorize(Tool.Loader tools, _Request request, _Response response, BiConsumer<_Request, _Response> sink);
-
-	public void authenticate(Tool.Loader tools, _Request request, _Response response, BiConsumer<_Request, _Response> sink);
-
-}
+package com.metreeca.tray.iam.rosters;

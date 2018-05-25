@@ -16,7 +16,7 @@
  */
 
 /**
- * Standard security gates.
+ * Credential digests.
  */
 
-package com.metreeca.link._gates;
+package com.metreeca.tray.iam.digests;

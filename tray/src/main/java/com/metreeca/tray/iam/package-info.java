@@ -16,7 +16,7 @@
  */
 
 /**
- * System tools.
+ * Identity and Access management tools.
  */
 
-package com.metreeca.tray.sys;
+package com.metreeca.tray.iam;

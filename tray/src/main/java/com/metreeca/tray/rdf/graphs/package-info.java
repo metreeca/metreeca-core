@@ -16,7 +16,7 @@
  */
 
 /**
- * System tools.
+ * Graph stores.
  */
 
-package com.metreeca.tray.sys;
+package com.metreeca.tray.rdf.graphs;

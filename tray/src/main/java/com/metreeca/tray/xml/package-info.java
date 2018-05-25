@@ -16,7 +16,7 @@
  */
 
 /**
- * Shared XML-related tools.
+ * XML tools.
  */
 
 package com.metreeca.tray.xml;

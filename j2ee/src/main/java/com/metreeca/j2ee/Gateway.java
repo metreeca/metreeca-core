@@ -65,15 +65,13 @@ import static java.util.Collections.list;
  * <ul>
  *
  * <li>initializes and destroys the shared {@linkplain Tool tool tray} managing platform components required by
- * resource
- * handlers;</li>
+ * resource handlers;</li>
  *
  * <li>intercepts HTTP requests and handles them using the {@linkplain Server server} tool provided by the shared tool
  * tray;</li>
  *
  * <li>forwards HTTP requests to the enclosing web application if no response is {@linkplain Response#committed()
- * committed} by
- * the linked data server.</li>
+ * committed} by the linked data server.</li>
  *
  * </ul>
  */
@@ -95,7 +93,10 @@ import static java.util.Collections.list;
 
 		try {
 
-			tray.set(Setup.Tool, tools -> setup(context)).set(Loader.Tool, tools -> loader(context)).set(Upload, tools -> upload(context));
+			tray
+					.set(Setup.Tool, tools -> setup(context))
+					.set(Loader.Tool, tools -> loader(context))
+					.set(Upload, tools -> upload(context));
 
 			for (final Toolkit toolkit : ServiceLoader.load(Toolkit.class)) { toolkit.load(tray); }
 
@@ -110,6 +111,7 @@ import static java.util.Collections.list;
 				t.printStackTrace(new PrintWriter(message));
 
 				tray.get(Trace.Tool).error(this, "error during data hub initialization: "+message);
+
 				context.log("error during data hub initialization", t);
 
 				throw t;
@@ -209,7 +211,9 @@ import static java.util.Collections.list;
 	@Override public void destroy() {}
 
 
-	@Override public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws ServletException, IOException {
+	@Override public void doFilter(
+			final ServletRequest request, final ServletResponse response, final FilterChain chain
+	) throws ServletException, IOException {
 
 		final Tray tray=(Tray)request.getServletContext().getAttribute(TrayAttribute);
 
@@ -394,7 +398,8 @@ import static java.util.Collections.list;
 
 		response.setStatus(reader.status());
 
-		reader.headers().forEachOrdered(header -> header.getValue().forEach(value -> response.addHeader(header.getKey(), value)));
+		reader.headers().forEachOrdered(header ->
+				header.getValue().forEach(value -> response.addHeader(header.getKey(), value)));
 
 		if ( reader.binary() ) {
 
