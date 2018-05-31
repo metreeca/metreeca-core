@@ -17,13 +17,12 @@
 
 package com.metreeca.mill;
 
-import com.metreeca.tray.Tool;
-import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Trace;
 
 import java.util.stream.Stream;
 
 import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.time;
 
 import static java.lang.String.format;
@@ -31,19 +30,7 @@ import static java.lang.String.format;
 
 public final class Mill {
 
-	private final Tool.Loader tools;
-
-
-	public Mill() { this(Tray.tray());}
-
-	public Mill(final Tool.Loader tools) {
-
-		if ( tools == null ) {
-			throw new NullPointerException("null tools");
-		}
-
-		this.tools=tools;
-	}
+	private final Trace trace=tool(Trace.Tool);
 
 
 	public Mill execute(final Task task) {
@@ -52,7 +39,7 @@ public final class Mill {
 			throw new NullPointerException("null task");
 		}
 
-		tools.get(Trace.Tool).info(this, format("executed task in %,d ms", time(() -> {
+		trace.info(this, format("executed task in %,d ms", time(() -> {
 			try (final Stream<_Cell> execute=task.execute(Stream.of(_Cell.cell(bnode())))) { execute.count(); }
 		})));
 

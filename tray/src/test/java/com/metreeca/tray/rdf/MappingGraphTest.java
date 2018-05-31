@@ -336,7 +336,7 @@ public final class MappingGraphTest {
 	private static Object mapping(final Supplier<Repository> supplier, final Consumer<Graph> task) { // !!! refactor
 		return repository(supplier, repository -> {
 
-			Tray.tray()
+			new Tray()
 
 					.set(Graph.Tool, tools -> new Graph("Test Graph", IsolationLevels.SERIALIZABLE, () -> repository) {})
 

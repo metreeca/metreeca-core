@@ -47,7 +47,7 @@ public final class _HandlerTest {
 	public static void tools(final Consumer<Tool.Loader> task) {
 		repository(repository -> {
 
-			final Tray manager=Tray.tray().set(Graph.Tool, tools ->
+			final Tray manager=new Tray().set(Graph.Tool, tools ->
 					new Graph("Test Repository", IsolationLevels.SERIALIZABLE, () -> repository) {});
 
 			try {

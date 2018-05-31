@@ -31,7 +31,7 @@ public class TrayTest {
 
 	@Test public void testReplacesToolsWithPlugins() {
 
-		final Tray tray=Tray.tray();
+		final Tray tray=new Tray();
 
 		final Tool<Object> target=tools -> "target";
 		final Tool<Object> plugin=tools -> "plugin";
@@ -43,7 +43,7 @@ public class TrayTest {
 
 	@Test public void testReleaseAutoCloseableResources() {
 
-		final Tray tray=Tray.tray();
+		final Tray tray=new Tray();
 
 		final class Resource implements AutoCloseable {
 
@@ -71,7 +71,7 @@ public class TrayTest {
 
 	@Test public void testReleaseDependenciesAfterResource() {
 
-		final Tray tray=Tray.tray();
+		final Tray tray=new Tray();
 
 		final Collection<Object> released=new ArrayList<>();
 
@@ -111,7 +111,7 @@ public class TrayTest {
 
 	@Test(expected=IllegalStateException.class) public void testPreventToolBindingIfAlreadyInUse() {
 
-		final Tray tray=Tray.tray();
+		final Tray tray=new Tray();
 		final Tool<Object> tool=tools1 -> new Object();
 
 		tray.get(tool);
@@ -121,7 +121,7 @@ public class TrayTest {
 
 	@Test(expected=IllegalStateException.class) public void testTrapCircularDependencies() {
 
-		final Tray tray=Tray.tray();
+		final Tray tray=new Tray();
 
 		final Map<String, Tool<Object>> cycle=new HashMap<>(); // avoid cyclic dependencies in initializers
 
@@ -139,7 +139,7 @@ public class TrayTest {
 
 	@Test(expected=NoSuchElementException.class) public void testHandleExceptionsInFactories() {
 
-		final Tool.Loader tray=Tray.tray();
+		final Tool.Loader tray=new Tray();
 
 		final Tool<Object> tool=tools -> {
 			throw new NoSuchElementException("missing resource");

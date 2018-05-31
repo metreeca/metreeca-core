@@ -18,6 +18,7 @@
 package com.metreeca.tray.sys;
 
 import com.metreeca.spec.things.Transputs;
+import com.metreeca.tray.Tray;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,8 +27,6 @@ import org.junit.rules.TemporaryFolder;
 import java.io.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-
-import static com.metreeca.tray.Tray.tray;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,7 +42,7 @@ public final class CacheTest {
 
 
 	private void exec(final Consumer<Cache> task) {
-		tray().exec(() -> {
+		new Tray().exec(() -> {
 			try {
 				task.accept(new Cache(tmp.newFolder()));
 			} catch ( final IOException e ) {

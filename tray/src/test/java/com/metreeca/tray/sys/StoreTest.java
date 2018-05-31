@@ -17,6 +17,8 @@
 
 package com.metreeca.tray.sys;
 
+import com.metreeca.tray.Tray;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -24,8 +26,6 @@ import org.junit.rules.TemporaryFolder;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.function.Consumer;
-
-import static com.metreeca.tray.Tray.tray;
 
 import static org.junit.Assert.assertFalse;
 
@@ -36,7 +36,7 @@ public final class StoreTest {
 
 
 	private void exec(final Consumer<Store> task) {
-		tray().exec(() -> {
+		new Tray().exec(() -> {
 			try {
 				task.accept(new Store(tmp.newFolder()));
 			} catch ( final IOException e ) {

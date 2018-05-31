@@ -36,10 +36,6 @@ public final class Tray implements Tool.Loader, Tool.Binder {
 	private static final ThreadLocal<Tray> context=new ThreadLocal<>();
 
 
-	public static Tray tray() {
-		return new Tray();
-	}
-
 	public static <T> T tool(final Tool<T> tool) {
 
 		if ( tool == null ) {
@@ -63,8 +59,6 @@ public final class Tray implements Tool.Loader, Tool.Binder {
 
 	private final Object pending=new Object(); // placeholder for detecting circular dependencies
 
-
-	private Tray() {}
 
 
 	@Override public <T> T get(final Tool<T> tool) {

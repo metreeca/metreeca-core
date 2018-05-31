@@ -46,7 +46,6 @@ import javax.servlet.http.HttpServletResponse;
 import static com.metreeca.link.Part.part;
 import static com.metreeca.spec.things.Strings.upper;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.Tray.tray;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
 
@@ -89,7 +88,7 @@ import static java.util.Collections.list;
 
 		final ServletContext context=event.getServletContext();
 
-		final Tray tray=tray();
+		final Tray tray=new Tray();
 
 		try {
 

@@ -23,16 +23,15 @@ import com.metreeca.mill.tasks.Peek;
 import com.metreeca.mill.tasks.Pipe;
 import com.metreeca.mill.tasks.xml.XSLT;
 import com.metreeca.spec.things.Transputs;
+import com.metreeca.tray.Tray;
 
 import org.junit.Test;
-
-import static com.metreeca.tray.Tray.tray;
 
 
 public final class GeoGoogleTest {
 
 	@Test public void work() {
-		tray().exec(() -> {
+		new Tray().exec(() -> {
 			new Mill().execute(new Pipe(
 
 					new Item().text(Transputs.text(GeoGoogle.class, "GeoGoogle.xml")),

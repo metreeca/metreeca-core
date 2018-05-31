@@ -57,7 +57,6 @@ import static com.metreeca.spec.things.Values.integer;
 import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.ValuesTest.term;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.Tray.tray;
 
 import static org.junit.Assert.fail;
 
@@ -122,7 +121,7 @@ public final class LinkTest {
 
 	public static final class Testbed {
 
-		private final Tray tray=tray();
+		private final Tray tray=new Tray();
 
 		private Supplier<Handler> handler=() -> tool(Server.Tool);
 
