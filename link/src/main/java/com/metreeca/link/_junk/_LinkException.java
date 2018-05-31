@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link;
+package com.metreeca.link._junk;
 
 
 public final class _LinkException extends RuntimeException {

@@ -18,6 +18,7 @@
 package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
+import com.metreeca.link._junk.*;
 import com.metreeca.link.handlers.ldp._Container;
 import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.link.handlers.ldp._Resource;
@@ -34,7 +35,7 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 
 import java.util.function.BiConsumer;
 
-import static com.metreeca.link._Handler.sysadm;
+import static com.metreeca.link._junk._Handler.sysadm;
 import static com.metreeca.spec.Shape.*;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;

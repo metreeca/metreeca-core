@@ -18,6 +18,7 @@
 package com.metreeca.link.handlers.ldp;
 
 import com.metreeca.link.*;
+import com.metreeca.link._junk.*;
 import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.spec.*;
 import com.metreeca.spec.codecs.QueryParser;
@@ -47,8 +48,8 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.link._Handler.unauthorized;
-import static com.metreeca.link._Handler.unsupported;
+import static com.metreeca.link._junk._Handler.unauthorized;
+import static com.metreeca.link._junk._Handler.unsupported;
 import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;

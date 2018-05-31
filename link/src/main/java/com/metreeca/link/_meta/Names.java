@@ -18,6 +18,9 @@
 package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
+import com.metreeca.link._junk._Request;
+import com.metreeca.link._junk._Response;
+import com.metreeca.link._junk._Transfer;
 import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
@@ -36,9 +39,9 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.link._Handler.sysadm;
-import static com.metreeca.link._Handler.unauthorized;
-import static com.metreeca.link._Handler.unsupported;
+import static com.metreeca.link._junk._Handler.sysadm;
+import static com.metreeca.link._junk._Handler.unauthorized;
+import static com.metreeca.link._junk._Handler.unsupported;
 import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.required;
 import static com.metreeca.spec.shapes.All.all;

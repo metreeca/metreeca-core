@@ -18,6 +18,9 @@
 package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
+import com.metreeca.link._junk._Handler;
+import com.metreeca.link._junk._Request;
+import com.metreeca.link._junk._Server;
 import com.metreeca.link.handlers.ldp._Container;
 import com.metreeca.link.handlers.ldp._Resource;
 import com.metreeca.spec.Shape;

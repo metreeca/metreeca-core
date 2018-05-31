@@ -18,6 +18,7 @@
 package com.metreeca.link.handlers.ldp;
 
 import com.metreeca.link.*;
+import com.metreeca.link._junk.*;
 import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.spec.Issue.Level;
 import com.metreeca.spec.*;
@@ -40,8 +41,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 
-import static com.metreeca.link._Handler.unauthorized;
-import static com.metreeca.link._Handler.unsupported;
+import static com.metreeca.link._junk._Handler.unauthorized;
+import static com.metreeca.link._junk._Handler.unsupported;
 import static com.metreeca.spec.Shape.*;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;

@@ -17,9 +17,9 @@
 
 package com.metreeca.link.handlers.ldp;
 
-import com.metreeca.link._Handler;
-import com.metreeca.link._Request;
-import com.metreeca.link._Response;
+import com.metreeca.link._junk._Handler;
+import com.metreeca.link._junk._Request;
+import com.metreeca.link._junk._Response;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.tray.Tool;
@@ -33,7 +33,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import org.junit.Test;
 
-import static com.metreeca.link._HandlerTest.*;
+import static com.metreeca.link._junk._HandlerTest.*;
 import static com.metreeca.spec.Shape.delete;
 import static com.metreeca.spec.Shape.relate;
 import static com.metreeca.spec.shapes.All.all;

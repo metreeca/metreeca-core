@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link;
+package com.metreeca.link._junk;
 
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.codecs.JSONAdapter;

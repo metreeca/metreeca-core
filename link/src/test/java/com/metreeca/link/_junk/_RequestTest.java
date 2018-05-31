@@ -15,7 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link;
+package com.metreeca.link._junk;
+
+import com.metreeca.link._junk._Request;
 
 import org.junit.Test;
 
