@@ -239,7 +239,7 @@ public final class LinkTest {
 					.wrap(parser()) // parse query string
 					.wrap(persistor()) // make response body getters idempotent
 
-					.exec(
+					.handle(
 
 							writer ->
 
@@ -303,7 +303,7 @@ public final class LinkTest {
 
 
 		private Wrapper parser() {
-			return handler -> (request, response) -> handler.exec(
+			return handler -> (request, response) -> handler.handle(
 
 					writer -> {
 
@@ -324,7 +324,7 @@ public final class LinkTest {
 		}
 
 		private Wrapper persistor() {
-			return handler -> (request, response) -> handler.exec(
+			return handler -> (request, response) -> handler.handle(
 
 					writer ->
 

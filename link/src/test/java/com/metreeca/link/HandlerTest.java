@@ -46,7 +46,7 @@ public final class HandlerTest {
 			}
 		};
 
-		handler.exec(writer -> writer.method(GET).done(), reader ->
+		handler.handle(writer -> writer.method(GET).done(), reader ->
 				assertEquals("request/response paired", GET, reader.request().method()));
 
 		assertTrue("target invoked", committed.get());
@@ -67,12 +67,12 @@ public final class HandlerTest {
 
 		handler
 
-				.wrap(wrapped -> (request, response) -> wrapped.exec(
+				.wrap(wrapped -> (request, response) -> wrapped.handle(
 						writer -> writer.copy(request).text("before/"+request.text()),
 						reader -> response.copy(reader).done()
 				))
 
-				.exec(
+				.handle(
 						writer -> writer.method(GET).text("text"),
 						reader -> assertEquals("wrapped", "handler/before/text", reader.text())
 				);
@@ -95,12 +95,12 @@ public final class HandlerTest {
 
 		handler
 
-				.wrap(wrapped -> (request, response) -> wrapped.exec(
+				.wrap(wrapped -> (request, response) -> wrapped.handle(
 						writer -> writer.copy(request).done(),
 						reader -> response.copy(reader).text("after/"+reader.text())
 				))
 
-				.exec(
+				.handle(
 						writer -> writer.method(GET).text("text"),
 						reader -> assertEquals("wrapped", "after/handler/text", reader.text())
 				);
@@ -115,7 +115,7 @@ public final class HandlerTest {
 
 		handler
 
-				.wrap(wrapped -> (request, response) -> wrapped.exec(
+				.wrap(wrapped -> (request, response) -> wrapped.handle(
 
 						writer -> writer.copy(request).user(RDF.REST).done(),
 
@@ -129,7 +129,7 @@ public final class HandlerTest {
 
 				))
 
-				.exec(
+				.handle(
 						writer -> writer.method(GET).user(RDF.FIRST).done(),
 						reader -> assertEquals("paired with original request", RDF.FIRST, reader.request().user())
 				);
@@ -149,7 +149,7 @@ public final class HandlerTest {
 
 		};
 
-		handler.exec(writer -> writer.method(GET).done(), reader -> transaction.add(reader.text()));
+		handler.handle(writer -> writer.method(GET).done(), reader -> transaction.add(reader.text()));
 
 		assertEquals("", asList("begin", "inside", "commit"), transaction);
 	}

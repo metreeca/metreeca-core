@@ -97,7 +97,7 @@ public final class Tracer implements Wrapper {
 	@Override public Handler wrap(final Handler handler) {
 		return (request, response) -> {
 			try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
-				transactor(connection, true).wrap((_request, _response) -> handler.exec(
+				transactor(connection, true).wrap((_request, _response) -> handler.handle(
 
 						writer ->
 

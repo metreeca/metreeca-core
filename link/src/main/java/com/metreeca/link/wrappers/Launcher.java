@@ -101,7 +101,7 @@ public final class Launcher implements Wrapper {
 
 
 	@Override public Handler wrap(final Handler handler) {
-		return (request, response) -> handler.exec(
+		return (request, response) -> handler.handle(
 
 				writer ->
 

@@ -94,7 +94,7 @@ public final class Bearer implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper execute(final IRI user, final Collection<Value> roles) {
-		return handler -> (request, response) -> handler.exec(
+		return handler -> (request, response) -> handler.handle(
 
 				writer -> writer
 						.copy(request)

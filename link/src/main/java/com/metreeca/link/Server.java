@@ -151,7 +151,7 @@ public final class Server implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper postprocessor() {
-		return handler -> (request, response) -> handler.exec(
+		return handler -> (request, response) -> handler.handle(
 
 				writer ->
 
@@ -190,7 +190,7 @@ public final class Server implements Handler {
 	}
 
 	private Wrapper rewriter() {
-		return handler -> (request, response) -> handler.exec(
+		return handler -> (request, response) -> handler.handle(
 
 				writer -> {
 

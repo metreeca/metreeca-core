@@ -55,7 +55,7 @@ public final class CORS implements Wrapper {
 
 		trace.info(this, enabled ? "enabled" : "disabled");
 
-		return enabled ? (request, response) -> handler.exec(
+		return enabled ? (request, response) -> handler.handle(
 
 				writer -> writer.copy(request).done(),
 

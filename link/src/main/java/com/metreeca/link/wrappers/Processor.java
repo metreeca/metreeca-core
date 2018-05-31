@@ -71,7 +71,7 @@ public final class Processor implements Wrapper {
 	@Override public Handler wrap(final Handler handler) {
 		return (request, response) -> {
 			if ( script.isEmpty() ) { handler.handle(request, response); } else {
-				handler.exec(
+				handler.handle(
 
 						writer ->
 

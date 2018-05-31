@@ -67,7 +67,7 @@ public final class Transactor implements Wrapper {
 
 				if ( !connection.isActive() ) {
 
-					handler.exec(
+					handler.handle(
 
 							writer -> {
 

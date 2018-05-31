@@ -69,7 +69,7 @@ import static com.metreeca.spec.things._JSON.object;
 
 	public void handle(final Request request, final Response response);
 
-	public default void exec(final Consumer<Request.Writer> source, final Consumer<Response.Reader> target) {
+	public default void handle(final Consumer<Request.Writer> source, final Consumer<Response.Reader> target) {
 
 		if ( source == null ) {
 			throw new NullPointerException("null source");

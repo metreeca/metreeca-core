@@ -197,7 +197,7 @@ public final class BearerTest {
 	//// Other Authorization Scheme ////////////////////////////////////////////////////////////////////////////////////
 
 	@Test public void testFallThroughToOtherSchemes() {
-		harness(handler(Response.Unauthorized).wrap(handler -> (request, response) -> handler.exec(
+		harness(handler(Response.Unauthorized).wrap(handler -> (request, response) -> handler.handle(
 
 				writer -> writer.copy(request).done(),
 

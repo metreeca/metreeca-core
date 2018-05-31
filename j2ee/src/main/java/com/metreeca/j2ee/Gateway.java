@@ -239,7 +239,7 @@ import static java.util.Collections.list;
 
 				final List<FileItem> items=isMultipartContent(request) ? tool(Upload).parseRequest(request) : emptyList();
 
-				tool(Server.Tool).exec(
+				tool(Server.Tool).handle(
 
 						writer -> request(writer, request, items), reader -> response(reader, response)
 
