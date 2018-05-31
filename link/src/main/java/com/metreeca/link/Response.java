@@ -334,7 +334,10 @@ public final class Response {
 
 
 		public IRI focus() {
-			return header("location").filter(location -> !location.isEmpty()).map(Values::iri).orElseGet(() -> request().focus());
+			return header("location")
+					.filter(location -> !location.isEmpty())
+					.map(Values::iri)
+					.orElseGet(() -> request().focus());
 		}
 
 

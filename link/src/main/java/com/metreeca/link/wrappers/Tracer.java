@@ -18,6 +18,7 @@
 package com.metreeca.link.wrappers;
 
 import com.metreeca.link.*;
+import com.metreeca.spec.things.Values;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
@@ -28,11 +29,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import static com.metreeca.link._work.Binder.binder;
+import static com.metreeca.spec.things.Bindings.bindings;
 import static com.metreeca.link.wrappers.Transactor.transactor;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
-import static com.metreeca.spec.things.Values.timestamp;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
@@ -121,7 +121,7 @@ public final class Tracer implements Wrapper {
 										: _request.safe() ? Link.relate : Link.update;
 
 
-								final Literal time=timestamp();
+								final Literal time=Values.time(true);
 
 								// add default trace record
 
@@ -138,7 +138,7 @@ public final class Tracer implements Wrapper {
 								// add custom info
 
 								if ( !sparql.isEmpty() ) {
-									binder()
+									bindings()
 
 											.set("this", trace)
 											.set("item", item)

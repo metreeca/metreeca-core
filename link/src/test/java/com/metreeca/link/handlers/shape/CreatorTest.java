@@ -196,7 +196,7 @@ public class CreatorTest {
 
 				.slug(auto(Employee))
 
-				.wrap(processor().script(sparql("insert { ?this :code ?code } where {}")))
+				.wrap(processor().script(sparql("insert { ?this :code ?name } where {}")))
 
 				.wrap(processor().script(sparql("insert { ?this rdfs:label ?label } where {\n"
 						+"\t?this :forename ?forename; :surname ?surname; :code ?code. \n"

@@ -80,11 +80,11 @@ public final class RewriterTest {
 
 
 	@Test(expected=IllegalArgumentException.class) public void testRejectRelativeBase() {
-		rewriter("/examle.org/", "");
+		rewriter("/example.org/", "");
 	}
 
 	@Test(expected=IllegalArgumentException.class) public void testRejectMalformedBase() {
-		rewriter("http://examle.org", "");
+		rewriter("http://example.org", "");
 	}
 
 }

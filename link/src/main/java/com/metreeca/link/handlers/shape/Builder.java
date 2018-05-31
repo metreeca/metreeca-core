@@ -39,10 +39,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.link._work.Binder.binder;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
+import static com.metreeca.spec.things.Bindings.bindings;
+import static com.metreeca.spec.things.Values.time;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -134,11 +135,11 @@ public final class Builder extends Shaper {
 			final Collection<Statement> model=new ArrayList<>();
 
 			try (final RepositoryConnection connection=graph.connect()) {
-				binder()
+				bindings()
 
-						.time()
-						.user(request.user())
-						.focus(request.focus())
+						.set("this", request.focus())
+						.set("user", request.user())
+						.set("time", time(true))
 
 						.bind(connection.prepareGraphQuery(QueryLanguage.SPARQL, sparql, request.base()))
 

@@ -38,6 +38,8 @@ import static java.util.Collections.singleton;
 /**
  * Bearer token authenticator.
  *
+ * <p>Work in progress…</p>
+ *
  * <p>Manages bearer token authentication using tokens issued by the shared {@link Roster#Tool roster} tool.</p>
  *
  * @see <a href="https://tools.ietf.org/html/rfc6750">The OAuth 2.0 Authorization Framework: Bearer Token Usage</a>

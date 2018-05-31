@@ -18,14 +18,17 @@
 package com.metreeca.link.wrappers;
 
 
-import com.metreeca.link.Handler;
-import com.metreeca.link.Wrapper;
+import com.metreeca.link.*;
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import static com.metreeca.link._work.Binder.binder;
+import static com.metreeca.spec.things.Bindings.bindings;
+import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.Values.time;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -34,6 +37,51 @@ import static com.metreeca.tray.Tray.tool;
  *
  * <p>Executes a SPARQL Update post-processing script in the shared {@linkplain Graph#Tool graph} tool on successful
  * request processing by the wrapped handler.</p>
+ *
+ * <p>The script will be executed with the following pre-defined bindinsg:</p>
+ *
+ * <table>
+ *
+ * <thead>
+ *
+ * <tr>
+ * <th>variable</th>
+ * <th>value</th>
+ * </tr>
+ *
+ * </thead>
+ *
+ * <tbody>
+ *
+ * <tr>
+ * <td>this</td>
+ * <td>the value of the {@linkplain Response.Reader#focus() response} {@code Location} header or the IRI identifying the
+ * {@linkplain Request#focus() request} target resource, if no {@code Location} header is set</td>
+ * </tr>
+ *
+ * <tr>
+ * <td>stem</td>
+ * <td>the {@linkplain IRI#getNamespace() namespace} of the IRI bound to the {@code this} variable</td>
+ * </tr>
+*
+ * <tr>
+ * <td>name</td>
+ * <td>the local {@linkplain IRI#getLocalName() name} of the IRI bound to the {@code this} variable</td>
+ * </tr>
+ *
+ * <tr>
+ * <td>user</td>
+ * <td>the IRI identifying the {@linkplain Request#user() user} submitting the request</td>
+ * </tr>
+ *
+ * <tr>
+ * <td>time</td>
+ * <td>an {@code xsd:dateTime} literal representing the current system time with millisecond precision</td>
+ * </tr>
+ *
+ * </tbody>
+ *
+ * </table>
  */
 public final class Processor implements Wrapper {
 
@@ -80,12 +128,19 @@ public final class Processor implements Wrapper {
 						reader -> {
 
 							if ( reader.success() ) {
-								try (final RepositoryConnection connection=graph.connect()) {
-									binder()
 
-											.time()
-											.user(reader.request().user())
-											.focus(reader.focus())
+								final IRI user=reader.request().user();
+								final IRI focus=reader.focus();
+
+								try (final RepositoryConnection connection=graph.connect()) {
+									bindings()
+
+
+											.set("this", focus)
+											.set("stem", iri(focus.getNamespace()))
+											.set("name", literal(focus.getLocalName()))
+											.set("user", user)
+											.set("time", time(true))
 
 											.bind(connection.prepareUpdate(QueryLanguage.SPARQL, script, request.base()))
 
