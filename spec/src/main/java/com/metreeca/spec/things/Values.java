@@ -330,23 +330,49 @@ public final class Values {
 	}
 
 
+	/**
+	 * Creates a date-time literal for the current time.
+	 *
+	 * @return an xsd:dateTime literal representing the current system with second precision
+	 */
 	public static Literal time() {
 		return time(Instant.now().toEpochMilli());
 	}
 
-	public static Literal time(final long timestamp) {
+	/**
+	 * Creates a date-time literal for a specific time.
+	 *
+	 * @param time the time to be converted represented as the number of milliseconds from the epoch of
+	 *             1970-01-01T00:00:00Z
+	 *
+	 * @return an xsd:dateTime literal representing {@code time} with second precision
+	 */
+	public static Literal time(final long time) {
 		return literal(DateTimeFormatter
 				.ofPattern("yyyy-MM-dd'T'HH:mm:ssX")
 				.withZone(ZoneOffset.UTC)
-				.format(Instant.ofEpochMilli(timestamp)), XMLSchema.DATETIME);
+				.format(Instant.ofEpochMilli(time)), XMLSchema.DATETIME);
 	}
 
 
+	/**
+	 * Creates a timestamp literal for the current time.
+	 *
+	 * @return an xsd:dateTime literal representing the current system with millisecond precision
+	 */
 	public static Literal timestamp() { // includes ms
 		return timestamp(Instant.now().toEpochMilli());
 	}
 
-	public static Literal timestamp(final long timestamp) { // includes ms
+	/**
+	 * Creates a timestamp literal for a specific time.
+	 *
+	 * @param timestamp the timestamp to be converted represented as the number of milliseconds from the epoch of
+	 *                  1970-01-01T00:00:00Z
+	 *
+	 * @return an xsd:dateTime literal representing {@code timestamp} with millisecond precision
+	 */
+	public static Literal timestamp(final long timestamp) {
 		return literal(DateTimeFormatter
 				.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
 				.withZone(ZoneOffset.UTC)
