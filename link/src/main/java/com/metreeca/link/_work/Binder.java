@@ -64,8 +64,7 @@ public final class Binder {
 
 		return set("this", focus)
 				.set("stem", iri(focus.getNamespace()))
-				.set("code", literal(focus.getLocalName()));
-
+				.set("name", literal(focus.getLocalName()));
 	}
 
 

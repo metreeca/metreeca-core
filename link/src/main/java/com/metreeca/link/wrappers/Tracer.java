@@ -54,7 +54,7 @@ public final class Tracer implements Wrapper {
 	private Value task=RDF.NIL;
 	private String sparql="";
 
-	private Predicate<Response.Reader> test=reader -> true;
+	private Predicate<Response.Reader> test=reader -> true; // !!! decouple
 
 
 	private Tracer() {}

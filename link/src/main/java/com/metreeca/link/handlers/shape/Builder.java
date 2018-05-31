@@ -157,8 +157,7 @@ public final class Builder extends Shaper {
 	 * Model restrictor.
 	 *
 	 * <p>Recursively extracts from a model and an initial collection of source values all the statements compatible
-	 * with
-	 * a shape.</p>
+	 * with a shape.</p>
 	 */
 	private static final class Restrictor extends Shape.Probe<Stream<Statement>> {
 
@@ -218,6 +217,7 @@ public final class Builder extends Shaper {
 		@Override public Stream<Statement> visit(final Group group) {
 			return group.getShape().accept(this);
 		}
+
 	}
 
 }

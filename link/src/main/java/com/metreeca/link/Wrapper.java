@@ -20,10 +20,19 @@ package com.metreeca.link;
 
 /**
  * Linked data resource handler wrapper.
+ *
+ * <p>Inspects and possibly alters incoming {@linkplain Request requests} and outgoing {@linkplain Response responses}
+ * processed by resource {@linkplain Handler handlers}.</p>
  */
 @FunctionalInterface public interface Wrapper {
 
-	public static Wrapper wrapper() { // identity wrapper
+	/**
+	 * Creates an identity wrapper
+	 *
+	 * @return return an identity wrapper, that is a wrapper whose {@linkplain #wrap(Handler) handler} and {@linkplain
+	 * #wrap(Wrapper) wrapper} wrap methods return their unchanged argument
+	 */
+	public static Wrapper wrapper() {
 		return new Wrapper() {
 
 			@Override public Wrapper wrap(final Wrapper wrapper) { return wrapper; }
@@ -34,8 +43,24 @@ package com.metreeca.link;
 	}
 
 
+	/**
+	 * Wraps a handler.
+	 *
+	 * @param handler the handler to be wrapped
+	 *
+	 * @return the combined handler obtained by wrapping this wrapper around {@code handler}
+	 */
 	public Handler wrap(final Handler handler);
 
+	/**
+	 * Wraps a wrapper.
+	 *
+	 * @param wrapper the handler to be wrapped
+	 *
+	 * @return the combined wrapper obtained by wrapping this wrapper around {@code wrapper}
+	 *
+	 * @throws NullPointerException if {@code wrapper} is {@code null}
+	 */
 	public default Wrapper wrap(final Wrapper wrapper) {
 
 		if ( wrapper == null ) {
