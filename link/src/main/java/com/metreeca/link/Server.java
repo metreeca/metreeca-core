@@ -18,7 +18,6 @@
 package com.metreeca.link;
 
 
-import com.metreeca.link._work.Rewriter;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;

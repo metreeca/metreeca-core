@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link._work;
+package com.metreeca.link;
 
 import com.metreeca.spec.things.Transputs;
 
