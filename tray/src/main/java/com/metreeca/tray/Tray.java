@@ -22,13 +22,14 @@ import com.metreeca.tray.sys.Trace;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import static java.lang.String.format;
 
 
 /**
- * Shared resource repository {thread-safe}.
+ * Tool tray {thread-safe}.
+ *
+ * <p>Manages shared process resources.</p>
  */
 @SuppressWarnings("unchecked")
 public final class Tray implements Tool.Loader, Tool.Binder {
@@ -172,7 +173,12 @@ public final class Tray implements Tool.Loader, Tool.Binder {
 	}
 
 
-	public Tray with(final Consumer<Tray> task) {
+	/**
+	 * Executes a task inside this tool tray
+	 * @param task the task to be executed
+	 * @return this tool tray
+	 */
+	public Tray exec(final Runnable task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -184,22 +190,13 @@ public final class Tray implements Tool.Loader, Tool.Binder {
 
 			context.set(this);
 
-			task.accept(this);
+			task.run();
 
 			return this;
 
 		} finally {
 			context.set(current);
 		}
-	}
-
-	public Tray exec(final Runnable task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		return with(tray -> task.run());
 	}
 
 }
