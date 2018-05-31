@@ -156,7 +156,7 @@ public class UpdaterTest {
 	@Test public void testPostProcess() {
 		testbed().handler(() -> server(updater(Employee)
 
-				.wrap(processor(sparql("delete { $this rdfs:label ?_label } \n"
+				.wrap(processor().script(sparql("delete { $this rdfs:label ?_label } \n"
 						+"insert { $this rdfs:label ?label }\n"
 						+"where { \n"
 						+"\n"

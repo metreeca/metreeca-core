@@ -87,7 +87,7 @@ public class DeleterTest {
 	@Test public void testPostProcess() {
 		testbed().handler(() -> server(deleter(Employee)
 
-				.wrap(processor(sparql("delete where { ?s ?p $this }")))))
+				.wrap(processor().script(sparql("delete where { ?s ?p $this }")))))
 
 				.dataset(small())
 

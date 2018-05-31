@@ -37,54 +37,69 @@ import static com.metreeca.tray.Tray.tool;
  */
 public final class Processor implements Wrapper {
 
-	public static Processor processor(final String sparql) {
+	public static Processor processor() { return new Processor(); }
 
-		if ( sparql == null ) {
-			throw new NullPointerException("null update");
-		}
-
-		return new Processor(sparql);
-	}
-
-
-	private final String sparql;
 
 	private final Graph graph=tool(Graph.Tool);
 
+	private String script;
 
-	private Processor(final String sparql) {
-		this.sparql=sparql;
+
+	private Processor() {}
+
+
+	/**
+	 * Configures the SPARQL Update script.
+	 *
+	 * @param script the SPARQL Update script to be executed by this processor on successful request processing; empty
+	 *               scripts are ignored
+	 *
+	 * @return this processor
+	 */
+	public Processor script(final String script) {
+
+		if ( script == null ) {
+			throw new NullPointerException("null script update script");
+		}
+
+		this.script=script;
+
+		return this;
 	}
 
 
 	@Override public Handler wrap(final Handler handler) {
-		return (request, response) -> handler.exec(
+		return (request, response) -> {
+			if ( script.isEmpty() ) { handler.handle(request, response); } else {
+				handler.exec(
 
-				writer ->
+						writer ->
 
-						writer.copy(request).done(),
+								writer.copy(request).done(),
 
-				reader -> {
+						reader -> {
 
-					if ( reader.success() ) {
-						try (final RepositoryConnection connection=graph.connect()) {
-							binder()
+							if ( reader.success() ) {
+								try (final RepositoryConnection connection=graph.connect()) {
+									binder()
 
-									.time()
-									.user(reader.request().user())
-									.focus(reader.focus())
+											.time()
+											.user(reader.request().user())
+											.focus(reader.focus())
 
-									.bind(connection.prepareUpdate(QueryLanguage.SPARQL, sparql, request.base()))
+											.bind(connection.prepareUpdate(QueryLanguage.SPARQL, script, request.base()))
 
-									.execute();
+											.execute();
+								}
+							}
+
+							response.copy(reader).done();
+
 						}
-					}
 
-					response.copy(reader).done();
-
-				}
-
-		);
+				);
+			}
+		};
 	}
 
 }

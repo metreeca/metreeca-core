@@ -69,17 +69,7 @@ import static com.metreeca.spec.things._JSON.object;
 
 	public void handle(final Request request, final Response response);
 
-
-	public default Handler wrap(final Wrapper wrapper) {
-
-		if ( wrapper == null ) {
-			throw new NullPointerException("null wrapper");
-		}
-
-		return wrapper.wrap(this);
-	}
-
-	public default Handler exec(final Consumer<Request.Writer> source, final Consumer<Response.Reader> target) {
+	public default void exec(final Consumer<Request.Writer> source, final Consumer<Response.Reader> target) {
 
 		if ( source == null ) {
 			throw new NullPointerException("null source");
@@ -90,8 +80,16 @@ import static com.metreeca.spec.things._JSON.object;
 		}
 
 		source.accept(new Request.Writer(request -> handle(request, new Response(request, target))));
+	}
 
-		return this;
+
+	public default Handler wrap(final Wrapper wrapper) {
+
+		if ( wrapper == null ) {
+			throw new NullPointerException("null wrapper");
+		}
+
+		return wrapper.wrap(this);
 	}
 
 }

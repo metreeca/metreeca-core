@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 import static java.util.Arrays.asList;
 
 
-public class HandlerTest {
+public final class HandlerTest {
 
 	@Test public void testExecute() {
 
@@ -46,7 +46,8 @@ public class HandlerTest {
 			}
 		};
 
-		handler.exec(writer -> writer.method(GET).done(), reader -> assertEquals("request/response paired", GET, reader.request().method()));
+		handler.exec(writer -> writer.method(GET).done(), reader ->
+				assertEquals("request/response paired", GET, reader.request().method()));
 
 		assertTrue("target invoked", committed.get());
 
@@ -66,9 +67,15 @@ public class HandlerTest {
 
 		handler
 
-				.wrap(wrapped -> (request, response) -> wrapped.exec(writer -> writer.copy(request).text("before/"+request.text()), reader -> response.copy(reader).done()))
+				.wrap(wrapped -> (request, response) -> wrapped.exec(
+						writer -> writer.copy(request).text("before/"+request.text()),
+						reader -> response.copy(reader).done()
+				))
 
-				.exec(writer -> writer.method(GET).text("text"), reader -> assertEquals("wrapped", "handler/before/text", reader.text()));
+				.exec(
+						writer -> writer.method(GET).text("text"),
+						reader -> assertEquals("wrapped", "handler/before/text", reader.text())
+				);
 
 		assertTrue("target invoked", committed.get());
 
@@ -88,9 +95,15 @@ public class HandlerTest {
 
 		handler
 
-				.wrap(wrapped -> (request, response) -> wrapped.exec(writer -> writer.copy(request).done(), reader -> response.copy(reader).text("after/"+reader.text())))
+				.wrap(wrapped -> (request, response) -> wrapped.exec(
+						writer -> writer.copy(request).done(),
+						reader -> response.copy(reader).text("after/"+reader.text())
+				))
 
-				.exec(writer -> writer.method(GET).text("text"), reader -> assertEquals("wrapped", "after/handler/text", reader.text()));
+				.exec(
+						writer -> writer.method(GET).text("text"),
+						reader -> assertEquals("wrapped", "after/handler/text", reader.text())
+				);
 
 		assertTrue("target invoked", committed.get());
 
@@ -116,7 +129,10 @@ public class HandlerTest {
 
 				))
 
-				.exec(writer -> writer.method(GET).user(RDF.FIRST).done(), reader -> assertEquals("paired with original request", RDF.FIRST, reader.request().user()));
+				.exec(
+						writer -> writer.method(GET).user(RDF.FIRST).done(),
+						reader -> assertEquals("paired with original request", RDF.FIRST, reader.request().user())
+				);
 	}
 
 	@Test public void testResultStreaming() {

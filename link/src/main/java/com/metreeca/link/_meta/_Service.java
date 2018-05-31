@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link;
+package com.metreeca.link._meta;
 
 import com.metreeca.tray.Tool;
 

@@ -28,6 +28,8 @@ import static com.metreeca.tray.Tray.tool;
 /**
  * CORS request manager (work in progress…).
  *
+ * <p>Work in progress…</p>
+ *
  * <p>Manages CORS HTTP requests.</p>
  *
  * @see <a href="https://fetch.spec.whatwg.org/#cors-protocol">Fetch - § 3.2 CORS protocol</a>

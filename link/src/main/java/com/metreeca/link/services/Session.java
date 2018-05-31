@@ -44,6 +44,8 @@ import static java.util.stream.Collectors.toList;
 /**
  * Basic session manager.
  *
+ * <p>Work in progress…</p>
+ *
  * <p>Manages session lifecycle interaction with the shared {@link Roster#Tool roster} tool.</p>
  */
 public final class Session implements Service {
@@ -51,15 +53,14 @@ public final class Session implements Service {
 	private static final String TicketMalformed="ticket-malformed";
 
 
+	private final Index tool=tool(Index.Tool);
 	private final Roster roster=tool(Roster.Tool);
 
 
 	@Override public void load() {
-		tool(Index.Tool)
+		tool.insert("/~", dispatcher()
 
-				.insert("/~", dispatcher()
-
-						.post(this::evolve));
+				.post(this::evolve));
 	}
 
 
