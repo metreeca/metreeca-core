@@ -56,7 +56,7 @@ public final class ProcessorTest {
 
 				.response(reader -> {
 
-					try (final RepositoryConnection connect=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connect=tool(Graph.Factory).connect()) {
 						assertIsomorphic("repository updated",
 								parse("<test> rdf:value rdf:first, rdf:rest."),
 								export(connect)
@@ -87,7 +87,7 @@ public final class ProcessorTest {
 
 				.response(reader -> {
 
-					try (final RepositoryConnection connect=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connect=tool(Graph.Factory).connect()) {
 						assertIsomorphic("repository updated",
 								parse("<test> rdf:value rdf:first, rdf:rest."),
 								export(connect)

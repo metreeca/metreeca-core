@@ -57,7 +57,7 @@ import static com.metreeca.tray.Tray.tool;
  * SPARQL 1.1 Graph Store endpoint.
  *
  * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain
- * Graph#Tool graph database} at the server-relative <code>{@value #Path}</code> path.</p>
+ * Graph#Factory graph database} at the server-relative <code>{@value #Path}</code> path.</p>
  *
  * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/0.0/references/configuration#queryupdate">configuration
  * properties</a>.</p>
@@ -78,10 +78,10 @@ public final class Graphs implements Service {
 	));
 
 
-	private final Setup setup=tool(Setup.Tool);
-	private final Index index=tool(Index.Tool);
-	private final Graph graph=tool(Graph.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final Setup setup=tool(Setup.Factory);
+	private final Index index=tool(Index.Factory);
+	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 	private final boolean publik=setup.get("graphs.public", false); // public availability of the endpoint
 

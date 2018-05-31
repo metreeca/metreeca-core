@@ -124,7 +124,7 @@ public final class Builder extends Shaper {
 
 		private final String sparql;
 
-		private final Graph graph=tool(Graph.Tool);
+		private final Graph graph=tool(Graph.Factory);
 
 
 		private SPARQLBuilder(final String sparql) { this.sparql=sparql; }

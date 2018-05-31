@@ -84,7 +84,7 @@ public class UpdaterTest {
 					assertEquals("success reported", Response.NoContent, response.status());
 					assertTrue("no details", response.text().isEmpty());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						final Model actual=construct(connection, "construct where { <employees/1370> ?p ?o }");
 
@@ -136,7 +136,7 @@ public class UpdaterTest {
 
 				.response(response -> {
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						assertTrue("first pipe applied", connection.hasStatement(
 								response.focus(), forename, literal("TINO"), true
@@ -173,7 +173,7 @@ public class UpdaterTest {
 				.request(this::update)
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						assertTrue("graph post-processed", connection.hasStatement(
 								response.focus(), RDFS.LABEL, literal("Tino Faussone"), true
@@ -199,7 +199,7 @@ public class UpdaterTest {
 					assertEquals("error reported", Response.InternalServerError, response.status());
 					assertTrue("error detailed", response.json() instanceof Map);
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertIsomorphic("graph unchanged", export(connection), small());
 					}
 

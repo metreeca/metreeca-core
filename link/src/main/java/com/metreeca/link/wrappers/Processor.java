@@ -35,7 +35,7 @@ import static com.metreeca.tray.Tray.tool;
 /**
  * SPARQL Update post-processor.
  *
- * <p>Executes a SPARQL Update post-processing script in the shared {@linkplain Graph#Tool graph} tool on successful
+ * <p>Executes a SPARQL Update post-processing script in the shared {@linkplain Graph#Factory graph} tool on successful
  * request processing by the wrapped handler.</p>
  *
  * <p>The script will be executed with the following pre-defined bindinsg:</p>
@@ -88,7 +88,7 @@ public final class Processor implements Wrapper {
 	public static Processor processor() { return new Processor(); }
 
 
-	private final Graph graph=tool(Graph.Tool);
+	private final Graph graph=tool(Graph.Factory);
 
 	private String script;
 

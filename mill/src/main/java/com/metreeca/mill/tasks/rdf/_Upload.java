@@ -40,8 +40,8 @@ public final class _Upload implements Task { // !!! merge into Graph
 	private static final int ConnectionGrace=250; // grace period between repeated backend connections [ms]
 
 
-	private final Graph graph=tool(Graph.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 	private final IRI context;
 

@@ -58,7 +58,7 @@ public final class Launcher implements Wrapper {
 	/**
 	 * Creates a new single page app launcher.
 	 *
-	 * @param path the absolute path of the app page (to be loaded through the {@linkplain Loader#Tool system loader}
+	 * @param path the absolute path of the app page (to be loaded through the {@linkplain Loader#Factory system loader}
 	 *             tool)
 	 *
 	 * @return the new single page app launcher
@@ -93,7 +93,7 @@ public final class Launcher implements Wrapper {
 				: path.endsWith(".xhtml") ? "application/xhtml+xml"
 				: "";
 
-		this.text=tool(Loader.Tool)
+		this.text=tool(Loader.Factory)
 				.load(path)
 				.map(Transputs::reader)
 				.map(Transputs::text)

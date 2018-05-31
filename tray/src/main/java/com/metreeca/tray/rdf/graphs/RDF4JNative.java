@@ -17,7 +17,6 @@
 
 package com.metreeca.tray.rdf.graphs;
 
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -28,15 +27,18 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
 import java.io.File;
+import java.util.function.Supplier;
+
+import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.IsolationLevels.SERIALIZABLE;
 
 
 public final class RDF4JNative extends Graph {
 
-	public static final Tool<Graph> Tool=tools -> {
+	public static final Supplier<Graph> Factory=() -> {
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tool(Setup.Factory);
 
 		final File storage=setup.get("graph.native.storage", storage(setup));
 

@@ -56,8 +56,8 @@ public final class CSV implements Task {
 	private static final IRI Record=iri(Internal, "Record");
 
 
-	private final _Cache cache=tool(_Cache.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final _Cache cache=tool(_Cache.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 	// !!! escape
 	// !!! quote

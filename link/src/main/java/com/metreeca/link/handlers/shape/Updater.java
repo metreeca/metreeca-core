@@ -59,7 +59,7 @@ public final class Updater extends Shaper {
 
 	private BiFunction<Request, Model, Model> pipe;
 
-	private final Graph graph=tool(Graph.Tool);
+	private final Graph graph=tool(Graph.Factory);
 
 
 	private Updater(final Shape shape) {

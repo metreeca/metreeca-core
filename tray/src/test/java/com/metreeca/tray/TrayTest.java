@@ -20,6 +20,9 @@ package com.metreeca.tray;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.function.Supplier;
+
+import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -33,12 +36,12 @@ public class TrayTest {
 
 		final Tray tray=new Tray();
 
-		final Tool<Object> target=tools -> "target";
-		final Tool<Object> plugin=tools -> "plugin";
+		final Supplier<Object> target=() -> "target";
+		final Supplier<Object> plugin=() -> "plugin";
 
 		tray.set(target, plugin);
 
-		assertEquals("tool plugin", plugin.create(tray), tray.get(target));
+		assertEquals("tool plugin", plugin.get(), tray.get(target));
 	}
 
 	@Test public void testReleaseAutoCloseableResources() {
@@ -59,7 +62,7 @@ public class TrayTest {
 
 		}
 
-		final Tool<Resource> tool=tools -> new Resource();
+		final Supplier<Resource> tool=() -> new Resource();
 
 		final Resource resource=tray.get(tool);
 
@@ -75,19 +78,19 @@ public class TrayTest {
 
 		final Collection<Object> released=new ArrayList<>();
 
-		final class Step implements Tool<AutoCloseable>, AutoCloseable {
+		final class Step implements Supplier<AutoCloseable>, AutoCloseable {
 
-			private final Tool<AutoCloseable> dependency;
+			private final Supplier<AutoCloseable> dependency;
 
 
-			private Step(final Tool<AutoCloseable> dependency) {
+			private Step(final Supplier<AutoCloseable> dependency) {
 				this.dependency=dependency;
 			}
 
 
-			@Override public AutoCloseable create(final Loader tools) {
+			@Override public AutoCloseable get() {
 
-				if ( dependency != null ) { tools.get(dependency); }
+				if ( dependency != null ) { tool(dependency); }
 
 				return this;
 			}
@@ -112,10 +115,10 @@ public class TrayTest {
 	@Test(expected=IllegalStateException.class) public void testPreventToolBindingIfAlreadyInUse() {
 
 		final Tray tray=new Tray();
-		final Tool<Object> tool=tools1 -> new Object();
+		final Supplier<Object> tool=Object::new;
 
 		tray.get(tool);
-		tray.set(tool, tools -> new Object());
+		tray.set(tool, Object::new);
 
 	}
 
@@ -123,14 +126,11 @@ public class TrayTest {
 
 		final Tray tray=new Tray();
 
-		final Map<String, Tool<Object>> cycle=new HashMap<>(); // avoid cyclic dependencies in initializers
+		final Map<String, Supplier<Object>> cycle=new HashMap<>(); // avoid cyclic dependencies in initializers
 
-		final Tool<Object> supplier2=tools -> tools.get(cycle.get("y"));
-		cycle.put("x", supplier2);
-		final Tool<Object> supplier1=tools -> tools.get(cycle.get("z"));
-		cycle.put("y", supplier1);
-		final Tool<Object> supplier=tools -> tools.get(cycle.get("x"));
-		cycle.put("z", supplier);
+		cycle.put("x", () -> tool(cycle.get("y")));
+		cycle.put("y", () -> tool(cycle.get("z")));
+		cycle.put("z", () -> tool(cycle.get("x")));
 
 		tray.get(cycle.get("x"));
 
@@ -139,9 +139,9 @@ public class TrayTest {
 
 	@Test(expected=NoSuchElementException.class) public void testHandleExceptionsInFactories() {
 
-		final Tool.Loader tray=new Tray();
+		final Tray tray=new Tray();
 
-		final Tool<Object> tool=tools -> {
+		final Supplier<Object> tool=() -> {
 			throw new NoSuchElementException("missing resource");
 		};
 

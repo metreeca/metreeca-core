@@ -73,7 +73,7 @@ public class DeleterTest {
 					assertEquals("success reported", Response.NoContent, response.status());
 					assertTrue("no details", response.text().isEmpty());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						final Model model=construct(connection, "construct where { <employees/1370> ?p ?o }");
 
@@ -94,7 +94,7 @@ public class DeleterTest {
 				.request(this::delete)
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						assertFalse("graph post-processed", connection.hasStatement(
 								null, null, response.focus(), true
@@ -120,7 +120,7 @@ public class DeleterTest {
 					assertEquals("error reported", Response.InternalServerError, response.status());
 					assertTrue("error detailed", response.json() instanceof Map);
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertIsomorphic("graph unchanged", export(connection), small());
 					}
 

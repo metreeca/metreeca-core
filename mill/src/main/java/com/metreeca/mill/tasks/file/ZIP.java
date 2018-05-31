@@ -42,8 +42,8 @@ import static java.lang.String.format;
  */
 public final class ZIP implements Task {
 
-	private final _Cache cache=tool(_Cache.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final _Cache cache=tool(_Cache.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {

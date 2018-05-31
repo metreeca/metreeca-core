@@ -17,8 +17,6 @@
 
 package com.metreeca.link._junk;
 
-import com.metreeca.tray.Tool;
-
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.function.BiConsumer;

@@ -51,7 +51,7 @@ public final class Deleter extends Shaper {
 
 	private Wrapper wrapper=wrapper();
 
-	private final Graph graph=tool(Graph.Tool);
+	private final Graph graph=tool(Graph.Factory);
 
 
 	private Deleter(final Shape shape) {

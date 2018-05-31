@@ -18,7 +18,6 @@
 package com.metreeca.tray.sys;
 
 import com.metreeca.spec.things.Transputs;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Store.Blob;
 
 import java.io.*;
@@ -26,6 +25,7 @@ import java.net.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Setup.storage;
@@ -49,8 +49,8 @@ public final class Cache {
 	 * <p>The default cache acquired through this factory stores retrieved data in the {@code cache} folder under the
 	 * default storage folder defined by the {@link Setup#StorageProperty} property.</p>
 	 */
-	public static final Tool<Cache> Tool=tools ->
-			new Cache(new File(storage(tools.get(Setup.Tool)), "cache"));
+	public static final Supplier<Cache> Factory=() ->
+			new Cache(new File(storage(tool(Setup.Factory)), "cache"));
 
 
 	private static final BiConsumer<URL, Blob> NullFetcher=(url, blob) -> {};
@@ -206,7 +206,7 @@ public final class Cache {
 
 	public static final class FileFetcher implements BiConsumer<URL, Blob> {
 
-		private final Trace trace=tool(Trace.Tool);
+		private final Trace trace=tool(Trace.Factory);
 
 		@Override public void accept(final URL url, final Blob blob) { // !!! metadata?
 			try {
@@ -239,7 +239,7 @@ public final class Cache {
 
 		private final Map<String, String> headers=new LinkedHashMap<>();
 
-		private final Trace trace=tool(Trace.Tool);
+		private final Trace trace=tool(Trace.Factory);
 
 
 		public HTTPFetcher header(final String name, final String value) {

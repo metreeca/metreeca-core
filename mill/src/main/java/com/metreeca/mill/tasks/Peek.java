@@ -38,11 +38,11 @@ import static com.metreeca.tray.Tray.tool;
 /**
  * Feed peeking task.
  *
- * <p>Dumps the feed to the {@linkplain Trace#Tool execution trace}.</p>
+ * <p>Dumps the feed to the {@linkplain Trace#Factory execution trace}.</p>
  */
 public final class Peek implements Task {
 
-	private final Trace trace=tool(Trace.Tool);
+	private final Trace trace=tool(Trace.Factory);
 
 	private final Function<_Cell, String> mapper;
 

@@ -20,7 +20,6 @@ package com.metreeca.link._junk;
 import com.metreeca.link.Link;
 import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.link.handlers._Router;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -93,11 +92,11 @@ public final class _Server {
 			throw new NullPointerException("null com.metreeca.next.handlers");
 		}
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tools.get(Setup.Factory);
 
 		this.canonical=setup.get(Setup.BaseProperty).orElse(null);
 
-		this.graph=tools.get(Graph.Tool);
+		this.graph=tools.get(Graph.Factory);
 
 		//final _Gate gate=tools.get(_Gate.Tool);
 

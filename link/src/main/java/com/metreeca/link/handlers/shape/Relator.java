@@ -65,7 +65,7 @@ public final class Relator extends Shaper {
 
 	private BiFunction<Request, Model, Model> pipe;
 
-	private final Graph graph=tool(Graph.Tool);
+	private final Graph graph=tool(Graph.Factory);
 
 
 	private Relator(final Shape shape) {

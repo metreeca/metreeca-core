@@ -127,7 +127,7 @@ public final class GraphsTest {
 						.text(write(Rest)))
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertIsomorphic(Rest, export(connection, (Resource)null));
 					}
 				});
@@ -148,7 +148,7 @@ public final class GraphsTest {
 						.text(write(Rest)))
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertIsomorphic(Rest, strip(export(connection, RDF.NIL)));
 					}
 				});
@@ -170,7 +170,7 @@ public final class GraphsTest {
 						.text(write(Rest)))
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertIsomorphic(merge(First, Rest), export(connection, (Resource)null));
 					}
 				});
@@ -191,7 +191,7 @@ public final class GraphsTest {
 						.text(write(Rest)))
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertIsomorphic(merge(First, Rest), strip(export(connection, RDF.NIL)));
 					}
 				});
@@ -213,7 +213,7 @@ public final class GraphsTest {
 						.done())
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertTrue("empty default graph", export(connection, (Resource)null).isEmpty());
 					}
 				});
@@ -235,7 +235,7 @@ public final class GraphsTest {
 						.done())
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertTrue("empty default graph", export(connection, RDF.NIL).isEmpty());
 					}
 				});

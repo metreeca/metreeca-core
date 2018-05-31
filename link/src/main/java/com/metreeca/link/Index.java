@@ -17,10 +17,9 @@
 
 package com.metreeca.link;
 
-import com.metreeca.tray.Tool;
-
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -47,7 +46,7 @@ import java.util.function.Function;
  */
 public final class Index {
 
-	public static final Tool<Index> Tool=loader -> new Index();
+	public static final Supplier<Index> Factory=Index::new;
 
 
 	private static boolean matches(final String x, final String y) {

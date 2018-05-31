@@ -58,7 +58,7 @@ import static java.util.stream.Collectors.toList;
  * <li>parametrize {@linkplain #iri(String) IRI} and {@linkplain #text(String) text} on the computed parameters; if
  * {@linkplain #iri(String) IRI} is empty, a new unique IRI is generated;</li>
  *
- * <li>if not empty, uploads the parametrized text to the {@linkplain _Cache#Tool cache}, identifying it with the
+ * <li>if not empty, uploads the parametrized text to the {@linkplain _Cache#Factory cache}, identifying it with the
  * parametrized IRI;</li>
  *
  * <li>generates a new cell focused on the parametrized IRI; downstream tasks may read the uploaded content from the
@@ -76,8 +76,8 @@ public final class Item implements Task {
 
 	private static final _Template Empty=new _Template("");
 
-	private final _Cache cache=tool(_Cache.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final _Cache cache=tool(_Cache.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 	private _Template iri=Empty;
 	private _Template text=Empty;

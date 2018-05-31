@@ -34,7 +34,7 @@ public class IndexTest {
 	@Test public void testMatchExactPathIgnoringTrailingSlashes() {
 		new Tray().exec(() -> {
 
-			final Index index=tool(Index.Tool);
+			final Index index=tool(Index.Factory);
 
 			final Handler one=handler("1");
 			final Handler two=handler("2");
@@ -56,7 +56,7 @@ public class IndexTest {
 	@Test public void testMatchLongestPrefix() {
 		new Tray().exec(() -> {
 
-			final Index index=tool(Index.Tool);
+			final Index index=tool(Index.Factory);
 
 			final Handler one=handler("1");
 			final Handler two=handler("1.2");
@@ -73,7 +73,7 @@ public class IndexTest {
 	@Test public void testManagesPrefixesOfEqualLength() {
 		new Tray().exec(() -> {
 
-			final Index index=tool(Index.Tool);
+			final Index index=tool(Index.Factory);
 
 			final Handler one=handler("1");
 			final Handler two=handler("2");
@@ -90,7 +90,7 @@ public class IndexTest {
 	@Test public void testNormalizePaths() {
 		new Tray().exec(() -> {
 
-			final Index index=tool(Index.Tool);
+			final Index index=tool(Index.Factory);
 
 			final Handler collection=handler("collection");
 			final Handler resource=handler("resource");

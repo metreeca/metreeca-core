@@ -53,7 +53,7 @@ import static java.util.stream.Collectors.toList;
 
 public abstract class Shaper implements Handler {
 
-	private final Trace trace=tool(Trace.Tool);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

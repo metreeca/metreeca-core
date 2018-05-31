@@ -19,13 +19,15 @@ package com.metreeca.tray.iam;
 
 import com.metreeca.tray.iam.digests.PBKDF2Digest;
 
+import java.util.function.Supplier;
+
 
 /**
  * Secret digest.
  */
 public abstract class Digest {
 
-	public static final com.metreeca.tray.Tool<Digest> Tool=tools -> new PBKDF2Digest(); // !!! auto-verify switch on digest tag
+	public static final Supplier<Digest> Factory=PBKDF2Digest::new; // !!! auto-verify switch on digest tag
 
 
 	public abstract String digest(final String secret);

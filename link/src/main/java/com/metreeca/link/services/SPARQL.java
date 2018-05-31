@@ -45,7 +45,7 @@ import static java.lang.Boolean.parseBoolean;
  * SPARQL 1.1 Query/Update endpoint.
  *
  * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
- * Graph#Tool graph database} at the server-relative <code>{@value #Path}</code> path.</p>
+ * Graph#Factory graph database} at the server-relative <code>{@value #Path}</code> path.</p>
  *
  * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/0.0/references/configuration#queryupdate">configuration properties</a>.</p>
  *
@@ -60,9 +60,9 @@ public class SPARQL implements Service {
 	private static final String Path="/sparql";
 
 
-	private final Setup setup=tool(Setup.Tool);
-	private final Index index=tool(Index.Tool);
-	private final Graph graph=tool(Graph.Tool);
+	private final Setup setup=tool(Setup.Factory);
+	private final Index index=tool(Index.Factory);
+	private final Graph graph=tool(Graph.Factory);
 
 	private final int timeout=setup.get("sparql.timeout", 60); // [s]
 	private final boolean publik=setup.get("sparql.public", false); // public availability of the endpoint

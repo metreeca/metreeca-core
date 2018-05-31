@@ -65,7 +65,7 @@ public class BrowserTest {
 
 					assertEquals("success reported", Response.OK, response.status());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						final Model expected=construct(connection,
 								"construct where { ?e a :Employee; rdfs:label ?label }");
@@ -97,7 +97,7 @@ public class BrowserTest {
 
 					assertEquals("success reported", Response.OK, response.status());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						final Model expected=construct(connection,
 								"construct { ?e a :Employee; :title ?t }\n"

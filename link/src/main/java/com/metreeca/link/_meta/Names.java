@@ -27,7 +27,6 @@ import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Outliner;
 import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -72,9 +71,9 @@ public final class Names implements _Service {
 
 	@Override public void load(final Tool.Loader tools) {
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tools.get(Setup.Factory);
 
-		this.graph=tools.get(Graph.Tool);
+		this.graph=tools.get(Graph.Factory);
 
 		tools.get(Index.Tool).insert("/!/names", new _Dispatcher(map(
 

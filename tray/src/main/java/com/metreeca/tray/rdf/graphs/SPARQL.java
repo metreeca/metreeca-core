@@ -17,7 +17,6 @@
 
 package com.metreeca.tray.rdf.graphs;
 
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -35,15 +34,17 @@ import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.tray.Tray.tool;
 
 
 public final class SPARQL extends Graph {
 
-	public static final Tool<Graph> Tool=tools -> {
+	public static final Supplier<Graph> Factory=() -> {
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tool(Setup.Factory);
 
 		final String url=setup.get("graph.sparql.url", "");
 		final String query=setup.get("graph.sparql.query", "");

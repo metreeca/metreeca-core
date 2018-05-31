@@ -42,9 +42,9 @@ public class Proxy implements Service {
 	private static final String Path="/proxy";
 
 
-	private final Setup setup=tool(Setup.Tool);
-	private final Index index=tool(Index.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final Setup setup=tool(Setup.Factory);
+	private final Index index=tool(Index.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	private final int timeoutConnect=setup.get("proxy.timeout.connect", 30); // [s]

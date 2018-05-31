@@ -30,7 +30,7 @@ import static java.lang.String.format;
 
 public final class Mill {
 
-	private final Trace trace=tool(Trace.Tool);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	public Mill execute(final Task task) {

@@ -26,7 +26,6 @@ import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -126,11 +125,11 @@ public final class Ports implements _Service {
 
 		private ContainerHandler(final Tool.Loader tools) {
 
-			final Setup setup=tools.get(Setup.Tool);
+			final Setup setup=tools.get(Setup.Factory);
 
 
 			this.index=tools.get(Index.Tool);
-			this.graph=tools.get(Graph.Tool);
+			this.graph=tools.get(Graph.Factory);
 
 			this.container=new _Container(tools, ContainerShape);
 		}
@@ -198,10 +197,10 @@ public final class Ports implements _Service {
 
 		private ResourceHandler(final Tool.Loader tools) {
 
-			final Setup setup=tools.get(Setup.Tool);
+			final Setup setup=tools.get(Setup.Factory);
 
 			this.index=tools.get(Index.Tool);
-			this.graph=tools.get(Graph.Tool);
+			this.graph=tools.get(Graph.Factory);
 
 			this.resource=new _Resource(tools, ResourceShape);
 		}

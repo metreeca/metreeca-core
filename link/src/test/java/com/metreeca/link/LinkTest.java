@@ -123,7 +123,7 @@ public final class LinkTest {
 
 		private final Tray tray=new Tray();
 
-		private Supplier<Handler> handler=() -> tool(Server.Tool);
+		private Supplier<Handler> handler=() -> tool(Server.Factory);
 
 		private Consumer<Request.Writer> request;
 
@@ -150,7 +150,7 @@ public final class LinkTest {
 			}
 
 			tray.exec(() -> {
-				try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+				try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 					connection.add(model, contexts);
 				}
 			});

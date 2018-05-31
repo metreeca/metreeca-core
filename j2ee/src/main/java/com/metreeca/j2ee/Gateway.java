@@ -19,7 +19,6 @@ package com.metreeca.j2ee;
 
 import com.metreeca.link.*;
 import com.metreeca.spec.things.Transputs;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
 import com.metreeca.tray.sys.Setup;
@@ -37,6 +36,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.*;
+import java.util.function.Supplier;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebListener;
@@ -63,7 +63,7 @@ import static java.util.Collections.list;
  *
  * <ul>
  *
- * <li>initializes and destroys the shared {@linkplain Tool tool tray} managing platform components required by
+ * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform components required by
  * resource handlers;</li>
  *
  * <li>intercepts HTTP requests and handles them using the {@linkplain Server server} tool provided by the shared tool
@@ -79,7 +79,7 @@ import static java.util.Collections.list;
 	private static final String TrayAttribute=Tray.class.getName();
 
 
-	private static final Tool<ServletFileUpload> Upload=tools -> new ServletFileUpload(); // shared file upload tool
+	private static final Supplier<ServletFileUpload> Upload=ServletFileUpload::new; // shared file upload tool
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,9 +93,9 @@ import static java.util.Collections.list;
 		try {
 
 			tray
-					.set(Setup.Tool, tools -> setup(context))
-					.set(Loader.Tool, tools -> loader(context))
-					.set(Upload, tools -> upload(context));
+					.set(Setup.Factory, () -> setup(context))
+					.set(Loader.Factory, () -> loader(context))
+					.set(Upload, () -> upload(context));
 
 			for (final Toolkit toolkit : ServiceLoader.load(Toolkit.class)) { toolkit.load(tray); }
 
@@ -109,7 +109,7 @@ import static java.util.Collections.list;
 
 				t.printStackTrace(new PrintWriter(message));
 
-				tray.get(Trace.Tool).error(this, "error during data hub initialization: "+message);
+				tray.get(Trace.Factory).error(this, "error during data hub initialization: "+message);
 
 				context.log("error during data hub initialization", t);
 
@@ -197,7 +197,7 @@ import static java.util.Collections.list;
 		upload.setSizeMax(10_000_000L);
 		upload.setFileSizeMax(10_000_000L);
 
-		tool(_tools -> (AutoCloseable)tracker::exitWhenFinished); // register cleanup hook
+		tool(() -> (AutoCloseable)tracker::exitWhenFinished); // register cleanup hook
 
 		return upload;
 	}
@@ -238,7 +238,7 @@ import static java.util.Collections.list;
 
 				final List<FileItem> items=isMultipartContent(request) ? tool(Upload).parseRequest(request) : emptyList();
 
-				tool(Server.Tool).handle(
+				tool(Server.Factory).handle(
 
 						writer -> request(writer, request, items), reader -> response(reader, response)
 

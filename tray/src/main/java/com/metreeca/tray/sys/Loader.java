@@ -17,10 +17,9 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.tray.Tool;
-
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 
 /**
@@ -34,7 +33,7 @@ import java.util.Optional;
 	 * <p>The default loader acquired through this factory retrieves system resources from the classpath through {@link
 	 * ClassLoader#getResourceAsStream(String)}.</p>
 	 */
-	public static Tool<Loader> Tool=tools -> path -> {
+	public static Supplier<Loader> Factory=() -> path -> {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");

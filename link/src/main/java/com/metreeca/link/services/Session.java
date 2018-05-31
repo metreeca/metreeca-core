@@ -46,15 +46,15 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Work in progress…</p>
  *
- * <p>Manages session lifecycle interaction with the shared {@link Roster#Tool roster} tool.</p>
+ * <p>Manages session lifecycle interaction with the shared {@link Roster#Factory roster} tool.</p>
  */
 public final class Session implements Service {
 
 	private static final String TicketMalformed="ticket-malformed";
 
 
-	private final Index tool=tool(Index.Tool);
-	private final Roster roster=tool(Roster.Tool);
+	private final Index tool=tool(Index.Factory);
+	private final Roster roster=tool(Roster.Factory);
 
 
 	@Override public void load() {

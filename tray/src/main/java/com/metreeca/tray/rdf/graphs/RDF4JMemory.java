@@ -17,7 +17,6 @@
 
 package com.metreeca.tray.rdf.graphs;
 
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -26,13 +25,16 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import java.io.File;
+import java.util.function.Supplier;
+
+import static com.metreeca.tray.Tray.tool;
 
 
 public final class RDF4JMemory extends Graph {
 
-	public static final Tool<Graph> Tool=tools -> {
+	public static final Supplier<Graph> Factory=() -> {
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tool(Setup.Factory);
 
 		final boolean persistent=setup.get("graph.memory.persistent", false);
 		final File storage=setup.get("graph.memory.storage", storage(setup));

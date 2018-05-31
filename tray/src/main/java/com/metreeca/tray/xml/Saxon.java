@@ -17,9 +17,8 @@
 
 package com.metreeca.tray.xml;
 
-import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things.Transputs;
-import com.metreeca.tray.Tool;
+import com.metreeca.spec.things.Values;
 
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.s9api.*;
@@ -29,6 +28,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.io.StringReader;
 import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -38,7 +38,7 @@ import javax.xml.transform.stream.StreamSource;
  */
 public final class Saxon {
 
-	public static final Tool<Saxon> Tool=tools -> new Saxon();
+	public static final Supplier<Saxon> Tool=Saxon::new;
 
 
 	private static final String identity=Transputs.text(Saxon.class, ".xsl");

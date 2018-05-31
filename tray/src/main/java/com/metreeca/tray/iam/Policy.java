@@ -17,10 +17,11 @@
 
 package com.metreeca.tray.iam;
 
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.iam.policies.BasicPolicy;
 
 import org.eclipse.rdf4j.model.IRI;
+
+import java.util.function.Supplier;
 
 
 /**
@@ -28,7 +29,7 @@ import org.eclipse.rdf4j.model.IRI;
  */
 public abstract class Policy {
 
-	public static final Tool<Policy> Tool=tools -> new BasicPolicy();
+	public static final Supplier<Policy> Factory=BasicPolicy::new;
 
 
 	public abstract boolean verify(final IRI usr, final String pwd); // !!! review API to return diagnostics as Collection<String>

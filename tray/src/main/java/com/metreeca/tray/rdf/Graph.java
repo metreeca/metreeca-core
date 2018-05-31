@@ -24,7 +24,6 @@ import com.metreeca.spec.Shape;
 import com.metreeca.spec.sparql.SPARQLEngine;
 import com.metreeca.spec.sparql.SPARQLWriter;
 import com.metreeca.spec.things._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.graphs.*;
 import com.metreeca.tray.sys.Setup;
 
@@ -46,6 +45,7 @@ import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.things.Lists.concat;
+import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -56,32 +56,32 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class Graph implements AutoCloseable {
 
-	public static final Tool<Graph> Tool=tools -> {
+	public static final Supplier<Graph> Factory=() -> {
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tool(Setup.Factory);
 		final String type=setup.get("graph", "memory");
 
 		switch ( type ) {
 
 			case "memory":
 
-				return RDF4JMemory.Tool.create(tools);
+				return RDF4JMemory.Factory.get();
 
 			case "native":
 
-				return RDF4JNative.Tool.create(tools);
+				return RDF4JNative.Factory.get();
 
 			case "remote":
 
-				return RDF4JRemote.Tool.create(tools);
+				return RDF4JRemote.Factory.get();
 
 			case "sparql":
 
-				return SPARQL.Tool.create(tools);
+				return SPARQL.Factory.get();
 
 			case "virtuoso":
 
-				return Virtuoso.Tool.create(tools);
+				return Virtuoso.Factory.get();
 
 			default:
 

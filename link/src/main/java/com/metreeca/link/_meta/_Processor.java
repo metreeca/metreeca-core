@@ -20,7 +20,6 @@ package com.metreeca.link._meta;
 import com.metreeca.link._junk._Handler;
 import com.metreeca.link._junk._Request;
 import com.metreeca.link._junk._Response;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -66,7 +65,7 @@ public final class _Processor implements _Handler {
 			throw new IllegalArgumentException("nulll or empty update script");
 		}
 
-		this.graph=tools.get(Graph.Tool);
+		this.graph=tools.get(Graph.Factory);
 
 		this.handler=handler;
 		this.updates=new HashMap<>(updates);

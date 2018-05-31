@@ -43,7 +43,7 @@ public final class Folder implements Task {
 	// !!! recursive listing
 	// !!! caching?
 
-	private final Trace trace=tool(Trace.Tool);
+	private final Trace trace=tool(Trace.Factory);
 
 	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return items.flatMap(item -> {

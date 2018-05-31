@@ -24,7 +24,6 @@ import com.metreeca.link._junk._Transfer;
 import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;

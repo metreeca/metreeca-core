@@ -21,7 +21,6 @@ package com.metreeca.link.handlers.shape;
 import com.metreeca.link.*;
 import com.metreeca.spec.*;
 import com.metreeca.spec.sparql.SPARQLEngine;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -32,6 +31,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Wrapper.wrapper;
@@ -56,7 +56,7 @@ public final class Creator extends Shaper {
 	/*
 	 * Shared lock for serializing slug operations (concurrent graph txns may produce conflicting results).
 	 */
-	private static final Tool<Object> LockTool=tray -> new Object(); // !!! ;( breaks in distributed containers
+	private static final Supplier<Object> LockFactory=Object::new; // !!! ;( breaks in distributed containers
 
 
 	public static Creator creator(final Shape shape) {
@@ -76,8 +76,8 @@ public final class Creator extends Shaper {
 	private BiFunction<Request, Model, Model> pipe;
 	private BiFunction<Request, Collection<Statement>, String> slug;
 
-	private final Graph graph=tool(Graph.Tool);
-	private final Object lock=tool(LockTool);
+	private final Graph graph=tool(Graph.Factory);
+	private final Object lock=tool(LockFactory);
 
 
 	private Creator(final Shape shape) {
@@ -194,7 +194,7 @@ public final class Creator extends Shaper {
 				.accept(view(Spec.digest))
 				.accept(role(Spec.any));
 
-		final Graph graph=tool(Graph.Tool);
+		final Graph graph=tool(Graph.Factory);
 
 		return (request, model) -> {
 			try (final RepositoryConnection connection=graph.connect()) {

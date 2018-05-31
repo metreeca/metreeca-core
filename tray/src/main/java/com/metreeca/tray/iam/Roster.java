@@ -18,7 +18,6 @@
 package com.metreeca.tray.iam;
 
 import com.metreeca.spec.Spec;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.iam.rosters.KeyRoster;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -27,6 +26,7 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -38,7 +38,7 @@ import static java.util.Collections.unmodifiableSet;
  */
 public interface Roster {
 
-	public static Tool<Roster> Tool=tools -> new KeyRoster();
+	public static Supplier<Roster> Factory=KeyRoster::new;
 
 
 	public static long MinuteDuration=60*1000L;

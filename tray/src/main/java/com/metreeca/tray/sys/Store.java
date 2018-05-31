@@ -18,7 +18,6 @@
 package com.metreeca.tray.sys;
 
 import com.metreeca.spec.things.Transputs;
-import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -29,7 +28,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Setup.storage;
 
 import static java.util.UUID.nameUUIDFromBytes;
@@ -46,8 +47,8 @@ public final class Store {
 	 * <p>The default store acquired through this factory stores blobs in the {@code store} folder under the default
 	 * storage folder defined by the {@link Setup#StorageProperty} property.</p>
 	 */
-	public static final Tool<Store> Tool=tools ->
-			new Store(new File(storage(tools.get(Setup.Tool)), "store"));
+	public static final Supplier<Store> Factory=() ->
+			new Store(new File(storage(tool(Setup.Factory)), "store"));
 
 
 	/**

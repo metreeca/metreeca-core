@@ -40,7 +40,7 @@ import static java.util.Collections.singleton;
  *
  * <p>Work in progress…</p>
  *
- * <p>Manages bearer token authentication using tokens issued by the shared {@link Roster#Tool roster} tool.</p>
+ * <p>Manages bearer token authentication using tokens issued by the shared {@link Roster#Factory roster} tool.</p>
  *
  * @see <a href="https://tools.ietf.org/html/rfc6750">The OAuth 2.0 Authorization Framework: Bearer Token Usage</a>
  */
@@ -52,7 +52,7 @@ public final class Bearer implements Wrapper {
 	public static Bearer bearer() { return new Bearer(); }
 
 
-	private final Roster roster=tool(Roster.Tool);
+	private final Roster roster=tool(Roster.Factory);
 
 
 	private Bearer() {}

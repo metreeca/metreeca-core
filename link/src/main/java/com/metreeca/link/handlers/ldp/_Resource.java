@@ -29,7 +29,6 @@ import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Outliner;
 import com.metreeca.spec.things.*;
 import com.metreeca.spec.things.Transputs;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -79,9 +78,9 @@ public final class _Resource implements _Handler { // !!! rename to avoid clashe
 			throw new NullPointerException("null shape");
 		}
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tools.get(Setup.Factory);
 
-		this.graph=tools.get(Graph.Tool);
+		this.graph=tools.get(Graph.Factory);
 
 		this.shape=shape.accept(new Optimizer());
 	}

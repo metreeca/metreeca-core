@@ -73,7 +73,7 @@ public class RelatorTest {
 
 					assertEquals("success reported", Response.OK, response.status());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						final Model expected=construct(connection,
 								"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }");
@@ -99,7 +99,7 @@ public class RelatorTest {
 
 					assertEquals("success reported", Response.OK, response.status());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						final Model expected=construct(connection,
 								"construct where { <employees/1370> a :Employee; :code ?c }");

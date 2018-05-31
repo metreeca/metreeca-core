@@ -48,7 +48,7 @@ import static com.metreeca.tray.sys.Trace.clip;
  */
 public class SPARQL implements Task {
 
-	private final Trace trace=tool(Trace.Tool);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	private String query="";

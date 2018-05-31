@@ -18,7 +18,6 @@
 package com.metreeca.link;
 
 
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 import com.metreeca.tray.sys.Trace;
@@ -28,6 +27,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static com.metreeca.link.Handler.error;
@@ -58,7 +58,7 @@ public final class Server implements Handler {
 	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=.*$");
 
 
-	public static final Tool<Server> Tool=tools -> server();
+	public static final Supplier<Server> Factory=Server::server;
 
 
 	public static Server server() {
@@ -94,10 +94,10 @@ public final class Server implements Handler {
 
 	private final Handler handler;
 
-	private final String base=tool(Setup.Tool).get(Setup.BaseProperty).orElse("");
+	private final String base=tool(Setup.Factory).get(Setup.BaseProperty).orElse("");
 
-	private final Graph graph=tool(Graph.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	private Server(final Handler handler) {

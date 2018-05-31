@@ -22,7 +22,6 @@ import com.metreeca.link._junk._Request;
 import com.metreeca.link._junk._Response;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -69,7 +68,7 @@ public final class _ContainerTest {
 					"<item-1> a :Item; rdf:value 1 . <item-2> a :Item; rdf:value 2 . <item-3> a :Item; rdf:value 3 ."
 			);
 
-			model(tools.get(Graph.Tool), items);
+			model(tools.get(Graph.Factory), items);
 
 			final IRI target=item("target/");
 			final String accept="text/turtle";
@@ -120,7 +119,7 @@ public final class _ContainerTest {
 					"<item-1> a :Item; rdf:value 1 . <item-2> a :Item; rdf:value 2 . <item-3> a :Item; rdf:value 3 ."
 			);
 
-			model(tools.get(Graph.Tool), items);
+			model(tools.get(Graph.Factory), items);
 
 			final IRI target=item("target/");
 			final String accept="text/turtle";
@@ -188,7 +187,7 @@ public final class _ContainerTest {
 		tools(tools -> {
 
 			final Model model=parse("<target> rdf:value rdf:first.");
-			final Graph graph=model(tools.get(Graph.Tool), model);
+			final Graph graph=model(tools.get(Graph.Factory), model);
 
 			final IRI target=item("target/");
 
@@ -239,7 +238,7 @@ public final class _ContainerTest {
 	@Test public void testCreateResource() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final IRI target=item("target/");
 			final String accept="text/plain";
@@ -343,7 +342,7 @@ public final class _ContainerTest {
 	@Test public void testCreateRejectUnauthorizedUser() {
 		tools(tools -> {
 
-			final Graph graph=tools.get(Graph.Tool);
+			final Graph graph=tools.get(Graph.Factory);
 
 			final IRI target=item("target/");
 			final Model model=parse("<target> rdf:value rdf:first.");
@@ -378,7 +377,7 @@ public final class _ContainerTest {
 	@Test public void testCreateRejectInvalidData() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final IRI target=item("target/");
 
@@ -409,7 +408,7 @@ public final class _ContainerTest {
 	@Test public void testCreateRejectUnreachableStatements() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final IRI target=item("target/");
 
@@ -440,7 +439,7 @@ public final class _ContainerTest {
 	@Test public void testCreateRejectOutOfEnvelopeStatements() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final IRI target=item("target/");
 

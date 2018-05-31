@@ -18,7 +18,6 @@
 package com.metreeca.tray.sys;
 
 import com.metreeca.spec.things.Transputs;
-import com.metreeca.tray.Tool;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -27,7 +26,9 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Setup.storage;
 
 import static java.util.Arrays.asList;
@@ -47,8 +48,8 @@ public final class _Cache { // !!! remove
 	 * <p>The default cache acquired through this factory stores retrieved data in the {@code cache} folder under the
 	 * default storage folder defined by the {@link Setup#StorageProperty} property.</p>
 	 */
-	public static final Tool<_Cache> Tool=tools ->
-			new _Cache(new File(storage(tools.get(Setup.Tool)), "cache"));
+	public static final Supplier<_Cache> Factory=() ->
+			new _Cache(new File(storage(tool(Setup.Factory)), "cache"));
 
 
 	/**

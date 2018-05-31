@@ -30,7 +30,6 @@ import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
 import com.metreeca.spec.things.*;
 import com.metreeca.spec.things.Transputs;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -124,9 +123,9 @@ public final class _Container implements _Handler {
 			throw new NullPointerException("null shape");
 		}
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tools.get(Setup.Factory);
 
-		this.graph=tools.get(Graph.Tool);
+		this.graph=tools.get(Graph.Factory);
 
 		this.shape=shape.accept(new Optimizer()); // merge multiple ldp:contains traits
 	}

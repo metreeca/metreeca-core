@@ -18,10 +18,9 @@
 package com.metreeca.tray.sys;
 
 
-import com.metreeca.tray.Tool;
-
 import java.io.*;
 import java.util.Locale;
+import java.util.function.Supplier;
 import java.util.logging.*;
 
 
@@ -51,7 +50,7 @@ public abstract class Trace {
 	private static final int NameLengthLimit=80; // log args length limit
 
 
-	public static final Tool<Trace> Tool=tools -> {
+	public static final Supplier<Trace> Factory=() -> {
 
 		// logging not configured: reset and load compact console configuration
 

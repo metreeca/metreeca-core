@@ -21,8 +21,6 @@ package com.metreeca.mill.tasks.xml;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
-import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
 
@@ -67,12 +65,12 @@ import static com.metreeca.tray.sys.Trace.clip;
  *
  * <ul>
  *
- * <li>retrieves the content of the IRI from the {@linkplain _Cache#Tool network cache};</li>
+ * <li>retrieves the content of the IRI from the {@linkplain _Cache#Factory network cache};</li>
  *
  * <li>parses the retrieved content as XML, possibly using a user-supplied {@linkplain #parser(Supplier) parser};</li>
  *
  * <li>executes an XML {@linkplain #transform(String) transform} using the parsed XML as context node and a {@linkplain
- * #processor(Tool.Loader, String)} processor} provided by the concrete implementation;</li>
+ * #processor(String)} processor} provided by the concrete implementation;</li>
  *
  * <li>for each item in the sequence returned by the transform, generates a cell according to the item type.</li>
  *
@@ -95,8 +93,8 @@ public abstract class XML<T extends XML<T>> implements Task {
 	public static final Supplier<XMLReader> HTML=org.ccil.cowan.tagsoup.Parser::new;
 
 
-	private final _Cache cache=tool(_Cache.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final _Cache cache=tool(_Cache.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 	private String transform;
 	private Supplier<XMLReader> parser; // thread-safeness >> generate a new parser per evaluation

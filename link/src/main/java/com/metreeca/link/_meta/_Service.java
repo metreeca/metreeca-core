@@ -17,8 +17,6 @@
 
 package com.metreeca.link._meta;
 
-import com.metreeca.tray.Tool;
-
 
 @FunctionalInterface public interface _Service {
 

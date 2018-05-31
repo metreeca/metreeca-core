@@ -94,7 +94,7 @@ public class CreatorTest {
 					assertTrue("location header set", location.startsWith(response.request().focus().stringValue()));
 					assertTrue("response empty", response.text().isEmpty());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						final IRI iri=iri(location);
 
@@ -123,7 +123,7 @@ public class CreatorTest {
 					assertEquals("location header set", location, item("employees/slug").stringValue());
 					assertTrue("response empty", response.text().isEmpty());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						final IRI iri=iri(location);
 
@@ -174,7 +174,7 @@ public class CreatorTest {
 
 				.response(response -> {
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						assertTrue("first pipe applied", connection.hasStatement(
 								response.focus(), forename, literal("TINO"), true
@@ -206,7 +206,7 @@ public class CreatorTest {
 				.request(this::create)
 
 				.response(response -> {
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 
 						connection.exportStatements(response.focus(), null, null, true, new TurtleWriter(System.out));
 
@@ -238,7 +238,7 @@ public class CreatorTest {
 					assertTrue("error detailed", response.json() instanceof Map);
 					assertTrue("location header not set", response.header("Location").orElse("").isEmpty());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertTrue("graph unchanged", connection.isEmpty());
 					}
 
@@ -260,7 +260,7 @@ public class CreatorTest {
 					assertEquals("error reported", Response.Unauthorized, response.status());
 					assertTrue("location header not set", response.header("Location").orElse("").isEmpty());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertTrue("graph unchanged", export(connection).isEmpty());
 					}
 
@@ -281,7 +281,7 @@ public class CreatorTest {
 					assertEquals("error reported", Response.Forbidden, response.status());
 					assertTrue("location header not set", response.header("Location").orElse("").isEmpty());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertTrue("graph unchanged", export(connection).isEmpty());
 					}
 
@@ -305,7 +305,7 @@ public class CreatorTest {
 					assertTrue("location header not set", response.header("Location").orElse("").isEmpty());
 					assertTrue("error detailed", response.json() instanceof Map);
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertTrue("graph unchanged", export(connection).isEmpty());
 					}
 
@@ -331,7 +331,7 @@ public class CreatorTest {
 					assertTrue("location header not set", response.header("Location").orElse("").isEmpty());
 					assertTrue("error detailed", response.json() instanceof Map);
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertTrue("graph unchanged", export(connection).isEmpty());
 					}
 
@@ -358,7 +358,7 @@ public class CreatorTest {
 					assertTrue("error detailed", response.json() instanceof Map);
 					assertTrue("location header not set", response.header("Location").orElse("").isEmpty());
 
-					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 						assertTrue("graph unchanged", export(connection).isEmpty());
 					}
 

@@ -49,8 +49,8 @@ public final class _Query implements Task { // !!! merge into SPARQL?
 	private final String query;
 	private final String base;
 
-	private final Graph graph=tool(Graph.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	public _Query(final IRI context, final String query) {

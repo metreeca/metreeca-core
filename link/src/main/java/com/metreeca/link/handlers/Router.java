@@ -26,7 +26,7 @@ import static com.metreeca.tray.Tray.tool;
 /**
  * Path-based request router.
  *
- * <p>Delegates request processing to a handler selected from the shared {@linkplain Index#Tool index} tool on the
+ * <p>Delegates request processing to a handler selected from the shared {@linkplain Index#Factory index} tool on the
  * basis of the request HTTP {@linkplain Request#path() path}.</p>
  *
  * <p>If the index doesn't contain a matchinh handler, no action is performed giving the system adapter a afall-back
@@ -37,7 +37,7 @@ public final class Router implements Handler {
 	public static Router router() { return new Router(); }
 
 
-	private final Index index=tool(Index.Tool);
+	private final Index index=tool(Index.Factory);
 
 
 	private Router() {}

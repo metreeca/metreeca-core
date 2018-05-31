@@ -32,7 +32,7 @@ import static com.metreeca.spec.sparql.SPARQLEngine.transactional;
  * SPARQL transaction manager
  *
  * <p>Executes the wrapped handler inside a SPARQL transaction on the connection provided by the shared {@linkplain
- * Graph#Tool graph} tool.</p>
+ * Graph#Factory graph} tool.</p>
  */
 public final class Transactor implements Wrapper {
 

@@ -19,7 +19,6 @@ package com.metreeca.link.handlers.ldp;
 
 import com.metreeca.link._junk.*;
 import com.metreeca.link.handlers._Dispatcher;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -53,9 +52,9 @@ public final class _Description implements _Handler { // !!! optimize for SPARQL
 			throw new NullPointerException("null tools");
 		}
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tools.get(Setup.Factory);
 
-		this.graph=tools.get(Graph.Tool);
+		this.graph=tools.get(Graph.Factory);
 	}
 
 

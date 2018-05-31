@@ -49,7 +49,7 @@ public final class SessionTest {
 	private Testbed harness() {
 		return testbed()
 
-				.toolkit(tray -> tray.set(Roster.Tool, tools -> new MockRoster()))
+				.toolkit(tray -> tray.set(Roster.Factory, tools -> new MockRoster()))
 				.service(Session::new);
 	}
 
@@ -62,7 +62,7 @@ public final class SessionTest {
 
 	private Request.Writer authenticated(final Request.Writer request) {
 		return anonymous(request)
-				.user(tool(Roster.Tool).refresh(RosterTest.This).user());
+				.user(tool(Roster.Factory).refresh(RosterTest.This).user());
 	}
 
 
@@ -106,8 +106,8 @@ public final class SessionTest {
 					assertEquals("success reported", Response.OK, response.status());
 					assertEquals("empty ticket", object(), response.json());
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -123,8 +123,8 @@ public final class SessionTest {
 					assertEquals("success reported", Response.OK, response.status());
 					assertEquals("empty ticket", object(), response.json());
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -149,12 +149,12 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit permit=tool(Roster.Factory).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -176,8 +176,8 @@ public final class SessionTest {
 
 					assertEquals("error defined", CredentialsRejected, report.get("error"));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -202,13 +202,13 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit permit=tool(Roster.Factory).profile(RosterTest.This);
 
 					assertTrue("new user logged in", permit.valid(currentTimeMillis()));
 					assertEquals("password updated", "qwertyuiop", permit.token());
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -230,8 +230,8 @@ public final class SessionTest {
 
 					assertEquals("error defined", CredentialsRejected, report.get("error"));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -259,12 +259,12 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit permit=tool(Roster.Factory).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -280,12 +280,12 @@ public final class SessionTest {
 					assertEquals("success reported", Response.OK, response.status());
 					assertEquals("empty ticket", object(), response.json());
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit permit=tool(Roster.Factory).profile(RosterTest.This);
 
 					assertFalse("user logged out", permit.valid(currentTimeMillis()));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -310,12 +310,12 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit permit=tool(Roster.Factory).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -337,12 +337,12 @@ public final class SessionTest {
 
 					assertEquals("error defined", CredentialsRejected, report.get("error"));
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit permit=tool(Roster.Factory).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -367,13 +367,13 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit permit=tool(Roster.Factory).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 					assertEquals("password updated", "qwertyuiop", permit.token());
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -395,13 +395,13 @@ public final class SessionTest {
 
 					assertEquals("error defined", CredentialsRejected, report.get("error"));
 
-					final Roster.Permit permit=tool(Roster.Tool).profile(RosterTest.This);
+					final Roster.Permit permit=tool(Roster.Factory).profile(RosterTest.This);
 
 					assertTrue("user logged in", permit.valid(currentTimeMillis()));
 					Assert.assertEquals("password not updated", RosterTest.This, permit.token());
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -429,14 +429,14 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit original=tool(Roster.Tool).profile(RosterTest.This);
-					final Roster.Permit switched=tool(Roster.Tool).profile(RosterTest.That);
+					final Roster.Permit original=tool(Roster.Factory).profile(RosterTest.This);
+					final Roster.Permit switched=tool(Roster.Factory).profile(RosterTest.That);
 
 					assertFalse("old user logged out", original.valid(currentTimeMillis()));
 					assertTrue("new user logged in", switched.valid(currentTimeMillis()));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -458,8 +458,8 @@ public final class SessionTest {
 
 					assertEquals("error defined", CredentialsRejected, report.get("error"));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -484,15 +484,15 @@ public final class SessionTest {
 					assertTrue("token provided", ticket.get("token") instanceof String);
 					assertTrue("lease defined", ticket.get("lease") instanceof Number);
 
-					final Roster.Permit original=tool(Roster.Tool).profile(RosterTest.This);
-					final Roster.Permit switched=tool(Roster.Tool).profile(RosterTest.That);
+					final Roster.Permit original=tool(Roster.Factory).profile(RosterTest.This);
+					final Roster.Permit switched=tool(Roster.Factory).profile(RosterTest.That);
 
 					assertFalse("old user logged out", original.valid(currentTimeMillis()));
 					assertTrue("new user logged in", switched.valid(currentTimeMillis()));
 					assertEquals("password updated", "qwertyuiop", switched.token());
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}
@@ -515,8 +515,8 @@ public final class SessionTest {
 
 					assertEquals("error defined", CredentialsRejected, report.get("error"));
 
-					tool(Trace.Tool).info("sample request", response.request().text());
-					tool(Trace.Tool).info("sample response", response.text());
+					tool(Trace.Factory).info("sample request", response.request().text());
+					tool(Trace.Factory).info("sample response", response.text());
 
 				});
 	}

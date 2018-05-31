@@ -46,7 +46,7 @@ import static com.metreeca.tray.sys.Trace.clip;
  *
  * <ul>
  *
- * <li>retrieves the content of the IRI from the {@linkplain _Cache#Tool network cache};</li>
+ * <li>retrieves the content of the IRI from the {@linkplain _Cache#Factory network cache};</li>
  *
  * <li>parses the retrieved content as RDF; unless {@linkplain #format(String) explicitly set}, the format is
  * {@linkplain Rio#getParserFormatForFileName(String) guessed} from the IRI filename extension; gzipped content is
@@ -60,8 +60,8 @@ import static com.metreeca.tray.sys.Trace.clip;
  */
 public final class _RDF implements Task { // !!! rename to avoid clashed with RDF vocabulary
 
-	private final _Cache cache=tool(_Cache.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final _Cache cache=tool(_Cache.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 	private String base=Values.Internal;
 	private RDFFormat format;

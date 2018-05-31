@@ -21,7 +21,6 @@ import com.metreeca.link._junk._Handler;
 import com.metreeca.link._junk._Request;
 import com.metreeca.link._junk._Response;
 import com.metreeca.link._meta.Index;
-import com.metreeca.tray.Tool;
 
 import java.util.function.BiConsumer;
 

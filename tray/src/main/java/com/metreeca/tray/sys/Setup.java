@@ -17,11 +17,10 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.tray.Tool;
-
 import java.io.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
@@ -75,7 +74,7 @@ public final class Setup {
 	 * <p>The default setup acquired through this factory includes {@linkplain #system(Setup) system} properties and
 	 * properties read from the {@linkplain #custom(Setup) custom} setup file, if defined.</p>
 	 */
-	public static final Tool<Setup> Tool=tools -> new Setup(asList(Setup::system, Setup::custom));
+	public static final Supplier<Setup> Factory=() -> new Setup(asList(Setup::system, Setup::custom));
 
 
 	/**

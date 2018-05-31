@@ -60,7 +60,7 @@ public final class Browser extends Shaper {
 
 	private final Shape shape;
 
-	private final Graph graph=tool(Graph.Tool);
+	private final Graph graph=tool(Graph.Factory);
 
 
 	private Browser(final Shape shape) {

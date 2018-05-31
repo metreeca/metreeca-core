@@ -41,7 +41,7 @@ public final class BearerTest {
 	private Testbed harness(final Handler handler) {
 		return testbed()
 
-				.toolkit(tray -> tray.set(Roster.Tool, tools -> new MockRoster()))
+				.toolkit(tray -> tray.set(Roster.Factory, tools -> new MockRoster()))
 				.handler(() -> bearer().wrap(handler));
 	}
 
@@ -111,7 +111,7 @@ public final class BearerTest {
 	@Test public void testAuthorizationGranted() {
 		harness(handler(Response.OK))
 
-				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)
@@ -133,7 +133,7 @@ public final class BearerTest {
 	@Test public void testAuthorizationBadCredentials() {
 		harness(handler(Response.OK))
 
-				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)
@@ -154,7 +154,7 @@ public final class BearerTest {
 	@Test public void testAuthorizationForbidden() {
 		harness(handler(Response.Forbidden))
 
-				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)
@@ -175,7 +175,7 @@ public final class BearerTest {
 	@Test public void testAuthorizationUnauthorized() {
 		harness(handler(Response.Unauthorized))
 
-				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)
@@ -205,7 +205,7 @@ public final class BearerTest {
 
 		)))
 
-				.exec(() -> tool(Roster.Tool).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.request(writer -> writer
 						.method(Request.GET)

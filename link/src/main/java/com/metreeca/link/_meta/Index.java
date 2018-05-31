@@ -28,7 +28,6 @@ import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.ShapeCodec;
 import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -110,7 +109,7 @@ public final class Index {
 	public Index(final Loader tools) {
 		this.tools=tools;
 		this.server=tools.get(_Server.Tool);
-		this.graph=tools.get(Graph.Tool);
+		this.graph=tools.get(Graph.Factory);
 	}
 
 

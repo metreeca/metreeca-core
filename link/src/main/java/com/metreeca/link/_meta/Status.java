@@ -22,7 +22,6 @@ import com.metreeca.link._junk.*;
 import com.metreeca.link.handlers._Dispatcher;
 import com.metreeca.spec.shapes.And;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
 
@@ -102,9 +101,9 @@ public final class Status implements _Service {
 
 	@Override public void load(final Tool.Loader tools) {
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tools.get(Setup.Factory);
 
-		this.graph=tools.get(Graph.Tool);
+		this.graph=tools.get(Graph.Factory);
 
 		tools.get(Index.Tool).insert("/!/", new _Dispatcher(map(
 
@@ -155,7 +154,7 @@ public final class Status implements _Service {
 
 		model.add(statement(target, Link.Setup, setupTerm));
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tools.get(Setup.Factory);
 
 		for (final Map.Entry<String, String> property : setup.properties().entrySet()) {
 

@@ -22,7 +22,6 @@ import com.metreeca.link._junk._Request;
 import com.metreeca.link._junk._Response;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -58,7 +57,7 @@ public final class _ResourceTest {
 	@Test public void testRelateResource() {
 		tools(catalog -> {
 
-			final Graph graph=model(catalog.get(Graph.Tool), parse(
+			final Graph graph=model(catalog.get(Graph.Factory), parse(
 					"<target> rdf:value rdf:first, rdf:rest."
 			));
 
@@ -146,7 +145,7 @@ public final class _ResourceTest {
 	@Test public void testRelateRejectUnauthorizedUser() {
 		tools(tools -> {
 
-			final Graph graph=tools.get(Graph.Tool);
+			final Graph graph=tools.get(Graph.Factory);
 
 			final IRI target=item("target");
 			final Model model=parse("<target> rdf:value rdf:first.");
@@ -184,7 +183,7 @@ public final class _ResourceTest {
 	@Test public void testUpdateResource() {
 		tools(catalog -> {
 
-			final Graph graph=model(catalog.get(Graph.Tool), parse(
+			final Graph graph=model(catalog.get(Graph.Factory), parse(
 
 					"<target> rdf:type rdf:nil; rdf:value rdf:first."
 
@@ -229,7 +228,7 @@ public final class _ResourceTest {
 	@Test public void testUpdateResourceJSON() { // !!! factor
 		tools(tools -> {
 
-			final Graph graph=tools.get(Graph.Tool);
+			final Graph graph=tools.get(Graph.Factory);
 
 			model(graph, parse("<target> rdf:type rdf:nil; rdf:value rdf:first."));
 
@@ -291,7 +290,7 @@ public final class _ResourceTest {
 	@Test public void testUpdateRejectUnknownResource() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final IRI target=item("target");
 			final String mime="text/turtle";
@@ -322,7 +321,7 @@ public final class _ResourceTest {
 	@Test public void testUpdateRejectUnauthorizedUser() {
 		tools(tools -> {
 
-			final Graph graph=tools.get(Graph.Tool);
+			final Graph graph=tools.get(Graph.Factory);
 
 			final Model model=parse("<target> rdf:value rdf:first.");
 
@@ -358,7 +357,7 @@ public final class _ResourceTest {
 	@Test public void testUpdateRejectInvalidData() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final Model model=parse("<target> rdf:type rdf:nil.");
 
@@ -392,7 +391,7 @@ public final class _ResourceTest {
 	@Test public void testUpdateRejectUnreachableStatements() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final Model model=parse("<target> rdf:type rdf:nil.");
 
@@ -423,7 +422,7 @@ public final class _ResourceTest {
 	@Test public void testUpdateRejectOutOfEnvelopeStatements() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final Model model=parse("<target> rdf:type rdf:nil.");
 
@@ -459,7 +458,7 @@ public final class _ResourceTest {
 	@Test public void testDeleteResource() {
 		tools(tools -> {
 
-			final Graph graph=tools.get(Graph.Tool);
+			final Graph graph=tools.get(Graph.Factory);
 
 			model(graph, parse("<target> rdf:type rdf:nil; rdf:value rdf:first. <other> rdf:value rdf:rest."));
 
@@ -516,7 +515,7 @@ public final class _ResourceTest {
 	@Test public void testDeleteRejectUnknownResource() {
 		tools(catalog -> {
 
-			final Graph graph=catalog.get(Graph.Tool);
+			final Graph graph=catalog.get(Graph.Factory);
 
 			final IRI target=item("target");
 
@@ -544,7 +543,7 @@ public final class _ResourceTest {
 	@Test public void testDeleteRejectUnauthorizedUser() {
 		tools(tools -> {
 
-			final Graph graph=tools.get(Graph.Tool);
+			final Graph graph=tools.get(Graph.Factory);
 
 			final Model model=parse("<target> rdf:value rdf:first.");
 

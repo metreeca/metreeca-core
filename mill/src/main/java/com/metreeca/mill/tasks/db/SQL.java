@@ -60,7 +60,7 @@ import static java.lang.String.format;
  */
 public final class SQL implements Task {
 
-	private final Trace trace=tool(Trace.Tool);
+	private final Trace trace=tool(Trace.Factory);
 
 	private String query="";
 

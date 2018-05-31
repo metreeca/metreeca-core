@@ -56,9 +56,9 @@ public final class Spool implements Service {
 	}
 
 
-	private final Setup setup=tool(Setup.Tool);
-	private final Graph graph=tool(Graph.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final Setup setup=tool(Setup.Factory);
+	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	private final File storage=setup.get("spool.storage", new File(storage(setup), "spool"));
@@ -68,7 +68,7 @@ public final class Spool implements Service {
 
 	// !!! breaks on GAE even if excluded with a conditional test
 
-	private final WatchService watcher=tool(_tools -> { // from tools to have it closed on system shutdown
+	private final WatchService watcher=tool(() -> { // from tray to have it closed on system shutdown
 
 		try {
 

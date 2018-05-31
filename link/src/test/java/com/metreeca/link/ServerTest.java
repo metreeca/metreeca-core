@@ -20,7 +20,7 @@ package com.metreeca.link;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things._JSON;
-import com.metreeca.tray.Tool;
+import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Setup;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -30,8 +30,8 @@ import java.util.Properties;
 
 import static com.metreeca.link.LinkTest.json;
 import static com.metreeca.link.LinkTest.testbed;
-import static com.metreeca.link.Server.server;
 import static com.metreeca.link.RewriterTest.*;
+import static com.metreeca.link.Server.server;
 import static com.metreeca.spec.Shape.required;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
@@ -47,8 +47,8 @@ import static java.util.Collections.singleton;
 
 public class ServerTest {
 
-	private void setup(final Tool.Binder tray) {
-		tray.set(Setup.Tool, tool -> new Setup(setup -> {
+	private void setup(final Tray tray) {
+		tray.set(Setup.Factory, () -> new Setup(setup -> {
 
 			final Properties properties=new Properties();
 

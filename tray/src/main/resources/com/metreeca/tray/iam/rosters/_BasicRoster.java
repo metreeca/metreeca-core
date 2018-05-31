@@ -17,7 +17,6 @@
 
 package com.metreeca.tray.iam.rosters;
 
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Setup;
 
 import java.util.regex.Pattern;
@@ -37,13 +36,10 @@ public final class _BasicRoster {
 	private final String key;
 
 
-	public _BasicRoster(final Tool.Loader tools) {
+	public _BasicRoster() {
 
-		if ( tools == null ) {
-			throw new NullPointerException("null tools");
-		}
 
-		final Setup setup=tools.get(Setup.Tool);
+		final Setup setup=tool(Setup.Factory);
 
 		this.key=setup.get(Setup.KeyProperty, "");
 	}

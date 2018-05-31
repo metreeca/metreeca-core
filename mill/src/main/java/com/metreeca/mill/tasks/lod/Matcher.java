@@ -48,7 +48,7 @@ public abstract class Matcher<T extends Matcher<T>> implements Task {
 	private static final IRI Match=iri(Values.Internal, "match");
 
 
-	private final Trace trace=tool(Trace.Tool);
+	private final Trace trace=tool(Trace.Factory);
 
 	private Task preprocessor;
 	private IRI link;

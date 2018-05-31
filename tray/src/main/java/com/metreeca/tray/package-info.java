@@ -16,7 +16,7 @@
  */
 
 /**
- * Resource sharing framework.
+ * Tool sharing framework.
  */
 
 package com.metreeca.tray;

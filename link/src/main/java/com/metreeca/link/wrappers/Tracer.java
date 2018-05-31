@@ -41,7 +41,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 /**
  * Activity tracer.
  *
- * <p>Creates an audit trail record in the shared {@linkplain Graph#Tool graph} tool on successful request processing by
+ * <p>Creates an audit trail record in the shared {@linkplain Graph#Factory graph} tool on successful request processing by
  * the wrapped handler.</p>
  */
 public final class Tracer implements Wrapper {
@@ -96,7 +96,7 @@ public final class Tracer implements Wrapper {
 
 	@Override public Handler wrap(final Handler handler) {
 		return (request, response) -> {
-			try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
+			try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 				transactor(connection, true).wrap((_request, _response) -> handler.handle(
 
 						writer ->

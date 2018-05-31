@@ -338,9 +338,9 @@ public final class MappingGraphTest {
 
 			new Tray()
 
-					.set(Graph.Tool, tools -> new Graph("Test Graph", IsolationLevels.SERIALIZABLE, () -> repository) {})
+					.set(Graph.Factory, () -> new Graph("Test Graph", IsolationLevels.SERIALIZABLE, () -> repository) {})
 
-					.exec(() -> task.accept(tool(Graph.Tool).map(External, Internal)))
+					.exec(() -> task.accept(tool(Graph.Factory).map(External, Internal)))
 
 					.clear();
 

@@ -38,8 +38,8 @@ import static java.lang.System.currentTimeMillis;
 
 public final class _Update implements Task { // !!! merge into SPARQL?
 
-	private final Graph graph=tool(Graph.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 	private final IRI context;
 

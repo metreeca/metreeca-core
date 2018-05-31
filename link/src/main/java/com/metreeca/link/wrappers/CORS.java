@@ -42,8 +42,8 @@ public final class CORS implements Wrapper {
 	public static CORS cors() { return new CORS(); }
 
 
-	private final Setup setup=tool(Setup.Tool);
-	private final Trace trace=tool(Trace.Tool);
+	private final Setup setup=tool(Setup.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 	private final boolean enabled=setup.get("cors", false);
 
