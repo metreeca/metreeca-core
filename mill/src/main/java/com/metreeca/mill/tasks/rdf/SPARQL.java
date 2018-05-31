@@ -20,7 +20,6 @@ package com.metreeca.mill.tasks.rdf;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.Resource;
@@ -40,6 +39,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.mill._Cell.cell;
 import static com.metreeca.spec.things.Values.bnode;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 
@@ -47,6 +47,8 @@ import static com.metreeca.tray.sys.Trace.clip;
  * SPARQL extraction/validation task.
  */
 public class SPARQL implements Task {
+
+	private final Trace trace=tool(Trace.Tool);
 
 
 	private String query="";
@@ -70,9 +72,7 @@ public class SPARQL implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) { // !!! refactor
-
-		final Trace trace=tools.get(Trace.Tool);
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) { // !!! refactor
 
 		final Repository repository=new SailRepository(new MemoryStore()); // !!! or remote endpoint parametrized on item
 

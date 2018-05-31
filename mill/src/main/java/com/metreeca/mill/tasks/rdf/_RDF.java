@@ -21,7 +21,6 @@ package com.metreeca.mill.tasks.rdf;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
 
@@ -36,6 +35,7 @@ import java.util.zip.GZIPInputStream;
 
 import static com.metreeca.mill._Cell.cell;
 import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 
@@ -59,6 +59,9 @@ import static com.metreeca.tray.sys.Trace.clip;
  * <p>Feed cells focused on blank nodes or literals are skipped with a warning.</p>
  */
 public final class _RDF implements Task { // !!! rename to avoid clashed with RDF vocabulary
+
+	private final _Cache cache=tool(_Cache.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
 	private String base=Values.Internal;
 	private RDFFormat format;
@@ -129,11 +132,7 @@ public final class _RDF implements Task { // !!! rename to avoid clashed with RD
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
-
-		final _Cache cache=tools.get(_Cache.Tool);
-		final Trace trace=tools.get(Trace.Tool);
-
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return items.flatMap(cell -> {
 
 			final Resource focus=cell.focus();

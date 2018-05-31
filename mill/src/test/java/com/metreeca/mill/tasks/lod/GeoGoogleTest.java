@@ -26,22 +26,26 @@ import com.metreeca.spec.things.Transputs;
 
 import org.junit.Test;
 
+import static com.metreeca.tray.Tray.tray;
+
 
 public final class GeoGoogleTest {
 
 	@Test public void work() {
+		tray().exec(() -> {
+			new Mill().execute(new Pipe(
 
-		new Mill().execute(new Pipe(
+					new Item().text(Transputs.text(GeoGoogle.class, "GeoGoogle.xml")),
 
-				new Item().text(Transputs.text(GeoGoogle.class, "GeoGoogle.xml")),
+					new XSLT()
 
-				new XSLT()
-
-						.transform(Transputs.text(GeoGoogle.class, "GeoGoogle.xsl")),
+							.transform(Transputs.text(GeoGoogle.class, "GeoGoogle.xsl")),
 
 
-				new Peek()
-		));
+					new Peek()
+			));
+
+		});
 	}
 
 }

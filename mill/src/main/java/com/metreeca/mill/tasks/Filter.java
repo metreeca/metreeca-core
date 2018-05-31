@@ -19,7 +19,6 @@ package com.metreeca.mill.tasks;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -73,7 +72,7 @@ public final class Filter implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return items.filter(predicate);
 	}
 

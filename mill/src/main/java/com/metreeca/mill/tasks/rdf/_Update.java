@@ -19,7 +19,6 @@ package com.metreeca.mill.tasks.rdf;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -30,11 +29,17 @@ import org.eclipse.rdf4j.query.impl.SimpleDataset;
 
 import java.util.stream.Stream;
 
+import static com.metreeca.tray.Tray.tool;
+
 import static java.lang.Math.max;
+import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 
 
 public final class _Update implements Task { // !!! merge into SPARQL?
+
+	private final Graph graph=tool(Graph.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
 	private final IRI context;
 
@@ -67,8 +72,8 @@ public final class _Update implements Task { // !!! merge into SPARQL?
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
-		return tools.get(Graph.Tool).update(connection -> {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
+		return graph.update(connection -> {
 
 			final SimpleDataset dataset=new SimpleDataset(); // !!! factor with _Query
 
@@ -99,7 +104,7 @@ public final class _Update implements Task { // !!! merge into SPARQL?
 			final long elapsed=stop-start;
 			final long delta=after-before;
 
-			tools.get(Trace.Tool).info(this, String.format("%s %d statements in %d ms",
+			trace.info(this, format("%s %d statements in %d ms",
 					delta >= 0 ? "inserted" : "deleted", delta, max(elapsed, 1)));
 
 			return Stream.of(_Cell.cell(context));

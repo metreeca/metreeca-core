@@ -18,13 +18,11 @@
 package com.metreeca.mill;
 
 
-import com.metreeca.tray.Tool;
-
 import java.util.stream.Stream;
 
 
 @FunctionalInterface public interface Task {
 
-	public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items);
+	public Stream<_Cell> execute(final Stream<_Cell> items);
 
 }

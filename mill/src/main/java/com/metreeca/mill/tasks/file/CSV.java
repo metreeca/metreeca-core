@@ -20,7 +20,6 @@ package com.metreeca.mill.tasks.file;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
 
@@ -40,8 +39,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.things.Values.*;
 import static com.metreeca.spec.things.Transputs.reader;
+import static com.metreeca.spec.things.Values.*;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.Math.max;
@@ -55,6 +55,9 @@ public final class CSV implements Task {
 
 	private static final IRI Record=iri(Internal, "Record");
 
+
+	private final _Cache cache=tool(_Cache.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
 	// !!! escape
 	// !!! quote
@@ -102,10 +105,7 @@ public final class CSV implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
-
-		final _Cache cache=tools.get(_Cache.Tool);
-		final Trace trace=tools.get(Trace.Tool);
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 
 		final AtomicLong count=new AtomicLong();
 		final AtomicLong elapsed=new AtomicLong();

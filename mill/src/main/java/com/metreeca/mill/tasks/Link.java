@@ -19,7 +19,6 @@ package com.metreeca.mill.tasks;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -65,13 +64,13 @@ public final class Link implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return items.map(item -> {
 
 			final Resource focus=item.focus();
 			final Collection<Statement> model=new ArrayList<>(item.model());
 
-			task.execute(tools, Stream.of(item)).forEachOrdered(target -> {
+			task.execute(Stream.of(item)).forEachOrdered(target -> {
 
 				final Collection<Statement> statements=target.model();
 

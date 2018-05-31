@@ -53,7 +53,7 @@ public final class Mill {
 		}
 
 		tools.get(Trace.Tool).info(this, format("executed task in %,d ms", time(() -> {
-			try (final Stream<_Cell> execute=task.execute(tools, Stream.of(_Cell.cell(bnode())))) { execute.count(); }
+			try (final Stream<_Cell> execute=task.execute(Stream.of(_Cell.cell(bnode())))) { execute.count(); }
 		})));
 
 		return this;

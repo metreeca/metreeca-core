@@ -18,7 +18,6 @@
 package com.metreeca.mill.tasks.xml;
 
 
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.xml.Saxon;
 
 import net.sf.saxon.s9api.*;
@@ -29,21 +28,24 @@ import java.util.stream.StreamSupport;
 
 import javax.xml.transform.Source;
 
+import static com.metreeca.tray.Tray.tool;
+
 
 /**
  * XQuery processing tasks.
  */
 public final class XQuery extends XML<XQuery> {
 
+	private final Saxon saxon=tool(Saxon.Tool);
+
+
 	@Override protected XQuery self() {
 		return this;
 	}
 
-	@Override protected Function<Source, Stream<? extends XdmValue>> processor(
-			final Tool.Loader tools, final String transform
-	) {
+	@Override protected Function<Source, Stream<? extends XdmValue>> processor(final String transform) {
 
-		final XQueryExecutable xquery=tools.get(Saxon.Tool).xquery(transform);
+		final XQueryExecutable xquery=saxon.xquery(transform);
 
 		return source -> {
 			try {

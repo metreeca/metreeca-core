@@ -20,7 +20,6 @@ package com.metreeca.mill.tasks.file;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 
 import java.io.File;
@@ -30,6 +29,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.String.format;
@@ -43,10 +43,9 @@ public final class Folder implements Task {
 	// !!! recursive listing
 	// !!! caching?
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	private final Trace trace=tool(Trace.Tool);
 
-		final Trace trace=tools.get(Trace.Tool);
-
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return items.flatMap(item -> {
 
 			final String url=iri(item.focus());

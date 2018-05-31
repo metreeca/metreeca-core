@@ -20,7 +20,6 @@ package com.metreeca.mill.tasks.rdf;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -64,7 +63,7 @@ public final class Graph implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 
 		final Resource focus=(context != null) ? context : bnode();
 

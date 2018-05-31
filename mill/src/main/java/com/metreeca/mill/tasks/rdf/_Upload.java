@@ -19,7 +19,6 @@ package com.metreeca.mill.tasks.rdf;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 
@@ -39,6 +39,9 @@ public final class _Upload implements Task { // !!! merge into Graph
 
 	private static final int ConnectionGrace=250; // grace period between repeated backend connections [ms]
 
+
+	private final Graph graph=tool(Graph.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
 	private final IRI context;
 
@@ -74,10 +77,7 @@ public final class _Upload implements Task { // !!! merge into Graph
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
-
-		final Graph graph=tools.get(Graph.Tool);
-		final Trace trace=tools.get(Trace.Tool);
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 
 		if ( clear ) {
 			graph.update(connection -> {

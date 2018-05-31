@@ -20,7 +20,6 @@ package com.metreeca.mill.tasks.file;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
 
@@ -32,6 +31,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.String.format;
@@ -42,11 +42,11 @@ import static java.lang.String.format;
  */
 public final class ZIP implements Task {
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	private final _Cache cache=tool(_Cache.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
-		final _Cache cache=tools.get(_Cache.Tool);
-		final Trace trace=tools.get(Trace.Tool);
 
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return items.flatMap(item -> {
 
 			final String url=iri(item.focus());

@@ -19,7 +19,6 @@ package com.metreeca.mill.tasks;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.Value;
 
@@ -52,7 +51,7 @@ public final class Loop implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 
 		final Map<Value, _Cell> outgoing=new LinkedHashMap<>(); // preserve order
 
@@ -60,7 +59,7 @@ public final class Loop implements Task {
 
 		for (Collection<_Cell> incoming=new ArrayList<>(outgoing.values()); !incoming.isEmpty(); ) { // concurrent modification
 			incoming=task
-					.execute(tools, incoming.stream())
+					.execute(incoming.stream())
 					.sequential()
 					.filter(cell -> outgoing.putIfAbsent(cell.focus(), cell) == null)
 					.collect(toList());

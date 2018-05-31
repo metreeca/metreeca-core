@@ -22,7 +22,6 @@ import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.mill._Template;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
 
@@ -39,6 +38,7 @@ import java.util.stream.Stream;
 import static com.metreeca.mill._Cell.cell;
 import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.tray.Tray.tool;
 
 import static java.util.stream.Collectors.toList;
 
@@ -75,6 +75,9 @@ public final class Item implements Task {
 	// !!! document parameter expression syntax / semantics
 
 	private static final _Template Empty=new _Template("");
+
+	private final _Cache cache=tool(_Cache.Tool);
+	private final Trace trace=tool(Trace.Tool);
 
 	private _Template iri=Empty;
 	private _Template text=Empty;
@@ -155,11 +158,7 @@ public final class Item implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
-
-		final _Cache cache=tools.get(_Cache.Tool);
-		final Trace trace=tools.get(Trace.Tool);
-
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return items.flatMap(item -> {
 
 			// compute parameter values

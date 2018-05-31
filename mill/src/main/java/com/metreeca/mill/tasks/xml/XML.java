@@ -22,6 +22,7 @@ import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.spec.things.Values;
 import com.metreeca.tray.Tool;
+import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys._Cache;
 
@@ -55,6 +56,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import static com.metreeca.mill._Cell.cell;
 import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 
@@ -93,15 +95,16 @@ public abstract class XML<T extends XML<T>> implements Task {
 	public static final Supplier<XMLReader> HTML=org.ccil.cowan.tagsoup.Parser::new;
 
 
+	private final _Cache cache=tool(_Cache.Tool);
+	private final Trace trace=tool(Trace.Tool);
+
 	private String transform;
 	private Supplier<XMLReader> parser; // thread-safeness >> generate a new parser per evaluation
 
 
 	protected abstract T self();
 
-	protected abstract Function<Source, Stream<? extends XdmValue>> processor(
-			Tool.Loader tool, final String transform
-	);
+	protected abstract Function<Source, Stream<? extends XdmValue>> processor(final String transform);
 
 
 	public T transform(final String transform) {
@@ -123,13 +126,10 @@ public abstract class XML<T extends XML<T>> implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
-
-		final _Cache cache=tools.get(_Cache.Tool);
-		final Trace trace=tools.get(Trace.Tool);
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 
 		final Function<Source, Stream<? extends XdmValue>> processor
-				=processor(tools, transform != null ? transform : "");
+				=processor(transform != null ? transform : "");
 
 		return items.flatMap(cell -> {
 

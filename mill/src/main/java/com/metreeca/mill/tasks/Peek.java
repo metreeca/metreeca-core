@@ -20,7 +20,6 @@ package com.metreeca.mill.tasks;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.Namespace;
@@ -33,6 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.spec.things.Values.format;
+import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -41,6 +41,8 @@ import static com.metreeca.spec.things.Values.format;
  * <p>Dumps the feed to the {@linkplain Trace#Tool execution trace}.</p>
  */
 public final class Peek implements Task {
+
+	private final Trace trace=tool(Trace.Tool);
 
 	private final Function<_Cell, String> mapper;
 
@@ -74,10 +76,7 @@ public final class Peek implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
-
-		final Trace trace=tools.get(Trace.Tool);
-
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return items.peek(cell -> {
 
 			final String focus=format(cell.focus());

@@ -19,7 +19,6 @@ package com.metreeca.mill.tasks;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,11 +55,11 @@ public final class Fork implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 
 		final List<_Cell> buffer=items.collect(toList()); // !!! streaming forking
 
-		return tasks.stream().flatMap(task -> task.execute(tools, buffer.stream()));
+		return tasks.stream().flatMap(task -> task.execute(buffer.stream()));
 	}
 
 }

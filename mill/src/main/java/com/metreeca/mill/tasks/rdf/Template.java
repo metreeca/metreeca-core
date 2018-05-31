@@ -21,7 +21,6 @@ package com.metreeca.mill.tasks.rdf;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -54,7 +53,7 @@ public class Template implements Task { // !!! merge into RDF
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 

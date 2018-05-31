@@ -20,7 +20,6 @@ package com.metreeca.mill.tasks.file;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.usermodel.*;
@@ -252,7 +251,7 @@ public final class Excel implements Task {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 

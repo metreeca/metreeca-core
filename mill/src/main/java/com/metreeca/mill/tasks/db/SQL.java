@@ -21,7 +21,6 @@ package com.metreeca.mill.tasks.db;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -36,6 +35,7 @@ import static com.metreeca.mill._Cell.cell;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.Math.max;
@@ -60,6 +60,8 @@ import static java.lang.String.format;
  */
 public final class SQL implements Task {
 
+	private final Trace trace=tool(Trace.Tool);
+
 	private String query="";
 
 
@@ -75,9 +77,7 @@ public final class SQL implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) { // !!! refactor
-
-		final Trace trace=tools.get(Trace.Tool);
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) { // !!! refactor
 
 		final AtomicLong count=new AtomicLong();
 		final AtomicLong elapsed=new AtomicLong();

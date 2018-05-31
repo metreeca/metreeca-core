@@ -19,7 +19,6 @@ package com.metreeca.mill.tasks;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,12 +53,12 @@ public final class Pipe implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 
 		Stream<_Cell> pipe=items;
 
 		for (final Task task : tasks) {
-			pipe=task.execute(tools, pipe);
+			pipe=task.execute(pipe);
 		}
 
 		return pipe;

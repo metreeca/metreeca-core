@@ -18,7 +18,6 @@
 package com.metreeca.mill.tasks.xml;
 
 
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.xml.Saxon;
 
 import net.sf.saxon.s9api.*;
@@ -28,22 +27,25 @@ import java.util.stream.Stream;
 
 import javax.xml.transform.Source;
 
+import static com.metreeca.tray.Tray.tool;
+
 
 /**
  * XSLT processing tasks.
  */
 public final class XSLT extends XML<XSLT> {
 
+	private final Saxon saxon=tool(Saxon.Tool);
+
+
 	@Override protected XSLT self() {
 		return this;
 	}
 
 
-	@Override protected Function<Source, Stream<? extends XdmValue>> processor(
-			final Tool.Loader tools, final String transform
-	) {
+	@Override protected Function<Source, Stream<? extends XdmValue>> processor(final String transform) {
 
-		final XsltExecutable xslt=tools.get(Saxon.Tool).xslt(transform);
+		final XsltExecutable xslt=saxon.xslt(transform);
 
 		return source -> {
 			try {

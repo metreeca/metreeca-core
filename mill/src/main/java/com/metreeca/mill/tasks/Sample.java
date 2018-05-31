@@ -19,7 +19,6 @@ package com.metreeca.mill.tasks;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.tray.Tool;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -50,7 +49,7 @@ public final class Sample implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return StreamSupport.stream(Spliterators.spliterator(new Iterator<_Cell>() {
 
 			private final Iterator<_Cell> iterator=items.iterator();

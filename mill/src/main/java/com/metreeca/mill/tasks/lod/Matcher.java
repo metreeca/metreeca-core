@@ -24,7 +24,6 @@ import com.metreeca.mill.tasks.Link;
 import com.metreeca.mill.tasks.Pipe;
 import com.metreeca.mill.tasks.Slice;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.Tool;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -32,6 +31,7 @@ import org.eclipse.rdf4j.model.IRI;
 import java.util.stream.Stream;
 
 import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.tray.Tray.tool;
 
 import static java.util.stream.Collectors.joining;
 
@@ -47,6 +47,8 @@ public abstract class Matcher<T extends Matcher<T>> implements Task {
 
 	private static final IRI Match=iri(Values.Internal, "match");
 
+
+	private final Trace trace=tool(Trace.Tool);
 
 	private Task preprocessor;
 	private IRI link;
@@ -82,17 +84,14 @@ public abstract class Matcher<T extends Matcher<T>> implements Task {
 	}
 
 
-	@Override public Stream<_Cell> execute(final Tool.Loader tools, final Stream<_Cell> items) {
-
-		final Trace trace=tools.get(Trace.Tool);
-
+	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
 		return new Link(new Pipe(
 
 				preprocessor != null ? preprocessor : new Slice(),
 
 				service(),
 
-				(_assets, _items) -> _items.peek(item -> {
+				(_items) -> _items.peek(item -> {
 
 					trace.info(this, item.model().stream()
 							.filter(s -> s.getSubject().equals(item.focus()))
@@ -108,7 +107,7 @@ public abstract class Matcher<T extends Matcher<T>> implements Task {
 
 				postprocessor()
 
-		)).link(link != null ? link : Match).execute(tools, items);
+		)).link(link != null ? link : Match).execute(items);
 	}
 
 }
