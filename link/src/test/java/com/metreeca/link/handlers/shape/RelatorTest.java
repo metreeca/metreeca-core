@@ -31,7 +31,6 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.Test;
 
 import static com.metreeca.link.handlers.shape.Relator.relator;
-import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
@@ -49,7 +48,7 @@ public class RelatorTest {
 
 				.dataset(small())
 
-				.handler(() -> relator(LinkTest.Employee));
+				.handler(() -> relator().shape(LinkTest.Employee));
 	}
 
 
@@ -120,7 +119,7 @@ public class RelatorTest {
 	@Test public void testRelatePiped() {
 		testbed()
 
-				.handler(() -> relator(LinkTest.Employee)
+				.handler(() -> relator().shape(LinkTest.Employee)
 
 						.pipe((request, model) -> {
 
@@ -195,23 +194,6 @@ public class RelatorTest {
 						.user(RDF.NIL)
 						.roles(LinkTest.Salesman)
 						.path("/employees/9999")
-						.done())
-
-				.response(response -> {
-
-					assertEquals("error reported", Response.NotFound, response.status());
-
-				});
-	}
-
-	@Test public void testInactive() {
-		testbed()
-
-				.handler(() -> relator(or()))
-
-				.request(request -> std(request)
-						.user(RDF.NIL)
-						.roles(LinkTest.Manager)
 						.done())
 
 				.response(response -> {

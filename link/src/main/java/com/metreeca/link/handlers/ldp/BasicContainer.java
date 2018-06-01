@@ -18,6 +18,9 @@
 package com.metreeca.link.handlers.ldp;
 
 import com.metreeca.link.*;
+import com.metreeca.link.handlers.Dispatcher;
+import com.metreeca.link.handlers.shape.Browser;
+import com.metreeca.link.handlers.shape.Creator;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
@@ -82,7 +85,7 @@ public final class BasicContainer implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Handler dispatcher;
+	private Handler dispatcher=dispatcher();
 
 
 	/**
@@ -100,10 +103,15 @@ public final class BasicContainer implements Handler {
 			throw new NullPointerException("null shape");
 		}
 
-		this.dispatcher=dispatcher()
+		final Browser browser=browser(shape);
+		final Creator creator=creator(shape);
 
-				.get(browser(shape))
-				.post(creator(shape))
+		final Dispatcher dispatcher=dispatcher();
+
+		if ( browser.active() ) { dispatcher.get(browser); }
+		if ( creator.active() ) { dispatcher.post(creator); }
+
+		this.dispatcher=dispatcher
 
 				.wrap(inspector().shape(shape));
 

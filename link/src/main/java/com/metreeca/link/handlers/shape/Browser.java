@@ -71,7 +71,7 @@ public final class Browser extends Shaper {
 	}
 
 
-	@Override public boolean active() {
+	public boolean active() {
 		return !empty(shape);
 	}
 

@@ -33,7 +33,6 @@ import java.util.Map;
 
 import static com.metreeca.link.LinkTest.*;
 import static com.metreeca.link.handlers.shape.Browser.browser;
-import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
 
@@ -159,21 +158,6 @@ public class BrowserTest {
 
 					assertEquals("success reported", Response.BadRequest, response.status()); // !!! vs Forbidden
 					assertTrue("error detailed", response.json() instanceof Map);
-
-				});
-	}
-
-	@Test public void testInactive() {
-		testbed().handler(() -> browser(or()))
-
-				.request(request -> std(request)
-						.user(RDF.NIL)
-						.roles(Salesman)
-						.done())
-
-				.response(response -> {
-
-					assertEquals("error reported", Response.NotFound, response.status());
 
 				});
 	}

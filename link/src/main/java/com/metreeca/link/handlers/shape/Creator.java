@@ -91,6 +91,10 @@ public final class Creator extends Shaper {
 	}
 
 
+	public boolean active() {
+		return !empty(shape);
+	}
+
 	public Creator pipe(final BiFunction<Request, Model, Model> pipe) {
 
 		if ( pipe == null ) {
@@ -113,10 +117,6 @@ public final class Creator extends Shaper {
 		return this;
 	}
 
-
-	@Override public boolean active() {
-		return !empty(shape);
-	}
 
 	@Override public Creator wrap(final Wrapper wrapper) {
 

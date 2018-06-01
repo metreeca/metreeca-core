@@ -40,7 +40,6 @@ import static com.metreeca.link.LinkTest.*;
 import static com.metreeca.link.Server.server;
 import static com.metreeca.link.handlers.shape.Updater.updater;
 import static com.metreeca.link.wrappers.Processor.processor;
-import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
@@ -300,23 +299,6 @@ public class UpdaterTest {
 
 					assertEquals("error reported", Response.UnprocessableEntity, response.status()); // vs Forbidden
 					assertTrue("error detailed", response.json() instanceof Map);
-
-				});
-	}
-
-	@Test public void testInactive() {
-		testbed()
-
-				.handler(() -> updater(or()))
-
-				.request(request -> std(request)
-						.user(RDF.NIL)
-						.roles(Manager)
-						.done())
-
-				.response(response -> {
-
-					assertEquals("error reported", Response.NotFound, response.status());
 
 				});
 	}

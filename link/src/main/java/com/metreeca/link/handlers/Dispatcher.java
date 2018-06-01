@@ -24,8 +24,6 @@ import com.metreeca.link.Response;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.toList;
-
 
 /**
  * Method-based request dispatcher.
@@ -96,23 +94,15 @@ public final class Dispatcher implements Handler {
 		return method.toUpperCase(Locale.ROOT);
 	}
 
-	private Collection<String> allow() {
-		return mappings.entrySet().stream()
-				.filter(entry -> entry.getValue().active())
-				.map(Map.Entry::getKey)
-				.collect(toList());
-	}
-
-
 
 	private void options(final Request request, final Response response) {
 		response.status(Response.OK)
-				.header("Allow", allow())
+				.header("Allow", mappings.keySet())
 				.done();
 	}
 	private void unsupported(final Request request, final Response response) {
 		response.status(Response.MethodNotAllowed)
-				.header("Allow", allow())
+				.header("Allow", mappings.keySet())
 				.done();
 	}
 

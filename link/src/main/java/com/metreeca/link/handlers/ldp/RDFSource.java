@@ -18,6 +18,10 @@
 package com.metreeca.link.handlers.ldp;
 
 import com.metreeca.link.*;
+import com.metreeca.link.handlers.Dispatcher;
+import com.metreeca.link.handlers.shape.Deleter;
+import com.metreeca.link.handlers.shape.Relator;
+import com.metreeca.link.handlers.shape.Updater;
 import com.metreeca.spec.Shape;
 
 import static com.metreeca.link.handlers.Dispatcher.dispatcher;
@@ -43,7 +47,7 @@ public final class RDFSource implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Handler dispatcher;
+	private Handler dispatcher=dispatcher();
 
 
 	/**
@@ -61,11 +65,17 @@ public final class RDFSource implements Handler {
 			throw new NullPointerException("null shape");
 		}
 
-		this.dispatcher=dispatcher()
+		final Relator relator=relator().shape(shape);
+		final Updater updater=updater(shape);
+		final Deleter deleter=deleter(shape);
 
-				.get(relator(shape))
-				.put(updater(shape))
-				.delete(deleter(shape))
+		final Dispatcher dispatcher=dispatcher();
+
+		if ( relator.active() ) { dispatcher.get(relator); }
+		if ( updater.active() ) { dispatcher.put(relator); }
+		if ( deleter.active() ) { dispatcher.delete(relator); }
+
+		this.dispatcher=dispatcher
 
 				.wrap(inspector().shape(shape));
 

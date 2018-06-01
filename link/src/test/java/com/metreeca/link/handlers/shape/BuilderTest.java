@@ -30,7 +30,6 @@ import org.junit.Test;
 import static com.metreeca.link.LinkTest.Manager;
 import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.handlers.shape.Builder.builder;
-import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.spec.things.ValuesTest.parse;
 import static com.metreeca.spec.things.ValuesTest.sparql;
@@ -167,21 +166,6 @@ public class BuilderTest {
 				.response(response -> {
 
 					assertEquals("error reported", Response.Forbidden, response.status());
-
-				});
-	}
-
-	@Test public void testInactive() {
-		testbed().handler(() -> builder(or(), request -> emptySet()))
-
-				.request(request -> relate(request)
-						.user(RDF.NIL)
-						.roles(Manager)
-						.done())
-
-				.response(response -> {
-
-					assertEquals("error reported", Response.NotFound, response.status());
 
 				});
 	}

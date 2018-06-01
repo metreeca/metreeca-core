@@ -130,36 +130,6 @@ import static com.metreeca.spec.things._JSON.object;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Tests handler activation status.
-	 *
-	 * <p>The default implementation returns always {@code true}.</p>
-	 *
-	 * @return {@code true} if this handler is potentially able to generate {@linkplain Response.Reader#success()
-	 * successful} responses; {@code false} otherwise
-	 */
-	public default boolean active() { return true; }
-
-	/**
-	 * Chains a wrapper with this handler.
-	 *
-	 * @param wrapper the wrapper to be chained with this handler
-	 *
-	 * @return the combined handler obtained by {@linkplain Wrapper#wrap(Handler) wrapping} {@code wrapper} around this
-	 * handler
-	 *
-	 * @throws NullPointerException if {@code wrapper} is {@code null}
-	 */
-	public default Handler wrap(final Wrapper wrapper) {
-
-		if ( wrapper == null ) {
-			throw new NullPointerException("null wrapper");
-		}
-
-		return wrapper.wrap(this);
-	}
-
-
-	/**
 	 * Handles a request/response exchange.
 	 *
 	 * @param request  the incoming request for the managed linked data resource
@@ -189,5 +159,24 @@ import static com.metreeca.spec.things._JSON.object;
 		source.accept(new Request.Writer(request -> handle(request, new Response(request, target))));
 	}
 
+
+	/**
+	 * Chains a wrapper with this handler.
+	 *
+	 * @param wrapper the wrapper to be chained with this handler
+	 *
+	 * @return the combined handler obtained by {@linkplain Wrapper#wrap(Handler) wrapping} {@code wrapper} around this
+	 * handler
+	 *
+	 * @throws NullPointerException if {@code wrapper} is {@code null}
+	 */
+	public default Handler wrap(final Wrapper wrapper) {
+
+		if ( wrapper == null ) {
+			throw new NullPointerException("null wrapper");
+		}
+
+		return wrapper.wrap(this);
+	}
 
 }

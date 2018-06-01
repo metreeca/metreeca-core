@@ -62,9 +62,10 @@ public final class Deleter extends Shaper {
 	}
 
 
-	@Override public boolean active() {
+	public boolean active() {
 		return !empty(shape);
 	}
+
 
 	@Override public Deleter wrap(final Wrapper wrapper) {
 

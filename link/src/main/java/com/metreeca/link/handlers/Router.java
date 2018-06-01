@@ -42,9 +42,6 @@ public final class Router implements Handler {
 	private final Index index=tool(Index.Tool);
 
 
-	private Router() {}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public void handle(final Request request, final Response response) {

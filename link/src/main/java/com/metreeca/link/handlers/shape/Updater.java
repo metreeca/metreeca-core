@@ -72,6 +72,10 @@ public final class Updater extends Shaper {
 	}
 
 
+	public boolean active() {
+		return !empty(shape);
+	}
+
 	public Updater pipe(final BiFunction<Request, Model, Model> pipe) {
 
 		if ( pipe == null ) {
@@ -85,10 +89,6 @@ public final class Updater extends Shaper {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public boolean active() {
-		return !empty(shape);
-	}
 
 	@Override public Updater wrap(final Wrapper wrapper) {
 

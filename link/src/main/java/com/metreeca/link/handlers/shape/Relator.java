@@ -52,29 +52,39 @@ import static com.metreeca.tray.Tray.tool;
 
 public final class Relator extends Shaper {
 
-	public static Relator relator(final Shape shape) {
+	public static Relator relator() {
+		return new Relator();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Graph graph=tool(Graph.Tool);
+
+
+	private Shape shape=and();
+
+	private BiFunction<Request, Model, Model> pipe;
+
+	private Relator() {}
+
+
+	public boolean active() {
+		return !empty(shape);
+	}
+
+	public Relator shape(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		return new Relator(shape);
-	}
-
-
-	private final Shape shape;
-
-	private BiFunction<Request, Model, Model> pipe;
-
-	private final Graph graph=tool(Graph.Tool);
-
-
-	private Relator(final Shape shape) {
 		this.shape=shape
 				.accept(task(Spec.relate))
 				.accept(view(Spec.detail));
-	}
 
+		return this;
+	}
 
 	public Relator pipe(final BiFunction<Request, Model, Model> pipe) { // !!! abstract
 
@@ -88,9 +98,7 @@ public final class Relator extends Shaper {
 	}
 
 
-	@Override public boolean active() {
-		return !empty(shape);
-	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public void handle(final Request request, final Response response) {
 		authorize(request, response, shape, shape ->
