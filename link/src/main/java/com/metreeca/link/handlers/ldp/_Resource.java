@@ -19,7 +19,7 @@ package com.metreeca.link.handlers.ldp;
 
 import com.metreeca.link.*;
 import com.metreeca.link._junk.*;
-import com.metreeca.link.handlers._Dispatcher;
+import com.metreeca.link._junk._Dispatcher;
 import com.metreeca.spec.Issue.Level;
 import com.metreeca.spec.*;
 import com.metreeca.spec.codecs.QueryParser;

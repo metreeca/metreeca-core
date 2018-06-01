@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link.handlers;
+package com.metreeca.link._junk;
 
 import com.metreeca.link._junk._Handler;
 import com.metreeca.link._junk._Request;

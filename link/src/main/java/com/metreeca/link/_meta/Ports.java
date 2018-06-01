@@ -20,7 +20,7 @@ package com.metreeca.link._meta;
 import com.metreeca.link.*;
 import com.metreeca.link._junk.*;
 import com.metreeca.link.handlers.ldp._Container;
-import com.metreeca.link.handlers._Dispatcher;
+import com.metreeca.link._junk._Dispatcher;
 import com.metreeca.link.handlers.ldp._Resource;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;

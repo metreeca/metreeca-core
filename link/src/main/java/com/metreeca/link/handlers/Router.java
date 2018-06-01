@@ -29,7 +29,7 @@ import static com.metreeca.tray.Tray.tool;
  * <p>Delegates request processing to a handler selected from the shared {@linkplain Index#Tool index} tool on the
  * basis of the request HTTP {@linkplain Request#path() path}.</p>
  *
- * <p>If the index doesn't contain a matchinh handler, no action is performed giving the system adapter a afall-back
+ * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  * opportunity to handle the request.</p>
  */
 public final class Router implements Handler {

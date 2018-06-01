@@ -18,7 +18,7 @@
 package com.metreeca.link.handlers.ldp;
 
 import com.metreeca.link._junk.*;
-import com.metreeca.link.handlers._Dispatcher;
+import com.metreeca.link._junk._Dispatcher;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
