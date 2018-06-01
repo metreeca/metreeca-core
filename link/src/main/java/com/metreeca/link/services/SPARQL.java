@@ -175,13 +175,20 @@ public class SPARQL implements Service {
 
 			} else if ( operation instanceof Update ) {
 
-				graph.update(_connection -> {
+				try {
+
+					connection.begin();
 
 					((Update)operation).execute();
 
-					return null;
+					connection.commit();
 
-				});
+				} catch ( final Throwable e ) {
+
+					connection.rollback();
+
+					throw e;
+				}
 
 				final BooleanQueryResultWriterFactory factory=Formats.service(
 						BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);

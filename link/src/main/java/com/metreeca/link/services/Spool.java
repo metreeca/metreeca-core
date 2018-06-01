@@ -24,6 +24,7 @@ import com.metreeca.tray.sys.Trace;
 
 import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.FileSystemException;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParserRegistry;
 
@@ -177,20 +178,32 @@ public final class Spool implements Service {
 
 			trace.info(this, "uploading "+file);
 
-			graph.update(connection -> {
-				try (final InputStream input=file.getContent().getInputStream()) {
+			try (final RepositoryConnection connection=graph.connect()) {
+
+				connection.begin();
+
+				try (
+						final FileContent content=file.getContent();
+				     final InputStream input=content.getInputStream()
+				) {
 
 					final RDFParserRegistry registry=RDFParserRegistry.getInstance();
 					final RDFFormat format=registry.getFileFormatForFileName(name).orElse(DefaultFormat);
 
 					connection.add(input, base, format);
 
-					return null;
+				} catch ( final Throwable e ) {
 
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
+					connection.rollback();
+
+					throw e;
 				}
-			});
+
+				connection.commit();
+
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
 		}
 	}
 

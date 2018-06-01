@@ -17,38 +17,21 @@
 
 package com.metreeca.tray.rdf;
 
-import com.metreeca.spec.Issue.Level;
-import com.metreeca.spec.Query;
-import com.metreeca.spec.Report;
-import com.metreeca.spec.Shape;
-import com.metreeca.spec.sparql.SPARQLEngine;
-import com.metreeca.spec.sparql.SPARQLWriter;
-import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.rdf.graphs.*;
 import com.metreeca.tray.sys.Setup;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.metreeca.spec.Issue.issue;
-import static com.metreeca.spec.Report.trace;
-import static com.metreeca.spec.shapes.And.and;
-import static com.metreeca.spec.things.Lists.concat;
 import static com.metreeca.tray.Tray.tool;
-
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -191,105 +174,6 @@ public abstract class Graph implements AutoCloseable {
 
 	//// !!! Legacy API ////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public boolean isTransactional() { // !!! replace with test on connection and remove
-		return !isolation.equals(IsolationLevels.NONE);
-	}
-
-
-	public Graph map(final String external, final String internal) {
-
-		if ( external == null ) {
-			throw new NullPointerException("null external");
-		}
-
-		if ( internal == null ) {
-			throw new NullPointerException("null internal");
-		}
-
-		return external.isEmpty() || internal.isEmpty() || external.equals(internal) ? this : new _MappingGraph(
-				external, internal, info, isolation, () -> repository
-		);
-	}
-
-
-	public boolean contains(final Resource resource) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		return browse(connection -> SPARQLEngine.contains(connection, resource));
-	}
-
-	public _Cell get(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return get(new com.metreeca.spec.queries.Graph(shape));
-	}
-
-	public _Cell get(final Query query) {
-
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
-
-		return browse(connection -> SPARQLEngine._browse(connection, query));
-	}
-
-
-	public Report set(final Shape shape, final _Cell cell) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( cell == null ) {
-			throw new NullPointerException("null cell");
-		}
-
-		return update(connection -> {
-
-			final boolean transactional=isTransactional(); // disable shape-driven validation if false // !!! just downgrade
-
-			// upload statements to repository and validate against shape
-
-			final Report report=new SPARQLWriter(connection).process(transactional ? shape : and(), cell);
-
-			// validate shape envelope
-
-			final Collection<Statement> envelope=report.outline();
-
-			final Collection<Statement> outliers=transactional ? cell.model().stream()
-					.filter(statement -> !envelope.contains(statement))
-					.collect(toList()) : emptySet();
-
-			// extend validation report with statements outside shape envelope
-
-			final Report extended=outliers.isEmpty() ? report : trace(concat(report.getIssues(), outliers.stream()
-					.map(outlier -> issue(Level.Error, "unexpected statement "+outlier, shape))
-					.collect(toList())
-			), report.getFrames());
-
-			// drop outlining frames for better readability
-
-			final Report pruned=extended.prune(Level.Info).orElseGet(Report::trace);
-
-			// log warnings and errors // !!! here?
-
-			if ( pruned.assess(Level.Warning) ) {
-				// !!! convert report to log records
-				// !!! factor with other com.metreeca.next.handlers
-			}
-
-			return pruned;
-
-		});
-	}
-
-
 	public <R> R browse(final Function<RepositoryConnection, R> browser) {
 
 		if ( browser == null ) {
@@ -350,8 +234,6 @@ public abstract class Graph implements AutoCloseable {
 			try (final RepositoryConnection connection=repository.getConnection()) {
 
 				Graph.connection.set(connection);
-
-				// !!! restrict supplied connection to guard against third-party code (e.g. no access to repository)
 
 				return task.apply(connection);
 

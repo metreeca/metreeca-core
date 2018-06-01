@@ -26,6 +26,7 @@ import com.metreeca.tray.sys.Trace;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,6 +80,11 @@ public final class _Query implements Task { // !!! merge into SPARQL?
 
 
 	@Override public Stream<_Cell> execute(final Stream<_Cell> items) {
+
+		try (final RepositoryConnection connection=graph.connect()) {
+
+		}
+
 		return graph.update(connection -> {
 
 			final SimpleDataset dataset=new SimpleDataset(); // !!! factor with _Update
