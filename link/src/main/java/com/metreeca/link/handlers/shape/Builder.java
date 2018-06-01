@@ -80,6 +80,8 @@ public final class Builder extends Shaper {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Shape shape;
 
 	private final Function<Request, Collection<Statement>> builder;
@@ -96,6 +98,8 @@ public final class Builder extends Shaper {
 
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public void handle(final Request request, final Response response) {
 		authorize(request, response, shape, shape -> {

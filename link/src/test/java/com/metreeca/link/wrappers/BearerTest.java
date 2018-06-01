@@ -41,7 +41,7 @@ public final class BearerTest {
 	private Testbed harness(final Handler handler) {
 		return testbed()
 
-				.toolkit(tray -> tray.set(Roster.Factory, tools -> new MockRoster()))
+				.toolkit(tray -> tray.set(Roster.Factory, MockRoster::new))
 				.handler(() -> bearer().wrap(handler));
 	}
 

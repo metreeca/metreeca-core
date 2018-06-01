@@ -20,9 +20,8 @@ package com.metreeca.link._meta;
 import com.metreeca.link.*;
 import com.metreeca.link._junk._Handler;
 import com.metreeca.link._junk._Request;
-import com.metreeca.link._junk._Server;
-import com.metreeca.link.handlers.ldp._Container;
-import com.metreeca.link.handlers.ldp._Resource;
+import com.metreeca.link.handlers.ldp.BasicContainer;
+import com.metreeca.link.handlers.ldp.RDFSource;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.codecs.ShapeCodec;
@@ -169,7 +168,7 @@ public final class Index {
 
 			if ( collection || container ) {
 
-				final _Container handler=new _Container(tools, and(
+				final BasicContainer handler=new BasicContainer(and(
 						trait(RDFS.LABEL, verify(required(), only(label))),
 						trait(RDFS.COMMENT, verify(optional(), notes != null ? only(notes) : and())),
 						trait(LDP.CONTAINS, digest)
@@ -192,7 +191,7 @@ public final class Index {
 
 			if ( collection ) { // ancillary resource port
 
-				final _Handler handler=new _Resource(tools, detail);
+				final _Handler handler=RDFSource.resource().shape(detail);
 
 				final Map<String, String> hooks=new HashMap<>();
 
@@ -209,7 +208,7 @@ public final class Index {
 
 			} else if ( !container ) { // real resource port
 
-				final _Handler handler=new _Resource(tools, detail);
+				final _Handler handler=RDFSource.resource().shape(detail);
 
 				final Map<String, String> hooks=new HashMap<>();
 

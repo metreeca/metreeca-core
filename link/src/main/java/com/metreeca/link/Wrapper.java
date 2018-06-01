@@ -27,7 +27,7 @@ package com.metreeca.link;
 @FunctionalInterface public interface Wrapper {
 
 	/**
-	 * Creates an identity wrapper
+	 * Creates an identity wrapper.
 	 *
 	 * @return return an identity wrapper, that is a wrapper whose {@linkplain #wrap(Handler) handler} and {@linkplain
 	 * #wrap(Wrapper) wrapper} wrap methods return their unchanged argument

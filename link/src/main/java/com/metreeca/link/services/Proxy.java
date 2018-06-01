@@ -18,7 +18,6 @@
 package com.metreeca.link.services;
 
 import com.metreeca.link.*;
-import com.metreeca.link._junk._Response;
 import com.metreeca.tray.sys.Setup;
 import com.metreeca.tray.sys.Trace;
 
@@ -146,7 +145,7 @@ public class Proxy implements Service {
 		final int code=connection.getResponseCode();
 		final String message=connection.getResponseMessage();
 
-		response.status(code/100 == 5 ? _Response.BadGateway : code); // !!! relay code/message on BadGateway error
+		response.status(code/100 == 5 ? Response.BadGateway : code); // !!! relay code/message on BadGateway error
 
 		// transfer server-controlled headers to the browser
 		// ;( if switching to connection.getHeaderFields(), be aware that header name are case-sensitive…

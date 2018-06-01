@@ -33,6 +33,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 
+import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
@@ -69,6 +70,10 @@ public final class Browser extends Shaper {
 				.accept(view(Spec.digest));
 	}
 
+
+	public boolean active() {
+		return !empty(shape);
+	}
 
 	@Override public void handle(final Request request, final Response response) {
 		authorize(request, response, shape, shape -> query(request, response, shape, filter -> {

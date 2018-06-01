@@ -19,9 +19,9 @@ package com.metreeca.link._meta;
 
 import com.metreeca.link.*;
 import com.metreeca.link._junk.*;
-import com.metreeca.link.handlers.ldp._Container;
-import com.metreeca.link.handlers._Dispatcher;
-import com.metreeca.link.handlers.ldp._Resource;
+import com.metreeca.link.handlers.ldp.BasicContainer;
+import com.metreeca.link._junk._Dispatcher;
+import com.metreeca.link.handlers.ldp.RDFSource;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.things.Values;
@@ -131,7 +131,7 @@ public final class Ports implements _Service {
 			this.index=tools.get(Index.Tool);
 			this.graph=tools.get(Graph.Factory);
 
-			this.container=new _Container(tools, ContainerShape);
+			this.container=new BasicContainer(ContainerShape);
 		}
 
 
@@ -202,7 +202,7 @@ public final class Ports implements _Service {
 			this.index=tools.get(Index.Tool);
 			this.graph=tools.get(Graph.Factory);
 
-			this.resource=new _Resource(tools, ResourceShape);
+			this.resource=RDFSource.resource().shape(ResourceShape);
 		}
 
 

@@ -27,6 +27,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
+import static com.metreeca.link.LinkTest.Manager;
 import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.handlers.shape.Builder.builder;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
@@ -71,7 +72,7 @@ public class BuilderTest {
 
 				.request(request -> relate(request)
 						.user(RDF.NIL)
-						.roles(LinkTest.Manager)
+						.roles(Manager)
 						.done())
 
 				.response(response -> {
@@ -130,7 +131,7 @@ public class BuilderTest {
 
 				.request(request -> relate(request)
 						.user(RDF.NIL)
-						.roles(LinkTest.Manager)
+						.roles(Manager)
 						.done())
 
 				.response(response -> {

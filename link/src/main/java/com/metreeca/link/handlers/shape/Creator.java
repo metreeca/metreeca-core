@@ -36,6 +36,7 @@ import java.util.function.Supplier;
 import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Wrapper.wrapper;
 import static com.metreeca.link.wrappers.Transactor.transactor;
+import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.role;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
@@ -89,6 +90,10 @@ public final class Creator extends Shaper {
 		this.slug=uuid();
 	}
 
+
+	public boolean active() {
+		return !empty(shape);
+	}
 
 	public Creator pipe(final BiFunction<Request, Model, Model> pipe) {
 

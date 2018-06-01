@@ -38,6 +38,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.metreeca.link.LinkTest.Employee;
+import static com.metreeca.link.LinkTest.Manager;
 import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.Server.server;
 import static com.metreeca.link.handlers.shape.Creator.auto;
@@ -294,7 +295,7 @@ public class CreatorTest {
 
 				.request(request -> std(request)
 						.user(RDF.NIL)
-						.roles(LinkTest.Manager)
+						.roles(Manager)
 						.text("{")
 				)
 

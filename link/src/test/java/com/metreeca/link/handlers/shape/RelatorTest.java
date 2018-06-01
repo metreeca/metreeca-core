@@ -48,7 +48,7 @@ public class RelatorTest {
 
 				.dataset(small())
 
-				.handler(() -> relator(LinkTest.Employee));
+				.handler(() -> relator().shape(LinkTest.Employee));
 	}
 
 
@@ -119,7 +119,7 @@ public class RelatorTest {
 	@Test public void testRelatePiped() {
 		testbed()
 
-				.handler(() -> relator(LinkTest.Employee)
+				.handler(() -> relator().shape(LinkTest.Employee)
 
 						.pipe((request, model) -> {
 
