@@ -38,11 +38,13 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.metreeca.link.LinkTest.Employee;
+import static com.metreeca.link.LinkTest.Manager;
 import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.Server.server;
 import static com.metreeca.link.handlers.shape.Creator.auto;
 import static com.metreeca.link.handlers.shape.Creator.creator;
 import static com.metreeca.link.wrappers.Processor.processor;
+import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.Values.statement;
@@ -294,7 +296,7 @@ public class CreatorTest {
 
 				.request(request -> std(request)
 						.user(RDF.NIL)
-						.roles(LinkTest.Manager)
+						.roles(Manager)
 						.text("{")
 				)
 
@@ -361,6 +363,21 @@ public class CreatorTest {
 					try (final RepositoryConnection connection=tool(Graph.Tool).connect()) {
 						assertTrue("graph unchanged", export(connection).isEmpty());
 					}
+
+				});
+	}
+
+	@Test public void testInactive() {
+		testbed().handler(() -> creator(or()))
+
+				.request(request -> std(request)
+						.user(RDF.NIL)
+						.roles(Manager)
+						.done())
+
+				.response(response -> {
+
+					assertEquals("error reported", Response.NotFound, response.status());
 
 				});
 	}

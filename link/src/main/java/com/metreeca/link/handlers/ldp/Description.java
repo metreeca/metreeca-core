@@ -49,7 +49,8 @@ import static java.util.Collections.singleton;
  *
  * <tr>
  * <td>GET</td>
- * <td>Returns the symmetric concise bounded description of the request focus resource; the description is extended with
+ * <td>Returns the symmetric concise bounded description of the request focus resource; the description is extended
+ * with
  * {@code rdfs:label/comment} annotations for all referenced IRIs</td>
  * </tr>
  * </table>
@@ -58,9 +59,7 @@ import static java.util.Collections.singleton;
  */
 public final class Description implements Handler {
 
-	public static Description description() {
-		return new Description();
-	}
+	public static Description description() { return new Description(); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,8 +144,10 @@ public final class Description implements Handler {
 
 		response.status(Response.OK)
 
-				.header("Link", "<http://www.w3.org/ns/ldp#RDFResource>; rel=\"type\"")
-				.header("Link", "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"")
+				.header("Link",
+						"<http://www.w3.org/ns/ldp#RDFSource>; rel=\"type\"",
+						"<http://www.w3.org/ns/ldp#Resource>; rel=\"type\""
+				)
 
 				.rdf(cell);
 

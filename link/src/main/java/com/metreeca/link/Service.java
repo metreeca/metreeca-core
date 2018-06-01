@@ -18,8 +18,6 @@
 package com.metreeca.link;
 
 
-import com.metreeca.link._meta._Server;
-import com.metreeca.link._meta.Index;
 import com.metreeca.tray.Tray;
 
 import java.util.ServiceLoader;
@@ -28,7 +26,7 @@ import java.util.ServiceLoader;
 /**
  * Linked data service.
  *
- * <p>Services enable linked data applications to configure the {@linkplain _Server server} or other shared tools
+ * <p>Services enable linked data applications to configure the {@linkplain Server server} or other shared tools
  * managed by a tool {@linkplain Tray tray}; the most common use case is binding a custom resource {@linkplain Handler
  * handler} to the server {@linkplain Index index}.</p>
  *

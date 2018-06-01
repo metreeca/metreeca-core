@@ -35,6 +35,7 @@ import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.Server.server;
 import static com.metreeca.link.handlers.shape.Deleter.deleter;
 import static com.metreeca.link.wrappers.Processor.processor;
+import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
 
@@ -158,6 +159,23 @@ public class DeleterTest {
 				.response(response -> {
 
 					assertEquals("error reported", Response.Forbidden, response.status());
+
+				});
+	}
+
+	@Test public void testInactive() {
+		testbed()
+
+				.handler(() -> deleter(or()))
+
+				.request(request -> std(request)
+						.user(RDF.NIL)
+						.roles(LinkTest.Manager)
+						.done())
+
+				.response(response -> {
+
+					assertEquals("error reported", Response.NotFound, response.status());
 
 				});
 	}

@@ -393,5 +393,4 @@ public final class LinkTest {
 		return Collections.unmodifiableMap(parameters);
 	}
 
-
 }

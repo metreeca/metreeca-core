@@ -34,6 +34,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
+import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
@@ -86,6 +87,10 @@ public final class Relator extends Shaper {
 		return this;
 	}
 
+
+	@Override public boolean active() {
+		return !empty(shape);
+	}
 
 	@Override public void handle(final Request request, final Response response) {
 		authorize(request, response, shape, shape ->

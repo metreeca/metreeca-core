@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import static com.metreeca.link.Wrapper.wrapper;
 import static com.metreeca.link.wrappers.Transactor.transactor;
+import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
 import static com.metreeca.spec.sparql.SPARQLEngine.contains;
@@ -60,6 +61,10 @@ public final class Deleter extends Shaper {
 				.accept(view(Spec.detail));
 	}
 
+
+	@Override public boolean active() {
+		return !empty(shape);
+	}
 
 	@Override public Deleter wrap(final Wrapper wrapper) {
 

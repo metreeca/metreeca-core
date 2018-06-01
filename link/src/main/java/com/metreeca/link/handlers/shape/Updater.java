@@ -34,6 +34,7 @@ import java.util.function.BiFunction;
 import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Wrapper.wrapper;
 import static com.metreeca.link.wrappers.Transactor.transactor;
+import static com.metreeca.spec.Shape.empty;
 import static com.metreeca.spec.Shape.task;
 import static com.metreeca.spec.Shape.view;
 import static com.metreeca.spec.sparql.SPARQLEngine.contains;
@@ -52,6 +53,8 @@ public final class Updater extends Shaper {
 		return new Updater(shape);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
 
@@ -81,6 +84,12 @@ public final class Updater extends Shaper {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public boolean active() {
+		return !empty(shape);
+	}
+
 	@Override public Updater wrap(final Wrapper wrapper) {
 
 		if ( wrapper == null ) {
@@ -109,10 +118,12 @@ public final class Updater extends Shaper {
 	}
 
 
-	private Handler process(final RepositoryConnection connection, final Shape shape, final Collection<Statement> model) {
-		return (_request, _response) -> {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			final IRI focus=_request.focus();
+	private Handler process(final RepositoryConnection connection, final Shape shape, final Collection<Statement> model) {
+		return (request, response) -> {
+
+			final IRI focus=request.focus();
 
 			// !!! remove system-generated properties (e.g. rdf:types inferred from Link header)
 
@@ -120,7 +131,7 @@ public final class Updater extends Shaper {
 
 				// !!! 410 Gone if the resource is known to have existed (how to test?)
 
-				_response.status(Response.NotFound).done();
+				response.status(Response.NotFound).done();
 
 			} else {
 
@@ -128,12 +139,12 @@ public final class Updater extends Shaper {
 
 				if ( report.assess(Issue.Level.Error) ) { // shape violations
 
-					_response.status(Response.UnprocessableEntity)
+					response.status(Response.UnprocessableEntity)
 							.json(error("data-invalid", report(report)));
 
 				} else { // valid data
 
-					_response.status(Response.NoContent).done();
+					response.status(Response.NoContent).done();
 
 				}
 
