@@ -49,6 +49,8 @@ import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Or.or;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
 import static com.metreeca.spec.things.Values.*;
 import static com.metreeca.spec.things._Cell.cell;
 
@@ -64,8 +66,10 @@ public final class _Resource implements _Handler { // !!! rename to avoid clashe
 
 	private final Shape shape;
 
-	private final _Handler dispatcher=new _Dispatcher(Maps.map(Maps.entry(_Request.GET, this::get), Maps.entry(_Request.PUT, _Handler.sysadm(this::put)), // !!! remove after testing shape-based authorization
-			Maps.entry(_Request.DELETE, _Handler.sysadm(this::delete)) // !!! remove after testing shape-based authorization
+	private final _Handler dispatcher=new _Dispatcher(map(
+			entry(_Request.GET, this::get),
+			entry(_Request.PUT, _Handler.sysadm(this::put)), // !!! remove after testing shape-based authorization
+			entry(_Request.DELETE, _Handler.sysadm(this::delete)) // !!! remove after testing shape-based authorization
 	));
 
 

@@ -16,7 +16,7 @@
  */
 
 /**
- * Model-driven LDP resource handlers.
+ * Model-driven resource handlers.
  */
 
 package com.metreeca.link.handlers.shape;

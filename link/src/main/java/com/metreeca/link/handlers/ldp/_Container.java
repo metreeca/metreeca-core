@@ -60,6 +60,8 @@ import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.Trait.traits;
 import static com.metreeca.spec.shifts.Step.step;
+import static com.metreeca.spec.things.Maps.entry;
+import static com.metreeca.spec.things.Maps.map;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.rewrite;
 import static com.metreeca.spec.things.Values.statement;
@@ -110,7 +112,9 @@ public final class _Container implements _Handler {
 
 	private final Shape shape;
 
-	private final _Handler dispatcher=new _Dispatcher(Maps.map(Maps.entry(_Request.GET, this::get), Maps.entry(_Request.POST, _Handler.sysadm(this::post)) // !!! remove after testing shape-based authorization
+	private final _Handler dispatcher=new _Dispatcher(map(
+			entry(_Request.GET, this::get),
+			entry(_Request.POST, _Handler.sysadm(this::post)) // !!! remove after testing shape-based authorization
 	));
 
 
@@ -229,6 +233,9 @@ public final class _Container implements _Handler {
 			// !!! handle multiple uris in include parameter
 			// !!! handle omit parameter (with multiple uris)
 			// !!! handle other representation values in https://www.w3.org/TR/ldp/#prefer-parameters
+
+			// !!! include Preference-Applied response header
+			// !!! include Vary response header?
 
 			// split container/resource shapes and augment them with system generated properties
 

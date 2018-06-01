@@ -18,7 +18,7 @@
 package com.metreeca.link;
 
 
-import com.metreeca.link._junk._Server;
+import com.metreeca.link._meta._Server;
 import com.metreeca.link._meta.Index;
 import com.metreeca.tray.Tray;
 

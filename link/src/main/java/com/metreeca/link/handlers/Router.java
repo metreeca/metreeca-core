@@ -37,11 +37,15 @@ public final class Router implements Handler {
 	public static Router router() { return new Router(); }
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Index index=tool(Index.Tool);
 
 
 	private Router() {}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public void handle(final Request request, final Response response) {
 		index.lookup(request.path()).ifPresent(handler -> handler.handle(request, response));

@@ -15,9 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.link._junk;
+package com.metreeca.link._meta;
 
 import com.metreeca.link.Link;
+import com.metreeca.link._junk.*;
 import com.metreeca.tray.Tool;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;

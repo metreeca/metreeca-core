@@ -36,6 +36,8 @@ public final class Dispatcher implements Handler {
 	public static Dispatcher dispatcher() { return new Dispatcher(); }
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Map<String, Handler> mappings=new LinkedHashMap<>();
 
 
@@ -43,6 +45,8 @@ public final class Dispatcher implements Handler {
 		mappings.put(Request.OPTIONS, this::options);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Dispatcher get(final Handler handler) {
 		return method(Request.GET, handler);
@@ -83,6 +87,8 @@ public final class Dispatcher implements Handler {
 				.handle(request, response);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String normalize(final String method) {
 		return method.toUpperCase(Locale.ROOT);
