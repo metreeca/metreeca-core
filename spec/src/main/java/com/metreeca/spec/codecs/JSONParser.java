@@ -95,7 +95,7 @@ public final class JSONParser extends AbstractRDFParser {
 	}
 
 	@Override public void parse(final Reader reader, final String baseURI)
-			throws IOException, RDFParseException, RDFHandlerException {
+			throws RDFParseException, RDFHandlerException {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
@@ -255,15 +255,15 @@ public final class JSONParser extends AbstractRDFParser {
 	private Stream<Value> parse(final BigDecimal value, final IRI type) {
 		return type == null || type.equals(XMLSchema.DECIMAL)
 				? Stream.of(createLiteral(value.toPlainString(), null, XMLSchema.DECIMAL))
-				: XMLSchema.DOUBLE.equals(type) ? parse(value.doubleValue(), (IRI)null)
+				: XMLSchema.DOUBLE.equals(type) ? parse(value.doubleValue(), null)
 				: error("unable to promote big decimal value to "+Values.format(type));
 	}
 
 	private Stream<Value> parse(final BigInteger value, final IRI type) {
 		return type == null || type.equals(XMLSchema.INTEGER)
 				? Stream.of(createLiteral(value.toString(), null, XMLSchema.INTEGER))
-				: XMLSchema.DECIMAL.equals(type) ? parse(new BigDecimal(value), (IRI)null)
-				: XMLSchema.DOUBLE.equals(type) ? parse(value.doubleValue(), (IRI)null)
+				: XMLSchema.DECIMAL.equals(type) ? parse(new BigDecimal(value), null)
+				: XMLSchema.DOUBLE.equals(type) ? parse(value.doubleValue(), null)
 				: error("unable to promote big integer value to "+Values.format(type));
 	}
 
@@ -286,7 +286,7 @@ public final class JSONParser extends AbstractRDFParser {
 	private Stream<Value> parse(final Double value, final IRI type) {
 		return type == null || type.equals(XMLSchema.DOUBLE)
 				? Stream.of(createLiteral(DoubleFormat.format(value), null, XMLSchema.DOUBLE))
-				: XMLSchema.DECIMAL.equals(type) ? parse(new BigDecimal(value), (IRI)null)
+				: XMLSchema.DECIMAL.equals(type) ? parse(new BigDecimal(value), null)
 				: error("unable to promote double value to "+Values.format(type));
 	}
 
@@ -299,7 +299,7 @@ public final class JSONParser extends AbstractRDFParser {
 		return Stream.of(type == null ? createLiteral(string, null, null)
 				: type.equals(Values.ResoureType) ? createResource(base, string)
 				: type.equals(Values.IRIType) ? createIRI(base, string)
-				: type.equals(Values.BNodeType) ? createBNode(string.startsWith("_:") ? string.substring(2) : string)
+				: type.equals(Values.BNodeType) ? createNode(string.startsWith("_:") ? string.substring(2) : string)
 				: createLiteral(string, null, type));
 	}
 
@@ -315,14 +315,14 @@ public final class JSONParser extends AbstractRDFParser {
 
 	private Optional<Resource> blank(final Map<?, ?> object) {
 		return object.containsKey("this")
-				? Optional.of(createBNode())
+				? Optional.of(createNode())
 				: Optional.empty();
 	}
 
 	private Optional<Resource> blank(final Shape shape) {
 		return datatype(shape)
 				.filter(type -> type.equals(Values.BNodeType))
-				.map(type -> (Resource)createBNode());
+				.map(type -> createNode());
 	}
 
 	private Optional<Resource> resource(final Shape shape) {
@@ -382,8 +382,8 @@ public final class JSONParser extends AbstractRDFParser {
 
 
 	private Resource createResource(final String base, final String id) {
-		return id.isEmpty() ? createBNode()
-				: id.startsWith("_:") ? createBNode(id.substring(2))
+		return id.isEmpty() ? createNode()
+				: id.startsWith("_:") ? createNode(id.substring(2))
 				: createIRI(base, id);
 	}
 

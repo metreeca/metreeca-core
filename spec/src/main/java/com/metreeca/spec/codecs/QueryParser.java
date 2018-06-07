@@ -58,7 +58,7 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 
 
-public final class QueryParser {
+@SuppressWarnings("unchecked") public final class QueryParser {
 
 	private static final java.util.regex.Pattern StepPatten
 			=java.util.regex.Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");

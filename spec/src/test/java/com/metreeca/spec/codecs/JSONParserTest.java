@@ -54,7 +54,7 @@ import static org.junit.Assert.assertTrue;
 public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test(expected=RDFParseException.class) public void testReportRDFParseException() {
-		try { new JSONParser().parse(new StringReader(""), ""); } catch ( final IOException ignored ) {}
+		new JSONParser().parse(new StringReader(""), "");
 	}
 
 

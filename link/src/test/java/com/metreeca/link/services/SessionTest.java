@@ -44,7 +44,7 @@ import static org.junit.Assert.assertTrue;
 import static java.lang.System.currentTimeMillis;
 
 
-public final class SessionTest {
+@SuppressWarnings("unchecked") public final class SessionTest {
 
 	private Testbed harness() {
 		return testbed()
