@@ -92,16 +92,15 @@ import static java.util.Collections.list;
 
 		try {
 
-			tray
+			context.setAttribute(TrayAttribute, tray
+
 					.set(Setup.Factory, () -> setup(context))
 					.set(Loader.Factory, () -> loader(context))
-					.set(Upload, () -> upload(context));
+					.set(Upload, () -> upload(context))
 
-			for (final Toolkit toolkit : ServiceLoader.load(Toolkit.class)) { toolkit.load(tray); }
 
-			tray.exec(() -> ServiceLoader.load(Service.class).forEach(Service::load));
-
-			context.setAttribute(TrayAttribute, tray);
+					.update(() -> ServiceLoader.load(Toolkit.class).forEach(Toolkit::load))
+					.lookup(() -> ServiceLoader.load(Service.class).forEach(Service::load)));
 
 		} catch ( final Throwable t ) {
 
@@ -220,7 +219,7 @@ import static java.util.Collections.list;
 			throw new IllegalStateException("no tray in context");
 		}
 
-		tray.exec(() -> filter((HttpServletRequest)request, (HttpServletResponse)response));
+		tray.lookup(() -> filter((HttpServletRequest)request, (HttpServletResponse)response));
 
 		if ( !response.isCommitted() ) {
 			chain.doFilter(request, response);

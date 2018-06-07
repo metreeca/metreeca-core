@@ -20,7 +20,6 @@ package com.metreeca.link;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things._JSON;
-import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Setup;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -39,6 +38,7 @@ import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.spec.things.ValuesTest.write;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;
 
@@ -47,8 +47,8 @@ import static java.util.Collections.singleton;
 
 public class ServerTest {
 
-	private void setup(final Tray tray) {
-		tray.set(Setup.Factory, () -> new Setup(setup -> {
+	private void setup() {
+		tool(Setup.Factory, () -> new Setup(setup -> {
 
 			final Properties properties=new Properties();
 
@@ -65,7 +65,7 @@ public class ServerTest {
 	@Test public void testHeadRewriting() {
 		testbed()
 
-				.toolkit(this::setup)
+				.toolkit(() -> setup())
 
 				.request(request -> request
 
@@ -120,7 +120,7 @@ public class ServerTest {
 	@Test public void testRDFRewriting() {
 		testbed()
 
-				.toolkit(this::setup)
+				.toolkit(() -> setup())
 
 				.request(request -> request
 
@@ -154,7 +154,7 @@ public class ServerTest {
 	@Test public void testJSONRewriting() {
 		testbed()
 
-				.toolkit(this::setup)
+				.toolkit(() -> setup())
 
 				.request(request -> request
 

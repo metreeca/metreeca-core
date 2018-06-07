@@ -134,7 +134,18 @@ public final class LinkTest {
 				throw new NullPointerException("null toolkit");
 			}
 
-			toolkit.load(tray);
+			tray.update(toolkit::load);
+
+			return this;
+		}
+
+		public Testbed service(final Supplier<Service> service) {
+
+			if ( service == null ) {
+				throw new NullPointerException("null service");
+			}
+
+			tray.lookup(() -> service.get().load());
 
 			return this;
 		}
@@ -149,22 +160,11 @@ public final class LinkTest {
 				throw new NullPointerException("null contexts");
 			}
 
-			tray.exec(() -> {
+			tray.lookup(() -> {
 				try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
 					connection.add(model, contexts);
 				}
 			});
-
-			return this;
-		}
-
-		public Testbed service(final Supplier<Service> service) {
-
-			if ( service == null ) {
-				throw new NullPointerException("null service");
-			}
-
-			exec(() -> service.get().load());
 
 			return this;
 		}
@@ -295,7 +295,7 @@ public final class LinkTest {
 				throw new NullPointerException("null task");
 			}
 
-			tray.exec(task);
+			tray.lookup(task);
 
 			return this;
 		}

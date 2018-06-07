@@ -105,7 +105,7 @@ public class TrayTest {
 		final Step y=new Step(z);
 		final Step x=new Step(y);
 
-		tray.exec(() -> tray.get(x)); // load the terminal tool with its dependencies
+		tray.lookup(() -> tray.get(x)); // load the terminal tool with its dependencies
 		tray.clear(); // release resources
 
 		assertEquals("dependencies released after relying resources", asList(x, y, z), released);

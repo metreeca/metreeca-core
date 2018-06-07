@@ -20,25 +20,28 @@ package com.metreeca.link;
 import com.metreeca.tray.Tray;
 
 import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 
 /**
  * Linked data toolkit.
  *
- * <p>Toolkits enable linked data applications to provide custom shared tools or to override standard platform-provided
- * tools with custom plugins.</p>
+ * <p>Toolkits enable linked data applications to provide custom shared tool factories or to override standard
+ * platform-provided tool factories with custom plugins.</p>
  *
  * <p>Custom toolkits listed in the {@code com.metreeca.link.Tookit} {@linkplain ServiceLoader service loader}
  * provider configuration file in the {@code META-INF/services/} resource directory of an application will be
- * automatically {@linkplain #load(Tray) loaded} by server adapters.</p>
+ * automatically {@linkplain #load() loaded} by server adapters inside a {@linkplain Tray#update(Runnable) write-only
+ * task} on a shared tool tray.</p>
  */
 @FunctionalInterface public interface Toolkit {
 
 	/**
-	 * Loads a custom toolkit into a shared tool tray.
+	 * Loads a custom toolkit.
 	 *
-	 * @param tray the shared tool tray custom and overridden tools are to be loaded to
+	 * <p>Custom tool factories may be inserted into the shared tool tray using the static {@linkplain
+	 * Tray#tool(Supplier, Supplier)} factory replacement} method.</p>
 	 */
-	public void load(final Tray tray); // !!! write-only
+	public void load();
 
 }

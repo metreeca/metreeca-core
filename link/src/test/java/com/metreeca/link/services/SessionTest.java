@@ -49,7 +49,7 @@ public final class SessionTest {
 	private Testbed harness() {
 		return testbed()
 
-				.toolkit(tray -> tray.set(Roster.Factory, MockRoster::new))
+				.toolkit(() -> tool(Roster.Factory, MockRoster::new))
 				.service(Session::new);
 	}
 

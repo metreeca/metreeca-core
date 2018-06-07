@@ -35,17 +35,19 @@ import static java.lang.String.format;
 @SuppressWarnings("unchecked")
 public final class Tray {
 
-	private static final ThreadLocal<Tray> context=new ThreadLocal<>();
+	private static final ThreadLocal<Tray> lookup=new ThreadLocal<>();
+	private static final ThreadLocal<Tray> update=new ThreadLocal<>();
 
 
 	/**
-	 * Retrieves a shared tool.
+	 * {@linkplain #get(Supplier) Retrieves} a shared tool from the current {@linkplain #lookup(Runnable) lookup} tray.
 	 *
-	 * @param factory the factory for retrieving dependencies for the new resource
+	 * @param factory the factory responsible for creating the required tool; must return a non-null and thread-safe
+	 *                object
+	 * @param <T>     the type of the shared tool created by {@code factory}
 	 *
-	 *                ; must be non-null and thread-safe
-	 *
-	 * @return the new shared tool created by {@code factory} or a factory replacement if one was defined
+	 * @return the shared tool created by {@code factory} or by its plugin replacement if one was {@linkplain
+	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is {@code null}
 	 */
@@ -55,13 +57,45 @@ public final class Tray {
 			throw new NullPointerException("null factory");
 		}
 
-		final Tray tray=context.get();
+		final Tray tray=lookup.get();
 
 		if ( tray == null ) {
 			throw new IllegalStateException("not running inside a tray");
 		}
 
 		return tray.get(factory);
+	}
+
+
+	/**
+	 * {@linkplain #set(Supplier, Supplier) Replaces} a tool factory with a pluginf in the current {@linkplain
+	 * #update(Runnable) update} tray.
+	 *
+	 * @param <T>     the type of the shared tool created by {@code factory}
+	 * @param factory the factory to be replaced
+	 * @param plugin  the replacing factory; must return a non-null and thread-safe object
+	 *
+	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is {@code null}
+	 * @throws IllegalStateException    if {@code factory} was already replaced with a plugin or its tool was already
+	 *                                  retrieved
+	 */
+	public static <T> void tool(final Supplier<T> factory, final Supplier<T> plugin) {
+
+		if ( factory == null ) {
+			throw new NullPointerException("null factory");
+		}
+
+		if ( plugin == null ) {
+			throw new NullPointerException("null plugin");
+		}
+
+		final Tray tray=update.get();
+
+		if ( tray == null ) {
+			throw new IllegalStateException("not running inside a tray");
+		}
+
+		tray.set(factory, plugin);
 	}
 
 
@@ -73,15 +107,19 @@ public final class Tray {
 	private final Object pending=new Object(); // placeholder for detecting circular dependencies
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Retrieves the shared tool created by a factory.
 	 *
 	 * <p>The new tool is cached so that further calls for the same factory are idempotent.</p>
 	 *
-	 * @param factory the factory responsible for creating the required tool
+	 * @param factory the factory responsible for creating the required tool; must return a non-null and thread-safe
+	 *                object
 	 * @param <T>     the type of the shared tool created by {@code factory}
 	 *
-	 * @return the shared tool created by {@code factory}
+	 * @return the shared tool created by {@code factory} or by its plugin replacement if one was {@linkplain
+	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is {@code null}
 	 */
@@ -130,18 +168,18 @@ public final class Tray {
 	/**
 	 * Replaces a tool factory with a plugin.
 	 *
-	 * <p>Subsequent calls to {@link #get(Supplier)} using {@code factory} as key will return the shared resource
+	 * <p>Subsequent calls to {@link #get(Supplier)} using {@code factory} as key will return the shared tool
 	 * created by {@code plugin}.</p>
 	 *
 	 * @param <T>     the type of the shared tool created by {@code factory}
 	 * @param factory the factory to be replaced
-	 * @param plugin  the replacing factory
+	 * @param plugin  the replacing factory; must return a non-null and thread-safe object
 	 *
 	 * @return this tool tray
 	 *
 	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is {@code null}
-	 * @throws IllegalStateException    if {@code factory} was already replaced with a plugin or its resource was
-	 *                                  already created
+	 * @throws IllegalStateException    if {@code factory} was already replaced with a plugin or its tool was already
+	 *                                  retrieved
 	 */
 	public <T> Tray set(final Supplier<T> factory, final Supplier<T> plugin) throws IllegalStateException {
 
@@ -174,8 +212,8 @@ public final class Tray {
 	/**
 	 * Clears this tool tray.
 	 *
-	 * <p>All {@linkplain #get(Supplier) cached} resources are purged. {@linkplain AutoCloseable Auto-closeable}
-	 * resource are closed in inverse creation order before purging.</p>
+	 * <p>All {@linkplain #get(Supplier) cached} tools are purged. {@linkplain AutoCloseable Auto-closeable}
+	 * tools are closed in inverse creation order before purging.</p>
 	 *
 	 * @return this tool tray
 	 */
@@ -217,32 +255,60 @@ public final class Tray {
 
 
 	/**
-	 * Executes a task inside this tool tray.
+	 * Executes a read-only task inside this tool tray.
 	 *
-	 * <p>Calls to {@link #tool(Supplier)} from within the executed task will be delegated to this tool tray.</p>
+	 * <p>Calls to the static tool {@linkplain #tool(Supplier) retrieval} method on the current thread from within the
+	 * executed task will be delegated to this tool tray.</p>
 	 *
-	 * @param task the task to be executed
+	 * @param task the read-only task to be executed
 	 *
 	 * @return this tool tray
 	 */
-	public Tray exec(final Runnable task) {
+	public Tray lookup(final Runnable task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
 		}
 
-		final Tray current=context.get();
+		return exec(task, lookup);
+	}
+
+	/**
+	 * Executes a write-only task inside this tool tray.
+	 *
+	 * <p>Calls to the static tool factory {@linkplain #tool(Supplier) replacement} method on the current thread from
+	 * within the executed task will be delegated to this tool tray.</p>
+	 *
+	 * @param task the read-only task to be executed
+	 *
+	 * @return this tool tray
+	 */
+	public Tray update(final Runnable task) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		return exec(task, update);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Tray exec(final Runnable task, final ThreadLocal<Tray> mode) {
+
+		final Tray current=mode.get();
 
 		try {
 
-			context.set(this);
+			mode.set(this);
 
 			task.run();
 
 			return this;
 
 		} finally {
-			context.set(current);
+			mode.set(current);
 		}
 	}
 

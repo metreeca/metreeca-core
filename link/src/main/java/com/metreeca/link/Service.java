@@ -17,25 +17,32 @@
 
 package com.metreeca.link;
 
-
 import com.metreeca.tray.Tray;
 
 import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 
 /**
  * Linked data service.
  *
- * <p>Services enable linked data applications to configure the {@linkplain Server server} or other shared tools
- * managed by a tool {@linkplain Tray tray}; the most common use case is binding a custom resource {@linkplain Handler
- * handler} to the server {@linkplain Index index}.</p>
+ * <p>Services enable linked data applications to configure the {@linkplain Server server} or other shared tools; the
+ * most common use case is binding a custom resource {@linkplain Handler handler} to the server {@linkplain Index
+ * index}.</p>
  *
  * <p>Custom services listed in the {@code com.metreeca.link.Service} {@linkplain ServiceLoader service loader}
  * provider configuration file in the {@code META-INF/services/} resource directory of an application will be
- * automatically {@linkplain #load() loaded} by server adapters.</p>
+ * automatically {@linkplain #load() loaded} by server adapters inside a {@linkplain Tray#lookup(Runnable) read-only
+ * task} on a shared tool tray.</p>
  */
 @FunctionalInterface public interface Service {
 
+	/**
+	 * Loads a custom service.
+	 *
+	 * <p>Required tools may be retrieved from the shared tool tray using the static {@linkplain Tray#tool(Supplier)
+	 * tool lookup} method.</p>
+	 */
 	public void load();
 
 }

@@ -32,7 +32,7 @@ import static org.junit.Assert.assertFalse;
 public class IndexTest {
 
 	@Test public void testMatchExactPathIgnoringTrailingSlashes() {
-		new Tray().exec(() -> {
+		new Tray().lookup(() -> {
 
 			final Index index=tool(Index.Factory);
 
@@ -54,7 +54,7 @@ public class IndexTest {
 	}
 
 	@Test public void testMatchLongestPrefix() {
-		new Tray().exec(() -> {
+		new Tray().lookup(() -> {
 
 			final Index index=tool(Index.Factory);
 
@@ -71,7 +71,7 @@ public class IndexTest {
 	}
 
 	@Test public void testManagesPrefixesOfEqualLength() {
-		new Tray().exec(() -> {
+		new Tray().lookup(() -> {
 
 			final Index index=tool(Index.Factory);
 
@@ -88,7 +88,7 @@ public class IndexTest {
 	}
 
 	@Test public void testNormalizePaths() {
-		new Tray().exec(() -> {
+		new Tray().lookup(() -> {
 
 			final Index index=tool(Index.Factory);
 

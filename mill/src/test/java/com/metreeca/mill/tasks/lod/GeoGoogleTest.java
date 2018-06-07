@@ -31,7 +31,7 @@ import org.junit.Test;
 public final class GeoGoogleTest {
 
 	@Test public void work() {
-		new Tray().exec(() -> {
+		new Tray().lookup(() -> {
 			new Mill().execute(new Pipe(
 
 					new Item().text(Transputs.text(GeoGoogle.class, "GeoGoogle.xml")),

@@ -757,6 +757,7 @@
       <option name="myAllowedSuppressions">
         <list>
           <option value="deprecation" />
+          <option value="unchecked" />
         </list>
       </option>
     </inspection_tool>
