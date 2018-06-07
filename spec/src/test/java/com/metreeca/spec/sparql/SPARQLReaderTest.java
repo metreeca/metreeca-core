@@ -98,9 +98,9 @@ public class SPARQLReaderTest {
 
 				"select * where { ?product a :Product }"
 
-		), set(matches.values()));
+		), matches.keySet());
 
-		assertTrue("empty model", matches.isEmpty());
+		assertTrue("empty model", model(matches).isEmpty());
 
 	}
 
@@ -165,7 +165,7 @@ public class SPARQLReaderTest {
 
 		final Map<Value, Collection<Statement>> matches=stats(trait(RDF.TYPE, all(RDF.NIL)));
 
-		assertEquals("meta focus", set(Spec.meta), set(matches.values()));
+		assertEquals("meta focus", set(Spec.meta), matches.keySet());
 
 		assertIsomorphic(
 
@@ -243,7 +243,7 @@ public class SPARQLReaderTest {
 
 		final Map<Value, Collection<Statement>> matches=items(trait(RDF.TYPE, all(RDF.NIL)));
 
-		assertEquals(set(Spec.meta), set(matches.values()));
+		assertEquals(set(Spec.meta), matches.keySet());
 
 		assertIsomorphic(
 
@@ -325,11 +325,14 @@ public class SPARQLReaderTest {
 	@Test public void testDirectUniversalConstraint() {
 		assertIsomorphic(
 
-				model("construct { ?customer :product ?product } where {\n"
-						+"\t?customer :product ?product, <products/S10_2016>, <products/S24_2022>\n"
+				model("construct { ?root :product ?product } where {\n"
+						+"\t?root :product ?product, <products/S10_2016>, <products/S24_2022>\n"
 						+"}"),
 
-				model(edges(trait(term("product"), all(item("products/S10_2016"), item("products/S24_2022"))))));
+				model(edges(trait(
+						term("product"),
+						all(item("products/S10_2016"), item("products/S24_2022"))
+				))));
 	}
 
 	@Test public void testInverseUniversalConstraint() {

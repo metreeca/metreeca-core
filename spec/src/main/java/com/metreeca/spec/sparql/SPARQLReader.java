@@ -46,12 +46,11 @@ import static com.metreeca.spec.things.Lists.list;
 import static com.metreeca.spec.things.Strings.indent;
 import static com.metreeca.spec.things.Values.bnode;
 import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.spec.things.Values.statement;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
 import static java.util.Collections.singletonMap;
-import static java.util.Collections.unmodifiableCollection;
-import static java.util.Collections.unmodifiableMap;
 
 
 final class SPARQLReader {
@@ -145,32 +144,34 @@ final class SPARQLReader {
 				final Value match=bindings.getValue(root.toString());
 
 				if ( match != null ) {
+					matches.compute(match, (value, statements) -> {
 
-					final Model model=new LinkedHashModel();
+						final Collection<Statement> computed=(statements != null) ? statements : new LinkedHashSet();
 
-					template.forEach(statement -> {
+						template.forEach(statement -> {
 
-						final Resource subject=statement.getSubject();
-						final Value object=statement.getObject();
+							final Resource subject=statement.getSubject();
+							final Value object=statement.getObject();
 
-						final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
-						final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
+							final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
+							final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
 
-						if ( source instanceof Resource && target != null ) {
-							model.add((Resource)source, statement.getPredicate(), target);
-						}
+							if ( source instanceof Resource && target != null ) {
+								computed.add(statement((Resource)source, statement.getPredicate(), target));
+							}
+
+						});
+
+						return computed;
 
 					});
-
-
-					matches.put(match, unmodifiableCollection(model));
 				}
 
 			}
 
 		});
 
-		return unmodifiableMap(matches);
+		return matches;
 	}
 
 	private Map<Value, Collection<Statement>> stats(final Stats stats) {

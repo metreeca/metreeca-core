@@ -25,12 +25,13 @@ import com.metreeca.mill.tasks.xml.XSLT;
 import com.metreeca.spec.things.Transputs;
 import com.metreeca.tray.Tray;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 
 public final class GeoGoogleTest {
 
-	@Test public void work() {
+	@Ignore  @Test public void work() {
 		new Tray().lookup(() -> {
 			new Mill().execute(new Pipe(
 
