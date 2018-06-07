@@ -57,16 +57,18 @@ public abstract class Trace {
 		if ( System.getProperty("java.util.logging.config.file") == null
 				&& System.getProperty("java.util.logging.config.class") == null ) {
 
+			final java.util.logging.Level level=java.util.logging.Level.INFO;
+
 			LogManager.getLogManager().reset();
 
 			final ConsoleHandler handler=new ConsoleHandler();
 
-			handler.setLevel(java.util.logging.Level.INFO);
+			handler.setLevel(level);
 			handler.setFormatter(new ConsoleFormatter());
 
 			final Logger logger=Logger.getLogger("");
 
-			logger.setLevel(java.util.logging.Level.INFO);
+			logger.setLevel(level);
 			logger.addHandler(handler);
 
 		}

@@ -38,7 +38,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import static com.metreeca.spec.things.Values.iri;
 
@@ -73,6 +73,29 @@ public final class ValuesTest {
 
 
 	private static final Map<String, Model> DatasetCache=new HashMap<>();
+
+
+	static { // logging not configured: reset and enable fine console logging
+
+		if ( System.getProperty("java.util.logging.config.file") == null
+				&& System.getProperty("java.util.logging.config.class") == null ) {
+
+			final Level level=Level.FINE;
+
+			LogManager.getLogManager().reset();
+
+			final ConsoleHandler handler=new ConsoleHandler();
+
+			handler.setLevel(level);
+
+			final Logger logger=Logger.getLogger("");
+
+			logger.setLevel(level);
+			logger.addHandler(handler);
+
+		}
+
+	}
 
 
 	private ValuesTest() {} // a utility class
