@@ -22,7 +22,9 @@ import com.metreeca.spec.shifts.Step;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Test;
 
+import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
+import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.Trait.traits;
 import static com.metreeca.spec.shapes.Virtual.virtual;
 import static com.metreeca.spec.things.Maps.entry;
@@ -38,7 +40,7 @@ public class TraitTest {
 
 	@Test public void testInspectTraits() {
 
-		final Trait trait=Trait.trait(RDF.VALUE, And.and());
+		final Trait trait=trait(RDF.VALUE, and());
 
 		assertEquals("singleton trait map", singletonMap(trait.getStep(), trait.getShape()), traits(trait));
 
@@ -46,7 +48,7 @@ public class TraitTest {
 
 	@Test public void testInspectVirtuals() {
 
-		final Virtual virtual=virtual(Trait.trait(RDF.VALUE), Step.step(RDF.NIL));
+		final Virtual virtual=virtual(trait(RDF.VALUE), Step.step(RDF.NIL));
 
 		assertEquals("singleton trait map", traits(virtual.getTrait()), traits(virtual));
 
@@ -54,23 +56,23 @@ public class TraitTest {
 
 	@Test public void testInspectConjunctions() {
 
-		final Trait x=Trait.trait(RDF.VALUE, And.and());
-		final Trait y=Trait.trait(RDF.TYPE, And.and());
-		final Trait z=Trait.trait(RDF.TYPE, maxCount(1));
+		final Trait x=trait(RDF.VALUE, and());
+		final Trait y=trait(RDF.TYPE, and());
+		final Trait z=trait(RDF.TYPE, maxCount(1));
 
 		assertEquals("union trait map", map(
 				entry(x.getStep(), x.getShape()),
 				entry(y.getStep(), y.getShape())
-		), traits(And.and(x, y)));
+		), traits(and(x, y)));
 
 		assertEquals("merged trait map", map(
-				entry(y.getStep(), And.and(y.getShape(), z.getShape()))
-		), traits(And.and(y, z)));
+				entry(y.getStep(), and(y.getShape(), z.getShape()))
+		), traits(and(y, z)));
 
 	}
 
 	@Test public void testInspectOtherShapes() {
-		assertTrue("no traits", traits(And.and()).isEmpty());
+		assertTrue("no traits", traits(and()).isEmpty());
 	}
 
 }

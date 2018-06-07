@@ -27,7 +27,6 @@ import com.metreeca.spec.shapes.MaxLength;
 import com.metreeca.spec.shapes.MinLength;
 import com.metreeca.spec.shifts.Count;
 import com.metreeca.spec.shifts.Step;
-import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -38,6 +37,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import static com.metreeca.spec.Query.decreasing;
@@ -57,6 +57,7 @@ import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shapes.Virtual.virtual;
 import static com.metreeca.spec.shifts.Step.step;
+import static com.metreeca.spec.things.Lists.concat;
 import static com.metreeca.spec.things.Lists.list;
 import static com.metreeca.spec.things.Sets.set;
 import static com.metreeca.spec.things.Values.integer;
@@ -75,51 +76,49 @@ public class SPARQLReaderTest {
 
 	@Test public void testEdgesEmptyShape() {
 
-		final _Cell cell=graph(and());
+		final Map<Value, Collection<Statement>> matches=edges(and());
 
-		assertTrue("empty focus", cell.values().isEmpty());
-		assertTrue("empty model", cell.model().isEmpty());
+		assertTrue("empty focus", matches.isEmpty());
 
 	}
 
 	@Test public void testEdgesEmptyResultSet() {
 
-		final _Cell cell=graph(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Value, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(RDF.NIL)));
 
-		assertTrue("empty focus", cell.values().isEmpty());
-		assertTrue("empty model", cell.model().isEmpty());
+		assertTrue("empty focus", matches.isEmpty());
 
 	}
 
 	@Test public void testEdgesEmptyProjection() {
 
-		final _Cell cell=graph(clazz(term("Product")));
+		final Map<Value, Collection<Statement>> matches=edges(clazz(term("Product")));
 
 		assertEquals("matching focus", focus(
 
 				"select * where { ?product a :Product }"
 
-		), set(cell.values()));
+		), set(matches.values()));
 
-		assertTrue("empty model", cell.model().isEmpty());
+		assertTrue("empty model", matches.isEmpty());
 
 	}
 
 	@Test public void testEdgesMatching() {
 
-		final _Cell cell=graph(trait(RDF.TYPE, all(term("Product"))));
+		final Map<Value, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(term("Product"))));
 
 		assertEquals("matching focus", focus(
 
 				"select * where { ?product a :Product }"
 
-		), set(cell.values()));
+		), set(matches.keySet()));
 
 		assertIsomorphic("matching model", model(
 
 				"construct where { ?product a :Product }"
 
-		), cell.model());
+		), model(matches));
 
 	}
 
@@ -135,27 +134,27 @@ public class SPARQLReaderTest {
 		assertEquals("default (on value)",
 
 				list(model(query+" order by ?product")),
-				list(graph(shape).model()));
+				list(model(edges(shape))));
 
 		assertEquals("custom increasing",
 
 				list(model(query+" order by ?label")),
-				list(graph(shape, increasing(step(RDFS.LABEL))).model()));
+				list(model(edges(shape, increasing(step(RDFS.LABEL))))));
 
 		assertEquals("custom decreasing",
 
 				list(model(query+" order by desc(?label)")),
-				list(graph(shape, decreasing(step(RDFS.LABEL))).model()));
+				list(model(edges(shape, decreasing(step(RDFS.LABEL))))));
 
 		assertEquals("custom combined",
 
 				list(model(query+" order by ?line ?label")),
-				list(graph(shape, increasing(step(term("line"))), increasing(step(RDFS.LABEL))).model()));
+				list(model(edges(shape, increasing(step(term("line"))), increasing(step(RDFS.LABEL))))));
 
 		assertEquals("custom on root",
 
 				list(model(query+" order by desc(?product)")),
-				list(graph(shape, decreasing()).model()));
+				list(model(edges(shape, decreasing()))));
 
 	}
 
@@ -164,20 +163,20 @@ public class SPARQLReaderTest {
 
 	@Test public void testStatsEmptyResultSet() {
 
-		final _Cell cell=stats(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Value, Collection<Statement>> matches=stats(trait(RDF.TYPE, all(RDF.NIL)));
 
-		assertEquals("meta focus", set(Spec.meta), set(cell.values()));
+		assertEquals("meta focus", set(Spec.meta), set(matches.values()));
 
 		assertIsomorphic(
 
 				model("prefix spec: <"+Spec.Namespace+"> construct { spec:meta spec:count 0 } where {}"),
 
-				cell.model());
+				model(matches));
 	}
 
 	@Test public void testStatsEmptyProjection() {
 
-		final _Cell cell=stats(clazz(term("Product")));
+		final Map<Value, Collection<Statement>> matches=stats(clazz(term("Product")));
 
 		assertIsomorphic(
 
@@ -202,13 +201,13 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				cell.model());
+				model(matches));
 
 	}
 
 	@Test public void testStatsRootConstraints() {
 
-		final _Cell cell=stats(all(item("employees/1370")), step(term("account")));
+		final Map<Value, Collection<Statement>> matches=stats(all(item("employees/1370")), step(term("account")));
 
 		assertIsomorphic(
 
@@ -233,7 +232,7 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				cell.model());
+				model(matches));
 
 	}
 
@@ -242,20 +241,20 @@ public class SPARQLReaderTest {
 
 	@Test public void testItemsEmptyResultSet() {
 
-		final _Cell cell=items(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Value, Collection<Statement>> matches=items(trait(RDF.TYPE, all(RDF.NIL)));
 
-		assertEquals(set(Spec.meta), set(cell.values()));
+		assertEquals(set(Spec.meta), set(matches.values()));
 
 		assertIsomorphic(
 
 				model("construct {} where {}"),
 
-				cell.model());
+				model(matches));
 	}
 
 	@Test public void testItemsEmptyProjection() {
 
-		final _Cell cell=items(clazz(term("Product")));
+		final Map<Value, Collection<Statement>> matches=items(clazz(term("Product")));
 
 		assertIsomorphic(
 
@@ -276,13 +275,13 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				cell.model());
+				model(matches));
 
 	}
 
 	@Test public void testItemsRootConstraints() {
 
-		final _Cell cell=items(all(item("employees/1370")), step(term("account")));
+		final Map<Value, Collection<Statement>> matches=items(all(item("employees/1370")), step(term("account")));
 
 		assertIsomorphic(
 
@@ -305,7 +304,7 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				cell.model());
+				model(matches));
 
 	}
 
@@ -317,10 +316,10 @@ public class SPARQLReaderTest {
 
 				model("construct where { ?product a :Product }"),
 
-				graph(and(
+				model(edges(and(
 						clazz(term("Product")),
 						trait(RDF.TYPE)
-				)).model());
+				))));
 	}
 
 	@Test public void testDirectUniversalConstraint() {
@@ -330,19 +329,20 @@ public class SPARQLReaderTest {
 						+"\t?customer :product ?product, <products/S10_2016>, <products/S24_2022>\n"
 						+"}"),
 
-				graph(trait(term("product"), all(item("products/S10_2016"), item("products/S24_2022")))).model());
+				model(edges(trait(term("product"), all(item("products/S10_2016"), item("products/S24_2022"))))));
 	}
 
 	@Test public void testInverseUniversalConstraint() {
 		assertIsomorphic(
 
 				model("construct { ?product :customer ?customer } where {\n"
-						+"\t?customer ^:customer ?product.\n"
-						+"\t?customer ^:customer <products/S10_2016>.\n"
-						+"\t?customer ^:customer <products/S24_2022>.\n"
+						+"\t?customer ^:customer ?product, <products/S10_2016>, <products/S24_2022>.\n"
 						+"}"),
 
-				graph(trait(step(term("customer"), true), all(item("products/S10_2016"), item("products/S24_2022")))).model());
+				model(edges(trait(
+						step(term("customer"), true),
+						all(item("products/S10_2016"), item("products/S24_2022"))
+				))));
 	}
 
 	@Test public void testRootUniversalConstraint() {
@@ -356,10 +356,10 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				graph(and(
+				model(edges(and(
 						all(item("products/S18_2248"), item("products/S24_3969")),
 						trait(RDF.TYPE)
-				)).model());
+				))));
 	}
 
 	@Test public void testSingletonUniversalConstraint() {
@@ -369,7 +369,7 @@ public class SPARQLReaderTest {
 						+"\t?customer :product ?product, <products/S10_2016>\n"
 						+"}"),
 
-				graph(trait(term("product"), all(item("products/S10_2016")))).model());
+				model(edges(trait(term("product"), all(item("products/S10_2016"))))));
 	}
 
 	@Test public void testExistentialConstraint() {
@@ -379,7 +379,7 @@ public class SPARQLReaderTest {
 						+"\t?item :product ?product, ?value filter (?value in (<products/S18_2248>, <products/S24_3969>))\n"
 						+"}"),
 
-				graph(trait(term("product"), any(item("products/S18_2248"), item("products/S24_3969")))).model());
+				model(edges(trait(term("product"), any(item("products/S18_2248"), item("products/S24_3969"))))));
 	}
 
 	@Test public void testSingletonExistentialConstraint() {
@@ -387,10 +387,10 @@ public class SPARQLReaderTest {
 
 				model("construct where { <products/S18_2248> rdfs:label ?label }"),
 
-				graph(and(
+				model(edges(and(
 						any(item("products/S18_2248")),
 						trait(RDFS.LABEL)
-				)).model());
+				))));
 	}
 
 	@Test public void testMinExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
@@ -406,7 +406,7 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				graph(trait(term("sell"), minExclusive(literal(BigDecimal.valueOf(100.17))))).model());
+				model(edges(trait(term("sell"), minExclusive(literal(BigDecimal.valueOf(100.17)))))));
 	}
 
 	@Test public void testMaxExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
@@ -422,7 +422,7 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				graph(trait(term("sell"), maxExclusive(literal(BigDecimal.valueOf(100.17))))).model());
+				model(edges(trait(term("sell"), maxExclusive(literal(BigDecimal.valueOf(100.17)))))));
 	}
 
 	@Test public void testMinInclusiveConstraint() {
@@ -438,7 +438,7 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				graph(trait(term("sell"), minInclusive(literal(BigDecimal.valueOf(100))))).model());
+				model(edges(trait(term("sell"), minInclusive(literal(BigDecimal.valueOf(100)))))));
 	}
 
 	@Test public void testMaxInclusiveConstraint() {
@@ -454,7 +454,7 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				graph(trait(term("sell"), maxInclusive(literal(BigDecimal.valueOf(100))))).model());
+				model(edges(trait(term("sell"), maxInclusive(literal(BigDecimal.valueOf(100)))))));
 	}
 
 	@Test public void testPattern() {
@@ -470,7 +470,7 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(trait(RDFS.LABEL, pattern("\\bferrari\\b", "i"))).model());
+				model(edges(trait(RDFS.LABEL, pattern("\\bferrari\\b", "i")))));
 	}
 
 	@Test public void testLike() {
@@ -486,7 +486,7 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(trait(RDFS.LABEL, like("alf ro"))).model());
+				model(edges(trait(RDFS.LABEL, like("alf ro")))));
 	}
 
 	@Test public void testMinLength() {
@@ -502,7 +502,7 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(trait(term("sell"), MinLength.minLength(5))).model());
+				model(edges(trait(term("sell"), MinLength.minLength(5)))));
 	}
 
 	@Test public void testMaxLength() {
@@ -518,7 +518,7 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(trait(term("sell"), MaxLength.maxLength(5))).model());
+				model(edges(trait(term("sell"), MaxLength.maxLength(5)))));
 	}
 
 
@@ -537,10 +537,10 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(and(
+				model(edges(and(
 						trait(RDF.TYPE, all(term("Product"))),
 						virtual(trait(term("price")), step(term("sell")))
-				)).model());
+				))));
 	}
 
 	// !!! nested expressions
@@ -558,13 +558,13 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(and(
+				model(edges(and(
 						trait(RDF.TYPE, all(term("Product"))),
 						virtual(
 								trait(term("price"), minInclusive(literal(integer(200)))),
 								step(term("sell"))
 						)
-				)).model());
+				))));
 	}
 
 	@Ignore @Test public void testDerivateExternalFiltering() {
@@ -580,11 +580,11 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(and(
+				model(edges(and(
 						trait(RDF.TYPE, all(term("Product"))),
 						virtual(trait(term("price")), step(term("sell"))),
 						trait(term("price"), minInclusive(literal(integer(200))))
-				)).model());
+				))));
 	}
 
 
@@ -603,20 +603,20 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"} order by ?price")),
 
-				list(graph(and(
+				list(model(edges(and(
 
 						trait(RDF.TYPE, all(term("Product"))),
 						virtual(trait(term("price")), step(term("sell")))
 
-				)).model(), increasing(step(term("price")))));
+				))), increasing(step(term("price")))));
 	}
 
 	@Ignore @Test public void testDerivateStats() {
 		assertIsomorphic(
 
-				stats(trait(RDF.TYPE), step(RDF.TYPE)).model(),
+				model(stats(trait(RDF.TYPE), step(RDF.TYPE))),
 
-				stats(virtual(trait(RDF.VALUE), step(RDF.TYPE)), step(RDF.VALUE)).model()
+				model(stats(virtual(trait(RDF.VALUE), step(RDF.TYPE)), step(RDF.VALUE)))
 
 		);
 	}
@@ -624,9 +624,9 @@ public class SPARQLReaderTest {
 	@Ignore @Test public void testDerivateItems() {
 		assertIsomorphic(
 
-				items(trait(RDF.TYPE), step(RDF.TYPE)).model(),
+				model(items(trait(RDF.TYPE), step(RDF.TYPE))),
 
-				items(virtual(trait(RDF.VALUE), step(RDF.TYPE)), step(RDF.VALUE)).model()
+				model(items(virtual(trait(RDF.VALUE), step(RDF.TYPE)), step(RDF.VALUE)))
 
 		);
 	}
@@ -651,10 +651,10 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(and(
+				model(edges(and(
 						trait(RDF.TYPE, all(term("Employee"))),
 						virtual(trait(term("subordinates")), Count.count(step(term("subordinate"))))
-				)).model());
+				))));
 	}
 
 	@Test public void testAggregateCountOnSingleton() {
@@ -674,10 +674,10 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(and(
+				model(edges(and(
 						all(item("product-lines/ships")),
 						virtual(trait(term("size")), Count.count(step(term("product"))))
-				)).model());
+				))));
 	}
 
 	// !!! sorting (($) project and reuse aggregates computed for filtering/sorting)
@@ -702,31 +702,35 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				graph(and(
+				model(edges(and(
 						trait(term("employee")),
 						test(filter(), trait(term("employee"), any(item("employees/1002"), item("employees/1188"))))
-				)).model());
+				))));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Cell graph(final Shape shape, final Query.Order... orders) {
+	private Map<Value, Collection<Statement>> edges(final Shape shape, final Query.Order... orders) {
 		return process(new Edges(shape, list(orders), 0, 0));
 	}
 
-	private _Cell stats(final Shape shape, final Step... path) {
+	private Map<Value, Collection<Statement>> stats(final Shape shape, final Step... path) {
 		return process(new Stats(shape, list(path)));
 	}
 
-	private _Cell items(final Shape shape, final Step... path) {
+	private Map<Value, Collection<Statement>> items(final Shape shape, final Step... path) {
 		return process(new Items(shape, list(path)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Cell process(final Query query) {
+	private Collection<Statement> model(final Map<Value, Collection<Statement>> matches) {
+		return matches.values().stream().reduce(list(), (x, y) -> concat(x, y));
+	}
+
+	private Map<Value, Collection<Statement>> process(final Query query) {
 		return connection(BIRT, connection -> new SPARQLReader(connection).process(query));
 	}
 

@@ -19,15 +19,14 @@ package com.metreeca.spec.sparql;
 
 import com.metreeca.spec.*;
 import com.metreeca.spec.queries.Edges;
-import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
@@ -56,19 +55,12 @@ public final class SPARQLEngine { // !!! migrate from utility class to processor
 	}
 
 
-	public static Collection<Statement> browse(final RepositoryConnection connection, final Shape shape) {
+	public static Map<Value, Collection<Statement>> browse(final RepositoryConnection connection, final Shape shape) {
 		return browse(connection, new Edges(shape));
 	}
 
-	public static Collection<Statement> browse(final RepositoryConnection connection, final Query query) {
-		return new SPARQLReader(connection)
-				.process(query)
-				.model();
-	}
-
-	public static _Cell _browse(final RepositoryConnection connection, final Query query) { // !!! merge
-		return new SPARQLReader(connection)
-				.process(query);
+	public static Map<Value, Collection<Statement>> browse(final RepositoryConnection connection, final Query query) {
+		return new SPARQLReader(connection).process(query);
 	}
 
 
@@ -76,7 +68,11 @@ public final class SPARQLEngine { // !!! migrate from utility class to processor
 			final RepositoryConnection connection, final IRI focus, final Shape shape) {
 		return new SPARQLReader(connection)
 				.process(new Edges(and(all(focus), shape)))
-				.model();
+				.entrySet()
+				.stream()
+				.findFirst()
+				.map(Map.Entry::getValue)
+				.orElseGet(Collections::emptySet);
 	}
 
 	public static Report create(

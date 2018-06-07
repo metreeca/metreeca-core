@@ -26,7 +26,6 @@ import com.metreeca.spec.queries.Edges;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shifts.Step;
-import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -50,6 +49,10 @@ import static com.metreeca.spec.things.Values.literal;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
+import static java.util.Collections.singletonMap;
+import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableMap;
+
 
 final class SPARQLReader {
 
@@ -71,19 +74,19 @@ final class SPARQLReader {
 	}
 
 
-	public _Cell process(final Query query) {
+	public Map<Value, Collection<Statement>> process(final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
 		}
 
-		return query.accept(new Query.Probe<_Cell>() {
+		return query.accept(new Query.Probe<Map<Value, Collection<Statement>>>() {
 
-			@Override public _Cell visit(final Edges edges) { return graph(edges); }
+			@Override public Map<Value, Collection<Statement>> visit(final Edges edges) { return edges(edges); }
 
-			@Override public _Cell visit(final Stats stats) { return stats(stats); }
+			@Override public Map<Value, Collection<Statement>> visit(final Stats stats) { return stats(stats); }
 
-			@Override public _Cell visit(final Items items) { return items(items); }
+			@Override public Map<Value, Collection<Statement>> visit(final Items items) { return items(items); }
 
 		});
 	}
@@ -91,7 +94,7 @@ final class SPARQLReader {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Cell graph(final Edges edges) {
+	private Map<Value, Collection<Statement>> edges(final Edges edges) {
 
 		final Shape shape=edges.getShape();
 		final List<Query.Order> orders=edges.getOrders();
@@ -100,10 +103,8 @@ final class SPARQLReader {
 
 		final Object root=0; // root identifier // !!! review
 
-		final Model model=new LinkedHashModel();
-		final Collection<Value> focus=new LinkedHashSet<>();
-
 		final Collection<Statement> template=new ArrayList<>();
+		final Map<Value, Collection<Statement>> matches=new LinkedHashMap<>();
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
@@ -144,31 +145,35 @@ final class SPARQLReader {
 				final Value match=bindings.getValue(root.toString());
 
 				if ( match != null ) {
-					focus.add(match);
+
+					final Model model=new LinkedHashModel();
+
+					template.forEach(statement -> {
+
+						final Resource subject=statement.getSubject();
+						final Value object=statement.getObject();
+
+						final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
+						final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
+
+						if ( source instanceof Resource && target != null ) {
+							model.add((Resource)source, statement.getPredicate(), target);
+						}
+
+					});
+
+
+					matches.put(match, unmodifiableCollection(model));
 				}
-
-				template.forEach(statement -> {
-
-					final Resource subject=statement.getSubject();
-					final Value object=statement.getObject();
-
-					final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
-					final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
-
-					if ( source instanceof Resource && target != null ) {
-						model.add((Resource)source, statement.getPredicate(), target);
-					}
-
-				});
 
 			}
 
 		});
 
-		return _Cell.cell(model).insert(focus);
+		return unmodifiableMap(matches);
 	}
 
-	private _Cell stats(final Stats stats) {
+	private Map<Value, Collection<Statement>> stats(final Stats stats) {
 
 		final Shape shape=stats.getShape();
 		final List<Step> path=stats.getPath();
@@ -254,10 +259,10 @@ final class SPARQLReader {
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
 				.ifPresent(max -> model.add(Spec.meta, Spec.max, max));
 
-		return _Cell.cell(model).insert(Spec.meta);
+		return singletonMap(Spec.meta, model);
 	}
 
-	private _Cell items(final Items items) {
+	private Map<Value, Collection<Statement>> items(final Items items) {
 
 		final Shape shape=items.getShape();
 		final List<Step> path=items.getPath();
@@ -320,7 +325,7 @@ final class SPARQLReader {
 			}
 		});
 
-		return _Cell.cell(model).insert(Spec.meta);
+		return singletonMap(Spec.meta, model);
 	}
 
 

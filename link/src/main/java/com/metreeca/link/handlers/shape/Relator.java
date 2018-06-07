@@ -33,12 +33,10 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.BiFunction;
 
-import static com.metreeca.spec.Shape.empty;
-import static com.metreeca.spec.Shape.mode;
-import static com.metreeca.spec.Shape.task;
-import static com.metreeca.spec.Shape.view;
+import static com.metreeca.spec.Shape.*;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.All.all;
@@ -114,7 +112,11 @@ public final class Relator extends Shaper {
 
 						} else {
 
-							final Collection<Statement> model=browse(connection, query);
+							final Collection<Statement> model=browse(connection, query)
+									.values()
+									.stream()
+									.findFirst()
+									.orElseGet(Collections::emptySet);
 
 							final Collection<Statement> piped=(pipe == null) ?
 									model : pipe.apply(request, new LinkedHashModel(model));

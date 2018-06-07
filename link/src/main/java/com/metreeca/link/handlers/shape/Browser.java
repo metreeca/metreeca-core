@@ -24,28 +24,31 @@ import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Outliner;
 import com.metreeca.spec.queries.Edges;
-import com.metreeca.spec.things._Cell;
+import com.metreeca.spec.sparql.SPARQLEngine;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Map;
 
-import static com.metreeca.spec.Shape.empty;
-import static com.metreeca.spec.Shape.mode;
-import static com.metreeca.spec.Shape.task;
-import static com.metreeca.spec.Shape.view;
+import static com.metreeca.spec.Shape.*;
 import static com.metreeca.spec.queries.Items.ItemsShape;
 import static com.metreeca.spec.queries.Stats.StatsShape;
 import static com.metreeca.spec.shapes.Or.or;
 import static com.metreeca.spec.shapes.Trait.trait;
-import static com.metreeca.spec.sparql.SPARQLEngine._browse;
+import static com.metreeca.spec.things.Lists.concat;
 import static com.metreeca.spec.things.Sets.union;
 import static com.metreeca.spec.things.Values.rewrite;
+import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.tray.Tray.tool;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 
 public final class Browser extends Shaper {
@@ -92,40 +95,45 @@ public final class Browser extends Shaper {
 				final Shape container=shape; // !!!
 				final Shape resource=shape; // !!!
 
-				// construct and process configured query, merging constraints from the query string
-
 				// retrieve filtered content from repository
 
-				final _Cell cell=_browse(connection, filter); // !!! remove Cell
-				final Collection<Statement> model=cell.model();
-
-				if ( filter instanceof Edges ) {
-					cell.reverse(LDP.CONTAINS).insert(focus);
-				}
+				final Map<Value, Collection<Statement>> matches=SPARQLEngine.browse(connection, filter);
+				final Collection<Statement> model=matches.values().stream().reduce(emptyList(), (x, y) -> concat(x, y));
 
 				// signal successful retrieval of the filtered container
 
-				response.status(Response.OK).rdf( // !!! re/factor
+				if ( request.query().isEmpty() ) { // base container: convert its shape to RDF and merge into results
 
-						request.query().isEmpty()
+					response.status(Response.OK).rdf(
 
-								// base container: convert its shape to RDF and merge into results
+							union(container.accept(mode(Spec.verify)).accept(new Outliner()), model),
 
-								? union(model, container.accept(mode(Spec.verify)).accept(new Outliner()))
+							or(container, trait(LDP.CONTAINS, resource))
 
-								// filtered container: return selected data
+					);
 
-								: filter instanceof Edges ? model
+				} else if ( filter instanceof Edges ) {
 
-								// introspection query: rewrite query results to the target IRI
+					response.status(Response.OK).rdf(
 
-								: rewrite(model, Spec.meta, focus),
+							union(matches.keySet().stream()
+									.map(item -> statement(focus, LDP.CONTAINS, item))
+									.collect(toList()), model),
 
-						// merge all possible shape elements to properly drive response formatting
+							trait(LDP.CONTAINS, resource)
 
-						or(container, trait(LDP.CONTAINS, resource), StatsShape, ItemsShape)
+					);
 
-				);
+				} else { //introspection query: rewrite query results to the target IRI
+
+					response.status(Response.OK).rdf(
+
+							rewrite(model, Spec.meta, focus),
+							or(StatsShape, ItemsShape)
+
+					);
+
+				}
 
 			}
 		}));

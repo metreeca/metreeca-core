@@ -24,7 +24,6 @@ import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Count;
 import com.metreeca.spec.shifts.Step;
 import com.metreeca.spec.things.Values;
-import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -93,7 +92,7 @@ public final class ShapeCodec {
 
 			final Resource root=model.subjects().stream()
 					.filter(subject -> !model.contains(null, null, subject))
-					.findFirst().orElseThrow(_Cell.Missing);
+					.findFirst().orElseThrow(() -> new IllegalStateException("missing cell value"));
 
 			return decode(root, model);
 

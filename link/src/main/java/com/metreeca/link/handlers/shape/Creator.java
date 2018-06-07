@@ -30,16 +30,14 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import static com.metreeca.link.Handler.error;
 import static com.metreeca.link.Wrapper.wrapper;
 import static com.metreeca.link.wrappers.Transactor.transactor;
-import static com.metreeca.spec.Shape.empty;
-import static com.metreeca.spec.Shape.role;
-import static com.metreeca.spec.Shape.task;
-import static com.metreeca.spec.Shape.view;
+import static com.metreeca.spec.Shape.*;
 import static com.metreeca.spec.sparql.SPARQLEngine.create;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.rewrite;
@@ -211,7 +209,11 @@ public final class Creator extends Shaper {
 				// !!! 409 Conflict https://tools.ietf.org/html/rfc7231#section-6.5.8 for clashing slug?
 
 				final String stem=request.stem();
-				final Collection<Statement> edges=SPARQLEngine.browse(connection, matcher);
+				final Collection<Statement> edges=SPARQLEngine.browse(connection, matcher)
+						.values()
+						.stream()
+						.findFirst()
+						.orElseGet(Collections::emptySet);
 
 				long count=edges.size();
 				IRI iri;
