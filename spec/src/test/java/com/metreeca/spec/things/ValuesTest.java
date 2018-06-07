@@ -17,7 +17,6 @@
 
 package com.metreeca.spec.things;
 
-import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
@@ -30,13 +29,11 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
-import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 import org.junit.ComparisonFailure;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.*;
 
@@ -304,6 +301,31 @@ public final class ValuesTest {
 	}
 
 
+	@SafeVarargs public static Supplier<RepositoryConnection> sandbox(final Iterable<Statement>... datasets) {
+
+		if ( datasets == null ) {
+			throw new NullPointerException("null datasets");
+		}
+
+		final Repository repository=new SailRepository(new MemoryStore());
+
+		repository.initialize();
+
+		try(final RepositoryConnection connection=repository.getConnection()) {
+			for (final Iterable<Statement> dataset : datasets) {
+
+				if ( dataset == null ) {
+					throw new NullPointerException("null dataset");
+				}
+
+				connection.add(dataset);
+			}
+		}
+
+		return repository::getConnection;
+	}
+
+
 	//// Model Assertions //////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -379,76 +401,5 @@ public final class ValuesTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private ValuesTest() {} // a utility class
-
-
-	//// !!! Legacy API ////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final Supplier<Repository> Sandbox=() -> {
-
-		final Repository repository=new SailRepository(new MemoryStore());
-
-		Runtime.getRuntime().addShutdownHook(new Thread(repository::shutDown));
-
-		repository.initialize();
-
-		return repository;
-
-	};
-
-	public static final Supplier<Repository> BIRT=new Supplier<Repository>() {
-
-		private final Repository repository
-				=new SailRepository(new NativeStore(new File(System.getProperty("java.io.tmpdir"), "birt-test")));
-
-		@Override public Repository get() {
-			synchronized ( repository ) {
-
-				if ( !repository.isInitialized() ) {
-
-					Runtime.getRuntime().addShutdownHook(new Thread(repository::shutDown));
-
-					repository.initialize();
-
-					try (final RepositoryConnection connection=repository.getConnection()) {
-
-						if ( connection.isEmpty() ) {
-							connection.add(
-									ValuesTest.class.getResource("ValuesTestLarge.ttl"),
-									Base, RDFFormat.TURTLE, iri(Base));
-						}
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-
-				}
-
-				return repository;
-			}
-		}
-	};
-
-
-	public static <R> R connection(final Supplier<Repository> supplier, final Function<RepositoryConnection, R> task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		try (final RepositoryConnection connection=supplier.get().getConnection()) {
-			try {
-
-				connection.begin(IsolationLevels.SERIALIZABLE);
-
-				return task.apply(connection);
-
-			} finally {
-
-				connection.rollback(); // unconditionally restore initial state
-
-			}
-		}
-
-	}
 
 }

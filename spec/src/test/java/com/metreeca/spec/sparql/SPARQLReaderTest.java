@@ -32,11 +32,15 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.metreeca.spec.Query.decreasing;
 import static com.metreeca.spec.Query.increasing;
@@ -69,6 +73,9 @@ import static java.util.stream.Collectors.toSet;
 
 
 public class SPARQLReaderTest {
+
+	private final Supplier<RepositoryConnection> sandbox=sandbox(large());
+
 
 	//// Edges /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -732,17 +739,24 @@ public class SPARQLReaderTest {
 	}
 
 	private Map<Value, Collection<Statement>> process(final Query query) {
-		return connection(BIRT, connection -> new SPARQLReader(connection).process(query));
+		try ( final RepositoryConnection connection=sandbox.get()) {
+			return new SPARQLReader(connection).process(query);
+		}
 	}
 
 	private Set<Value> focus(final String query) {
-		return connection(BIRT, connection -> select(connection, query)).stream().
-				flatMap(tuple -> tuple.values().stream())
-				.collect(toSet());
+		try ( final RepositoryConnection connection=sandbox.get()) {
+			return select(connection, query)
+					.stream()
+					.flatMap(tuple -> tuple.values().stream())
+					.collect(toSet());
+		}
 	}
 
 	private Collection<Statement> model(final String query) {
-		return connection(BIRT, connection -> construct(connection, query));
+		try ( final RepositoryConnection connection=sandbox.get()) {
+			return construct(connection, query);
+		}
 	}
 
 }

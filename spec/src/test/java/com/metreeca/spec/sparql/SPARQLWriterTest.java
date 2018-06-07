@@ -29,9 +29,11 @@ import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
@@ -51,7 +53,7 @@ import static com.metreeca.spec.things.Sets.set;
 import static com.metreeca.spec.things.Values.bnode;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.literal;
-import static com.metreeca.spec.things.ValuesTest.connection;
+import static com.metreeca.spec.things.ValuesTest.sandbox;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -66,6 +68,9 @@ public class SPARQLWriterTest {
 	private static final IRI x=ValuesTest.item("x");
 	private static final IRI y=ValuesTest.item("y");
 	private static final IRI z=ValuesTest.item("z");
+
+
+	private final Supplier<RepositoryConnection> sandbox=sandbox();
 
 
 	//// Validation ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -497,7 +502,9 @@ public class SPARQLWriterTest {
 	}
 
 	private Report process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
-		return connection(ValuesTest.Sandbox, connection -> new SPARQLWriter(connection).process(shape, statements, focus));
+		try ( final RepositoryConnection connection=sandbox.get()) {
+			return new SPARQLWriter(connection).process(shape, statements, focus);
+		}
 	}
 
 }
