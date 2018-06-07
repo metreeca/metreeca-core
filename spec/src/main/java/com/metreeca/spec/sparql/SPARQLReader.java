@@ -22,7 +22,7 @@ import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Optimizer;
 import com.metreeca.spec.probes.Pruner;
-import com.metreeca.spec.queries.Graph;
+import com.metreeca.spec.queries.Edges;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shifts.Step;
@@ -79,7 +79,7 @@ final class SPARQLReader {
 
 		return query.accept(new Query.Probe<_Cell>() {
 
-			@Override public _Cell visit(final Graph graph) { return graph(graph); }
+			@Override public _Cell visit(final Edges edges) { return graph(edges); }
 
 			@Override public _Cell visit(final Stats stats) { return stats(stats); }
 
@@ -91,12 +91,12 @@ final class SPARQLReader {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Cell graph(final Graph graph) {
+	private _Cell graph(final Edges edges) {
 
-		final Shape shape=graph.getShape();
-		final List<Query.Order> orders=graph.getOrders();
-		final int offset=graph.getOffset();
-		final int limit=graph.getLimit();
+		final Shape shape=edges.getShape();
+		final List<Query.Order> orders=edges.getOrders();
+		final int offset=edges.getOffset();
+		final int limit=edges.getLimit();
 
 		final Object root=0; // root identifier // !!! review
 
@@ -121,7 +121,7 @@ final class SPARQLReader {
 
 				return list(
 
-						"# graph query\f",
+						"# edges query\f",
 
 						prefixes(),
 

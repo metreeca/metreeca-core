@@ -27,7 +27,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 
 
-public final class Graph implements Query { // !!! rename to Edges to avoid clashes? / review docs
+public final class Edges implements Query {
 
 	private final Shape shape;
 
@@ -37,11 +37,11 @@ public final class Graph implements Query { // !!! rename to Edges to avoid clas
 	private final int limit;
 
 
-	public Graph(final Shape shape) {
+	public Edges(final Shape shape) {
 		this(shape, emptyList(), 0, 0);
 	}
 
-	public Graph(final Shape shape, final List<Order> orders, final int offset, final int limit) {
+	public Edges(final Shape shape, final List<Order> orders, final int offset, final int limit) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

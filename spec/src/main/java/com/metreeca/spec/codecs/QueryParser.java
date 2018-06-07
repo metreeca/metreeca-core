@@ -20,7 +20,7 @@ package com.metreeca.spec.codecs;
 import com.metreeca.spec.Query;
 import com.metreeca.spec.Query.Order;
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.queries.Graph;
+import com.metreeca.spec.queries.Edges;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shapes.*;
@@ -100,7 +100,7 @@ import static java.util.stream.Collectors.toList;
 
 		return stats != null ? new Stats(merged, stats)
 				: items != null ? new Items(merged, items)
-				: new Graph(merged, order, offset, limit);
+				: new Edges(merged, order, offset, limit);
 
 	}
 

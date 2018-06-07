@@ -19,7 +19,7 @@ package com.metreeca.spec.codecs;
 
 import com.metreeca.spec.Query;
 import com.metreeca.spec.Shape;
-import com.metreeca.spec.queries.Graph;
+import com.metreeca.spec.queries.Edges;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shapes.Test;
@@ -281,11 +281,11 @@ public class QueryParserTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void graph(final String json, final Shape shape, final Consumer<Graph> tester) {
+	private void graph(final String json, final Shape shape, final Consumer<Edges> tester) {
 		test(json, shape, new Query.Probe<Boolean>() {
-			@Override public Boolean visit(final Graph graph) {
+			@Override public Boolean visit(final Edges edges) {
 
-				tester.accept(graph);
+				tester.accept(edges);
 
 				return true;
 			}

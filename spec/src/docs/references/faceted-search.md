@@ -24,9 +24,9 @@ JSON query serialization extends the idiomatic [JSON](idiomatic-json) format wit
 
 ## Graph Query
 
-[Graph](../apidocs/com/metreeca/spec/queries/Graph.html) queries return the RDF description of container items matching a set of facet filters.
+[Edges](../apidocs/com/metreeca/spec/queries/Edges.html) queries return the RDF description of container items matching a set of facet filters.
 
-    <graph query> ::= { // all fields are optional
+    <edges query> ::= { // all fields are optional
         "filter": <filter>,        
         "order": <criterion> | [<criterion>,(<criterion>)*],
         "offset": <integer>,
@@ -35,7 +35,7 @@ JSON query serialization extends the idiomatic [JSON](idiomatic-json) format wit
     
     <criterion> :;= "[-+]?<path>"
     
-    <graph response> ::= {
+    <edges response> ::= {
         "this": "<target-iri>"
         "contains": [<term>(, <term>)*]
     }

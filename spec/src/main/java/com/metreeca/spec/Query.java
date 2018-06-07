@@ -17,7 +17,7 @@
 
 package com.metreeca.spec;
 
-import com.metreeca.spec.queries.Graph;
+import com.metreeca.spec.queries.Edges;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shifts.Step;
@@ -105,7 +105,7 @@ public interface Query {
 
 	public abstract static class Probe<V> {
 
-		public V visit(final Graph graph) { return fallback(graph); }
+		public V visit(final Edges edges) { return fallback(edges); }
 
 		public V visit(final Stats stats) { return fallback(stats); }
 

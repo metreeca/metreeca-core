@@ -212,7 +212,7 @@ public final class BasicContainer implements Handler {
 	//
 	//		final _Cell cell=request.map(graph).get(filter);
 	//
-	//		if ( filter instanceof com.metreeca.spec.queries.Graph ) {
+	//		if ( filter instanceof com.metreeca.spec.queries.Edges ) {
 	//			cell.reverse(LDP.CONTAINS).insert(target);
 	//		}
 	//
@@ -230,7 +230,7 @@ public final class BasicContainer implements Handler {
 	//
 	//						// filtered container: return selected data
 	//
-	//						: filter instanceof com.metreeca.spec.queries.Graph ? cell.model()
+	//						: filter instanceof com.metreeca.spec.queries.Edges ? cell.model()
 	//
 	//						// introspection query: rewrite query results to the target IRI
 	//

@@ -18,7 +18,7 @@
 package com.metreeca.spec.sparql;
 
 import com.metreeca.spec.*;
-import com.metreeca.spec.queries.Graph;
+import com.metreeca.spec.queries.Edges;
 import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.IsolationLevels;
@@ -58,7 +58,7 @@ public final class SPARQLEngine { // !!! migrate from utility class to processor
 
 
 	public static Collection<Statement> browse(final RepositoryConnection connection, final Shape shape) {
-		return browse(connection, new Graph(shape));
+		return browse(connection, new Edges(shape));
 	}
 
 	public static Collection<Statement> browse(final RepositoryConnection connection, final Query query) {
@@ -76,7 +76,7 @@ public final class SPARQLEngine { // !!! migrate from utility class to processor
 	public static Collection<Statement> relate(
 			final RepositoryConnection connection, final IRI focus, final Shape shape) {
 		return new SPARQLReader(connection)
-				.process(new Graph(and(all(focus), shape)))
+				.process(new Edges(and(all(focus), shape)))
 				.model();
 	}
 

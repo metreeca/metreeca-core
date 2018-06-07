@@ -23,6 +23,7 @@ import com.metreeca.link.Response;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Outliner;
+import com.metreeca.spec.queries.Edges;
 import com.metreeca.spec.things._Cell;
 import com.metreeca.tray.rdf.Graph;
 
@@ -98,7 +99,7 @@ public final class Browser extends Shaper {
 				final _Cell cell=_browse(connection, filter); // !!! remove Cell
 				final Collection<Statement> model=cell.model();
 
-				if ( filter instanceof com.metreeca.spec.queries.Graph ) {
+				if ( filter instanceof Edges ) {
 					cell.reverse(LDP.CONTAINS).insert(focus);
 				}
 
@@ -114,7 +115,7 @@ public final class Browser extends Shaper {
 
 								// filtered container: return selected data
 
-								: filter instanceof com.metreeca.spec.queries.Graph ? model
+								: filter instanceof Edges ? model
 
 								// introspection query: rewrite query results to the target IRI
 

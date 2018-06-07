@@ -20,7 +20,7 @@ package com.metreeca.spec.sparql;
 import com.metreeca.spec.Query;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
-import com.metreeca.spec.queries.Graph;
+import com.metreeca.spec.queries.Edges;
 import com.metreeca.spec.queries.Items;
 import com.metreeca.spec.queries.Stats;
 import com.metreeca.spec.shapes.MaxLength;
@@ -71,9 +71,9 @@ import static java.util.stream.Collectors.toSet;
 
 public class SPARQLReaderTest {
 
-	//// Graph /////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Edges /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testGraphEmptyShape() {
+	@Test public void testEdgesEmptyShape() {
 
 		final _Cell cell=graph(and());
 
@@ -82,7 +82,7 @@ public class SPARQLReaderTest {
 
 	}
 
-	@Test public void testGraphEmptyResultSet() {
+	@Test public void testEdgesEmptyResultSet() {
 
 		final _Cell cell=graph(trait(RDF.TYPE, all(RDF.NIL)));
 
@@ -91,7 +91,7 @@ public class SPARQLReaderTest {
 
 	}
 
-	@Test public void testGraphEmptyProjection() {
+	@Test public void testEdgesEmptyProjection() {
 
 		final _Cell cell=graph(clazz(term("Product")));
 
@@ -105,7 +105,7 @@ public class SPARQLReaderTest {
 
 	}
 
-	@Test public void testGraphMatching() {
+	@Test public void testEdgesMatching() {
 
 		final _Cell cell=graph(trait(RDF.TYPE, all(term("Product"))));
 
@@ -123,7 +123,7 @@ public class SPARQLReaderTest {
 
 	}
 
-	@Test public void testGraphSorting() {
+	@Test public void testEdgesSorting() {
 
 		final String query="construct { ?product a :Product }"
 				+" where { ?product a :Product; rdfs:label ?label; :line ?line }";
@@ -712,7 +712,7 @@ public class SPARQLReaderTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private _Cell graph(final Shape shape, final Query.Order... orders) {
-		return process(new Graph(shape, list(orders), 0, 0));
+		return process(new Edges(shape, list(orders), 0, 0));
 	}
 
 	private _Cell stats(final Shape shape, final Step... path) {

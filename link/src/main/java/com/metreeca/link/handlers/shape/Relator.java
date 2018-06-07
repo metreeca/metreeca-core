@@ -23,6 +23,7 @@ import com.metreeca.link.Response;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.Spec;
 import com.metreeca.spec.probes.Outliner;
+import com.metreeca.spec.queries.Edges;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -136,7 +137,7 @@ public final class Relator extends Shaper {
 
 												// filtered resource: return selected data
 
-												: query instanceof com.metreeca.spec.queries.Graph ? piped
+												: query instanceof Edges ? piped
 
 												// introspection query: rewrite query results to the target IRI
 
