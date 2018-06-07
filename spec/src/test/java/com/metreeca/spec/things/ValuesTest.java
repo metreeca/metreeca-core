@@ -47,6 +47,29 @@ import static java.util.stream.Collectors.joining;
 
 public final class ValuesTest {
 
+	static { // logging not configured: reset and enable fine console logging
+
+		if ( System.getProperty("java.util.logging.config.file") == null
+				&& System.getProperty("java.util.logging.config.class") == null ) {
+
+			final Level level=Level.FINE;
+
+			LogManager.getLogManager().reset();
+
+			final ConsoleHandler handler=new ConsoleHandler();
+
+			handler.setLevel(level);
+
+			final Logger logger=Logger.getLogger("");
+
+			logger.setLevel(level);
+			logger.addHandler(handler);
+
+		}
+
+	}
+
+
 	private static final Logger logger=Logger.getLogger(ValuesTest.class.getName());
 
 
@@ -75,33 +98,7 @@ public final class ValuesTest {
 	private static final Map<String, Model> DatasetCache=new HashMap<>();
 
 
-	static { // logging not configured: reset and enable fine console logging
-
-		if ( System.getProperty("java.util.logging.config.file") == null
-				&& System.getProperty("java.util.logging.config.class") == null ) {
-
-			final Level level=Level.FINE;
-
-			LogManager.getLogManager().reset();
-
-			final ConsoleHandler handler=new ConsoleHandler();
-
-			handler.setLevel(level);
-
-			final Logger logger=Logger.getLogger("");
-
-			logger.setLevel(level);
-			logger.addHandler(handler);
-
-		}
-
-	}
-
-
-	private ValuesTest() {} // a utility class
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static IRI term(final String name) {
 
@@ -122,22 +119,22 @@ public final class ValuesTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Datasets //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Model small() {
-		return graph(ValuesTest.class.getResource("ValuesTestSmall.ttl"));
+		return dataset(ValuesTest.class.getResource("ValuesTestSmall.ttl"));
 	}
 
 	public static Model large() {
-		return graph(ValuesTest.class.getResource("ValuesTestLarge.ttl"));
+		return dataset(ValuesTest.class.getResource("ValuesTestLarge.ttl"));
 	}
 
 
-	public static Model graph(final Class<?> master) {
-		return graph(master, Base);
+	public static Model dataset(final Class<?> master) {
+		return dataset(master, Base);
 	}
 
-	public static Model graph(final Class<?> master, final String base) {
+	public static Model dataset(final Class<?> master, final String base) {
 
 		if ( master == null ) {
 			throw new NullPointerException("null master");
@@ -154,15 +151,15 @@ public final class ValuesTest {
 			throw new MissingResourceException("dataset", master.getName(), name);
 		}
 
-		return graph(url, base);
+		return dataset(url, base);
 	}
 
 
-	public static Model graph(final URL resource) {
-		return graph(resource, Base);
+	public static Model dataset(final URL resource) {
+		return dataset(resource, Base);
 	}
 
-	public static Model graph(final URL resource, final String base) {
+	public static Model dataset(final URL resource, final String base) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");
@@ -173,8 +170,8 @@ public final class ValuesTest {
 		}
 
 		return DatasetCache.computeIfAbsent(resource.toExternalForm(), key -> {
-			try {
-				return Rio.parse(resource.openStream(), base, RDFFormat.TURTLE).unmodifiable();
+			try (final InputStream input=resource.openStream()) {
+				return Rio.parse(input, base, RDFFormat.TURTLE).unmodifiable();
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
@@ -182,26 +179,21 @@ public final class ValuesTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// RDF Codecs ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static String turtle(final String turtle) {
-		return TurtlePrefixes+"\n\n"+turtle;
+	public static Model decode(final String rdf) {
+		return decode(rdf, Base);
 	}
 
-
-	public static Model parse(final String rdf) {
-		return parse(rdf, Base);
+	public static Model decode(final String rdf, final String base) {
+		return decode(rdf, base, RDFFormat.TURTLE);
 	}
 
-	public static Model parse(final String rdf, final String base) {
-		return parse(rdf, base, RDFFormat.TURTLE);
+	public static Model decode(final String rdf, final RDFFormat format) {
+		return decode(rdf, Base, format);
 	}
 
-	public static Model parse(final String rdf, final RDFFormat format) {
-		return parse(rdf, Base, format);
-	}
-
-	public static Model parse(final String rdf, final String base, final RDFFormat format) { // includes default base/prefixes
+	public static Model decode(final String rdf, final String base, final RDFFormat format) { // includes default base/prefixes
 
 		if ( rdf == null ) {
 			throw new NullPointerException("null rdf");
@@ -217,7 +209,7 @@ public final class ValuesTest {
 
 			parser.setPreserveBNodeIDs(true);
 			parser.setRDFHandler(collector);
-			parser.parse(new StringReader(format.equals(RDFFormat.TURTLE) ? turtle(rdf) : rdf), base);
+			parser.parse(new StringReader(format.equals(RDFFormat.TURTLE) ? TurtlePrefixes+"\n\n"+rdf : rdf), base);
 
 			return new LinkedHashModel(collector.getStatements());
 
@@ -227,11 +219,11 @@ public final class ValuesTest {
 	}
 
 
-	public static String write(final Iterable<Statement> model) {
-		return write(model, RDFFormat.TURTLE);
+	public static String encode(final Iterable<Statement> model) {
+		return encode(model, RDFFormat.TURTLE);
 	}
 
-	public static String write(final Iterable<Statement> model, final RDFFormat format) {
+	public static String encode(final Iterable<Statement> model, final RDFFormat format) {
 
 		final StringWriter writer=new StringWriter();
 
@@ -241,7 +233,7 @@ public final class ValuesTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Graph Operations //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String sparql(final String sparql) {
 		return SPARQLPrefixes+"\n\n"+sparql; // !!! avoid prefix clashes
@@ -249,15 +241,6 @@ public final class ValuesTest {
 
 
 	public static List<Map<String, Value>> select(final RepositoryConnection connection, final String sparql) {
-		return select(connection, RDF.NIL, sparql);
-	}
-
-	public static Model construct(final RepositoryConnection connection, final String sparql) {
-		return construct(connection, RDF.NIL, sparql);
-	}
-
-
-	public static List<Map<String, Value>> select(final RepositoryConnection connection, final Value focus, final String sparql) {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
@@ -265,22 +248,21 @@ public final class ValuesTest {
 
 			final List<Map<String, Value>> tuples=new ArrayList<>();
 
-			final TupleQuery query=connection.prepareTupleQuery(QueryLanguage.SPARQL, sparql(sparql), Base);
+			connection
+					.prepareTupleQuery(QueryLanguage.SPARQL, sparql(sparql), Base)
+					.evaluate(new AbstractTupleQueryResultHandler() {
+						@Override public void handleSolution(final BindingSet bindings) {
 
-			query.setBinding("this", focus);
-			query.evaluate(new AbstractTupleQueryResultHandler() {
-				@Override public void handleSolution(final BindingSet bindings) {
+							final Map<String, Value> tuple=new LinkedHashMap<>();
 
-					final Map<String, Value> tuple=new LinkedHashMap<>();
+							for (final Binding binding : bindings) {
+								tuple.put(binding.getName(), binding.getValue());
+							}
 
-					for (final Binding binding : bindings) {
-						tuple.put(binding.getName(), binding.getValue());
-					}
+							tuples.add(tuple);
 
-					tuples.add(tuple);
-
-				}
-			});
+						}
+					});
 
 			return tuples;
 
@@ -291,7 +273,7 @@ public final class ValuesTest {
 		}
 	}
 
-	public static Model construct(final RepositoryConnection connection, final Value focus, final String sparql) {
+	public static Model construct(final RepositoryConnection connection, final String sparql) {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
@@ -299,10 +281,9 @@ public final class ValuesTest {
 
 			final Model model=new LinkedHashModel();
 
-			final GraphQuery query=connection.prepareGraphQuery(QueryLanguage.SPARQL, sparql(sparql), Base);
-
-			query.setBinding("this", focus);
-			query.evaluate(new StatementCollector(model));
+			connection
+					.prepareGraphQuery(QueryLanguage.SPARQL, sparql(sparql), Base)
+					.evaluate(new StatementCollector(model));
 
 			return model;
 
@@ -312,7 +293,6 @@ public final class ValuesTest {
 
 		}
 	}
-
 
 	public static Model export(final RepositoryConnection connection, final Resource... contexts) {
 
@@ -324,13 +304,13 @@ public final class ValuesTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Model Assertions //////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Asserts that expected and actual statement sequences are isomorphic.
+	 * Asserts that expected and actual statement collections are isomorphic.
 	 *
-	 * @param expected the expected statement sequence
-	 * @param actual   the actual statement sequence
+	 * @param expected the expected statement collection
+	 * @param actual   the actual statement collection
 	 */
 	public static void assertIsomorphic(
 			final Collection<Statement> expected, final Collection<Statement> actual) {
@@ -355,17 +335,17 @@ public final class ValuesTest {
 		if ( !Models.isomorphic(expected, actual) ) {
 			throw new ComparisonFailure(
 					message+(message.isEmpty() ? "" : ": ")+"not isomorphic",
-					write(new TreeModel(expected), RDFFormat.NTRIPLES),
-					write(new TreeModel(actual), RDFFormat.NTRIPLES));
+					encode(new TreeModel(expected), RDFFormat.NTRIPLES),
+					encode(new TreeModel(actual), RDFFormat.NTRIPLES));
 		}
 	}
 
 
 	/**
-	 * Asserts that the expected statement sequence is a subset of the actual one.
+	 * Asserts that the expected statement collection is a subset of the actual one.
 	 *
-	 * @param expected the expected statement sequence
-	 * @param actual   the actual statement sequence
+	 * @param expected the expected statement collection
+	 * @param actual   the actual statement collection
 	 */
 	public static void assertSubset(
 			final Collection<Statement> expected, final Collection<Statement> actual) {
@@ -390,10 +370,15 @@ public final class ValuesTest {
 		if ( !Models.isSubset(expected, actual) ) {
 			throw new ComparisonFailure(
 					message+(message.isEmpty() ? "" : ": ")+"not subsumed",
-					write(new TreeModel(expected), RDFFormat.NTRIPLES),
-					write(new TreeModel(actual), RDFFormat.NTRIPLES));
+					encode(new TreeModel(expected), RDFFormat.NTRIPLES),
+					encode(new TreeModel(actual), RDFFormat.NTRIPLES));
 		}
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private ValuesTest() {} // a utility class
 
 
 	//// !!! Legacy API ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -444,57 +429,26 @@ public final class ValuesTest {
 	};
 
 
-	public static List<Map<String, Value>> select(final Supplier<Repository> supplier, final String query) {
-		return connection(supplier, connection -> select(connection, query));
-	}
-
-
-	public static Model construct(final Supplier<Repository> supplier, final String query) {
-		return connection(supplier, connection -> construct(connection, query));
-	}
-
-
-	public static <R> R repository(final Function<Repository, R> task) {
-		return repository(Sandbox, task);
-	}
-
-	public static <R> R connection(final Function<RepositoryConnection, R> task) {
-		return connection(Sandbox, task);
-	}
-
-
-	public static <R> R repository(final Supplier<Repository> supplier, final Function<Repository, R> task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		return task.apply(supplier.get());
-	}
-
 	public static <R> R connection(final Supplier<Repository> supplier, final Function<RepositoryConnection, R> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
 		}
 
-		return repository(supplier, repository -> {
+		try (final RepositoryConnection connection=supplier.get().getConnection()) {
+			try {
 
-			try (final RepositoryConnection connection=repository.getConnection()) {
-				try {
+				connection.begin(IsolationLevels.SERIALIZABLE);
 
-					connection.begin(IsolationLevels.SERIALIZABLE);
+				return task.apply(connection);
 
-					return task.apply(connection);
+			} finally {
 
-				} finally {
+				connection.rollback(); // unconditionally restore initial state
 
-					connection.rollback(); // unconditionally restore initial state
-
-				}
 			}
+		}
 
-		});
 	}
 
 }

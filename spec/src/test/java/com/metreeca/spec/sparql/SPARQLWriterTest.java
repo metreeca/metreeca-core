@@ -42,6 +42,7 @@ import static com.metreeca.spec.shapes.In.in;
 import static com.metreeca.spec.shapes.Like.like;
 import static com.metreeca.spec.shapes.MaxCount.maxCount;
 import static com.metreeca.spec.shapes.MaxExclusive.maxExclusive;
+import static com.metreeca.spec.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.spec.shapes.MinExclusive.minExclusive;
 import static com.metreeca.spec.shapes.Test.test;
 import static com.metreeca.spec.shapes.Trait.trait;
@@ -50,7 +51,7 @@ import static com.metreeca.spec.things.Sets.set;
 import static com.metreeca.spec.things.Values.bnode;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.literal;
-import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.connection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -71,7 +72,7 @@ public class SPARQLWriterTest {
 
 	@Test public void testGenerateTraceNodes() {
 
-		final Shape shape=MaxInclusive.maxInclusive(literal(10));
+		final Shape shape=maxInclusive(literal(10));
 
 		final Report report=process(shape, literal(1), literal(100));
 		final Collection<Issue> issues=report.getIssues();
@@ -113,7 +114,7 @@ public class SPARQLWriterTest {
 	@Test public void testOutlineClasses() {
 
 		final Shape shape=clazz(RDFS.RESOURCE);
-		final Model model=parse("rdf:first a rdfs:Resource.");
+		final Model model=ValuesTest.decode("rdf:first a rdfs:Resource.");
 
 		final Report report=process(shape, model, RDF.FIRST);
 
@@ -125,7 +126,7 @@ public class SPARQLWriterTest {
 	@Test public void testOutlineDirectEdgeTraits() {
 
 		final Shape shape=trait(step(RDF.VALUE), any(RDF.NIL));
-		final Model model=parse("<x> rdf:value rdf:nil. <y> rdf:value rdf:nil.");
+		final Model model=ValuesTest.decode("<x> rdf:value rdf:nil. <y> rdf:value rdf:nil.");
 
 		final Report report=process(shape, model, x, y);
 
@@ -137,7 +138,7 @@ public class SPARQLWriterTest {
 	@Test public void testOutlineInverseEdgeTraits() {
 
 		final Shape shape=trait(step(RDF.VALUE, true), any(RDF.NIL));
-		final Model model=parse("rdf:nil rdf:value <x>. rdf:nil rdf:value <y>.");
+		final Model model=ValuesTest.decode("rdf:nil rdf:value <x>. rdf:nil rdf:value <y>.");
 
 		final Report report=process(shape, model, x, y);
 
@@ -151,7 +152,7 @@ public class SPARQLWriterTest {
 	@Test public void testOutlineMultipleObjects() {
 
 		final Shape shape=trait(step(RDF.VALUE), and());
-		final Model model=parse("<x> rdf:value rdf:first, rdf:rest. <y> rdf:value rdf:first, rdf:rest.");
+		final Model model=ValuesTest.decode("<x> rdf:value rdf:first, rdf:rest. <y> rdf:value rdf:first, rdf:rest.");
 
 		final Report report=process(shape, model, x, y);
 
@@ -163,7 +164,7 @@ public class SPARQLWriterTest {
 	@Test public void testOutlineMultipleSources() {
 
 		final Shape shape=trait(step(RDF.VALUE, true), and());
-		final Model model=parse(
+		final Model model=ValuesTest.decode(
 				"rdf:first rdf:value <x>. rdf:rest rdf:value <x>. rdf:first rdf:value <y>. rdf:rest rdf:value <y>."
 		);
 
@@ -181,7 +182,7 @@ public class SPARQLWriterTest {
 				trait(step(RDF.REST), and())
 		);
 
-		final Model model=parse(
+		final Model model=ValuesTest.decode(
 				"<x> rdf:first rdf:value; rdf:rest rdf:value . <y> rdf:first rdf:value; rdf:rest rdf:value .");
 
 		final Report report=process(shape, model, x, y);
@@ -198,7 +199,7 @@ public class SPARQLWriterTest {
 				trait(step(RDF.REST, true), and())
 		);
 
-		final Model model=parse(
+		final Model model=ValuesTest.decode(
 				"rdf:value rdf:first <x>. rdf:value rdf:rest <x>. rdf:value rdf:first <y>. rdf:value rdf:rest <y>.");
 
 		final Report report=process(shape, model, x, y);
@@ -215,7 +216,7 @@ public class SPARQLWriterTest {
 				trait(step(RDF.REST, true), and())
 		);
 
-		final Model model=parse(""
+		final Model model=ValuesTest.decode(""
 				+"rdf:first rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest ."
 				+"rdf:rest rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest ."
 		);
@@ -301,7 +302,7 @@ public class SPARQLWriterTest {
 	@Test public void testValidateClazz() {
 
 		final Shape shape=clazz(z);
-		final Model model=parse("<x> a <y>. <y> rdfs:subClassOf <z>.");
+		final Model model=ValuesTest.decode("<x> a <y>. <y> rdfs:subClassOf <z>.");
 
 		assertTrue("pass", validate(shape, model, x));
 		assertFalse("fail", validate(shape, model, y));
@@ -341,7 +342,7 @@ public class SPARQLWriterTest {
 
 	@Test public void testValidateMaxInclusive() {
 
-		final Shape shape=MaxInclusive.maxInclusive(literal(10));
+		final Shape shape=maxInclusive(literal(10));
 
 		assertTrue("integer / pass", validate(shape, literal(2)));
 		assertTrue("integer / pass / equal", validate(shape, literal(10)));
@@ -404,7 +405,7 @@ public class SPARQLWriterTest {
 		final Shape shape=Custom.custom(Issue.Level.Error, "test custom shape",
 				"select * { filter not exists { ?this rdf:value rdf:first } }");
 
-		final Model model=parse(""
+		final Model model=ValuesTest.decode(""
 				+"<x> rdf:value rdf:first.\n"
 				+"<y> rdf:value rdf:first, rdf:rest.\n"
 				+"<z> rdf:value rdf:rest. ");
@@ -496,7 +497,7 @@ public class SPARQLWriterTest {
 	}
 
 	private Report process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
-		return ValuesTest.connection(connection -> new SPARQLWriter(connection).process(shape, statements, focus));
+		return connection(ValuesTest.Sandbox, connection -> new SPARQLWriter(connection).process(shape, statements, focus));
 	}
 
 }

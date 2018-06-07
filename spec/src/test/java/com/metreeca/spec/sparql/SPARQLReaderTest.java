@@ -36,9 +36,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.metreeca.spec.Query.decreasing;
 import static com.metreeca.spec.Query.increasing;
@@ -738,11 +736,13 @@ public class SPARQLReaderTest {
 	}
 
 	private Set<Value> focus(final String query) {
-		return select(BIRT, query).stream().flatMap(tuple -> tuple.values().stream()).collect(toSet());
+		return connection(BIRT, connection -> select(connection, query)).stream().
+				flatMap(tuple -> tuple.values().stream())
+				.collect(toSet());
 	}
 
 	private Collection<Statement> model(final String query) {
-		return construct(BIRT, query);
+		return connection(BIRT, connection -> construct(connection, query));
 	}
 
 }

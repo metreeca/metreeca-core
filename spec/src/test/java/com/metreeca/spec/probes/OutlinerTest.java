@@ -18,6 +18,7 @@
 package com.metreeca.spec.probes;
 
 import com.metreeca.spec.Shape;
+import com.metreeca.spec.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -31,7 +32,7 @@ import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Clazz.clazz;
 import static com.metreeca.spec.shapes.Trait.trait;
-import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.decode;
 
 import static org.junit.Assert.assertEquals;
 
@@ -40,31 +41,31 @@ public class OutlinerTest {
 
 	@Test public void testOutlineClasses() {
 		assertEquals("classes",
-				parse("rdf:first a rdfs:Resource."),
+				ValuesTest.decode("rdf:first a rdfs:Resource."),
 				outline(and(all(RDF.FIRST), clazz(RDFS.RESOURCE))));
 	}
 
 	@Test public void testOutlineSubjectExistentials() {
 		assertEquals("subject existentials",
-				parse("rdf:first rdf:value rdf:nil. rdf:rest rdf:value rdf:nil."),
+				ValuesTest.decode("rdf:first rdf:value rdf:nil. rdf:rest rdf:value rdf:nil."),
 				outline(and(all(RDF.FIRST, RDF.REST), trait(RDF.VALUE, all(RDF.NIL)))));
 	}
 
 	@Test public void testOutlineObjectExistentials() {
 		assertEquals("object existentials",
-				parse("rdf:nil rdf:value rdf:first, rdf:rest."),
+				ValuesTest.decode("rdf:nil rdf:value rdf:first, rdf:rest."),
 				outline(and(all(RDF.NIL), trait(RDF.VALUE, all(RDF.FIRST, RDF.REST)))));
 	}
 
 	@Test public void testOutlineConjunctions() {
 		assertEquals("value union",
-				parse("rdf:nil rdf:value rdf:first."),
+				ValuesTest.decode("rdf:nil rdf:value rdf:first."),
 				outline(and(all(RDF.NIL), and(trait(RDF.VALUE, all(RDF.FIRST))))));
 	}
 
 	@Test public void testOutlineNestedConjunctions() {
 		assertEquals("value union",
-				parse("rdf:nil rdf:value rdf:first, rdf:rest."),
+				ValuesTest.decode("rdf:nil rdf:value rdf:first, rdf:rest."),
 				outline(and(all(RDF.NIL), trait(RDF.VALUE, and(all(RDF.FIRST), all(RDF.REST))))));
 	}
 

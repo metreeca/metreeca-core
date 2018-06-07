@@ -20,6 +20,7 @@ package com.metreeca.spec.codecs;
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.shapes.Or;
 import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -45,7 +46,7 @@ import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.shifts.Step.step;
 import static com.metreeca.spec.things.Values.bnode;
 import static com.metreeca.spec.things.Values.iri;
-import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.decode;
 import static com.metreeca.spec.things.ValuesTest.term;
 
 import static org.junit.Assert.assertEquals;
@@ -58,7 +59,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 	@Test public void testNoObjects() {
 		assertEquals("no objects",
 				json(array()),
-				json(parse("")));
+				json(ValuesTest.decode("")));
 	}
 
 	@Test public void testBlankObjects() {
@@ -67,7 +68,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						field("this", "_:x"),
 						field(value, array("x"))
 				))),
-				json(parse("_:x rdf:value 'x'.")));
+				json(ValuesTest.decode("_:x rdf:value 'x'.")));
 	}
 
 	@Test public void testNamedObjects() {
@@ -76,32 +77,32 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						field("this", "http://example.com/x"),
 						field(value, array("x"))
 				))),
-				json(parse("<x> rdf:value 'x'.")));
+				json(ValuesTest.decode("<x> rdf:value 'x'.")));
 	}
 
 	@Test public void testTypedObjects() {
 
-		assertEquivalent("boolean", json(blanks(true)), json(parse("_:focus rdf:value true .")));
-		assertEquivalent("string", json(blanks("string")), json(parse("[] rdf:value 'string' .")));
-		assertEquivalent("integer", json(blanks(BigInteger.ONE)), json(parse("[] rdf:value 1 .")));
-		assertEquivalent("decimal", json(blanks(new BigDecimal("1.0"))), json(parse("[] rdf:value 1.0 .")));
-		assertEquivalent("double", json(blanks(1.0)), json(parse("[] rdf:value 1e0 .")));
+		assertEquivalent("boolean", json(blanks(true)), json(ValuesTest.decode("_:focus rdf:value true .")));
+		assertEquivalent("string", json(blanks("string")), json(ValuesTest.decode("[] rdf:value 'string' .")));
+		assertEquivalent("integer", json(blanks(BigInteger.ONE)), json(ValuesTest.decode("[] rdf:value 1 .")));
+		assertEquivalent("decimal", json(blanks(new BigDecimal("1.0"))), json(ValuesTest.decode("[] rdf:value 1.0 .")));
+		assertEquivalent("double", json(blanks(1.0)), json(ValuesTest.decode("[] rdf:value 1e0 .")));
 
 		assertEquivalent("numeric",
 				json(blanks(object(field("text", "1"), field("type", XMLSchema.INT.stringValue())))),
-				json(parse("[] rdf:value '1'^^xsd:int .")));
+				json(ValuesTest.decode("[] rdf:value '1'^^xsd:int .")));
 
 		assertEquivalent("custom",
 				json(blanks(object(field("text", "text"), field("type", term("type").stringValue())))),
-				json(parse("[] rdf:value 'text'^^:type .")));
+				json(ValuesTest.decode("[] rdf:value 'text'^^:type .")));
 
 		assertEquivalent("tagged",
 				json(blanks(object(field("text", "text"), field("lang", "en")))),
-				json(parse("[] rdf:value 'text'@en .")));
+				json(ValuesTest.decode("[] rdf:value 'text'@en .")));
 
 		assertEquivalent("malformed",
 				json(blanks(object(field("text", "malformed"), field("type", XMLSchema.BOOLEAN.stringValue())))),
-				json(parse("[] rdf:value 'malformed'^^xsd:boolean .")));
+				json(ValuesTest.decode("[] rdf:value 'malformed'^^xsd:boolean .")));
 
 	}
 
@@ -115,7 +116,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						field(value, array("x"))
 				)),
 				json(
-						parse("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
+						ValuesTest.decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
 						iri("http://example.com/x")
 				));
 	}
@@ -124,7 +125,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("unknown focus",
 				json(object()),
 				json(
-						parse("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
+						ValuesTest.decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
 						bnode()
 				));
 	}
@@ -148,7 +149,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						))
 				)),
 				json(
-						parse("<x> rdf:value <w>, <y>. <w> rdf:value <z>. <y> rdf:value <z>."),
+						ValuesTest.decode("<x> rdf:value <w>, <y>. <w> rdf:value <z>. <y> rdf:value <z>."),
 						iri("http://example.com/x")
 				));
 	}
@@ -165,7 +166,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						))
 				)),
 				json(
-						parse("<x> rdf:value <y>. <y> rdf:value <x>."),
+						ValuesTest.decode("<x> rdf:value <y>. <y> rdf:value <x>."),
 						iri("http://example.com/x")
 				));
 	}
@@ -182,7 +183,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						))
 				)),
 				json(
-						parse("_:x rdf:value _:y. _:y rdf:value _:x."),
+						ValuesTest.decode("_:x rdf:value _:y. _:y rdf:value _:x."),
 						bnode("x")
 				));
 	}
@@ -195,7 +196,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("direct inferred",
 				json(object(field("value", array(object())))),
 				json(
-						parse("_:x rdf:value _:y ."),
+						ValuesTest.decode("_:x rdf:value _:y ."),
 						bnode("x"),
 						trait(RDF.VALUE)
 				));
@@ -203,7 +204,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("inverse inferred",
 				json(object(field("valueOf", array(object())))),
 				json(
-						parse("_:y rdf:value _:x ."),
+						ValuesTest.decode("_:y rdf:value _:x ."),
 						bnode("x"),
 						trait(step(RDF.VALUE, true))
 				));
@@ -211,7 +212,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("user-defined",
 				json(object(field("alias", array(object())))),
 				json(
-						parse("_:x rdf:value _:y ."),
+						ValuesTest.decode("_:x rdf:value _:y ."),
 						bnode("x"),
 						trait(RDF.VALUE, alias("alias"))
 				));
@@ -223,7 +224,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("aliased nested trait",
 				json(object(field("value", array(object(field("alias", array(object()))))))),
 				json(
-						parse("_:x rdf:value [rdf:value _:y] ."),
+						ValuesTest.decode("_:x rdf:value [rdf:value _:y] ."),
 						bnode("x"),
 						trait(RDF.VALUE, trait(step(RDF.VALUE), alias("alias")))
 				));
@@ -237,7 +238,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						field(term("value").stringValue(), array(object()))
 				)),
 				json(
-						parse("_:x rdf:value _:y; :value _:z."),
+						ValuesTest.decode("_:x rdf:value _:y; :value _:z."),
 						bnode("x"),
 						and(
 								trait(RDF.VALUE),
@@ -250,7 +251,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("reserved alias",
 				json(object(field("value", array(object())))),
 				json(
-						parse("_:x rdf:value _:y ."),
+						ValuesTest.decode("_:x rdf:value _:y ."),
 						bnode("x"),
 						trait(RDF.VALUE, alias("this"))
 				));
@@ -266,7 +267,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						field("rest", "y")
 				)),
 				json(
-						parse("_:focus rdf:first 'x'; rdf:rest 'y'."), // invalid shape (forces content on both branches)
+						ValuesTest.decode("_:focus rdf:first 'x'; rdf:rest 'y'."), // invalid shape (forces content on both branches)
 						bnode("focus"),
 						Or.or(
 								trait(RDF.FIRST, required()),
@@ -284,7 +285,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						)))
 				)),
 				json(
-						parse("<y> rdf:value <x> ."),
+						ValuesTest.decode("<y> rdf:value <x> ."),
 						iri("http://example.com/x"),
 						trait(step(RDF.VALUE, true))
 				));
@@ -294,7 +295,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("blank reverse links",
 				json(object(field("valueOf", array(object())))),
 				json(
-						parse("_:y rdf:value _:x ."),
+						ValuesTest.decode("_:y rdf:value _:x ."),
 						bnode("x"),
 						trait(step(RDF.VALUE, true))
 				));
@@ -304,7 +305,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("omitted empty array",
 				json(object()),
 				json(
-						parse("_:focus rdf:value 'x'."),
+						ValuesTest.decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
 						trait(RDF.TYPE, required())
 				));
@@ -315,7 +316,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("omitted empty array",
 				json(object()),
 				json(
-						parse("_:focus rdf:value 'x'."),
+						ValuesTest.decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
 						trait(RDF.TYPE)
 				));
@@ -326,7 +327,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("simplified unrepeatable value",
 				json(object(field("value", "x"))),
 				json(
-						parse("_:focus rdf:value 'x'."),
+						ValuesTest.decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
 						trait(RDF.VALUE, maxCount(1))
 				));
@@ -336,7 +337,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("simplified leaf IRI",
 				json(object(field("value", RDF.NIL.stringValue()))),
 				json(
-						parse("_:focus rdf:value rdf:nil."),
+						ValuesTest.decode("_:focus rdf:value rdf:nil."),
 						bnode("focus"),
 						trait(RDF.VALUE, and(datatype(Values.IRIType), maxCount(1)))
 				));
@@ -346,7 +347,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquivalent("simplified literal with known datatype",
 				json(object(field("value", "2016-08-11"))),
 				json(
-						parse("_:focus rdf:value '2016-08-11'^^xsd:date."),
+						ValuesTest.decode("_:focus rdf:value '2016-08-11'^^xsd:date."),
 						bnode("focus"),
 						trait(RDF.VALUE, and(datatype(XMLSchema.DATE), maxCount(1)))
 				));
@@ -357,7 +358,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 		assertEquals("unreferenced proved blank",
 				json(object(field("value", array(object())))),
 				json(
-						parse("_:x rdf:value _:y ."),
+						ValuesTest.decode("_:x rdf:value _:y ."),
 						bnode("x"),
 						and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
 				));
@@ -367,7 +368,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 						field("this", "_:x"),
 						field("value", array(object(field("this", "_:x")))))),
 				json(
-						parse("_:x rdf:value _:x ."),
+						ValuesTest.decode("_:x rdf:value _:x ."),
 						bnode("x"),
 						and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
 				));

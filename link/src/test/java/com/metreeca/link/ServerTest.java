@@ -19,6 +19,7 @@ package com.metreeca.link;
 
 import com.metreeca.spec.Shape;
 import com.metreeca.spec.things.Values;
+import com.metreeca.spec.things.ValuesTest;
 import com.metreeca.spec.things._JSON;
 import com.metreeca.tray.sys.Setup;
 
@@ -37,7 +38,6 @@ import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
-import static com.metreeca.spec.things.ValuesTest.write;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertEquals;
@@ -129,7 +129,7 @@ public class ServerTest {
 						.base(External)
 						.path("/s")
 
-						.text(write(singleton(external("s", "p", "o")))))
+						.text(ValuesTest.encode(singleton(external("s", "p", "o")))))
 
 				.handler(() -> server((request, response) -> {
 

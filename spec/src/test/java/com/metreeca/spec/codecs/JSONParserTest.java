@@ -44,7 +44,7 @@ import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.shapes.Datatype.datatype;
 import static com.metreeca.spec.shapes.Trait.trait;
 import static com.metreeca.spec.things.Values.*;
-import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.decode;
 import static com.metreeca.spec.things.ValuesTest.term;
 
 import static org.junit.Assert.assertEquals;
@@ -61,22 +61,22 @@ public final class JSONParserTest extends JSONAdapterTest {
 	//// Objects ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test public void testNoObjects() {
-		assertEquals("empty object", parse(""), rdf(object()));
-		assertEquals("empty array", parse(""), rdf(array()));
+		assertEquals("empty object", ValuesTest.decode(""), rdf(object()));
+		assertEquals("empty array", ValuesTest.decode(""), rdf(array()));
 	}
 
 	@Test public void testBlankObjects() {
 
 		assertEquals("blank object",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(blanks(object(field("this", "_:x")))));
 
 		assertEquals("empty id blank object",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(blanks(object(field("this", "")))));
 
 		assertEquals("null id blank object",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(blanks(object(field("this", null)))));
 
 		assertTrue("preserve bnode id", rdf(blanks(object(field("this", "_:x")))).stream()
@@ -91,7 +91,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 	@Test public void testNamedObjects() {
 
 		assertEquals("named objects with naked predicate IRIs",
-				parse("<x> rdf:value <y>. <z> rdf:value <x>."),
+				ValuesTest.decode("<x> rdf:value <y>. <z> rdf:value <x>."),
 				rdf(object(
 						field("this", "http://example.com/x"),
 						field(value, object(field("this", "http://example.com/y"))),
@@ -99,7 +99,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 				)));
 
 		assertEquals("named objects with bracketed predicate IRIs",
-				parse("<x> rdf:value <y>. <z> rdf:value <x>."),
+				ValuesTest.decode("<x> rdf:value <y>. <z> rdf:value <x>."),
 				rdf(object(
 						field("this", "http://example.com/x"),
 						field("<"+value+">", object(field("this", "http://example.com/y"))),
@@ -110,26 +110,26 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testTypedObjects() {
 
-		assertEquals("null", parse(""), rdf(blanks((Object)null)));
-		assertEquals("boolean", parse("[] rdf:value true ."), rdf(blanks(true)));
-		assertEquals("string", parse("[] rdf:value 'string' ."), rdf(blanks("string")));
-		assertEquals("decimal", parse("[] rdf:value 1.0 ."), rdf(blanks(new BigDecimal("1.0"))));
-		assertEquals("integer", parse("[] rdf:value 1 ."), rdf(blanks(BigInteger.ONE)));
+		assertEquals("null", ValuesTest.decode(""), rdf(blanks((Object)null)));
+		assertEquals("boolean", ValuesTest.decode("[] rdf:value true ."), rdf(blanks(true)));
+		assertEquals("string", ValuesTest.decode("[] rdf:value 'string' ."), rdf(blanks("string")));
+		assertEquals("decimal", ValuesTest.decode("[] rdf:value 1.0 ."), rdf(blanks(new BigDecimal("1.0"))));
+		assertEquals("integer", ValuesTest.decode("[] rdf:value 1 ."), rdf(blanks(BigInteger.ONE)));
 
 		// !!! unable to test for exponent presence using JSON-P
 		//assertEquals("double", parse("[] rdf:value 1.0E0 ."), // special support for doubles
 		//		rdf("[{\"this\": \"_:node1bcl7j42cx10\", \"http://www.w3.org/1999/02/22-rdf-syntax-ns#value\": [1.0e0]}]"));
 
 		assertEquals("numeric",
-				parse("[] rdf:value '1'^^xsd:int ."),
+				ValuesTest.decode("[] rdf:value '1'^^xsd:int ."),
 				rdf(blanks(object(field("text", "1"), field("type", XMLSchema.INT.stringValue())))));
 
 		assertEquals("custom",
-				parse("[] rdf:value 'text'^^:type ."),
+				ValuesTest.decode("[] rdf:value 'text'^^:type ."),
 				rdf(blanks(object(field("text", "text"), field("type", term("type").stringValue())))));
 
 		assertEquals("tagged",
-				parse("[] rdf:value 'text'@en ."),
+				ValuesTest.decode("[] rdf:value 'text'@en ."),
 				rdf(blanks(object(field("text", "text"), field("lang", "en")))));
 
 	}
@@ -139,7 +139,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseOnlyFocusNode() {
 		assertEquals("focus node only",
-				parse("<x> rdf:value 'x' ."),
+				ValuesTest.decode("<x> rdf:value 'x' ."),
 				rdf(
 						array(
 								object(field("this", "http://example.com/x"), field(value, "x")),
@@ -151,7 +151,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testHandleUnknownFocusNode() {
 		assertEquals("unknown focus",
-				parse(""),
+				ValuesTest.decode(""),
 				rdf(
 						object(field("this", "http://example.com/x"), field(value, "x")),
 						bnode()
@@ -160,7 +160,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testAssumeFocusAsSubject() {
 		assertEquals("focus assumed as subject",
-				parse("<x> rdf:value 'x' ."),
+				ValuesTest.decode("<x> rdf:value 'x' ."),
 				rdf(
 						array(
 								object(field(value, "x"))
@@ -174,7 +174,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testHandleNamedLoops() {
 		assertEquals("named loops",
-				parse("<x> rdf:value <y>. <y> rdf:value <x>."),
+				ValuesTest.decode("<x> rdf:value <y>. <y> rdf:value <x>."),
 				rdf(object(
 						field("this", "http://example.com/x"),
 						field(value, object(
@@ -187,7 +187,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testHandleBlankLoops() {
 		assertEquals("named loops",
-				parse("_:x rdf:value [rdf:value _:x] ."),
+				ValuesTest.decode("_:x rdf:value [rdf:value _:x] ."),
 				rdf(object(
 						field("this", "_:a"),
 						field(value, blank(field(value, object(field("this", "_:a")))))
@@ -200,7 +200,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 	@Test public void testParseAliasedTraits() {
 
 		assertEquals("direct inferred",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(
 						blank(field("value", blank())),
 						null,
@@ -208,7 +208,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 				));
 
 		assertEquals("inverse inferred",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(
 						blank(field("valueOf", blank())),
 						null,
@@ -216,7 +216,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 				));
 
 		assertEquals("user-defined",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(
 						blank(field("alias", blank())),
 						null,
@@ -228,7 +228,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 	@Test public void testParseAliasedNestedTraits() {
 
 		assertEquals("aliased nested trait",
-				parse("[] rdf:value [rdf:value []] ."),
+				ValuesTest.decode("[] rdf:value [rdf:value []] ."),
 				rdf(
 						blank(field("value", blank(field("alias", blank())))),
 						null,
@@ -262,7 +262,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 	@Test public void testResolveRelativeIRIs() {
 
 		assertEquals("base relative subject",
-				parse("<x> rdf:value <y> ."),
+				ValuesTest.decode("<x> rdf:value <y> ."),
 				rdf(
 						object(field("this", "x"), field(value, "http://example.com/y")),
 						null,
@@ -270,7 +270,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 				));
 
 		assertEquals("root-relative subject",
-				parse("<x> rdf:value <y>."),
+				ValuesTest.decode("<x> rdf:value <y>."),
 				rdf(
 						object(field("this", "/x"), field(value, "http://example.com/y")),
 						null,
@@ -278,7 +278,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 				));
 
 		assertEquals("base relative object",
-				parse("<x> rdf:value <y> ."),
+				ValuesTest.decode("<x> rdf:value <y> ."),
 				rdf(
 						object(field("this", "http://example.com/x"), field(value, "y")),
 						null,
@@ -286,7 +286,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 				));
 
 		assertEquals("root-relative object",
-				parse("<x> rdf:value <http://example.com/z>."),
+				ValuesTest.decode("<x> rdf:value <http://example.com/z>."),
 				rdf(
 						object(field("this", "http://example.com/x"), field(value, "/z")),
 						null,
@@ -300,7 +300,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseNamedReverseLinks() {
 		assertEquals("named reverse links",
-				parse("<y> rdf:value <x> ."),
+				ValuesTest.decode("<y> rdf:value <x> ."),
 				rdf(
 						object(
 								field("this", "http://example.com/x"),
@@ -315,7 +315,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseBlankReverseLinks() {
 		assertEquals("blank reverse links",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(
 						blank(field("valueOf", blank())),
 						null,
@@ -325,7 +325,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseInlinedProvedTypedLiterals() {
 		assertEquals("simplified literal with known datatype",
-				parse("[] rdf:value '2016-08-11'^^xsd:date."),
+				ValuesTest.decode("[] rdf:value '2016-08-11'^^xsd:date."),
 				rdf(
 						blank(field("value", "2016-08-11")),
 						null,
@@ -335,7 +335,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseThisLessProvedBlanks() {
 		assertEquals("proved blanks",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(
 						object(field("value", object())),
 						null,
@@ -345,7 +345,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseThisLessProvedNameds() {
 		assertEquals("proved named",
-				parse("<x> rdf:value [] ."),
+				ValuesTest.decode("<x> rdf:value [] ."),
 				rdf(
 						object(field("value", blank())),
 						null,
@@ -355,7 +355,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseIDOnlyProvedBlanks() {
 		assertEquals("proved blank",
-				parse("[] rdf:value [] ."),
+				ValuesTest.decode("[] rdf:value [] ."),
 				rdf(
 						blanks("_:x"),
 						null,
@@ -365,7 +365,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseIRIOnlyProvedNameds() {
 		assertEquals("proved named",
-				parse("[] rdf:value <x> ."),
+				ValuesTest.decode("[] rdf:value <x> ."),
 				rdf(
 						blanks("http://example.com/x"),
 						null,
@@ -375,7 +375,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseStringOnlyProvedResources() {
 		assertEquals("proved resources",
-				parse("[] rdf:value [], <x> ."),
+				ValuesTest.decode("[] rdf:value [], <x> ."),
 				rdf(
 						blanks("_:x", "http://example.com/x"),
 						null,
@@ -385,7 +385,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseProvedDecimalsLeniently() {
 		assertEquals("proved decimal",
-				parse("[] rdf:value 1.0 ."),
+				ValuesTest.decode("[] rdf:value 1.0 ."),
 				rdf(
 						blanks(decimal(1), integer(1), 1.0),
 						null,
@@ -395,7 +395,7 @@ public final class JSONParserTest extends JSONAdapterTest {
 
 	@Test public void testParseProvedDoublesLeniently() {
 		assertEquals("proved decimal",
-				parse("[] rdf:value 1.0E0 ."),
+				ValuesTest.decode("[] rdf:value 1.0E0 ."),
 				rdf(
 						blanks(1.0, integer(1), decimal(1)),
 						null,

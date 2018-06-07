@@ -29,7 +29,7 @@ import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.wrappers.Processor.processor;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.spec.things.ValuesTest.export;
-import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.decode;
 import static com.metreeca.spec.things.ValuesTest.sparql;
 import static com.metreeca.tray.Tray.tool;
 
@@ -39,7 +39,7 @@ public final class ProcessorTest {
 	@Test public void testExecuteUpdateScriptOnRequestFocus() {
 		testbed()
 
-				.dataset(parse("<test> rdf:value rdf:first."))
+				.dataset(ValuesTest.decode("<test> rdf:value rdf:first."))
 
 				.handler(() -> processor()
 						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
@@ -58,7 +58,7 @@ public final class ProcessorTest {
 
 					try (final RepositoryConnection connect=tool(Graph.Factory).connect()) {
 						assertIsomorphic("repository updated",
-								parse("<test> rdf:value rdf:first, rdf:rest."),
+								ValuesTest.decode("<test> rdf:value rdf:first, rdf:rest."),
 								export(connect)
 						);
 					}
@@ -69,7 +69,7 @@ public final class ProcessorTest {
 	@Test public void testExecuteUpdateScriptOnResponseLocation() {
 		testbed()
 
-				.dataset(parse("<test> rdf:value rdf:first."))
+				.dataset(ValuesTest.decode("<test> rdf:value rdf:first."))
 
 				.handler(() -> processor()
 						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
@@ -89,7 +89,7 @@ public final class ProcessorTest {
 
 					try (final RepositoryConnection connect=tool(Graph.Factory).connect()) {
 						assertIsomorphic("repository updated",
-								parse("<test> rdf:value rdf:first, rdf:rest."),
+								ValuesTest.decode("<test> rdf:value rdf:first, rdf:rest."),
 								export(connect)
 						);
 					}

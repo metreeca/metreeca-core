@@ -69,13 +69,13 @@ public class CreatorTest {
 	private Request.Writer create(final Request.Writer request) {
 		return std(request)
 				.user(RDF.NIL)
-				.roles(LinkTest.Manager)
-				.text(turtle("<>"
+				.roles(Manager)
+				.text("@prefix : <http://example.com/terms#> . <>"
 						+" :forename 'Tino' ;"
 						+" :surname 'Faussone' ;"
 						+" :email 'tfaussone@classicmodelcars.com' ;"
 						+" :title 'Sales Rep' ;"
-						+" :seniority 1 ."));
+						+" :seniority 1 .");
 	}
 
 
@@ -318,7 +318,7 @@ public class CreatorTest {
 
 				.request(request -> std(request)
 						.user(RDF.NIL)
-						.roles(LinkTest.Manager)
+						.roles(Manager)
 						.json(object(
 								field("forename", "Tino"),
 								field("surname", "Faussone")
