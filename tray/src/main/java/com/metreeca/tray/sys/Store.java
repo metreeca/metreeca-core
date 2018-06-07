@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Setup.storage;
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.nameUUIDFromBytes;
 
 
@@ -171,6 +172,10 @@ public final class Store {
 			return Collections.emptySet(); // !!!
 		}
 
+		public Blob dependencies(final Blob... dependencies) {
+			return dependencies(asList(dependencies));
+		}
+
 		public Blob dependencies(final Collection<Blob> dependencies) {
 			return this; // !!!
 		}
@@ -199,6 +204,18 @@ public final class Store {
 			}
 		}
 
+		public Blob data(final InputStream data) {
+			try (final OutputStream output=output()) {
+
+				Transputs.data(output, data);
+
+				return this;
+
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		}
+
 
 		public String text() {
 			try (final Reader reader=reader();) {
@@ -209,6 +226,18 @@ public final class Store {
 		}
 
 		public Blob text(final String text) {
+			try (final Writer writer=writer()) {
+
+				Transputs.text(writer, text);
+
+				return this;
+
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		}
+
+		public Blob text(final Reader text) {
 			try (final Writer writer=writer()) {
 
 				Transputs.text(writer, text);

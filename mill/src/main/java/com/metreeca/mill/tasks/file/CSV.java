@@ -20,8 +20,8 @@ package com.metreeca.mill.tasks.file;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
+import com.metreeca.tray.sys.Cache;
 import com.metreeca.tray.sys.Trace;
-import com.metreeca.tray.sys._Cache;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -56,7 +56,7 @@ public final class CSV implements Task {
 	private static final IRI Record=iri(Internal, "Record");
 
 
-	private final _Cache cache=tool(_Cache.Factory);
+	private final Cache cache=tool(Cache.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 	// !!! escape
@@ -110,15 +110,13 @@ public final class CSV implements Task {
 		final AtomicLong count=new AtomicLong();
 		final AtomicLong elapsed=new AtomicLong();
 
-		return items.flatMap(item -> {
-
+		return items.flatMap(item -> cache.exec(iri(item.focus()), blob -> {
 			try {
 
 				trace.debug(this, format("opening record stream <%s>", clip(item.focus())));
 
-				final _Cache.Entry entry=cache.get(iri(item.focus()));
 
-				final Reader reader=encoding.isEmpty() ? entry.reader() : reader(entry.input(), encoding);
+				final Reader reader=encoding.isEmpty() ? blob.reader() : reader(blob.input(), encoding);
 				final CSVParser records=new CSVParser(reader, format);
 
 				final Map<String, Integer> fields=records.getHeaderMap();
@@ -180,7 +178,7 @@ public final class CSV implements Task {
 
 			}
 
-		}).onClose(() -> {
+		})).onClose(() -> {
 
 			final long c=count.get();
 			final long e=elapsed.get();

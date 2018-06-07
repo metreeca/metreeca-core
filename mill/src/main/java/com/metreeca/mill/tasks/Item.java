@@ -22,13 +22,11 @@ import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.mill._Template;
 import com.metreeca.spec.things.Values;
+import com.metreeca.tray.sys.Cache;
 import com.metreeca.tray.sys.Trace;
-import com.metreeca.tray.sys._Cache;
 
 import org.eclipse.rdf4j.model.*;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -58,7 +56,7 @@ import static java.util.stream.Collectors.toList;
  * <li>parametrize {@linkplain #iri(String) IRI} and {@linkplain #text(String) text} on the computed parameters; if
  * {@linkplain #iri(String) IRI} is empty, a new unique IRI is generated;</li>
  *
- * <li>if not empty, uploads the parametrized text to the {@linkplain _Cache#Factory cache}, identifying it with the
+ * <li>if not empty, uploads the parametrized text to the {@linkplain Cache#Factory cache}, identifying it with the
  * parametrized IRI;</li>
  *
  * <li>generates a new cell focused on the parametrized IRI; downstream tasks may read the uploaded content from the
@@ -76,7 +74,7 @@ public final class Item implements Task {
 
 	private static final _Template Empty=new _Template("");
 
-	private final _Cache cache=tool(_Cache.Factory);
+	private final Cache cache=tool(Cache.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 	private _Template iri=Empty;
@@ -172,17 +170,9 @@ public final class Item implements Task {
 			// parametrize and upload text, unless empty
 
 			if ( !text.equals(Empty) ) {
-				try {
 
-					cache.set(Values.iri(iri), new StringReader(text.fill(values::get)));
+				cache.exec(Values.iri(iri), blob -> blob.text(text.fill(values::get)));
 
-				} catch ( final IOException e ) {
-
-					trace.error(this, "unable to upload text to cache", e);
-
-					return Stream.empty();
-
-				}
 			}
 
 			// insert non-empty computed parameter values in the item model

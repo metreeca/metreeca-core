@@ -82,6 +82,8 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final String info;
 
 	private final IsolationLevel isolation;
@@ -113,7 +115,7 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 
-	public String info() { // !!! rename as info()
+	public String info() {
 		return info;
 	}
 

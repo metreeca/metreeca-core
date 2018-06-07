@@ -20,12 +20,11 @@ package com.metreeca.mill.tasks.file;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
+import com.metreeca.tray.sys.Cache;
 import com.metreeca.tray.sys.Trace;
-import com.metreeca.tray.sys._Cache;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -44,7 +43,7 @@ import static java.lang.String.format;
  */
 public final class Split implements Task {
 
-	private final _Cache cache=tool(_Cache.Factory);
+	private final Cache cache=tool(Cache.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 	private int head;
@@ -80,78 +79,83 @@ public final class Split implements Task {
 			final String url=iri(item.focus());
 			final String memo=url+"@"+getClass().getName();
 
-			if ( cache.has(memo) ) {
+			return cache.exec(memo, blob -> {
+				if ( blob.exists() ) {
 
-				try {
+					try {
 
-					return decode(cache.get(memo).reader()).stream();
+						return decode(blob.reader()).stream();
 
-				} catch ( final IOException e ) {
+					} catch ( final IOException e ) {
 
-					trace.error(this, format("unable to extract cached chunks for <%s>", clip(url)), e);
+						trace.error(this, format("unable to extract cached chunks for <%s>", clip(url)), e);
 
-					return Stream.empty();
+						return Stream.empty();
+
+					}
+
+				} else {
+
+					trace.info(this, format("splitting <%s>", clip(url)));
+
+					return cache.exec(url, source -> {
+						try (final BufferedReader reader=new BufferedReader(source.reader())) {
+
+							for (int head=0; head < this.head; ++head) { reader.readLine(); }
+
+							String line;
+
+							int next=0;
+							int size=0;
+
+							final StringBuilder buffer=new StringBuilder(this.size == 0 ? 1000 : this.size*100);
+
+							final Collection<_Cell> chunks=new ArrayList<>();
+
+							do {
+
+								if ( (line=reader.readLine()) != null ) {
+
+									buffer.append(line);
+									buffer.append('\n');
+
+									size++;
+								}
+
+								if ( line == null || size > 0 && this.size > 0 && size%this.size == 0 ) { // time to write
+
+									trace.debug(this, format("writing chunk %06d", next));
+
+									final String chunk=url+"#"+format("%06d", next);
+
+									chunks.add(_Cell.cell(iri(chunk))); // !!! metadata?
+									cache.exec(chunk, target -> target.text(buffer.toString()).dependencies(source));
+
+									next++;
+
+									buffer.setLength(size=0);
+								}
+
+							} while ( line != null );
+
+							blob.text(encode(chunks)).dependencies(source);
+
+							trace.info(this, format("split <%s> into %,d chunks", clip(url), chunks.size()));
+
+							return chunks.stream();
+
+						} catch ( final IOException e ) {
+
+							trace.error(this, format("unable to split <%s>", clip(url)), e);
+
+							return Stream.empty();
+						}
+
+					});
 
 				}
 
-			} else {
-
-				trace.info(this, format("splitting <%s>", clip(url)));
-
-				try (final BufferedReader reader=new BufferedReader(cache.get(url).reader())) {
-
-					for (int head=0; head < this.head; ++head) { reader.readLine(); }
-
-					String line;
-
-					int next=0;
-					int size=0;
-
-					final StringBuilder buffer=new StringBuilder(this.size == 0 ? 1000 : this.size*100);
-
-					final Collection<_Cell> chunks=new ArrayList<>();
-
-					do {
-
-						if ( (line=reader.readLine()) != null ) {
-
-							buffer.append(line);
-							buffer.append('\n');
-
-							size++;
-						}
-
-						if ( line == null || size > 0 && this.size > 0 && size%this.size == 0 ) { // time to write
-
-							trace.debug(this, format("writing chunk %06d", next));
-
-							final String chunk=url+"#"+format("%06d", next);
-
-							chunks.add(_Cell.cell(iri(chunk))); // !!! metadata?
-							cache.set(chunk, new StringReader(buffer.toString()), url);
-
-							next++;
-							size=0;
-
-							buffer.setLength(size=0);
-						}
-
-					} while ( line != null );
-
-					cache.set(memo, encode(chunks), url);
-
-					trace.info(this, format("split <%s> into %,d chunks", clip(url), chunks.size()));
-
-					return chunks.stream();
-
-				} catch ( final IOException e ) {
-
-					trace.error(this, format("unable to split <%s>", clip(url)), e);
-
-					return Stream.empty();
-				}
-
-			}
+			});
 
 		});
 	}

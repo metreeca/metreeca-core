@@ -21,8 +21,8 @@ package com.metreeca.mill.tasks.rdf;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.spec.things.Values;
+import com.metreeca.tray.sys.Cache;
 import com.metreeca.tray.sys.Trace;
-import com.metreeca.tray.sys._Cache;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.rio.*;
@@ -46,7 +46,7 @@ import static com.metreeca.tray.sys.Trace.clip;
  *
  * <ul>
  *
- * <li>retrieves the content of the IRI from the {@linkplain _Cache#Factory network cache};</li>
+ * <li>retrieves the content of the IRI from the {@linkplain Cache#Factory network cache};</li>
  *
  * <li>parses the retrieved content as RDF; unless {@linkplain #format(String) explicitly set}, the format is
  * {@linkplain Rio#getParserFormatForFileName(String) guessed} from the IRI filename extension; gzipped content is
@@ -60,7 +60,7 @@ import static com.metreeca.tray.sys.Trace.clip;
  */
 public final class _RDF implements Task { // !!! rename to avoid clashed with RDF vocabulary
 
-	private final _Cache cache=tool(_Cache.Factory);
+	private final Cache cache=tool(Cache.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 	private String base=Values.Internal;
@@ -157,24 +157,26 @@ public final class _RDF implements Task { // !!! rename to avoid clashed with RD
 				// guess compresson from IRI extension
 				// !!! guess from http response headers / document
 
-				try (
-						final InputStream input=cache.get(iri).input();
-						final InputStream stream=iri.endsWith(".gz") ? new GZIPInputStream(input) : input;
-				) {
+				return cache.exec(iri, blob -> {
+					try (
+							final InputStream input=blob.input();
+							final InputStream stream=iri.endsWith(".gz") ? new GZIPInputStream(input) : input;
+					) {
 
-					trace.info(this, String.format("parsing <%s> as <%s>", clip(iri), format.getName()));
+						trace.info(this, String.format("parsing <%s> as <%s>", clip(iri), format.getName()));
 
-					parser.parse(stream, base);
+						parser.parse(stream, base);
 
-					return Stream.of(cell(focus, collector.getStatements()));
+						return Stream.of(cell(focus, collector.getStatements()));
 
-				} catch ( final IOException|RDFParseException|UnsupportedRDFormatException e ) {
+					} catch ( final IOException|RDFParseException|UnsupportedRDFormatException e ) {
 
-					trace.error(this, String.format("unable to parse RDF from <%s>", clip(iri)), e);
+						trace.error(this, String.format("unable to parse RDF from <%s>", clip(iri)), e);
 
-					return Stream.empty();
+						return Stream.empty();
 
-				}
+					}
+				});
 
 			} else {
 

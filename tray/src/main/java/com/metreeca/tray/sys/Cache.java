@@ -107,6 +107,8 @@ public final class Cache {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public <T> T exec(final String url, final Function<Blob, T> task) throws UncheckedIOException {
 
 		if ( url == null ) {

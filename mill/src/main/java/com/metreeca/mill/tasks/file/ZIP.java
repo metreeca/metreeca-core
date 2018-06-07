@@ -20,8 +20,8 @@ package com.metreeca.mill.tasks.file;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
+import com.metreeca.tray.sys.Cache;
 import com.metreeca.tray.sys.Trace;
-import com.metreeca.tray.sys._Cache;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ import static java.lang.String.format;
  */
 public final class ZIP implements Task {
 
-	private final _Cache cache=tool(_Cache.Factory);
+	private final Cache cache=tool(Cache.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 
@@ -52,57 +52,63 @@ public final class ZIP implements Task {
 			final String url=iri(item.focus());
 			final String memo=url+"@"+getClass().getName();
 
-			if ( cache.has(memo) ) {
+			return cache.exec(memo, blob -> {
+				if ( blob.exists() ) {
 
-				try {
+					try {
 
-					return _Cell.decode(cache.get(memo).reader()).stream();
+						return _Cell.decode(blob.reader()).stream();
 
-				} catch ( final IOException e ) {
+					} catch ( final IOException e ) {
 
-					trace.error(this, format("unable to extract cached zip entries for <%s>", clip(url)), e);
+						trace.error(this, format("unable to extract cached zip entries for <%s>", clip(url)), e);
 
-					return Stream.empty();
-
-				}
-
-			} else {
-
-				trace.info(this, format("unzipping <%s>", clip(url)));
-
-				try (final ZipInputStream zip=new ZipInputStream(cache.get(url).input())) {
-
-					final Collection<_Cell> chunks=new ArrayList<>();
-
-					for (ZipEntry entry; (entry=zip.getNextEntry()) != null; ) {
-
-						final String name=entry.getName();
-
-						if ( !name.endsWith("/") ) {
-
-							trace.info(this, format("extracting <%s>", clip(name)));
-
-							final String chunk=url+"#"+name;
-
-							chunks.add(_Cell.cell(iri(chunk))); // !!! metadata in cell model
-							cache.set(chunk, zip, url);
-						}
+						return Stream.empty();
 
 					}
 
-					cache.set(memo, _Cell.encode(chunks), url);
+				} else {
 
-					return chunks.stream();
+					trace.info(this, format("unzipping <%s>", clip(url)));
 
-				} catch ( IOException e ) {
+					return cache.exec(url, master -> {
+						try (final ZipInputStream zip=new ZipInputStream(blob.input())) {
 
-					trace.error(this, format("unable to extract zip entries from <%s>", clip(url)), e);
+							final Collection<_Cell> chunks=new ArrayList<>();
 
-					return Stream.empty();
+							for (ZipEntry entry; (entry=zip.getNextEntry()) != null; ) {
+
+								final String name=entry.getName();
+
+								if ( !name.endsWith("/") ) {
+
+									trace.info(this, format("extracting <%s>", clip(name)));
+
+									final String chunk=url+"#"+name;
+
+									chunks.add(_Cell.cell(iri(chunk))); // !!! metadata in cell model
+
+									cache.exec(chunk, target -> target.data(zip).dependencies(master));
+								}
+
+							}
+
+							blob.text(_Cell.encode(chunks)).dependencies(master);
+
+							return chunks.stream();
+
+						} catch ( IOException e ) {
+
+							trace.error(this, format("unable to extract zip entries from <%s>", clip(url)), e);
+
+							return Stream.empty();
+
+						}
+					});
 
 				}
 
-			}
+			});
 
 		});
 

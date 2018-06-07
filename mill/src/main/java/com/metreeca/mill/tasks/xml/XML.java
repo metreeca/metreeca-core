@@ -21,8 +21,7 @@ package com.metreeca.mill.tasks.xml;
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
 import com.metreeca.spec.things.Values;
-import com.metreeca.tray.sys.Trace;
-import com.metreeca.tray.sys._Cache;
+import com.metreeca.tray.sys.*;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -65,7 +64,7 @@ import static com.metreeca.tray.sys.Trace.clip;
  *
  * <ul>
  *
- * <li>retrieves the content of the IRI from the {@linkplain _Cache#Factory network cache};</li>
+ * <li>retrieves the content of the IRI from the {@linkplain Cache#Factory network cache};</li>
  *
  * <li>parses the retrieved content as XML, possibly using a user-supplied {@linkplain #parser(Supplier) parser};</li>
  *
@@ -93,7 +92,7 @@ public abstract class XML<T extends XML<T>> implements Task {
 	public static final Supplier<XMLReader> HTML=org.ccil.cowan.tagsoup.Parser::new;
 
 
-	private final _Cache cache=tool(_Cache.Factory);
+	private final Cache cache=tool(Cache.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 	private String transform;
@@ -138,11 +137,15 @@ public abstract class XML<T extends XML<T>> implements Task {
 
 				try {
 
-					return processor.apply(source(cache.get(url)))
-							.map(XdmValue::getUnderlyingValue)
-							.map(this::convert);
+					return cache.exec(url, blob -> {
+						return processor.apply(source(url, blob.reader()))
+								.map(XdmValue::getUnderlyingValue)
+								.map(this::convert);
 
-				} catch ( final IOException|RuntimeException e ) {
+					});
+
+
+				} catch ( final RuntimeException e ) {
 
 					trace.error(this, String.format("unable to transform RDF from <%s>", clip(url)), e);
 
@@ -162,11 +165,7 @@ public abstract class XML<T extends XML<T>> implements Task {
 	}
 
 
-	private Source source(final _Cache.Entry entry) throws IOException {
-
-		final String url=entry.url();
-		final Reader reader=entry.reader();
-
+	private Source source(final String url, final Reader reader) {
 		if ( parser == null ) {
 
 			return new StreamSource(reader, url);
