@@ -95,7 +95,7 @@ public class TrayTest {
 				return this;
 			}
 
-			@Override public void close() throws Exception {
+			@Override public void close() {
 				released.add(this);
 			}
 
@@ -105,12 +105,23 @@ public class TrayTest {
 		final Step y=new Step(z);
 		final Step x=new Step(y);
 
-		tray.get(x); // load the terminal tool with its dependencies
+		tray.exec(() -> tray.get(x)); // load the terminal tool with its dependencies
 		tray.clear(); // release resources
 
 		assertEquals("dependencies released after relying resources", asList(x, y, z), released);
 	}
 
+
+	@Test(expected=IllegalStateException.class) public void testPreventToolBindingIfAlreadyReplaced() {
+
+		final Tray tray=new Tray();
+		final Supplier<Object> tool=Object::new;
+
+		tray
+				.set(tool, Object::new)
+				.set(tool, Object::new);
+
+	}
 
 	@Test(expected=IllegalStateException.class) public void testPreventToolBindingIfAlreadyInUse() {
 

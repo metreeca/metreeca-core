@@ -155,6 +155,10 @@ public final class Tray {
 
 		synchronized ( tools ) {
 
+			if ( factories.containsKey(factory) ) {
+				throw new IllegalStateException("factory already replaced with a plugin");
+			}
+
 			if ( tools.containsKey(factory) ) {
 				throw new IllegalStateException("factory already in use");
 			}
