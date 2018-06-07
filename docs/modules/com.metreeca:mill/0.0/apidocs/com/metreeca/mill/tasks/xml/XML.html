@@ -126,11 +126,11 @@ implements <a href="../../../../../com/metreeca/mill/Task.html" title="interface
 
  <ul>
 
- <li>retrieves the content of the IRI from the <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/sys/_Cache.html?is-external=true#Tool" title="class or interface in com.metreeca.tray.sys">network cache</a>;</li>
+ <li>retrieves the content of the IRI from the <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/sys/Cache.html?is-external=true#Factory" title="class or interface in com.metreeca.tray.sys">network cache</a>;</li>
 
  <li>parses the retrieved content as XML, possibly using a user-supplied <a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#parser-java.util.function.Supplier-">parser</a>;</li>
 
- <li>executes an XML <a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#transform-java.lang.String-">transform</a> using the parsed XML as context node and a <a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#processor-com.metreeca.tray.Tool.Loader-java.lang.String-">processor(Tool.Loader, String)</a> processor} provided by the concrete implementation;</li>
+ <li>executes an XML <a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#transform-java.lang.String-">transform</a> using the parsed XML as context node and a <a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#processor-java.lang.String-">processor(String)</a> processor} provided by the concrete implementation;</li>
 
  <li>for each item in the sequence returned by the transform, generates a cell according to the item type.</li>
 
@@ -193,8 +193,7 @@ implements <a href="../../../../../com/metreeca/mill/Task.html" title="interface
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;<a href="../../../../../com/metreeca/mill/_Cell.html" title="class in com.metreeca.mill">_Cell</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#execute-com.metreeca.tray.Tool.Loader-java.util.stream.Stream-">execute</a></span>(<a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tool.Loader.html?is-external=true" title="class or interface in com.metreeca.tray">Tool.Loader</a>&nbsp;tools,
-       <a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;<a href="../../../../../com/metreeca/mill/_Cell.html" title="class in com.metreeca.mill">_Cell</a>&gt;&nbsp;items)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#execute-java.util.stream.Stream-">execute</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;<a href="../../../../../com/metreeca/mill/_Cell.html" title="class in com.metreeca.mill">_Cell</a>&gt;&nbsp;items)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/metreeca/mill/tasks/xml/XML.html" title="type parameter in XML">T</a></code></td>
@@ -202,8 +201,7 @@ implements <a href="../../../../../com/metreeca/mill/Task.html" title="interface
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>protected abstract <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/javax/xml/transform/Source.html?is-external=true" title="class or interface in javax.xml.transform">Source</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;? extends net.sf.saxon.s9api.XdmValue&gt;&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#processor-com.metreeca.tray.Tool.Loader-java.lang.String-">processor</a></span>(<a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tool.Loader.html?is-external=true" title="class or interface in com.metreeca.tray">Tool.Loader</a>&nbsp;tool,
-         <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;transform)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/mill/tasks/xml/XML.html#processor-java.lang.String-">processor</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;transform)</code>&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>protected abstract <a href="../../../../../com/metreeca/mill/tasks/xml/XML.html" title="type parameter in XML">T</a></code></td>
@@ -278,14 +276,13 @@ implements <a href="../../../../../com/metreeca/mill/Task.html" title="interface
 <pre>protected abstract&nbsp;<a href="../../../../../com/metreeca/mill/tasks/xml/XML.html" title="type parameter in XML">T</a>&nbsp;self()</pre>
 </li>
 </ul>
-<a name="processor-com.metreeca.tray.Tool.Loader-java.lang.String-">
+<a name="processor-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>processor</h4>
-<pre>protected abstract&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/javax/xml/transform/Source.html?is-external=true" title="class or interface in javax.xml.transform">Source</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;? extends net.sf.saxon.s9api.XdmValue&gt;&gt;&nbsp;processor(<a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tool.Loader.html?is-external=true" title="class or interface in com.metreeca.tray">Tool.Loader</a>&nbsp;tool,
-                                                                                            <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;transform)</pre>
+<pre>protected abstract&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/javax/xml/transform/Source.html?is-external=true" title="class or interface in javax.xml.transform">Source</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;? extends net.sf.saxon.s9api.XdmValue&gt;&gt;&nbsp;processor(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;transform)</pre>
 </li>
 </ul>
 <a name="transform-java.lang.String-">
@@ -306,17 +303,16 @@ implements <a href="../../../../../com/metreeca/mill/Task.html" title="interface
 <pre>public&nbsp;<a href="../../../../../com/metreeca/mill/tasks/xml/XML.html" title="type parameter in XML">T</a>&nbsp;parser(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/org/xml/sax/XMLReader.html?is-external=true" title="class or interface in org.xml.sax">XMLReader</a>&gt;&nbsp;parser)</pre>
 </li>
 </ul>
-<a name="execute-com.metreeca.tray.Tool.Loader-java.util.stream.Stream-">
+<a name="execute-java.util.stream.Stream-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>execute</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;<a href="../../../../../com/metreeca/mill/_Cell.html" title="class in com.metreeca.mill">_Cell</a>&gt;&nbsp;execute(<a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tool.Loader.html?is-external=true" title="class or interface in com.metreeca.tray">Tool.Loader</a>&nbsp;tools,
-                             <a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;<a href="../../../../../com/metreeca/mill/_Cell.html" title="class in com.metreeca.mill">_Cell</a>&gt;&nbsp;items)</pre>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;<a href="../../../../../com/metreeca/mill/_Cell.html" title="class in com.metreeca.mill">_Cell</a>&gt;&nbsp;execute(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html?is-external=true" title="class or interface in java.util.stream">Stream</a>&lt;<a href="../../../../../com/metreeca/mill/_Cell.html" title="class in com.metreeca.mill">_Cell</a>&gt;&nbsp;items)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/metreeca/mill/Task.html#execute-com.metreeca.tray.Tool.Loader-java.util.stream.Stream-">execute</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/metreeca/mill/Task.html" title="interface in com.metreeca.mill">Task</a></code></dd>
+<dd><code><a href="../../../../../com/metreeca/mill/Task.html#execute-java.util.stream.Stream-">execute</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/metreeca/mill/Task.html" title="interface in com.metreeca.mill">Task</a></code></dd>
 </dl>
 </li>
 </ul>

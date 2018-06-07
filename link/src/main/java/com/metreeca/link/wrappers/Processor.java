@@ -38,9 +38,9 @@ import static com.metreeca.tray.Tray.tool;
  * <p>Executes a SPARQL Update post-processing script in the shared {@linkplain Graph#Factory graph} tool on successful
  * request processing by the wrapped handler.</p>
  *
- * <p>The script will be executed with the following pre-defined bindinsg:</p>
+ * <p>The script will be executed with the following pre-defined bindings:</p>
  *
- * <table>
+ * <table summary="pre-defined bindings">
  *
  * <thead>
  *

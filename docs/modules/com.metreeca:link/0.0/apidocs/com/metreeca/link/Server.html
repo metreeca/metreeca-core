@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/metreeca/link/Response.Reader.html" title="class in com.metreeca.link"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../com/metreeca/link/Rewriter.html" title="class in com.metreeca.link"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../com/metreeca/link/Service.html" title="interface in com.metreeca.link"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -146,8 +146,8 @@ implements <a href="../../../com/metreeca/link/Handler.html" title="interface in
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>static <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tool.html?is-external=true" title="class or interface in com.metreeca.tray">Tool</a>&lt;<a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Server.html#Tool">Tool</a></span></code>&nbsp;</td>
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;<a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Server.html#Factory">Factory</a></span></code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -167,7 +167,9 @@ implements <a href="../../../com/metreeca/link/Handler.html" title="interface in
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Server.html#handle-com.metreeca.link.Request-com.metreeca.link.Response-">handle</a></span>(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
-      <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>&nbsp;</td>
+      <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>
+<div class="block">Handles a request/response exchange.</div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a></code></td>
@@ -183,7 +185,9 @@ implements <a href="../../../com/metreeca/link/Handler.html" title="interface in
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Server.html#wrap-com.metreeca.link.Wrapper-">wrap</a></span>(<a href="../../../com/metreeca/link/Wrapper.html" title="interface in com.metreeca.link">Wrapper</a>&nbsp;wrapper)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Server.html#wrap-com.metreeca.link.Wrapper-">wrap</a></span>(<a href="../../../com/metreeca/link/Wrapper.html" title="interface in com.metreeca.link">Wrapper</a>&nbsp;wrapper)</code>
+<div class="block">Chains a wrapper with this handler.</div>
+</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -198,7 +202,7 @@ implements <a href="../../../com/metreeca/link/Handler.html" title="interface in
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;com.metreeca.link.<a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">Handler</a></h3>
-<code><a href="../../../com/metreeca/link/Handler.html#error-java.lang.String-">error</a>, <a href="../../../com/metreeca/link/Handler.html#error-java.lang.String-java.lang.Object-">error</a>, <a href="../../../com/metreeca/link/Handler.html#error-java.lang.String-java.lang.Throwable-">error</a>, <a href="../../../com/metreeca/link/Handler.html#exec-java.util.function.Consumer-java.util.function.Consumer-">exec</a>, <a href="../../../com/metreeca/link/Handler.html#forbidden-com.metreeca.link.Request-com.metreeca.link.Response-">forbidden</a>, <a href="../../../com/metreeca/link/Handler.html#refused-com.metreeca.link.Request-com.metreeca.link.Response-">refused</a>, <a href="../../../com/metreeca/link/Handler.html#unauthorized-com.metreeca.link.Request-com.metreeca.link.Response-">unauthorized</a></code></li>
+<code><a href="../../../com/metreeca/link/Handler.html#error-java.lang.String-">error</a>, <a href="../../../com/metreeca/link/Handler.html#error-java.lang.String-java.lang.Object-">error</a>, <a href="../../../com/metreeca/link/Handler.html#error-java.lang.String-java.lang.Throwable-">error</a>, <a href="../../../com/metreeca/link/Handler.html#forbidden-com.metreeca.link.Request-com.metreeca.link.Response-">forbidden</a>, <a href="../../../com/metreeca/link/Handler.html#handle-java.util.function.Consumer-java.util.function.Consumer-">handle</a>, <a href="../../../com/metreeca/link/Handler.html#refused-com.metreeca.link.Request-com.metreeca.link.Response-">refused</a>, <a href="../../../com/metreeca/link/Handler.html#unauthorized-com.metreeca.link.Request-com.metreeca.link.Response-">unauthorized</a></code></li>
 </ul>
 </li>
 </ul>
@@ -214,13 +218,13 @@ implements <a href="../../../com/metreeca/link/Handler.html" title="interface in
 <!--   -->
 </a>
 <h3>Field Detail</h3>
-<a name="Tool">
+<a name="Factory">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>Tool</h4>
-<pre>public static final&nbsp;<a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tool.html?is-external=true" title="class or interface in com.metreeca.tray">Tool</a>&lt;<a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a>&gt; Tool</pre>
+<h4>Factory</h4>
+<pre>public static final&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;<a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a>&gt; Factory</pre>
 </li>
 </ul>
 </li>
@@ -266,9 +270,14 @@ implements <a href="../../../com/metreeca/link/Handler.html" title="interface in
 <h4>handle</h4>
 <pre>public&nbsp;void&nbsp;handle(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
                    <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/metreeca/link/Handler.html#handle-com.metreeca.link.Request-com.metreeca.link.Response-">Handler</a></code></span></div>
+<div class="block">Handles a request/response exchange.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../com/metreeca/link/Handler.html#handle-com.metreeca.link.Request-com.metreeca.link.Response-">handle</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">Handler</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>request</code> - the incoming request for the managed linked data resource</dd>
+<dd><code>response</code> - the outgoing response generated for the managed linked data resource in reaction to <code>request</code></dd>
 </dl>
 </li>
 </ul>
@@ -279,9 +288,16 @@ implements <a href="../../../com/metreeca/link/Handler.html" title="interface in
 <li class="blockList">
 <h4>wrap</h4>
 <pre>public&nbsp;<a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a>&nbsp;wrap(<a href="../../../com/metreeca/link/Wrapper.html" title="interface in com.metreeca.link">Wrapper</a>&nbsp;wrapper)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/metreeca/link/Handler.html#wrap-com.metreeca.link.Wrapper-">Handler</a></code></span></div>
+<div class="block">Chains a wrapper with this handler.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../com/metreeca/link/Handler.html#wrap-com.metreeca.link.Wrapper-">wrap</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">Handler</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>wrapper</code> - the wrapper to be chained with this handler</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the combined handler obtained by <a href="../../../com/metreeca/link/Wrapper.html#wrap-com.metreeca.link.Handler-">wrapping</a> <code>wrapper</code> around this
+ handler</dd>
 </dl>
 </li>
 </ul>
@@ -313,7 +329,7 @@ implements <a href="../../../com/metreeca/link/Handler.html" title="interface in
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/metreeca/link/Response.Reader.html" title="class in com.metreeca.link"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../com/metreeca/link/Rewriter.html" title="class in com.metreeca.link"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../com/metreeca/link/Service.html" title="interface in com.metreeca.link"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">

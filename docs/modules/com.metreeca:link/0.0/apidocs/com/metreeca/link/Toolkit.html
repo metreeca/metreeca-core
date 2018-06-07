@@ -109,12 +109,13 @@ var activeTableTab = "activeTableTab";
 public interface <span class="typeNameLabel">Toolkit</span></pre>
 <div class="block">Linked data toolkit.
 
- <p>Toolkits enable linked data applications to provide custom shared tools or to override standard platform-provided
- tools with custom plugins.</p>
+ <p>Toolkits enable linked data applications to provide custom shared tool factories or to override standard
+ platform-provided tool factories with custom plugins.</p>
 
  <p>Custom toolkits listed in the <code>com.metreeca.link.Tookit</code> <a href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html?is-external=true" title="class or interface in java.util">service loader</a>
  provider configuration file in the <code>META-INF/services/</code> resource directory of an application will be
- automatically <a href="../../../com/metreeca/link/Toolkit.html#load-com.metreeca.tray.Tray-">loaded</a> by server adapters.</p></div>
+ automatically <a href="../../../com/metreeca/link/Toolkit.html#load--">loaded</a> by server adapters inside a <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tray.html?is-external=true#update-java.lang.Runnable-" title="class or interface in com.metreeca.tray">write-only
+ task</a> on a shared tool tray.</p></div>
 </li>
 </ul>
 </div>
@@ -135,8 +136,8 @@ public interface <span class="typeNameLabel">Toolkit</span></pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Toolkit.html#load-com.metreeca.tray.Tray-">load</a></span>(<a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tray.html?is-external=true" title="class or interface in com.metreeca.tray">Tray</a>&nbsp;tray)</code>
-<div class="block">Loads a custom toolkit into a shared tool tray.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Toolkit.html#load--">load</a></span>()</code>
+<div class="block">Loads a custom toolkit.</div>
 </td>
 </tr>
 </table>
@@ -154,18 +155,16 @@ public interface <span class="typeNameLabel">Toolkit</span></pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="load-com.metreeca.tray.Tray-">
+<a name="load--">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>load</h4>
-<pre>void&nbsp;load(<a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tray.html?is-external=true" title="class or interface in com.metreeca.tray">Tray</a>&nbsp;tray)</pre>
-<div class="block">Loads a custom toolkit into a shared tool tray.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>tray</code> - the shared tool tray custom and overridden tools are to be loaded to</dd>
-</dl>
+<pre>void&nbsp;load()</pre>
+<div class="block">Loads a custom toolkit.
+
+ <p>Custom tool factories may be inserted into the shared tool tray using the static <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tray.html?is-external=true#tool-java.util.function.Supplier-java.util.function.Supplier-" title="class or interface in com.metreeca.tray">Tray.tool(Supplier, Supplier)</a> factory replacement} method.</p></div>
 </li>
 </ul>
 </li>

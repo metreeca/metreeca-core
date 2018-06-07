@@ -40,7 +40,7 @@ import static java.util.Collections.singleton;
 /**
  * Bounded description handler.
  *
- * <table>
+ * <table summary="HTTP methods">
  *
  * <tr>
  * <th>HTTP Method</th>

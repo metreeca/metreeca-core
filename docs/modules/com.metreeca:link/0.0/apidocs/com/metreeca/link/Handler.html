@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":17,"i1":17,"i2":17,"i3":18,"i4":17,"i5":6,"i6":17,"i7":17,"i8":18};
+var methods = {"i0":17,"i1":17,"i2":17,"i3":17,"i4":18,"i5":6,"i6":17,"i7":17,"i8":18};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],16:["t5","Default Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/metreeca/link/_Transfer.html" title="class in com.metreeca.link"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Prev&nbsp;Class</li>
 <li><a href="../../../com/metreeca/link/Index.html" title="class in com.metreeca.link"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -101,7 +101,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../com/metreeca/next/handlers/shape/Browser.html" title="class in com.metreeca.next.handlers.shape">Browser</a>, <a href="../../../com/metreeca/next/handlers/shape/Builder.html" title="class in com.metreeca.next.handlers.shape">Builder</a>, <a href="../../../com/metreeca/next/handlers/shape/Creator.html" title="class in com.metreeca.next.handlers.shape">Creator</a>, <a href="../../../com/metreeca/next/handlers/shape/Deleter.html" title="class in com.metreeca.next.handlers.shape">Deleter</a>, <a href="../../../com/metreeca/next/handlers/Dispatcher.html" title="class in com.metreeca.next.handlers">Dispatcher</a>, <a href="../../../com/metreeca/next/handlers/shape/Relator.html" title="class in com.metreeca.next.handlers.shape">Relator</a>, <a href="../../../com/metreeca/next/handlers/Router.html" title="class in com.metreeca.next.handlers">Router</a>, <a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a>, <a href="../../../com/metreeca/next/handlers/shape/Shaper.html" title="class in com.metreeca.next.handlers.shape">Shaper</a>, <a href="../../../com/metreeca/next/handlers/shape/Updater.html" title="class in com.metreeca.next.handlers.shape">Updater</a></dd>
+<dd><a href="../../../com/metreeca/link/handlers/ldp/BasicContainer.html" title="class in com.metreeca.link.handlers.ldp">BasicContainer</a>, <a href="../../../com/metreeca/link/handlers/shape/Browser.html" title="class in com.metreeca.link.handlers.shape">Browser</a>, <a href="../../../com/metreeca/link/handlers/shape/Builder.html" title="class in com.metreeca.link.handlers.shape">Builder</a>, <a href="../../../com/metreeca/link/handlers/shape/Creator.html" title="class in com.metreeca.link.handlers.shape">Creator</a>, <a href="../../../com/metreeca/link/handlers/shape/Deleter.html" title="class in com.metreeca.link.handlers.shape">Deleter</a>, <a href="../../../com/metreeca/link/handlers/ldp/Description.html" title="class in com.metreeca.link.handlers.ldp">Description</a>, <a href="../../../com/metreeca/link/handlers/Dispatcher.html" title="class in com.metreeca.link.handlers">Dispatcher</a>, <a href="../../../com/metreeca/link/handlers/ldp/RDFSource.html" title="class in com.metreeca.link.handlers.ldp">RDFSource</a>, <a href="../../../com/metreeca/link/handlers/shape/Relator.html" title="class in com.metreeca.link.handlers.shape">Relator</a>, <a href="../../../com/metreeca/link/handlers/Router.html" title="class in com.metreeca.link.handlers">Router</a>, <a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">Server</a>, <a href="../../../com/metreeca/link/handlers/shape/Shaper.html" title="class in com.metreeca.link.handlers.shape">Shaper</a>, <a href="../../../com/metreeca/link/handlers/shape/Updater.html" title="class in com.metreeca.link.handlers.shape">Updater</a></dd>
 </dl>
 <dl>
 <dt>Functional Interface:</dt>
@@ -111,7 +111,10 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html?is-external=true" title="class or interface in java.lang">@FunctionalInterface</a>
 public interface <span class="typeNameLabel">Handler</span></pre>
-<div class="block">Linked data resource handler.</div>
+<div class="block">Linked data resource handler.
+
+ <p>Manages and exposes the state of a linked data resource, generating outgoing <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">responses</a>
+ in reaction to to incoming <a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">requests</a>.</p></div>
 </li>
 </ul>
 </div>
@@ -145,33 +148,45 @@ public interface <span class="typeNameLabel">Handler</span></pre>
      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;cause)</code>&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code>default <a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">Handler</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Handler.html#exec-java.util.function.Consumer-java.util.function.Consumer-">exec</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/link/Request.Writer.html" title="class in com.metreeca.link">Request.Writer</a>&gt;&nbsp;source,
-    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/link/Response.Reader.html" title="class in com.metreeca.link">Response.Reader</a>&gt;&nbsp;target)</code>&nbsp;</td>
-</tr>
-<tr id="i4" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Handler.html#forbidden-com.metreeca.link.Request-com.metreeca.link.Response-">forbidden</a></span>(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
-         <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>&nbsp;</td>
+         <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>
+<div class="block">Handles forbidden requests.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>default void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Handler.html#handle-java.util.function.Consumer-java.util.function.Consumer-">handle</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/link/Request.Writer.html" title="class in com.metreeca.link">Request.Writer</a>&gt;&nbsp;source,
+      <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/link/Response.Reader.html" title="class in com.metreeca.link">Response.Reader</a>&gt;&nbsp;target)</code>
+<div class="block">Handles a request/response exchange.</div>
+</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Handler.html#handle-com.metreeca.link.Request-com.metreeca.link.Response-">handle</a></span>(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
-      <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>&nbsp;</td>
+      <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>
+<div class="block">Handles a request/response exchange.</div>
+</td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Handler.html#refused-com.metreeca.link.Request-com.metreeca.link.Response-">refused</a></span>(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
-       <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>&nbsp;</td>
+       <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>
+<div class="block">Handles refused requests.</div>
+</td>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Handler.html#unauthorized-com.metreeca.link.Request-com.metreeca.link.Response-">unauthorized</a></span>(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
-            <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>&nbsp;</td>
+            <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</code>
+<div class="block">Handles unauthorized requests.</div>
+</td>
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>default <a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">Handler</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Handler.html#wrap-com.metreeca.link.Wrapper-">wrap</a></span>(<a href="../../../com/metreeca/link/Wrapper.html" title="interface in com.metreeca.link">Wrapper</a>&nbsp;wrapper)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Handler.html#wrap-com.metreeca.link.Wrapper-">wrap</a></span>(<a href="../../../com/metreeca/link/Wrapper.html" title="interface in com.metreeca.link">Wrapper</a>&nbsp;wrapper)</code>
+<div class="block">Chains a wrapper with this handler.</div>
+</td>
 </tr>
 </table>
 </li>
@@ -196,6 +211,17 @@ public interface <span class="typeNameLabel">Handler</span></pre>
 <h4>refused</h4>
 <pre>static&nbsp;void&nbsp;refused(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
                     <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</pre>
+<div class="block">Handles refused requests.
+
+ <p>Generates an empty response with a  status code, if the request <a href="../../../com/metreeca/link/Request.html#user--">user</a> is anonymous (that it's equal to <a href="http://docs.metreeca.com/modules/com.metreeca:spec/0.0/apidocs/com/metreeca/spec/Spec.html?is-external=true#none" title="class or interface in com.metreeca.spec"><code>Spec.none</code></a>), or a 
+ status code, otherwise.</p></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>request</code> - the incoming request</dd>
+<dd><code>response</code> - the outgoing response</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if either <code>request</code> or <code>response</code> is <code>null</code></dd>
+</dl>
 </li>
 </ul>
 <a name="unauthorized-com.metreeca.link.Request-com.metreeca.link.Response-">
@@ -206,6 +232,16 @@ public interface <span class="typeNameLabel">Handler</span></pre>
 <h4>unauthorized</h4>
 <pre>static&nbsp;void&nbsp;unauthorized(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
                          <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</pre>
+<div class="block">Handles unauthorized requests.
+
+ <p>Generates an empty response with a  status code.</p></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>request</code> - the incoming request</dd>
+<dd><code>response</code> - the outgoing response</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if either <code>request</code> or <code>response</code> is <code>null</code></dd>
+</dl>
 </li>
 </ul>
 <a name="forbidden-com.metreeca.link.Request-com.metreeca.link.Response-">
@@ -216,6 +252,16 @@ public interface <span class="typeNameLabel">Handler</span></pre>
 <h4>forbidden</h4>
 <pre>static&nbsp;void&nbsp;forbidden(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
                       <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</pre>
+<div class="block">Handles forbidden requests.
+
+ <p>Generates an empty response with a  status code.</p></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>request</code> - the incoming request</dd>
+<dd><code>response</code> - the outgoing response</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if either <code>request</code> or <code>response</code> is <code>null</code></dd>
+</dl>
 </li>
 </ul>
 <a name="error-java.lang.String-">
@@ -255,25 +301,49 @@ public interface <span class="typeNameLabel">Handler</span></pre>
 <h4>handle</h4>
 <pre>void&nbsp;handle(<a href="../../../com/metreeca/link/Request.html" title="class in com.metreeca.link">Request</a>&nbsp;request,
             <a href="../../../com/metreeca/link/Response.html" title="class in com.metreeca.link">Response</a>&nbsp;response)</pre>
+<div class="block">Handles a request/response exchange.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>request</code> - the incoming request for the managed linked data resource</dd>
+<dd><code>response</code> - the outgoing response generated for the managed linked data resource in reaction to <code>request</code></dd>
+</dl>
+</li>
+</ul>
+<a name="handle-java.util.function.Consumer-java.util.function.Consumer-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>handle</h4>
+<pre>default&nbsp;void&nbsp;handle(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/link/Request.Writer.html" title="class in com.metreeca.link">Request.Writer</a>&gt;&nbsp;source,
+                    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/link/Response.Reader.html" title="class in com.metreeca.link">Response.Reader</a>&gt;&nbsp;target)</pre>
+<div class="block">Handles a request/response exchange.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>source</code> - the source of the incoming request</dd>
+<dd><code>target</code> - the target of the outgoing response</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if either <code>source</code> or <code>target</code> is <code>null</code></dd>
+</dl>
 </li>
 </ul>
 <a name="wrap-com.metreeca.link.Wrapper-">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>wrap</h4>
 <pre>default&nbsp;<a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">Handler</a>&nbsp;wrap(<a href="../../../com/metreeca/link/Wrapper.html" title="interface in com.metreeca.link">Wrapper</a>&nbsp;wrapper)</pre>
-</li>
-</ul>
-<a name="exec-java.util.function.Consumer-java.util.function.Consumer-">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>exec</h4>
-<pre>default&nbsp;<a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">Handler</a>&nbsp;exec(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/link/Request.Writer.html" title="class in com.metreeca.link">Request.Writer</a>&gt;&nbsp;source,
-                     <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/link/Response.Reader.html" title="class in com.metreeca.link">Response.Reader</a>&gt;&nbsp;target)</pre>
+<div class="block">Chains a wrapper with this handler.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>wrapper</code> - the wrapper to be chained with this handler</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the combined handler obtained by <a href="../../../com/metreeca/link/Wrapper.html#wrap-com.metreeca.link.Handler-">wrapping</a> <code>wrapper</code> around this
+ handler</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>wrapper</code> is <code>null</code></dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -304,7 +374,7 @@ public interface <span class="typeNameLabel">Handler</span></pre>
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/metreeca/link/_Transfer.html" title="class in com.metreeca.link"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Prev&nbsp;Class</li>
 <li><a href="../../../com/metreeca/link/Index.html" title="class in com.metreeca.link"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">

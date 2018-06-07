@@ -101,7 +101,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../com/metreeca/next/services/Session.html" title="class in com.metreeca.next.services">Session</a>, <a href="../../../com/metreeca/link/services/SPARQL.html" title="class in com.metreeca.link.services">SPARQL</a></dd>
+<dd><a href="../../../com/metreeca/link/services/Graphs.html" title="class in com.metreeca.link.services">Graphs</a>, <a href="../../../com/metreeca/link/services/Proxy.html" title="class in com.metreeca.link.services">Proxy</a>, <a href="../../../com/metreeca/link/services/Session.html" title="class in com.metreeca.link.services">Session</a>, <a href="../../../com/metreeca/link/services/SPARQL.html" title="class in com.metreeca.link.services">SPARQL</a>, <a href="../../../com/metreeca/link/services/Spool.html" title="class in com.metreeca.link.services">Spool</a></dd>
 </dl>
 <dl>
 <dt>Functional Interface:</dt>
@@ -113,12 +113,13 @@ var activeTableTab = "activeTableTab";
 public interface <span class="typeNameLabel">Service</span></pre>
 <div class="block">Linked data service.
 
- <p>Services enable linked data applications to configure the <a href="../../../com/metreeca/link/_Server.html" title="class in com.metreeca.link">server</a> or other shared tools
- managed by a tool <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tray.html?is-external=true" title="class or interface in com.metreeca.tray">tray</a>; the most common use case is binding a custom resource <a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">handler</a> to the server <a href="../../../com/metreeca/link/Index.html" title="class in com.metreeca.link">index</a>.</p>
+ <p>Services enable linked data applications to configure the <a href="../../../com/metreeca/link/Server.html" title="class in com.metreeca.link">server</a> or other shared tools; the
+ most common use case is binding a custom resource <a href="../../../com/metreeca/link/Handler.html" title="interface in com.metreeca.link">handler</a> to the server <a href="../../../com/metreeca/link/Index.html" title="class in com.metreeca.link">index</a>.</p>
 
  <p>Custom services listed in the <code>com.metreeca.link.Service</code> <a href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html?is-external=true" title="class or interface in java.util">service loader</a>
  provider configuration file in the <code>META-INF/services/</code> resource directory of an application will be
- automatically <a href="../../../com/metreeca/link/Service.html#load--">loaded</a> by server adapters.</p></div>
+ automatically <a href="../../../com/metreeca/link/Service.html#load--">loaded</a> by server adapters inside a <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tray.html?is-external=true#lookup-java.lang.Runnable-" title="class or interface in com.metreeca.tray">read-only
+ task</a> on a shared tool tray.</p></div>
 </li>
 </ul>
 </div>
@@ -139,7 +140,9 @@ public interface <span class="typeNameLabel">Service</span></pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Service.html#load--">load</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/link/Service.html#load--">load</a></span>()</code>
+<div class="block">Loads a custom service.</div>
+</td>
 </tr>
 </table>
 </li>
@@ -163,6 +166,9 @@ public interface <span class="typeNameLabel">Service</span></pre>
 <li class="blockList">
 <h4>load</h4>
 <pre>void&nbsp;load()</pre>
+<div class="block">Loads a custom service.
+
+ <p>Required tools may be retrieved from the shared tool tray using the static <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tray.html?is-external=true#tool-java.util.function.Supplier-" title="class or interface in com.metreeca.tray">tool lookup</a> method.</p></div>
 </li>
 </ul>
 </li>

@@ -85,7 +85,7 @@
 <tr class="altColor">
 <td class="colFirst"><a href="#com.metreeca.tray">com.metreeca.tray</a></td>
 <td class="colLast">
-<div class="block">Resource sharing framework.</div>
+<div class="block">Tool sharing framework.</div>
 </td>
 </tr>
 </tbody>
@@ -107,38 +107,27 @@
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
 <td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#clear--">clear</a></span>()</code>
-<div class="block">Clears this tray.</div>
+<div class="block">Clears this tool tray.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#exec-java.lang.Runnable-">exec</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#lookup-java.lang.Runnable-">lookup</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</code>
+<div class="block">Executes a read-only task inside this tool tray.</div>
+</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#set-com.metreeca.tray.Tool-com.metreeca.tray.Tool-">set</a></span>(<a href="../../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;tool,
-   <a href="../../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;plugin)</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#set-java.util.function.Supplier-java.util.function.Supplier-">set</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory,
+   <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;plugin)</code>
+<div class="block">Replaces a tool factory with a plugin.</div>
+</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#tray--">tray</a></span>()</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#with-java.util.function.Consumer-">with</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&gt;&nbsp;task)</code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Method parameters in <a href="../../../../com/metreeca/tray/package-summary.html">com.metreeca.tray</a> with type arguments of type <a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code><a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#with-java.util.function.Consumer-">with</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&gt;&nbsp;task)</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">Tray.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/tray/Tray.html#update-java.lang.Runnable-">update</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</code>
+<div class="block">Executes a write-only task inside this tool tray.</div>
+</td>
 </tr>
 </tbody>
 </table>

@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/metreeca/tray/Tool.Loader.html" title="interface in com.metreeca.tray"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Prev&nbsp;Class</li>
 <li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
@@ -76,13 +76,13 @@ var activeTableTab = "activeTableTab";
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
@@ -107,22 +107,36 @@ var activeTableTab = "activeTableTab";
 <div class="description">
 <ul class="blockList">
 <li class="blockList">
-<dl>
-<dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../com/metreeca/tray/Tool.Binder.html" title="interface in com.metreeca.tray">Tool.Binder</a>, <a href="../../../com/metreeca/tray/Tool.Loader.html" title="interface in com.metreeca.tray">Tool.Loader</a></dd>
-</dl>
 <hr>
 <br>
 <pre>public final class <span class="typeNameLabel">Tray</span>
-extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
-implements <a href="../../../com/metreeca/tray/Tool.Loader.html" title="interface in com.metreeca.tray">Tool.Loader</a>, <a href="../../../com/metreeca/tray/Tool.Binder.html" title="interface in com.metreeca.tray">Tool.Binder</a></pre>
-<div class="block">Shared resource repository {thread-safe}.</div>
+extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
+<div class="block">Tool tray {thread-safe}.
+
+ <p>Manages shared tools.</p></div>
 </li>
 </ul>
 </div>
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#Tray--">Tray</a></span>()</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
 <!-- ========== METHOD SUMMARY =========== -->
 <ul class="blockList">
 <li class="blockList"><a name="method.summary">
@@ -138,37 +152,46 @@ implements <a href="../../../com/metreeca/tray/Tool.Loader.html" title="interfac
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#clear--">clear</a></span>()</code>
-<div class="block">Clears this tray.</div>
+<div class="block">Clears this tool tray.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#exec-java.lang.Runnable-">exec</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</code>&nbsp;</td>
+<td class="colFirst"><code>&lt;T&gt;&nbsp;T</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#get-java.util.function.Supplier-">get</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory)</code>
+<div class="block">Retrieves the shared tool created by a factory.</div>
+</td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code>&lt;T&gt;&nbsp;T</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#get-com.metreeca.tray.Tool-">get</a></span>(<a href="../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;tool)</code>
-<div class="block">Retrieves the shared resource created by a tool.</div>
+<td class="colFirst"><code><a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#lookup-java.lang.Runnable-">lookup</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</code>
+<div class="block">Executes a read-only task inside this tool tray.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#set-com.metreeca.tray.Tool-com.metreeca.tray.Tool-">set</a></span>(<a href="../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;tool,
-   <a href="../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;plugin)</code>
-<div class="block">Replaces a tool with a plugin.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#set-java.util.function.Supplier-java.util.function.Supplier-">set</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory,
+   <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;plugin)</code>
+<div class="block">Replaces a tool factory with a plugin.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>static &lt;T&gt;&nbsp;T</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#tool-com.metreeca.tray.Tool-">tool</a></span>(<a href="../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;tool)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#tool-java.util.function.Supplier-">tool</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory)</code>
+<div class="block"><a href="../../../com/metreeca/tray/Tray.html#get-java.util.function.Supplier-">Retrieves</a> a shared tool from the current <a href="../../../com/metreeca/tray/Tray.html#lookup-java.lang.Runnable-">lookup</a> tray.</div>
+</td>
 </tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code>static <a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#tray--">tray</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>static &lt;T&gt;&nbsp;void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#tool-java.util.function.Supplier-java.util.function.Supplier-">tool</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory,
+    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;plugin)</code>
+<div class="block"><a href="../../../com/metreeca/tray/Tray.html#set-java.util.function.Supplier-java.util.function.Supplier-">Replaces</a> a tool factory with a pluginf in the current <a href="../../../com/metreeca/tray/Tray.html#update-java.lang.Runnable-">update</a> tray.</div>
+</td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#with-java.util.function.Consumer-">with</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&gt;&nbsp;task)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/tray/Tray.html#update-java.lang.Runnable-">update</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</code>
+<div class="block">Executes a write-only task inside this tool tray.</div>
+</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -186,81 +209,120 @@ implements <a href="../../../com/metreeca/tray/Tool.Loader.html" title="interfac
 <div class="details">
 <ul class="blockList">
 <li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="Tray--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>Tray</h4>
+<pre>public&nbsp;Tray()</pre>
+</li>
+</ul>
+</li>
+</ul>
 <!-- ============ METHOD DETAIL ========== -->
 <ul class="blockList">
 <li class="blockList"><a name="method.detail">
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="tray--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>tray</h4>
-<pre>public static&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;tray()</pre>
-</li>
-</ul>
-<a name="tool-com.metreeca.tray.Tool-">
+<a name="tool-java.util.function.Supplier-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>tool</h4>
-<pre>public static&nbsp;&lt;T&gt;&nbsp;T&nbsp;tool(<a href="../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;tool)</pre>
+<pre>public static&nbsp;&lt;T&gt;&nbsp;T&nbsp;tool(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory)</pre>
+<div class="block"><a href="../../../com/metreeca/tray/Tray.html#get-java.util.function.Supplier-">Retrieves</a> a shared tool from the current <a href="../../../com/metreeca/tray/Tray.html#lookup-java.lang.Runnable-">lookup</a> tray.</div>
+<dl>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>T</code> - the type of the shared tool created by <code>factory</code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>factory</code> - the factory responsible for creating the required tool; must return a non-null and thread-safe
+                object</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the shared tool created by <code>factory</code> or by its plugin replacement if one was <a href="../../../com/metreeca/tray/Tray.html#set-java.util.function.Supplier-java.util.function.Supplier-">specified</a></dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if <code>factory</code> is <code>null</code></dd>
+</dl>
 </li>
 </ul>
-<a name="get-com.metreeca.tray.Tool-">
+<a name="tool-java.util.function.Supplier-java.util.function.Supplier-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>tool</h4>
+<pre>public static&nbsp;&lt;T&gt;&nbsp;void&nbsp;tool(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory,
+                            <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;plugin)</pre>
+<div class="block"><a href="../../../com/metreeca/tray/Tray.html#set-java.util.function.Supplier-java.util.function.Supplier-">Replaces</a> a tool factory with a pluginf in the current <a href="../../../com/metreeca/tray/Tray.html#update-java.lang.Runnable-">update</a> tray.</div>
+<dl>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>T</code> - the type of the shared tool created by <code>factory</code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>factory</code> - the factory to be replaced</dd>
+<dd><code>plugin</code> - the replacing factory; must return a non-null and thread-safe object</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if either <code>factory</code> or <code>pluging</code> is <code>null</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></code> - if <code>factory</code> was already replaced with a plugin or its tool was already
+                                  retrieved</dd>
+</dl>
+</li>
+</ul>
+<a name="get-java.util.function.Supplier-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>get</h4>
-<pre>public&nbsp;&lt;T&gt;&nbsp;T&nbsp;get(<a href="../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;tool)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/metreeca/tray/Tool.Loader.html#get-com.metreeca.tray.Tool-">Tool.Loader</a></code></span></div>
-<div class="block">Retrieves the shared resource created by a tool.
+<pre>public&nbsp;&lt;T&gt;&nbsp;T&nbsp;get(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory)</pre>
+<div class="block">Retrieves the shared tool created by a factory.
 
- <p>The <a href="../../../com/metreeca/tray/Tool.html#create-com.metreeca.tray.Tool.Loader-">new resource</a> should be cached so that further calls for the
- same tool are idempotent.</p></div>
+ <p>The new tool is cached so that further calls for the same factory are idempotent.</p></div>
 <dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../com/metreeca/tray/Tool.Loader.html#get-com.metreeca.tray.Tool-">get</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/metreeca/tray/Tool.Loader.html" title="interface in com.metreeca.tray">Tool.Loader</a></code></dd>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
-<dd><code>T</code> - the type of the shared resource created by <code>tool</code></dd>
+<dd><code>T</code> - the type of the shared tool created by <code>factory</code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>tool</code> - the tool creating the required resource</dd>
+<dd><code>factory</code> - the factory responsible for creating the required tool; must return a non-null and thread-safe
+                object</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the shared resource created by <code>tool</code></dd>
+<dd>the shared tool created by <code>factory</code> or by its plugin replacement if one was <a href="../../../com/metreeca/tray/Tray.html#set-java.util.function.Supplier-java.util.function.Supplier-">specified</a></dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if <code>factory</code> is <code>null</code></dd>
 </dl>
 </li>
 </ul>
-<a name="set-com.metreeca.tray.Tool-com.metreeca.tray.Tool-">
+<a name="set-java.util.function.Supplier-java.util.function.Supplier-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>set</h4>
-<pre>public&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;set(<a href="../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;tool,
-                    <a href="../../../com/metreeca/tray/Tool.html" title="interface in com.metreeca.tray">Tool</a>&lt;T&gt;&nbsp;plugin)
+<pre>public&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;set(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;factory,
+                    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;&nbsp;plugin)
              throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/metreeca/tray/Tool.Binder.html#set-com.metreeca.tray.Tool-com.metreeca.tray.Tool-">Tool.Binder</a></code></span></div>
-<div class="block">Replaces a tool with a plugin.
+<div class="block">Replaces a tool factory with a plugin.
 
- <p>Subsequent calls to <a href="../../../com/metreeca/tray/Tool.Loader.html#get-com.metreeca.tray.Tool-"><code>Tool.Loader.get(Tool)</code></a> on the underlying implementation using <code>tool</code> as key
- must return the shared resource created by <code>plugin</code>.</p></div>
+ <p>Subsequent calls to <a href="../../../com/metreeca/tray/Tray.html#get-java.util.function.Supplier-"><code>get(Supplier)</code></a> using <code>factory</code> as key will return the shared tool
+ created by <code>plugin</code>.</p></div>
 <dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../com/metreeca/tray/Tool.Binder.html#set-com.metreeca.tray.Tool-com.metreeca.tray.Tool-">set</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/metreeca/tray/Tool.Binder.html" title="interface in com.metreeca.tray">Tool.Binder</a></code></dd>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
-<dd><code>T</code> - the type of the shared resource created by <code>tool</code></dd>
+<dd><code>T</code> - the type of the shared tool created by <code>factory</code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>tool</code> - the tool to be replaced</dd>
-<dd><code>plugin</code> - the replacing tool</dd>
+<dd><code>factory</code> - the factory to be replaced</dd>
+<dd><code>plugin</code> - the replacing factory; must return a non-null and thread-safe object</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>this binder</dd>
+<dd>this tool tray</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></code> - if <code>tool</code> was already replaced with a plugin or its resource
-                                  was already created</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if either <code>factory</code> or <code>pluging</code> is <code>null</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></code> - if <code>factory</code> was already replaced with a plugin or its tool was already
+                                  retrieved</dd>
 </dl>
 </li>
 </ul>
@@ -271,32 +333,52 @@ implements <a href="../../../com/metreeca/tray/Tool.Loader.html" title="interfac
 <li class="blockList">
 <h4>clear</h4>
 <pre>public&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;clear()</pre>
-<div class="block">Clears this tray.
+<div class="block">Clears this tool tray.
 
- <p>All <a href="../../../com/metreeca/tray/Tool.Loader.html#get-com.metreeca.tray.Tool-">cached</a> resources are purged. <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/AutoCloseable.html?is-external=true" title="class or interface in java.lang">Auto-closeable</a>
- resource are closed in inverse creation order before purging.</p></div>
+ <p>All <a href="../../../com/metreeca/tray/Tray.html#get-java.util.function.Supplier-">cached</a> tools are purged. <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/AutoCloseable.html?is-external=true" title="class or interface in java.lang">Auto-closeable</a>
+ tools are closed in inverse creation order before purging.</p></div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>this tray</dd>
+<dd>this tool tray</dd>
 </dl>
 </li>
 </ul>
-<a name="with-java.util.function.Consumer-">
+<a name="lookup-java.lang.Runnable-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>with</h4>
-<pre>public&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;with(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&gt;&nbsp;task)</pre>
+<h4>lookup</h4>
+<pre>public&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;lookup(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</pre>
+<div class="block">Executes a read-only task inside this tool tray.
+
+ <p>Calls to the static tool <a href="../../../com/metreeca/tray/Tray.html#tool-java.util.function.Supplier-">retrieval</a> method on the current thread from within the
+ executed task will be delegated to this tool tray.</p></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>task</code> - the read-only task to be executed</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>this tool tray</dd>
+</dl>
 </li>
 </ul>
-<a name="exec-java.lang.Runnable-">
+<a name="update-java.lang.Runnable-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>exec</h4>
-<pre>public&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;exec(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</pre>
+<h4>update</h4>
+<pre>public&nbsp;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;update(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;task)</pre>
+<div class="block">Executes a write-only task inside this tool tray.
+
+ <p>Calls to the static tool factory <a href="../../../com/metreeca/tray/Tray.html#tool-java.util.function.Supplier-">replacement</a> method on the current thread from
+ within the executed task will be delegated to this tool tray.</p></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>task</code> - the read-only task to be executed</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>this tool tray</dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -327,7 +409,7 @@ implements <a href="../../../com/metreeca/tray/Tool.Loader.html" title="interfac
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/metreeca/tray/Tool.Loader.html" title="interface in com.metreeca.tray"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Prev&nbsp;Class</li>
 <li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
@@ -354,13 +436,13 @@ implements <a href="../../../com/metreeca/tray/Tool.Loader.html" title="interfac
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>

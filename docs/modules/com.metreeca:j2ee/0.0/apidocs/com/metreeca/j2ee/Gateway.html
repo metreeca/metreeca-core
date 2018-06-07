@@ -119,19 +119,17 @@ implements javax.servlet.ServletContextListener, javax.servlet.Filter</pre>
 <div class="block">J2EE/Metreeca gateway.
 
  <p>Provides a gateway between a web application managed by Servlet 3.1 container and linked data resource handlers
- based on the Metreeca <a href="https://github.com/metreeca/metreeca-core/link/apidocs/com/metreeca/next/package-summary.html?is-external=true">linked data framework</a>:</p>
+ based on the Metreeca <a href="http://docs.metreeca.com/modules/com.metreeca:link/0.0/apidocs/com/metreeca/link/package-summary.html?is-external=true">linked data framework</a>:</p>
 
  <ul>
 
- <li>initializes and destroys the shared <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tool.html?is-external=true" title="class or interface in com.metreeca.tray">tool tray</a> managing platform components required by
- resource
- handlers;</li>
+ <li>initializes and destroys the shared tool <a href="http://docs.metreeca.com/modules/com.metreeca:tray/0.0/apidocs/com/metreeca/tray/Tray.html?is-external=true" title="class or interface in com.metreeca.tray">tray</a> managing platform components required by
+ resource handlers;</li>
 
  <li>intercepts HTTP requests and handles them using the <a href="http://docs.metreeca.com/modules/com.metreeca:link/0.0/apidocs/com/metreeca/link/Server.html?is-external=true" title="class or interface in com.metreeca.link">server</a> tool provided by the shared tool
  tray;</li>
 
- <li>forwards HTTP requests to the enclosing web application if no response is <a href="http://docs.metreeca.com/modules/com.metreeca:link/0.0/apidocs/com/metreeca/link/Response.html?is-external=true#committed--" title="class or interface in com.metreeca.link">committed</a> by
- the linked data server.</li>
+ <li>forwards HTTP requests to the enclosing web application if no response is <a href="http://docs.metreeca.com/modules/com.metreeca:link/0.0/apidocs/com/metreeca/link/Response.html?is-external=true#committed--" title="class or interface in com.metreeca.link">committed</a> by the linked data server.</li>
 
  </ul></div>
 </li>
