@@ -16,7 +16,7 @@
  */
 
 /**
- * RDF tools.
+ * RDF/SPARQL tools.
  */
 
 package com.metreeca.tray.rdf;

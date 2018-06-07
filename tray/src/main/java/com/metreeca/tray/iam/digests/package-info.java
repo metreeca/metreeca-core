@@ -16,7 +16,7 @@
  */
 
 /**
- * Credential digests.
+ * Secret digests.
  */
 
 package com.metreeca.tray.iam.digests;
