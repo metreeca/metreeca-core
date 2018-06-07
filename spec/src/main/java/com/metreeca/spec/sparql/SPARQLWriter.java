@@ -22,7 +22,6 @@ import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.shifts.Step;
 import com.metreeca.spec.things.Lists;
 import com.metreeca.spec.things.Sets;
-import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -40,18 +39,19 @@ import java.util.regex.Matcher;
 import static com.metreeca.spec.Frame.frame;
 import static com.metreeca.spec.Issue.issue;
 import static com.metreeca.spec.Report.trace;
+import static com.metreeca.spec.Shape.mode;
 import static com.metreeca.spec.things.Strings.indent;
 import static com.metreeca.spec.things.Values.compare;
 import static com.metreeca.spec.things.Values.is;
 import static com.metreeca.spec.things.Values.text;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-public final class SPARQLWriter { // !!! package-local
+final class SPARQLWriter {
 
 	private static final Logger logger=Logger.getLogger(SPARQLWriter.class.getName()); // !!! migrate logging to Graph?
 
@@ -69,35 +69,25 @@ public final class SPARQLWriter { // !!! package-local
 	}
 
 
-	public Report process(final Shape shape, final _Cell cell) {
+	public Report process(final Shape shape, final Iterable<Statement> model, final Value... focus) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( cell == null ) {
-			throw new NullPointerException("null cell");
+		if ( model == null ) {
+			throw new NullPointerException("null model");
 		}
 
-		final Collection<Value> values=cell.values();
-		final Collection<Statement> model=cell.model();
-
-		if ( !model.isEmpty() ) {
-			connection.add(model);
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
 		}
+
+		connection.add(model);
 
 		return shape
-				.accept(Shape.mode(Spec.verify))
-				.accept(new TracesProbe(new LinkedHashSet<>(values)));
-	}
-
-
-	private Report merge(final Report x, final Report y) {
-
-		final Set<Issue> issues=Sets.union(x.getIssues(), y.getIssues());
-		final Collection<Frame<Report>> frames=Frame.frames(Sets.union(x.getFrames(), y.getFrames()), reducing(trace(), this::merge));
-
-		return trace(issues, frames);
+				.accept(mode(Spec.verify))
+				.accept(new TracesProbe(new LinkedHashSet<>(asList(focus))));
 	}
 
 
@@ -425,13 +415,13 @@ public final class SPARQLWriter { // !!! package-local
 		@Override public Report visit(final And and) {
 			return and.getShapes().stream()
 					.map(shape -> shape.accept(this))
-					.reduce(trace(), SPARQLWriter.this::merge);
+					.reduce(trace(), Report::merge);
 		}
 
 		@Override public Report visit(final Or or) {
 			return or.getShapes().stream()
 					.map(shape -> shape.accept(this))
-					.reduce(trace(), SPARQLWriter.this::merge);
+					.reduce(trace(), Report::merge);
 		}
 
 		@Override public Report visit(final Test test) {

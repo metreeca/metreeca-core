@@ -23,7 +23,6 @@ import com.metreeca.spec.Shape;
 import com.metreeca.spec.shapes.*;
 import com.metreeca.spec.things.Values;
 import com.metreeca.spec.things.ValuesTest;
-import com.metreeca.spec.things._Cell;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Models;
@@ -497,13 +496,7 @@ public class SPARQLWriterTest {
 	}
 
 	private Report process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
-		return ValuesTest.connection(connection -> {
-
-			connection.add(statements);
-
-			return new SPARQLWriter(connection).process(shape, _Cell.cell(focus));
-
-		});
+		return ValuesTest.connection(connection -> new SPARQLWriter(connection).process(shape, statements, focus));
 	}
 
 }

@@ -26,12 +26,12 @@ import org.eclipse.rdf4j.model.*;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.spec.Frame.frames;
+import static com.metreeca.spec.things.Sets.union;
 import static com.metreeca.spec.things.Values.statement;
 
 import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 
 /**
@@ -92,6 +92,19 @@ public final class Report {
 
 	public Set<Frame<Report>> getFrames() {
 		return unmodifiableSet(frames);
+	}
+
+
+	public Report merge(final Report report) {
+
+		if ( report == null ) {
+			throw new NullPointerException("null report");
+		}
+
+		final Set<Issue> issues=union(getIssues(), report.getIssues());
+		final Collection<Frame<Report>> frames=frames(union(getFrames(), report.getFrames()), reducing(trace(), Report::merge));
+
+		return trace(issues, frames);
 	}
 
 
@@ -214,5 +227,4 @@ public final class Report {
 			);
 		});
 	}
-
 }

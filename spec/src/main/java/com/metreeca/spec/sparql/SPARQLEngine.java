@@ -34,7 +34,6 @@ import static com.metreeca.spec.Report.trace;
 import static com.metreeca.spec.shapes.All.all;
 import static com.metreeca.spec.shapes.And.and;
 import static com.metreeca.spec.things.Lists.concat;
-import static com.metreeca.spec.things._Cell.cell;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -84,18 +83,17 @@ public final class SPARQLEngine { // !!! migrate from utility class to processor
 			final RepositoryConnection connection, final IRI focus, final Shape shape, final Collection<Statement> model) {
 
 		final boolean transactional=transactional(connection);
-		final _Cell cell=cell(model).insert(focus);
 
 		// upload statements to repository and validate against shape
 		// disable shape-driven validation if not transactional // !!! just downgrade
 
-		final Report report=new SPARQLWriter(connection).process(transactional ? shape : and(), cell);
+		final Report report=new SPARQLWriter(connection).process(transactional ? shape : and(), model, focus);
 
 		// validate shape envelope // !!! validate even if not transactional
 
 		final Collection<Statement> envelope=report.outline();
 
-		final Collection<Statement> outliers=transactional ? cell.model().stream()
+		final Collection<Statement> outliers=transactional ? model.stream()
 				.filter(statement -> !envelope.contains(statement))
 				.collect(toList()) : emptySet();
 

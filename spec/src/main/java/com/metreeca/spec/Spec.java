@@ -107,7 +107,7 @@ public final class Spec {
 
 	//// Query Properties //////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final IRI meta=iri(Namespace, "meta"); // default subject for query results // !!! review
+	public static final IRI meta=iri(Namespace, "meta"); // default subject for introspective query results
 	public static final IRI path=iri(Namespace, "path");
 
 	public static final IRI stats=iri(Namespace, "stats");
