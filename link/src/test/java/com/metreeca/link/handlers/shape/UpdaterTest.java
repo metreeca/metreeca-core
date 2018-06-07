@@ -62,11 +62,11 @@ public class UpdaterTest {
 		return std(request)
 				.user(RDF.NIL)
 				.roles(Salesman)
-				.text(turtle("<>"
+				.text("@prefix : <http://example.com/terms#> . <>"
 						+":forename 'Tino';"
 						+":surname 'Faussone';"
 						+":email 'tfaussone@example.com';"
-						+":title 'Sales Rep'."));
+						+":title 'Sales Rep'.");
 	}
 
 
@@ -265,7 +265,7 @@ public class UpdaterTest {
 				.request(request -> std(request)
 						.user(RDF.NIL)
 						.roles(Manager)
-						.text(write(parse("<employees/1370>" // missing seniority/supervisor/subordinate
+						.text(encode(decode("<employees/1370>" // missing seniority/supervisor/subordinate
 								+":forename 'Tino';"
 								+":surname 'Faussone';"
 								+":email 'tfaussone@example.com';"
@@ -287,7 +287,7 @@ public class UpdaterTest {
 				.request(request -> std(request)
 						.user(RDF.NIL)
 						.roles(Salesman)
-						.text(write(parse("<employees/1370>"
+						.text(encode(decode("<employees/1370>"
 								+":forename 'Tino';"
 								+":surname 'Faussone';"
 								+":email 'tfaussone@example.com';"

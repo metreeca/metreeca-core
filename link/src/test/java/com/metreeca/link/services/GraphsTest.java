@@ -39,7 +39,6 @@ import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.spec.things.ValuesTest.export;
-import static com.metreeca.spec.things.ValuesTest.write;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.assertTrue;
@@ -124,7 +123,7 @@ public final class GraphsTest {
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
 						.query("default")
-						.text(write(Rest)))
+						.text(ValuesTest.encode(Rest)))
 
 				.response(response -> {
 					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
@@ -145,7 +144,7 @@ public final class GraphsTest {
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
 						.query("graph="+RDF.NIL)
-						.text(write(Rest)))
+						.text(ValuesTest.encode(Rest)))
 
 				.response(response -> {
 					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
@@ -167,7 +166,7 @@ public final class GraphsTest {
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
 						.query("default")
-						.text(write(Rest)))
+						.text(ValuesTest.encode(Rest)))
 
 				.response(response -> {
 					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
@@ -188,7 +187,7 @@ public final class GraphsTest {
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
 						.query("graph="+RDF.NIL)
-						.text(write(Rest)))
+						.text(ValuesTest.encode(Rest)))
 
 				.response(response -> {
 					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {

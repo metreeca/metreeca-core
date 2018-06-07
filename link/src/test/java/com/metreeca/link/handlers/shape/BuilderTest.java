@@ -22,6 +22,7 @@ import com.metreeca.link.LinkTest;
 import com.metreeca.link.Request;
 import com.metreeca.link.Response;
 import com.metreeca.spec.Spec;
+import com.metreeca.spec.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -31,7 +32,7 @@ import static com.metreeca.link.LinkTest.Manager;
 import static com.metreeca.link.LinkTest.testbed;
 import static com.metreeca.link.handlers.shape.Builder.builder;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
-import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.decode;
 import static com.metreeca.spec.things.ValuesTest.sparql;
 
 import static org.junit.Assert.assertEquals;
@@ -79,7 +80,7 @@ public class BuilderTest {
 
 					assertEquals("success reported", Response.OK, response.status());
 
-					final Model expected=parse("<virtual> a :Employee ;\n"
+					final Model expected=ValuesTest.decode("<virtual> a :Employee ;\n"
 							+"\trdfs:label 'Tino Faussone' ;\n"
 							+"\t:code '1234' ;\n"
 							+"\t:surname 'Faussone' ;\n"
@@ -108,7 +109,7 @@ public class BuilderTest {
 
 					assertEquals("success reported", Response.OK, response.status());
 
-					final Model expected=parse("<virtual> a :Employee ;\n"
+					final Model expected=ValuesTest.decode("<virtual> a :Employee ;\n"
 							+"\trdfs:label 'Tino Faussone' ;\n"
 							+"\t:code '1234' ;\n"
 							+"\t:surname 'Faussone' ;\n"

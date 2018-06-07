@@ -20,6 +20,7 @@ package com.metreeca.spec;
 import com.metreeca.spec.shapes.And;
 import com.metreeca.spec.shifts.Step;
 import com.metreeca.spec.things.Sets;
+import com.metreeca.spec.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -32,7 +33,7 @@ import static com.metreeca.spec.things.Sets.set;
 import static com.metreeca.spec.things.Values.literal;
 import static com.metreeca.spec.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.spec.things.ValuesTest.item;
-import static com.metreeca.spec.things.ValuesTest.parse;
+import static com.metreeca.spec.things.ValuesTest.decode;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -79,25 +80,25 @@ public class ReportTest {
 
 	@Test public void testOutline() {
 
-		assertIsomorphic("direct edge", parse("<x> rdf:value <y>."), trace(
+		assertIsomorphic("direct edge", ValuesTest.decode("<x> rdf:value <y>."), trace(
 
 				frame(x, slot(Step.step(RDF.VALUE), trace(frame(y))))
 
 		).outline());
 
-		assertIsomorphic("inverse edge", parse("<y> rdf:value <x>."), trace(
+		assertIsomorphic("inverse edge", ValuesTest.decode("<y> rdf:value <x>."), trace(
 
 				frame(x, slot(Step.step(RDF.VALUE, true), trace(frame(y))))
 
 		).outline());
 
-		assertIsomorphic("multiple traces", parse("<x> rdf:value <y>, <z>."), trace(
+		assertIsomorphic("multiple traces", ValuesTest.decode("<x> rdf:value <y>, <z>."), trace(
 
 				frame(x, slot(Step.step(RDF.VALUE), trace(frame(y), frame(z))))
 
 		).outline());
 
-		assertIsomorphic("multiple edges", parse("<x> rdf:first <y>; rdf:rest <z>."), trace(
+		assertIsomorphic("multiple edges", ValuesTest.decode("<x> rdf:first <y>; rdf:rest <z>."), trace(
 
 				frame(x,
 
@@ -119,7 +120,7 @@ public class ReportTest {
 
 		).outline());
 
-		assertIsomorphic("nested edges", parse("<x> rdf:value <y>. <y> rdf:value <z>."), trace(
+		assertIsomorphic("nested edges", ValuesTest.decode("<x> rdf:value <y>. <y> rdf:value <z>."), trace(
 
 				frame(x, slot(Step.step(RDF.VALUE),
 						trace(frame(y, slot(Step.step(RDF.VALUE),
