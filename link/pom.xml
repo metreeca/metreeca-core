@@ -32,7 +32,7 @@
 	<version>0.0-SNAPSHOT</version>
 
 	<name>Metreeca Linked Data Framework</name>
-	<description>A high-level model-driven framework for rapid linked data server development.</description>
+	<description>A high-level model-driven framework for rapid linked data API development.</description>
 
 	<dependencies>
 

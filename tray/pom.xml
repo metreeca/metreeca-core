@@ -32,6 +32,7 @@
 	<artifactId>tray</artifactId>
 
 	<name>Metreeca Tooling Framework</name>
+	<description>A pluggable framework for sharing configurable tools and services among app components.</description>
 
 	<dependencies>
 
