@@ -54,8 +54,8 @@ These APIs are not listed in the [LDP Port catalog](#ldp-ports) and may be acces
 Payload specs and samples make use of the following system-defined RDF namespaces:
 
 ```sparql
-prefix link: <tag:com.metreeca,2016:link/terms#>
-prefix spec: <tag:com.metreeca,2016:spec/terms#>
+prefix link: <app://link.metreeca.com/terms#>
+prefix spec: <app://spec.metreeca.com/terms#>
 ```
 
 ## Status
@@ -194,7 +194,7 @@ SPARQL Update post-processing scripts are executed after the corresponding state
 ```json
 {
     "this": "http://localhost/!/ports/0d32d37f-47f0-390b-9d9d-5181dc492187",
-    "type": "tag:com.metreeca,2016:link/terms#Port",
+    "type": "app://link.metreeca.com/terms#Port",
     "label": "Product Lines",
     "path": "/product-lines/",
     "root": true,

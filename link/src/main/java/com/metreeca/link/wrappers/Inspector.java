@@ -43,7 +43,7 @@ import static java.lang.String.format;
  * Shape inspector.
  *
  * <p>Associates linked data resources managed by the wrapped handler with the {@linkplain Shape shape} model
- * constraining their representation and driving their lifecycle.
+ * constraining their representation and driving their lifecycle.</p>
  *
  * <p>The associated shape may be inspected as an RDF model retrievable from the location advertised through the {@code
  * Link rel="ldp:constrainedBY} header.</p>

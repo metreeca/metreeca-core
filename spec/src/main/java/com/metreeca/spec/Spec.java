@@ -27,7 +27,7 @@ import static com.metreeca.spec.things.Values.iri;
  */
 public final class Spec {
 
-	public static final String Namespace="tag:com.metreeca,2016:spec/terms#"; // keep aligned with client // !!! review
+	public static final String Namespace="app://spec.metreeca.com/terms#"; // keep aligned with client
 
 
 	//// Shape Types ///////////////////////////////////////////////////////////////////////////////////////////////////

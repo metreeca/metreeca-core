@@ -172,7 +172,7 @@ Parametric shapes for the [mode](../apidocs/com/metreeca/spec/Spec.html#mode) ax
 Linked data shapes may be stored and exchanged as RDF models, recursively encoded according to the following patterns:
 
 ```turtle
-@prefix spec: <tag:com.metreeca,2016:spec/terms#>.
+@prefix spec: <app://spec.metreeca.com/terms#>.
 
 [] a spec:{Shape};
     spec:{property} {value};
@@ -205,7 +205,7 @@ where:
 Shorthands for [set constraints](#set-constraints) and task/view/mode [parametric shapes](#parameters) may be directly encoded acoording to the folloing patterns:
 
 ```
-@prefix spec: <tag:com.metreeca,2016:spec/terms#>.
+@prefix spec: <app://spec.metreeca.com/terms#>.
 
 [] a spec:{shorthand}.
 [] a spec:{shorthand}; spec:values ({value}, …).
@@ -226,7 +226,7 @@ and(required(), datatype(xsd:string))
 will be ancoded in RDF as:
 
 ```turtle
-@prefix spec: <tag:com.metreeca,2016:spec/terms#>.
+@prefix spec: <app://spec.metreeca.com/terms#>.
 
 [] a spec:And; spec:shapes (
     [a spec:required],
