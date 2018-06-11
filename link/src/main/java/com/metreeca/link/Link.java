@@ -19,73 +19,15 @@ package com.metreeca.link;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.io.*;
-import java.util.Properties;
-
 import static com.metreeca.spec.things.Values.iri;
 
 
 /**
- * Linked data server configuration RDF vocabulary.
+ * Linked data server RDF vocabulary.
  */
 public final class Link {
 
-	/**
-	 * Linked data framework build number.
-	 */
-	public static final String Build;
-
-	/**
-	 * Linked data framework identification token.
-	 *
-	 * A semantically versioned identification token suitable for inclusion in HTTP {@code Server} headers.
-	 *
-	 * @see <a href="http://semver.org">Semantic Versioning 2.0.0</a>
-	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.4.2">RFC 7231 Hypertext Transfer Protocol (HTTP/1.1):
-	 * Semantics and Content § 7.4.2. Server</a>
-	 */
-	public static final String Token;
-
-	static {
-		try (
-				final InputStream input=Link.class.getResourceAsStream("Link.properties");
-				final Reader reader=new InputStreamReader(input, "UTF-8");
-		) {
-
-			final Properties properties=new Properties();
-
-			properties.load(reader);
-
-			Build=properties.getProperty("timestamp");
-			Token="Metreeca/"+properties.getProperty("version")+"+"+Build;
-
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	public static final String Namespace="app://link.metreeca.com/terms#"; // keep aligned with client
-
-
-	//// Port Specs ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI Port=iri(Namespace, "Port"); // port class
-
-	public static final IRI path=iri(Namespace, "path"); // port path
-	public static final IRI uuid=iri(Namespace, "uuid"); // port uuid
-	public static final IRI spec=iri(Namespace, "spec"); // port spec
-
-	public static final IRI root=iri(Namespace, "root"); // port root resource flag
-	public static final IRI soft=iri(Namespace, "soft"); // port soft management flag
-
-	public static final IRI create=iri(Namespace, "create"); // port create SPARQL post-processing hook
-	public static final IRI relate=iri(Namespace, "relate"); // port relate SPARQL post-processing hook
-	public static final IRI update=iri(Namespace, "update"); // port update SPARQL post-processing hook
-	public static final IRI delete=iri(Namespace, "delete"); // port delete SPARQL post-processing hook
-	public static final IRI mutate=iri(Namespace, "mutate"); // port mutate SPARQL post-processing hook
 
 
 	//// Extended LDP Resource Types ///////////////////////////////////////////////////////////////////////////////////
@@ -94,47 +36,23 @@ public final class Link {
 	public static final IRI ShapedResource=iri(Namespace, "ShapedResource");
 
 
-	//// Server Metadata ///////////////////////////////////////////////////////////////////////////////////////////////
+	//// Linked Data Tasks /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final IRI ServerVersion=iri(Namespace, "server-version");
+	public static final IRI create=iri(Namespace, "create");
+	public static final IRI relate=iri(Namespace, "relate");
+	public static final IRI update=iri(Namespace, "update");
+	public static final IRI delete=iri(Namespace, "delete");
 
-	public static final IRI SystemName=iri(Namespace, "system-name");
-	public static final IRI SystemVersion=iri(Namespace, "system-version");
-	public static final IRI SystemArchitecture=iri(Namespace, "system-architecture");
-	public static final IRI SystemProcessors=iri(Namespace, "system-processors");
-
-	public static final IRI RuntimeSpecName=iri(Namespace, "runtime-spec-name");
-	public static final IRI RuntimeSpecVendor=iri(Namespace, "runtime-spec-vendor");
-	public static final IRI RuntimeSpecVersion=iri(Namespace, "runtime-spec-version");
-
-	public static final IRI RuntimeVMName=iri(Namespace, "runtime-vm-name");
-	public static final IRI RuntimeVMVendor=iri(Namespace, "runtime-vm-vendor");
-	public static final IRI RuntimeVMVersion=iri(Namespace, "runtime-vm-version");
-
-	public static final IRI RuntimeMemoryTotal=iri(Namespace, "runtime-memory-total");
-	public static final IRI RuntimeMemoryUsage=iri(Namespace, "runtime-memory-usage");
-
-	public static final IRI Backend=iri(Namespace, "backend");
-
-	public static final IRI Setup=iri(Namespace, "setup"); // range: dictionary
-	public static final IRI Properties=iri(Namespace, "properties"); // range: dictionary
-
-
-	//// Dictionaries //////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI Entry=iri(Namespace, "entry");
-	public static final IRI Key=iri(Namespace, "key");
-	public static final IRI Value=iri(Namespace, "value");
 
 
 	//// Audit Trail Records ///////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI Trace=iri(Namespace, "Trace"); // marker RDF class
 
-	public static final IRI Item=iri(Namespace, "item"); // operation target resource (IRI)
-	public static final IRI Task=iri(Namespace, "task"); // operation type tag (Value)
-	public static final IRI User=iri(Namespace, "user"); // operation actor (IRI)
-	public static final IRI Time=iri(Namespace, "time"); // operation ms-precision timestamp (xsd:dataTime)
+	public static final IRI item=iri(Namespace, "item"); // operation target resource (IRI)
+	public static final IRI task=iri(Namespace, "task"); // operation type tag (Value)
+	public static final IRI user=iri(Namespace, "user"); // operation actor (IRI)
+	public static final IRI time=iri(Namespace, "time"); // operation ms-precision timestamp (xsd:dataTime)
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -63,6 +63,53 @@ import static org.junit.Assert.fail;
 
 public final class LinkTest {
 
+	//// !!! factor to request ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//private Supplier<Map<String, List<String>>> parameters=() -> parameters(method.equals(POST)
+	//		&& getHeader("Content-Type").orElse("").startsWith(URLEncodedForm) // ignore charset parameter
+	//		? getText() : query);
+
+
+	private static Map<String, List<String>> parameters(final String query) {
+
+		final Map<String, List<String>> parameters=new LinkedHashMap<>();
+
+		final int length=query.length();
+
+		for (int head=0, tail; head < length; head=tail+1) {
+			try {
+
+				final int equal=query.indexOf('=', head);
+				final int ampersand=query.indexOf('&', head);
+
+				tail=(ampersand >= 0) ? ampersand : length;
+
+				final boolean split=equal >= 0 && equal < tail;
+
+				final String label=URLDecoder.decode(query.substring(head, split ? equal : tail), "UTF-8");
+				final String value=URLDecoder.decode(query.substring(split ? equal+1 : tail, tail), "UTF-8");
+
+				parameters.compute(label, (name, values) -> {
+
+					final List<String> strings=(values != null) ? values : new ArrayList<>();
+
+					strings.add(value);
+
+					return strings;
+
+				});
+
+			} catch ( final UnsupportedEncodingException unexpected ) {
+				throw new UncheckedIOException(unexpected);
+			}
+		}
+
+		return Collections.unmodifiableMap(parameters);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
@@ -346,51 +393,6 @@ public final class LinkTest {
 			);
 		}
 
-	}
-
-
-	//// !!! factor to request ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//private Supplier<Map<String, List<String>>> parameters=() -> parameters(method.equals(POST)
-	//		&& getHeader("Content-Type").orElse("").startsWith(URLEncodedForm) // ignore charset parameter
-	//		? getText() : query);
-
-
-	private static Map<String, List<String>> parameters(final String query) {
-
-		final Map<String, List<String>> parameters=new LinkedHashMap<>();
-
-		final int length=query.length();
-
-		for (int head=0, tail; head < length; head=tail+1) {
-			try {
-
-				final int equal=query.indexOf('=', head);
-				final int ampersand=query.indexOf('&', head);
-
-				tail=(ampersand >= 0) ? ampersand : length;
-
-				final boolean split=equal >= 0 && equal < tail;
-
-				final String label=URLDecoder.decode(query.substring(head, split ? equal : tail), "UTF-8");
-				final String value=URLDecoder.decode(query.substring(split ? equal+1 : tail, tail), "UTF-8");
-
-				parameters.compute(label, (name, values) -> {
-
-					final List<String> strings=(values != null) ? values : new ArrayList<>();
-
-					strings.add(value);
-
-					return strings;
-
-				});
-
-			} catch ( final UnsupportedEncodingException unexpected ) {
-				throw new UncheckedIOException(unexpected);
-			}
-		}
-
-		return Collections.unmodifiableMap(parameters);
 	}
 
 }

@@ -128,10 +128,10 @@ public final class Tracer implements Wrapper {
 								final Collection<Statement> model=new ArrayList<>();
 
 								model.add(statement(trace, RDF.TYPE, Link.Trace));
-								model.add(statement(trace, Link.Item, item));
-								model.add(statement(trace, Link.Task, task));
-								model.add(statement(trace, Link.User, user));
-								model.add(statement(trace, Link.Time, time));
+								model.add(statement(trace, Link.item, item));
+								model.add(statement(trace, Link.task, task));
+								model.add(statement(trace, Link.user, user));
+								model.add(statement(trace, Link.time, time));
 
 								connection.add(model);
 
