@@ -28,7 +28,7 @@
 	<packaging>pom</packaging>
 
 	<name>Metreeca Core</name>
-	<description>Metreeca core back-end modules.</description>
+	<description>Metreeca back-end modules.</description>
 	<url>https://github.com/metreeca/metreeca-core</url>
 	<inceptionYear>2013</inceptionYear>
 

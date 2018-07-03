@@ -42,7 +42,7 @@ import static com.metreeca.spec.things.Values.format;
 import static java.util.stream.Collectors.toList;
 
 
-/**
+	/**
  * Model-driven LDP Basic Container handler.
  *
  * <p>Manages read/write operations for LDP basic containers under the control of a linked data {@linkplain Shape

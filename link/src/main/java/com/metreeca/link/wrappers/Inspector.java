@@ -90,7 +90,7 @@ public final class Inspector implements Wrapper {
 		return (request, response) -> {
 			if ( request.method().equals(Request.GET) && request.query().equals(SpecsQuery) ) {
 
-				// !!! check resource existence (HEAD request? What about virtual containers?)
+				// !!! check resource existence (HEAD request? what about virtual containers?)
 
 				final IRI focus=request.focus();
 				final IRI specs=iri(focus+"?"+SpecsQuery);
