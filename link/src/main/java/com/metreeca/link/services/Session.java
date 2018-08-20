@@ -42,9 +42,7 @@ import static java.util.stream.Collectors.toList;
 
 
 /**
- * Basic session manager.
- *
- * <p>Work in progress…</p>
+ * Basic session manager (work in progress…).
  *
  * <p>Manages session lifecycle interaction with the shared {@link Roster#Factory roster} tool.</p>
  */

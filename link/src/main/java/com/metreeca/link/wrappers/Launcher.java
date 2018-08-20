@@ -30,9 +30,7 @@ import static java.lang.String.format;
 
 
 /**
- * Single page app launcher.
- *
- * <p>Work in progress…</p>
+ * Single page app launcher (work in progress…).
  *
  * <p>Replaces {@linkplain Response.Reader#interactive() non-interactive responses} to {@linkplain
  * Request#interactive() interactive requests} with a relocated version of a (x)html page where absolute {@code href} or

@@ -36,9 +36,7 @@ import static java.util.Collections.singleton;
 
 
 /**
- * Bearer token authenticator.
- *
- * <p>Work in progress…</p>
+ * Bearer token authenticator (work in progress…).
  *
  * <p>Manages bearer token authentication using tokens issued by the shared {@link Roster#Factory roster} tool.</p>
  *

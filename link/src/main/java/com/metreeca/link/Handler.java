@@ -29,7 +29,7 @@ import static com.metreeca.spec.things._JSON.object;
 /**
  * Linked data resource handler.
  *
- * <p>Manages and exposes the state of a linked data resource, generating outgoing {@linkplain Response responses}
+ * <p>Exposes and manages the state of a linked data resource, generating outgoing {@linkplain Response responses}
  * in reaction to to incoming {@linkplain Request requests}.</p>
  */
 @FunctionalInterface public interface Handler {

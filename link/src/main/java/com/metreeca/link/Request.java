@@ -68,9 +68,13 @@ public final class Request {
 	public static final String TRACE="TRACE"; // https://tools.ietf.org/html/rfc7231#section-4.3.8
 	public static final String PATCH="PATCH"; // https://tools.ietf.org/html/rfc5789#section-2
 
-	private static final Collection<String> Safe=new HashSet<>(asList(GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
+
+	private static final Collection<String> Safe=new HashSet<>(asList(
+			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
 	));
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private IRI user=Spec.none;
 	private Set<Value> roles=singleton(Spec.none);

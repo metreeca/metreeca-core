@@ -41,7 +41,7 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
 
 /**
- * RDF spool service
+ * RDF spool service.
  */
 public final class Spool implements Service {
 

@@ -73,6 +73,8 @@ public final class Response {
 	public static final int GatewayTimeout=504; // https://tools.ietf.org/html/rfc7231#section-6.6.5
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Request request;
 
 	private Consumer<Reader> target;

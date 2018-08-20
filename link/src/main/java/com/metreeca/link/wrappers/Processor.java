@@ -90,7 +90,7 @@ public final class Processor implements Wrapper {
 
 	private final Graph graph=tool(Graph.Factory);
 
-	private String script;
+	private String script="";
 
 
 	private Processor() {}

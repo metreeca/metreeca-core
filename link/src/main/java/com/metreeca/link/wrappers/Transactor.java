@@ -29,7 +29,7 @@ import static com.metreeca.spec.sparql.SPARQLEngine.transactional;
 
 
 /**
- * SPARQL transaction manager
+ * SPARQL transaction manager.
  *
  * <p>Executes the wrapped handler inside a SPARQL transaction on the connection provided by the shared {@linkplain
  * Graph#Factory graph} tool.</p>
