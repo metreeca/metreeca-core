@@ -27,10 +27,9 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.Predicate;
 
-import static com.metreeca.spec.things.Bindings.bindings;
 import static com.metreeca.link.wrappers.Transactor.transactor;
+import static com.metreeca.spec.things.Bindings.bindings;
 import static com.metreeca.spec.things.Values.iri;
 import static com.metreeca.spec.things.Values.statement;
 import static com.metreeca.tray.Tray.tool;
@@ -46,19 +45,11 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
  */
 public final class Tracer implements Wrapper {
 
-	public static Tracer tracer() {
-		return new Tracer();
-	}
-
-
 	private Value task=RDF.NIL;
 	private String sparql="";
 
-	private Predicate<Response.Reader> test=reader -> true; // !!! decouple
 
-
-	private Tracer() {}
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Tracer task(final Value task) {
 
@@ -82,17 +73,8 @@ public final class Tracer implements Wrapper {
 		return this;
 	}
 
-	public Tracer test(final Predicate<Response.Reader> test) {
 
-		if ( test == null ) {
-			throw new NullPointerException("null test");
-		}
-
-		this.test=test;
-
-		return this;
-	}
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
 		return (request, response) -> {
@@ -105,7 +87,7 @@ public final class Tracer implements Wrapper {
 
 						reader -> {
 
-							if ( reader.success() && test.test(reader) ) {
+							if ( reader.success() ) {
 
 								final String method=_request.method();
 

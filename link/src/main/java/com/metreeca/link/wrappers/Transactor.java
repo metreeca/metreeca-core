@@ -52,7 +52,7 @@ public final class Transactor implements Wrapper {
 
 	private final RepositoryConnection connection;
 
-	private final boolean conditional; // !!! review
+	private final boolean conditional; // !!! review/remove
 
 
 	private Transactor(final RepositoryConnection connection, final boolean conditional) {
