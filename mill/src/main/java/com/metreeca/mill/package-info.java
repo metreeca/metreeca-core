@@ -16,7 +16,7 @@
  */
 
 /**
- * Linked data integration engine.
+ * Linked data integration engine (work in progress…).
  */
 
 package com.metreeca.mill;
