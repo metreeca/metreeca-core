@@ -5,6 +5,9 @@
 
 Metreeca/Core provides a Java framework and core back-end components for rapid development of linked data integration pipelines and read/write REST APIs.
 
+home / [www.metreeca.com](https://www.metreeca.com/)  
+docs / [docs.metreeca.com](https://docs.metreeca.com/)  
+forum / [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca)
 
 ## License
 
