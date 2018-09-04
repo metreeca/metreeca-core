@@ -3,7 +3,7 @@
 - operating system: _name_ / _version_
 - java VM: _vendor_ / _version_
 
-# Steps to Reproduce
+# How to Reproduce
 
 - …
 
