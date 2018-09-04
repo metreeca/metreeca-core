@@ -5,7 +5,7 @@
 	<key>ApplicationVersion</key>
 	<array>
 		<string>com.omnigroup.OmniGraffle7</string>
-		<string>181.4.0.297378</string>
+		<string>191.13.0.314553</string>
 	</array>
 	<key>ColorProfiles</key>
 	<array>
@@ -103,7 +103,7 @@
 	<key>Creator</key>
 	<string>Alessandro</string>
 	<key>GraphDocumentVersion</key>
-	<integer>14</integer>
+	<integer>15</integer>
 	<key>GuidesLocked</key>
 	<string>NO</string>
 	<key>GuidesVisible</key>
@@ -189,7 +189,7 @@
 				<key>Class</key>
 				<string>GraffleShapes.CanvasBackgroundGraphic</string>
 				<key>ID</key>
-				<integer>2</integer>
+				<integer>0</integer>
 				<key>Style</key>
 				<dict>
 					<key>shadow</key>
@@ -225,6 +225,13 @@
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -254,16 +261,12 @@
 						</dict>
 						<key>stroke</key>
 						<dict>
-							<key>HeadArrow</key>
-							<string>0</string>
 							<key>HeadScale</key>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -287,6 +290,13 @@
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -312,7 +322,7 @@
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -328,6 +338,13 @@
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -345,10 +362,10 @@
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>38.273644137465169</real>
+					<real>46.373644137465163</real>
 					<key>Points</key>
 					<array>
-						<string>{318.03902480828293, 308.00140559171444}</string>
+						<string>{318.03902480828287, 308.0014055917145}</string>
 						<string>{373.70920068368855, 400.74869386664483}</string>
 					</array>
 					<key>Style</key>
@@ -375,8 +392,6 @@
 							<integer>2</integer>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -394,6 +409,13 @@
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -411,10 +433,10 @@
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>38.273644137465169</real>
+					<real>46.37364769239602</real>
 					<key>Points</key>
 					<array>
-						<string>{318.03902480828293, 308.00140559171444}</string>
+						<string>{318.03902480828287, 308.0014055917145}</string>
 						<string>{254.26776743814457, 400.74870097650654}</string>
 					</array>
 					<key>Style</key>
@@ -441,8 +463,6 @@
 							<integer>2</integer>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -471,6 +491,13 @@
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -494,7 +521,7 @@
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -517,6 +544,13 @@ data(:Model, :Shape)}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -538,7 +572,7 @@ data(:Model, :Shape)}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -610,6 +644,13 @@ data(:Model, :Shape)}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -633,7 +674,7 @@ data(:Model, :Shape)}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -658,6 +699,13 @@ data(:Shape):Model}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -679,7 +727,7 @@ data(:Shape):Model}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -740,6 +788,13 @@ data(:Shape):Model}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -785,8 +840,6 @@ data(:Shape):Model}</string>
 							<integer>2</integer>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -804,6 +857,13 @@ data(:Shape):Model}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -849,8 +909,6 @@ data(:Shape):Model}</string>
 							<integer>2</integer>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -879,6 +937,13 @@ data(:Shape):Model}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -900,7 +965,7 @@ data(:Shape):Model}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -922,6 +987,13 @@ data(:Shape):Model}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -945,7 +1017,7 @@ data(:Shape):Model}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1019,6 +1091,13 @@ data(:Shape):Model}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -1042,7 +1121,7 @@ data(:Shape):Model}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1067,6 +1146,13 @@ detach(path:String, :Handler)}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -1088,7 +1174,7 @@ detach(path:String, :Handler)}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1160,6 +1246,13 @@ detach(path:String, :Handler)}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -1181,7 +1274,7 @@ detach(path:String, :Handler)}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1203,6 +1296,13 @@ detach(path:String, :Handler)}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Size</key>
 								<real>8</real>
 							</dict>
@@ -1226,7 +1326,7 @@ detach(path:String, :Handler)}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1325,8 +1425,6 @@ detach(path:String, :Handler)}</string>
 			</dict>
 			<key>Orientation</key>
 			<integer>2</integer>
-			<key>OutlineStyle</key>
-			<string>Basic</string>
 			<key>PrintOnePage</key>
 			<false/>
 			<key>RowAlign</key>
@@ -1356,7 +1454,7 @@ detach(path:String, :Handler)}</string>
 				<key>Class</key>
 				<string>GraffleShapes.CanvasBackgroundGraphic</string>
 				<key>ID</key>
-				<integer>2</integer>
+				<integer>0</integer>
 				<key>Style</key>
 				<dict>
 					<key>shadow</key>
@@ -1389,7 +1487,7 @@ detach(path:String, :Handler)}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{285.86869102135722, 755.22321045806348}, {42, 21}}</string>
+					<string>{{307.91003643943282, 733.18187151511188}, {42, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1398,6 +1496,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>HelveticaNeue-Italic</string>
 						<key>Size</key>
@@ -1410,7 +1515,7 @@ detach(path:String, :Handler)}</string>
 						<key>ID</key>
 						<integer>4</integer>
 						<key>Position</key>
-						<real>0.70182894463467038</real>
+						<real>0.70182895660400391</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -1437,7 +1542,7 @@ detach(path:String, :Handler)}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1454,6 +1559,13 @@ detach(path:String, :Handler)}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -1471,7 +1583,7 @@ detach(path:String, :Handler)}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>8.76922607421875</real>
+					<real>73.477815130271608</real>
 					<key>Points</key>
 					<array>
 						<string>{247.81003643943285, 617.89178073424023}</string>
@@ -1499,8 +1611,6 @@ detach(path:String, :Handler)}</string>
 							<true/>
 							<key>LineType</key>
 							<integer>2</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -1524,6 +1634,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>NSKern</key>
 						<real>0.0</real>
 						<key>Size</key>
@@ -1561,7 +1678,7 @@ detach(path:String, :Handler)}</string>
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1574,7 +1691,7 @@ detach(path:String, :Handler)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{284.45249976540595, 678.49719591122039}, {34, 15}}</string>
+					<string>{{309.91003643943282, 653.03966544558762}, {34, 15}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1583,6 +1700,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>HelveticaNeue-Italic</string>
 						<key>Size</key>
@@ -1595,7 +1719,7 @@ detach(path:String, :Handler)}</string>
 						<key>ID</key>
 						<integer>7</integer>
 						<key>Position</key>
-						<real>0.57683728294139591</real>
+						<real>0.57683730125427246</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -1624,7 +1748,7 @@ detach(path:String, :Handler)}</string>
 						<key>Pad</key>
 						<real>3</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1642,6 +1766,13 @@ detach(path:String, :Handler)}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -1657,7 +1788,7 @@ detach(path:String, :Handler)}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>8.76922607421875</real>
+					<real>71.477814644969925</real>
 					<key>Points</key>
 					<array>
 						<string>{247.81003643943285, 617.89178073424023}</string>
@@ -1685,8 +1816,6 @@ detach(path:String, :Handler)}</string>
 							<true/>
 							<key>LineType</key>
 							<integer>2</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -1712,6 +1841,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>NSKern</key>
 						<real>0.0</real>
 						<key>Size</key>
@@ -1747,7 +1883,7 @@ detach(path:String, :Handler)}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1770,6 +1906,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>NSKern</key>
 						<real>0.0</real>
 						<key>Size</key>
@@ -1805,7 +1948,7 @@ detach(path:String, :Handler)}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1819,7 +1962,7 @@ detach(path:String, :Handler)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{283.96976743822188, 702.49719591122039}, {36, 15}}</string>
+					<string>{{283.9697619719812, 702.49719591122039}, {36, 15}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1828,6 +1971,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>HelveticaNeue-Italic</string>
 						<key>Size</key>
@@ -1840,7 +1990,7 @@ detach(path:String, :Handler)}</string>
 						<key>ID</key>
 						<integer>11</integer>
 						<key>Position</key>
-						<real>0.62224319094221592</real>
+						<real>0.62224316596984863</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -1869,7 +2019,7 @@ detach(path:String, :Handler)}</string>
 						<key>Pad</key>
 						<real>3</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1887,6 +2037,13 @@ detach(path:String, :Handler)}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -1930,8 +2087,6 @@ detach(path:String, :Handler)}</string>
 							<true/>
 							<key>LineType</key>
 							<integer>2</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -1955,6 +2110,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>NSKern</key>
 						<real>0.0</real>
 						<key>Size</key>
@@ -1990,7 +2152,7 @@ detach(path:String, :Handler)}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2004,7 +2166,7 @@ detach(path:String, :Handler)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{283.88166958927434, 660.49719591122039}, {35, 15}}</string>
+					<string>{{309.41003643943282, 634.96883175323603}, {35, 15}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2013,6 +2175,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>HelveticaNeue-Italic</string>
 						<key>Size</key>
@@ -2025,7 +2194,7 @@ detach(path:String, :Handler)}</string>
 						<key>ID</key>
 						<integer>14</integer>
 						<key>Position</key>
-						<real>0.53701692494537301</real>
+						<real>0.53701692819595337</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -2054,7 +2223,7 @@ detach(path:String, :Handler)}</string>
 						<key>Pad</key>
 						<real>3</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2072,6 +2241,13 @@ detach(path:String, :Handler)}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -2087,7 +2263,7 @@ detach(path:String, :Handler)}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>8.76922607421875</real>
+					<real>71.477815130271608</real>
 					<key>Points</key>
 					<array>
 						<string>{247.81003643943285, 617.89178073424023}</string>
@@ -2115,8 +2291,6 @@ detach(path:String, :Handler)}</string>
 							<true/>
 							<key>LineType</key>
 							<integer>2</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -2142,6 +2316,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>NSKern</key>
 						<real>0.0</real>
 						<key>Size</key>
@@ -2177,7 +2358,7 @@ detach(path:String, :Handler)}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2191,7 +2372,7 @@ detach(path:String, :Handler)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{281.27016957309621, 628.16816433374311}, {75, 15}}</string>
+					<string>{{289.41003643943282, 620.02829565014827}, {75, 15}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2200,6 +2381,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>HelveticaNeue-Italic</string>
 						<key>Size</key>
@@ -2212,7 +2400,7 @@ detach(path:String, :Handler)}</string>
 						<key>ID</key>
 						<integer>17</integer>
 						<key>Position</key>
-						<real>0.55207744135045889</real>
+						<real>0.55207741260528564</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -2241,7 +2429,7 @@ detach(path:String, :Handler)}</string>
 						<key>Pad</key>
 						<real>3</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2259,6 +2447,13 @@ detach(path:String, :Handler)}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -2274,7 +2469,7 @@ detach(path:String, :Handler)}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>8.76922607421875</real>
+					<real>71.477814644969925</real>
 					<key>Points</key>
 					<array>
 						<string>{247.81003643943285, 617.89178073424023}</string>
@@ -2302,8 +2497,6 @@ detach(path:String, :Handler)}</string>
 							<true/>
 							<key>LineType</key>
 							<integer>2</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -2327,6 +2520,13 @@ detach(path:String, :Handler)}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>NSKern</key>
 						<real>0.0</real>
 						<key>Size</key>
@@ -2362,7 +2562,7 @@ detach(path:String, :Handler)}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2376,7 +2576,7 @@ link:Port}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{280.70670210720266, 610.39178073424023}, {34, 15}}</string>
+					<string>{{280.70670353063099, 610.39178073424023}, {34, 15}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2385,6 +2585,13 @@ link:Port}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>HelveticaNeue-Italic</string>
 						<key>Size</key>
@@ -2426,7 +2633,7 @@ link:Port}</string>
 						<key>Pad</key>
 						<real>3</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2444,6 +2651,13 @@ link:Port}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -2459,7 +2673,7 @@ link:Port}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>8.76922607421875</real>
+					<real>-1</real>
 					<key>Points</key>
 					<array>
 						<string>{247.81003643943285, 617.89178073424023}</string>
@@ -2487,8 +2701,6 @@ link:Port}</string>
 							<true/>
 							<key>LineType</key>
 							<integer>2</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -2503,7 +2715,7 @@ link:Port}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{279.48820323304795, 726.67048284825114}, {69, 21}}</string>
+					<string>{{279.48820386516189, 726.67048284825114}, {69, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2512,6 +2724,13 @@ link:Port}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>HelveticaNeue-Italic</string>
 						<key>Size</key>
@@ -2551,7 +2770,7 @@ link:Port}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2568,6 +2787,13 @@ rdfs:isDefinedBy}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -2613,8 +2839,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>LineType</key>
 							<integer>2</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -2640,6 +2864,13 @@ rdfs:isDefinedBy}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>NSKern</key>
 						<real>0.0</real>
 						<key>Size</key>
@@ -2675,7 +2906,7 @@ rdfs:isDefinedBy}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2689,7 +2920,7 @@ rdfs:isDefinedBy}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{192.81003643943285, 528.69839941539294}, {50, 15}}</string>
+					<string>{{192.86036758827817, 528.69839957676515}, {50, 15}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2698,6 +2929,13 @@ rdfs:isDefinedBy}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>HelveticaNeue-Italic</string>
 						<key>Size</key>
@@ -2739,7 +2977,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>3</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2763,6 +3001,13 @@ rdfs:isDefinedBy}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>NSKern</key>
 						<real>0.0</real>
 						<key>Size</key>
@@ -2798,7 +3043,7 @@ rdfs:isDefinedBy}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2815,6 +3060,13 @@ rdfs:isDefinedBy}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -2833,7 +3085,7 @@ rdfs:isDefinedBy}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{217.89385447106255, 478}</string>
+						<string>{217.90033231928089, 478}</string>
 						<string>{217.81003643943285, 607.39178073424023}</string>
 					</array>
 					<key>Style</key>
@@ -2858,8 +3110,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>LineType</key>
 							<integer>2</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -2875,16 +3125,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -2919,8 +3159,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -2935,7 +3173,7 @@ rdfs:isDefinedBy}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{613.26041934642126, 476.78852501799201}, {112.17670866986919, 33}}</string>
+					<string>{{613.26041903246812, 476.7885252086752}, {112.17670866986919, 33}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2969,7 +3207,7 @@ rdfs:isDefinedBy}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2981,16 +3219,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -3000,8 +3228,8 @@ rdfs:isDefinedBy}</string>
 					<integer>30</integer>
 					<key>Points</key>
 					<array>
-						<string>{733.41367347357914, 454.37794170860479}</string>
-						<string>{597.93216991081067, 536.6642536884458}</string>
+						<string>{733.41367362222479, 454.37794161832312}</string>
+						<string>{597.93216957031507, 536.66425389524989}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3025,8 +3253,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -3041,7 +3267,7 @@ rdfs:isDefinedBy}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{645.69113081831006, 389.98940654157428}, {112.17670866986919, 33}}</string>
+					<string>{{645.69113033305666, 389.98940608611713}, {112.17670866986919, 33}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3075,7 +3301,7 @@ rdfs:isDefinedBy}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3087,16 +3313,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -3106,8 +3322,8 @@ rdfs:isDefinedBy}</string>
 					<integer>32</integer>
 					<key>Points</key>
 					<array>
-						<string>{641.98802290367826, 350.36934986873564}</string>
-						<string>{734.87561850804877, 437.55332118160976}</string>
+						<string>{641.98802325187216, 350.36935019554926}</string>
+						<string>{734.87561820885162, 437.55332090078434}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3131,8 +3347,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -3147,7 +3361,7 @@ rdfs:isDefinedBy}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{563.55808493785435, 391.45970923047719}, {78, 22}}</string>
+					<string>{{563.55808493785446, 391.45970923047713}, {78, 22}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3181,7 +3395,7 @@ rdfs:isDefinedBy}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3195,16 +3409,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -3215,7 +3419,7 @@ rdfs:isDefinedBy}</string>
 					<key>Points</key>
 					<array>
 						<string>{590.4742336427164, 428.7289511764294}</string>
-						<string>{625.89423364271624, 351.7289511764294}</string>
+						<string>{625.89423364271647, 351.7289511764294}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3239,8 +3443,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -3289,7 +3491,7 @@ rdfs:isDefinedBy}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3303,16 +3505,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -3347,8 +3539,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -3377,6 +3567,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -3409,7 +3606,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3433,6 +3630,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -3467,7 +3671,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -3520,6 +3724,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -3552,7 +3763,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3576,6 +3787,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -3610,7 +3828,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -3685,7 +3903,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3701,16 +3919,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -3745,8 +3953,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -3762,16 +3968,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -3781,8 +3977,8 @@ rdfs:isDefinedBy}</string>
 					<integer>45</integer>
 					<key>Points</key>
 					<array>
-						<string>{370.98689717010637, 323.99948072561546}</string>
-						<string>{399.18423364271621, 323.61886569549057}</string>
+						<string>{370.98689717010637, 323.99962913681128}</string>
+						<string>{399.18423364271621, 323.61926027141732}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3806,8 +4002,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -3823,16 +4017,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -3842,8 +4026,8 @@ rdfs:isDefinedBy}</string>
 					<integer>46</integer>
 					<key>Points</key>
 					<array>
-						<string>{260.68423364271621, 324.22894591804078}</string>
-						<string>{312.98689717010637, 324.22894591804078}</string>
+						<string>{260.68423364271621, 324.2289511764294}</string>
+						<string>{312.98689717010637, 324.2289511764294}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3867,8 +4051,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -3897,6 +4079,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -3929,7 +4118,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3953,6 +4142,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -3987,7 +4183,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -4026,7 +4222,7 @@ rdfs:isDefinedBy}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{450.06716887391309, 475.5046092497962}, {40, 20}}</string>
+					<string>{{450.06716863539197, 475.5046090517024}, {40, 20}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -4062,7 +4258,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4078,16 +4274,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -4097,8 +4283,8 @@ rdfs:isDefinedBy}</string>
 					<integer>51</integer>
 					<key>Points</key>
 					<array>
-						<string>{407.72504996924687, 433.7289511764294}</string>
-						<string>{532.32423715113521, 537.20963205630267}</string>
+						<string>{407.72504996924681, 433.7289511764294}</string>
+						<string>{532.32423691277677, 537.20963185834398}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4122,8 +4308,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -4174,7 +4358,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4190,16 +4374,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -4234,8 +4408,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -4251,16 +4423,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -4270,8 +4432,8 @@ rdfs:isDefinedBy}</string>
 					<integer>56</integer>
 					<key>Points</key>
 					<array>
-						<string>{289.93372107336427, 479.84976016788272}</string>
-						<string>{319.29976818752124, 515.4665067464133}</string>
+						<string>{289.9349528274978, 479.84886053586689}</string>
+						<string>{319.30580379441159, 515.46319630904884}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4295,8 +4457,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -4312,16 +4472,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -4331,8 +4481,8 @@ rdfs:isDefinedBy}</string>
 					<integer>57</integer>
 					<key>Points</key>
 					<array>
-						<string>{291.65009327737198, 461.09256325798276}</string>
-						<string>{326.28030135793682, 432.68689750726986}</string>
+						<string>{291.64911734312, 461.09080615411625}</string>
+						<string>{326.27529773398305, 432.67980305745522}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4356,8 +4506,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -4386,6 +4534,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -4418,7 +4573,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4442,6 +4597,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -4476,7 +4638,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -4529,6 +4691,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -4561,7 +4730,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4585,6 +4754,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -4619,7 +4795,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -4661,6 +4837,13 @@ rdfs:isDefinedBy}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -4673,8 +4856,8 @@ rdfs:isDefinedBy}</string>
 					<integer>64</integer>
 					<key>Points</key>
 					<array>
-						<string>{760.68423364271644, 353.55083956272699}</string>
-						<string>{827.06223495043446, 338.73686487968098}</string>
+						<string>{760.68423364271644, 353.55083958844659}</string>
+						<string>{827.06223495054871, 338.73686504764282}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4690,16 +4873,12 @@ rdfs:isDefinedBy}</string>
 						</dict>
 						<key>stroke</key>
 						<dict>
-							<key>HeadArrow</key>
-							<string>0</string>
 							<key>HeadScale</key>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -4723,6 +4902,13 @@ rdfs:isDefinedBy}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -4764,7 +4950,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4778,16 +4964,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -4797,8 +4973,8 @@ rdfs:isDefinedBy}</string>
 					<integer>66</integer>
 					<key>Points</key>
 					<array>
-						<string>{736.68423364271644, 354.00929797918837}</string>
-						<string>{680.18423364271644, 343.55843084217867}</string>
+						<string>{736.68423364271644, 354.00929799723866}</string>
+						<string>{680.18423364271644, 343.55843094521555}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4822,8 +4998,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -4852,6 +5026,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -4884,7 +5065,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4908,6 +5089,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -4942,7 +5130,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -4995,6 +5183,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5027,7 +5222,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5051,6 +5246,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5085,7 +5287,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -5125,16 +5327,6 @@ rdfs:isDefinedBy}</string>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-					</dict>
 					<key>Head</key>
 					<dict>
 						<key>ID</key>
@@ -5144,8 +5336,8 @@ rdfs:isDefinedBy}</string>
 					<integer>73</integer>
 					<key>Points</key>
 					<array>
-						<string>{618.18423364271644, 338.85846922435638}</string>
-						<string>{530.44895422294508, 329.60926791628879}</string>
+						<string>{618.18423364271644, 338.85846924871856}</string>
+						<string>{530.44895433252259, 329.60926811661983}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -5169,8 +5361,6 @@ rdfs:isDefinedBy}</string>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -5194,6 +5384,13 @@ rdfs:isDefinedBy}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Font</key>
 						<string>Roboto-Light</string>
 					</dict>
@@ -5226,7 +5423,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5255,6 +5452,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5289,7 +5493,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5313,6 +5517,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5347,7 +5558,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5371,6 +5582,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5405,7 +5623,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5429,6 +5647,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5463,7 +5688,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5527,6 +5752,13 @@ rdfs:isDefinedBy}</string>
 					<string>LineGraphic</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -5539,8 +5771,8 @@ rdfs:isDefinedBy}</string>
 					<integer>80</integer>
 					<key>Points</key>
 					<array>
-						<string>{647.99342502805007, 330.64149690717807}</string>
-						<string>{621.58386322411775, 312.79892902105473}</string>
+						<string>{647.99344765022772, 330.64148752319545}</string>
+						<string>{621.58396738263184, 312.7989288164124}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -5556,16 +5788,12 @@ rdfs:isDefinedBy}</string>
 						</dict>
 						<key>stroke</key>
 						<dict>
-							<key>HeadArrow</key>
-							<string>0</string>
 							<key>HeadScale</key>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -5589,6 +5817,13 @@ rdfs:isDefinedBy}</string>
 					<string>Resize</string>
 					<key>FontInfo</key>
 					<dict>
+						<key>Color</key>
+						<dict>
+							<key>space</key>
+							<string>gg22</string>
+							<key>w</key>
+							<string>0</string>
+						</dict>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -5630,7 +5865,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5657,6 +5892,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5689,7 +5931,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5713,6 +5955,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5747,7 +5996,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -5800,6 +6049,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5832,7 +6088,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5856,6 +6112,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5890,7 +6153,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -5943,6 +6206,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -5975,7 +6245,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5999,6 +6269,13 @@ rdfs:isDefinedBy}</string>
 							<string>Resize</string>
 							<key>FontInfo</key>
 							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
 								<key>Font</key>
 								<string>Roboto-Light</string>
 							</dict>
@@ -6033,7 +6310,7 @@ rdfs:isDefinedBy}</string>
 								<key>Pad</key>
 								<real>6</real>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 FontAwesome;}
 {\colortbl;\red255\green255\blue255;\red38\green38\blue38;}
 {\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;}
@@ -6294,7 +6571,7 @@ rdfs:isDefinedBy}</string>
 				<key>Class</key>
 				<string>GraffleShapes.CanvasBackgroundGraphic</string>
 				<key>ID</key>
-				<integer>2</integer>
+				<integer>0</integer>
 				<key>Style</key>
 				<dict>
 					<key>shadow</key>
@@ -6377,7 +6654,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -6442,7 +6719,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -6467,8 +6744,8 @@ rdfs:isDefinedBy}</string>
 					<integer>5</integer>
 					<key>Points</key>
 					<array>
-						<string>{549.27659142574316, 479.44291798312827}</string>
-						<string>{600.94488734222762, 471.86405728092308}</string>
+						<string>{549.38539824820043, 479.44291798312827}</string>
+						<string>{600.94488734222762, 471.8920686317386}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -6490,8 +6767,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -6556,7 +6831,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset77 ZapfDingbatsITC;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -6583,8 +6858,8 @@ rdfs:isDefinedBy}</string>
 					<integer>7</integer>
 					<key>Points</key>
 					<array>
-						<string>{532.35826983836705, 388.59076195213947}</string>
-						<string>{572.7320421531914, 389.12793073383165}</string>
+						<string>{532.35826983836705, 389.01955542524325}</string>
+						<string>{572.7320421531914, 389.7626892452011}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -6606,8 +6881,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -6672,7 +6945,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset77 ZapfDingbatsITC;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -6698,8 +6971,8 @@ rdfs:isDefinedBy}</string>
 					<integer>9</integer>
 					<key>Points</key>
 					<array>
-						<string>{362.66240394096656, 256.3816411104014}</string>
-						<string>{431.50137926950038, 263.75186854146909}</string>
+						<string>{362.66240394096656, 256.15141173796849}</string>
+						<string>{432.3377980094341, 263.43628199767903}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -6721,8 +6994,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -6787,7 +7058,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -6810,8 +7081,8 @@ rdfs:isDefinedBy}</string>
 					<integer>11</integer>
 					<key>Points</key>
 					<array>
-						<string>{362.66240394096656, 244.02257851167289}</string>
-						<string>{492.4921307294386, 240.42713822924659}</string>
+						<string>{362.66240394096656, 244.01365853576223}</string>
+						<string>{492.4921307294386, 240.40559103581413}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -6833,8 +7104,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -6899,7 +7168,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset77 ZapfDingbatsITC;\f1\fnil\fcharset0 HelveticaNeue-Light;\f2\fnil\fcharset0 LucidaGrande;
 }
 {\colortbl;\red255\green255\blue255;}
@@ -6928,8 +7197,8 @@ rdfs:isDefinedBy}</string>
 					<integer>13</integer>
 					<key>Points</key>
 					<array>
-						<string>{189.75566659246329, 401.0787433337976}</string>
-						<string>{135.8538192846176, 421.10236584398677}</string>
+						<string>{189.75645575352249, 401.0787433337976}</string>
+						<string>{135.85562792071892, 421.10236584398677}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -6951,8 +7220,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7017,7 +7284,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset77 ZapfDingbatsITC;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7041,8 +7308,8 @@ rdfs:isDefinedBy}</string>
 					<integer>15</integer>
 					<key>Points</key>
 					<array>
-						<string>{218.71833318017735, 401.07874333379755}</string>
-						<string>{182.19092389511002, 445.44291798312827}</string>
+						<string>{218.71837921194464, 401.07874333379755}</string>
+						<string>{182.19110167922321, 445.44291798312832}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7064,8 +7331,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7130,7 +7395,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset77 ZapfDingbatsITC;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7157,8 +7422,8 @@ rdfs:isDefinedBy}</string>
 					<integer>17</integer>
 					<key>Points</key>
 					<array>
-						<string>{507.4015794068809, 337.45149696486197}</string>
-						<string>{554.87451317216494, 338.43225412083456}</string>
+						<string>{507.4015794068809, 337.67496555419694}</string>
+						<string>{554.87451317216494, 338.79694976461099}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7180,8 +7445,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7246,7 +7509,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset77 ZapfDingbatsITC;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7272,8 +7535,8 @@ rdfs:isDefinedBy}</string>
 					<integer>19</integer>
 					<key>Points</key>
 					<array>
-						<string>{99.642089406464905, 324.60433160632027}</string>
-						<string>{197.9663921326883, 370.07874333379755}</string>
+						<string>{99.642088906641078, 324.60433232453613}</string>
+						<string>{197.96637996251101, 370.07874333379755}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7295,8 +7558,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7321,8 +7582,8 @@ rdfs:isDefinedBy}</string>
 					<integer>20</integer>
 					<key>Points</key>
 					<array>
-						<string>{101.34421861715261, 307.58749264806215}</string>
-						<string>{179.31473637256616, 279.53253653234782}</string>
+						<string>{101.34432323429266, 307.58762134272729}</string>
+						<string>{179.31485405370168, 279.53325953687335}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7344,8 +7605,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7370,8 +7629,8 @@ rdfs:isDefinedBy}</string>
 					<integer>21</integer>
 					<key>Points</key>
 					<array>
-						<string>{374.31549186952179, 464.91612529053657}</string>
-						<string>{437.57320766206465, 479.44291798312827}</string>
+						<string>{374.31326057205746, 464.91704431360176}</string>
+						<string>{437.56095863017765, 479.44291798312827}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7393,8 +7652,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7459,7 +7716,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7484,8 +7741,8 @@ rdfs:isDefinedBy}</string>
 					<integer>23</integer>
 					<key>Points</key>
 					<array>
-						<string>{378.03149831341943, 454.52332067277422}</string>
-						<string>{435.68504299648157, 458.40050502446496}</string>
+						<string>{378.03149831341943, 454.60585015107841}</string>
+						<string>{435.68504299648157, 458.55174181990708}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7507,8 +7764,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7533,8 +7788,8 @@ rdfs:isDefinedBy}</string>
 					<integer>24</integer>
 					<key>Points</key>
 					<array>
-						<string>{378.03149831341943, 445.66268795388515}</string>
-						<string>{453.36220692339839, 441.09026275223914}</string>
+						<string>{378.03149831341943, 445.66898307944479}</string>
+						<string>{453.36220692339839, 441.10340557150596}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7556,8 +7811,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7622,7 +7875,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7687,7 +7940,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7712,8 +7965,8 @@ rdfs:isDefinedBy}</string>
 					<integer>27</integer>
 					<key>Points</key>
 					<array>
-						<string>{250.11759619750649, 401.0787433337976}</string>
-						<string>{290.14254051579559, 434.36614564159697}</string>
+						<string>{250.11752610005561, 401.0787433337976}</string>
+						<string>{290.14231987885773, 434.36614564159697}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7735,8 +7988,6 @@ rdfs:isDefinedBy}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -7801,7 +8052,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset77 ZapfDingbatsITC;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7865,7 +8116,7 @@ rdfs:isDefinedBy}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7932,7 +8183,7 @@ resources are stored under their canonical IRI}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8000,7 +8251,7 @@ request are server from alternate IRIs including a canonical location header\
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8025,8 +8276,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>32</integer>
 					<key>Points</key>
 					<array>
-						<string>{362.66240394096656, 215.3625164214252}</string>
-						<string>{367.71653804356652, 213.64314394217405}</string>
+						<string>{362.66240394096656, 222.25568854297353}</string>
+						<string>{368.23368391460184, 220.77912704772663}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8048,8 +8299,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -8114,7 +8363,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset77 ZapfDingbatsITC;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8181,7 +8430,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;\f1\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8247,7 +8496,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8272,8 +8521,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>36</integer>
 					<key>Points</key>
 					<array>
-						<string>{310.0000016331673, 47.608482669408531}</string>
-						<string>{436.53543703161824, 52.950123246092843}</string>
+						<string>{310.0000016331673, 47.608481156884089}</string>
+						<string>{436.53543703161824, 52.950118969922215}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8295,8 +8544,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -8321,8 +8568,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>37</integer>
 					<key>Points</key>
 					<array>
-						<string>{460.53543703161824, 56.133149508301543}</string>
-						<string>{509.60030615188003, 67.076479012253046}</string>
+						<string>{460.53543703161824, 56.133144189072723}</string>
+						<string>{509.60031961218601, 67.076454946238954}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8344,8 +8591,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -8370,8 +8615,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>38</integer>
 					<key>Points</key>
 					<array>
-						<string>{460.53543703161824, 51.305299046285867}</string>
-						<string>{504.5356497553671, 43.416813852931043}</string>
+						<string>{460.53543703161824, 51.305253157417098}</string>
+						<string>{504.53521256255505, 43.416678086924968}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8393,8 +8638,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -8459,7 +8702,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8522,7 +8765,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8547,8 +8790,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>41</integer>
 					<key>Points</key>
 					<array>
-						<string>{396.14222842163906, 135.33270458924628}</string>
-						<string>{427.71703303723802, 139.38466655754209}</string>
+						<string>{396.14222842163906, 135.33270461010321}</string>
+						<string>{427.71703303723802, 139.38466660975871}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8570,8 +8813,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -8596,8 +8837,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>42</integer>
 					<key>Points</key>
 					<array>
-						<string>{396.14222842163906, 129.79351346655125}</string>
-						<string>{446.45669696415501, 122.97881911846176}</string>
+						<string>{396.14222842163906, 129.79416202451696}</string>
+						<string>{446.45669696415501, 122.9810215740162}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8619,8 +8860,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -8685,7 +8924,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8710,8 +8949,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>44</integer>
 					<key>Points</key>
 					<array>
-						<string>{116.03149668025219, 141.10134429286768}</string>
-						<string>{167.24409600562004, 148.66008499827984}</string>
+						<string>{116.03149668025218, 141.10143371868088}</string>
+						<string>{167.24409600562004, 148.66036524610723}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8733,8 +8972,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -8799,7 +9036,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8862,7 +9099,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8887,8 +9124,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>47</integer>
 					<key>Points</key>
 					<array>
-						<string>{110.42725853284934, 40.687636648701584}</string>
-						<string>{189.3820384820437, 79.370079460294221}</string>
+						<string>{110.42718141991612, 40.687670697340138}</string>
+						<string>{189.38129506773839, 79.370079460294221}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8910,8 +9147,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -8976,7 +9211,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8999,8 +9234,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>49</integer>
 					<key>Points</key>
 					<array>
-						<string>{114.03149668025219, 33.260674867028136}</string>
-						<string>{171.49606454813573, 38.446565136256936}</string>
+						<string>{114.03149668025219, 33.258958934027625}</string>
+						<string>{171.49606454813573, 38.440562014197084}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9022,8 +9257,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -9088,7 +9321,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9151,7 +9384,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9176,8 +9409,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>52</integer>
 					<key>Points</key>
 					<array>
-						<string>{572.81835192310723, 78.121477996618168}</string>
-						<string>{647.39569516727511, 87.635163668121464}</string>
+						<string>{572.81835197785983, 78.121474288196367}</string>
+						<string>{647.39569517525888, 87.63515129467379}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9193,16 +9426,12 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						</dict>
 						<key>stroke</key>
 						<dict>
-							<key>HeadArrow</key>
-							<string>0</string>
 							<key>HeadScale</key>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -9260,7 +9489,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9285,8 +9514,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>54</integer>
 					<key>Points</key>
 					<array>
-						<string>{594.20896244144319, 43.685039730147132}</string>
-						<string>{639.75080071798322, 56.552147654250952}</string>
+						<string>{594.20927840721652, 43.685039730147132}</string>
+						<string>{639.75088303628843, 56.551966776595712}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9308,8 +9537,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -9334,8 +9561,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>55</integer>
 					<key>Points</key>
 					<array>
-						<string>{572.8189022543861, 71.152103831433536}</string>
-						<string>{639.21260422486955, 65.161593020157312}</string>
+						<string>{572.8189022543861, 71.151608855152972}</string>
+						<string>{639.21260422486955, 65.160071065512554}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9357,8 +9584,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -9423,7 +9648,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9448,8 +9673,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>57</integer>
 					<key>Points</key>
 					<array>
-						<string>{617.31496516935465, 33.686293156370624}</string>
-						<string>{651.84350985279491, 33.687032968052087}</string>
+						<string>{617.31496516935465, 33.685039730147132}</string>
+						<string>{651.84350985241679, 33.685039730147132}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9465,16 +9690,12 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						</dict>
 						<key>stroke</key>
 						<dict>
-							<key>HeadArrow</key>
-							<string>0</string>
 							<key>HeadScale</key>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -9532,7 +9753,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9590,7 +9811,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9655,7 +9876,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9720,7 +9941,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9785,7 +10006,7 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						<key>Pad</key>
 						<real>6</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9810,8 +10031,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>63</integer>
 					<key>Points</key>
 					<array>
-						<string>{686.21260422486944, 63.039584270912982}</string>
-						<string>{718.45768368519646, 63.039877111939873}</string>
+						<string>{686.21260422486944, 63.039370850315265}</string>
+						<string>{718.45768368516372, 63.039370850315265}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9827,16 +10048,12 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 						</dict>
 						<key>stroke</key>
 						<dict>
-							<key>HeadArrow</key>
-							<string>0</string>
 							<key>HeadScale</key>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
 							<key>Pattern</key>
 							<integer>1</integer>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -9861,8 +10078,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>64</integer>
 					<key>Points</key>
 					<array>
-						<string>{294.09649287427681, 370.07874333379755}</string>
-						<string>{358.16635095432997, 354.21889923099047}</string>
+						<string>{294.13134601639536, 370.07874333379755}</string>
+						<string>{358.17634547490894, 354.23387223362465}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9884,8 +10101,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -9910,8 +10125,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>65</integer>
 					<key>Points</key>
 					<array>
-						<string>{325.48031620800964, 385.78462280235226}</string>
-						<string>{364.25197180885027, 385.86954075820427}</string>
+						<string>{325.4803162080097, 386.39971873844871}</string>
+						<string>{364.25197180885027, 386.73834188361781}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9933,8 +10148,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -9959,8 +10172,8 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 					<integer>66</integer>
 					<key>Points</key>
 					<array>
-						<string>{116.03149668025219, 517.40157566621929}</string>
-						<string>{267.37401817849297, 517.40157566621929}</string>
+						<string>{116.03149668025219, 517.40157940688096}</string>
+						<string>{267.37401817849297, 517.40157940688096}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -9982,8 +10195,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 							<real>3</real>
 							<key>Legacy</key>
 							<true/>
-							<key>TailArrow</key>
-							<string>0</string>
 							<key>TailScale</key>
 							<real>3</real>
 							<key>Width</key>
@@ -10070,11 +10281,11 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 		<key>Sidebar</key>
 		<true/>
 		<key>SidebarWidth</key>
-		<integer>200</integer>
+		<integer>216</integer>
 		<key>Sidebar_Tab</key>
 		<integer>0</integer>
 		<key>VisibleRegion</key>
-		<string>{{83.200001791119561, 256.40000382065773}, {880.08333333333326, 537}}</string>
+		<string>{{89.20000179111959, 256.40000382065773}, {868.71825396825409, 537}}</string>
 		<key>ZoomValues</key>
 		<array>
 			<array>
@@ -10121,8 +10332,6 @@ resource access from alternate IRIs are redirected to canonical IRIs}</string>
 	<integer>7</integer>
 	<key>marginWidthKey</key>
 	<real>0.0</real>
-	<key>previewTypeKey</key>
-	<integer>0</integer>
 	<key>readOnlyKey</key>
 	<false/>
 	<key>resolutionForBMPKey</key>

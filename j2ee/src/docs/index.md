@@ -10,7 +10,7 @@ applications managed by a Servlet 3.1 container.
 
 # Getting Started
 
-To deploy a linked data apps as a web application, package it as a `war` archive adding:
+To deploy a linked data app as a web application, package it as a `war` archive adding:
 
 - compile dependencies from the platform [linked data framework](/modules/com.metreeca:link/${module.version}/) and other required platfom components;
 - a runtime dependency from the J2EE module;
