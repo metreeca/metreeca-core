@@ -17,7 +17,7 @@
 
 package com.metreeca.mill;
 
-import com.metreeca.spec.things.Values;
+import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -32,8 +32,8 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import java.io.*;
 import java.util.*;
 
-import static com.metreeca.spec.things.Values.format;
-import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.form.things.Values.format;
+import static com.metreeca.form.things.Values.statement;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;

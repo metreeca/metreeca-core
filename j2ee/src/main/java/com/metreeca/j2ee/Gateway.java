@@ -17,8 +17,8 @@
 
 package com.metreeca.j2ee;
 
-import com.metreeca.link.*;
-import com.metreeca.spec.things.Transputs;
+import com.metreeca.form.things.Transputs;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
 import com.metreeca.tray.sys.Setup;
@@ -43,8 +43,8 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.metreeca.link.Part.part;
-import static com.metreeca.spec.things.Strings.upper;
+import static com.metreeca.form.things.Strings.upper;
+import static com.metreeca.rest.Part.part;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
@@ -59,7 +59,7 @@ import static java.util.Collections.list;
  * J2EE/Metreeca gateway.
  *
  * <p>Provides a gateway between a web application managed by Servlet 3.1 container and linked data resource handlers
- * based on the Metreeca {@linkplain com.metreeca.link linked data framework}:</p>
+ * based on the Metreeca {@linkplain com.metreeca.rest linked data framework}:</p>
  *
  * <ul>
  *

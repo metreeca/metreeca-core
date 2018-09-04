@@ -17,7 +17,7 @@
 
 package com.metreeca.mill.tasks.file;
 
-import com.metreeca.spec.things.Transputs;
+import com.metreeca.form.things.Transputs;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -30,9 +30,9 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.mill.tasks.file.Excel.*;
-import static com.metreeca.spec.things.Values.literal;
-import static com.metreeca.spec.things.ValuesTest.term;
+import static com.metreeca.form.things.Values.literal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -28,8 +28,8 @@ import java.util.LinkedHashSet;
 import java.util.stream.Stream;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.things.Values.bnode;
-import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.form.things.Values.bnode;
+import static com.metreeca.form.things.Values.statement;
 
 import static java.util.stream.Collectors.toCollection;
 

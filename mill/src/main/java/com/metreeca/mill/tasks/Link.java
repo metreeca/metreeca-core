@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.form.things.Values.statement;
 
 
 /**

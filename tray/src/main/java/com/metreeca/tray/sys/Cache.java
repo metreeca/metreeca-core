@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.spec.things.Transputs;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.tray.sys.Store.Blob;
 
 import java.io.*;

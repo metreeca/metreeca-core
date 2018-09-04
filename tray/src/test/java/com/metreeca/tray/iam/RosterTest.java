@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.metreeca.spec.things.ValuesTest.item;
+import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.tray.iam.Roster.permit;
 
 

@@ -22,7 +22,7 @@ import com.metreeca.mill.tasks.Item;
 import com.metreeca.mill.tasks.Peek;
 import com.metreeca.mill.tasks.Pipe;
 import com.metreeca.mill.tasks.xml.XSLT;
-import com.metreeca.spec.things.Transputs;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.tray.Tray;
 
 import org.junit.Ignore;

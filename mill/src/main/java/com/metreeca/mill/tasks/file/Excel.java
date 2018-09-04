@@ -19,7 +19,7 @@ package com.metreeca.mill.tasks.file;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.spec.things.Values;
+import com.metreeca.form.things.Values;
 
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.usermodel.*;
@@ -42,8 +42,8 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.spec.things.Strings.normalize;
-import static com.metreeca.spec.things.Values.literal;
+import static com.metreeca.form.things.Strings.normalize;
+import static com.metreeca.form.things.Values.literal;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;

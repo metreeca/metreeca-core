@@ -17,8 +17,8 @@
 
 package com.metreeca.tray.xml;
 
-import com.metreeca.spec.things.Transputs;
-import com.metreeca.spec.things.Values;
+import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Values;
 
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.s9api.*;

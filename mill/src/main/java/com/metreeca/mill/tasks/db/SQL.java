@@ -20,7 +20,7 @@ package com.metreeca.mill.tasks.db;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.spec.things.Values;
+import com.metreeca.form.things.Values;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -32,9 +32,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.things.Values.iri;
-import static com.metreeca.spec.things.Values.literal;
-import static com.metreeca.spec.things.Values.statement;
+import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 

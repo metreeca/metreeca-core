@@ -31,7 +31,7 @@ import java.io.StringWriter;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.spec.things.Values.format;
+import static com.metreeca.form.things.Values.format;
 import static com.metreeca.tray.Tray.tool;
 
 

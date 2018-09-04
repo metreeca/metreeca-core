@@ -20,7 +20,7 @@ package com.metreeca.mill.tasks.xml;
 
 import com.metreeca.mill.Task;
 import com.metreeca.mill._Cell;
-import com.metreeca.spec.things.Values;
+import com.metreeca.form.things.Values;
 import com.metreeca.tray.sys.*;
 
 import net.sf.saxon.om.NodeInfo;
@@ -52,7 +52,7 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
 import static com.metreeca.mill._Cell.cell;
-import static com.metreeca.spec.things.Values.iri;
+import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 

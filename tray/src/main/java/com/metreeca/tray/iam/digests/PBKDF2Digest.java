@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.iam.digests;
 
-import com.metreeca.spec.things.Transputs;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.tray.iam.Digest;
 
 import java.security.NoSuchAlgorithmException;

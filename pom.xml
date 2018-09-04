@@ -23,12 +23,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.metreeca</groupId>
-	<artifactId>core</artifactId>
+	<artifactId>link</artifactId>
 	<version>0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Metreeca Core</name>
-	<description>Metreeca back-end modules.</description>
+	<name>Metreeca Model-Driven Linked Data Framework</name>
 	<url>https://github.com/metreeca/metreeca-core</url>
 	<inceptionYear>2013</inceptionYear>
 
@@ -79,10 +78,10 @@
 
 		<module>j2ee</module>
 
-		<module>link</module>
+		<module>rest</module>
 		<module>mill</module>
 		<module>tray</module>
-		<module>spec</module>
+		<module>form</module>
 
 	</modules>
 

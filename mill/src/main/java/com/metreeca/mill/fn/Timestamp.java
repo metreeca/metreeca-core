@@ -18,7 +18,7 @@
 package com.metreeca.mill.fn;
 
 
-import com.metreeca.spec.things.Values;
+import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;

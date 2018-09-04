@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.iam;
 
-import com.metreeca.spec.Spec;
+import com.metreeca.form.Spec;
 import com.metreeca.tray.iam.rosters.KeyRoster;
 
 import org.eclipse.rdf4j.model.IRI;
