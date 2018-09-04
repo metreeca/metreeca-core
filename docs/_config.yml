@@ -1,7 +1,8 @@
-include: [_]
-exclude: [_config.yml, Gemfile, Gemfile.lock]
+baseurl: /link # no custom domain
+repository: metreeca/link # local testing (https://help.github.com/articles/repository-metadata-on-github-pages/)
+remote_theme: metreeca/docs
 
-github: [metadata] # see https://github.com/github/pages-gem/issues/399#issuecomment-301827749
+exclude: [Gemfile, Gemfile.lock]
 
 plugins:
   - jekyll-redirect-from
