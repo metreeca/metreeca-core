@@ -82,8 +82,8 @@ public final class Creator extends Shaper {
 	private Creator(final Shape shape) {
 
 		this.shape=shape
-				.accept(task(Spec.create))
-				.accept(view(Spec.detail));
+				.accept(task(Form.create))
+				.accept(view(Form.detail));
 
 		this.slug=uuid();
 	}
@@ -193,9 +193,9 @@ public final class Creator extends Shaper {
 		}
 
 		final Shape matcher=shape
-				.accept(task(Spec.relate))
-				.accept(view(Spec.digest))
-				.accept(role(Spec.any));
+				.accept(task(Form.relate))
+				.accept(view(Form.digest))
+				.accept(role(Form.any));
 
 		final Graph graph=tool(Graph.Factory);
 

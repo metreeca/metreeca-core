@@ -17,8 +17,8 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
 import com.metreeca.form.codecs.JSONAdapter;
 import com.metreeca.form.things.*;
 
@@ -75,8 +75,8 @@ public final class Request {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private IRI user=Spec.none;
-	private Set<Value> roles=singleton(Spec.none);
+	private IRI user=Form.none;
+	private Set<Value> roles=singleton(Form.none);
 
 	private String method="";
 	private String base="app:/";
@@ -120,7 +120,7 @@ public final class Request {
 	/**
 	 * Retrieves the identifier of the request user.
 	 *
-	 * @return an IRI uniquely associated with the user or {@link Spec#none} if no user is authenticated
+	 * @return an IRI uniquely associated with the user or {@link Form#none} if no user is authenticated
 	 */
 	public IRI user() { return user; }
 

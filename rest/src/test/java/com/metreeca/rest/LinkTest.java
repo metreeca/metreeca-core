@@ -17,8 +17,8 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.tray.Tray;
@@ -117,8 +117,8 @@ public final class LinkTest {
 
 			or(
 
-					and(when(Spec.role, Manager)),
-					and(when(Spec.role, Salesman), when(Spec.task, Spec.create, Spec.relate, Spec.update))
+					and(when(Form.role, Manager)),
+					and(when(Form.role, Salesman), when(Form.task, Form.create, Form.relate, Form.update))
 			),
 
 			and(
@@ -135,7 +135,7 @@ public final class LinkTest {
 									trait(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
 									trait(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
 							),
-							test(when(Spec.role, Manager), and(
+							test(when(Form.role, Manager), and(
 
 									trait(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
 											minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),

@@ -164,7 +164,7 @@ public final class BasicContainer implements Handler {
 	//	final IRI target=iri(request.getTarget());
 	//	final String query=request.getQuery();
 	//
-	//	final Shape relating=shape.accept(Shape.task(Spec.relate));
+	//	final Shape relating=shape.accept(Shape.task(Form.relate));
 	//	final Shape authorized=relating.accept(Shape.role(request.getRoles()));
 	//
 	// if ( representation.equals("http://www.w3.org/ns/ldp#PreferMinimalContainer")
@@ -185,7 +185,7 @@ public final class BasicContainer implements Handler {
 	//
 	//		new _Transfer(request, response).model( // !!! re/factor
 	//
-	//				container.accept(Shape.mode(Spec.verify)).accept(new Outliner()), container
+	//				container.accept(Shape.mode(Form.verify)).accept(new Outliner()), container
 	//
 	//		);
 	//
@@ -226,7 +226,7 @@ public final class BasicContainer implements Handler {
 	//
 	//						// base container: convert its shape to RDF and merge into results
 	//
-	//						? Sets.union(cell.model(), container.accept(Shape.mode(Spec.verify)).accept(new Outliner()))
+	//						? Sets.union(cell.model(), container.accept(Shape.mode(Form.verify)).accept(new Outliner()))
 	//
 	//						// filtered container: return selected data
 	//
@@ -234,7 +234,7 @@ public final class BasicContainer implements Handler {
 	//
 	//						// introspection query: rewrite query results to the target IRI
 	//
-	//						: rewrite(cell.model(), Spec.meta, target),
+	//						: rewrite(cell.model(), Form.meta, target),
 	//
 	//				// merge all possible shape elements to properly drive response formatting
 	//

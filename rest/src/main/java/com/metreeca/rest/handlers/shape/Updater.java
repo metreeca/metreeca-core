@@ -67,8 +67,8 @@ public final class Updater extends Shaper {
 
 	private Updater(final Shape shape) {
 		this.shape=shape
-				.accept(task(Spec.update))
-				.accept(view(Spec.detail));
+				.accept(task(Form.update))
+				.accept(view(Form.detail));
 	}
 
 

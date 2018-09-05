@@ -17,7 +17,7 @@
 
 package com.metreeca.rest.handlers.shape;
 
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.rest.LinkTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -253,7 +253,7 @@ public class CreatorTest {
 		testbed().handler(() -> creator(Employee))
 
 				.request(request -> std(request)
-						.user(Spec.none)
+						.user(Form.none)
 						.done())
 
 				.response(response -> {

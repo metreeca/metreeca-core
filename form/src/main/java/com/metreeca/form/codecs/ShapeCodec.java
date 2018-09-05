@@ -17,11 +17,10 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.Shape;
 import com.metreeca.form.Shift;
-import com.metreeca.form.Spec;
-import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Count;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
@@ -190,58 +189,58 @@ public final class ShapeCodec {
 
 		final Set<Value> types=types(root, model);
 
-		return types.contains(Spec.Datatype) ? datatype(root, model)
-				: types.contains(Spec.Class) ? clazz(root, model)
-				: types.contains(Spec.MinExclusive) ? minExclusive(root, model)
-				: types.contains(Spec.MaxExclusive) ? maxExclusive(root, model)
-				: types.contains(Spec.MinInclusive) ? minInclusive(root, model)
-				: types.contains(Spec.MaxInclusive) ? maxInclusive(root, model)
-				: types.contains(Spec.Pattern) ? pattern(root, model)
-				: types.contains(Spec.Like) ? like(root, model)
-				: types.contains(Spec.MinLength) ? minLength(root, model)
-				: types.contains(Spec.MaxLength) ? maxLength(root, model)
+		return types.contains(Form.Datatype) ? datatype(root, model)
+				: types.contains(Form.Class) ? clazz(root, model)
+				: types.contains(Form.MinExclusive) ? minExclusive(root, model)
+				: types.contains(Form.MaxExclusive) ? maxExclusive(root, model)
+				: types.contains(Form.MinInclusive) ? minInclusive(root, model)
+				: types.contains(Form.MaxInclusive) ? maxInclusive(root, model)
+				: types.contains(Form.Pattern) ? pattern(root, model)
+				: types.contains(Form.Like) ? like(root, model)
+				: types.contains(Form.MinLength) ? minLength(root, model)
+				: types.contains(Form.MaxLength) ? maxLength(root, model)
 
-				: types.contains(Spec.MinCount) ? minCount(root, model)
-				: types.contains(Spec.MaxCount) ? maxCount(root, model)
-				: types.contains(Spec.In) ? in(root, model)
-				: types.contains(Spec.All) ? all(root, model)
-				: types.contains(Spec.Any) ? any(root, model)
+				: types.contains(Form.MinCount) ? minCount(root, model)
+				: types.contains(Form.MaxCount) ? maxCount(root, model)
+				: types.contains(Form.In) ? in(root, model)
+				: types.contains(Form.All) ? all(root, model)
+				: types.contains(Form.Any) ? any(root, model)
 
-				: types.contains(Spec.required) ? required(root, model)
-				: types.contains(Spec.optional) ? optional(root, model)
-				: types.contains(Spec.repeatable) ? repeatable(root, model)
-				: types.contains(Spec.multiple) ? multiple(root, model)
-				: types.contains(Spec.only) ? only(root, model)
+				: types.contains(Form.required) ? required(root, model)
+				: types.contains(Form.optional) ? optional(root, model)
+				: types.contains(Form.repeatable) ? repeatable(root, model)
+				: types.contains(Form.multiple) ? multiple(root, model)
+				: types.contains(Form.only) ? only(root, model)
 
-				:  types.contains(Spec.Trait) ? trait(root, model)
-				: types.contains(Spec.Virtual) ? virtual(root, model)
+				:  types.contains(Form.Trait) ? trait(root, model)
+				: types.contains(Form.Virtual) ? virtual(root, model)
 
-				: types.contains(Spec.And) ? and(root, model)
-				: types.contains(Spec.Or) ? or(root, model)
-				: types.contains(Spec.Test) ? test(root, model)
-				: types.contains(Spec.When) ? when(root, model)
+				: types.contains(Form.And) ? and(root, model)
+				: types.contains(Form.Or) ? or(root, model)
+				: types.contains(Form.Test) ? test(root, model)
+				: types.contains(Form.When) ? when(root, model)
 
-				: types.contains(Spec.Alias) ? alias(root, model)
-				: types.contains(Spec.Label) ? label(root, model)
-				: types.contains(Spec.Notes) ? notes(root, model)
-				: types.contains(Spec.Placeholder) ? placeholder(root, model)
-				: types.contains(Spec.Default) ? dflt(root, model)
-				: types.contains(Spec.Hint) ? hint(root, model)
-				: types.contains(Spec.Group) ? group(root, model)
+				: types.contains(Form.Alias) ? alias(root, model)
+				: types.contains(Form.Label) ? label(root, model)
+				: types.contains(Form.Notes) ? notes(root, model)
+				: types.contains(Form.Placeholder) ? placeholder(root, model)
+				: types.contains(Form.Default) ? dflt(root, model)
+				: types.contains(Form.Hint) ? hint(root, model)
+				: types.contains(Form.Group) ? group(root, model)
 
-				: types.contains(Spec.create) ? create(root, model)
-				: types.contains(Spec.relate) ? relate(root, model)
-				: types.contains(Spec.update) ? update(root, model)
-				: types.contains(Spec.delete) ? delete(root, model)
+				: types.contains(Form.create) ? create(root, model)
+				: types.contains(Form.relate) ? relate(root, model)
+				: types.contains(Form.update) ? update(root, model)
+				: types.contains(Form.delete) ? delete(root, model)
 
-				: types.contains(Spec.client) ? client(root, model)
-				: types.contains(Spec.server) ? server(root, model)
+				: types.contains(Form.client) ? client(root, model)
+				: types.contains(Form.server) ? server(root, model)
 
-				: types.contains(Spec.digest) ? digest(root, model)
-				: types.contains(Spec.detail) ? detail(root, model)
+				: types.contains(Form.digest) ? digest(root, model)
+				: types.contains(Form.detail) ? detail(root, model)
 
-				: types.contains(Spec.verify) ? verify(root, model)
-				: types.contains(Spec.filter) ? filter(root, model)
+				: types.contains(Form.verify) ? verify(root, model)
+				: types.contains(Form.filter) ? filter(root, model)
 
 				: error("unknown shape type "+types);
 	}
@@ -251,14 +250,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Datatype));
-		model.add(statement(node, Spec.iri, datatype.getIRI()));
+		model.add(statement(node, RDF.TYPE, Form.Datatype));
+		model.add(statement(node, Form.iri, datatype.getIRI()));
 
 		return node;
 	}
 
 	private Shape datatype(final Resource root, final Collection<Statement> model) {
-		return Datatype.datatype(iri(root, Spec.iri, model));
+		return Datatype.datatype(iri(root, Form.iri, model));
 	}
 
 
@@ -266,14 +265,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Class));
-		model.add(statement(node, Spec.iri, clazz.getIRI()));
+		model.add(statement(node, RDF.TYPE, Form.Class));
+		model.add(statement(node, Form.iri, clazz.getIRI()));
 
 		return node;
 	}
 
 	private Shape clazz(final Resource root, final Collection<Statement> model) {
-		return Clazz.clazz(iri(root, Spec.iri, model));
+		return Clazz.clazz(iri(root, Form.iri, model));
 	}
 
 
@@ -281,14 +280,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.MinExclusive));
-		model.add(statement(node, Spec.value, minExclusive.getValue()));
+		model.add(statement(node, RDF.TYPE, Form.MinExclusive));
+		model.add(statement(node, Form.value, minExclusive.getValue()));
 
 		return node;
 	}
 
 	private Shape minExclusive(final Resource root, final Collection<Statement> model) {
-		return MinExclusive.minExclusive(value(root, Spec.value, model));
+		return MinExclusive.minExclusive(value(root, Form.value, model));
 	}
 
 
@@ -296,14 +295,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.MaxExclusive));
-		model.add(statement(node, Spec.value, maxExclusive.getValue()));
+		model.add(statement(node, RDF.TYPE, Form.MaxExclusive));
+		model.add(statement(node, Form.value, maxExclusive.getValue()));
 
 		return node;
 	}
 
 	private Shape maxExclusive(final Resource root, final Collection<Statement> model) {
-		return MaxExclusive.maxExclusive(value(root, Spec.value, model));
+		return MaxExclusive.maxExclusive(value(root, Form.value, model));
 	}
 
 
@@ -311,14 +310,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.MinInclusive));
-		model.add(statement(node, Spec.value, minInclusive.getValue()));
+		model.add(statement(node, RDF.TYPE, Form.MinInclusive));
+		model.add(statement(node, Form.value, minInclusive.getValue()));
 
 		return node;
 	}
 
 	private Shape minInclusive(final Resource root, final Collection<Statement> model) {
-		return MinInclusive.minInclusive(value(root, Spec.value, model));
+		return MinInclusive.minInclusive(value(root, Form.value, model));
 	}
 
 
@@ -326,14 +325,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.MaxInclusive));
-		model.add(statement(node, Spec.value, maxInclusive.getValue()));
+		model.add(statement(node, RDF.TYPE, Form.MaxInclusive));
+		model.add(statement(node, Form.value, maxInclusive.getValue()));
 
 		return node;
 	}
 
 	private Shape maxInclusive(final Resource root, final Collection<Statement> model) {
-		return MaxInclusive.maxInclusive(value(root, Spec.value, model));
+		return MaxInclusive.maxInclusive(value(root, Form.value, model));
 	}
 
 
@@ -341,9 +340,9 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Pattern));
-		model.add(statement(node, Spec.text, Values.literal(pattern.getText())));
-		model.add(statement(node, Spec.flags, Values.literal(pattern.getFlags())));
+		model.add(statement(node, RDF.TYPE, Form.Pattern));
+		model.add(statement(node, Form.text, Values.literal(pattern.getText())));
+		model.add(statement(node, Form.flags, Values.literal(pattern.getFlags())));
 
 		return node;
 	}
@@ -351,8 +350,8 @@ public final class ShapeCodec {
 	private Shape pattern(final Resource root, final Collection<Statement> model) {
 
 		return Pattern.pattern(
-				literal(root, Spec.text, model).stringValue(),
-				literal(root, Spec.flags, model).stringValue());
+				literal(root, Form.text, model).stringValue(),
+				literal(root, Form.flags, model).stringValue());
 	}
 
 
@@ -360,14 +359,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Like));
-		model.add(statement(node, Spec.text, Values.literal(like.getText())));
+		model.add(statement(node, RDF.TYPE, Form.Like));
+		model.add(statement(node, Form.text, Values.literal(like.getText())));
 
 		return node;
 	}
 
 	private Shape like(final Resource root, final Collection<Statement> model) {
-		return Like.like(literal(root, Spec.text, model).stringValue());
+		return Like.like(literal(root, Form.text, model).stringValue());
 	}
 
 
@@ -375,14 +374,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.MinLength));
-		model.add(statement(node, Spec.limit, Values.literal(integer(minLength.getLimit()))));
+		model.add(statement(node, RDF.TYPE, Form.MinLength));
+		model.add(statement(node, Form.limit, Values.literal(integer(minLength.getLimit()))));
 
 		return node;
 	}
 
 	private Shape minLength(final Resource root, final Collection<Statement> model) {
-		return MinLength.minLength(literal(root, Spec.limit, model).integerValue().intValue());
+		return MinLength.minLength(literal(root, Form.limit, model).integerValue().intValue());
 	}
 
 
@@ -390,14 +389,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.MaxLength));
-		model.add(statement(node, Spec.limit, Values.literal(integer(maxLength.getLimit()))));
+		model.add(statement(node, RDF.TYPE, Form.MaxLength));
+		model.add(statement(node, Form.limit, Values.literal(integer(maxLength.getLimit()))));
 
 		return node;
 	}
 
 	private Shape maxLength(final Resource root, final Collection<Statement> model) {
-		return MaxLength.maxLength(literal(root, Spec.limit, model).integerValue().intValue());
+		return MaxLength.maxLength(literal(root, Form.limit, model).integerValue().intValue());
 	}
 
 
@@ -405,14 +404,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.MinCount));
-		model.add(statement(node, Spec.limit, Values.literal(integer(minCount.getLimit()))));
+		model.add(statement(node, RDF.TYPE, Form.MinCount));
+		model.add(statement(node, Form.limit, Values.literal(integer(minCount.getLimit()))));
 
 		return node;
 	}
 
 	private Shape minCount(final Resource root, final Collection<Statement> model) {
-		return MinCount.minCount(literal(root, Spec.limit, model).integerValue().intValue());
+		return MinCount.minCount(literal(root, Form.limit, model).integerValue().intValue());
 	}
 
 
@@ -420,14 +419,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.MaxCount));
-		model.add(statement(node, Spec.limit, Values.literal(integer(maxCount.getLimit()))));
+		model.add(statement(node, RDF.TYPE, Form.MaxCount));
+		model.add(statement(node, Form.limit, Values.literal(integer(maxCount.getLimit()))));
 
 		return node;
 	}
 
 	private Shape maxCount(final Resource root, final Collection<Statement> model) {
-		return MaxCount.maxCount(literal(root, Spec.limit, model).integerValue().intValue());
+		return MaxCount.maxCount(literal(root, Form.limit, model).integerValue().intValue());
 	}
 
 
@@ -435,14 +434,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.In));
-		model.add(statement(node, Spec.values, values(in.getValues(), model)));
+		model.add(statement(node, RDF.TYPE, Form.In));
+		model.add(statement(node, Form.values, values(in.getValues(), model)));
 
 		return node;
 	}
 
 	private Shape in(final Resource root, final Collection<Statement> model) {
-		return In.in(values(resource(root, Spec.values, model), model));
+		return In.in(values(resource(root, Form.values, model), model));
 	}
 
 
@@ -450,14 +449,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.All));
-		model.add(statement(node, Spec.values, values(all.getValues(), model)));
+		model.add(statement(node, RDF.TYPE, Form.All));
+		model.add(statement(node, Form.values, values(all.getValues(), model)));
 
 		return node;
 	}
 
 	private Shape all(final Resource root, final Collection<Statement> model) {
-		return All.all(values(resource(root, Spec.values, model), model));
+		return All.all(values(resource(root, Form.values, model), model));
 	}
 
 
@@ -465,14 +464,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Any));
-		model.add(statement(node, Spec.values, values(any.getValues(), model)));
+		model.add(statement(node, RDF.TYPE, Form.Any));
+		model.add(statement(node, Form.values, values(any.getValues(), model)));
 
 		return node;
 	}
 
 	private Shape any(final Resource root, final Collection<Statement> model) {
-		return Any.any(values(resource(root, Spec.values, model), model));
+		return Any.any(values(resource(root, Form.values, model), model));
 	}
 
 
@@ -493,7 +492,7 @@ public final class ShapeCodec {
 	}
 
 	private Shape only(final Resource root, final Collection<Statement> model) {
-		return Shape.only(values(resource(root, Spec.values, model), model));
+		return Shape.only(values(resource(root, Form.values, model), model));
 	}
 
 
@@ -501,17 +500,17 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Trait));
-		model.add(statement(node, Spec.step, step(trait.getStep(), model)));
-		model.add(statement(node, Spec.shape, shape(trait.getShape(), model)));
+		model.add(statement(node, RDF.TYPE, Form.Trait));
+		model.add(statement(node, Form.step, step(trait.getStep(), model)));
+		model.add(statement(node, Form.shape, shape(trait.getShape(), model)));
 
 		return node;
 	}
 
 	private Trait trait(final Resource root, final Collection<Statement> model) {
 		return Trait.trait(
-				step(resource(root, Spec.step, model), model),
-				shape(resource(root, Spec.shape, model), model)
+				step(resource(root, Form.step, model), model),
+				shape(resource(root, Form.shape, model), model)
 		);
 	}
 
@@ -520,17 +519,17 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Virtual));
-		model.add(statement(node, Spec.trait, shape(virtual.getTrait(), model)));
-		model.add(statement(node, Spec.shift, shift(virtual.getShift(), model)));
+		model.add(statement(node, RDF.TYPE, Form.Virtual));
+		model.add(statement(node, Form.trait, shape(virtual.getTrait(), model)));
+		model.add(statement(node, Form.shift, shift(virtual.getShift(), model)));
 
 		return node;
 	}
 
 	private Shape virtual(final Resource root, final Collection<Statement> model) {
 		return Virtual.virtual(
-				trait(resource(root, Spec.trait, model), model),
-				shift(resource(root, Spec.shift, model), model)
+				trait(resource(root, Form.trait, model), model),
+				shift(resource(root, Form.shift, model), model)
 		);
 	}
 
@@ -539,15 +538,15 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.And));
-		model.add(statement(node, Spec.shapes, shapes(and.getShapes(), model)));
+		model.add(statement(node, RDF.TYPE, Form.And));
+		model.add(statement(node, Form.shapes, shapes(and.getShapes(), model)));
 
 		return node;
 	}
 
 	private Shape and(final Resource root, final Collection<Statement> model) {
 
-		final Resource shapes=resource(root, Spec.shapes, model);
+		final Resource shapes=resource(root, Form.shapes, model);
 
 		return shapes.equals(RDF.NIL) ? And.and() : And.and(shapes(shapes, model));
 	}
@@ -557,8 +556,8 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Or));
-		model.add(statement(node, Spec.shapes, shapes(or.getShapes(), model)));
+		model.add(statement(node, RDF.TYPE, Form.Or));
+		model.add(statement(node, Form.shapes, shapes(or.getShapes(), model)));
 
 		final Collection<Shape> shapes=or.getShapes();
 
@@ -567,7 +566,7 @@ public final class ShapeCodec {
 
 	private Shape or(final Resource root, final Collection<Statement> model) {
 
-		final Resource shapes=resource(root, Spec.shapes, model);
+		final Resource shapes=resource(root, Form.shapes, model);
 
 		return shapes.equals(RDF.NIL) ? Or.or() : Or.or(shapes(shapes, model));
 	}
@@ -577,19 +576,19 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Test));
-		model.add(statement(node, Spec.test, shape(test.getTest(), model)));
-		model.add(statement(node, Spec.pass, shape(test.getPass(), model)));
-		model.add(statement(node, Spec.fail, shape(test.getFail(), model)));
+		model.add(statement(node, RDF.TYPE, Form.Test));
+		model.add(statement(node, Form.test, shape(test.getTest(), model)));
+		model.add(statement(node, Form.pass, shape(test.getPass(), model)));
+		model.add(statement(node, Form.fail, shape(test.getFail(), model)));
 
 		return node;
 	}
 
 	private Shape test(final Resource root, final Collection<Statement> model) {
 		return Test.test(
-				shape(resource(root, Spec.test, model), model),
-				shape(resource(root, Spec.pass, model), model),
-				shape(resource(root, Spec.fail, model), model)
+				shape(resource(root, Form.test, model), model),
+				shape(resource(root, Form.pass, model), model),
+				shape(resource(root, Form.fail, model), model)
 		);
 	}
 
@@ -598,17 +597,17 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.When));
-		model.add(statement(node, Spec.iri, when.getIRI()));
-		model.add(statement(node, Spec.values, values(when.getValues(), model)));
+		model.add(statement(node, RDF.TYPE, Form.When));
+		model.add(statement(node, Form.iri, when.getIRI()));
+		model.add(statement(node, Form.values, values(when.getValues(), model)));
 
 		return node;
 	}
 
 	private Shape when(final Resource root, final Collection<Statement> model) {
 		return When.when(
-				iri(root, Spec.iri, model),
-				values(resource(root, Spec.values, model), model)
+				iri(root, Form.iri, model),
+				values(resource(root, Form.values, model), model)
 		);
 	}
 
@@ -617,14 +616,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Alias));
-		model.add(statement(node, Spec.text, Values.literal(alias.getText())));
+		model.add(statement(node, RDF.TYPE, Form.Alias));
+		model.add(statement(node, Form.text, Values.literal(alias.getText())));
 
 		return node;
 	}
 
 	private Shape alias(final Resource root, final Collection<Statement> model) {
-		return Alias.alias(literal(root, Spec.text, model).stringValue());
+		return Alias.alias(literal(root, Form.text, model).stringValue());
 	}
 
 
@@ -632,14 +631,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Label));
-		model.add(statement(node, Spec.text, Values.literal(label.getText())));
+		model.add(statement(node, RDF.TYPE, Form.Label));
+		model.add(statement(node, Form.text, Values.literal(label.getText())));
 
 		return node;
 	}
 
 	private Shape label(final Resource root, final Collection<Statement> model) {
-		return Label.label(literal(root, Spec.text, model).stringValue());
+		return Label.label(literal(root, Form.text, model).stringValue());
 	}
 
 
@@ -647,14 +646,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Notes));
-		model.add(statement(node, Spec.text, Values.literal(notes.getText())));
+		model.add(statement(node, RDF.TYPE, Form.Notes));
+		model.add(statement(node, Form.text, Values.literal(notes.getText())));
 
 		return node;
 	}
 
 	private Shape notes(final Resource root, final Collection<Statement> model) {
-		return Notes.notes(literal(root, Spec.text, model).stringValue());
+		return Notes.notes(literal(root, Form.text, model).stringValue());
 	}
 
 
@@ -662,14 +661,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Placeholder));
-		model.add(statement(node, Spec.text, Values.literal(placeholder.getText())));
+		model.add(statement(node, RDF.TYPE, Form.Placeholder));
+		model.add(statement(node, Form.text, Values.literal(placeholder.getText())));
 
 		return node;
 	}
 
 	private Shape placeholder(final Resource root, final Collection<Statement> model) {
-		return Placeholder.placeholder(literal(root, Spec.text, model).stringValue());
+		return Placeholder.placeholder(literal(root, Form.text, model).stringValue());
 	}
 
 
@@ -677,14 +676,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Default));
-		model.add(statement(node, Spec.value, dflt.getValue()));
+		model.add(statement(node, RDF.TYPE, Form.Default));
+		model.add(statement(node, Form.value, dflt.getValue()));
 
 		return node;
 	}
 
 	private Shape dflt(final Resource root, final Collection<Statement> model) {
-		return Default.dflt(value(root, Spec.value, model));
+		return Default.dflt(value(root, Form.value, model));
 	}
 
 
@@ -692,14 +691,14 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Hint));
-		model.add(statement(node, Spec.iri, hint.getIRI()));
+		model.add(statement(node, RDF.TYPE, Form.Hint));
+		model.add(statement(node, Form.iri, hint.getIRI()));
 
 		return node;
 	}
 
 	private Shape hint(final Resource root, final Collection<Statement> model) {
-		return Hint.hint(iri(root, Spec.iri, model));
+		return Hint.hint(iri(root, Form.iri, model));
 	}
 
 
@@ -707,59 +706,59 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Group));
-		model.add(statement(node, Spec.shape, shape(group.getShape(), model)));
+		model.add(statement(node, RDF.TYPE, Form.Group));
+		model.add(statement(node, Form.shape, shape(group.getShape(), model)));
 
 
 		return node;
 	}
 
 	private Shape group(final Resource root, final Collection<Statement> model) {
-		return Group.group(shape(resource(root, Spec.shape, model), model));
+		return Group.group(shape(resource(root, Form.shape, model), model));
 	}
 
 
 	private Shape create(final Resource root, final Collection<Statement> model) {
-		return Shape.create(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.create(shapes(resource(root, Form.shapes, model), model));
 	}
 
 	private Shape relate(final Resource root, final Collection<Statement> model) {
-		return Shape.relate(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.relate(shapes(resource(root, Form.shapes, model), model));
 	}
 
 	private Shape update(final Resource root, final Collection<Statement> model) {
-		return Shape.update(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.update(shapes(resource(root, Form.shapes, model), model));
 	}
 
 	private Shape delete(final Resource root, final Collection<Statement> model) {
-		return Shape.delete(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.delete(shapes(resource(root, Form.shapes, model), model));
 	}
 
 
 	private Shape client(final Resource root, final Collection<Statement> model) {
-		return Shape.client(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.client(shapes(resource(root, Form.shapes, model), model));
 	}
 
 	private Shape server(final Resource root, final Collection<Statement> model) {
-		return Shape.server(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.server(shapes(resource(root, Form.shapes, model), model));
 	}
 
 
 	private Shape digest(final Resource root, final Collection<Statement> model) {
-		return Shape.digest(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.digest(shapes(resource(root, Form.shapes, model), model));
 	}
 
 	private Shape detail(final Resource root, final Collection<Statement> model) {
-		return Shape.detail(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.detail(shapes(resource(root, Form.shapes, model), model));
 	}
 
 
 	private Shape verify(final Resource root, final Collection<Statement> model) {
-		return Shape.verify(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.verify(shapes(resource(root, Form.shapes, model), model));
 	}
 
 	private Shape filter(final Resource root, final Collection<Statement> model) {
-		return Shape.filter(shapes(resource(root, Spec.shapes, model), model));
+		return Shape.filter(shapes(resource(root, Form.shapes, model), model));
 	}
 
 
@@ -791,9 +790,9 @@ public final class ShapeCodec {
 
 		final Set<Value> types=types(root, model);
 
-		return types.contains(Spec.Step) ? step(root, model)
+		return types.contains(Form.Step) ? step(root, model)
 
-				: types.contains(Spec.Count) ? count(root, model)
+				: types.contains(Form.Count) ? count(root, model)
 
 				: shift("unknown shape type "+types);
 	}
@@ -803,17 +802,17 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Step));
-		model.add(statement(node, Spec.iri, step.getIRI()));
-		model.add(statement(node, Spec.inverse, Values.literal(step.isInverse())));
+		model.add(statement(node, RDF.TYPE, Form.Step));
+		model.add(statement(node, Form.iri, step.getIRI()));
+		model.add(statement(node, Form.inverse, Values.literal(step.isInverse())));
 
 		return node;
 	}
 
 	private Step step(final Resource root, final Collection<Statement> model) {
 		return Step.step(
-				iri(root, Spec.iri, model),
-				literal(root, Spec.inverse, model).booleanValue()
+				iri(root, Form.iri, model),
+				literal(root, Form.inverse, model).booleanValue()
 		);
 	}
 
@@ -822,8 +821,8 @@ public final class ShapeCodec {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Spec.Count));
-		model.add(statement(node, Spec.shift, shift(count.getShift(), model)));
+		model.add(statement(node, RDF.TYPE, Form.Count));
+		model.add(statement(node, Form.shift, shift(count.getShift(), model)));
 
 		return node;
 	}

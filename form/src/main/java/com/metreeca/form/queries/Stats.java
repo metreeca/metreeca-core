@@ -17,7 +17,7 @@
 
 package com.metreeca.form.queries;
 
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
@@ -36,13 +36,13 @@ import static java.util.Collections.unmodifiableList;
 public final class Stats implements Query {
 
 	public static final Shape StatsShape=and(
-			trait(Spec.count, maxCount(1)),
-			trait(Spec.min, maxCount(1)),
-			trait(Spec.max, maxCount(1)),
-			trait(Spec.stats, and(
-					trait(Step.step(Spec.count), maxCount(1)),
-					trait(Step.step(Spec.min), maxCount(1)),
-					trait(Step.step(Spec.max), maxCount(1))
+			trait(Form.count, maxCount(1)),
+			trait(Form.min, maxCount(1)),
+			trait(Form.max, maxCount(1)),
+			trait(Form.stats, and(
+					trait(Step.step(Form.count), maxCount(1)),
+					trait(Step.step(Form.min), maxCount(1)),
+					trait(Step.step(Form.max), maxCount(1))
 			))
 	);
 

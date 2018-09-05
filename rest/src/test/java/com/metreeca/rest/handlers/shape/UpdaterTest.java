@@ -18,9 +18,9 @@
 package com.metreeca.rest.handlers.shape;
 
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.form.Spec;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -213,7 +213,7 @@ public class UpdaterTest {
 		testbed().handler(() -> updater(Employee))
 
 				.request(request -> std(request)
-						.user(Spec.none)
+						.user(Form.none)
 						.done())
 
 				.response(response -> {

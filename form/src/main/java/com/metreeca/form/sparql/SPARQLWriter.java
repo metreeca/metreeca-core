@@ -17,11 +17,10 @@
 
 package com.metreeca.form.sparql;
 
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.*;
-import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Sets;
 
@@ -88,7 +87,7 @@ final class SPARQLWriter {
 		connection.add(model);
 
 		return shape
-				.accept(mode(Spec.verify))
+				.accept(mode(Form.verify))
 				.accept(new TracesProbe(new LinkedHashSet<>(asList(focus))));
 	}
 

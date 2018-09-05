@@ -17,8 +17,8 @@
 
 package com.metreeca.rest.services;
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.*;
-import com.metreeca.form.Spec;
 import com.metreeca.form.things.Formats;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Setup;
@@ -50,7 +50,7 @@ import static java.lang.Boolean.parseBoolean;
  * <p>Endpoint behaviour may be fine tuned with custom <a href="/modules/com.metreeca:tray/0.0/references/configuration#queryupdate">configuration
  * properties</a>.</p>
  *
- * <p>Query operations are restricted to users in the {@linkplain Spec#root root} {@linkplain Request#roles()
+ * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
  * role}, unless otherwise specified through configuration properties; update operations are always restricted to users
  * in the root role.</p>
  *
@@ -100,7 +100,7 @@ public class SPARQL implements Service {
 						"missing query/update parameter"
 				));
 
-			} else if ( !(publik && operation instanceof Query || request.role(Spec.root)) ) {
+			} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
 
 				refused(request, response);
 

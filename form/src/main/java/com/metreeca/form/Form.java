@@ -21,15 +21,13 @@ import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.form.things.Values.iri;
-
 
 /**
  * Shape constraints RDF vocabulary.
  */
-public final class Spec {
+public final class Form {
 
-	public static final String Namespace="app://spec.metreeca.com/terms#"; // keep aligned with client
+	public static final String Namespace="app://form.metreeca.com/terms#";
 
 
 	//// Shape Types ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,6 +154,6 @@ public final class Spec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Spec() {}
+	private Form() {}
 
 }

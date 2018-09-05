@@ -17,9 +17,9 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Wrapper;
-import com.metreeca.form.Spec;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -63,7 +63,7 @@ public final class Transactor implements Wrapper {
 
 	@Override public Handler wrap(final Handler handler) {
 		return (request, response) -> {
-			if ( !transactional(connection) && !request.role(Spec.root) ) { refused(request, response); } else {
+			if ( !transactional(connection) && !request.role(Form.root) ) { refused(request, response); } else {
 
 				if ( !connection.isActive() ) {
 

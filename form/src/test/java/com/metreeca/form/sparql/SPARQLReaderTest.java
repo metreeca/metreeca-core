@@ -17,7 +17,7 @@
 
 package com.metreeca.form.sparql;
 
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -169,11 +169,11 @@ public class SPARQLReaderTest {
 
 		final Map<Value, Collection<Statement>> matches=stats(trait(RDF.TYPE, All.all(RDF.NIL)));
 
-		Assert.assertEquals("meta focus", Sets.set(Spec.meta), matches.keySet());
+		Assert.assertEquals("meta focus", Sets.set(Form.meta), matches.keySet());
 
 		ValuesTest.assertIsomorphic(
 
-				model("prefix spec: <"+Spec.Namespace+"> construct { spec:meta spec:count 0 } where {}"),
+				model("prefix spec: <"+Form.Namespace+"> construct { spec:meta spec:count 0 } where {}"),
 
 				model(matches));
 	}
@@ -184,7 +184,7 @@ public class SPARQLReaderTest {
 
 		ValuesTest.assertIsomorphic(
 
-				model("prefix spec: <"+Spec.Namespace+">\n"
+				model("prefix spec: <"+Form.Namespace+">\n"
 						+"\n"
 						+"construct { \n"
 						+"\n"
@@ -215,7 +215,7 @@ public class SPARQLReaderTest {
 
 		ValuesTest.assertIsomorphic(
 
-				model("prefix spec: <"+Spec.Namespace+">\n"
+				model("prefix spec: <"+Form.Namespace+">\n"
 						+"\n"
 						+"construct { \n"
 						+"\n"
@@ -247,7 +247,7 @@ public class SPARQLReaderTest {
 
 		final Map<Value, Collection<Statement>> matches=items(trait(RDF.TYPE, All.all(RDF.NIL)));
 
-		Assert.assertEquals(Sets.set(Spec.meta), matches.keySet());
+		Assert.assertEquals(Sets.set(Form.meta), matches.keySet());
 
 		ValuesTest.assertIsomorphic(
 
@@ -262,7 +262,7 @@ public class SPARQLReaderTest {
 
 		ValuesTest.assertIsomorphic(
 
-				model("prefix spec: <"+Spec.Namespace+">\n"
+				model("prefix spec: <"+Form.Namespace+">\n"
 						+"\n"
 						+"construct { \n"
 						+"\n"
@@ -289,7 +289,7 @@ public class SPARQLReaderTest {
 
 		ValuesTest.assertIsomorphic(
 
-				model("prefix spec: <"+Spec.Namespace+">\n"
+				model("prefix spec: <"+Form.Namespace+">\n"
 						+"\n"
 						+"construct { \n"
 						+"\n"

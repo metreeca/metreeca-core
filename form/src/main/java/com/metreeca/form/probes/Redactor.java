@@ -17,10 +17,10 @@
 
 package com.metreeca.form.probes;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.shapes.Test;
 import com.metreeca.form.shapes.When;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
 import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -111,7 +111,7 @@ public final class Redactor extends Shape.Probe<Shape> {
 		final Set<? extends Value> accepted=when.getValues();
 
 		return actual == null ? when // ignore undefined variables
-				: !disjoint(accepted, actual) || actual.contains(Spec.any) ? and()
+				: !disjoint(accepted, actual) || actual.contains(Form.any) ? and()
 				: or();
 	}
 

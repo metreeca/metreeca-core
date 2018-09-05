@@ -17,10 +17,10 @@
 
 package com.metreeca.form.sparql;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Pruner;
 import com.metreeca.form.queries.Edges;
@@ -111,8 +111,8 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape pattern=shape.accept(mode(Spec.verify));
-				final Shape selector=shape.accept(mode(Spec.filter)).accept(new Pruner()).accept(new Optimizer());
+				final Shape pattern=shape.accept(mode(Form.verify));
+				final Shape selector=shape.accept(mode(Form.filter)).accept(new Pruner()).accept(new Optimizer());
 
 				link(pattern, root);
 				link(selector, root);
@@ -189,7 +189,7 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape selector=shape.accept(mode(Spec.filter)).accept(new Pruner()).accept(new Optimizer());
+				final Shape selector=shape.accept(mode(Form.filter)).accept(new Pruner()).accept(new Optimizer());
 
 				final Object source=var(id(selector));
 				final Object target=path.isEmpty() ? source : var(id());
@@ -232,10 +232,10 @@ final class SPARQLReader {
 				final Value min=bindings.getValue("min");
 				final Value max=bindings.getValue("max");
 
-				if ( type != null ) { model.add(Spec.meta, Spec.stats, type); }
-				if ( type != null && count != null ) { model.add(type, Spec.count, count); }
-				if ( type != null && min != null ) { model.add(type, Spec.min, min); }
-				if ( type != null && max != null ) { model.add(type, Spec.max, max); }
+				if ( type != null ) { model.add(Form.meta, Form.stats, type); }
+				if ( type != null && count != null ) { model.add(type, Form.count, count); }
+				if ( type != null && min != null ) { model.add(type, Form.min, min); }
+				if ( type != null && max != null ) { model.add(type, Form.max, max); }
 
 				counts.add(count);
 				mins.add(min);
@@ -245,7 +245,7 @@ final class SPARQLReader {
 
 		});
 
-		model.add(Spec.meta, Spec.count, literal(BigInteger.valueOf(counts.stream()
+		model.add(Form.meta, Form.count, literal(BigInteger.valueOf(counts.stream()
 				.filter(Objects::nonNull)
 				.mapToLong(Literal::longValue)
 				.sum())));
@@ -253,14 +253,14 @@ final class SPARQLReader {
 		mins.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.LT) ? x : y)
-				.ifPresent(min -> model.add(Spec.meta, Spec.min, min));
+				.ifPresent(min -> model.add(Form.meta, Form.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
-				.ifPresent(max -> model.add(Spec.meta, Spec.max, max));
+				.ifPresent(max -> model.add(Form.meta, Form.max, max));
 
-		return singletonMap(Spec.meta, model);
+		return singletonMap(Form.meta, model);
 	}
 
 	private Map<Value, Collection<Statement>> items(final Items items) {
@@ -274,7 +274,7 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape selector=shape.accept(mode(Spec.filter)).accept(new Pruner()).accept(new Optimizer());
+				final Shape selector=shape.accept(mode(Form.filter)).accept(new Pruner()).accept(new Optimizer());
 
 				final Object source=var(id(selector));
 				final Object target=path.isEmpty() ? source : var(id());
@@ -313,9 +313,9 @@ final class SPARQLReader {
 
 				final BNode item=bnode();
 
-				if ( item != null ) { model.add(Spec.meta, Spec.items, item); }
-				if ( item != null && value != null ) { model.add(item, Spec.value, value); }
-				if ( item != null && count != null ) { model.add(item, Spec.count, count); }
+				if ( item != null ) { model.add(Form.meta, Form.items, item); }
+				if ( item != null && value != null ) { model.add(item, Form.value, value); }
+				if ( item != null && count != null ) { model.add(item, Form.count, count); }
 
 				// !!! manage multiple labels
 
@@ -326,7 +326,7 @@ final class SPARQLReader {
 			}
 		});
 
-		return singletonMap(Spec.meta, model);
+		return singletonMap(Form.meta, model);
 	}
 
 

@@ -17,8 +17,8 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.*;
-import com.metreeca.form.Spec;
 import com.metreeca.tray.iam.Roster;
 import com.metreeca.tray.iam.Roster.Permit;
 
@@ -83,7 +83,7 @@ public final class Bearer implements Wrapper {
 
 			} else { // no bearer token > fall-through to other authorization schemes
 
-				handler.wrap(execute(Spec.none, singleton(Spec.none)))
+				handler.wrap(execute(Form.none, singleton(Form.none)))
 						.handle(request, response);
 
 			}

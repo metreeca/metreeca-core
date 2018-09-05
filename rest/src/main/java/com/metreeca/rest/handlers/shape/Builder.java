@@ -18,10 +18,10 @@
 package com.metreeca.rest.handlers.shape;
 
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.tray.rdf.Graph;
@@ -90,9 +90,9 @@ public final class Builder extends Shaper {
 	private Builder(final Shape shape, final Function<Request, Collection<Statement>> builder) {
 
 		this.shape=shape
-				.accept(task(Spec.relate))
-				.accept(view(Spec.detail))
-				.accept(mode(Spec.verify));
+				.accept(task(Form.relate))
+				.accept(view(Form.detail))
+				.accept(mode(Form.verify));
 
 		this.builder=builder;
 

@@ -17,7 +17,7 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -40,7 +40,7 @@ import static com.metreeca.form.things._JSON.object;
 	 * Handles refused requests.
 	 *
 	 * <p>Generates an empty response with a {@value Response#Unauthorized} status code, if the request {@linkplain
-	 * Request#user()  user} is anonymous (that it's equal to {@link Spec#none}), or a {@value Response#Forbidden}
+	 * Request#user()  user} is anonymous (that it's equal to {@link Form#none}), or a {@value Response#Forbidden}
 	 * status code, otherwise.</p>
 	 *
 	 * @param request  the incoming request
@@ -58,7 +58,7 @@ import static com.metreeca.form.things._JSON.object;
 			throw new NullPointerException("null response");
 		}
 
-		if ( request.user().equals(Spec.none) ) {
+		if ( request.user().equals(Form.none) ) {
 			unauthorized(request, response);
 		} else {
 			forbidden(request, response);

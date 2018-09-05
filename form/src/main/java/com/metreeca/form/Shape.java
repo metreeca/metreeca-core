@@ -20,7 +20,6 @@ package com.metreeca.form;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
-import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -93,19 +92,19 @@ public interface Shape {
 
 	public static Shape create(final Shape... shapes) { return create(asList(shapes));}
 
-	public static Shape create(final Collection<Shape> shapes) { return shape(Spec.task, set(Spec.create), shapes); }
+	public static Shape create(final Collection<Shape> shapes) { return shape(Form.task, set(Form.create), shapes); }
 
 	public static Shape relate(final Shape... shapes) { return relate(asList(shapes));}
 
-	public static Shape relate(final Collection<Shape> shapes) { return shape(Spec.task, set(Spec.relate), shapes); }
+	public static Shape relate(final Collection<Shape> shapes) { return shape(Form.task, set(Form.relate), shapes); }
 
 	public static Shape update(final Shape... shapes) {return update(asList(shapes));}
 
-	public static Shape update(final Collection<Shape> shapes) { return shape(Spec.task, set(Spec.update), shapes); }
+	public static Shape update(final Collection<Shape> shapes) { return shape(Form.task, set(Form.update), shapes); }
 
 	public static Shape delete(final Shape... shapes) {return delete(asList(shapes));}
 
-	public static Shape delete(final Collection<Shape> shapes) { return shape(Spec.task, set(Spec.delete), shapes); }
+	public static Shape delete(final Collection<Shape> shapes) { return shape(Form.task, set(Form.delete), shapes); }
 
 
 	/**
@@ -125,7 +124,7 @@ public interface Shape {
 	 * @return
 	 */
 	public static Shape server(final Collection<Shape> shapes) {
-		return shape(Spec.task, set(Spec.relate, Spec.delete), shapes);
+		return shape(Form.task, set(Form.relate, Form.delete), shapes);
 	}
 
 	/**
@@ -145,26 +144,26 @@ public interface Shape {
 	 * @return
 	 */
 	public static Shape client(final Collection<Shape> shapes) {
-		return shape(Spec.task, set(Spec.create, Spec.relate, Spec.delete), shapes);
+		return shape(Form.task, set(Form.create, Form.relate, Form.delete), shapes);
 	}
 
 
 	public static Shape digest(final Shape... shapes) { return digest(asList(shapes)); }
 
-	public static Shape digest(final Collection<Shape> shapes) { return shape(Spec.view, set(Spec.digest), shapes); }
+	public static Shape digest(final Collection<Shape> shapes) { return shape(Form.view, set(Form.digest), shapes); }
 
 	public static Shape detail(final Shape... shapes) {return detail(asList(shapes));}
 
-	public static Shape detail(final Collection<Shape> shapes) { return shape(Spec.view, set(Spec.detail), shapes); }
+	public static Shape detail(final Collection<Shape> shapes) { return shape(Form.view, set(Form.detail), shapes); }
 
 
 	public static Shape verify(final Shape... shapes) { return verify(asList(shapes)); }
 
-	public static Shape verify(final Collection<Shape> shapes) { return shape(Spec.mode, set(Spec.verify), shapes); }
+	public static Shape verify(final Collection<Shape> shapes) { return shape(Form.mode, set(Form.verify), shapes); }
 
 	public static Shape filter(final Shape... shapes) { return filter(asList(shapes)); }
 
-	public static Shape filter(final Collection<Shape> shapes) { return shape(Spec.mode, set(Spec.filter), shapes); }
+	public static Shape filter(final Collection<Shape> shapes) { return shape(Form.mode, set(Form.filter), shapes); }
 
 
 	public static Shape shape(final IRI variable, final Set<Value> values, final Collection<Shape> shapes) {
@@ -176,23 +175,23 @@ public interface Shape {
 	//// Parametric Probes /////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Probe<Shape> role(final Value... roles) {
-		return probe(Spec.role, new HashSet<>(asList(roles)));
+		return probe(Form.role, new HashSet<>(asList(roles)));
 	}
 
 	public static Probe<Shape> role(final Set<? extends Value> roles) {
-		return probe(Spec.role, roles);
+		return probe(Form.role, roles);
 	}
 
 	public static Probe<Shape> task(final Value task) {
-		return probe(Spec.task, set(task));
+		return probe(Form.task, set(task));
 	}
 
 	public static Probe<Shape> view(final Value view) {
-		return probe(Spec.view, set(view));
+		return probe(Form.view, set(view));
 	}
 
 	public static Probe<Shape> mode(final Value mode) {
-		return probe(Spec.mode, set(mode));
+		return probe(Form.mode, set(mode));
 	}
 
 
