@@ -9,6 +9,7 @@
         <module name="form" />
         <module name="j2ee" />
         <module name="mill" />
+        <module name="next" />
         <module name="rest" />
         <module name="tray" />
       </profile>
