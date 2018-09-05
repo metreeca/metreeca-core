@@ -17,7 +17,7 @@
 
 package com.metreeca.form.queries;
 
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.Query;
@@ -40,10 +40,10 @@ import static java.util.Collections.unmodifiableList;
 public final class Items implements Query {
 
 	public static final Shape ItemsShape=and(
-			trait(Spec.items, and(
+			trait(Form.items, and(
 					datatype(Values.BNodeType),
-					trait(Step.step(Spec.count), maxCount(1)),
-					trait(Step.step(Spec.value), and(
+					trait(Step.step(Form.count), maxCount(1)),
+					trait(Step.step(Form.value), and(
 							maxCount(1),
 							trait(Step.step(RDFS.LABEL), maxCount(1))
 					))

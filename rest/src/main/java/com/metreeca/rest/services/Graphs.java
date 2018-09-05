@@ -19,7 +19,7 @@ package com.metreeca.rest.services;
 
 import com.metreeca.rest.*;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.tray.rdf.Graph;
@@ -62,7 +62,7 @@ import static com.metreeca.tray.Tray.tool;
  * <p>Endpoint behaviour may be fine-tuned with custom <a href="/modules/com.metreeca:tray/0.0/references/configuration#queryupdate">configuration
  * properties</a>.</p>
  *
- * <p>Query operations are restricted to users in the {@linkplain Spec#root root} {@linkplain Request#roles()
+ * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
  * role}, unless otherwise specified through configuration properties; update operations are always restricted to users
  * in the root role.</p>
  *
@@ -122,7 +122,7 @@ public final class Graphs implements Service {
 					"missing target graph parameter"
 			));
 
-		} else if ( !publik && !request.role(Spec.root) ) {
+		} else if ( !publik && !request.role(Form.root) ) {
 
 			refused(request, response);
 
@@ -180,7 +180,7 @@ public final class Graphs implements Service {
 
 			response.status(Response.BadRequest).json(error("parameter-missing", "missing target graph parameter"));
 
-		} else if ( !request.role(Spec.root) ) {
+		} else if ( !request.role(Form.root) ) {
 
 			refused(request, response);
 
@@ -245,7 +245,7 @@ public final class Graphs implements Service {
 
 			response.status(Response.BadRequest).json(error("parameter-missing", "missing target graph parameter"));
 
-		} else if ( !request.role(Spec.root) ) {
+		} else if ( !request.role(Form.root) ) {
 
 			refused(request, response);
 
@@ -289,7 +289,7 @@ public final class Graphs implements Service {
 
 			response.status(Response.BadRequest).json(error("parameter-missing", "missing target graph parameter"));
 
-		} else if ( !request.role(Spec.root) ) {
+		} else if ( !request.role(Form.root) ) {
 
 			refused(request, response);
 

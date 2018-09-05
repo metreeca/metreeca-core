@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.iam;
 
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.tray.iam.rosters.KeyRoster;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -79,8 +79,8 @@ public interface Roster {
 
 		private long expiry;
 
-		private IRI user=Spec.none;
-		private Set<Value> roles=singleton(Spec.none);
+		private IRI user=Form.none;
+		private Set<Value> roles=singleton(Form.none);
 
 		private String alias="";
 		private String label="";

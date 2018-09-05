@@ -18,8 +18,8 @@
 package com.metreeca.form.codecs;
 
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.shapes.Alias;
@@ -110,7 +110,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 		final Shape driver=(shape == null) ? null : shape // infer implicit constraints to drive json shorthands
 
-				.accept(Shape.mode(Spec.verify))
+				.accept(Shape.mode(Form.verify))
 				.accept(new Inferencer())
 				.accept(new Optimizer());
 

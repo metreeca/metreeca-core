@@ -135,7 +135,7 @@ public abstract class Shaper implements Handler {
 
 		if ( model != null ) {
 
-			model.addAll(shape.accept(mode(Spec.verify)).accept(new Outliner(focus))); // shape-implied statements
+			model.addAll(shape.accept(mode(Form.verify)).accept(new Outliner(focus))); // shape-implied statements
 
 			delegate.accept(model);
 		}

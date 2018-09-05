@@ -18,7 +18,7 @@
 package com.metreeca.rest.services;
 
 import com.metreeca.rest.Request;
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.tray.rdf.Graph;
 
@@ -61,7 +61,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.GET)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
@@ -83,7 +83,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.GET)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
@@ -100,7 +100,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.GET)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
@@ -118,7 +118,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.PUT)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
@@ -139,7 +139,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.PUT)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
@@ -161,7 +161,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.POST)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
@@ -182,7 +182,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.POST)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
@@ -204,7 +204,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.DELETE)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)
@@ -226,7 +226,7 @@ public final class GraphsTest {
 
 				.request(request -> request
 
-						.roles(singleton(Spec.root))
+						.roles(singleton(Form.root))
 						.method(Request.DELETE)
 						.base(ValuesTest.Base)
 						.path(Graphs.Path)

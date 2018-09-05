@@ -19,7 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.codecs.ShapeCodec;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
@@ -101,7 +101,7 @@ public final class Inspector implements Wrapper {
 
 				final Shape shape=this.shape
 						.accept(role(request.roles()))
-						.accept(mode(Spec.verify))
+						.accept(mode(Form.verify))
 						.accept(new Inferencer())
 						.accept(new Optimizer());
 
@@ -110,10 +110,10 @@ public final class Inspector implements Wrapper {
 				// !!! extract/manage container creation shape
 				// final Shape create=traits(shape)
 				//		.getOrDefault(step(LDP.CONTAINS), and()) // extract resource creation shape
-				//		.accept(Shape.task(Spec.create));
+				//		.accept(Shape.task(Form.create));
 
 
-				for (final IRI task : Lists.list(Spec.relate, Spec.update, Spec.delete)) {
+				for (final IRI task : Lists.list(Form.relate, Form.update, Form.delete)) {
 
 					final Shape spec=shape.accept(task(task));
 

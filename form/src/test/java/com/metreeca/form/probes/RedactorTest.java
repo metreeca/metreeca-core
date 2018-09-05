@@ -17,7 +17,7 @@
 
 package com.metreeca.form.probes;
 
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.shapes.When;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.Shape;
@@ -46,7 +46,7 @@ public class RedactorTest {
 
 	private static final Redactor first=new Redactor(singletonMap(RDF.VALUE, singleton(RDF.FIRST)));
 	private static final Redactor rest=new Redactor(singletonMap(RDF.VALUE, singleton(RDF.REST)));
-	private static final Redactor any=new Redactor(singletonMap(RDF.VALUE, singleton(Spec.any)));
+	private static final Redactor any=new Redactor(singletonMap(RDF.VALUE, singleton(Form.any)));
 
 
 	@Test public void testIgnoreUnconditionalShapes() {

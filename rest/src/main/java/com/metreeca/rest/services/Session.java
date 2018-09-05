@@ -17,8 +17,8 @@
 
 package com.metreeca.rest.services;
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.*;
-import com.metreeca.form.Spec;
 import com.metreeca.tray.iam.Roster;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -94,7 +94,7 @@ public final class Session implements Service {
 
 			final IRI user=request.user();
 
-			if ( user.equals(Spec.none) ) {
+			if ( user.equals(Form.none) ) {
 
 				response.status(Response.OK).json(object());
 

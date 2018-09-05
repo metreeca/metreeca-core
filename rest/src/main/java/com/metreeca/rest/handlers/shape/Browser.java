@@ -18,10 +18,10 @@
 package com.metreeca.rest.handlers.shape;
 
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
 import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.sparql.SPARQLEngine;
@@ -70,8 +70,8 @@ public final class Browser extends Shaper {
 
 	private Browser(final Shape shape) {
 		this.shape=shape
-				.accept(task(Spec.relate))
-				.accept(view(Spec.digest));
+				.accept(task(Form.relate))
+				.accept(view(Form.digest));
 	}
 
 
@@ -106,7 +106,7 @@ public final class Browser extends Shaper {
 
 					response.status(Response.OK).rdf(
 
-							union(container.accept(mode(Spec.verify)).accept(new Outliner()), model),
+							union(container.accept(mode(Form.verify)).accept(new Outliner()), model),
 
 							or(container, trait(LDP.CONTAINS, resource))
 
@@ -128,7 +128,7 @@ public final class Browser extends Shaper {
 
 					response.status(Response.OK).rdf(
 
-							rewrite(model, Spec.meta, focus),
+							rewrite(model, Form.meta, focus),
 							or(StatsShape, ItemsShape)
 
 					);

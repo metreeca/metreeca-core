@@ -18,9 +18,9 @@
 package com.metreeca.rest.handlers.shape;
 
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.*;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -57,8 +57,8 @@ public final class Deleter extends Shaper {
 
 	private Deleter(final Shape shape) {
 		this.shape=shape
-				.accept(task(Spec.delete))
-				.accept(view(Spec.detail));
+				.accept(task(Form.delete))
+				.accept(view(Form.detail));
 	}
 
 

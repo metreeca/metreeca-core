@@ -21,7 +21,7 @@ package com.metreeca.rest.handlers.shape;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.tray.rdf.Graph;
@@ -79,8 +79,8 @@ public final class Relator extends Shaper {
 		}
 
 		this.shape=shape
-				.accept(task(Spec.relate))
-				.accept(view(Spec.detail));
+				.accept(task(Form.relate))
+				.accept(view(Form.detail));
 
 		return this;
 	}
@@ -135,7 +135,7 @@ public final class Relator extends Shaper {
 
 												// base resource: convert its shape to RDF and merge into results
 
-												? union(piped, focused.accept(mode(Spec.verify)).accept(new Outliner()))
+												? union(piped, focused.accept(mode(Form.verify)).accept(new Outliner()))
 
 												// filtered resource: return selected data
 
@@ -143,7 +143,7 @@ public final class Relator extends Shaper {
 
 												// introspection query: rewrite query results to the target IRI
 
-												: rewrite(piped, Spec.meta, focus),
+												: rewrite(piped, Form.meta, focus),
 
 										// merge all possible shape elements to properly drive response formatting
 

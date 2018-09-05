@@ -21,7 +21,7 @@ package com.metreeca.rest.handlers.shape;
 import com.metreeca.rest.LinkTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.form.Spec;
+import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.Model;
@@ -146,7 +146,7 @@ public class BuilderTest {
 		testbed().handler(this::handler)
 
 				.request(request -> relate(request)
-						.user(Spec.none)
+						.user(Form.none)
 						.done())
 
 				.response(response -> {
