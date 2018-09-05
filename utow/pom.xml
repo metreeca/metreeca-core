@@ -17,29 +17,37 @@
   If not, see <http://www.gnu.org/licenses/>.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.metreeca</groupId>
-        <artifactId>link</artifactId>
-        <version>0.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>com.metreeca</groupId>
+		<artifactId>link</artifactId>
+		<version>0.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>next</artifactId>
-    <version>0.0-SNAPSHOT</version>
+	<artifactId>utow</artifactId>
+	<version>0.0-SNAPSHOT</version>
 
-    <dependencies>
+	<name>Metreeca Undertow Adapter</name>
+	<description>An adapter for deploying Metreeca linked data apps as Undertow handlers.</description>
 
-	    <dependency>
-		    <groupId>com.metreeca</groupId>
-		    <artifactId>tray</artifactId>
-		    <version>0.0-SNAPSHOT</version>
-	    </dependency>
+	<dependencies>
 
-    </dependencies>
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>next</artifactId>
+			<version>0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency> <!-- https://mvnrepository.com/artifact/io.undertow/undertow-core -->
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-core</artifactId>
+			<version>2.0.13.Final</version>
+		</dependency>
+
+	</dependencies>
 
 </project>

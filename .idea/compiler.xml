@@ -12,6 +12,7 @@
         <module name="next" />
         <module name="rest" />
         <module name="tray" />
+        <module name="utow" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -45,6 +46,7 @@
       <module name="tool" target="1.8" />
       <module name="tray" target="1.8" />
       <module name="tray (1)" target="1.8" />
+      <module name="utow" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
