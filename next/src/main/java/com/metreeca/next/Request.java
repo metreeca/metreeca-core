@@ -17,7 +17,7 @@
 
 package com.metreeca.next;
 
-public final class Request extends Message<Request> {
+public final class Request extends Readable<Request> {
 
 	private String method="";
 

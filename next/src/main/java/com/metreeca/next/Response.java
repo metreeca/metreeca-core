@@ -17,21 +17,14 @@
 
 package com.metreeca.next;
 
-import java.io.OutputStream;
-import java.io.Writer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 
-public final class Response extends Message<Response> implements Source<Response> {
+public final class Response extends Writable<Response> implements Source<Response> {
 
 	private final Request request;
 
 	private int status;
-
-	private Consumer<Supplier<Writer>> text=supplier -> {};
-	private Consumer<Supplier<OutputStream>> data=supplier -> {};
 
 
 	public Response(final Request request) {
@@ -80,60 +73,6 @@ public final class Response extends Message<Response> implements Source<Response
 		this.status=status;
 
 		return this;
-	}
-
-
-	public Consumer<Supplier<Writer>> text() {
-		return text;
-	}
-
-	public Response text(final Consumer<Supplier<Writer>> text) {
-
-		if ( text == null ) {
-			throw new NullPointerException("null text");
-		}
-
-		this.text=text;
-
-		return this;
-	}
-
-	public Response text(final UnaryOperator<Writer> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		final Consumer<Supplier<Writer>> text=this.text;
-
-		return text(sink -> { text.accept(() -> filter.apply(sink.get())); });
-	}
-
-
-	public Consumer<Supplier<OutputStream>> data() {
-		return data;
-	}
-
-	public Response data(final Consumer<Supplier<OutputStream>> data) {
-
-		if ( data == null ) {
-			throw new NullPointerException("null data");
-		}
-
-		this.data=data;
-
-		return this;
-	}
-
-	public Response data(final UnaryOperator<OutputStream> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		final Consumer<Supplier<OutputStream>> data=this.data;
-
-		return data(sink -> { data.accept(() -> filter.apply(sink.get())); });
 	}
 
 }
