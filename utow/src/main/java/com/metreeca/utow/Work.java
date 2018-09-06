@@ -17,66 +17,29 @@
 
 package com.metreeca.utow;
 
-import com.metreeca.next.Handler;
-import com.metreeca.next.Request;
-import com.metreeca.tray.Tray;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 
-import io.undertow.Undertow;
-import io.undertow.util.Headers;
-
-import java.io.*;
+import static com.metreeca.utow.Gateway.run;
 
 
 public final class Work {
 
-	public static void main(final String[] args) {
-
-		final Tray tray=new Tray();
-
-		final Handler handler=tray.get(() -> request -> request.response()
+	public static void main(final String... args) {
+		run(6800, "localhost", tray -> tray.get(() -> request -> request.response()
 
 				.status(200)
 
-				.text(supplier -> {
-					try (final Writer writer=supplier.get()) {
+				.text(sink -> {
+					try (final Writer writer=sink.get()) {
 
 						writer.write("Ciao babbo!");
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-				}));
-
-		Undertow.builder()
-
-				.addHttpListener(6800, "localhost")
-
-				.setHandler(exchange -> handler
-
-						// !!! handle multi-part forms (https://stackoverflow.com/questions/37839418/multipart-form-data-example-using-undertow)
-
-						.handle(new Request().method(exchange.getRequestMethod().toString()))
-
-						.accept(response -> {
-
-							final StringWriter writer=new StringWriter(1000);
-
-							response.text().accept(() -> writer);
-
-							exchange.setStatusCode(response.status());
-
-							exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-							exchange.getResponseSender().send(writer.toString()); // !!! stream
-
-							// !!! handle binary data
-
-						}))
-
-				.build()
-				.start();
-
-		Runtime.getRuntime().addShutdownHook(new Thread(tray::clear));
-
+				})));
 	}
 
 }

@@ -16,7 +16,7 @@
  */
 
 /**
- * Metreeca Undertow adapter.
+ * Undertow adapter.
  */
 
 package com.metreeca.utow;
