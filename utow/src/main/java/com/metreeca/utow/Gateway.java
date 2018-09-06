@@ -20,6 +20,7 @@ package com.metreeca.utow;
 import com.metreeca.next.Handler;
 import com.metreeca.next.Request;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.sys.Trace;
 
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -103,6 +104,8 @@ public final class Gateway implements HttpHandler {
 			throw new IllegalStateException("active gateway");
 		}
 
+		tray.get(Trace.Factory).info(this, "starting");
+
 		final Handler handler=loader.apply(tray);
 
 		this.handler=new GracefulShutdownHandler(exchange -> handler
@@ -134,6 +137,8 @@ public final class Gateway implements HttpHandler {
 		if ( handler == null ) {
 			throw new IllegalStateException("inactive gateway");
 		}
+
+		tray.get(Trace.Factory).info(this, "stopping");
 
 		try {
 
