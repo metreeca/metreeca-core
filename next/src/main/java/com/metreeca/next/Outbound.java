@@ -24,7 +24,12 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 
-public abstract class Writable<T extends Writable<T>> extends Message<T> {
+/**
+ * Abstract outbound HTTP message.
+ *
+ * <p>Handles shared state/behaviour for outbound HTTP messages and message parts.</p>
+ */
+public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 
 	private Consumer<Supplier<Writer>> text=supplier -> {};
 	private Consumer<Supplier<OutputStream>> data=supplier -> {};

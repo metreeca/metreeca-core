@@ -25,7 +25,12 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 
-public abstract class Readable<T extends Readable<T>> extends Message<T> {
+/**
+ * Abstract inbound HTTP message.
+ *
+ * <p>Handles shared state/behaviour for inbound HTTP messages and message parts.</p>
+ */
+public abstract class Inbound<T extends Inbound<T>> extends Message<T> {
 
 	private Supplier<Reader> text=Transputs::reader;
 	private Supplier<InputStream> data=Transputs::input;

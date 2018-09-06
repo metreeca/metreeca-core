@@ -31,7 +31,7 @@ final class WorkTest {
 
 	@Test void test() {
 
-		final Handler handler=request -> (Source<Response>)consumer -> consumer.accept(request.response().status(200)
+		final Handler handler=request -> (Lazy<Response>)consumer -> consumer.accept(request.response().status(200)
 
 				.text(sink -> {
 					try (final Writer writer=sink.get()) {

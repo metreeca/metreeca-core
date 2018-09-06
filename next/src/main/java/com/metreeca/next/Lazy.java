@@ -21,12 +21,24 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 
-@FunctionalInterface public interface Source<T> {
+/**
+ * Lazy object source.
+ *
+ * Manages a lazy object generation pipeline.
+ *
+ * @param <T> the type of the generated object
+ */
+@FunctionalInterface public interface Lazy<T> {
 
+	/**
+	 * Generates the source object.
+	 *
+	 * @param consumer the target consumer for the generated object
+	 */
 	public void accept(final Consumer<T> consumer);
 
 
-	public default <R> Source<R> map(final Function<T, R> mapper) {
+	public default <R> Lazy<R> map(final Function<T, R> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");

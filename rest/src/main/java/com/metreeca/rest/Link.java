@@ -27,7 +27,7 @@ import static com.metreeca.form.things.Values.iri;
  */
 public final class Link {
 
-	public static final String Namespace="app://link.metreeca.com/terms#"; // keep aligned with client
+	public static final String Namespace="app://link.metreeca.com/terms#";
 
 
 	//// Extended LDP Resource Types ///////////////////////////////////////////////////////////////////////////////////

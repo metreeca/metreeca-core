@@ -20,7 +20,35 @@ package com.metreeca.next;
 import java.util.function.Consumer;
 
 
-public final class Response extends Writable<Response> implements Source<Response> {
+/**
+ * HTTP response.
+ */
+public final class Response extends Outbound<Response> implements Lazy<Response> {
+
+	public static final int OK=200; // https://tools.ietf.org/html/rfc7231#section-6.3.1
+	public static final int Created=201; // https://tools.ietf.org/html/rfc7231#section-6.3.2
+	public static final int Accepted=202; // https://tools.ietf.org/html/rfc7231#section-6.3.3
+	public static final int NoContent=204; // https://tools.ietf.org/html/rfc7231#section-6.3.5
+
+	public static final int MovedPermanently=301; // https://tools.ietf.org/html/rfc7231#section-6.4.2
+	public static final int SeeOther=303; // https://tools.ietf.org/html/rfc7231#section-6.4.4
+
+	public static final int BadRequest=400; // https://tools.ietf.org/html/rfc7231#section-6.5.1
+	public static final int Unauthorized=401; // https://tools.ietf.org/html/rfc7235#section-3.1
+	public static final int Forbidden=403; // https://tools.ietf.org/html/rfc7231#section-6.5.3
+	public static final int NotFound=404; // https://tools.ietf.org/html/rfc7231#section-6.5.4
+	public static final int MethodNotAllowed=405; // https://tools.ietf.org/html/rfc7231#section-6.5.5
+	public static final int Conflict=409; // https://tools.ietf.org/html/rfc7231#section-6.5.8
+	public static final int UnprocessableEntity=422; // https://tools.ietf.org/html/rfc4918#section-11.2
+
+	public static final int InternalServerError=500; // https://tools.ietf.org/html/rfc7231#section-6.6.1
+	public static final int NotImplemented=501; // https://tools.ietf.org/html/rfc7231#section-6.6.2
+	public static final int BadGateway=502; // https://tools.ietf.org/html/rfc7231#section-6.6.3
+	public static final int ServiceUnavailable=503; // https://tools.ietf.org/html/rfc7231#section-6.6.4
+	public static final int GatewayTimeout=504; // https://tools.ietf.org/html/rfc7231#section-6.6.5
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Request request;
 

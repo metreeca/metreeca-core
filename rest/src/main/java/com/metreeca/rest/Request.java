@@ -53,7 +53,7 @@ import static java.util.stream.Collectors.toList;
 public final class Request {
 
 	/**
-	 * The name of the part containing the main body payload in multipart/form-data requests ({@code {@value}}).
+	 * The name of the message part containing the main body payload in multipart/form-data requests ({@code {@value}}).
 	 */
 	public static final String BodyPart="body";
 

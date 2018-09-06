@@ -25,6 +25,11 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableCollection;
 
 
+/**
+ * Abstract HTTP message.
+ *
+ * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
+ */
 public abstract class Message<T extends Message<T>> {
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();

@@ -17,7 +17,39 @@
 
 package com.metreeca.next;
 
-public final class Request extends Readable<Request> {
+import java.util.Collection;
+import java.util.HashSet;
+
+import static java.util.Arrays.asList;
+
+
+/**
+ * HTTP request.
+ */
+public final class Request extends Inbound<Request> {
+
+	/**
+	 * The name of the message part containing the main body payload in multipart/form-data requests ({@code {@value}}).
+	 */
+	public static final String BodyPart="body";
+
+	public static final String GET="GET"; // https://tools.ietf.org/html/rfc7231#section-4.3.1
+	public static final String HEAD="HEAD"; // https://tools.ietf.org/html/rfc7231#section-4.3.2
+	public static final String POST="POST"; // https://tools.ietf.org/html/rfc7231#section-4.3.3
+	public static final String PUT="PUT"; // https://tools.ietf.org/html/rfc7231#section-4.3.4
+	public static final String DELETE="DELETE"; // https://tools.ietf.org/html/rfc7231#section-4.3.5
+	public static final String CONNECT="CONNECT"; // https://tools.ietf.org/html/rfc7231#section-4.3.6
+	public static final String OPTIONS="OPTIONS"; // https://tools.ietf.org/html/rfc7231#section-4.3.7
+	public static final String TRACE="TRACE"; // https://tools.ietf.org/html/rfc7231#section-4.3.8
+	public static final String PATCH="PATCH"; // https://tools.ietf.org/html/rfc5789#section-2
+
+
+	private static final Collection<String> Safe=new HashSet<>(asList(
+			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
+	));
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String method="";
 
