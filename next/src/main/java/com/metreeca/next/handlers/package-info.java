@@ -19,4 +19,4 @@
  * Standard handlers.
  */
 
-package com.metreeca.rest.handlers;
+package com.metreeca.next.handlers;
