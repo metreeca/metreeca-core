@@ -32,6 +32,9 @@
     <artifactId>next</artifactId>
     <version>0.0-SNAPSHOT</version>
 
+	<name>Metreeca REST API Framework</name>
+	<description>A concise REST API framework for linked data.</description>
+
     <dependencies>
 
 	    <dependency>

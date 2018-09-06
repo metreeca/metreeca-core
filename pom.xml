@@ -28,6 +28,7 @@
 	<packaging>pom</packaging>
 
 	<name>Metreeca Model-Driven Linked Data Framework</name>
+	<description>A declarative model-driven framework for rapid linked data service development.</description>
 	<url>https://github.com/metreeca/metreeca-core</url>
 	<inceptionYear>2013</inceptionYear>
 
