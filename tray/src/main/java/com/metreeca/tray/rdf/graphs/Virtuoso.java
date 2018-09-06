@@ -18,7 +18,7 @@
 package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -32,14 +32,14 @@ import virtuoso.rdf4j.driver.VirtuosoRepository;
 
 import java.util.function.Supplier;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 public final class Virtuoso extends Graph {
 
 	public static final Supplier<Graph> Factory=() -> {
 
-		final Setup setup=tool(Setup.Factory);
+		final _Setup setup=tool(_Setup.Factory);
 
 		final String url=setup.get("graph.virtuoso.url")
 				.orElseThrow(() -> new IllegalArgumentException("missing remote URL property"));

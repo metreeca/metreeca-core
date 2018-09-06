@@ -27,8 +27,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Setup.storage;
+import static com.metreeca.tray._Tray.tool;
+import static com.metreeca.tray.sys._Setup.storage;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.String.format;
@@ -47,10 +47,10 @@ public final class Cache {
 	 * Cache factory.
 	 *
 	 * <p>The default cache acquired through this factory stores retrieved data in the {@code cache} folder under the
-	 * default storage folder defined by the {@link Setup#StorageProperty} property.</p>
+	 * default storage folder defined by the {@link _Setup#StorageProperty} property.</p>
 	 */
 	public static final Supplier<Cache> Factory=() ->
-			new Cache(new File(storage(tool(Setup.Factory)), "cache"));
+			new Cache(new File(storage(tool(_Setup.Factory)), "cache"));
 
 
 	private static final BiConsumer<URL, Blob> NullFetcher=(url, blob) -> {};

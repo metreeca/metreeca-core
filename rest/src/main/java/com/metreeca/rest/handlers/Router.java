@@ -20,7 +20,7 @@ package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.*;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 /**

@@ -46,7 +46,7 @@ import static com.metreeca.form.sparql.SPARQLEngine.browse;
 import static com.metreeca.form.sparql.SPARQLEngine.contains;
 import static com.metreeca.form.things.Sets.union;
 import static com.metreeca.form.things.Values.rewrite;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 public final class Relator extends Shaper {

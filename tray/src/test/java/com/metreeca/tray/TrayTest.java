@@ -4,35 +4,36 @@
  * This file is part of Metreeca.
  *
  * Metreeca is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * of the GNU Affero General  License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
  * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
+ * See the GNU Affero General  License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General  License along with Metreeca.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.tray;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 import static com.metreeca.tray.Tray.tool;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static java.util.Arrays.asList;
 
 
-public class TrayTest {
+final class TrayTest {
 
-	@Test public void testReplacesToolsWithPlugins() {
+	@Test void testReplacesToolsWithPlugins() {
 
 		final Tray tray=new Tray();
 
@@ -41,10 +42,10 @@ public class TrayTest {
 
 		tray.set(target, plugin);
 
-		assertEquals("tool plugin", plugin.get(), tray.get(target));
+		assertEquals(plugin.get(), tray.get(target));
 	}
 
-	@Test public void testReleaseAutoCloseableResources() {
+	@Test void testReleaseAutoCloseableResources() {
 
 		final Tray tray=new Tray();
 
@@ -68,11 +69,11 @@ public class TrayTest {
 
 		tray.clear();
 
-		assertTrue("resource released", resource.isClosed());
+		assertTrue(resource.isClosed());
 
 	}
 
-	@Test public void testReleaseDependenciesAfterResource() {
+	@Test void testReleaseDependenciesAfterResource() {
 
 		final Tray tray=new Tray();
 
@@ -105,35 +106,38 @@ public class TrayTest {
 		final Step y=new Step(z);
 		final Step x=new Step(y);
 
-		tray.lookup(() -> tray.get(x)); // load the terminal tool with its dependencies
+		tray.get(x); // load the terminal tool with its dependencies
 		tray.clear(); // release resources
 
-		assertEquals("dependencies released after relying resources", asList(x, y, z), released);
+		assertEquals(asList(x, y, z), released, "dependencies released after relying resources");
 	}
 
 
-	@Test(expected=IllegalStateException.class) public void testPreventToolBindingIfAlreadyReplaced() {
+	@Test void testPreventToolBindingIfAlreadyReplaced() {
 
 		final Tray tray=new Tray();
 		final Supplier<Object> tool=Object::new;
 
-		tray
+		assertThrows(IllegalStateException.class, () -> tray
+
 				.set(tool, Object::new)
-				.set(tool, Object::new);
-
+				.set(tool, Object::new));
 	}
 
-	@Test(expected=IllegalStateException.class) public void testPreventToolBindingIfAlreadyInUse() {
+	@Test void testPreventToolBindingIfAlreadyInUse() {
 
 		final Tray tray=new Tray();
 		final Supplier<Object> tool=Object::new;
 
-		tray.get(tool);
-		tray.set(tool, Object::new);
+		assertThrows(IllegalStateException.class, () -> {
 
+			tray.get(tool);
+			tray.set(tool, Object::new);
+
+		});
 	}
 
-	@Test(expected=IllegalStateException.class) public void testTrapCircularDependencies() {
+	@Test void testTrapCircularDependencies() {
 
 		final Tray tray=new Tray();
 
@@ -143,12 +147,15 @@ public class TrayTest {
 		cycle.put("y", () -> tool(cycle.get("z")));
 		cycle.put("z", () -> tool(cycle.get("x")));
 
-		tray.get(cycle.get("x"));
+
+		assertThrows(IllegalStateException.class, () ->
+
+				tray.get(cycle.get("x")));
 
 	}
 
 
-	@Test(expected=NoSuchElementException.class) public void testHandleExceptionsInFactories() {
+	@Test void testHandleExceptionsInFactories() {
 
 		final Tray tray=new Tray();
 
@@ -156,9 +163,9 @@ public class TrayTest {
 			throw new NoSuchElementException("missing resource");
 		};
 
-		try { tray.get(tool); } catch ( final NoSuchElementException ignored ) {}
+		assertThrows(NoSuchElementException.class, () ->
 
-		tray.get(tool);
+				tray.get(tool));
 
 	}
 }

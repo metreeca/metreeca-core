@@ -29,7 +29,7 @@ import static com.metreeca.form.things.Bindings.bindings;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.time;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 /**

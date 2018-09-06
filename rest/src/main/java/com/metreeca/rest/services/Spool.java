@@ -19,7 +19,7 @@ package com.metreeca.rest.services;
 
 import com.metreeca.rest.Service;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 import com.metreeca.tray.sys.Trace;
 
 import org.apache.commons.vfs2.*;
@@ -31,8 +31,8 @@ import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import java.io.*;
 import java.nio.file.*;
 
-import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Setup.storage;
+import static com.metreeca.tray._Tray.tool;
+import static com.metreeca.tray.sys._Setup.storage;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
@@ -57,14 +57,14 @@ public final class Spool implements Service {
 	}
 
 
-	private final Setup setup=tool(Setup.Factory);
+	private final _Setup setup=tool(_Setup.Factory);
 	private final Graph graph=tool(Graph.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 
 	private final File storage=setup.get("spool.storage", new File(storage(setup), "spool"));
 
-	private final String base=setup.get("spool.base", setup.get(Setup.BaseProperty, ""));
+	private final String base=setup.get("spool.base", setup.get(_Setup.BaseProperty, ""));
 
 
 	// !!! breaks on GAE even if excluded with a conditional test

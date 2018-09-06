@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import static com.metreeca.rest.LinkTest.testbed;
 import static com.metreeca.rest.wrappers.Bearer.bearer;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

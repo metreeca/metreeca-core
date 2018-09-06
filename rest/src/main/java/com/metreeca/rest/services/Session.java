@@ -34,7 +34,7 @@ import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
 import static com.metreeca.form.things._JSON.field;
 import static com.metreeca.form.things._JSON.object;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;

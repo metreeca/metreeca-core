@@ -19,10 +19,10 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Wrapper;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 import com.metreeca.tray.sys.Trace;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 /**
@@ -40,7 +40,7 @@ public final class CORS implements Wrapper {
 	public static CORS cors() { return new CORS(); }
 
 
-	private final Setup setup=tool(Setup.Factory);
+	private final _Setup setup=tool(_Setup.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 	private final boolean enabled=setup.get("cors", false);

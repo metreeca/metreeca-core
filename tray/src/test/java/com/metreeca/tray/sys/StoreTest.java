@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.tray.Tray;
+import com.metreeca.tray._Tray;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +36,7 @@ public final class StoreTest {
 
 
 	private void exec(final Consumer<Store> task) {
-		new Tray().lookup(() -> {
+		new _Tray().lookup(() -> {
 			try {
 				task.accept(new Store(tmp.newFolder()));
 			} catch ( final IOException e ) {

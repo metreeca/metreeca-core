@@ -32,7 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Values.format;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 /**

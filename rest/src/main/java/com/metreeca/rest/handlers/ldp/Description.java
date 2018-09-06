@@ -32,7 +32,7 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import java.util.*;
 
 import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.util.Collections.singleton;
 

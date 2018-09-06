@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 
-import static com.metreeca.utow.Gateway.run;
+import static com.metreeca.utow._Gateway.run;
 
 
 public final class Work {

@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.singleton;

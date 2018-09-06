@@ -36,7 +36,7 @@ import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.rest.handlers.shape.Relator.relator;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

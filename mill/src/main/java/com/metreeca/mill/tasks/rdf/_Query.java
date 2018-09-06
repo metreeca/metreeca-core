@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.Math.max;
 import static java.lang.String.format;

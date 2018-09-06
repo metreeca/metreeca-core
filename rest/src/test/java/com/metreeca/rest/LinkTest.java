@@ -21,7 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.tray.Tray;
+import com.metreeca.tray._Tray;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -56,7 +56,7 @@ import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.integer;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.term;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.junit.Assert.fail;
 
@@ -168,7 +168,7 @@ public final class LinkTest {
 
 	public static final class Testbed {
 
-		private final Tray tray=new Tray();
+		private final _Tray tray=new _Tray();
 
 		private Supplier<Handler> handler=() -> tool(Server.Factory);
 

@@ -39,7 +39,7 @@ import static com.metreeca.form.Shape.task;
 import static com.metreeca.form.Shape.view;
 import static com.metreeca.form.sparql.SPARQLEngine.contains;
 import static com.metreeca.form.sparql.SPARQLEngine.update;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 public final class Updater extends Shaper {

@@ -32,7 +32,7 @@ import static com.metreeca.rest.wrappers.Transactor.transactor;
 import static com.metreeca.form.things.Bindings.bindings;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 

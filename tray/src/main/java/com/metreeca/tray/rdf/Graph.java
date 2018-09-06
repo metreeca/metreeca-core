@@ -18,7 +18,7 @@
 package com.metreeca.tray.rdf;
 
 import com.metreeca.tray.rdf.graphs.*;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
@@ -31,7 +31,7 @@ import java.io.File;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 /**
@@ -41,7 +41,7 @@ public abstract class Graph implements AutoCloseable {
 
 	public static final Supplier<Graph> Factory=() -> {
 
-		final Setup setup=tool(Setup.Factory);
+		final _Setup setup=tool(_Setup.Factory);
 		final String type=setup.get("graph", "memory");
 
 		switch ( type ) {
@@ -77,8 +77,8 @@ public abstract class Graph implements AutoCloseable {
 	private static final ThreadLocal<RepositoryConnection> connection=new ThreadLocal<>();
 
 
-	protected static File storage(final Setup setup) {
-		return new File(Setup.storage(setup), "graph");
+	protected static File storage(final _Setup setup) {
+		return new File(_Setup.storage(setup), "graph");
 	}
 
 

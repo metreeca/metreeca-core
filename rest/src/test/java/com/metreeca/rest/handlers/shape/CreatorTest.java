@@ -50,7 +50,7 @@ import static com.metreeca.rest.Server.server;
 import static com.metreeca.rest.handlers.shape.Creator.auto;
 import static com.metreeca.rest.handlers.shape.Creator.creator;
 import static com.metreeca.rest.wrappers.Processor.processor;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

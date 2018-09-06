@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.query.impl.SimpleDataset;
 
 import java.util.stream.Stream;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.Math.max;
 import static java.lang.String.format;

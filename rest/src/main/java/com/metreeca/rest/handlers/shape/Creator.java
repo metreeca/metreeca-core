@@ -41,7 +41,7 @@ import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.sparql.SPARQLEngine.create;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.rewrite;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.eclipse.rdf4j.IsolationLevels.SERIALIZABLE;
 

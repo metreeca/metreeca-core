@@ -26,13 +26,13 @@ import static org.junit.Assert.assertEquals;
 import static java.util.Collections.singleton;
 
 
-public class SetupTest {
+public class _SetupTest {
 
 	@Test public void testRetrieveIntegerProperties() {
 
-		assertEquals("return fallback", (Integer)1000, get(null, 1000, Setup::get));
-		assertEquals("ignore malformed values", (Integer)1000, get("none", 1000, Setup::get));
-		assertEquals("strip underscores", (Integer)1000, get("1_000", 0, Setup::get));
+		assertEquals("return fallback", (Integer)1000, get(null, 1000, _Setup::get));
+		assertEquals("ignore malformed values", (Integer)1000, get("none", 1000, _Setup::get));
+		assertEquals("strip underscores", (Integer)1000, get("1_000", 0, _Setup::get));
 
 	}
 
@@ -47,13 +47,13 @@ public class SetupTest {
 			properties.setProperty("test", value);
 		}
 
-		return getter.get(new Setup(singleton(setup -> properties)), "test", fallback);
+		return getter.get(new _Setup(singleton(setup -> properties)), "test", fallback);
 	}
 
 
 	@FunctionalInterface private interface Getter<T> {
 
-		public T get(final Setup setup, final String property, final T fallback);
+		public T get(final _Setup setup, final String property, final T fallback);
 
 	}
 

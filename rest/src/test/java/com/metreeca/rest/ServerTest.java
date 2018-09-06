@@ -21,7 +21,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.form.things._JSON;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.junit.Test;
@@ -38,7 +38,7 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,11 +48,11 @@ import static java.util.Collections.singleton;
 public class ServerTest {
 
 	private void setup() {
-		tool(Setup.Factory, () -> new Setup(setup -> {
+		tool(_Setup.Factory, () -> new _Setup(setup -> {
 
 			final Properties properties=new Properties();
 
-			properties.setProperty(Setup.BaseProperty, Internal);
+			properties.setProperty(_Setup.BaseProperty, Internal);
 
 			return properties;
 

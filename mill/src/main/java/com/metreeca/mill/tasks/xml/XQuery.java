@@ -28,7 +28,7 @@ import java.util.stream.StreamSupport;
 
 import javax.xml.transform.Source;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 /**

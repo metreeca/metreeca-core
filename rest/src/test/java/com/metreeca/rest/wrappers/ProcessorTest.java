@@ -31,7 +31,7 @@ import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.form.things.ValuesTest.export;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.things.ValuesTest.sparql;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 public final class ProcessorTest {

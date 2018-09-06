@@ -44,7 +44,7 @@ import static com.metreeca.form.Shape.task;
 import static com.metreeca.form.Shape.view;
 import static com.metreeca.form.things.Bindings.bindings;
 import static com.metreeca.form.things.Values.time;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;

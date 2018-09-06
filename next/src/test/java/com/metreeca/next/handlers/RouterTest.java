@@ -15,37 +15,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.mill.tasks.lod;
+package com.metreeca.next.handlers;
 
-import com.metreeca.mill.Mill;
-import com.metreeca.mill.tasks.Item;
-import com.metreeca.mill.tasks.Peek;
-import com.metreeca.mill.tasks.Pipe;
-import com.metreeca.mill.tasks.xml.XSLT;
-import com.metreeca.form.things.Transputs;
-import com.metreeca.tray._Tray;
-
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
-public final class GeoGoogleTest {
+final class RouterTest {
 
-	@Ignore  @Test public void work() {
-		new _Tray().lookup(() -> {
-			new Mill().execute(new Pipe(
+	@Test void test() {
 
-					new Item().text(Transputs.text(GeoGoogle.class, "GeoGoogle.xml")),
-
-					new XSLT()
-
-							.transform(Transputs.text(GeoGoogle.class, "GeoGoogle.xsl")),
-
-
-					new Peek()
-			));
-
-		});
 	}
 
 }

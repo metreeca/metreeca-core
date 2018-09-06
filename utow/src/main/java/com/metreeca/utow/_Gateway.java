@@ -20,6 +20,7 @@ package com.metreeca.utow;
 import com.metreeca.next.Handler;
 import com.metreeca.next.Request;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray._Tray;
 import com.metreeca.tray.sys.Trace;
 
 import io.undertow.Undertow;
@@ -28,7 +29,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.GracefulShutdownHandler;
 import io.undertow.util.Headers;
 
-import java.io.*;
+import java.io.StringWriter;
 import java.util.function.Function;
 
 
@@ -40,7 +41,7 @@ import java.util.function.Function;
  *
  * <ul>
  *
- * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform components required by
+ * <li>initializes and destroys the shared tool {@linkplain _Tray tray} managing platform components required by
  * resource handlers;</li>
  *
  * <li>intercepts HTTP requests and handles them using the {@linkplain Server server} tool provided by the shared tool
@@ -48,9 +49,9 @@ import java.util.function.Function;
  *
  * </ul>
  */
-public final class Gateway implements HttpHandler {
+public final class _Gateway implements HttpHandler {
 
-	public static void run(final int port, final String host, final Function<Tray, Handler> loader) {
+	public static void run(final int port, final String host, final Function<_Tray, Handler> loader) {
 
 		if ( port < 0 ) {
 			throw new IllegalArgumentException("illegal port ["+port+"]");
@@ -64,7 +65,7 @@ public final class Gateway implements HttpHandler {
 			throw new NullPointerException("null loader");
 		}
 
-		final Gateway gateway=new Gateway();
+		final _Gateway gateway=new _Gateway();
 
 		final Undertow server=Undertow.builder()
 				.addHttpListener(port, host, gateway.start(loader))
@@ -94,7 +95,7 @@ public final class Gateway implements HttpHandler {
 	}
 
 
-	public Gateway start(final Function<Tray, Handler> loader) {
+	public _Gateway start(final Function<_Tray, Handler> loader) {
 
 		if ( loader == null ) {
 			throw new NullPointerException("null loader");
@@ -132,7 +133,7 @@ public final class Gateway implements HttpHandler {
 		return this;
 	}
 
-	public Gateway stop() {
+	public _Gateway stop() {
 
 		if ( handler == null ) {
 			throw new IllegalStateException("inactive gateway");

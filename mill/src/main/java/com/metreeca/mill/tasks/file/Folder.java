@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.String.format;

@@ -35,7 +35,7 @@ import java.util.zip.GZIPInputStream;
 
 import static com.metreeca.mill._Cell.cell;
 import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 import static com.metreeca.tray.sys.Trace.clip;
 
 

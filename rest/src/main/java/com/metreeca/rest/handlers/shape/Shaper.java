@@ -46,7 +46,7 @@ import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.things.Strings.indent;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.util.stream.Collectors.toList;
 

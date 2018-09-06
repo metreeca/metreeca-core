@@ -19,9 +19,9 @@ package com.metreeca.j2ee;
 
 import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.*;
-import com.metreeca.tray.Tray;
+import com.metreeca.tray._Tray;
 import com.metreeca.tray.sys.Loader;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 import com.metreeca.tray.sys.Trace;
 
 import org.apache.commons.fileupload.FileItem;
@@ -45,7 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.rest.Part.part;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
 
@@ -63,7 +63,7 @@ import static java.util.Collections.list;
  *
  * <ul>
  *
- * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform components required by
+ * <li>initializes and destroys the shared tool {@linkplain _Tray tray} managing platform components required by
  * resource handlers;</li>
  *
  * <li>intercepts HTTP requests and handles them using the {@linkplain Server server} tool provided by the shared tool
@@ -76,7 +76,7 @@ import static java.util.Collections.list;
  */
 @WebListener public final class Gateway implements ServletContextListener, Filter {
 
-	private static final String TrayAttribute=Tray.class.getName();
+	private static final String TrayAttribute=_Tray.class.getName();
 
 
 	private static final Supplier<ServletFileUpload> Upload=ServletFileUpload::new; // shared file upload tool
@@ -88,13 +88,13 @@ import static java.util.Collections.list;
 
 		final ServletContext context=event.getServletContext();
 
-		final Tray tray=new Tray();
+		final _Tray tray=new _Tray();
 
 		try {
 
 			context.setAttribute(TrayAttribute, tray
 
-					.set(Setup.Factory, () -> setup(context))
+					.set(_Setup.Factory, () -> setup(context))
 					.set(Loader.Factory, () -> loader(context))
 					.set(Upload, () -> upload(context))
 
@@ -133,7 +133,7 @@ import static java.util.Collections.list;
 
 		try {
 
-			final Tray tray=(Tray)context.getAttribute(TrayAttribute);
+			final _Tray tray=(_Tray)context.getAttribute(TrayAttribute);
 
 			if ( tray != null ) { tray.clear(); }
 
@@ -143,8 +143,8 @@ import static java.util.Collections.list;
 	}
 
 
-	private Setup setup(final ServletContext context) {
-		return new Setup(Setup::system, Setup::custom, setup -> {
+	private _Setup setup(final ServletContext context) {
+		return new _Setup(_Setup::system, _Setup::custom, setup -> {
 
 			try { // defaults from WEB-INF directory, if found
 
@@ -213,7 +213,7 @@ import static java.util.Collections.list;
 			final ServletRequest request, final ServletResponse response, final FilterChain chain
 	) throws ServletException, IOException {
 
-		final Tray tray=(Tray)request.getServletContext().getAttribute(TrayAttribute);
+		final _Tray tray=(_Tray)request.getServletContext().getAttribute(TrayAttribute);
 
 		if ( tray == null ) {
 			throw new IllegalStateException("no tray in context");

@@ -18,7 +18,7 @@
 package com.metreeca.tray.sys;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.tray.Tray;
+import com.metreeca.tray._Tray;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public final class CacheTest {
 
 
 	private void exec(final Consumer<Cache> task) {
-		new Tray().lookup(() -> {
+		new _Tray().lookup(() -> {
 			try {
 				task.accept(new Cache(tmp.newFolder()));
 			} catch ( final IOException e ) {

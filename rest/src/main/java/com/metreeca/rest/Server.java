@@ -19,7 +19,7 @@ package com.metreeca.rest;
 
 
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys.Trace.Level;
 
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.handlers.Router.router;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -94,7 +94,7 @@ public final class Server implements Handler {
 
 	private final Handler handler;
 
-	private final String base=tool(Setup.Factory).get(Setup.BaseProperty).orElse("");
+	private final String base=tool(_Setup.Factory).get(_Setup.BaseProperty).orElse("");
 
 	private final Graph graph=tool(Graph.Factory);
 	private final Trace trace=tool(Trace.Factory);

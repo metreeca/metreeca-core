@@ -34,7 +34,7 @@ import java.util.Map;
 import static com.metreeca.rest.LinkTest.testbed;
 import static com.metreeca.form.things._JSON.field;
 import static com.metreeca.form.things._JSON.object;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 import static com.metreeca.tray.iam.Roster.CredentialsRejected;
 
 import static org.junit.Assert.assertEquals;

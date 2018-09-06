@@ -18,7 +18,7 @@
 package com.metreeca.rest.services;
 
 import com.metreeca.rest.*;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 import com.metreeca.tray.sys.Trace;
 
 import java.io.*;
@@ -28,7 +28,7 @@ import java.net.URLEncoder;
 
 import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.util.Arrays.asList;
 
@@ -41,7 +41,7 @@ public class Proxy implements Service {
 	private static final String Path="/proxy";
 
 
-	private final Setup setup=tool(Setup.Factory);
+	private final _Setup setup=tool(_Setup.Factory);
 	private final Index index=tool(Index.Factory);
 	private final Trace trace=tool(Trace.Factory);
 

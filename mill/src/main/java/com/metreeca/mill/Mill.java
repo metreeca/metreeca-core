@@ -22,7 +22,7 @@ import com.metreeca.tray.sys.Trace;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Values.bnode;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 import static com.metreeca.tray.sys.Trace.time;
 
 import static java.lang.String.format;

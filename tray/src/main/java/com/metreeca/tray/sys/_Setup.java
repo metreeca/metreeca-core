@@ -33,7 +33,7 @@ import static java.util.Collections.unmodifiableMap;
  *
  * <p>Provides access to system-wide setup properties.</p>
  */
-public final class Setup {
+public final class _Setup {
 
 
 	/**
@@ -71,10 +71,10 @@ public final class Setup {
 	/**
 	 * Setup factory.
 	 *
-	 * <p>The default setup acquired through this factory includes {@linkplain #system(Setup) system} properties and
-	 * properties read from the {@linkplain #custom(Setup) custom} setup file, if defined.</p>
+	 * <p>The default setup acquired through this factory includes {@linkplain #system(_Setup) system} properties and
+	 * properties read from the {@linkplain #custom(_Setup) custom} setup file, if defined.</p>
 	 */
-	public static final Supplier<Setup> Factory=() -> new Setup(asList(Setup::system, Setup::custom));
+	public static final Supplier<_Setup> Factory=() -> new _Setup(asList(_Setup::system, _Setup::custom));
 
 
 	/**
@@ -86,7 +86,7 @@ public final class Setup {
 	 *
 	 * @throws IllegalArgumentException if {@code setup} is {@code null}
 	 */
-	public static Properties system(final Setup setup) {
+	public static Properties system(final _Setup setup) {
 
 		if ( setup == null ) {
 			throw new NullPointerException("null setup");
@@ -105,7 +105,7 @@ public final class Setup {
 	 *
 	 * @throws IllegalArgumentException if {@code setup} is {@code null}
 	 */
-	public static Properties custom(final Setup setup) {
+	public static Properties custom(final _Setup setup) {
 
 		if ( setup == null ) {
 			throw new NullPointerException("null setup");
@@ -145,7 +145,7 @@ public final class Setup {
 	 *
 	 * @throws IllegalArgumentException if {@code setup} is {@code null}
 	 */
-	public static File storage(final Setup setup) {
+	public static File storage(final _Setup setup) {
 
 		if ( setup == null ) {
 			throw new NullPointerException("null setup");
@@ -169,7 +169,7 @@ public final class Setup {
 	 *
 	 * @throws IllegalArgumentException if either {@code loaders} or one of its elements is {@code null}
 	 */
-	@SafeVarargs public Setup(final Function<Setup, Properties>... loaders) {
+	@SafeVarargs public _Setup(final Function<_Setup, Properties>... loaders) {
 		this(asList(loaders));
 	}
 
@@ -180,13 +180,13 @@ public final class Setup {
 	 *
 	 * @throws IllegalArgumentException if either {@code loaders} or one of its elements is {@code null}
 	 */
-	public Setup(final Iterable<Function<Setup, Properties>> loaders) {
+	public _Setup(final Iterable<Function<_Setup, Properties>> loaders) {
 
 		if ( loaders == null ) {
 			throw new NullPointerException("null loaders");
 		}
 
-		for (final Function<Setup, Properties> loader : loaders) {
+		for (final Function<_Setup, Properties> loader : loaders) {
 
 			final Map<Object, Object> properties=loader.apply(this);
 

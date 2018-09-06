@@ -23,7 +23,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -50,7 +50,7 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 
 /**
@@ -78,7 +78,7 @@ public final class Graphs implements Service {
 	));
 
 
-	private final Setup setup=tool(Setup.Factory);
+	private final _Setup setup=tool(_Setup.Factory);
 	private final Index index=tool(Index.Factory);
 	private final Graph graph=tool(Graph.Factory);
 	private final Trace trace=tool(Trace.Factory);

@@ -24,7 +24,7 @@ import com.metreeca.tray.sys.Loader;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.String.format;
 

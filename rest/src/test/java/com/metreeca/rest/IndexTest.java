@@ -17,13 +17,13 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.tray.Tray;
+import com.metreeca.tray._Tray;
 
 import org.junit.Test;
 
 import java.util.Optional;
 
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray._Tray.tool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,7 +32,7 @@ import static org.junit.Assert.assertFalse;
 public class IndexTest {
 
 	@Test public void testMatchExactPathIgnoringTrailingSlashes() {
-		new Tray().lookup(() -> {
+		new _Tray().lookup(() -> {
 
 			final Index index=tool(Index.Factory);
 
@@ -54,7 +54,7 @@ public class IndexTest {
 	}
 
 	@Test public void testMatchLongestPrefix() {
-		new Tray().lookup(() -> {
+		new _Tray().lookup(() -> {
 
 			final Index index=tool(Index.Factory);
 
@@ -71,7 +71,7 @@ public class IndexTest {
 	}
 
 	@Test public void testManagesPrefixesOfEqualLength() {
-		new Tray().lookup(() -> {
+		new _Tray().lookup(() -> {
 
 			final Index index=tool(Index.Factory);
 
@@ -88,7 +88,7 @@ public class IndexTest {
 	}
 
 	@Test public void testNormalizePaths() {
-		new Tray().lookup(() -> {
+		new _Tray().lookup(() -> {
 
 			final Index index=tool(Index.Factory);
 

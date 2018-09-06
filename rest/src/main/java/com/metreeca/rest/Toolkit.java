@@ -17,7 +17,7 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.tray.Tray;
+import com.metreeca.tray._Tray;
 
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  *
  * <p>Custom toolkits listed in the {@code com.metreeca.link.Tookit} {@linkplain ServiceLoader service loader}
  * provider configuration file in the {@code META-INF/services/} resource directory of an application will be
- * automatically {@linkplain #load() loaded} by server adapters inside a {@linkplain Tray#update(Runnable) write-only
+ * automatically {@linkplain #load() loaded} by server adapters inside a {@linkplain _Tray#update(Runnable) write-only
  * task} on a shared tool tray.</p>
  */
 @FunctionalInterface public interface Toolkit {
@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 	 * Loads a custom toolkit.
 	 *
 	 * <p>Custom tool factories may be inserted into the shared tool tray using the static {@linkplain
-	 * Tray#tool(Supplier, Supplier)} factory replacement} method.</p>
+	 * _Tray#tool(Supplier, Supplier)} factory replacement} method.</p>
 	 */
 	public void load();
 

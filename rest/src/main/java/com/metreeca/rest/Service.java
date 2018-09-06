@@ -17,7 +17,7 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.tray.Tray;
+import com.metreeca.tray._Tray;
 
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  *
  * <p>Custom services listed in the {@code com.metreeca.link.Service} {@linkplain ServiceLoader service loader}
  * provider configuration file in the {@code META-INF/services/} resource directory of an application will be
- * automatically {@linkplain #load() loaded} by server adapters inside a {@linkplain Tray#lookup(Runnable) read-only
+ * automatically {@linkplain #load() loaded} by server adapters inside a {@linkplain _Tray#lookup(Runnable) read-only
  * task} on a shared tool tray.</p>
  */
 @FunctionalInterface public interface Service {
@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 	/**
 	 * Loads a custom service.
 	 *
-	 * <p>Required tools may be retrieved from the shared tool tray using the static {@linkplain Tray#tool(Supplier)
+	 * <p>Required tools may be retrieved from the shared tool tray using the static {@linkplain _Tray#tool(Supplier)
 	 * tool lookup} method.</p>
 	 */
 	public void load();
