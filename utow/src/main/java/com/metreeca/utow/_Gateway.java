@@ -19,6 +19,7 @@ package com.metreeca.utow;
 
 import com.metreeca.next.Handler;
 import com.metreeca.next.Request;
+import com.metreeca.next.Target;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray._Tray;
 import com.metreeca.tray.sys.Trace;
@@ -27,10 +28,14 @@ import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.GracefulShutdownHandler;
+import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 
-import java.io.StringWriter;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 /**
@@ -51,7 +56,7 @@ import java.util.function.Function;
  */
 public final class _Gateway implements HttpHandler {
 
-	public static void run(final int port, final String host, final Function<_Tray, Handler> loader) {
+	public static void run(final int port, final String host, final Function<Tray, Handler> loader) {
 
 		if ( port < 0 ) {
 			throw new IllegalArgumentException("illegal port ["+port+"]");
@@ -71,7 +76,7 @@ public final class _Gateway implements HttpHandler {
 				.addHttpListener(port, host, gateway.start(loader))
 				.build();
 
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> { // !!! ;( randomly skipped
 
 			gateway.stop();
 			server.stop();
@@ -95,7 +100,7 @@ public final class _Gateway implements HttpHandler {
 	}
 
 
-	public _Gateway start(final Function<_Tray, Handler> loader) {
+	public _Gateway start(final Function<Tray, Handler> loader) {
 
 		if ( loader == null ) {
 			throw new NullPointerException("null loader");
@@ -109,26 +114,44 @@ public final class _Gateway implements HttpHandler {
 
 		final Handler handler=loader.apply(tray);
 
-		this.handler=new GracefulShutdownHandler(exchange -> handler
+		this.handler=new GracefulShutdownHandler(exchange -> {
 
-				// !!! handle multi-part forms (https://stackoverflow.com/questions/37839418/multipart-form-data-example-using-undertow)
+			final Request request=new Request();
 
-				.handle(new Request().method(exchange.getRequestMethod().toString()))
+			request.method(exchange.getRequestMethod().toString());
 
-				.accept(response -> {
+			exchange.getRequestHeaders().forEach(header -> request.headers(header.getHeaderName().toString(), header));
 
-					final StringWriter writer=new StringWriter(1000);
+			handler
 
-					response.text().accept(() -> writer);
+					// !!! handle multi-part forms (https://stackoverflow.com/questions/37839418/multipart-form-data-example-using-undertow)
 
-					exchange.setStatusCode(response.status());
+					.handle(request)
 
-					exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-					exchange.getResponseSender().send(writer.toString()); // !!! stream
+					.accept(response -> {
 
-					// !!! handle binary data
+						exchange.setStatusCode(response.status());
 
-				}));
+						response.headers().forEach((name, values) ->
+								exchange.getResponseHeaders().putAll(HttpString.tryFromString(name), values)
+						);
+
+						try (final StringWriter writer=new StringWriter(1000)) {
+
+							response.body().accept(new Target() {
+								@Override public Writer writer() { return writer; }
+							});
+
+							exchange.getResponseSender().send(writer.toString()); // !!! stream
+
+						} catch ( final IOException e ) {
+							throw new UncheckedIOException(e);
+						}
+
+						// !!! handle binary data
+
+					});
+		});
 
 		return this;
 	}

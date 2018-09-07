@@ -15,14 +15,39 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next;
-
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+package com.metreeca.next.handlers;
 
 
-final class ResponseTest {
+import com.metreeca.next.*;
 
-	@Test @Disabled void testPreventDualTextualBinaryResponses() {}
+
+/**
+ * Path-based request router.
+ *
+ * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#path()
+ * path}.</p>
+ *
+ * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
+ * opportunity to handle the request.</p>
+ */
+public final class Router implements Handler {
+
+	public Router path(final String path, final Handler handler) {
+		return this;
+	}
+
+
+	@Override public Lazy<Response> handle(final Request request) {
+
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
+
+		final String path=request.path();
+
+
+
+		return null;
+	}
 
 }

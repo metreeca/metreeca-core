@@ -29,81 +29,6 @@ import static java.util.Arrays.asList;
 
 final class HandlerTest {
 
-	//@Test public void testExecute() {
-	//
-	//	final AtomicBoolean committed=new AtomicBoolean();
-	//
-	//	final Handler handler=(request, response) -> {
-	//		try {
-	//			response.status(Response.OK).done();
-	//		} finally {
-	//			committed.set(true);
-	//		}
-	//	};
-	//
-	//	handler.handle(writer -> writer.method(Request.GET).done(), reader ->
-	//			Assert.assertEquals("request/response paired", Request.GET, reader.request().method()));
-	//
-	//	Assert.assertTrue("target invoked", committed.get());
-	//
-	//}
-
-	//@Test public void testBefore() {
-	//
-	//	final AtomicBoolean committed=new AtomicBoolean();
-	//
-	//	final Handler handler=(request, response) -> {
-	//		try {
-	//			response.status(Response.OK).text("handler/"+request.text());
-	//		} finally {
-	//			committed.set(true);
-	//		}
-	//	};
-	//
-	//	handler
-	//
-	//			.wrap(wrapped -> (request, response) -> wrapped.handle(
-	//					writer -> writer.copy(request).text("before/"+request.text()),
-	//					reader -> response.copy(reader).done()
-	//			))
-	//
-	//			.handle(
-	//					writer -> writer.method(Request.GET).text("text"),
-	//					reader -> Assert.assertEquals("wrapped", "handler/before/text", reader.text())
-	//			);
-	//
-	//	Assert.assertTrue("target invoked", committed.get());
-	//
-	//}
-
-	//@Test public void testAfter() {
-	//
-	//	final AtomicBoolean committed=new AtomicBoolean();
-	//
-	//	final Handler handler=(request, response) -> {
-	//		try {
-	//			response.status(Response.OK).text("handler/"+request.text());
-	//		} finally {
-	//			committed.set(true);
-	//		}
-	//	};
-	//
-	//	handler
-	//
-	//			.wrap(wrapped -> (request, response) -> wrapped.handle(
-	//					writer -> writer.copy(request).done(),
-	//					reader -> response.copy(reader).text("after/"+reader.text())
-	//			))
-	//
-	//			.handle(
-	//					writer -> writer.method(Request.GET).text("text"),
-	//					reader -> Assert.assertEquals("wrapped", "after/handler/text", reader.text())
-	//			);
-	//
-	//	Assert.assertTrue("target invoked", committed.get());
-	//
-	//}
-
 	@Test void testResultStreaming() {
 
 		final List<String> transaction=new ArrayList<>();
@@ -112,15 +37,15 @@ final class HandlerTest {
 
 			transaction.add("begin");
 
-			consumer.accept(request.response().status(Response.OK)/* !!! .text("inside")*/);
+			consumer.accept(request.response().text("inside"));
 
 			transaction.add("commit");
 
 		};
 
-		handler.handle(new Request()).accept(response -> transaction.add(String.valueOf(response.status()) /* !!! response.text()*/));
+		handler.handle(new Request()).accept(response -> transaction.add(response.text().orElse("")));
 
-		assertEquals(asList("begin", "200" /* !!! "inside"*/, "commit"), transaction);
+		assertEquals(asList("begin", "inside", "commit"), transaction);
 	}
 
 }

@@ -17,10 +17,12 @@
 
 package com.metreeca.next;
 
-import java.io.OutputStream;
-import java.io.Writer;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 
@@ -31,61 +33,99 @@ import java.util.function.UnaryOperator;
  */
 public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 
-	private Consumer<Supplier<Writer>> text=supplier -> {};
-	private Consumer<Supplier<OutputStream>> data=supplier -> {};
+	public static final Function<String, Consumer<Target>> TextFormat=text -> target -> {
+		try (final Writer writer=target.writer()) {
+
+			writer.write(text);
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	};
+
+	public static final Function<byte[], Consumer<Target>> DataFormat=data -> target -> {
+		try (final OutputStream output=target.output()) {
+
+			output.write(data);
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	};
 
 
-	public Consumer<Supplier<Writer>> text() {
-		return text;
+	private static final Consumer<Target> Empty=target -> {};
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Consumer<Target> body=Empty;
+
+	private final Map<Object, Object> views=new HashMap<>();
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	public Consumer<Target> body() {
+		try {
+
+			return body;
+
+		} finally {
+
+			body=Empty;
+
+		}
 	}
 
-	public T text(final Consumer<Supplier<Writer>> text) {
+	public T body(final Consumer<Target> body) {
 
-		if ( text == null ) {
-			throw new NullPointerException("null text");
-		}
+		this.body=body;
 
-		this.text=text;
+		views.clear();
 
 		return self();
 	}
 
-	public T text(final UnaryOperator<Writer> filter) {
 
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		final Consumer<Supplier<Writer>> text=this.text;
-
-		return text(sink -> { text.accept(() -> filter.apply(sink.get())); });
+	public <V> Optional<V> body(final Function<V, Consumer<Target>> format) {
+		return Optional.ofNullable((V)views.get(format));
 	}
 
+	public <V> T body(final Function<V, Consumer<Target>> format, final V body) {
 
-	public Consumer<Supplier<OutputStream>> data() {
-		return data;
-	}
+		this.body=format.apply(body);
 
-	public T data(final Consumer<Supplier<OutputStream>> data) {
-
-		if ( data == null ) {
-			throw new NullPointerException("null data");
-		}
-
-		this.data=data;
+		views.clear();
+		views.put(format, body);
 
 		return self();
 	}
 
-	public T data(final UnaryOperator<OutputStream> filter) {
 
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
+	public T filter(final UnaryOperator<Consumer<Target>> filter) {
+		return body(filter.apply(body));
+	}
 
-		final Consumer<Supplier<OutputStream>> data=this.data;
 
-		return data(sink -> { data.accept(() -> filter.apply(sink.get())); });
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Optional<String> text() {
+		return body(TextFormat);
+	}
+
+	public T text(final String text) {
+		return body(TextFormat, text);
+	}
+
+
+	public Optional<byte[]> data() {
+		return body(DataFormat);
+	}
+
+	public T data(final byte[] data) {
+		return body(DataFormat, data);
 	}
 
 }

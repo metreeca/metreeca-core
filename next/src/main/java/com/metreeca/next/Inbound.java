@@ -19,9 +19,11 @@ package com.metreeca.next;
 
 import com.metreeca.form.things.Transputs;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.function.Supplier;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 
@@ -32,61 +34,100 @@ import java.util.function.UnaryOperator;
  */
 public abstract class Inbound<T extends Inbound<T>> extends Message<T> {
 
-	private Supplier<Reader> text=Transputs::reader;
-	private Supplier<InputStream> data=Transputs::input;
+	public static final Function<Inbound<?>, Optional<String>> TextFormat=inbound -> {
+		try (Reader reader=inbound.body().reader()) {
+
+			return Optional.of(Transputs.text(reader));
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	};
 
 
-	public Supplier<Reader> text() {
-		return text;
+	private static final Source Empty=new Source() {
+
+		@Override public Reader reader() { throw new IllegalStateException("undefined text source"); }
+
+		@Override public InputStream input() { throw new IllegalStateException("undefined data source"); }
+
+	};
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Source body=Empty;
+
+	private final Map<Object, Object> views=new HashMap<>();
+
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Source body() {
+		try {
+
+			return body;
+
+		} finally {
+
+			body=Empty;
+
+		}
 	}
 
-	public T text(final Supplier<Reader> text) {
+	public T body(final Source body) {
+
+		if ( body == null ) {
+			throw new NullPointerException("null body");
+		}
+
+		this.body=body;
+
+		views.clear();
+
+		return self();
+	}
+
+
+	public <V> Optional<V> body(final Function<Inbound<?>, Optional<V>> format) {
+		return Optional.ofNullable((V)views.computeIfAbsent(format, key -> format.apply(self()).orElse(null)));
+	}
+
+	public <V> T body(final Function<Inbound<?>, Optional<V>> format, final V body) {
+
+		this.body=Empty;
+
+		views.clear();
+		views.put(format, body);
+
+		return self();
+	}
+
+
+	public T filter(final UnaryOperator<Source> filter) {
+
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
+
+		return body(filter.apply(body));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Optional<String> text() {
+		return body(TextFormat);
+	}
+
+	public T text(final String text) {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");
 		}
 
-		this.text=text;
-
-		return self();
-	}
-
-	public T text(final UnaryOperator<Reader> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		final Supplier<Reader> text=this.text;
-
-		return text(() -> filter.apply(text.get()));
-	}
-
-
-	public Supplier<InputStream> data() {
-		return data;
-	}
-
-	public T data(final Supplier<InputStream> data) {
-
-		if ( data == null ) {
-			throw new NullPointerException("null data");
-		}
-
-		this.data=data;
-
-		return self();
-	}
-
-	public T data(final UnaryOperator<InputStream> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		final Supplier<InputStream> data=this.data;
-
-		return data(() -> filter.apply(data.get()));
+		return body(TextFormat, text);
 	}
 
 }

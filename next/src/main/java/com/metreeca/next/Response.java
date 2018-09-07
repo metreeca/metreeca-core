@@ -17,11 +17,18 @@
 
 package com.metreeca.next;
 
+import com.metreeca.form.things.Values;
+
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.Optional;
 import java.util.function.Consumer;
 
 
 /**
  * HTTP response.
+ *
+ * <p>Handles state/behaviour for HTTP responses.</p>
  */
 public final class Response extends Outbound<Response> implements Lazy<Response> {
 
@@ -50,11 +57,19 @@ public final class Response extends Outbound<Response> implements Lazy<Response>
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Request request;
+	private final Request request; // the originating request
 
-	private int status;
+	private int status; // the HTTP status code
+	private Throwable cause; // a (possibly null) optional cause for an error status code
 
 
+	/**
+	 * Creates a new response for a request.
+	 *
+	 * @param request the originating request for the new response
+	 *
+	 * @throws NullPointerException if {@code request} is {@code null}
+	 */
 	public Response(final Request request) {
 
 		if ( request == null ) {
@@ -83,22 +98,104 @@ public final class Response extends Outbound<Response> implements Lazy<Response>
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Retrieves the originating request for this response.
+	 *
+	 * @return the originating request for this response
+	 */
 	public Request request() {
 		return request;
 	}
 
 
+	/**
+	 * Checks if this response is successful.
+	 *
+	 * @return {@code true} if the {@linkplain #status() status} code is in the {@code 2XX} range; {@code false} otherwise
+	 */
+	public boolean success() {
+		return status/100 == 2;
+	}
+
+	/**
+	 * Checks if this response is an error.
+	 *
+	 * @return {@code true} if the {@linkplain #status() status} code is in beyond the {@code 3XX} range; {@code false}
+	 * otherwise
+	 */
+	public boolean error() {
+		return status/100 > 3;
+	}
+
+
+	/**
+	 * Retrieves the focus item IRI of this response.
+	 *
+	 * @return the absolute IRI included in the {@code Location} header of this response, if defined; the {@linkplain
+	 * Request#item() focus item} IRI of the originating request otherwise
+	 */
+	public IRI item() {
+		return header("location")
+				.map(Values::iri)
+				.orElseGet(() -> request().item());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the status code of this response.
+	 *
+	 * @return the status code of this response
+	 */
 	public int status() {
 		return status;
 	}
 
+	/**
+	 * Configures the status code of this response.
+	 *
+	 * @param status the status code of this response
+	 *
+	 * @return this response
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 0 or greater than 599
+	 */
 	public Response status(final int status) {
 
 		if ( status < 100 || status > 599 ) {
-			throw new IllegalArgumentException("illegal status ["+status+"]");
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
 		}
 
 		this.status=status;
+
+		return this;
+	}
+
+
+	/**
+	 * Retrieves the cause for the status code.
+	 *
+	 * @return a optional throwable causing the selection of the status code
+	 */
+	public Optional<Throwable> cause() { return Optional.ofNullable(cause); }
+
+	/**
+	 * Configures the cause for the status code.
+	 *
+	 * @param cause the throwable causing the selection of the status code
+	 *
+	 * @return this response
+	 *
+	 * @throws NullPointerException if {@code cause} is {@code null}
+	 */
+	public Response cause(final Throwable cause) {
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
+		this.cause=cause;
 
 		return this;
 	}

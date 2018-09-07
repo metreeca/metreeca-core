@@ -15,14 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next;
+/**
+ * Standard wrappers.
+ */
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
-
-final class RequestTest {
-
-	@Test @Disabled void testPreventDualTextualBinaryProcessing() {}
-
-}
+package com.metreeca.next.wrappers;

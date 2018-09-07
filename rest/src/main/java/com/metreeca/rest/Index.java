@@ -127,28 +127,6 @@ public final class Index {
 		});
 	}
 
-	/**
-	 * Removes a handler from this index.
-	 *
-	 * @param path the path pattern the handler to be removed is bound to; the value is normalized before use
-	 *
-	 * @return this index
-	 */
-	public Index remove(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return exec(index -> {
-
-			index.handlers.remove(normalize(path));
-
-			return index;
-
-		});
-	}
-
 
 	/**
 	 * Executes a task within an isolated index transaction.

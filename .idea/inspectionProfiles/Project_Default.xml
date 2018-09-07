@@ -234,6 +234,9 @@
     <inspection_tool class="EmptyDirectory" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="EmptyFinallyBlockJS" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="EmptyInitializer" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="EmptyStatementBody" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="m_reportEmptyBlocks" value="false" />
+    </inspection_tool>
     <inspection_tool class="EmptySynchronizedStatement" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="EmptyTryBlockJS" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="EnumSwitchStatementWhichMissesCases" enabled="true" level="WARNING" enabled_by_default="true">
@@ -934,7 +937,6 @@
     <inspection_tool class="UseOfProcessBuilder" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UseOfPropertiesAsHashtable" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UseOfSunClasses" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="UtilityClassCanBeEnum" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UtilityClassWithPublicConstructor" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UtilityClassWithoutPrivateConstructor" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignorableAnnotations">

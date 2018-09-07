@@ -369,7 +369,7 @@ public final class Transputs {
 		private final CharBuffer chars=CharBuffer.allocate(16);
 
 
-		public ReaderInputStream(final Reader reader, final String encoding) {
+		private ReaderInputStream(final Reader reader, final String encoding) {
 
 			if ( reader == null ) {
 				throw new NullPointerException("null reader");
@@ -434,7 +434,7 @@ public final class Transputs {
 		private final CharBuffer chars=CharBuffer.allocate(16);
 
 
-		public WriterOutputStream(final Writer writer, final String encoding) {
+		private WriterOutputStream(final Writer writer, final String encoding) {
 
 			if ( writer == null ) {
 				throw new NullPointerException("null writer");
@@ -470,7 +470,7 @@ public final class Transputs {
 				chars.flip();
 
 				while ( chars.hasRemaining() ) {
-					writer.write((int)chars.get());
+					writer.write(chars.get());
 				}
 
 				chars.compact();

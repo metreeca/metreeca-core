@@ -38,12 +38,22 @@ import static com.metreeca.tray._Tray.tool;
  */
 public class _SPARQL implements Handler {
 
-
-	private final Graph graph=tool(Graph.Factory);
-
 	private int timeout=60; // [s]
 	private boolean publik=false; // public availability of the endpoint
 
+	private final Graph graph=tool(Graph.Factory);
+
+	private final Handler delegate=new Dispatcher()
+			.get(this::process)
+			.post(this::process);
+
+
+	@Override public Lazy<Response> handle(final Request request) {
+		return delegate.handle(request);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public _SPARQL timeout(final int timeout) {
 
@@ -64,17 +74,13 @@ public class _SPARQL implements Handler {
 	}
 
 
-	//index.insert(Path, Dispatcher.dispatcher()
-	//
-	//		.get(this::handle)
-	//		.post(this::handle));
 
 
-	@Override public Lazy<Response> handle(final Request request) {
+	private Lazy<Response> process(final Request request) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	//private void handle(final Request request, final Response response) {
+	//private void process(final Request request, final Response response) {
 	//	try (final RepositoryConnection connection=graph.connect()) {
 	//
 	//		final Operation operation=operation(request, connection);

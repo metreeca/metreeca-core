@@ -15,8 +15,22 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Framework components.
- */
+package com.metreeca.next.wrappers;
 
-package com.metreeca.rest;
+import com.metreeca.next.Handler;
+import com.metreeca.next.Wrapper;
+
+
+/**
+ * Identity wrapper.
+ *
+ * <p>Provides a wrapper placeholder whose {@linkplain #wrap(Handler) handler} and {@linkplain #wrap(Wrapper) wrapper}
+ * wrap methods return their unchanged argument.</p>
+ */
+public final class _Identity implements Wrapper {
+
+	@Override public Wrapper wrap(final Wrapper wrapper) { return wrapper; }
+
+	@Override public Handler wrap(final Handler handler) { return handler; }
+
+}

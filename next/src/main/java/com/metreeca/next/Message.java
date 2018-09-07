@@ -18,11 +18,14 @@
 package com.metreeca.next;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Strings.title;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableCollection;
+import static java.util.Arrays.asList;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -32,12 +35,59 @@ import static java.util.Collections.unmodifiableCollection;
  */
 public abstract class Message<T extends Message<T>> {
 
+	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
 
+	/**
+	 * Retrieves this message.
+	 *
+	 * @return this message
+	 *
+	 * @apiNote required to support abstract fluent API through the self-bound abstract class pattern.
+	 */
 	protected abstract T self();
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Checks if this message is interactive.
+	 *
+	 * @return {@code true} if an {@code Accept} or {@code Content-Type} header of this message include a MIME type
+	 * usually associated with an interactive browser-managed HTTP exchanges (e.g. {@code text/html}
+	 */
+	public boolean interactive() {
+		return Stream.of(headers("accept"), headers("content-type"))
+				.flatMap(Collection::stream)
+				.anyMatch(value -> HTMLPattern.matcher(value).find());
+	}
+
+
+	/**
+	 * Retrieves the headers of this message.
+	 *
+	 * @return an immutable map from header names to collections of headers values
+	 */
+	public Map<String, Collection<String>> headers() {
+		return unmodifiableMap(headers);
+	}
+
+
+	/**
+	 * Retrieves header value.
+	 *
+	 * @param name the name of the header whose value is to be retrieved
+	 *
+	 * @return an optional value containing the first value among those returned by {@link #headers(String)}, if one is
+	 * present; an empty optional otherwise
+	 *
+	 * @throws NullPointerException if {@code name} is {@code null}
+	 */
 	public Optional<String> header(final String name) {
 
 		if ( name == null ) {
@@ -47,6 +97,73 @@ public abstract class Message<T extends Message<T>> {
 		return headers(name).stream().findFirst();
 	}
 
+
+	/**
+	 * Appends header values.
+	 *
+	 * <p>Existing header values are preserved.</p>
+	 *
+	 * @param name   the name of the header values are to be appended to
+	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 *                              contains a {@code null} value
+	 */
+	public T header(final String name, final String... values) {
+		return header(name, asList(values));
+	}
+
+	/**
+	 * Appends header values.
+	 *
+	 * <p>Existing header values are preserved.</p>
+	 *
+	 * @param name   the name of the header values are to be appended to
+	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 *                              contains a {@code null} value
+	 */
+	public T header(final String name, final Collection<String> values) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		if ( values.contains(null) ) {
+			throw new NullPointerException("null value");
+		}
+
+		headers.compute(title(name), (key, current) -> unmodifiableList(
+				Stream.concat(
+
+						current == null ? Stream.empty() : current.stream(),
+						values.stream().filter(value -> !value.isEmpty())
+
+				)
+						.distinct()
+						.collect(toList())
+		));
+
+		return self();
+	}
+
+
+	/**
+	 * Retrieves header values.
+	 *
+	 * @param name the name of the header whose values are to be retrieved
+	 *
+	 * @return a possibly empty collection of values
+	 */
 	public Collection<String> headers(final String name) {
 
 		if ( name == null ) {
@@ -54,6 +171,60 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		return unmodifiableCollection(headers.getOrDefault(title(name), emptyList()));
+	}
+
+	/**
+	 * Configures header values.
+	 *
+	 * <p>Existing header values are overwritten.</p>
+	 *
+	 * @param name   the name of the header whose values are to be configured
+	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 *                              contains a {@code null} value
+	 */
+	public T headers(final String name, final String... values) {
+		return headers(name, asList(values));
+	}
+
+	/**
+	 * Configures header values.
+	 *
+	 * <p>Existing header values are overwritten.</p>
+	 *
+	 * @param name   the name of the header whose values are to be configured
+	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 *                              contains a {@code null} value
+	 */
+	public T headers(final String name, final Collection<String> values) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		if ( values.contains(null) ) {
+			throw new NullPointerException("null value");
+		}
+
+		headers.put(title(name), unmodifiableList(values
+				.stream()
+				.filter(value -> !value.isEmpty())
+				.distinct()
+				.collect(toList())
+		));
+
+		return self();
 	}
 
 }

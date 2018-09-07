@@ -15,8 +15,21 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Standard wrappers.
- */
+package com.metreeca.next;
 
-package com.metreeca.rest.wrappers;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+
+final class InboundTest {
+
+	@Test @Disabled void testPreventDoubleReading() {}
+
+	@Test @Disabled void testPreventDoubleStreaming() {}
+
+	@Test @Disabled void testPreventCrossOpening() {}
+
+
+	@Test void testRepresentationCaching() {}
+
+}

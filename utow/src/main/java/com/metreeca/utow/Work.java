@@ -17,10 +17,6 @@
 
 package com.metreeca.utow;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.io.Writer;
-
 import static com.metreeca.utow._Gateway.run;
 
 
@@ -30,16 +26,10 @@ public final class Work {
 		run(6800, "localhost", tray -> tray.get(() -> request -> request.response()
 
 				.status(200)
+				.header("content-type", "text/plain")
+				.text("Ciao babbo!")
 
-				.text(sink -> {
-					try (final Writer writer=sink.get()) {
-
-						writer.write("Ciao babbo!");
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				})));
+		));
 	}
 
 }

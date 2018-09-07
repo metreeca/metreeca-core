@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.handlers.Router.router;
+import static com.metreeca.rest.handlers._Router.router;
 import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.String.format;

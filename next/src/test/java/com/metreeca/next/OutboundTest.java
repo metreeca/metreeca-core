@@ -17,21 +17,12 @@
 
 package com.metreeca.next;
 
-/**
- * Linked data resource handler.
- *
- * <p>Exposes and manages the state of a linked data resource, generating {@linkplain Response responses} in reaction to
- * {@linkplain Request requests}.</p>
- */
-@FunctionalInterface public interface Handler {
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-	/**
-	 * Handles a request/response exchange.
-	 *
-	 * @param request the inbound request for the managed linked data resource
-	 *
-	 * @return a lazy outbound response generated for the managed linked data resource in reaction to {@code request}
-	 */
-	public Lazy<Response> handle(final Request request);
+
+final class OutboundTest {
+
+	@Test @Disabled void testPreventDualTextualBinaryProcessing() {}
 
 }

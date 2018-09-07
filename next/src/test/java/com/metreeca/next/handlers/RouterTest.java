@@ -17,13 +17,83 @@
 
 package com.metreeca.next.handlers;
 
+import com.metreeca.next.Handler;
+
 import org.junit.jupiter.api.Test;
 
 
 final class RouterTest {
 
-	@Test void test() {
+	@Test void testMatchExactPathIgnoringTrailingSlashes() {
 
+		//final String one="1";
+		//final String two="2";
+		//
+		//final Router router=new Router()
+		//
+		//		.path("/one", handler(one))
+		//		.path("/two/", handler(two));// trailing slash
+		//
+		//router.handle(new Request().path("/one")).accept(response ->
+		//		assertEquals(one, response., "exact match one")
+		//);
+
+
+		//assertEquals("exact match one (trailing slash)", Optional.of(one), index.lookup("/one/"));
+
+		//assertEquals("exact match two", Optional.of(two), index.lookup("/two"));
+		//assertEquals("exact match two (trailing slash)", Optional.of(two), index.lookup("/two/"));
+
+		//assertFalse("no match", index.lookup("/zero").isPresent());
+	}
+
+	//@Test void testMatchLongestPrefix() {
+	//
+	//
+	//	final Handler one=handler("1");
+	//	final Handler two=handler("1.2");
+	//
+	//	index.insert("/one/*", one);
+	//	index.insert("/one/two/*", two);
+	//
+	//	assertEquals("prefix match", Optional.of(one), index.lookup("/one/zero"));
+	//	assertEquals("longest prefix match", Optional.of(two), index.lookup("/one/two/zero"));
+	//
+	//}
+
+	//@Test void testManagesPrefixesOfEqualLength() {
+	//
+	//	final Handler one=handler("1");
+	//	final Handler two=handler("2");
+	//
+	//	index.insert("/one/*", one);
+	//	index.insert("/two/*", two);
+	//
+	//	assertEquals("prefix match one", Optional.of(one), index.lookup("/one/zero"));
+	//	assertEquals("prefix match two", Optional.of(two), index.lookup("/two/zero"));
+	//
+	//}
+
+	//@Test public void testNormalizePaths() {
+	//
+	//	final Handler collection=handler("collection");
+	//	final Handler resource=handler("resource");
+	//
+	//	index.insert("/uno/", collection);
+	//	index.insert("/uno/*", resource);
+	//
+	//	assertEquals("collection match", Optional.of(collection), index.lookup("/uno"));
+	//	assertEquals("collection match trailing slash", Optional.of(collection), index.lookup("/uno/"));
+	//
+	//	assertEquals("resource match", Optional.of(resource), index.lookup("/uno/due"));
+	//
+	//}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Handler handler(final String id) {
+		return request -> request.response().text(id);
 	}
 
 }

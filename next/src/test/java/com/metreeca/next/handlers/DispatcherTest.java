@@ -15,23 +15,29 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next;
+package com.metreeca.next.handlers;
 
-/**
- * Linked data resource handler.
- *
- * <p>Exposes and manages the state of a linked data resource, generating {@linkplain Response responses} in reaction to
- * {@linkplain Request requests}.</p>
- */
-@FunctionalInterface public interface Handler {
 
-	/**
-	 * Handles a request/response exchange.
-	 *
-	 * @param request the inbound request for the managed linked data resource
-	 *
-	 * @return a lazy outbound response generated for the managed linked data resource in reaction to {@code request}
-	 */
-	public Lazy<Response> handle(final Request request);
+final class DispatcherTest {
+
+	//@Test public void testHandleOPTIONSByDefault() {
+	//	testbed()
+	//
+	//			.handler(() -> new Dispatcher().get((request) -> request.response().status(Response.OK)))
+	//
+	//			.request(request -> request
+	//					.method(Request.POST)
+	//					.done())
+	//
+	//			.response(response -> {
+	//
+	//				assertEquals(Response.MethodNotAllowed, response.status(), "error reported");
+	//
+	//				assertEquals(new HashSet<>(asList(Request.OPTIONS, Request.GET)),
+	//						new HashSet<>(response.headers("Allow")),
+	//						"allowed method reported");
+	//
+	//			});
+	//}
 
 }

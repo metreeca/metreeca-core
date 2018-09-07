@@ -220,16 +220,20 @@ public final class Request {
 
 
 	private String content() {
-		return part(BodyPart).map(p -> p.header("Content-Type").orElse("")).orElseGet(() -> header("Content-Type").orElse(""));
+		return part(BodyPart)
+				.map(p -> p.header("Content-Type").orElse(""))
+				.orElseGet(() -> header("Content-Type").orElse(""));
 	}
 
 
 	public InputStream input() {
-		return part(BodyPart).map(Part::input).orElseGet(() -> input != null ? input.get() : reader != null ? Transputs.input(reader.get()) : Transputs.input());
+		return part(BodyPart).map(Part::input)
+				.orElseGet(() -> input != null ? input.get() : reader != null ? Transputs.input(reader.get()) : Transputs.input());
 	}
 
 	public Reader reader() {
-		return part(BodyPart).map(Part::reader).orElseGet(() -> reader != null ? reader.get() : input != null ? Transputs.reader(input.get()) : Transputs.reader());
+		return part(BodyPart).map(Part::reader)
+				.orElseGet(() -> reader != null ? reader.get() : input != null ? Transputs.reader(input.get()) : Transputs.reader());
 	}
 
 

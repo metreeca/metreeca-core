@@ -131,7 +131,7 @@ public final class Request extends Inbound<Request> {
 
 
 	/**
-	 * Retrieves the item IRI of this request.
+	 * Retrieves the focus item IRI of this request.
 	 *
 	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
 	 * this request
