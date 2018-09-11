@@ -56,7 +56,7 @@ final class InboundTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TestInbound extends Inbound<TestInbound> {
+	public static final class TestInbound extends Inbound<TestInbound> {
 
 		@Override protected TestInbound self() { return this; }
 

@@ -17,11 +17,14 @@
 
 package com.metreeca.next;
 
+import com.metreeca.next.InboundTest.TestInbound;
+
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.things.Lists.list;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static java.util.Collections.emptySet;
 
@@ -36,13 +39,22 @@ final class RequestTest {
 		assertTrue(request.parameters().entrySet().isEmpty());
 	}
 
-	@Test void testHeadersOverwritesValues() {
+	@Test void testParametersOverwritesValues() {
 
 		final Request request=new Request()
 				.parameter("parameter", "one")
 				.parameter("parameter", "two");
 
 		assertEquals(list("two"), list(request.parameters("parameter")));
+	}
+
+	@Test void testBodyHandlesDefaultPart() {
+
+		final Request request=new Request()
+				.part(Request.MainPart, new TestInbound().text("main"))
+				.part("part", new TestInbound().text("part"));
+
+		assertEquals("main", request.text().orElse(""));
 	}
 
 }

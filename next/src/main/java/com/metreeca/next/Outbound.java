@@ -140,7 +140,7 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 			throw new NullPointerException("null filter");
 		}
 
-		return body(filter.apply(body));
+		return body(filter.apply(body()));
 	}
 
 

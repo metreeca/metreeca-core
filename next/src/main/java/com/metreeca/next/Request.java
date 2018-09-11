@@ -24,6 +24,8 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
@@ -39,9 +41,9 @@ import static java.util.Collections.*;
 public final class Request extends Inbound<Request> {
 
 	/**
-	 * The name of the message part containing the main body payload in multipart/form-data requests ({@code {@value}}).
+	 * The name of the message part containing the main payload in multipart/form-data requests ({@code {@value}}).
 	 */
-	public static final String BodyPart="body";
+	public static final String MainPart="main";
 
 	public static final String GET="GET"; // https://tools.ietf.org/html/rfc7231#section-4.3.1
 	public static final String HEAD="HEAD"; // https://tools.ietf.org/html/rfc7231#section-4.3.2
@@ -70,13 +72,41 @@ public final class Request extends Inbound<Request> {
 	private String query="";
 
 	private final Map<String, List<String>> parameters=new LinkedHashMap<>();
-	private final Map<String, List<Inbound<?>>> parts=new LinkedHashMap<>();
+	private final Map<String, Inbound<?>> parts=new LinkedHashMap<>();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override protected Request self() {
 		return this;
+	}
+
+
+	/**
+	 * @return the content source supplier of the {@linkplain #MainPart main request part}, if one is present; the
+	 * {@linkplain Inbound#body() content source supplier} of this request, otherwise
+	 */
+	@Override public Supplier<Source> body() throws IllegalStateException {
+		return Optional
+				.ofNullable(parts.get(MainPart))
+				.map(Inbound::body)
+				.orElseGet(super::body);
+	}
+
+	/**
+	 * @return a structured representation of the body of the {@linkplain #MainPart main request part}, if one is
+	 * present; a {@linkplain Inbound#body(Function) structured representation} of the body of this request, otherwise
+	 */
+	@Override public <V> Optional<V> body(final Function<Inbound<?>, Optional<V>> format) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		return Optional
+				.ofNullable(parts.get(MainPart))
+				.map(part -> part.body(format))
+				.orElseGet(() -> super.body(format));
 	}
 
 
@@ -494,6 +524,91 @@ public final class Request extends Inbound<Request> {
 		}
 
 		return self();
+	}
+
+
+	/**
+	 * Retrieves request parts.
+	 *
+	 * @return an immutable and possibly empty map from parts names to part contents
+	 */
+	public Map<String, Inbound<?>> parts() {
+		return unmodifiableMap(parts);
+	}
+
+	/**
+	 * Configures request parts.
+	 *
+	 * <p>Existing request parts are overwritten.</p>
+	 *
+	 * @param parts a map from part names to parts contents
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException if {@code parts} is {@code null} or contains either null keys or null values
+	 */
+	public Request parts(final Map<String, Inbound<?>> parts) {
+
+		if ( parts == null ) {
+			throw new NullPointerException("null parts");
+		}
+
+		if ( parts.containsKey(null) ) {
+			throw new NullPointerException("null part name");
+		}
+
+		if ( parts.containsValue(null) ) {
+			throw new NullPointerException("null part content");
+		}
+
+		this.parts.clear();
+		this.parts.putAll(parts);
+
+		return this;
+	}
+
+	/**
+	 * Retrieves request part.
+	 *
+	 * @param name the name of the request part to be retrieved
+	 *
+	 * @return an optional inbound message providing access to the content of the named part, if one is present; an
+	 * empty optional otherwise
+	 *
+	 * @throws NullPointerException if name is {@code null}
+	 */
+	public Optional<Inbound<?>> part(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return Optional.ofNullable(parts.get(name));
+	}
+
+	/**
+	 * Configures request part.
+	 *
+	 * @param name  the name of the request part to be configures
+	 * @param value the inbound message providing access to the content of the part to be configured
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code value} is {@code null}
+	 */
+	public Request part(final String name, final Inbound<?> value) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		parts.put(name, value);
+
+		return this;
 	}
 
 }
