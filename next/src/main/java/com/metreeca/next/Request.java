@@ -418,18 +418,18 @@ public final class Request extends Inbound<Request> {
 	 *
 	 * @throws NullPointerException if {@code parameters} is {@code null} or contains either null keys or null values
 	 */
-	public Request parameters(final Map<String, Collection<String>> parameters) {
+	public Request parameters(final Map<String, ? extends Collection<String>> parameters) {
 
 		if ( parameters == null ) {
-			throw new NullPointerException("null headers");
+			throw new NullPointerException("null parameters");
 		}
 
 		if ( parameters.containsKey(null) ) {
-			throw new NullPointerException("null part name");
+			throw new NullPointerException("null parameter name");
 		}
 
 		if ( parameters.containsValue(null) ) {
-			throw new NullPointerException("null part content");
+			throw new NullPointerException("null parameter value");
 		}
 
 		this.parameters.clear();
@@ -579,7 +579,7 @@ public final class Request extends Inbound<Request> {
 	 *
 	 * @throws NullPointerException if {@code parts} is {@code null} or contains either null keys or null values
 	 */
-	public Request parts(final Map<String, Inbound<?>> parts) {
+	public Request parts(final Map<String, ? extends Inbound<?>> parts) {
 
 		if ( parts == null ) {
 			throw new NullPointerException("null parts");

@@ -91,18 +91,18 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if {@code headers} is {@code null} or contains either null keys or null values
 	 */
-	public T headers(final Map<String, Collection<String>> headers) {
+	public T headers(final Map<String, ? extends Collection<String>> headers) {
 
 		if ( headers == null ) {
 			throw new NullPointerException("null headers");
 		}
 
 		if ( headers.containsKey(null) ) {
-			throw new NullPointerException("null part name");
+			throw new NullPointerException("null header name");
 		}
 
 		if ( headers.containsValue(null) ) {
-			throw new NullPointerException("null part content");
+			throw new NullPointerException("null header value");
 		}
 
 		this.headers.clear();
