@@ -27,7 +27,7 @@ public final class Work {
 
 				.status(200)
 				.header("content-type", "text/plain")
-				.text("Ciao babbo!")
+				.text("Ciao babbo! @"+request.base()+" "+request.path())
 
 		));
 	}

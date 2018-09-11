@@ -30,9 +30,9 @@ import com.metreeca.next.*;
  * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  * opportunity to handle the request.</p>
  */
-public final class Router implements Handler {
+public final class _Router implements Handler {
 
-	public Router path(final String path, final Handler handler) {
+	public _Router path(final String path, final Handler handler) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");

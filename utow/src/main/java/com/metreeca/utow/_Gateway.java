@@ -17,9 +17,8 @@
 
 package com.metreeca.utow;
 
-import com.metreeca.next.Handler;
-import com.metreeca.next.Request;
-import com.metreeca.next.Target;
+import com.metreeca.form.things.Transputs;
+import com.metreeca.next.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray._Tray;
 import com.metreeca.tray.sys.Trace;
@@ -27,15 +26,13 @@ import com.metreeca.tray.sys.Trace;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.CanonicalPathHandler;
 import io.undertow.server.handlers.GracefulShutdownHandler;
-import io.undertow.util.HeaderValues;
-import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 /**
@@ -114,47 +111,16 @@ public final class _Gateway implements HttpHandler {
 
 		final Handler handler=loader.apply(tray);
 
-		this.handler=new GracefulShutdownHandler(exchange -> {
+		this.handler=new GracefulShutdownHandler(new CanonicalPathHandler(exchange -> handler
 
-			final Request request=new Request();
+				.handle(request(exchange))
+				.accept(response(exchange))
 
-			request.method(exchange.getRequestMethod().toString());
-
-			exchange.getRequestHeaders().forEach(header -> request.headers(header.getHeaderName().toString(), header));
-
-			handler
-
-					// !!! handle multi-part forms (https://stackoverflow.com/questions/37839418/multipart-form-data-example-using-undertow)
-
-					.handle(request)
-
-					.accept(response -> {
-
-						exchange.setStatusCode(response.status());
-
-						response.headers().forEach((name, values) ->
-								exchange.getResponseHeaders().putAll(HttpString.tryFromString(name), values)
-						);
-
-						try (final StringWriter writer=new StringWriter(1000)) {
-
-							response.body().accept(new Target() {
-								@Override public Writer writer() { return writer; }
-							});
-
-							exchange.getResponseSender().send(writer.toString()); // !!! stream
-
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
-
-						// !!! handle binary data
-
-					});
-		});
+		));
 
 		return this;
 	}
+
 
 	public _Gateway stop() {
 
@@ -179,6 +145,66 @@ public final class _Gateway implements HttpHandler {
 		}
 
 		return this;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Request request(final HttpServerExchange exchange) {
+
+		// !!! handle multi-part forms (https://stackoverflow.com/questions/37839418/multipart-form-data-example-using-undertow)
+
+		final Request request=new Request();
+
+		request.method(exchange.getRequestMethod().toString())
+
+				.base(exchange.getRequestURL().substring(0, exchange.getRequestURL().length()-exchange.getRequestPath().length()+1))
+				.path(exchange.getRelativePath()) // canonical form
+
+				.query(exchange.getQueryString())
+				// !!! NPE .parameters(exchange.getQueryParameters())
+		;
+
+		exchange.getRequestHeaders().forEach(header -> request.headers(header.getHeaderName().toString(), header));
+
+		return request
+
+				.body(() -> new Source() {
+
+					@Override public Reader reader() throws IllegalStateException {
+						return Transputs.reader(input(), exchange.getRequestCharset());
+					}
+
+					@Override public InputStream input() throws IllegalStateException {
+						return exchange.getInputStream();
+					}
+
+				});
+	}
+
+	private Consumer<Response> response(final HttpServerExchange exchange) {
+		return response -> {
+
+			exchange.setStatusCode(response.status());
+
+			response.headers().forEach((name, values) ->
+					exchange.getResponseHeaders().putAll(HttpString.tryFromString(name), values)
+			);
+
+			try (final StringWriter writer=new StringWriter(1000)) {
+
+				response.body().accept(new Target() {
+					@Override public Writer writer() { return writer; }
+				});
+
+				exchange.getResponseSender().send(writer.toString()); // !!! stream
+
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+
+			// !!! handle binary data
+		};
 	}
 
 }
