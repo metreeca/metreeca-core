@@ -105,7 +105,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * <p>Existing values are overwritten, except when defining a new cookie with {@code Set-Cookie}.</p>
 	 *
-	 * @param name  the name of the header whose value is to be configures
+	 * @param name  the name of the header whose value is to be configured
 	 * @param value the new value for {@code name}; empty values are ignored
 	 *
 	 * @return this message

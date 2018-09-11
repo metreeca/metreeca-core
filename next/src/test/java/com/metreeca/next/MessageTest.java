@@ -29,7 +29,7 @@ import static java.util.Collections.emptySet;
 
 final class MessageTest {
 
-	@Test void testHeadersNormalizeHedareNames() {
+	@Test void testHeadersNormalizeHeadreNames() {
 
 		final TestMessage message=new TestMessage()
 				.headers("test-header", "value");

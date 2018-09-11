@@ -25,13 +25,12 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
+import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.disjoint;
-import static java.util.Collections.singleton;
-import static java.util.Collections.unmodifiableSet;
+import static java.util.Collections.*;
 
 
 /**
@@ -70,6 +69,9 @@ public final class Request extends Inbound<Request> {
 	private String path="/";
 	private String query="";
 
+	private final Map<String, List<String>> parameters=new LinkedHashMap<>();
+	private final Map<String, List<Inbound<?>>> parts=new LinkedHashMap<>();
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -80,6 +82,11 @@ public final class Request extends Inbound<Request> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Creates a response for this request.
+	 *
+	 * @return a new response {@linkplain Response#request() associated} to this request
+	 */
 	public Response response() {
 		return new Response(this);
 	}
@@ -94,10 +101,6 @@ public final class Request extends Inbound<Request> {
 	public boolean safe() {
 		return Safe.contains(method);
 	}
-
-	//public boolean interactive() {
-	//	return method.equals(GET) && headers("Accept").stream().anyMatch(Message::interactive);
-	//}
 
 
 	/**
@@ -197,7 +200,6 @@ public final class Request extends Inbound<Request> {
 	 * @return this request
 	 *
 	 * @throws NullPointerException if {@code roles} is {@code null} or contains a {@code null} value
-	 *
 	 */
 	public Request roles(final Value... roles) {
 		return roles(asList(roles));
@@ -212,7 +214,6 @@ public final class Request extends Inbound<Request> {
 	 * @return this request
 	 *
 	 * @throws NullPointerException if {@code roles} is {@code null} or contains a {@code null} value
-	 *
 	 */
 	public Request roles(final Collection<? extends Value> roles) {
 
@@ -364,6 +365,135 @@ public final class Request extends Inbound<Request> {
 		this.query=query;
 
 		return this;
+	}
+
+
+	/**
+	 * Retrieves request query parameters.
+	 *
+	 * @return an immutable and possibly empty map from query parameters names to collections of values
+	 */
+	public Map<String, Collection<String>> parameters() {
+		return unmodifiableMap(parameters);
+	}
+
+
+	/**
+	 * Retrieves request query parameter value.
+	 *
+	 * @param name the name of the query parameter whose value is to be retrieved
+	 *
+	 * @return an optional value containing the first value among those returned by {@link #parameters(String)}, if one
+	 * is present; an empty optional otherwise
+	 *
+	 * @throws NullPointerException if {@code name} is {@code null}
+	 */
+	public Optional<String> parameter(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return parameters(name).stream().findFirst();
+	}
+
+	/**
+	 * Configures request query parameter value.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param name  the name of the query parameter whose value is to be configured
+	 * @param value the new value for {@code name}
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code value} is {@code null}
+	 */
+	public Request parameter(final String name, final String value) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		return parameters(name, value);
+	}
+
+
+	/**
+	 * Retrieves request query parameter values.
+	 *
+	 * @param name the name of the query parameter whose values are to be retrieved
+	 *
+	 * @return an immutable and possibly empty collection of values
+	 */
+	public Collection<String> parameters(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return unmodifiableCollection(parameters.getOrDefault(name, list()));
+	}
+
+	/**
+	 * Configures request query parameter values.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param name   the name of the query parameter whose values are to be configured
+	 * @param values a possibly empty collection of values
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 *                              contains a {@code null} value
+	 */
+	public Request parameters(final String name, final String... values) {
+		return parameters(name, asList(values));
+	}
+
+	/**
+	 * Configures request query parameter values.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param name   the name of the query parameter whose values are to be configured
+	 * @param values a possibly empty collection of values
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 *                              contains a {@code null} value
+	 */
+	public Request parameters(final String name, final Collection<String> values) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		if ( values.contains(null) ) {
+			throw new NullPointerException("null value");
+		}
+
+		if ( values.isEmpty() ) {
+
+			parameters.remove(name);
+
+		} else {
+
+			parameters.put(name, unmodifiableList(new ArrayList<>(values)));
+
+		}
+
+		return self();
 	}
 
 }

@@ -39,7 +39,7 @@ final class InboundTest {
 
 	}
 
-	@Test void testRepresentationCaching() {
+	@Test void testBodyCachesRepresentations() {
 
 		final TestInbound inbound=new TestInbound().body(() -> new Source() {
 
