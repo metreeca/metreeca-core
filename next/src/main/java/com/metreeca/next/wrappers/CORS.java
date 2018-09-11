@@ -15,14 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.wrappers;
+package com.metreeca.next.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Wrapper;
-import com.metreeca.tray.sys._Setup;
-import com.metreeca.tray.sys.Trace;
 
-import static com.metreeca.tray._Tray.tool;
+import com.metreeca.next.Handler;
+import com.metreeca.next.Wrapper;
 
 
 /**
@@ -37,30 +34,9 @@ public final class CORS implements Wrapper {
 
 	// !!! https://www.html5rocks.com/static/images/cors_server_flowchart.png
 
-	public static CORS cors() { return new CORS(); }
-
-
-	private final _Setup setup=tool(_Setup.Factory);
-	private final Trace trace=tool(Trace.Factory);
-
-	private final boolean enabled=setup.get("cors", false);
-
-
-	private CORS() {}
-
-
 	@Override public Handler wrap(final Handler handler) {
-
-		trace.info(this, enabled ? "enabled" : "disabled");
-
-		return enabled ? (request, response) -> handler.handle(
-
-				writer -> writer.copy(request).done(),
-
-				reader -> response.copy(reader)
-						.header("Access-Control-Allow-Origin", request.header("Origin").orElse(""))
-						.done()
-
-		) : handler;
+		return request -> handler.handle(request).map(response -> response
+				.header("Access-Control-Allow-Origin", request.header("Origin").orElse(""))); // !!! ;(
 	}
+
 }

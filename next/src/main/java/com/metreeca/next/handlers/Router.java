@@ -33,6 +33,15 @@ import com.metreeca.next.*;
 public final class Router implements Handler {
 
 	public Router path(final String path, final Handler handler) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		if ( handler == null ) {
+			throw new NullPointerException("null handler");
+		}
+
 		return this;
 	}
 
@@ -44,7 +53,6 @@ public final class Router implements Handler {
 		}
 
 		final String path=request.path();
-
 
 
 		return null;

@@ -15,10 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.handlers;
+package com.metreeca.next.handlers.sparql;
 
 import com.metreeca.form.Form;
 import com.metreeca.next.*;
+import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.ValueFactory;
