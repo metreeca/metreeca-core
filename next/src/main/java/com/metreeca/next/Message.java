@@ -18,10 +18,10 @@
 package com.metreeca.next;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
 
 import static java.util.Arrays.asList;
@@ -69,8 +69,20 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
-	 * Retrieves header value.
+	 * Retrieves message headers.
+	 *
+	 * @return an immutable and possibly empty map from header names to collections of headers values
+	 */
+	public Map<String, Collection<String>> headers() {
+		return unmodifiableMap(headers);
+	}
+
+
+	/**
+	 * Retrieves message header value.
 	 *
 	 * @param name the name of the header whose value is to be retrieved
 	 *
@@ -88,26 +100,40 @@ public abstract class Message<T extends Message<T>> {
 		return headers(name).stream().findFirst();
 	}
 
+	/**
+	 * Configures message header value.
+	 *
+	 * <p>Existing values are overwritten, except when defining a new cookie with {@code Set-Cookie}.</p>
+	 *
+	 * @param name  the name of the header whose value is to be configures
+	 * @param value the new value for {@code name}; empty values are ignored
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code value} is {@code null}
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>)
+	 */
 	public T header(final String name, final String value) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
 		return headers(name, value);
 	}
 
 
 	/**
-	 * Retrieves the headers of this message.
-	 *
-	 * @return an immutable map from header names to collections of headers values
-	 */
-	public Map<String, Collection<String>> headers() {
-		return unmodifiableMap(headers);
-	}
-
-	/**
-	 * Retrieves header values.
+	 * Retrieves message header values.
 	 *
 	 * @param name the name of the header whose values are to be retrieved
 	 *
-	 * @return a possibly empty collection of values
+	 * @return an immutable and possibly empty collection of values
 	 */
 	public Collection<String> headers(final String name) {
 
@@ -115,13 +141,13 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null name");
 		}
 
-		return unmodifiableCollection(headers.getOrDefault(title(name), emptyList()));
+		return unmodifiableCollection(headers.getOrDefault(normalize(name), emptyList()));
 	}
 
 	/**
-	 * Configures header values.
+	 * Configures message header values.
 	 *
-	 * <p>Existing header values are overwritten.</p>
+	 * <p>Existing values are overwritten, except when defining a new cookie with {@code Set-Cookie}.</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
@@ -130,15 +156,17 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
 	 *                              contains a {@code null} value
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>)
 	 */
 	public T headers(final String name, final String... values) {
 		return headers(name, asList(values));
 	}
 
 	/**
-	 * Configures header values.
+	 * Configures message header values.
 	 *
-	 * <p>Existing header values are overwritten.</p>
+	 * <p>Existing values are overwritten, except when defining a new cookie with {@code Set-Cookie}.</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
@@ -147,6 +175,8 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
 	 *                              contains a {@code null} value
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>)
 	 */
 	public T headers(final String name, final Collection<String> values) {
 
@@ -162,22 +192,36 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
-		headers.compute(title(name), (key, current) -> unmodifiableList(
-				Stream.concat(
+		final String _name=normalize(name);
 
-						current == null ? Stream.empty() : current.stream(),
-						values.stream().filter(value -> !value.isEmpty())
+		final List<String> _values=values
+				.stream()
+				.filter(value -> !value.isEmpty())
+				.distinct()
+				.collect(toList());
 
-				)
-						.distinct()
-						.collect(toList())
-		));
+		if ( _name.equals("Set-Cookie") ) {
+
+			headers.compute(_name, (key, value) -> concat(value, _values));
+
+		} else if ( _values.isEmpty() ) {
+
+			headers.remove(_name);
+
+		} else {
+
+			headers.put(_name, unmodifiableList(_values));
+
+		}
 
 		return self();
 	}
 
-	public T headers(final String name, final UnaryOperator<Collection<String>> filter) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private String normalize(final String name) {
+		return title(name);
 	}
 
 }

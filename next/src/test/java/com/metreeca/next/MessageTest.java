@@ -22,36 +22,51 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.things.Lists.list;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static java.util.Collections.emptySet;
 
 
 final class MessageTest {
 
-	@Test void testIgnoreEmptyHeaders() {
+	@Test void testHeadersNormalizeHedareNames() {
+
+		final TestMessage message=new TestMessage()
+				.headers("test-header", "value");
+
+		assertTrue(message.headers().keySet().contains("Test-Header"));
+	}
+
+	@Test void testHeadersIgnoreEmptyHeaders() {
 
 		final TestMessage message=new TestMessage()
 				.headers("test-header", emptySet());
 
-		assertFalse(message.headers().containsKey("test-header"));
+		assertTrue(message.headers().entrySet().isEmpty());
 	}
 
-
-	@Test void testConfigurePreserving() {
+	@Test void testHeadersOverwritesValues() {
 
 		final TestMessage message=new TestMessage()
 				.header("test-header", "one")
 				.header("test-header", "two");
 
-		assertEquals(list("one", "two"), list(message.headers("test-header")));
+		assertEquals(list("two"), list(message.headers("test-header")));
 	}
 
-	@Test void testConfigurePreservingIgnoreEmptyAndDuplicateValues() {
+	@Test void testHeadersAppendsCookies() {
 
 		final TestMessage message=new TestMessage()
-				.headers("test-header", "", "one")
-				.headers("test-header", "two", "", "one", "two");
+				.header("set-cookie", "one")
+				.header("set-cookie", "two");
+
+		assertEquals(list("one", "two"), list(message.headers("set-cookie")));
+	}
+
+	@Test void testHeadersIgnoresEmptyAndDuplicateValues() {
+
+		final TestMessage message=new TestMessage()
+				.headers("test-header", "one", "two", "", "two");
 
 		assertEquals(list("one", "two"), list(message.headers("test-header")));
 	}
