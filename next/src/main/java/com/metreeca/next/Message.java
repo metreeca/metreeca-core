@@ -89,7 +89,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if {@code map} is {@code null} or contains either null keys or null values
+	 * @throws NullPointerException if {@code headers} is {@code null} or contains either null keys or null values
 	 */
 	public T headers(final Map<String, Collection<String>> headers) {
 

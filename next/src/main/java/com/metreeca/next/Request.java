@@ -407,6 +407,38 @@ public final class Request extends Inbound<Request> {
 		return unmodifiableMap(parameters);
 	}
 
+	/**
+	 * Configures request query parameters.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param parameters a map from parameter names to lists of values
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code parameters} is {@code null} or contains either null keys or null values
+	 */
+	public Request parameters(final Map<String, Collection<String>> parameters) {
+
+		if ( parameters == null ) {
+			throw new NullPointerException("null headers");
+		}
+
+		if ( parameters.containsKey(null) ) {
+			throw new NullPointerException("null part name");
+		}
+
+		if ( parameters.containsValue(null) ) {
+			throw new NullPointerException("null part content");
+		}
+
+		this.parameters.clear();
+
+		parameters.forEach(this::parameters);
+
+		return this;
+	}
+
 
 	/**
 	 * Retrieves request query parameter value.
@@ -460,13 +492,13 @@ public final class Request extends Inbound<Request> {
 	 *
 	 * @return an immutable and possibly empty collection of values
 	 */
-	public Collection<String> parameters(final String name) {
+	public List<String> parameters(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
 		}
 
-		return unmodifiableCollection(parameters.getOrDefault(name, list()));
+		return unmodifiableList(parameters.getOrDefault(name, list()));
 	}
 
 	/**
