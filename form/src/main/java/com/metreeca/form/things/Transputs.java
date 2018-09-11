@@ -140,6 +140,11 @@ public final class Transputs {
 
 	//// Input Utilities ///////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Creates an empty reader.
+	 *
+	 * @return an emtpy input stream
+	 */
 	public static InputStream input() {
 		return new ByteArrayInputStream(EmptyData);
 	}
@@ -167,6 +172,11 @@ public final class Transputs {
 	}
 
 
+	/**
+	 * Creates an empty reader.
+	 *
+	 * @return an emtpy reader
+	 */
 	public static Reader reader() {
 		return new StringReader(EmptyText);
 	}

@@ -17,12 +17,42 @@
 
 package com.metreeca.next;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 final class OutboundTest {
 
-	@Test @Disabled void testPreventDualTextualBinaryProcessing() {}
+	@Test void testBodyPreventRepeatedUsage() {
+
+		final TestOutbound outbound=new TestOutbound();
+
+		assertThrows(IllegalStateException.class, () -> {
+			outbound.body();
+			outbound.body();
+		});
+
+	}
+
+	@Test void testRepresentationCaching() {
+
+		final TestOutbound outbound=new TestOutbound().text("text");
+
+		assertEquals(
+				outbound.text().orElseThrow(IllegalStateException::new),
+				outbound.text().orElseThrow(IllegalStateException::new)
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class TestOutbound extends Outbound<TestOutbound> {
+
+		@Override protected TestOutbound self() { return this; }
+
+	}
 
 }

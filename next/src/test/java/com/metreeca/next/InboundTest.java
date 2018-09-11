@@ -17,19 +17,49 @@
 
 package com.metreeca.next;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.io.Reader;
+import java.io.StringReader;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 final class InboundTest {
 
-	@Test @Disabled void testPreventDoubleReading() {}
+	@Test void testBodyPreventRepeatedUsage() {
 
-	@Test @Disabled void testPreventDoubleStreaming() {}
+		final TestInbound inbound=new TestInbound();
 
-	@Test @Disabled void testPreventCrossOpening() {}
+		assertThrows(IllegalStateException.class, () -> {
+			inbound.body();
+			inbound.body();
+		});
+
+	}
+
+	@Test void testRepresentationCaching() {
+
+		final TestInbound inbound=new TestInbound().body(() -> new Source() {
+
+			@Override public Reader reader() { return new StringReader("test"); }
+
+		});
+
+		assertEquals(
+				inbound.text().orElseThrow(IllegalStateException::new),
+				inbound.text().orElseThrow(IllegalStateException::new)
+		);
+	}
 
 
-	@Test void testRepresentationCaching() {}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class TestInbound extends Inbound<TestInbound> {
+
+		@Override protected TestInbound self() { return this; }
+
+	}
 
 }

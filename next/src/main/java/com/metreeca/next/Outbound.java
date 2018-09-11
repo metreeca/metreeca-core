@@ -60,12 +60,9 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	};
 
 
-	private static final Consumer<Target> EmptyBody=target -> {};
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Consumer<Target> body=EmptyBody;
+	private Consumer<Target> body=target -> {};
 
 	private final Map<Object, Object> views=new HashMap<>(); // structured body representations (at most one item)
 
@@ -78,15 +75,22 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	 *
 	 * @return a consumer able to write the body of this message to a writer or an output stream retrieved from the
 	 * supplied content target
+	 *
+	 * @throws IllegalStateException if the body generator was already retrieved
 	 */
-	public Consumer<Target> body() {
+	public Consumer<Target> body() throws IllegalStateException {
+
+		if ( body == null ) {
+			throw new IllegalStateException("undefined body");
+		}
+
 		try {
 
 			return body;
 
 		} finally {
 
-			body=EmptyBody;
+			body=null;
 
 		}
 	}

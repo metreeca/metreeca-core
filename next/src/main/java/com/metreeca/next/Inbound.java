@@ -68,14 +68,15 @@ public abstract class Inbound<T extends Inbound<T>> extends Message<T> {
 	};
 
 
-	private static final Supplier<Source> EmptyBody=() -> {
-		throw new IllegalStateException("undefined body supplier");
-	};
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Supplier<Source> body=EmptyBody;
+	private Supplier<Source> body=() -> new Source() {
+
+		@Override public Reader reader() { return Transputs.reader(); }
+
+		@Override public InputStream input() { return  Transputs.input(); }
+
+	};
 
 	private final Map<Object, Object> views=new HashMap<>(); // structured body representations
 
@@ -85,19 +86,23 @@ public abstract class Inbound<T extends Inbound<T>> extends Message<T> {
 	/**
 	 * Retrieves the body supplier of this message.
 	 *
-	 * <p>After retrieval, the current message body supplier is cleared and replaced with a dummy one throwing {@code
-	 * IllegalStateException} on further access attempts.</p>
-	 *
 	 * @return a content source supplier able to generate either a reader or an input stream for the body of this message
+	 *
+	 * @throws IllegalStateException if the body supplier was already retrieved
 	 */
-	public Supplier<Source> body() {
+	public Supplier<Source> body() throws IllegalStateException {
+
+		if ( body == null ) {
+			throw new IllegalStateException("undefined body");
+		}
+
 		try {
 
 			return body;
 
 		} finally {
 
-			body=EmptyBody;
+			body=null;
 
 		}
 	}
@@ -178,8 +183,7 @@ public abstract class Inbound<T extends Inbound<T>> extends Message<T> {
 	/**
 	 * Configures the structured representation of this message.
 	 *
-	 * <p>The current body supplier is cleared and replaced with a dummy one throwing {@code IllegalStateException} on
-	 * further access attempts. Current structured representations, if already defined, are cleared.</p>
+	 * <p>The current body supplier and current structured representations, if already defined, are cleared.</p>
 	 *
 	 * @param format a function able to convert an inbound message into a structured representation of its body, relying
 	 *               on its {@linkplain #body() body supplier} and other structured representations
@@ -200,7 +204,7 @@ public abstract class Inbound<T extends Inbound<T>> extends Message<T> {
 			throw new NullPointerException("null body");
 		}
 
-		this.body=EmptyBody;
+		this.body=null;
 
 		views.clear();
 		views.put(format, body);

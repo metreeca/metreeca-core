@@ -79,4 +79,5 @@ final class MessageTest {
 		@Override protected TestMessage self() { return this; }
 
 	}
+
 }
