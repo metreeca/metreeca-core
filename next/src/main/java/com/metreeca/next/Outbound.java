@@ -33,6 +33,9 @@ import java.util.function.UnaryOperator;
  */
 public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 
+	/**
+	 * The {@linkplain #body(Function, Object) format function} for the textual body representation.
+	 */
 	public static final Function<String, Consumer<Target>> TextFormat=text -> target -> {
 		try (final Writer writer=target.writer()) {
 
@@ -43,6 +46,9 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 		}
 	};
 
+	/**
+	 * The {@linkplain #body(Function, Object) format function} for the binary body representation.
+	 */
 	public static final Function<byte[], Consumer<Target>> DataFormat=data -> target -> {
 		try (final OutputStream output=target.output()) {
 
@@ -67,6 +73,12 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+	/**
+	 * Retrieves the body generator of this message.
+	 *
+	 * @return a consumer able to write the body of this message to a writer or an output stream retrieved from the supplied
+	 * content target
+	 */
 	public Consumer<Target> body() {
 		try {
 
@@ -79,7 +91,22 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 		}
 	}
 
+	/**
+	 * Configures the body generator of this message.
+	 *
+	 * @param body a consumer able to write the body of this message to a writer or an output stream retrieved from the
+	 *             supplied
+	 *             content target
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code body} is {@code null}
+	 */
 	public T body(final Consumer<Target> body) {
+
+		if ( body == null ) {
+			throw new NullPointerException("null body");
+		}
 
 		this.body=body;
 
@@ -89,11 +116,51 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	}
 
 
+	/**
+	 * Retrieves the structured representation of the body of this message.
+	 *
+	 * @param format a function able to convert a structured representation of the body into a {@linkplain #body() body
+	 *               generator}
+	 * @param <V>    the type of the structured representation of the body to be retrieved
+	 *
+	 * @return an optional structured representation of the body of this message, if previously defined with the same
+	 * {@code format} function; an empty optional otherwise
+	 *
+	 * @throws NullPointerException if {@code format} is {@code null}
+	 */
 	public <V> Optional<V> body(final Function<V, Consumer<Target>> format) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
 		return Optional.ofNullable((V)views.get(format));
 	}
 
+	/**
+	 * Configures the structured representation of the body of this message.
+	 *
+	 * <p>The current body generator and the current structured representation, if already defined,
+	 * are overwritten.</p>
+	 *
+	 * @param format a function able to convert a structured representation of the body into a {@linkplain #body() body
+	 *               generator}
+	 * @param body   the structured representation of the body to be configured using {@code format}
+	 * @param <V>    the type of the structured representation of the body to be configured
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code format} or {@code body} is {@code null}
+	 */
 	public <V> T body(final Function<V, Consumer<Target>> format, final V body) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		if ( body == null ) {
+			throw new NullPointerException("null body");
+		}
 
 		this.body=format.apply(body);
 
@@ -104,27 +171,85 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	}
 
 
+	/**
+	 * Filters the body of this message.
+	 *
+	 * <p>Replaces the current {@linkplain #body() body} of this message with a new body obtained by filtering it with a
+	 * mapping function.</p>
+	 *
+	 * @param filter the mapping function to be applied to the current message body
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code filter} is {@code null}
+	 */
 	public T filter(final UnaryOperator<Consumer<Target>> filter) {
+
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
+
 		return body(filter.apply(body));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	/**
+	 * Retrieves the textual representation of the body of this message.
+	 *
+	 * @return the optional textual representation of the body of this message, if previously {@linkplain #text(String)
+	 * configured}; an empty optional otherwise
+	 */
 	public Optional<String> text() {
 		return body(TextFormat);
 	}
 
+	/**
+	 * Configures the textual representation of the body of this message.
+	 *
+	 * @param text the textual representation of the body of this message
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code text} is {@code null}
+	 */
 	public T text(final String text) {
+
+		if ( text == null ) {
+			throw new NullPointerException("null text");
+		}
+
 		return body(TextFormat, text);
 	}
 
 
+	/**
+	 * Retrieves the binary representation of the body of this message.
+	 *
+	 * @return the optional binary representation of the body of this message, if previously {@linkplain #data(byte[])
+	 * configured}; an empty optional otherwise
+	 */
 	public Optional<byte[]> data() {
 		return body(DataFormat);
 	}
 
-	public T data(final byte[] data) {
+	/**
+	 * Configures the binary representation of the body of this message.
+	 *
+	 * @param data the binary representation of the body of this message
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code data} is {@code null}
+	 */
+	public T data(final byte... data) {
+
+		if ( data == null ) {
+			throw new NullPointerException("null data");
+		}
+
 		return body(DataFormat, data);
 	}
 
