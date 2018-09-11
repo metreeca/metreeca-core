@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singletonList;
 
 
 final class MessageTest {
@@ -51,28 +50,10 @@ final class MessageTest {
 	@Test void testConfigurePreservingIgnoreEmptyAndDuplicateValues() {
 
 		final TestMessage message=new TestMessage()
-				.header("test-header", "", "one")
-				.header("test-header", "two", "", "one", "two");
+				.headers("test-header", "", "one")
+				.headers("test-header", "two", "", "one", "two");
 
 		assertEquals(list("one", "two"), list(message.headers("test-header")));
-	}
-
-	@Test void testConfigureOverwriting() {
-
-		final TestMessage message=new TestMessage()
-				.headers("test-header", "one")
-				.headers("test-header", "two");
-
-		assertEquals(singletonList("two"), list(message.headers("test-header")));
-	}
-
-	@Test void testConfigureOverwritingIgnoreEmptyAndDuplicateValues() {
-
-		final TestMessage message=new TestMessage()
-				.headers("test-header", "", "one")
-				.headers("test-header", "two", "", "two");
-
-		assertEquals(list("two"), list(message.headers("test-header")));
 	}
 
 

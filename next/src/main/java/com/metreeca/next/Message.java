@@ -18,6 +18,7 @@
 package com.metreeca.next;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -56,7 +57,7 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Checks if this message is interactive.
+	 * Tests if this message is interactive.
 	 *
 	 * @return {@code true} if an {@code Accept} or {@code Content-Type} header of this message include a MIME type
 	 * usually associated with an interactive browser-managed HTTP exchanges (e.g. {@code text/html}
@@ -65,16 +66,6 @@ public abstract class Message<T extends Message<T>> {
 		return Stream.of(headers("accept"), headers("content-type"))
 				.flatMap(Collection::stream)
 				.anyMatch(value -> HTMLPattern.matcher(value).find());
-	}
-
-
-	/**
-	 * Retrieves the headers of this message.
-	 *
-	 * @return an immutable map from header names to collections of headers values
-	 */
-	public Map<String, Collection<String>> headers() {
-		return unmodifiableMap(headers);
 	}
 
 
@@ -97,65 +88,19 @@ public abstract class Message<T extends Message<T>> {
 		return headers(name).stream().findFirst();
 	}
 
-
-	/**
-	 * Appends header values.
-	 *
-	 * <p>Existing header values are preserved.</p>
-	 *
-	 * @param name   the name of the header values are to be appended to
-	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
-	 *                              contains a {@code null} value
-	 */
-	public T header(final String name, final String... values) {
-		return header(name, asList(values));
+	public T header(final String name, final String value) {
+		return headers(name, value);
 	}
 
+
 	/**
-	 * Appends header values.
+	 * Retrieves the headers of this message.
 	 *
-	 * <p>Existing header values are preserved.</p>
-	 *
-	 * @param name   the name of the header values are to be appended to
-	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
-	 *                              contains a {@code null} value
+	 * @return an immutable map from header names to collections of headers values
 	 */
-	public T header(final String name, final Collection<String> values) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		if ( values.contains(null) ) {
-			throw new NullPointerException("null value");
-		}
-
-		headers.compute(title(name), (key, current) -> unmodifiableList(
-				Stream.concat(
-
-						current == null ? Stream.empty() : current.stream(),
-						values.stream().filter(value -> !value.isEmpty())
-
-				)
-						.distinct()
-						.collect(toList())
-		));
-
-		return self();
+	public Map<String, Collection<String>> headers() {
+		return unmodifiableMap(headers);
 	}
-
 
 	/**
 	 * Retrieves header values.
@@ -217,14 +162,22 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
-		headers.put(title(name), unmodifiableList(values
-				.stream()
-				.filter(value -> !value.isEmpty())
-				.distinct()
-				.collect(toList())
+		headers.compute(title(name), (key, current) -> unmodifiableList(
+				Stream.concat(
+
+						current == null ? Stream.empty() : current.stream(),
+						values.stream().filter(value -> !value.isEmpty())
+
+				)
+						.distinct()
+						.collect(toList())
 		));
 
 		return self();
+	}
+
+	public T headers(final String name, final UnaryOperator<Collection<String>> filter) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
 }
