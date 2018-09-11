@@ -47,9 +47,9 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves this message.
 	 *
-	 * @return this message
+	 * <p>This method is required to support the abstract fluent API through the self-bound abstract class pattern.</p>
 	 *
-	 * @apiNote required to support abstract fluent API through the self-bound abstract class pattern.
+	 * @return this message
 	 */
 	protected abstract T self();
 

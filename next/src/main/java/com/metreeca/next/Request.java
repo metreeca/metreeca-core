@@ -41,7 +41,7 @@ import static java.util.Collections.*;
 public final class Request extends Inbound<Request> {
 
 	/**
-	 * The name of the message part containing the main payload in multipart/form-data requests ({@code {@value}}).
+	 * The name of the message part containing the main payload in multipart/form-data requests ({@value}).
 	 */
 	public static final String MainPart="main";
 

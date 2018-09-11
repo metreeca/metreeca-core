@@ -20,7 +20,6 @@ package com.metreeca.utow;
 import com.metreeca.form.things.Transputs;
 import com.metreeca.next.*;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray._Tray;
 import com.metreeca.tray.sys.Trace;
 
 import io.undertow.Undertow;
@@ -35,7 +34,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 
-/**
+/* !!!
+
  * Undertow gateway.
  *
  * <p>Provides a gateway between a web application managed by Servlet 3.1 container and linked data resource handlers

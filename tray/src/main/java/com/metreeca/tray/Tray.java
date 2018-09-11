@@ -84,6 +84,9 @@ public final class Tray {
 	 * <p>During object construction, nested shared tools dependencies may be retrieved from this tool tray through
 	 * the static {@linkplain  #tool(Supplier) service locator} method of the Tray class.</p>
 	 *
+	 * <p>The context tray used by the service locator method is managed through a {@link ThreadLocal} variable,
+	 * so it won't be available to object constructors executed on a different thread.</p>
+	 *
 	 * @param factory the factory responsible for creating the required tool; must return a non-null and thread-safe
 	 *                object
 	 * @param <T>     the type of the shared tool created by {@code factory}
@@ -92,8 +95,6 @@ public final class Tray {
 	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is {@code null}
-	 * @apiNote the context tray used by the service locator method is managed through a {@link ThreadLocal} variable,
-	 * so it won't be available to object constructors executed on a different thread.
 	 */
 	public <T> T get(final Supplier<T> factory) {
 
