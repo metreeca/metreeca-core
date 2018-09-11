@@ -21,7 +21,16 @@ import com.metreeca.form.Form;
 import com.metreeca.next.*;
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.query.Operation;
+import org.eclipse.rdf4j.query.impl.SimpleDataset;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+
+import java.util.Collection;
+
 import static com.metreeca.tray._Tray.tool;
+
+import static java.lang.Boolean.parseBoolean;
 
 
 /**
@@ -93,9 +102,9 @@ public class _SPARQL implements Handler {
 	//					"missing query/update parameter"
 	//			));
 	//
-	//		} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
+	//		} else if ( !(publik && operation instanceof Query || request.as(Form.root)) ) {
 	//
-	//			Handler.refused(request, response);
+	//			Handler.refused(request);
 	//
 	//		} else if ( operation instanceof BooleanQuery ) {
 	//
@@ -253,35 +262,35 @@ public class _SPARQL implements Handler {
 	//}
 
 
-	//private Operation operation(final Request request, final RepositoryConnection connection) {
-	//
-	//	final String query=request.parameter("query").orElse("");
-	//	final String update=request.parameter("update").orElse("");
-	//	final String infer=request.parameter("infer").orElse("");
-	//
-	//	final List<String> basics=request.parameters("default-graph-uri");
-	//	final List<String> nameds=request.parameters("named-graph-uri");
-	//
-	//	final Operation operation=!query.isEmpty() ? connection.prepareQuery(query)
-	//			: !update.isEmpty() ? connection.prepareUpdate(update)
-	//			: null;
-	//
-	//	if ( operation != null ) {
-	//
-	//		final ValueFactory factory=connection.getValueFactory();
-	//		final SimpleDataset dataset=new SimpleDataset();
-	//
-	//		basics.stream().distinct().forEachOrdered(basic -> dataset.addDefaultGraph(factory.createIRI(basic)));
-	//		nameds.stream().distinct().forEachOrdered(named -> dataset.addNamedGraph(factory.createIRI(named)));
-	//
-	//		operation.setDataset(dataset);
-	//		operation.setMaxExecutionTime(timeout);
-	//		operation.setIncludeInferred(infer.isEmpty() || parseBoolean(infer));
-	//
-	//	}
-	//
-	//	return operation;
-	//
-	//}
+	private Operation operation(final Request request, final RepositoryConnection connection) {
+
+		final String query=request.parameter("query").orElse("");
+		final String update=request.parameter("update").orElse("");
+		final String infer=request.parameter("infer").orElse("");
+
+		final Collection<String> basics=request.parameters("default-graph-uri");
+		final Collection<String> nameds=request.parameters("named-graph-uri");
+
+		final Operation operation=!query.isEmpty() ? connection.prepareQuery(query)
+				: !update.isEmpty() ? connection.prepareUpdate(update)
+				: null;
+
+		if ( operation != null ) {
+
+			final ValueFactory factory=connection.getValueFactory();
+			final SimpleDataset dataset=new SimpleDataset();
+
+			basics.stream().distinct().forEachOrdered(basic -> dataset.addDefaultGraph(factory.createIRI(basic)));
+			nameds.stream().distinct().forEachOrdered(named -> dataset.addNamedGraph(factory.createIRI(named)));
+
+			operation.setDataset(dataset);
+			operation.setMaxExecutionTime(timeout);
+			operation.setIncludeInferred(infer.isEmpty() || parseBoolean(infer));
+
+		}
+
+		return operation;
+
+	}
 
 }
