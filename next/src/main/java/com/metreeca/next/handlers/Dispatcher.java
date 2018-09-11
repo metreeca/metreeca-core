@@ -43,23 +43,69 @@ public final class Dispatcher implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Configures the handler for the GET HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HTTP GET method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is {@code null}
+	 */
 	public Dispatcher get(final Handler handler) {
 		return method(Request.GET, handler);
 	}
 
+	/**
+	 * Configures the handler for the POST HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HTTP POST method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is {@code null}
+	 */
 	public Dispatcher post(final Handler handler) {
 		return method(Request.POST, handler);
 	}
 
+	/**
+	 * Configures the handler for the PUT HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HTTP PUT method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is {@code null}
+	 */
 	public Dispatcher put(final Handler handler) {
 		return method(Request.PUT, handler);
 	}
 
+	/**
+	 * Configures the handler for the DELETE HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HTTP DELETE method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is {@code null}
+	 */
 	public Dispatcher delete(final Handler handler) {
 		return method(Request.DELETE, handler);
 	}
 
 
+	/**
+	 * Configures the handler for a HTTP method.
+	 *
+	 * @param method the HTTP method whose handler is to be configured
+	 * @param handler the handler to be delegated for {@code method}
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if either {@code method} or {@code handler} is {@code null}
+	 */
 	public Dispatcher method(final String method, final Handler handler) {
 
 		if ( method == null ) {
@@ -75,6 +121,9 @@ public final class Dispatcher implements Handler {
 		return this;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public Lazy<Response> handle(final Request request) {
 		return Optional.ofNullable(mappings.get(request.method()))
 				.orElse(this::unsupported)
@@ -84,19 +133,16 @@ public final class Dispatcher implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	private Response options(final Request request) {
 		return request.response()
 				.status(Response.OK)
-				//  !!! .header("Allow", mappings.keySet())
-				;
+				.headers("Allow", mappings.keySet());
 	}
 
 	private Response unsupported(final Request request) {
 		return request.response()
 				.status(Response.MethodNotAllowed)
-				// !!! .header("Allow", mappings.keySet())
-				;
+				.headers("Allow", mappings.keySet());
 	}
 
 }

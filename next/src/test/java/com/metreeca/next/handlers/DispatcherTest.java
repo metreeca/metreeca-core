@@ -18,26 +18,36 @@
 package com.metreeca.next.handlers;
 
 
+import com.metreeca.next.Request;
+import com.metreeca.next.Response;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.HashSet;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static java.util.Arrays.asList;
+
+
 final class DispatcherTest {
 
-	//@Test public void testHandleOPTIONSByDefault() {
-	//	testbed()
-	//
-	//			.handler(() -> new Dispatcher().get((request) -> request.response().status(Response.OK)))
-	//
-	//			.request(request -> request
-	//					.method(Request.POST)
-	//					.done())
-	//
-	//			.response(response -> {
-	//
-	//				assertEquals(Response.MethodNotAllowed, response.status(), "error reported");
-	//
-	//				assertEquals(new HashSet<>(asList(Request.OPTIONS, Request.GET)),
-	//						new HashSet<>(response.headers("Allow")),
-	//						"allowed method reported");
-	//
-	//			});
-	//}
+	@Test void testHandleOPTIONSByDefault() {
+		new Dispatcher()
+
+				.get((request) -> request.response().status(Response.OK))
+
+				.handle(new Request().method(Request.POST))
+
+				.accept(response -> {
+
+					assertEquals(Response.MethodNotAllowed, response.status(), "error reported");
+
+					assertEquals(new HashSet<>(asList(Request.OPTIONS, Request.GET)),
+							new HashSet<>(response.headers("Allow")),
+							"allowed method reported");
+
+				});
+	}
 
 }
