@@ -60,14 +60,14 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	};
 
 
-	private static final Consumer<Target> Empty=target -> {};
+	private static final Consumer<Target> EmptyBody=target -> {};
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Consumer<Target> body=Empty;
+	private Consumer<Target> body=EmptyBody;
 
-	private final Map<Object, Object> views=new HashMap<>();
+	private final Map<Object, Object> views=new HashMap<>(); // structured body representations (at most one item)
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,8 +76,8 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	/**
 	 * Retrieves the body generator of this message.
 	 *
-	 * @return a consumer able to write the body of this message to a writer or an output stream retrieved from the supplied
-	 * content target
+	 * @return a consumer able to write the body of this message to a writer or an output stream retrieved from the
+	 * supplied content target
 	 */
 	public Consumer<Target> body() {
 		try {
@@ -86,7 +86,7 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 
 		} finally {
 
-			body=Empty;
+			body=EmptyBody;
 
 		}
 	}
@@ -94,9 +94,11 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	/**
 	 * Configures the body generator of this message.
 	 *
+	 * <p>The current structured representation, if already {@linkplain #body(Function, Object) defined}, is
+	 * overwritten.</p>
+	 *
 	 * @param body a consumer able to write the body of this message to a writer or an output stream retrieved from the
-	 *             supplied
-	 *             content target
+	 *             supplied content target
 	 *
 	 * @return this message
 	 *
@@ -115,13 +117,37 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 		return self();
 	}
 
+	/**
+	 * Filters the body of this message.
+	 *
+	 * <p>Replaces the current {@linkplain #body() body generator} of this message with a new generator obtained by
+	 * filtering it with a mapping function. The current structured representation, if already {@linkplain
+	 * #body(Function, Object) defined}, is overwritten.</p>
+	 *
+	 * @param filter the mapping function to be applied to the current message body generator
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code filter} is {@code null}
+	 */
+	public T filter(final UnaryOperator<Consumer<Target>> filter) {
+
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
+
+		return body(filter.apply(body));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the structured representation of the body of this message.
 	 *
 	 * @param format a function able to convert a structured representation of the body into a {@linkplain #body() body
 	 *               generator}
-	 * @param <V>    the type of the structured representation of the body to be retrieved
+	 * @param <V>    the type of the structured representation to be retrieved
 	 *
 	 * @return an optional structured representation of the body of this message, if previously defined with the same
 	 * {@code format} function; an empty optional otherwise
@@ -140,13 +166,12 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 	/**
 	 * Configures the structured representation of the body of this message.
 	 *
-	 * <p>The current body generator and the current structured representation, if already defined,
-	 * are overwritten.</p>
+	 * <p>The current body generator and the current structured representation, if already defined, are overwritten.</p>
 	 *
 	 * @param format a function able to convert a structured representation of the body into a {@linkplain #body() body
 	 *               generator}
 	 * @param body   the structured representation of the body to be configured using {@code format}
-	 * @param <V>    the type of the structured representation of the body to be configured
+	 * @param <V>    the type of the structured representation to be configured
 	 *
 	 * @return this message
 	 *
@@ -168,28 +193,6 @@ public abstract class Outbound<T extends Outbound<T>> extends Message<T> {
 		views.put(format, body);
 
 		return self();
-	}
-
-
-	/**
-	 * Filters the body of this message.
-	 *
-	 * <p>Replaces the current {@linkplain #body() body} of this message with a new body obtained by filtering it with a
-	 * mapping function.</p>
-	 *
-	 * @param filter the mapping function to be applied to the current message body
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if {@code filter} is {@code null}
-	 */
-	public T filter(final UnaryOperator<Consumer<Target>> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		return body(filter.apply(body));
 	}
 
 
