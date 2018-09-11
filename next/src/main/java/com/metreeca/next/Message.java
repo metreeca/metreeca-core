@@ -80,6 +80,38 @@ public abstract class Message<T extends Message<T>> {
 		return unmodifiableMap(headers);
 	}
 
+	/**
+	 * Configures message headers.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param headers a map from header names to collections of headers values; empty and duplicate values are ignored
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code map} is {@code null} or contains either null keys or null values
+	 */
+	public T headers(final Map<String, Collection<String>> headers) {
+
+		if ( headers == null ) {
+			throw new NullPointerException("null headers");
+		}
+
+		if ( headers.containsKey(null) ) {
+			throw new NullPointerException("null part name");
+		}
+
+		if ( headers.containsValue(null) ) {
+			throw new NullPointerException("null part content");
+		}
+
+		this.headers.clear();
+
+		headers.forEach(this::headers);
+
+		return self();
+	}
+
 
 	/**
 	 * Retrieves message header value.
@@ -193,12 +225,7 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		final String _name=normalize(name);
-
-		final List<String> _values=values
-				.stream()
-				.filter(value -> !value.isEmpty())
-				.distinct()
-				.collect(toList());
+		final Collection<String> _values=normalize(values);
 
 		if ( _name.equals("Set-Cookie") ) {
 
@@ -210,7 +237,7 @@ public abstract class Message<T extends Message<T>> {
 
 		} else {
 
-			headers.put(_name, unmodifiableList(_values));
+			headers.put(_name, unmodifiableCollection(_values));
 
 		}
 
@@ -222,6 +249,14 @@ public abstract class Message<T extends Message<T>> {
 
 	private String normalize(final String name) {
 		return title(name);
+	}
+
+	private Collection<String> normalize(final Collection<String> values) {
+		return values
+				.stream()
+				.filter(value -> !value.isEmpty())
+				.distinct()
+				.collect(toList());
 	}
 
 }
