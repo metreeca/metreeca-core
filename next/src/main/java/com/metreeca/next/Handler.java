@@ -21,7 +21,7 @@ import com.metreeca.form.Form;
 
 
 /**
- * Linked data resource handler.
+ * Resource handler.
  *
  * <p>Exposes and manages the state of a linked data resource, generating {@linkplain Response responses} in reaction to
  * {@linkplain Request requests}.</p>
