@@ -17,6 +17,9 @@
 
 package com.metreeca.next;
 
+import com.metreeca.next.formats.Data;
+import com.metreeca.next.formats.Text;
+
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -307,10 +310,10 @@ public abstract class Message<T extends Message<T>> {
 	 * Retrieves the textual representation of the body of this message.
 	 *
 	 * @return the optional textual representation of the body of this message, as {@linkplain #body(Format) retrieved}
-	 * using the {@link Format#Text} format
+	 * using the {@link Text#Format} format
 	 */
 	public Optional<String> text() {
-		return body(Format.Text);
+		return body(Text.Format);
 	}
 
 	/**
@@ -318,7 +321,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @param text the textual representation of the body of this message
 	 *
-	 * @return this message, as {@linkplain #body(Format, Object) configured} using the {@link Format#Text} format
+	 * @return this message, as {@linkplain #body(Format, Object) configured} using the {@link Text#Format} format
 	 *
 	 * @throws NullPointerException if {@code text} is {@code null}
 	 */
@@ -328,7 +331,7 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null text");
 		}
 
-		return body(Format.Text, text);
+		return body(Text.Format, text);
 	}
 
 
@@ -336,10 +339,10 @@ public abstract class Message<T extends Message<T>> {
 	 * Retrieves the binary representation of the body of this message.
 	 *
 	 * @return the optional binary representation of the body of this message, as {@linkplain #body(Format) retrieved}
-	 * using the {@link Format#Data} format
+	 * using the {@link Data#Format} format
 	 */
 	public Optional<byte[]> data() {
-		return body(Format.Data);
+		return body(Data.Format);
 	}
 
 	/**
@@ -347,17 +350,17 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @param data the binary representation of the body of this message
 	 *
-	 * @return this message, as {@linkplain #body(Format, Object) configured} using the {@link Format#Data} format
+	 * @return this message, as {@linkplain #body(Format, Object) configured} using the {@link Data#Format} format
 	 *
 	 * @throws NullPointerException if {@code data} is {@code null}
 	 */
-	public T data(final byte[] data) {
+	public T data(final byte... data) {
 
 		if ( data == null ) {
 			throw new NullPointerException("null data");
 		}
 
-		return body(Format.Data, data);
+		return body(Data.Format, data);
 	}
 
 

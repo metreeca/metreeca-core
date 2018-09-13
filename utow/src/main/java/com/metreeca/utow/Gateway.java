@@ -19,6 +19,8 @@ package com.metreeca.utow;
 
 import com.metreeca.form.things.Transputs;
 import com.metreeca.next.*;
+import com.metreeca.next.formats.Inbound;
+import com.metreeca.next.formats.Outbound;
 import com.metreeca.next.handlers.Server;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Trace;
@@ -171,7 +173,7 @@ import java.util.function.Function;
 
 		return request
 
-				.body(Format.Inbound, new Source() {
+				.body(Inbound.Format, new Source() {
 
 					@Override public Reader reader() throws IllegalStateException {
 						return Transputs.reader(input(), exchange.getRequestCharset());
@@ -195,7 +197,7 @@ import java.util.function.Function;
 
 			try (final StringWriter writer=new StringWriter(1000)) {
 
-				response.body(Format.Outbound).ifPresent(consumer -> consumer.accept(new Target() {
+				response.body(Outbound.Format).ifPresent(consumer -> consumer.accept(new Target() {
 					@Override public Writer writer() { return writer; }
 				}));
 

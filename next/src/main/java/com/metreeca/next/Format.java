@@ -17,12 +17,7 @@
 
 package com.metreeca.next;
 
-import java.io.*;
 import java.util.Optional;
-import java.util.function.Consumer;
-
-import static com.metreeca.form.things.Transputs.data;
-import static com.metreeca.form.things.Transputs.text;
 
 
 /**
@@ -33,95 +28,6 @@ import static com.metreeca.form.things.Transputs.text;
  * @param <V> the type of the structured message body representation managed by the format
  */
 public interface Format<V> {
-
-	/**
-	 * Inbound raw message body format.
-	 */
-	public static final Format<Source> Inbound=new Format<Source>() {};
-
-	/**
-	 * Outbound raw message body format.
-	 */
-	public static final Format<Consumer<Target>> Outbound=new Format<Consumer<Target>>() {};
-
-	/**
-	 * Textual message body format.
-	 *
-	 * <p>{@linkplain #get(Message) Retrieves} the textual content of the message body from the reader supplied by its
-	 * {@link #Inbound} representation.</p>
-	 *
-	 * <p>Configures the {@link #Outbound} representation of the message body to write its textual content to the
-	 * writer supplied by the accepted {@link Target}.</p>
-	 */
-	public static final Format<String> Text=new Format<String>() {
-
-		@Override public Optional<String> get(final Message<?> message) {
-			return message.body(Inbound).map(source -> {
-				try (final Reader reader=source.reader()) {
-
-					return text(reader);
-
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
-				}
-			});
-		}
-
-		@Override public void set(final Message<?> message, final String value) {
-			message.body(Outbound, target -> {
-						try (final Writer writer=target.writer()) {
-
-							writer.write(value);
-
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
-					}
-			);
-		}
-
-	};
-
-	/**
-	 * Binary message body format.
-	 *
-	 * <p>{@linkplain #get(Message) Retrieves} the binary content of the message body from the input stream supplied by
-	 * its {@link #Inbound} representation.</p>
-	 *
-	 * <p>Configures the {@link #Outbound} representation of the message body to write its binary content to the
-	 * output stream supplied by the accepted {@link Target}.</p>
-	 */
-	public static final Format<byte[]> Data=new Format<byte[]>() {
-
-		@Override public Optional<byte[]> get(final Message<?> message) {
-			return message.body(Inbound).map(source -> {
-				try (final InputStream input=source.input()) {
-
-					return data(input);
-
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
-				}
-			});
-		}
-
-		@Override public void set(final Message<?> message, final byte[] value) {
-			message.body(Outbound, target -> {
-						try (final OutputStream output=target.output()) {
-
-							output.write(value);
-
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
-					}
-			);
-		}
-
-	};
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the representation of a message body.
