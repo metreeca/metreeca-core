@@ -23,14 +23,16 @@ import com.metreeca.next.Wrapper;
 
 
 /**
- * CORS request manager (work in progress…).
+ * CORS request manager.
  *
  * <p>Manages CORS HTTP requests.</p>
  *
  * @see <a href="https://fetch.spec.whatwg.org/#cors-protocol">Fetch - § 3.2 CORS protocol</a>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) @ MDN</a>
+ *
+ * @deprecated Provisional implementation; don't use in production
  */
-public final class CORS implements Wrapper {
+@Deprecated public final class CORS implements Wrapper {
 
 	// !!! https://www.html5rocks.com/static/images/cors_server_flowchart.png
 

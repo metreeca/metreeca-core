@@ -29,10 +29,12 @@ import com.metreeca.next.*;
  *
  * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  * opportunity to handle the request.</p>
+ *
+ * @deprecated Work in progress
  */
-public final class _Router implements Handler {
+@Deprecated public final class Router implements Handler {
 
-	public _Router path(final String path, final Handler handler) {
+	public Router path(final String path, final Handler handler) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");

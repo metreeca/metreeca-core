@@ -257,8 +257,9 @@ public abstract class Message<T extends Message<T>> {
 	 * @param format the format of the body representation to be retrieved
 	 * @param <V>    the type of the body representation to be retrieved
 	 *
-	 * @return an optional representation of the body of this message, if previously defined with the same
-	 * {@code format}; an empty optional otherwise
+	 * @return an optional representation of the body of this message, if previously defined with the same {@code
+	 * format} or {@linkplain Format#get(Message) derived} by {@code format} from existing representation; an empty
+	 * optional otherwise
 	 *
 	 * @throws NullPointerException if {@code format} is {@code null}
 	 */
@@ -272,10 +273,10 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 	/**
-	 * Configures the  representation of the body of this message.
+	 * Configures a representation of the body of this message.
 	 *
 	 * @param format the format of the body representation to be configured
-	 * @param value   the body representation of the body to be configured using {@code format}
+	 * @param value  the body representation of the body to be configured using {@code format}
 	 * @param <V>    the type of the body representation to be configured
 	 *
 	 * @return this message
@@ -306,7 +307,7 @@ public abstract class Message<T extends Message<T>> {
 	 * Retrieves the textual representation of the body of this message.
 	 *
 	 * @return the optional textual representation of the body of this message, as {@linkplain #body(Format) retrieved}
-	 * using {@link Format#Text} format
+	 * using the {@link Format#Text} format
 	 */
 	public Optional<String> text() {
 		return body(Format.Text);
@@ -317,7 +318,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @param text the textual representation of the body of this message
 	 *
-	 * @return this message
+	 * @return this message, as {@linkplain #body(Format, Object) configured} using the {@link Format#Text} format
 	 *
 	 * @throws NullPointerException if {@code text} is {@code null}
 	 */
@@ -331,32 +332,33 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
-	///**
-	// * Retrieves the binary representation of the body of this message.
-	// *
-	// * @return the optional binary representation of the body of this message, as retrieved using {@link #DataFormat}
-	// */
-	//public Optional<byte[]> data() {
-	//	return body(DataFormat);
-	//}
-	//
-	///**
-	// * Configures the binary representation of the body of this message.
-	// *
-	// * @param data the binary representation of the body of this message
-	// *
-	// * @return this message
-	// *
-	// * @throws NullPointerException if {@code data} is {@code null}
-	// */
-	//public T text(final byte... data) {
-	//
-	//	if ( data == null ) {
-	//		throw new NullPointerException("null data");
-	//	}
-	//
-	//	return body(DataFormat, data);
-	//}
+	/**
+	 * Retrieves the binary representation of the body of this message.
+	 *
+	 * @return the optional binary representation of the body of this message, as {@linkplain #body(Format) retrieved}
+	 * using the {@link Format#Data} format
+	 */
+	public Optional<byte[]> data() {
+		return body(Format.Data);
+	}
+
+	/**
+	 * Configures the binary representation of the body of this message.
+	 *
+	 * @param data the binary representation of the body of this message
+	 *
+	 * @return this message, as {@linkplain #body(Format, Object) configured} using the {@link Format#Data} format
+	 *
+	 * @throws NullPointerException if {@code data} is {@code null}
+	 */
+	public T data(final byte[] data) {
+
+		if ( data == null ) {
+			throw new NullPointerException("null data");
+		}
+
+		return body(Format.Data, data);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

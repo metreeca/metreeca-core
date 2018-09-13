@@ -17,11 +17,12 @@
 
 package com.metreeca.next;
 
-import com.metreeca.form.things.Transputs;
-
 import java.io.*;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import static com.metreeca.form.things.Transputs.data;
+import static com.metreeca.form.things.Transputs.text;
 
 
 /**
@@ -33,26 +34,32 @@ import java.util.function.Consumer;
  */
 public interface Format<V> {
 
-	public static final Format<Source> Source=new Format<Source>() {};
-
-	public static final Format<Consumer<Target>> Target=new Format<Consumer<Target>>() {};
-
+	/**
+	 * Inbound raw message body format.
+	 */
+	public static final Format<Source> Inbound=new Format<Source>() {};
 
 	/**
-	 * The format for textual message body representations.
+	 * Outbound raw message body format.
+	 */
+	public static final Format<Consumer<Target>> Outbound=new Format<Consumer<Target>>() {};
+
+	/**
+	 * Textual message body format.
 	 *
-	 * <p>On decoding, </p>
+	 * <p>{@linkplain #get(Message) Retrieves} the textual content of the message body from the reader supplied by its
+	 * {@link #Inbound} representation.</p>
 	 *
-	 * <p>Gets Retrieves the textual content of the reader provided by the {@linkplain #body() body supplier} of the target
-	 * inbound message.</p>
+	 * <p>Configures the {@link #Outbound} representation of the message body to write its textual content to the
+	 * writer supplied by the accepted {@link Target}.</p>
 	 */
 	public static final Format<String> Text=new Format<String>() {
 
 		@Override public Optional<String> get(final Message<?> message) {
-			return message.body(Source).map(source -> {
+			return message.body(Inbound).map(source -> {
 				try (final Reader reader=source.reader()) {
 
-					return Transputs.text(reader);
+					return text(reader);
 
 				} catch ( final IOException e ) {
 					throw new UncheckedIOException(e);
@@ -61,7 +68,7 @@ public interface Format<V> {
 		}
 
 		@Override public void set(final Message<?> message, final String value) {
-			message.body(Target, target -> {
+			message.body(Outbound, target -> {
 						try (final Writer writer=target.writer()) {
 
 							writer.write(value);
@@ -75,11 +82,64 @@ public interface Format<V> {
 
 	};
 
+	/**
+	 * Binary message body format.
+	 *
+	 * <p>{@linkplain #get(Message) Retrieves} the binary content of the message body from the input stream supplied by
+	 * its {@link #Inbound} representation.</p>
+	 *
+	 * <p>Configures the {@link #Outbound} representation of the message body to write its binary content to the
+	 * output stream supplied by the accepted {@link Target}.</p>
+	 */
+	public static final Format<byte[]> Data=new Format<byte[]>() {
+
+		@Override public Optional<byte[]> get(final Message<?> message) {
+			return message.body(Inbound).map(source -> {
+				try (final InputStream input=source.input()) {
+
+					return data(input);
+
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+			});
+		}
+
+		@Override public void set(final Message<?> message, final byte[] value) {
+			message.body(Outbound, target -> {
+						try (final OutputStream output=target.output()) {
+
+							output.write(value);
+
+						} catch ( final IOException e ) {
+							throw new UncheckedIOException(e);
+						}
+					}
+			);
+		}
+
+	};
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Retrieves the representation of a message body.
+	 *
+	 * @param message the message whose body representation associated with this format is to be retrieved
+	 *
+	 * @return the optional body representation associated with this format, if it was possible to derive one from
+	 * {@code message}; an empty optional, otherwise
+	 */
 	public default Optional<V> get(final Message<?> message) { return Optional.empty(); }
 
+	/**
+	 * Configures derived message body representations.
+	 *
+	 * @param message the message whose body representations derived from {@code value} on the basis of this format are
+	 *                to be configured
+	 * @param value   the body representation to be used as basis for derived body representations for {@code message}
+	 */
 	public default void set(final Message<?> message, final V value) {}
 
 }

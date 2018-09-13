@@ -171,7 +171,7 @@ import java.util.function.Function;
 
 		return request
 
-				.body(Format.Source, new Source() {
+				.body(Format.Inbound, new Source() {
 
 					@Override public Reader reader() throws IllegalStateException {
 						return Transputs.reader(input(), exchange.getRequestCharset());
@@ -195,7 +195,7 @@ import java.util.function.Function;
 
 			try (final StringWriter writer=new StringWriter(1000)) {
 
-				response.body(Format.Target).ifPresent(consumer -> consumer.accept(new Target() {
+				response.body(Format.Outbound).ifPresent(consumer -> consumer.accept(new Target() {
 					@Override public Writer writer() { return writer; }
 				}));
 
