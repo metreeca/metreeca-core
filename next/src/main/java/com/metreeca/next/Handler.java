@@ -23,8 +23,8 @@ import com.metreeca.form.Form;
 /**
  * Resource handler.
  *
- * <p>Exposes and manages the state of a linked data resource, generating {@linkplain Response responses} in reaction to
- * {@linkplain Request requests}.</p>
+ * <p>Exposes and manages the state of a linked data resource, generating {@linkplain Response responses} in reaction
+ * to {@linkplain Request requests}.</p>
  */
 @FunctionalInterface public interface Handler {
 

@@ -17,6 +17,8 @@
 
 package com.metreeca.utow;
 
+import com.metreeca.next.formats.Text;
+
 import static com.metreeca.utow.Gateway.run;
 
 
@@ -25,9 +27,8 @@ public final class Work {
 	public static void main(final String... args) {
 		run(6800, "localhost", tray -> tray.get(() -> request -> request.response()
 
-				.status(200)
-				.header("content-type", "text/plain")
-				.text("Ciao babbo! @"+request.base()+" "+request.path())
+						.status(200)
+						.header("content-type", "text/plain").body(Text.Format, "Ciao babbo! @"+request.base()+" "+request.path())
 
 		));
 	}

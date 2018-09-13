@@ -17,10 +17,8 @@
 
 package com.metreeca.next;
 
-import com.metreeca.next.formats.Data;
-import com.metreeca.next.formats.Text;
-
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -63,6 +61,7 @@ public abstract class Message<T extends Message<T>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 	/**
 	 * Tests if this message is interactive.
 	 *
@@ -73,6 +72,27 @@ public abstract class Message<T extends Message<T>> {
 		return Stream.of(headers("accept"), headers("content-type"))
 				.flatMap(Collection::stream)
 				.anyMatch(value -> HTMLPattern.matcher(value).find());
+	}
+
+
+	/**
+	 * Executes a task on this message.
+	 *
+	 * @param task the task to be executed on this message
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code task} is {@code null}
+	 */
+	public T with(final Consumer<T> task) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		task.accept(self());
+
+		return self();
 	}
 
 
@@ -104,13 +124,17 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null headers");
 		}
 
-		if ( headers.containsKey(null) ) {
-			throw new NullPointerException("null header name");
-		}
+		headers.forEach((name, value) -> { // ;( parameters.containsKey()/ContainsValue() can throw NPE
 
-		if ( headers.containsValue(null) ) {
-			throw new NullPointerException("null header value");
-		}
+			if ( name == null ) {
+				throw new NullPointerException("null header name");
+			}
+
+			if ( value == null ) {
+				throw new NullPointerException("null header value");
+			}
+
+		});
 
 		this.headers.clear();
 
@@ -301,66 +325,6 @@ public abstract class Message<T extends Message<T>> {
 		format.set(this, value);
 
 		return self();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves the textual representation of the body of this message.
-	 *
-	 * @return the optional textual representation of the body of this message, as {@linkplain #body(Format) retrieved}
-	 * using the {@link Text#Format} format
-	 */
-	public Optional<String> text() {
-		return body(Text.Format);
-	}
-
-	/**
-	 * Configures the textual representation of the body of this message.
-	 *
-	 * @param text the textual representation of the body of this message
-	 *
-	 * @return this message, as {@linkplain #body(Format, Object) configured} using the {@link Text#Format} format
-	 *
-	 * @throws NullPointerException if {@code text} is {@code null}
-	 */
-	public T text(final String text) {
-
-		if ( text == null ) {
-			throw new NullPointerException("null text");
-		}
-
-		return body(Text.Format, text);
-	}
-
-
-	/**
-	 * Retrieves the binary representation of the body of this message.
-	 *
-	 * @return the optional binary representation of the body of this message, as {@linkplain #body(Format) retrieved}
-	 * using the {@link Data#Format} format
-	 */
-	public Optional<byte[]> data() {
-		return body(Data.Format);
-	}
-
-	/**
-	 * Configures the binary representation of the body of this message.
-	 *
-	 * @param data the binary representation of the body of this message
-	 *
-	 * @return this message, as {@linkplain #body(Format, Object) configured} using the {@link Data#Format} format
-	 *
-	 * @throws NullPointerException if {@code data} is {@code null}
-	 */
-	public T data(final byte... data) {
-
-		if ( data == null ) {
-			throw new NullPointerException("null data");
-		}
-
-		return body(Data.Format, data);
 	}
 
 

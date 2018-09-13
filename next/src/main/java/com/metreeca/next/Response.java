@@ -111,7 +111,8 @@ public final class Response extends Message<Response> implements Lazy<Response> 
 	/**
 	 * Checks if this response is successful.
 	 *
-	 * @return {@code true} if the {@linkplain #status() status} code is in the {@code 2XX} range; {@code false} otherwise
+	 * @return {@code true} if the {@linkplain #status() status} code is in the {@code 2XX} range; {@code false}
+	 * otherwise
 	 */
 	public boolean success() {
 		return status/100 == 2;

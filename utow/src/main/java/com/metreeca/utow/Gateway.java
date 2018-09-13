@@ -158,20 +158,21 @@ import java.util.function.Function;
 
 		// !!! handle multi-part forms (https://stackoverflow.com/questions/37839418/multipart-form-data-example-using-undertow)
 
-		final Request request=new Request();
+		final String url=exchange.getRequestURL();
 
-		request.method(exchange.getRequestMethod().toString())
+		return new Request()
 
-				.base(exchange.getRequestURL().substring(0, exchange.getRequestURL().length()-exchange.getRequestPath().length()+1))
+				.method(exchange.getRequestMethod().toString())
+
+				.base(url.substring(0, url.length()-exchange.getRequestPath().length()+1))
 				.path(exchange.getRelativePath()) // canonical form
 
 				.query(exchange.getQueryString())
-		// !!! NPE .parameters(exchange.getQueryParameters())
-		;
+				.parameters(exchange.getQueryParameters())
 
-		exchange.getRequestHeaders().forEach(header -> request.headers(header.getHeaderName().toString(), header));
-
-		return request
+				.with(request -> exchange.getRequestHeaders().forEach(header ->
+						request.headers(header.getHeaderName().toString(), header)
+				))
 
 				.body(Inbound.Format, new Source() {
 

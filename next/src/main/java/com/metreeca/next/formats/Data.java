@@ -48,7 +48,7 @@ public final class Data implements Format<byte[]> {
 	 * by its {@link Inbound#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<byte[]> get(final Message<?> message) {
-		return message.body(com.metreeca.next.formats.Inbound.Format).map(source -> {
+		return message.body(Inbound.Format).map(source -> {
 			try (final InputStream input=source.input()) {
 
 				return data(input);
@@ -64,16 +64,15 @@ public final class Data implements Format<byte[]> {
 	 * output stream supplied by the accepted {@link Target}.
 	 */
 	@Override public void set(final Message<?> message, final byte... value) {
-		message.body(com.metreeca.next.formats.Outbound.Format, target -> {
-					try (final OutputStream output=target.output()) {
+		message.body(Outbound.Format, target -> {
+			try (final OutputStream output=target.output()) {
 
-						output.write(value);
+				output.write(value);
 
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}
-		);
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		});
 	}
 
 }

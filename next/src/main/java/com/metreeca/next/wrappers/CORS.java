@@ -29,7 +29,6 @@ import com.metreeca.next.Wrapper;
  *
  * @see <a href="https://fetch.spec.whatwg.org/#cors-protocol">Fetch - § 3.2 CORS protocol</a>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) @ MDN</a>
- *
  * @deprecated Provisional implementation; don't use in production
  */
 @Deprecated public final class CORS implements Wrapper {

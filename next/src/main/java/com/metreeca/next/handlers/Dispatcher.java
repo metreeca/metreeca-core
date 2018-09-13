@@ -99,7 +99,7 @@ public final class Dispatcher implements Handler {
 	/**
 	 * Configures the handler for a HTTP method.
 	 *
-	 * @param method the HTTP method whose handler is to be configured
+	 * @param method  the HTTP method whose handler is to be configured
 	 * @param handler the handler to be delegated for {@code method}
 	 *
 	 * @return this dispatcher

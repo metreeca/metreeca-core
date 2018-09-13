@@ -37,7 +37,8 @@ import static java.lang.Boolean.parseBoolean;
 /**
  * SPARQL 1.1 Query/Update endpoint.
  *
- * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain Graph#Factory
+ * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
+ * Graph#Factory
  * graph database}.</p>
  *
  * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
@@ -82,8 +83,6 @@ public class _SPARQL implements Handler {
 
 		return this;
 	}
-
-
 
 
 	private Lazy<Response> process(final Request request) {

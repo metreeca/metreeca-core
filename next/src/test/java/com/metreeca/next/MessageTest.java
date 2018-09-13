@@ -17,6 +17,8 @@
 
 package com.metreeca.next;
 
+import com.metreeca.next.formats.Text;
+
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.things.Lists.list;
@@ -72,14 +74,13 @@ final class MessageTest {
 	}
 
 
-
 	@Test void testRepresentationCaching() {
 
-		final TestMessage outbound=new TestMessage().text("text");
+		final TestMessage outbound=new TestMessage().body(Text.Format, "text");
 
 		assertEquals(
-				outbound.text().orElseThrow(IllegalStateException::new),
-				outbound.text().orElseThrow(IllegalStateException::new)
+				outbound.body(Text.Format).orElseThrow(IllegalStateException::new),
+				outbound.body(Text.Format).orElseThrow(IllegalStateException::new)
 		);
 	}
 

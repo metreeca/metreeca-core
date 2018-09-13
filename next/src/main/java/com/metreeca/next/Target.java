@@ -35,7 +35,7 @@ public interface Target {
 	/**
 	 * Retrieves the target writer.
 	 *
-	 * @return a writer for the target textual content, by default generated from the the target {@linkplain #output()} ()
+	 * @return a writer for the target textual content, by default generated from the the target {@linkplain #output()
 	 * output} stream using the {@linkplain Transputs#UTF8 default} character encoding.
 	 *
 	 * @throws IllegalStateException if the target writer is not available
@@ -45,8 +45,8 @@ public interface Target {
 	/**
 	 * Retrieves the target output stream.
 	 *
-	 * @return an output stream for the target binary content, by default generated from the the target {@linkplain #writer()
-	 * writer} using the {@linkplain Transputs#UTF8 default} character encoding.
+	 * @return an output stream for the target binary content, by default generated from the the target {@linkplain
+	 * #writer() writer} using the {@linkplain Transputs#UTF8 default} character encoding.
 	 *
 	 * @throws IllegalStateException if the target output stream is not available
 	 */

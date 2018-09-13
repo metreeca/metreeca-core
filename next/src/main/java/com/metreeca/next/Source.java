@@ -45,8 +45,8 @@ public interface Source {
 	/**
 	 * Retrieves the source input stream.
 	 *
-	 * @return an input stream for the source binary content, by default generated from the the source {@linkplain #reader()
-	 * reader} using the {@linkplain Transputs#UTF8 default} character encoding.
+	 * @return an input stream for the source binary content, by default generated from the the source {@linkplain
+	 * #reader() reader} using the {@linkplain Transputs#UTF8 default} character encoding.
 	 *
 	 * @throws IllegalStateException if the source input stream is not available
 	 */

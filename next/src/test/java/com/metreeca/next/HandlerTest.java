@@ -17,6 +17,8 @@
 
 package com.metreeca.next;
 
+import com.metreeca.next.formats.Text;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -37,13 +39,13 @@ final class HandlerTest {
 
 			transaction.add("begin");
 
-			consumer.accept(request.response().text("inside"));
+			consumer.accept(request.response().body(Text.Format, "inside"));
 
 			transaction.add("commit");
 
 		};
 
-		handler.handle(new Request()).accept(response -> transaction.add(response.text().orElse("")));
+		handler.handle(new Request()).accept(response -> transaction.add(response.body(Text.Format).orElse("")));
 
 		assertEquals(asList("begin", "inside", "commit"), transaction);
 	}

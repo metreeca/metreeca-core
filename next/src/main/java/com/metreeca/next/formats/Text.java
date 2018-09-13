@@ -48,7 +48,7 @@ public final class Text implements Format<String> {
 	 * {@link Inbound#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<String> get(final Message<?> message) {
-		return message.body(com.metreeca.next.formats.Inbound.Format).map(source -> {
+		return message.body(Inbound.Format).map(source -> {
 			try (final Reader reader=source.reader()) {
 
 				return text(reader);
@@ -64,16 +64,15 @@ public final class Text implements Format<String> {
 	 * the writer supplied by the accepted {@link Target}.
 	 */
 	@Override public void set(final Message<?> message, final String value) {
-		message.body(com.metreeca.next.formats.Outbound.Format, target -> {
-					try (final Writer writer=target.writer()) {
+		message.body(Outbound.Format, target -> {
+			try (final Writer writer=target.writer()) {
 
-						writer.write(value);
+				writer.write(value);
 
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}
-		);
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		});
 	}
 
 }

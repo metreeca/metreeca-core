@@ -153,7 +153,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the identifier of the request user.
 	 *
-	 * @return an absolute IRI identifying the user performing this request or {@link Form#none} if no user is authenticated
+	 * @return an absolute IRI identifying the user performing this request or {@link Form#none} if no user is
+	 * authenticated
 	 */
 	public IRI user() { return user; }
 
@@ -273,7 +274,8 @@ public final class Request extends Message<Request> {
 	 * @return this request
 	 *
 	 * @throws NullPointerException     if {@code base} is {@code null}
-	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing slash
+	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing
+	 *                                  slash
 	 */
 	public Request base(final String base) {
 
@@ -388,13 +390,17 @@ public final class Request extends Message<Request> {
 			throw new NullPointerException("null parameters");
 		}
 
-		if ( parameters.containsKey(null) ) {
-			throw new NullPointerException("null parameter name");
-		}
+		parameters.forEach((name, value) -> { // ;( parameters.containsKey()/ContainsValue() can throw NPE
 
-		if ( parameters.containsValue(null) ) {
-			throw new NullPointerException("null parameter value");
-		}
+			if ( name == null ) {
+				throw new NullPointerException("null parameter name");
+			}
+
+			if ( value == null ) {
+				throw new NullPointerException("null parameter value");
+			}
+
+		});
 
 		this.parameters.clear();
 
