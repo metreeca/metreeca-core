@@ -15,10 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.services;
+package com.metreeca.next.handlers.sparql;
 
-import com.metreeca.rest.*;
-import com.metreeca.tray.sys._Setup;
+import com.metreeca.next.*;
+import com.metreeca.next.formats.JSON;
+import com.metreeca.next.formats.Outbound;
+import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.sys.Trace;
 
 import java.io.*;
@@ -26,8 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import static com.metreeca.rest.Handler.error;
-import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
+import static com.metreeca.next.Rest.error;
 import static com.metreeca.tray._Tray.tool;
 
 import static java.util.Arrays.asList;
@@ -35,54 +36,52 @@ import static java.util.Arrays.asList;
 
 /**
  * SPARQL proxy endpoint.
+ *
+ * <p>Forwards SPARQL queries to the remote endpoint defined by the {@code endpoint} query parameter of the incoming
+ * request.</p>
  */
-public class Proxy implements Service {
+public class Proxy implements Handler {
 
-	private static final String Path="/proxy";
+	// !!! support hardwired remote endpoint
 
+	private int timeoutConnect=30; // [s]
+	private int timeoutRead=60; // [s]
 
-	private final _Setup setup=tool(_Setup.Factory);
-	private final Index index=tool(Index.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
-
-	private final int timeoutConnect=setup.get("proxy.timeout.connect", 30); // [s]
-	private final int timeoutRead=setup.get("proxy.timeout.read", 60); // [s]
-
-
-	@Override public void load() {
-		index.insert(Path, dispatcher()
-
-				.get(this::handle)
-				.post(this::handle));
+	private final Handler delegate=new Dispatcher()
+			.get(this::process)
+			.post(this::process);
 
 
-		// !!! port metadata
-		//map(
-		//
-		//		entry(RDFS.LABEL, literal("SPARQL Proxy Endpoint"))
-		//
-		//)
+	@Override public Lazy<Response> handle(final Request request) {
+		return delegate.handle(request);
 	}
 
 
-	private void handle(final Request request, final Response response) {
-		try {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			out(response, in(request));
+	private Lazy<Response> process(final Request request) {
+		return consumer -> {
+			try {
 
-		} catch ( final IOException|RuntimeException e ) {
+				consumer.accept(out(request.response(), in(request)));
 
-			trace.warning(this, "failed proxy request", e);
+			} catch ( final IOException|RuntimeException e ) {
 
-			response.status(e instanceof IllegalArgumentException ? Response.BadRequest // !!! review
-							: e instanceof IOException ? Response.BadGateway
-							: Response.InternalServerError)
+				trace.warning(this, "failed proxy request", e);
 
-					.cause(e)
-					.json(error("request-failed", e));
+				consumer.accept(request.response()
 
-		}
+						.status(e instanceof IllegalArgumentException ? Response.BadRequest // !!! review
+								: e instanceof IOException ? Response.BadGateway
+								: Response.InternalServerError)
+
+						.cause(e)
+						.body(JSON.Format, error("request-failed", e)));
+
+			}
+		};
 	}
 
 
@@ -158,14 +157,15 @@ public class Proxy implements Service {
 
 			final String value=connection.getHeaderField(header);
 
-
 			if ( value != null ) { response.header(header, value); }
 
 		}
 
-		return response.output(output -> {
-
-			try (final InputStream in=connect(connection)) {
+		return response.body(Outbound.Format, target -> {
+			try (
+					final OutputStream output=target.output();
+					final InputStream in=connect(connection)
+			) {
 
 				final byte[] buffer=new byte[1024];
 
@@ -175,10 +175,9 @@ public class Proxy implements Service {
 
 				output.flush();
 
-			} catch ( IOException e ) {
+			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-
 		});
 
 	}
