@@ -30,7 +30,7 @@ import java.util.function.Consumer;
  *
  * <p>Handles state/behaviour for HTTP responses.</p>
  */
-public final class Response extends Outbound<Response> implements Lazy<Response> {
+public final class Response extends Message<Response> implements Lazy<Response> {
 
 	public static final int OK=200; // https://tools.ietf.org/html/rfc7231#section-6.3.1
 	public static final int Created=201; // https://tools.ietf.org/html/rfc7231#section-6.3.2

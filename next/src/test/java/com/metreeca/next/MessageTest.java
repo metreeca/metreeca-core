@@ -72,6 +72,18 @@ final class MessageTest {
 	}
 
 
+
+	@Test void testRepresentationCaching() {
+
+		final TestMessage outbound=new TestMessage().text("text");
+
+		assertEquals(
+				outbound.text().orElseThrow(IllegalStateException::new),
+				outbound.text().orElseThrow(IllegalStateException::new)
+		);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final class TestMessage extends Message<TestMessage> {

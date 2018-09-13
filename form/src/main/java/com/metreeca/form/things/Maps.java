@@ -21,6 +21,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
 
 
@@ -30,6 +31,10 @@ public final class Maps {
 
 	public static <K, V> Map<K, V> map() {
 		return emptyMap();
+	}
+
+	public static <K, V> Map<K, V> map(final K key, final V value) {
+		return singletonMap(key, value);
 	}
 
 	@SafeVarargs public static <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {

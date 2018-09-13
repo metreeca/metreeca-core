@@ -25,12 +25,14 @@ import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toList;
 
 
 /**
- * Abstract HTTP message.
+ * HTTP message.
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
  */
@@ -42,6 +44,8 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
+
+	private final Map<Format<?>, Object> bodies=new HashMap<>();
 
 
 	/**
@@ -243,6 +247,116 @@ public abstract class Message<T extends Message<T>> {
 
 		return self();
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves a representation of the body of this message.
+	 *
+	 * @param format the format of the body representation to be retrieved
+	 * @param <V>    the type of the body representation to be retrieved
+	 *
+	 * @return an optional representation of the body of this message, if previously defined with the same
+	 * {@code format}; an empty optional otherwise
+	 *
+	 * @throws NullPointerException if {@code format} is {@code null}
+	 */
+	@SuppressWarnings("unchecked") public <V> Optional<V> body(final Format<V> format) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		return Optional.ofNullable((V)bodies.computeIfAbsent(format, f -> f.get(this).orElse(null)));
+	}
+
+	/**
+	 * Configures the  representation of the body of this message.
+	 *
+	 * @param format the format of the body representation to be configured
+	 * @param value   the body representation of the body to be configured using {@code format}
+	 * @param <V>    the type of the body representation to be configured
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code format} or {@code body} is {@code null}
+	 */
+	public <V> T body(final Format<V> format, final V value) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		bodies.put(format, value);
+
+		format.set(this, value);
+
+		return self();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the textual representation of the body of this message.
+	 *
+	 * @return the optional textual representation of the body of this message, as {@linkplain #body(Format) retrieved}
+	 * using {@link Format#Text} format
+	 */
+	public Optional<String> text() {
+		return body(Format.Text);
+	}
+
+	/**
+	 * Configures the textual representation of the body of this message.
+	 *
+	 * @param text the textual representation of the body of this message
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code text} is {@code null}
+	 */
+	public T text(final String text) {
+
+		if ( text == null ) {
+			throw new NullPointerException("null text");
+		}
+
+		return body(Format.Text, text);
+	}
+
+
+	///**
+	// * Retrieves the binary representation of the body of this message.
+	// *
+	// * @return the optional binary representation of the body of this message, as retrieved using {@link #DataFormat}
+	// */
+	//public Optional<byte[]> data() {
+	//	return body(DataFormat);
+	//}
+	//
+	///**
+	// * Configures the binary representation of the body of this message.
+	// *
+	// * @param data the binary representation of the body of this message
+	// *
+	// * @return this message
+	// *
+	// * @throws NullPointerException if {@code data} is {@code null}
+	// */
+	//public T text(final byte... data) {
+	//
+	//	if ( data == null ) {
+	//		throw new NullPointerException("null data");
+	//	}
+	//
+	//	return body(DataFormat, data);
+	//}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

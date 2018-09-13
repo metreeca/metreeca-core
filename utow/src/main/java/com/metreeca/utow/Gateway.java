@@ -19,6 +19,7 @@ package com.metreeca.utow;
 
 import com.metreeca.form.things.Transputs;
 import com.metreeca.next.*;
+import com.metreeca.next.handlers.Server;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Trace;
 
@@ -34,24 +35,25 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 
-/* !!!
-
+/**
  * Undertow gateway.
  *
- * <p>Provides a gateway between a web application managed by Servlet 3.1 container and linked data resource handlers
- * based on the Metreeca/Link linked data framework:</p>
+ * <p>Provides a gateway between a web application managed by a <a href="http://undertow.io/">Undertow</a> server and
+ * resource handlers based on the Metreeca/Link linked data framework:</p>
  *
  * <ul>
  *
- * <li>initializes and destroys the shared tool {@linkplain _Tray tray} managing platform components required by
+ * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform components required by
  * resource handlers;</li>
  *
  * <li>intercepts HTTP requests and handles them using the {@linkplain Server server} tool provided by the shared tool
  * tray.</li>
  *
  * </ul>
+ *
+ * @deprecated Work in progress
  */
-public final class _Gateway implements HttpHandler {
+@Deprecated public final class Gateway implements HttpHandler {
 
 	public static void run(final int port, final String host, final Function<Tray, Handler> loader) {
 
@@ -67,7 +69,7 @@ public final class _Gateway implements HttpHandler {
 			throw new NullPointerException("null loader");
 		}
 
-		final _Gateway gateway=new _Gateway();
+		final Gateway gateway=new Gateway();
 
 		final Undertow server=Undertow.builder()
 				.addHttpListener(port, host, gateway.start(loader))
@@ -97,7 +99,7 @@ public final class _Gateway implements HttpHandler {
 	}
 
 
-	public _Gateway start(final Function<Tray, Handler> loader) {
+	public Gateway start(final Function<Tray, Handler> loader) {
 
 		if ( loader == null ) {
 			throw new NullPointerException("null loader");
@@ -122,7 +124,7 @@ public final class _Gateway implements HttpHandler {
 	}
 
 
-	public _Gateway stop() {
+	public Gateway stop() {
 
 		if ( handler == null ) {
 			throw new IllegalStateException("inactive gateway");
@@ -162,14 +164,14 @@ public final class _Gateway implements HttpHandler {
 				.path(exchange.getRelativePath()) // canonical form
 
 				.query(exchange.getQueryString())
-				// !!! NPE .parameters(exchange.getQueryParameters())
+		// !!! NPE .parameters(exchange.getQueryParameters())
 		;
 
 		exchange.getRequestHeaders().forEach(header -> request.headers(header.getHeaderName().toString(), header));
 
 		return request
 
-				.body(() -> new Source() {
+				.body(Format.Source, new Source() {
 
 					@Override public Reader reader() throws IllegalStateException {
 						return Transputs.reader(input(), exchange.getRequestCharset());
@@ -193,9 +195,9 @@ public final class _Gateway implements HttpHandler {
 
 			try (final StringWriter writer=new StringWriter(1000)) {
 
-				response.body().accept(new Target() {
+				response.body(Format.Target).ifPresent(consumer -> consumer.accept(new Target() {
 					@Override public Writer writer() { return writer; }
-				});
+				}));
 
 				exchange.getResponseSender().send(writer.toString()); // !!! stream
 

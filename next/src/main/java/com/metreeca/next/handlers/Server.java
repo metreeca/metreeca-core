@@ -15,21 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.utow;
+package com.metreeca.next.handlers;
 
-import static com.metreeca.utow.Gateway.run;
-
-
-public final class Work {
-
-	public static void main(final String... args) {
-		run(6800, "localhost", tray -> tray.get(() -> request -> request.response()
-
-				.status(200)
-				.header("content-type", "text/plain")
-				.text("Ciao babbo! @"+request.base()+" "+request.path())
-
-		));
-	}
-
+/**
+ * @deprecated Work in progress
+ */
+@Deprecated public final class Server {
 }

@@ -58,7 +58,7 @@ import static java.util.Collections.list;
 /**
  * J2EE gateway.
  *
- * <p>Provides a gateway between a web application managed by Servlet 3.1 container and linked data resource handlers
+ * <p>Provides a gateway between a web application managed by Servlet 3.1 container and resource handlers
  * based on the Metreeca/Link linked data framework:</p>
  *
  * <ul>
