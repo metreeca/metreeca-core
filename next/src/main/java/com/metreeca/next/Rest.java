@@ -89,7 +89,7 @@ public final class Rest {
 	 * @param error a machine readable tag for the error condition
 	 * @param cause the underlying cause of the error condition
 	 *
-	 * @return a JSON object describing the error condition ({@code { "error": <error>; "cause": "<cause>" } })
+	 * @return a JSON object describing the error condition ({@code { "error": "<error>", "cause": "<cause>" } })
 	 *
 	 * @throws NullPointerException if either {@code error} or {@code cause} is {@code null}
 	 */
@@ -111,7 +111,7 @@ public final class Rest {
 	 * @param error a machine readable tag for the error condition
 	 * @param cause a human readable description of the underlying cause of the error condition
 	 *
-	 * @return a JSON object describing the error condition ({@code { "error": <error>; "cause": "<cause>" } })
+	 * @return a JSON object describing the error condition ({@code { "error": "<error>", "cause": "<cause>" } })
 	 *
 	 * @throws NullPointerException if either {@code error} or {@code cause} is {@code null}
 	 */
@@ -137,7 +137,7 @@ public final class Rest {
 	 * @param error a machine readable tag for the error condition
 	 * @param cause a structured JSON report describing the underlying cause of the error condition
 	 *
-	 * @return a JSON object describing the error condition ({@code { "error": <error>; "cause": <cause> } })
+	 * @return a JSON object describing the error condition ({@code { "error": "<error>", "cause": <cause> } })
 	 *
 	 * @throws NullPointerException if either {@code error} or {@code cause} is {@code null}
 	 */

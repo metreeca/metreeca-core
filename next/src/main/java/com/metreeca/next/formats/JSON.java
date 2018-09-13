@@ -21,15 +21,11 @@ import com.metreeca.next.Format;
 import com.metreeca.next.Message;
 import com.metreeca.next.Target;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.io.*;
 import java.util.Optional;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.stream.JsonGenerator;
-import javax.json.stream.JsonGeneratorFactory;
 
 
 /**
@@ -48,11 +44,6 @@ public final class JSON implements Format<JsonObject> {
 	 * The default MIME type for JSON message bodies.
 	 */
 	public static final String MIME="application/json";
-
-
-	private static final JsonGeneratorFactory generators=Json.createGeneratorFactory(ImmutableMap.of(
-			JsonGenerator.PRETTY_PRINTING, true
-	));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +81,7 @@ public final class JSON implements Format<JsonObject> {
 				.body(Outbound.Format, target -> {
 					try (final Writer writer=target.writer()) {
 
-						generators.createGenerator(writer).write(value).close();
+						Json.createWriter(writer).write(value);
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
