@@ -44,9 +44,9 @@ import static com.metreeca.form.shapes.Alias.aliases;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.traits;
-import static com.metreeca.form.things._JSON.encode;
-import static com.metreeca.form.things._JSON.field;
-import static com.metreeca.form.things._JSON.object;
+import static com.metreeca.form.things.JSON.encode;
+import static com.metreeca.form.things.JSON.field;
+import static com.metreeca.form.things.JSON.object;
 
 import static java.util.stream.Collectors.toList;
 

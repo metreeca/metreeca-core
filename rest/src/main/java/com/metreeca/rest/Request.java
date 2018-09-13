@@ -255,7 +255,7 @@ public final class Request {
 
 
 	public Object json() throws JsonException {
-		return _JSON.decode(text());
+		return JSON.decode(text());
 	}
 
 
@@ -628,7 +628,7 @@ public final class Request {
 				throw new NullPointerException("null json");
 			}
 
-			return header("Content-Type", "application/json").text(_JSON.encode(json));
+			return header("Content-Type", "application/json").text(JSON.encode(json));
 		}
 
 

@@ -32,8 +32,8 @@ import javax.json.JsonException;
 
 import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
-import static com.metreeca.form.things._JSON.field;
-import static com.metreeca.form.things._JSON.object;
+import static com.metreeca.form.things.JSON.field;
+import static com.metreeca.form.things.JSON.object;
 import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.System.currentTimeMillis;

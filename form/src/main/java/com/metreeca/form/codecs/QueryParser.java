@@ -26,7 +26,7 @@ import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things._JSON;
+import com.metreeca.form.things.JSON;
 
 import org.eclipse.rdf4j.model.Value;
 
@@ -110,9 +110,9 @@ import static java.util.stream.Collectors.toList;
 		return Optional
 				.of(json)
 				.filter(v -> !v.isEmpty())
-				.map(_JSON::decode)
+				.map(JSON::decode)
 				.map(v -> v instanceof Map ? (Map<String, Object>)v : error("query is not a json object"))
-				.orElseGet(_JSON::object);
+				.orElseGet(JSON::object);
 	}
 
 

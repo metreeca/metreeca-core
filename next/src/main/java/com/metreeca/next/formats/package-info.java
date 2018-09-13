@@ -15,22 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.utow;
+/**
+ * Standard message body formats.
+ */
 
-import com.metreeca.next.formats.JSON;
-
-import static com.metreeca.next.Rest.error;
-import static com.metreeca.utow.Gateway.run;
-
-
-public final class Work {
-
-	public static void main(final String... args) {
-		run(6800, "localhost", tray -> tray.get(() -> request -> request.response()
-
-				.status(200).body(JSON.Format, error("ciao", "babbo!"))
-
-		));
-	}
-
-}
+package com.metreeca.next.formats;

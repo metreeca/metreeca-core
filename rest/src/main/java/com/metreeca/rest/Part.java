@@ -18,7 +18,7 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.form.things._JSON;
+import com.metreeca.form.things.JSON;
 
 import java.io.*;
 import java.util.*;
@@ -111,7 +111,7 @@ public final class Part { // !!! factor to Message
 
 
 	public Object json() throws JsonException {
-		return _JSON.decode(text());
+		return JSON.decode(text());
 	}
 
 
@@ -234,7 +234,7 @@ public final class Part { // !!! factor to Message
 				throw new NullPointerException("null json");
 			}
 
-			return header("Content-Type", "application/json").text(_JSON.encode(json));
+			return header("Content-Type", "application/json").text(JSON.encode(json));
 		}
 
 

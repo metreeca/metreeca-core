@@ -21,7 +21,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.JSONAdapter;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
-import com.metreeca.form.things._JSON;
+import com.metreeca.form.things.JSON;
 import com.metreeca.form.things.Transputs;
 
 import org.eclipse.rdf4j.model.*;
@@ -233,7 +233,7 @@ public final class Response {
 			throw new NullPointerException("null json");
 		}
 
-		return header("Content-Type", "application/json;charset=UTF-8").text(_JSON.encode(json));
+		return header("Content-Type", "application/json;charset=UTF-8").text(JSON.encode(json));
 	}
 
 
@@ -438,7 +438,7 @@ public final class Response {
 
 
 		public Object json() {
-			return header("content-type").orElse("").startsWith("application/json") ? _JSON.decode(text()) : null;
+			return header("content-type").orElse("").startsWith("application/json") ? JSON.decode(text()) : null;
 		}
 
 

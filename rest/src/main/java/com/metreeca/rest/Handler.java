@@ -22,8 +22,8 @@ import com.metreeca.form.Form;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static com.metreeca.form.things._JSON.field;
-import static com.metreeca.form.things._JSON.object;
+import static com.metreeca.form.things.JSON.field;
+import static com.metreeca.form.things.JSON.object;
 
 
 /**

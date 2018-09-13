@@ -36,8 +36,9 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
  * JSON codecs.
  *
  * @see "https://javaee.github.io/jsonp/"
+ * @deprecated To be removed
  */
-public final class _JSON { // !!! review/remove
+@Deprecated public final class JSON {
 
 	private static final JsonParserFactory parsers=Json
 			.createParserFactory(null);
@@ -259,6 +260,6 @@ public final class _JSON { // !!! review/remove
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _JSON() {}
+	private JSON() {}
 
 }

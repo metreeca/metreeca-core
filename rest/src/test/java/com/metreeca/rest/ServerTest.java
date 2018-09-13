@@ -20,7 +20,7 @@ package com.metreeca.rest;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.form.things._JSON;
+import com.metreeca.form.things.JSON;
 import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -186,7 +186,7 @@ public class ServerTest {
 				.response(response -> {
 
 					assertEquals("response json rewritten",
-							_JSON.decode(json("{ 'this': '"+external("s")+"', 'p': '"+external("o")+"' }")),
+							JSON.decode(json("{ 'this': '"+external("s")+"', 'p': '"+external("o")+"' }")),
 							response.json());
 
 				});
