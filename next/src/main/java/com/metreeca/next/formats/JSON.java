@@ -44,6 +44,11 @@ public final class JSON implements Format<JsonObject> {
 	 */
 	public static final Format<JsonObject> Format=new JSON();
 
+	/**
+	 * The default MIME type for JSON message bodies.
+	 */
+	public static final String MIME="application/json";
+
 
 	private static final JsonGeneratorFactory generators=Json.createGeneratorFactory(ImmutableMap.of(
 			JsonGenerator.PRETTY_PRINTING, true
@@ -60,15 +65,19 @@ public final class JSON implements Format<JsonObject> {
 	 * {@link Inbound#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<JsonObject> get(final Message<?> message) {
-		return message.body(Inbound.Format).map(source -> {
-			try (final Reader reader=source.reader()) {
+		return message.body(Inbound.Format)
 
-				return Json.createReader(reader).readObject();
+				.filter(source -> message.header("content-type").orElse("").equals(MIME))
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+				.map(source -> {
+					try (final Reader reader=source.reader()) {
+
+						return Json.createReader(reader).readObject();
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 	}
 
 	/**
@@ -76,15 +85,17 @@ public final class JSON implements Format<JsonObject> {
 	 * writer supplied by the accepted {@link Target}.
 	 */
 	@Override public void set(final Message<?> message, final JsonObject value) {
-		message.body(Outbound.Format, target -> {
-			try (final Writer writer=target.writer()) {
+		message.header("content-type", MIME)
 
-				generators.createGenerator(writer).write(value).close();
+				.body(Outbound.Format, target -> {
+					try (final Writer writer=target.writer()) {
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+						generators.createGenerator(writer).write(value).close();
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 	}
 
 }
