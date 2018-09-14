@@ -22,12 +22,10 @@ import com.metreeca.form.things.ValuesTest;
 import com.metreeca.next.Request;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 
-import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -77,8 +75,7 @@ final class GraphsTest {
 	@Test void testGetDefaultGraph() {
 		new Tray()
 
-				.set(Graph.Factory, () -> new Graph("RDF4J Memory Store (Transient)", IsolationLevels.SERIALIZABLE, () ->
-						new SailRepository(new MemoryStore())) {})
+				.set(Graph.Factory, RDF4JMemory::new)
 
 				.run(() -> tool(Graph.Factory).update(connection -> { connection.add(First); }))
 

@@ -109,17 +109,8 @@ public final class Tray {
 				throw new IllegalStateException("circular dependency ["+factory+"]");
 			}
 
-			if ( cached != null ) {
-
-				return cached;
-
-			} else {
-
-				final Tray current=context.get();
-
+			return cached != null ? cached : context(() -> {
 				try {
-
-					context.set(this);
 
 					tools.put(factory, pending); // mark factory as being acquired
 
@@ -135,13 +126,8 @@ public final class Tray {
 
 					throw e;
 
-				} finally {
-
-					context.set(current);
-
 				}
-
-			}
+			});
 
 		}
 	}
@@ -257,15 +243,27 @@ public final class Tray {
 			throw new NullPointerException("null task");
 		}
 
+		return context(() -> {
+
+			task.run();
+
+			return this;
+
+		});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private <V> V context(final Supplier<V> task) {
+
 		final Tray current=context.get();
 
 		try {
 
 			context.set(this);
 
-			task.run();
-
-			return this;
+			return task.get();
 
 		} finally {
 

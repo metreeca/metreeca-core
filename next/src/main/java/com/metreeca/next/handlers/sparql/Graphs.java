@@ -22,9 +22,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.next.*;
-import com.metreeca.next.formats.In;
-import com.metreeca.next.formats.JSON;
-import com.metreeca.next.formats.Out;
+import com.metreeca.next.formats.*;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -156,7 +154,7 @@ public final class Graphs implements Handler {
 
 				client.accept(request.response().status(Response.OK).body(
 						com.metreeca.next.formats.RDF.Format,
-						new com.metreeca.next.formats.RDF.Crate(request.item(), model, GraphsShape))
+						new Crate(request.item(), GraphsShape, model))
 				);
 
 			} else {

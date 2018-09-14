@@ -17,34 +17,17 @@
 
 package com.metreeca.next.formats;
 
-import com.metreeca.form.Shape;
 import com.metreeca.next.Format;
 import com.metreeca.next.Message;
 import com.metreeca.next.Target;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-
-import java.util.Collection;
 import java.util.Optional;
 
 
 /**
  * RDF body format.
  */
-@Deprecated public final class RDF implements Format<RDF.Crate> {
-
-	public static final class Crate {
-
-		public Crate(final IRI focus, final Collection<Statement> model, final Shape shape) {
-
-		}
-
-		public Collection<Statement> model() {
-			return null;
-		}
-	}
-
+@Deprecated public final class RDF implements Format<Crate> {
 
 	/**
 	 * The singleton RDF body format.
