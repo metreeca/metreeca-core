@@ -15,21 +15,20 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.wrappers;
+package com.metreeca.next.wrappers;
 
 
-import com.metreeca.rest.*;
+import com.metreeca.next.*;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import static com.metreeca.form.things.Bindings.bindings;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.time;
-import static com.metreeca.tray._Tray.tool;
+import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -55,15 +54,14 @@ import static com.metreeca.tray._Tray.tool;
  *
  * <tr>
  * <td>this</td>
- * <td>the value of the {@linkplain Response.Reader#focus() response} {@code Location} header or the IRI identifying the
- * {@linkplain Request#focus() request} target resource, if no {@code Location} header is set</td>
+ * <td>the value of the response focus {@linkplain Response#item() item}</td>
  * </tr>
  *
  * <tr>
  * <td>stem</td>
  * <td>the {@linkplain IRI#getNamespace() namespace} of the IRI bound to the {@code this} variable</td>
  * </tr>
-*
+ *
  * <tr>
  * <td>name</td>
  * <td>the local {@linkplain IRI#getLocalName() name} of the IRI bound to the {@code this} variable</td>
@@ -85,16 +83,12 @@ import static com.metreeca.tray._Tray.tool;
  */
 public final class Processor implements Wrapper {
 
-	public static Processor processor() { return new Processor(); }
-
+	private String script="";
 
 	private final Graph graph=tool(Graph.Factory);
 
-	private String script="";
 
-
-	private Processor() {}
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Configures the SPARQL Update script.
@@ -116,45 +110,35 @@ public final class Processor implements Wrapper {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public Handler wrap(final Handler handler) {
-		return (request, response) -> {
-			if ( script.isEmpty() ) { handler.handle(request, response); } else {
-				handler.handle(
+		return request -> script.isEmpty() ? handler.handle(request) : handler.handle(request).map(response -> {
 
-						writer ->
+			if ( response.success() ) {
+				graph.update(connection -> {
 
-								writer.copy(request).done(),
+					final IRI user=response.request().user();
+					final IRI item=response.item();
 
-						reader -> {
-
-							if ( reader.success() ) {
-
-								final IRI user=reader.request().user();
-								final IRI focus=reader.focus();
-
-								try (final RepositoryConnection connection=graph.connect()) {
-									bindings()
+					bindings()
 
 
-											.set("this", focus)
-											.set("stem", iri(focus.getNamespace()))
-											.set("name", literal(focus.getLocalName()))
-											.set("user", user)
-											.set("time", time(true))
+							.set("this", item)
+							.set("stem", iri(item.getNamespace()))
+							.set("name", literal(item.getLocalName()))
+							.set("user", user)
+							.set("time", time(true))
 
-											.bind(connection.prepareUpdate(QueryLanguage.SPARQL, script, request.base()))
+							.bind(connection.prepareUpdate(QueryLanguage.SPARQL, script, request.base()))
 
-											.execute();
-								}
-							}
-
-							response.copy(reader).done();
-
-						}
-
-				);
+							.execute();
+				});
 			}
-		};
+
+			return response;
+
+		});
 	}
 
 }
