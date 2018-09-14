@@ -31,7 +31,7 @@ import com.metreeca.next.Wrapper;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) @ MDN</a>
  * @deprecated Provisional implementation; don't use in production
  */
-@Deprecated public final class CORS implements Wrapper {
+@Deprecated final class CORS implements Wrapper {
 
 	// !!! https://www.html5rocks.com/static/images/cors_server_flowchart.png
 

@@ -20,6 +20,7 @@ package com.metreeca.next.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.next.Request;
+import com.metreeca.next.Response;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.rdf.graphs.RDF4JMemory;
@@ -38,6 +39,7 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.tray.Tray.tool;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import static java.util.Collections.singleton;
@@ -83,14 +85,17 @@ final class GraphsTest {
 
 				.handle(new Request()
 
-						.roles(singleton(Form.root))
+						.roles(Form.root)
 						.method(Request.GET)
 						.base(ValuesTest.Base)
 						.query("default"))
 
-				.accept(response -> assertIsomorphic(
-						First, response.body(com.metreeca.next.formats.RDF.Format).orElseGet(() -> fail("no RDF body")).model())
-				);
+				.accept(response -> {
+
+					assertEquals(Response.OK, response.status());
+					assertIsomorphic(First, response.body(com.metreeca.next.formats.RDF.Format).orElseGet(() -> fail("no RDF body")).model());
+
+				});
 	}
 
 	@Test @Disabled void testGetNamedGraph() {

@@ -28,7 +28,7 @@ import com.metreeca.next.Wrapper;
  *
  * @deprecated To be implemented
  */
-@Deprecated public final class Multipart implements Wrapper {
+@Deprecated final class Multipart implements Wrapper {
 
 	// !!! see https://github.com/DanielN/multipart-handler/tree/master/src/main/java/com/github/danieln/multipart
 	// !!! harden against malformed multipart messages (e.g. mismatched boundary in content-type header and body)

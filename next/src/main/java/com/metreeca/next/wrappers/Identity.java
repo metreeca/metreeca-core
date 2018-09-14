@@ -27,7 +27,7 @@ import com.metreeca.next.Wrapper;
  * <p>Provides a wrapper placeholder whose {@linkplain #wrap(Handler) handler} and {@linkplain #wrap(Wrapper) wrapper}
  * wrap methods return their unchanged argument.</p>
  */
-@Deprecated public final class Identity implements Wrapper {
+@Deprecated final class Identity implements Wrapper {
 
 	@Override public Wrapper wrap(final Wrapper wrapper) { return wrapper; }
 
