@@ -1,7 +1,10 @@
+**Coming soon** / Follow us on [Twitter](https://twitter.com/metreeca)  to learn about the first public relesase.
+
+---
 
 # Metreeca/Link
 
-<p class="warning"><strong>Coming soon</strong> / Follow us on <a href="https://twitter.com/metreeca">Twitter</a> to learn about the first public relesase.</p>
+<p class="warning"><strong>Coming soon</strong> / </p>
 
 Metreeca/Link is a Java framework enabling rapid development of linked data applications.
 
