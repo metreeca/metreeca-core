@@ -15,11 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.wrappers;
+package com.metreeca.next.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.next.Handler;
+import com.metreeca.next.Request;
+import com.metreeca.next.Wrapper;
 
 import java.util.function.Predicate;
 
@@ -83,13 +83,7 @@ public final class Conditional implements Wrapper {
 
 			final Handler wrapped=wrapper.wrap(handler);
 
-			return (request, response) -> {
-				if ( predicate.test(request) ) {
-					wrapped.handle(request, response);
-				} else {
-					handler.handle(request, response);
-				}
-			};
+			return request -> (predicate.test(request) ? wrapped : handler).handle(request);
 
 		};
 	}

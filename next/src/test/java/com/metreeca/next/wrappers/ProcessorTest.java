@@ -17,7 +17,6 @@
 
 package com.metreeca.next.wrappers;
 
-import com.metreeca.form.things.ValuesTest;
 import com.metreeca.next.Handler;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
@@ -51,18 +50,12 @@ final class ProcessorTest {
 						.base(Base)
 						.path("/test"))
 
-				.accept(tray.get(() -> {
-
-					final Graph graph=tool(Graph.Factory);
-
-					return response -> graph.browse(connection -> {
-						assertIsomorphic("repository updated",
-								decode("<test> rdf:value rdf:first, rdf:rest."),
-								export(connection)
-						);
-					});
-
-				}));
+				.accept(response -> tray.run(() -> tool(Graph.Factory).browse(connection -> {
+					assertIsomorphic("repository updated",
+							decode("<test> rdf:value rdf:first, rdf:rest."),
+							export(connection)
+					);
+				})));
 	}
 
 	@Test void testExecuteUpdateScriptOnResponseLocation() {
@@ -77,29 +70,21 @@ final class ProcessorTest {
 
 				.get(() -> new Processor()
 						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-						.wrap((Handler)request -> {
-							return request.response()
-									.status(Response.OK)
-									.header("Location", ValuesTest.Base+"test");
-						}))
+						.wrap((Handler)request -> request.response()
+								.status(Response.OK)
+								.header("Location", Base+"test")))
 
 				.handle(new Request()
 						.method(Request.POST)
-						.base(ValuesTest.Base)
+						.base(Base)
 						.path("/"))
 
-				.accept(tray.get(() -> {
-
-					final Graph graph=tool(Graph.Factory);
-
-					return response -> graph.browse(connection -> {
-						assertIsomorphic("repository updated",
-								decode("<test> rdf:value rdf:first, rdf:rest."),
-								export(connection)
-						);
-					});
-
-				}));
+				.accept(response -> tray.run(() -> tool(Graph.Factory).browse(connection -> {
+					assertIsomorphic("repository updated",
+							decode("<test> rdf:value rdf:first, rdf:rest."),
+							export(connection)
+					);
+				})));
 	}
 
 }
