@@ -17,8 +17,10 @@
 
 package com.metreeca.next.wrappers;
 
+import com.metreeca.next.Handler;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
+import com.metreeca.next.Wrapper;
 import com.metreeca.tray.Tray;
 
 import org.junit.jupiter.api.Test;
@@ -31,9 +33,10 @@ final class ConditionalTest {
 	private static final int HandlerStatus=Response.OK;
 	private static final int WrapperStatus=Response.Accepted;
 
-	private static final com.metreeca.next.Handler Handler=request -> request.response().status(HandlerStatus);
+	private static final Handler Handler=request ->
+			request.response().status(HandlerStatus);
 
-	private static final com.metreeca.next.Wrapper Wrapper=handler -> request ->
+	private static final Wrapper Wrapper=handler -> request ->
 			handler.handle(request).map(response -> response.status(WrapperStatus));
 
 

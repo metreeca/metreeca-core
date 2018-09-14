@@ -32,9 +32,9 @@ import static com.metreeca.tray._Tray.tool;
  * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  * opportunity to handle the request.</p>
  */
-public final class _Router implements Handler {
+public final class Router implements Handler {
 
-	public static _Router router() { return new _Router(); }
+	public static Router router() { return new Router(); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

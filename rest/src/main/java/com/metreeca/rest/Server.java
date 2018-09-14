@@ -19,9 +19,9 @@ package com.metreeca.rest;
 
 
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys._Setup;
 import com.metreeca.tray.sys.Trace;
 import com.metreeca.tray.sys.Trace.Level;
+import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.handlers._Router.router;
+import static com.metreeca.rest.handlers.Router.router;
 import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.String.format;
@@ -190,58 +190,64 @@ public final class Server implements Handler {
 	}
 
 	private Wrapper rewriter() {
-		return handler -> (request, response) -> handler.handle(
+		return new RewriterWrapper();
+	}
 
-				writer -> {
+	private final class RewriterWrapper implements Wrapper {
 
-					// !!! limit input size? e.g. to prevent DoS attacks in cloud
+		@Override public Handler wrap(final Handler handler) {
+			return (request, response) -> handler.handle(
 
-					final Rewriter rewriter=Rewriter.rewriter(request.base(), base);
+					writer -> {
 
-					writer.copy(request)
+						// !!! limit input size? e.g. to prevent DoS attacks in cloud
 
-							.user(rewriter.internal(request.user()))
-							.roles(request.roles().stream().map(rewriter::internal).collect(toSet()))
+						final Rewriter rewriter=Rewriter.rewriter(request.base(), base);
 
-							.base(rewriter.internal(request.base()))
+						writer.copy(request)
 
-							.query(rewriter.internal(request.query()))
+								.user(rewriter.internal(request.user()))
+								.roles(request.roles().stream().map(rewriter::internal).collect(toSet()))
 
-							.parameters(request.parameters().map(h -> new SimpleImmutableEntry<>(h.getKey(),
-									h.getValue().stream().map(rewriter::internal).collect(toList()))))
+								.base(rewriter.internal(request.base()))
 
-							.headers(request.headers().map(h -> new SimpleImmutableEntry<>(h.getKey(),
-									h.getValue().stream().map(rewriter::internal).collect(toList()))))
+								.query(rewriter.internal(request.query()))
 
-							.body(() -> rewriter.internal(request.input()), () -> rewriter.internal(request.reader()));
-				},
+								.parameters(request.parameters().map(h -> new SimpleImmutableEntry<>(h.getKey(),
+										h.getValue().stream().map(rewriter::internal).collect(toList()))))
 
-				reader -> {
+								.headers(request.headers().map(h -> new SimpleImmutableEntry<>(h.getKey(),
+										h.getValue().stream().map(rewriter::internal).collect(toList()))))
 
-					final Rewriter rewriter=Rewriter.rewriter(request.base(), base);
+								.body(() -> rewriter.internal(request.input()), () -> rewriter.internal(request.reader()));
+					},
 
-					response.copy(reader)
+					reader -> {
 
-							.headers(reader.headers().map(h -> new SimpleImmutableEntry<>(h.getKey(),
-									h.getValue().stream().map(rewriter::external).collect(toList()))));
+						final Rewriter rewriter=Rewriter.rewriter(request.base(), base);
 
-					if ( reader.binary() ) {
+						response.copy(reader)
 
-						response.output(output -> reader.output(rewriter.external(output)));
+								.headers(reader.headers().map(h -> new SimpleImmutableEntry<>(h.getKey(),
+										h.getValue().stream().map(rewriter::external).collect(toList()))));
 
-					} else if ( reader.textual() ) {
+						if ( reader.binary() ) {
 
-						response.writer(writer -> reader.writer(rewriter.external(writer)));
+							response.output(output -> reader.output(rewriter.external(output)));
 
-					} else {
+						} else if ( reader.textual() ) {
 
-						response.done();
+							response.writer(writer -> reader.writer(rewriter.external(writer)));
+
+						} else {
+
+							response.done();
+
+						}
 
 					}
 
-				}
-
-		);
+			);
+		}
 	}
-
 }

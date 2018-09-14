@@ -43,8 +43,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
  * Response#success() successful} request processing by the wrapped handler. Standard records are structured according
  * to the following template and may be extended using a custom SPARQL Update {@linkplain #sparql(String) script}.</p>
  *
- * <pre>{@code
- *      @prefix : <app://rest.metreeca.com/terms#>
+ * <pre>{@code      @prefix : <app://rest.metreeca.com/terms#>
  *
  *     _:node a :Trace;
  *          :item <IRI>;                        # target resource

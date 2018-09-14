@@ -174,8 +174,8 @@ public abstract class Message<T extends Message<T>> {
 	 * @return this message
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code value} is {@code null}
-	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
-	 * Message Syntax and Routing - § 3.2.2. Field Order</a>)
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">
+	 * RFC 7230 Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T header(final String name, final String value) {
 
@@ -220,7 +220,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
 	 *                              contains a {@code null} value
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
-	 * Message Syntax and Routing - § 3.2.2. Field Order</a>)
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T headers(final String name, final String... values) {
 		return headers(name, asList(values));
@@ -239,7 +239,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
 	 *                              contains a {@code null} value
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
-	 * Message Syntax and Routing - § 3.2.2. Field Order</a>)
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T headers(final String name, final Collection<String> values) {
 

@@ -108,9 +108,9 @@ import static java.util.Collections.list;
 
 				t.printStackTrace(new PrintWriter(message));
 
-				tray.get(Trace.Factory).error(this, "error during data hub initialization: "+message);
+				tray.get(Trace.Factory).error(this, "error during initialization: "+message);
 
-				context.log("error during data hub initialization", t);
+				context.log("error during initialization", t);
 
 				throw t;
 
