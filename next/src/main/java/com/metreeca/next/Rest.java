@@ -36,20 +36,6 @@ public final class Rest {
 	public static final String Namespace="app://rest.metreeca.com/terms#";
 
 
-	//// Extended LDP Resource Types ///////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI ShapedContainer=iri(Namespace, "ShapedContainer");
-	public static final IRI ShapedResource=iri(Namespace, "ShapedResource");
-
-
-	//// Linked Data Tasks /////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI create=iri(Namespace, "create");
-	public static final IRI relate=iri(Namespace, "relate");
-	public static final IRI update=iri(Namespace, "update");
-	public static final IRI delete=iri(Namespace, "delete");
-
-
 	//// Audit Trail Records ///////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI Trace=iri(Namespace, "Trace"); // marker RDF class

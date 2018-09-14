@@ -69,7 +69,6 @@ final class ProcessorTest {
 
 		final Tray tray=new Tray();
 
-
 		tray
 
 				.run(() -> tool(Graph.Factory).update(connection -> {
