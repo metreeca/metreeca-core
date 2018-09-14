@@ -16,7 +16,7 @@
  */
 
 /**
- * SPARQL endpoint handlers.
+ * Identity and access management handlers.
  */
 
-package com.metreeca.next.handlers.sparql;
+package com.metreeca.next.handlers.iam;

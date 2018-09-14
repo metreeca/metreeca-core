@@ -33,6 +33,7 @@ import static java.lang.String.format;
  * <p>Manages shared tools.</p>
  */
 @SuppressWarnings("unchecked")
+@Deprecated
 public final class _Tray {
 
 	private static final ThreadLocal<_Tray> lookup=new ThreadLocal<>();

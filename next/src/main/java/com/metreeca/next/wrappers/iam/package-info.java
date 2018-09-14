@@ -16,7 +16,7 @@
  */
 
 /**
- * Standard linked data services.
+ * Identity and access management wrappers.
  */
 
-package com.metreeca.rest.services;
+package com.metreeca.next.wrappers.iam;

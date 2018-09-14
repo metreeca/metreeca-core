@@ -15,49 +15,43 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.wrappers;
+package com.metreeca.next.wrappers.iam;
 
-import com.metreeca.form.Form;
-import com.metreeca.rest.*;
+import com.metreeca.next.*;
 import com.metreeca.tray.iam.Roster;
 import com.metreeca.tray.iam.Roster.Permit;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
-
-import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.tray._Tray.tool;
+
+import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.System.currentTimeMillis;
-import static java.util.Collections.singleton;
 
 
 /**
- * Bearer token authenticator (work in progress…).
+ * Bearer token authenticator.
  *
  * <p>Manages bearer token authentication using tokens issued by the shared {@link Roster#Factory roster} tool.</p>
  *
  * @see <a href="https://tools.ietf.org/html/rfc6750">The OAuth 2.0 Authorization Framework: Bearer Token Usage</a>
+ * @deprecated Work in progress
  */
-public final class Bearer implements Wrapper {
+@Deprecated final class Bearer implements Wrapper {
 
 	private static final Pattern BearerPattern=Pattern.compile("\\s*Bearer\\s*(?<token>\\S*)\\s*");
 
 
-	public static Bearer bearer() { return new Bearer(); }
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Roster roster=tool(Roster.Factory);
 
 
-	private Bearer() {}
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return (request, response) -> {
+		return request -> {
 
 			// !!! handle token in form/query parameter (https://tools.ietf.org/html/rfc6750#section-2)
 
@@ -70,21 +64,28 @@ public final class Bearer implements Wrapper {
 
 				if ( permit.valid(currentTimeMillis()) ) {
 
-					handler.wrap(execute(permit.user(), permit.roles()))
-							.handle(request, response);
+					return handler
+
+							.handle(request
+									.user(permit.user())
+									.roles(permit.roles()))
+
+							.map(response -> authenticate(request, response));
 
 				} else {
 
-					response.status(Response.Unauthorized)
-							.header("WWW-Authenticate", authenticate(request, "invalid_token"))
-							.done();
+					return request.response().status(Response.Unauthorized)
+							.header("WWW-Authenticate", authenticate(request, "invalid_token"));
 
 				}
 
 			} else { // no bearer token > fall-through to other authorization schemes
 
-				handler.wrap(execute(Form.none, singleton(Form.none)))
-						.handle(request, response);
+				return handler
+
+						.handle(request)
+
+						.map(response -> authenticate(request, response));
 
 			}
 		};
@@ -93,33 +94,12 @@ public final class Bearer implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Wrapper execute(final IRI user, final Collection<Value> roles) {
-		return handler -> (request, response) -> handler.handle(
+	private Response authenticate(final Request request, final Response response) {
 
-				writer -> writer
-						.copy(request)
-						.user(user)
-						.roles(roles)
-						.done(),
+		// add authorization challenge, unless already provided by nested authorization schemes
 
-				reader -> {
-
-					response.copy(reader);
-
-					final int status=reader.status();
-
-					// add authorization challenge, unless already provided by nested authorization schemes
-
-					if ( status == Response.Unauthorized && reader.headers("WWW-Authenticate").isEmpty() ) {
-						response.header("WWW-Authenticate", authenticate(request));
-					}
-
-					response.done();
-
-				}
-
-		);
-
+		return response.status() == Response.Unauthorized && response.headers("WWW-Authenticate").isEmpty() ?
+				response.header("WWW-Authenticate", authenticate(request)) : response;
 	}
 
 
