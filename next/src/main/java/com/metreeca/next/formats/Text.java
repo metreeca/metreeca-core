@@ -28,12 +28,12 @@ import static com.metreeca.form.things.Transputs.text;
 
 
 /**
- * Textual message body format.
+ * Textual body format.
  */
 public final class Text implements Format<String> {
 
 	/**
-	 * The singleton textual message body format.
+	 * The singleton textual body format.
 	 */
 	public static final Format<String> Format=new Text();
 

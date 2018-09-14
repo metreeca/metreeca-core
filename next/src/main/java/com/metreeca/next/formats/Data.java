@@ -28,12 +28,12 @@ import static com.metreeca.form.things.Transputs.data;
 
 
 /**
- * Binary message body format.
+ * Binary body format.
  */
 public final class Data implements Format<byte[]> {
 
 	/**
-	 * The singleton binary message body format.
+	 * The singleton binary body format.
 	 */
 	public static final Format<byte[]> Format=new Data();
 

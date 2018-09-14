@@ -59,7 +59,7 @@ import static java.lang.Boolean.parseBoolean;
  */
 public class SPARQL implements Handler {
 
-	private int timeout=60; // enpoint operations timeout [s]
+	private int timeout=60; // endpoint operations timeout [s]
 	private boolean publik; // public availability of the endpoint
 
 	private final Graph graph=tool(Graph.Factory);

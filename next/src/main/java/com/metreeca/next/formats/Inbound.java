@@ -22,12 +22,12 @@ import com.metreeca.next.Source;
 
 
 /**
- * Inbound raw message body format.
+ * Inbound raw body format.
  */
 public final class Inbound implements Format<Source> {
 
 	/**
-	 * The singleton inbound raw message body format.
+	 * The singleton inbound raw body format.
 	 */
 	public static final Format<Source> Format=new Inbound();
 

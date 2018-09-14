@@ -82,10 +82,9 @@ public final class Tray {
 	 * <p>The new tool is cached so that further calls for the same factory are idempotent.</p>
 	 *
 	 * <p>During object construction, nested shared tools dependencies may be retrieved from this tool tray through
-	 * the static {@linkplain  #tool(Supplier) service locator} method of the Tray class.</p>
-	 *
-	 * <p>The context tray used by the service locator method is managed through a {@link ThreadLocal} variable,
-	 * so it won't be available to object constructors executed on a different thread.</p>
+	 * the static {@linkplain  #tool(Supplier) service locator} method of the Tray class. The context tray used by the
+	 * service locator method is managed through a {@link ThreadLocal} variable, so it won't be available to object
+	 * constructors executed on a different thread.</p>
 	 *
 	 * @param factory the factory responsible for creating the required tool; must return a non-null and thread-safe
 	 *                object
@@ -233,6 +232,47 @@ public final class Tray {
 
 			}
 		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Executes a task using shared tools managed by this tray.
+	 *
+	 * <p>During task execution, shared tools may be retrieved from this tool tray through
+	 * the static {@linkplain  #tool(Supplier) service locator} method of the Tray class. The context tray used by the
+	 * service locator method is managed through a {@link ThreadLocal} variable, so it won't be available to methods
+	 * executed on a different thread.</p>
+	 *
+	 * @param task the task to be executed
+	 *
+	 * @return this tool tray
+	 *
+	 * @throws NullPointerException if {@code task} is {@code null}
+	 */
+	public Tray run(final Runnable task) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		final Tray current=context.get();
+
+		try {
+
+			context.set(this);
+
+			task.run();
+
+			return this;
+
+		} finally {
+
+			context.set(current);
+
+		}
+
 	}
 
 }

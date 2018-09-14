@@ -33,7 +33,7 @@
 	<version>0.0-SNAPSHOT</version>
 
 	<name>Metreeca REST API Framework</name>
-	<description>A concise REST API framework for linked data.</description>
+	<description>A concise REST framework for linked data APIs.</description>
 
 	<dependencies>
 
@@ -41,6 +41,16 @@
 			<groupId>com.metreeca</groupId>
 			<artifactId>tray</artifactId>
 			<version>0.0-SNAPSHOT</version>
+		</dependency>
+
+		<!-- testing -->
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>form</artifactId>
+			<version>0.0-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

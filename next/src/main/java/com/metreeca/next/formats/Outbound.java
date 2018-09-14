@@ -24,12 +24,12 @@ import java.util.function.Consumer;
 
 
 /**
- * Outbound raw message body format.
+ * Outbound raw body format.
  */
 public final class Outbound implements Format<Consumer<Target>> {
 
 	/**
-	 * The singleton outbound raw message body format.
+	 * The singleton outbound raw body format.
 	 */
 	public static final Format<Consumer<Target>> Format=new Outbound();
 

@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.rdf;
 
-import com.metreeca.tray.rdf.graphs.*;
+import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.IsolationLevel;
@@ -28,10 +28,9 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
 
 import java.io.File;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.metreeca.tray._Tray.tool;
 
 
 /**
@@ -39,39 +38,7 @@ import static com.metreeca.tray._Tray.tool;
  */
 public abstract class Graph implements AutoCloseable {
 
-	public static final Supplier<Graph> Factory=() -> {
-
-		final _Setup setup=tool(_Setup.Factory);
-		final String type=setup.get("graph", "memory");
-
-		switch ( type ) {
-
-			case "memory":
-
-				return RDF4JMemory.Factory.get();
-
-			case "native":
-
-				return RDF4JNative.Factory.get();
-
-			case "remote":
-
-				return RDF4JRemote.Factory.get();
-
-			case "sparql":
-
-				return SPARQL.Factory.get();
-
-			case "virtuoso":
-
-				return Virtuoso.Factory.get();
-
-			default:
-
-				throw new UnsupportedOperationException("unknown graph type ["+type+"]");
-
-		}
-	};
+	public static final Supplier<Graph> Factory=RDF4JMemory.Factory;
 
 
 	private static final ThreadLocal<RepositoryConnection> connection=new ThreadLocal<>();
@@ -183,6 +150,22 @@ public abstract class Graph implements AutoCloseable {
 		}
 
 		return exec(browser);
+	}
+
+
+	public Graph update(final Consumer<RepositoryConnection> updater) {
+
+		if ( updater == null ) {
+			throw new NullPointerException("null updater");
+		}
+
+		return update(connection -> {
+
+			updater.accept(connection);
+
+			return this;
+
+		});
 	}
 
 	public <R> R update(final Function<RepositoryConnection, R> updater) {

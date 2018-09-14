@@ -19,8 +19,8 @@ package com.metreeca.rest.services;
 
 import com.metreeca.rest.Service;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys._Setup;
 import com.metreeca.tray.sys.Trace;
+import com.metreeca.tray.sys._Setup;
 
 import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.FileSystemException;
@@ -44,6 +44,20 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
  * RDF spool service.
  */
 public final class Spool implements Service {
+
+
+	// <dependency> <!-- Apache Commons VFS / http://commons.apache.org/proper/commons-vfs/ / required by Spool service -->
+	// 	<groupId>org.apache.commons</groupId>
+	// 	<artifactId>commons-vfs2</artifactId>
+	// 	<version>2.2</version>
+	// </dependency>
+	//
+	// <dependency> <!-- required to activate tar/bz2 in Apache Commons VFS -->
+	// 	<groupId>org.apache.commons</groupId>
+	// 	<artifactId>commons-compress</artifactId>
+	// 	<version>1.14</version>
+	// </dependency>
+
 
 	// !!! default format
 	// !!! default context
@@ -184,7 +198,7 @@ public final class Spool implements Service {
 
 				try (
 						final FileContent content=file.getContent();
-				     final InputStream input=content.getInputStream()
+						final InputStream input=content.getInputStream()
 				) {
 
 					final RDFParserRegistry registry=RDFParserRegistry.getInstance();

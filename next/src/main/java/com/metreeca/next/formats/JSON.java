@@ -29,14 +29,14 @@ import javax.json.JsonObject;
 
 
 /**
- * JSON message body format.
+ * JSON body format.
  *
  * @see "https://javaee.github.io/jsonp/"
  */
 public final class JSON implements Format<JsonObject> {
 
 	/**
-	 * The singleton JSON message body format.
+	 * The singleton JSON body format.
 	 */
 	public static final Format<JsonObject> Format=new JSON();
 

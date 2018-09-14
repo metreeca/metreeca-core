@@ -16,7 +16,7 @@
  */
 
 /**
- * Standard message body formats.
+ * Standard body formats.
  */
 
 package com.metreeca.next.formats;
