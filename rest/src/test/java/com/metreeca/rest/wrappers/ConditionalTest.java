@@ -41,7 +41,7 @@ public final class ConditionalTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testDelegateHandlerUnconditonally() {
+	@Test public void testDelegateHandlerUnconditionally() {
 		testbed()
 
 				.handler(() -> new Conditional()

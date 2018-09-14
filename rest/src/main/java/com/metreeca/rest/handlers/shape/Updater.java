@@ -33,7 +33,7 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.wrappers.Transactor.transactor;
+import static com.metreeca.rest.wrappers._Transactor.transactor;
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.task;
 import static com.metreeca.form.Shape.view;

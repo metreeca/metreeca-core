@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 
 import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.wrappers.Transactor.transactor;
+import static com.metreeca.rest.wrappers._Transactor.transactor;
 import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.sparql.SPARQLEngine.create;
 import static com.metreeca.form.things.Values.iri;

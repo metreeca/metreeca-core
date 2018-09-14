@@ -34,19 +34,19 @@ import static com.metreeca.form.sparql.SPARQLEngine.transactional;
  * <p>Executes the wrapped handler inside a SPARQL transaction on the connection provided by the shared {@linkplain
  * Graph#Factory graph} tool.</p>
  */
-public final class Transactor implements Wrapper {
+public final class _Transactor implements Wrapper {
 
-	public static Transactor transactor(final RepositoryConnection connection) {
+	public static _Transactor transactor(final RepositoryConnection connection) {
 		return transactor(connection, false);
 	}
 
-	public static Transactor transactor(final RepositoryConnection connection, final boolean conditional) {
+	public static _Transactor transactor(final RepositoryConnection connection, final boolean conditional) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");
 		}
 
-		return new Transactor(connection, conditional);
+		return new _Transactor(connection, conditional);
 	}
 
 
@@ -55,7 +55,7 @@ public final class Transactor implements Wrapper {
 	private final boolean conditional; // !!! review/remove
 
 
-	private Transactor(final RepositoryConnection connection, final boolean conditional) {
+	private _Transactor(final RepositoryConnection connection, final boolean conditional) {
 		this.connection=connection;
 		this.conditional=conditional;
 	}
