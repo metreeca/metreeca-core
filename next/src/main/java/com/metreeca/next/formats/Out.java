@@ -15,22 +15,27 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.wrappers;
+package com.metreeca.next.formats;
 
-import com.metreeca.next.Handler;
-import com.metreeca.next.Wrapper;
+import com.metreeca.next.Format;
+import com.metreeca.next.Target;
+
+import java.util.function.Consumer;
 
 
 /**
- * Identity wrapper.
- *
- * <p>Provides a wrapper placeholder whose {@linkplain #wrap(Handler) handler} and {@linkplain #wrap(Wrapper) wrapper}
- * wrap methods return their unchanged argument.</p>
+ * Outbound raw body format.
  */
-public final class _Identity implements Wrapper {
+public final class Out implements Format<Consumer<Target>> {
 
-	@Override public Wrapper wrap(final Wrapper wrapper) { return wrapper; }
+	/**
+	 * The singleton outbound raw body format.
+	 */
+	public static final Format<Consumer<Target>> Format=new Out();
 
-	@Override public Handler wrap(final Handler handler) { return handler; }
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Out() {} // singleton
 
 }

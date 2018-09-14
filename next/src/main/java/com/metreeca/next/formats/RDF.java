@@ -58,7 +58,7 @@ import java.util.Optional;
 
 
 	/**
-	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link Inbound#Format}
+	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link In#Format}
 	 * representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<Crate> get(final Message<?> message) {
@@ -66,7 +66,7 @@ import java.util.Optional;
 	}
 
 	/**
-	 * Configures the {@link Outbound#Format} representation of {@code message} to write the RDF {@code value} to the
+	 * Configures the {@link Out#Format} representation of {@code message} to write the RDF {@code value} to the
 	 * accepted {@link Target}.
 	 */
 	@Override public void set(final Message<?> message, final Crate value) {

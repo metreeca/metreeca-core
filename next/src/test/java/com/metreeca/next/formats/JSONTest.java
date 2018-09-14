@@ -45,7 +45,7 @@ final class JSONTest {
 
 	@Test void testRetrieveJSON() {
 
-		final Request request=new Request().header("content-type", JSON.MIME).body(Inbound.Format, new Source() {
+		final Request request=new Request().header("content-type", JSON.MIME).body(In.Format, new Source() {
 			@Override public Reader reader() { return new StringReader(TestJSON.toString()); }
 		});
 
@@ -54,7 +54,7 @@ final class JSONTest {
 
 	@Test void testRetrieveJSONChecksContentType() {
 
-		final Request request=new Request().body(Inbound.Format, new Source() {
+		final Request request=new Request().body(In.Format, new Source() {
 			@Override public Reader reader() { return new StringReader(TestJSON.toString()); }
 		});
 
@@ -65,7 +65,7 @@ final class JSONTest {
 
 		final Request request=new Request().body(JSON.Format, TestJSON);
 
-		assertEquals(TestJSON, request.body(Outbound.Format)
+		assertEquals(TestJSON, request.body(Out.Format)
 
 				.map(consumer -> {
 					try (final StringWriter writer=new StringWriter()) {

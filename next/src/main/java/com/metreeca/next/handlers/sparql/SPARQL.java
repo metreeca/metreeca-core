@@ -21,7 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.next.*;
 import com.metreeca.next.formats.JSON;
-import com.metreeca.next.formats.Outbound;
+import com.metreeca.next.formats.Out;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
 
@@ -139,7 +139,7 @@ public class SPARQL implements Handler {
 
 				return request.response().status(Response.OK)
 						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-						.body(Outbound.Format, target -> {
+						.body(Out.Format, target -> {
 							try (final OutputStream output=target.output()) {
 
 								factory.getWriter(output).handleBoolean(result);
@@ -160,7 +160,7 @@ public class SPARQL implements Handler {
 
 				return request.response().status(Response.OK)
 						.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-						.body(Outbound.Format, target -> {
+						.body(Out.Format, target -> {
 							try (final OutputStream output=target.output()) {
 
 								final TupleQueryResultWriter writer=factory.getWriter(output);
@@ -190,7 +190,7 @@ public class SPARQL implements Handler {
 
 				return request.response().status(Response.OK)
 						.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-						.body(Outbound.Format, target -> {
+						.body(Out.Format, target -> {
 							try (final OutputStream output=target.output()) {
 
 								final RDFWriter writer=factory.getWriter(output);
@@ -236,7 +236,7 @@ public class SPARQL implements Handler {
 
 				return request.response().status(Response.OK)
 						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-						.body(Outbound.Format, target -> {
+						.body(Out.Format, target -> {
 							try (final OutputStream output=target.output()) {
 
 								factory.getWriter(output).handleBoolean(true);

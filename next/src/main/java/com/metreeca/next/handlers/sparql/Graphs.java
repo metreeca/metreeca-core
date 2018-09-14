@@ -22,9 +22,9 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.next.*;
-import com.metreeca.next.formats.Inbound;
+import com.metreeca.next.formats.In;
 import com.metreeca.next.formats.JSON;
-import com.metreeca.next.formats.Outbound;
+import com.metreeca.next.formats.Out;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -176,7 +176,7 @@ public final class Graphs implements Handler {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(Outbound.Format, target1 -> {
+							.body(Out.Format, target1 -> {
 								try (final Writer writer=target1.writer()) {
 									connection.export(factory.getWriter(writer), context);
 								} catch ( final IOException e ) {
@@ -219,7 +219,7 @@ public final class Graphs implements Handler {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
-				final Source source=request.body(Inbound.Format)
+				final Source source=request.body(In.Format)
 						.orElseThrow(() -> new IllegalStateException("missing raw body"));
 
 				try (
@@ -343,7 +343,7 @@ public final class Graphs implements Handler {
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
-				final Source source=request.body(Inbound.Format)
+				final Source source=request.body(In.Format)
 						.orElseThrow(() -> new IllegalStateException("missing raw body"));
 
 				try (

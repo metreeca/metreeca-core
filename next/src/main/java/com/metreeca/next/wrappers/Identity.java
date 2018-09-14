@@ -15,25 +15,22 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.formats;
+package com.metreeca.next.wrappers;
 
-import com.metreeca.next.Format;
-import com.metreeca.next.Source;
+import com.metreeca.next.Handler;
+import com.metreeca.next.Wrapper;
 
 
 /**
- * Inbound raw body format.
+ * Identity wrapper.
+ *
+ * <p>Provides a wrapper placeholder whose {@linkplain #wrap(Handler) handler} and {@linkplain #wrap(Wrapper) wrapper}
+ * wrap methods return their unchanged argument.</p>
  */
-public final class Inbound implements Format<Source> {
+@Deprecated public final class Identity implements Wrapper {
 
-	/**
-	 * The singleton inbound raw body format.
-	 */
-	public static final Format<Source> Format=new Inbound();
+	@Override public Wrapper wrap(final Wrapper wrapper) { return wrapper; }
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Inbound() {} // singleton
+	@Override public Handler wrap(final Handler handler) { return handler; }
 
 }

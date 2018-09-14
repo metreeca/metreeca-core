@@ -45,10 +45,10 @@ public final class Text implements Format<String> {
 
 	/**
 	 * @return the optional textual body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link Inbound#Format} representation, if present; an empty optional, otherwise
+	 * {@link In#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<String> get(final Message<?> message) {
-		return message.body(Inbound.Format).map(source -> {
+		return message.body(In.Format).map(source -> {
 			try (final Reader reader=source.reader()) {
 
 				return text(reader);
@@ -60,11 +60,11 @@ public final class Text implements Format<String> {
 	}
 
 	/**
-	 * Configures the {@link Outbound#Format} representation of {@code message} to write the textual {@code value} to
+	 * Configures the {@link Out#Format} representation of {@code message} to write the textual {@code value} to
 	 * the writer supplied by the accepted {@link Target}.
 	 */
 	@Override public void set(final Message<?> message, final String value) {
-		message.body(Outbound.Format, target -> {
+		message.body(Out.Format, target -> {
 			try (final Writer writer=target.writer()) {
 
 				writer.write(value);

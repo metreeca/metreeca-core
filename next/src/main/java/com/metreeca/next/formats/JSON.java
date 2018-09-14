@@ -53,10 +53,10 @@ public final class JSON implements Format<JsonObject> {
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link Inbound#Format} representation, if present; an empty optional, otherwise
+	 * {@link In#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<JsonObject> get(final Message<?> message) {
-		return message.body(Inbound.Format)
+		return message.body(In.Format)
 
 				.filter(source -> message.header("content-type").orElse("").equals(MIME))
 
@@ -72,13 +72,13 @@ public final class JSON implements Format<JsonObject> {
 	}
 
 	/**
-	 * Configures the {@link Outbound#Format} representation of {@code message} to write the JSON {@code value} to the
+	 * Configures the {@link Out#Format} representation of {@code message} to write the JSON {@code value} to the
 	 * writer supplied by the accepted {@link Target}.
 	 */
 	@Override public void set(final Message<?> message, final JsonObject value) {
 		message.header("content-type", MIME)
 
-				.body(Outbound.Format, target -> {
+				.body(Out.Format, target -> {
 					try (final Writer writer=target.writer()) {
 
 						Json.createWriter(writer).write(value);

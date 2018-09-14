@@ -18,24 +18,22 @@
 package com.metreeca.next.formats;
 
 import com.metreeca.next.Format;
-import com.metreeca.next.Target;
-
-import java.util.function.Consumer;
+import com.metreeca.next.Source;
 
 
 /**
- * Outbound raw body format.
+ * Inbound raw body format.
  */
-public final class Outbound implements Format<Consumer<Target>> {
+public final class In implements Format<Source> {
 
 	/**
-	 * The singleton outbound raw body format.
+	 * The singleton inbound raw body format.
 	 */
-	public static final Format<Consumer<Target>> Format=new Outbound();
+	public static final Format<Source> Format=new In();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Outbound() {} // singleton
+	private In() {} // singleton
 
 }

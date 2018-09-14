@@ -45,10 +45,10 @@ public final class Data implements Format<byte[]> {
 
 	/**
 	 * @return the optional binary body representation of {@code message}, as retrieved from the input stream supplied
-	 * by its {@link Inbound#Format} representation, if present; an empty optional, otherwise
+	 * by its {@link In#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<byte[]> get(final Message<?> message) {
-		return message.body(Inbound.Format).map(source -> {
+		return message.body(In.Format).map(source -> {
 			try (final InputStream input=source.input()) {
 
 				return data(input);
@@ -60,11 +60,11 @@ public final class Data implements Format<byte[]> {
 	}
 
 	/**
-	 * Configures the {@link Outbound#Format} representation of {@code message} to write the binary {@code value} to the
+	 * Configures the {@link Out#Format} representation of {@code message} to write the binary {@code value} to the
 	 * output stream supplied by the accepted {@link Target}.
 	 */
 	@Override public void set(final Message<?> message, final byte... value) {
-		message.body(Outbound.Format, target -> {
+		message.body(Out.Format, target -> {
 			try (final OutputStream output=target.output()) {
 
 				output.write(value);
