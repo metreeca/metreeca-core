@@ -19,7 +19,7 @@ package com.metreeca.next.handlers.sparql;
 
 import com.metreeca.next.*;
 import com.metreeca.next.formats.JSON;
-import com.metreeca.next.formats.Out;
+import com.metreeca.next.formats._Output;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.sys.Trace;
 
@@ -161,11 +161,8 @@ public class Proxy implements Handler {
 
 		}
 
-		return response.body(Out.Format, target -> {
-			try (
-					final OutputStream output=target.output();
-					final InputStream in=connect(connection)
-			) {
+		return response.body(_Output.Format, output -> {
+			try (final InputStream in=connect(connection)) {
 
 				final byte[] buffer=new byte[1024];
 

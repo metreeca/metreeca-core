@@ -17,9 +17,9 @@
 
 package com.metreeca.next.wrappers.iam;
 
+import com.metreeca.form.things.Transputs;
 import com.metreeca.next.*;
-import com.metreeca.next.formats.Out;
-import com.metreeca.next.formats.Text;
+import com.metreeca.next.formats.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.iam.Roster;
 import com.metreeca.tray.iam.RosterTest;
@@ -57,7 +57,8 @@ final class BearerTest {
 				.get(() -> bearer(handler(Response.OK)))
 
 				.handle(new Request()
-						.method(Request.GET))
+						.method(Request.GET)
+						.body(_Reader.Format, Transputs::reader))
 
 				.accept(response -> {
 
@@ -127,7 +128,8 @@ final class BearerTest {
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status(), "success reported");
-					assertFalse(response.body(Out.Format).isPresent(), "empty body");
+					assertFalse(response.body(_Output.Format).isPresent(), "no binary body");
+					assertFalse(response.body(_Writer.Format).isPresent(), "no textual body");
 
 					assertFalse(response
 									.header("WWW-Authenticate")
@@ -153,8 +155,8 @@ final class BearerTest {
 					assertEquals(Response.Unauthorized, reader.status(), "error reported");
 
 					assertTrue(reader
-							.header("WWW-Authenticate").orElse("")
-							.matches("Bearer realm=\".*\", error=\"invalid_token\""),
+									.header("WWW-Authenticate").orElse("")
+									.matches("Bearer realm=\".*\", error=\"invalid_token\""),
 							"challenge included with error");
 
 				});
@@ -176,8 +178,8 @@ final class BearerTest {
 					assertEquals(Response.Forbidden, response.status(), "error reported");
 
 					assertFalse(response
-							.header("WWW-Authenticate")
-							.isPresent(),
+									.header("WWW-Authenticate")
+									.isPresent(),
 							"challenge not included");
 
 				});
@@ -199,8 +201,8 @@ final class BearerTest {
 					assertEquals(Response.Unauthorized, reader.status(), "error reported");
 
 					assertTrue(reader
-							.header("WWW-Authenticate").orElse("")
-							.matches("Bearer realm=\".*\""),
+									.header("WWW-Authenticate").orElse("")
+									.matches("Bearer realm=\".*\""),
 							"challenge included without error");
 
 				});

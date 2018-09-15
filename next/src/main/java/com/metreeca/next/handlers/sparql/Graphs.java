@@ -20,11 +20,12 @@ package com.metreeca.next.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.Values;
 import com.metreeca.next.*;
+import com.metreeca.next._work.Crate;
 import com.metreeca.next.formats.*;
 import com.metreeca.next.handlers.Dispatcher;
-import com.metreeca.next._work.Crate;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -42,6 +43,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.metreeca.form.Shape.only;
 import static com.metreeca.form.shapes.And.and;
@@ -175,14 +177,7 @@ public final class Graphs implements Handler {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(Out.Format, target1 -> {
-								try (final Writer writer=target1.writer()) {
-									connection.export(factory.getWriter(writer), context);
-								} catch ( final IOException e ) {
-									throw new UncheckedIOException(e);
-								}
-							}));
-
+							.body(_Writer.Format, writer -> connection.export(factory.getWriter(writer), context)));
 				}
 			}
 		};
@@ -218,12 +213,11 @@ public final class Graphs implements Handler {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
-				final Source source=request.body(In.Format)
-						.orElseThrow(() -> new IllegalStateException("missing raw body"));
-
 				try (
 						final RepositoryConnection connection=graph.connect();
-						final InputStream input=source.input();
+						final InputStream input=request.body(_Input.Format)
+								.orElseThrow(() -> new IllegalStateException("missing raw body"))
+								.get();
 				) {
 
 					final boolean exists=exists(connection, context);
@@ -342,47 +336,43 @@ public final class Graphs implements Handler {
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
-				final Source source=request.body(In.Format)
-						.orElseThrow(() -> new IllegalStateException("missing raw body"));
+				graph.update(connection -> {
+					try (final InputStream input=request.body(_Input.Format).map(Supplier::get).orElseGet(Transputs::input)) {
 
-				try (
-						final RepositoryConnection connection=graph.connect();
-						final InputStream input=source.input()
-				) {
+						final boolean exists=exists(connection, context);
 
-					final boolean exists=exists(connection, context);
+						connection.add(input, request.base(), factory.getRDFFormat(), context);
 
-					connection.add(input, request.base(), factory.getRDFFormat(), context);
+						client.accept(request.response().status(exists ? Response.NoContent : Response.Created));
 
-					client.accept(request.response().status(exists ? Response.NoContent : Response.Created));
+					} catch ( final IOException e ) {
 
-				} catch ( final IOException e ) {
+						trace.warning(this, "unable to read RDF payload", e);
 
-					trace.warning(this, "unable to read RDF payload", e);
+						client.accept(request.response().status(Response.InternalServerError).body(JSON.Format, error(
+								"payload-unreadable",
+								"I/O while reading RDF payload: see server logs for more detail"
+						)));
 
-					client.accept(request.response().status(Response.InternalServerError).body(JSON.Format, error(
-							"payload-unreadable",
-							"I/O while reading RDF payload: see server logs for more detail"
-					)));
+					} catch ( final RDFParseException e ) {
 
-				} catch ( final RDFParseException e ) {
+						trace.warning(this, "malformed RDF payload", e);
 
-					trace.warning(this, "malformed RDF payload", e);
+						client.accept(request.response().status(Response.BadRequest).body(JSON.Format, error(
+								"payload-malformed",
+								"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
+						)));
 
-					client.accept(request.response().status(Response.BadRequest).body(JSON.Format, error(
-							"payload-malformed",
-							"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
-					)));
+					} catch ( final RepositoryException e ) {
 
-				} catch ( final RepositoryException e ) {
+						trace.warning(this, "unable to update graph "+context, e);
 
-					trace.warning(this, "unable to update graph "+context, e);
+						client.accept(request.response().status(Response.InternalServerError).body(JSON.Format, error(
+								"update-aborted", "unable to update graph: see server logs for more detail"
+						)));
 
-					client.accept(request.response().status(Response.InternalServerError).body(JSON.Format, error(
-							"update-aborted", "unable to update graph: see server logs for more detail"
-					)));
-
-				}
+					}
+				});
 
 			}
 

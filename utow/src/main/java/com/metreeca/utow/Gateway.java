@@ -17,10 +17,10 @@
 
 package com.metreeca.utow;
 
-import com.metreeca.form.things.Transputs;
 import com.metreeca.next.*;
-import com.metreeca.next.formats.In;
-import com.metreeca.next.formats.Out;
+import com.metreeca.next.formats._Input;
+import com.metreeca.next.formats._Reader;
+import com.metreeca.next.formats._Writer;
 import com.metreeca.next.handlers.Server;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Trace;
@@ -35,6 +35,8 @@ import io.undertow.util.HttpString;
 import java.io.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static com.metreeca.form.things.Transputs.reader;
 
 
 /**
@@ -174,17 +176,9 @@ import java.util.function.Function;
 						request.headers(header.getHeaderName().toString(), header)
 				))
 
-				.body(In.Format, new Source() {
+				.body(_Input.Format, exchange::getInputStream)
 
-					@Override public Reader reader() throws IllegalStateException {
-						return Transputs.reader(input(), exchange.getRequestCharset());
-					}
-
-					@Override public InputStream input() throws IllegalStateException {
-						return exchange.getInputStream();
-					}
-
-				});
+				.body(_Reader.Format, () -> reader(exchange.getInputStream(), exchange.getRequestCharset()));
 	}
 
 	private Consumer<Response> response(final HttpServerExchange exchange) {
@@ -198,9 +192,7 @@ import java.util.function.Function;
 
 			try (final StringWriter writer=new StringWriter(1000)) {
 
-				response.body(Out.Format).ifPresent(consumer -> consumer.accept(new Target() {
-					@Override public Writer writer() { return writer; }
-				}));
+				response.body(_Writer.Format).ifPresent(consumer -> consumer.accept(writer));
 
 				exchange.getResponseSender().send(writer.toString()); // !!! stream
 

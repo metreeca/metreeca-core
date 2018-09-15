@@ -21,7 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.next.*;
 import com.metreeca.next.formats.JSON;
-import com.metreeca.next.formats.Out;
+import com.metreeca.next.formats._Output;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
 
@@ -32,9 +32,6 @@ import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -139,15 +136,7 @@ import static java.lang.Boolean.parseBoolean;
 
 				return request.response().status(Response.OK)
 						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-						.body(Out.Format, target -> {
-							try (final OutputStream output=target.output()) {
-
-								factory.getWriter(output).handleBoolean(result);
-
-							} catch ( final IOException e ) {
-								throw new UncheckedIOException(e);
-							}
-						});
+						.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(result));
 
 			} else if ( operation instanceof TupleQuery ) {
 
@@ -160,8 +149,8 @@ import static java.lang.Boolean.parseBoolean;
 
 				return request.response().status(Response.OK)
 						.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-						.body(Out.Format, target -> {
-							try (final OutputStream output=target.output()) {
+						.body(_Output.Format, output -> {
+							try  {
 
 								final TupleQueryResultWriter writer=factory.getWriter(output);
 
@@ -172,8 +161,6 @@ import static java.lang.Boolean.parseBoolean;
 
 								writer.endQueryResult();
 
-							} catch ( final IOException e ) {
-								throw new UncheckedIOException(e);
 							} finally {
 								result.close();
 							}
@@ -190,28 +177,24 @@ import static java.lang.Boolean.parseBoolean;
 
 				return request.response().status(Response.OK)
 						.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-						.body(Out.Format, target -> {
-							try (final OutputStream output=target.output()) {
+						.body(_Output.Format, output -> {
 
-								final RDFWriter writer=factory.getWriter(output);
+							final RDFWriter writer=factory.getWriter(output);
 
-								writer.startRDF();
+							writer.startRDF();
 
-								for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
-									writer.handleNamespace(entry.getKey(), entry.getValue());
-								}
-
-								try {
-									while ( result.hasNext() ) { writer.handleStatement(result.next());}
-								} finally {
-									result.close();
-								}
-
-								writer.endRDF();
-
-							} catch ( final IOException e ) {
-								throw new UncheckedIOException(e);
+							for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
+								writer.handleNamespace(entry.getKey(), entry.getValue());
 							}
+
+							try {
+								while ( result.hasNext() ) { writer.handleStatement(result.next());}
+							} finally {
+								result.close();
+							}
+
+							writer.endRDF();
+
 						});
 
 			} else if ( operation instanceof Update ) {
@@ -236,15 +219,7 @@ import static java.lang.Boolean.parseBoolean;
 
 				return request.response().status(Response.OK)
 						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-						.body(Out.Format, target -> {
-							try (final OutputStream output=target.output()) {
-
-								factory.getWriter(output).handleBoolean(true);
-
-							} catch ( final IOException e ) {
-								throw new UncheckedIOException(e);
-							}
-						});
+						.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(true));
 
 			} else {
 

@@ -18,8 +18,6 @@
 package com.metreeca.next.formats;
 
 import com.metreeca.next.Request;
-import com.metreeca.next.Source;
-import com.metreeca.next.Target;
 
 import org.junit.jupiter.api.Test;
 
@@ -45,18 +43,17 @@ final class JSONTest {
 
 	@Test void testRetrieveJSON() {
 
-		final Request request=new Request().header("content-type", JSON.MIME).body(In.Format, new Source() {
-			@Override public _Reader reader() { return new StringReader(TestJSON.toString()); }
-		});
+		final Request request=new Request()
+				.header("content-type", JSON.MIME)
+				.body(_Reader.Format, () -> new StringReader(TestJSON.toString()));
 
 		assertEquals(TestJSON, request.body(JSON.Format).orElseGet(() -> fail("no json representation")));
 	}
 
 	@Test void testRetrieveJSONChecksContentType() {
 
-		final Request request=new Request().body(In.Format, new Source() {
-			@Override public _Reader reader() { return new StringReader(TestJSON.toString()); }
-		});
+		final Request request=new Request()
+				.body(_Reader.Format, () -> new StringReader(TestJSON.toString()));
 
 		assertFalse(request.body(JSON.Format).isPresent());
 	}
@@ -65,14 +62,12 @@ final class JSONTest {
 
 		final Request request=new Request().body(JSON.Format, TestJSON);
 
-		assertEquals(TestJSON, request.body(Out.Format)
+		assertEquals(TestJSON, request.body(_Writer.Format)
 
-				.map(consumer -> {
+				.map(client -> {
 					try (final StringWriter writer=new StringWriter()) {
 
-						consumer.accept(new Target() {
-							@Override public Writer writer() { return writer; }
-						});
+						client.accept(writer);
 
 						return writer.toString();
 

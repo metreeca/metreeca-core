@@ -18,6 +18,7 @@
 package com.metreeca.next.formats;
 
 import com.metreeca.next.Format;
+import com.metreeca.next.Message;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;
@@ -37,5 +38,12 @@ public final class _Output implements Format<Consumer<OutputStream>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private _Output() {} // singleton
+
+
+	@Override public void set(final Message<?> message, final Consumer<OutputStream> value) {
+		if ( !message.header("content-type").isPresent() ) {
+			message.header("content-type", "application/octet-stream");
+		}
+	}
 
 }

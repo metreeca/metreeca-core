@@ -19,9 +19,10 @@ package com.metreeca.next.formats;
 
 import com.metreeca.next.Format;
 import com.metreeca.next.Message;
-import com.metreeca.next.Target;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Optional;
 
 import static com.metreeca.form.things.Transputs.data;
@@ -45,11 +46,11 @@ public final class Data implements Format<byte[]> {
 
 	/**
 	 * @return the optional binary body representation of {@code message}, as retrieved from the input stream supplied
-	 * by its {@link In#Format} representation, if present; an empty optional, otherwise
+	 * by its {@link _Input#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<byte[]> get(final Message<?> message) {
-		return message.body(In.Format).map(source -> {
-			try (final InputStream input=source.input()) {
+		return message.body(_Input.Format).map(source -> {
+			try (final InputStream input=source.get()) {
 
 				return data(input);
 
@@ -60,12 +61,12 @@ public final class Data implements Format<byte[]> {
 	}
 
 	/**
-	 * Configures the {@link Out#Format} representation of {@code message} to write the binary {@code value} to the
-	 * output stream supplied by the accepted {@link Target}.
+	 * Configures the {@link _Output#Format} representation of {@code message} to write the binary {@code value} to the
+	 * output stream supplied by the accepted output stream.
 	 */
 	@Override public void set(final Message<?> message, final byte... value) {
-		message.body(Out.Format, target -> {
-			try (final OutputStream output=target.output()) {
+		message.body(_Output.Format, output -> {
+			try  {
 
 				output.write(value);
 

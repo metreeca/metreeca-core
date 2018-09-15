@@ -19,6 +19,7 @@ package com.metreeca.next;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -323,6 +324,32 @@ public abstract class Message<T extends Message<T>> {
 		bodies.put(format, value);
 
 		format.set(this, value);
+
+		return self();
+	}
+
+	/**
+	 * Maps a representation of the body of this message.
+	 *
+	 * @param format the format of the body representation to be mapped
+	 * @param mapper the mapping function for the body representation
+	 * @param <V>    the type of the body representation to be mapped
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code format} or {@code mapper} is {@code null}
+	 */
+	public <V> T map(final Format<V> format, final Function<V, V> mapper) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		body(format).map(mapper).ifPresent(value -> body(format, value));
 
 		return self();
 	}

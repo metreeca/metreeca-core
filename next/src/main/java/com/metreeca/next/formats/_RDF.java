@@ -19,7 +19,6 @@ package com.metreeca.next.formats;
 
 import com.metreeca.next.Format;
 import com.metreeca.next.Message;
-import com.metreeca.next.Target;
 import com.metreeca.next._work.Crate;
 
 import java.util.Optional;
@@ -42,7 +41,7 @@ import java.util.Optional;
 
 
 	/**
-	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link In#Format}
+	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link _Input#Format}
 	 * representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<Crate> get(final Message<?> message) {
@@ -50,8 +49,8 @@ import java.util.Optional;
 	}
 
 	/**
-	 * Configures the {@link Out#Format} representation of {@code message} to write the RDF {@code value} to the
-	 * accepted {@link Target}.
+	 * Configures the {@link _Output#Format} representation of {@code message} to write the RDF {@code value} to the
+	 * accepted output stream.
 	 */
 	@Override public void set(final Message<?> message, final Crate value) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi

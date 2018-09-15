@@ -18,13 +18,9 @@
 package com.metreeca.next.formats;
 
 import com.metreeca.next.Format;
-import com.metreeca.next.Message;
 
 import java.io.Reader;
-import java.util.Optional;
 import java.util.function.Supplier;
-
-import static com.metreeca.form.things.Transputs.reader;
 
 
 /**
@@ -41,16 +37,5 @@ public final class _Reader implements Format<Supplier<Reader>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private _Reader() {} // singleton
-
-
-	@Override public Optional<Supplier<Reader>> get(final Message<?> message) {
-		return message.body(_Input.Format).map(input -> () -> reader(input.get())); // !!! use message charset
-	}
-
-	@Override public void set(final Message<?> message, final Supplier<Reader> value) {
-		if ( !message.header("content-type").isPresent() ) {
-			message.header("content-type", "text/plain");
-		}
-	}
 
 }

@@ -19,7 +19,6 @@ package com.metreeca.next.formats;
 
 import com.metreeca.next.Format;
 import com.metreeca.next.Message;
-import com.metreeca.next.Target;
 
 import java.io.*;
 import java.util.Optional;
@@ -45,11 +44,11 @@ public final class Text implements Format<String> {
 
 	/**
 	 * @return the optional textual body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link In#Format} representation, if present; an empty optional, otherwise
+	 * {@link _Reader#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<String> get(final Message<?> message) {
-		return message.body(In.Format).map(source -> {
-			try (final _Reader reader=source.reader()) {
+		return message.body(_Reader.Format).map(source -> {
+			try (final Reader reader=source.get()) {
 
 				return text(reader);
 
@@ -60,12 +59,12 @@ public final class Text implements Format<String> {
 	}
 
 	/**
-	 * Configures the {@link Out#Format} representation of {@code message} to write the textual {@code value} to
-	 * the writer supplied by the accepted {@link Target}.
+	 * Configures the {@link _Writer#Format} representation of {@code message} to write the textual {@code value} to
+	 * the writer supplied by the accepted writer.
 	 */
 	@Override public void set(final Message<?> message, final String value) {
-		message.body(Out.Format, target -> {
-			try (final Writer writer=target.writer()) {
+		message.body(_Writer.Format, writer -> {
+			try {
 
 				writer.write(value);
 

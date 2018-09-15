@@ -19,9 +19,10 @@ package com.metreeca.next.formats;
 
 import com.metreeca.next.Format;
 import com.metreeca.next.Message;
-import com.metreeca.next.Target;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.util.Optional;
 
 import javax.json.Json;
@@ -53,15 +54,15 @@ public final class JSON implements Format<JsonObject> {
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link In#Format} representation, if present; an empty optional, otherwise
+	 * {@link _Reader#Format} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<JsonObject> get(final Message<?> message) {
-		return message.body(In.Format)
+		return message.body(_Reader.Format)
 
 				.filter(source -> message.header("content-type").orElse("").equals(MIME))
 
 				.map(source -> {
-					try (final _Reader reader=source.reader()) {
+					try (final Reader reader=source.get()) {
 
 						return Json.createReader(reader).readObject();
 
@@ -72,20 +73,14 @@ public final class JSON implements Format<JsonObject> {
 	}
 
 	/**
-	 * Configures the {@link Out#Format} representation of {@code message} to write the JSON {@code value} to the
-	 * writer supplied by the accepted {@link Target}.
+	 * Configures the {@link _Writer#Format} representation of {@code message} to write the JSON {@code value} to the
+	 * writer supplied by the accepted writer.
 	 */
 	@Override public void set(final Message<?> message, final JsonObject value) {
 		message.header("content-type", MIME)
 
-				.body(Out.Format, target -> {
-					try (final Writer writer=target.writer()) {
-
-						Json.createWriter(writer).write(value);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
+				.body(_Writer.Format, writer -> {
+					Json.createWriter(writer).write(value);
 				});
 	}
 

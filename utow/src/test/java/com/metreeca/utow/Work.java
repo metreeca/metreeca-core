@@ -17,7 +17,13 @@
 
 package com.metreeca.utow;
 
+import com.metreeca.next.Handler;
+import com.metreeca.next.Wrapper;
 import com.metreeca.next.formats.JSON;
+import com.metreeca.next.formats._Writer;
+
+import java.io.IOException;
+import java.io.Writer;
 
 import static com.metreeca.next.Rest.error;
 import static com.metreeca.utow.Gateway.run;
@@ -26,11 +32,34 @@ import static com.metreeca.utow.Gateway.run;
 public final class Work {
 
 	public static void main(final String... args) {
-		run(6800, "localhost", tray -> tray.get(() -> request -> request.response()
 
-				.status(200).body(JSON.Format, error("ciao", "babbo!"))
+		final Wrapper wrapper=handler -> request -> handler.handle(request)
+				.map(response -> response.map(_Writer.Format, consumer -> writer -> consumer.accept(upper(writer))));
 
-		));
+		final Handler handler=request -> request.response()
+				.status(200).body(JSON.Format, error("ciao", "babbo!"));
+
+		run(6800, "localhost", tray -> tray.get(() -> wrapper.wrap(handler)));
+	}
+
+
+	private static Writer upper(final Writer writer) {
+		return new Writer() {
+
+			@Override public void write(final char[] cbuf, final int off, final int len) throws IOException {
+
+				for (int i=0; i < cbuf.length; i++) {
+					cbuf[i]=Character.toUpperCase(cbuf[i]);
+				}
+
+				writer.write(cbuf, off, len);
+			}
+
+			@Override public void flush() throws IOException { writer.flush(); }
+
+			@Override public void close() throws IOException { writer.close(); }
+
+		};
 	}
 
 }

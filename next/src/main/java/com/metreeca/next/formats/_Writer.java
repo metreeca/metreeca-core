@@ -18,6 +18,7 @@
 package com.metreeca.next.formats;
 
 import com.metreeca.next.Format;
+import com.metreeca.next.Message;
 
 import java.io.Writer;
 import java.util.function.Consumer;
@@ -37,5 +38,12 @@ public final class _Writer implements Format<Consumer<Writer>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private _Writer() {} // singleton
+
+
+	@Override public void set(final Message<?> message, final Consumer<Writer> value) {
+		if ( !message.header("content-type").isPresent() ) {
+			message.header("content-type", "text/plain");
+		}
+	}
 
 }
