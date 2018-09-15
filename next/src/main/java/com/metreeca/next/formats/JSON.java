@@ -61,7 +61,7 @@ public final class JSON implements Format<JsonObject> {
 				.filter(source -> message.header("content-type").orElse("").equals(MIME))
 
 				.map(source -> {
-					try (final Reader reader=source.reader()) {
+					try (final _Reader reader=source.reader()) {
 
 						return Json.createReader(reader).readObject();
 

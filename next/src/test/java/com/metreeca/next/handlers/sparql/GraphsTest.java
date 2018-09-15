@@ -21,9 +21,9 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.next.Request;
 import com.metreeca.next.Response;
+import com.metreeca.next.formats._RDF;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static java.util.Collections.singleton;
 
 
-final class GraphsTest {
+@Deprecated final class GraphsTest {
 
 	private static final Set<Statement> First=singleton(statement(RDF.NIL, RDF.VALUE, RDF.FIRST));
 	private static final Set<Statement> Rest=singleton(statement(RDF.NIL, RDF.VALUE, RDF.REST));
@@ -77,8 +77,6 @@ final class GraphsTest {
 	@Test void testGetDefaultGraph() {
 		new Tray()
 
-				.set(Graph.Factory, RDF4JMemory::new)
-
 				.run(() -> tool(Graph.Factory).update(connection -> { connection.add(First); }))
 
 				.get(Graphs::new)
@@ -93,7 +91,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertIsomorphic(First, response.body(com.metreeca.next.formats.RDF.Format).orElseGet(() -> fail("no RDF body")).model());
+					assertIsomorphic(First, response.body(_RDF.Format).orElseGet(() -> fail("no RDF body")).model());
 
 				});
 	}

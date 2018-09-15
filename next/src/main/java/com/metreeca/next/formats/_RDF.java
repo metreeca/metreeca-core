@@ -20,6 +20,7 @@ package com.metreeca.next.formats;
 import com.metreeca.next.Format;
 import com.metreeca.next.Message;
 import com.metreeca.next.Target;
+import com.metreeca.next._work.Crate;
 
 import java.util.Optional;
 
@@ -27,17 +28,17 @@ import java.util.Optional;
 /**
  * RDF body format.
  */
-@Deprecated public final class RDF implements Format<Crate> {
+@Deprecated public final class _RDF implements Format<Crate> {
 
 	/**
 	 * The singleton RDF body format.
 	 */
-	public static final Format<Crate> Format=new RDF();
+	public static final Format<Crate> Format=new _RDF();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private RDF() {} // singleton
+	private _RDF() {} // singleton
 
 
 	/**

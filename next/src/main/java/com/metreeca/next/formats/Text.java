@@ -49,7 +49,7 @@ public final class Text implements Format<String> {
 	 */
 	@Override public Optional<String> get(final Message<?> message) {
 		return message.body(In.Format).map(source -> {
-			try (final Reader reader=source.reader()) {
+			try (final _Reader reader=source.reader()) {
 
 				return text(reader);
 

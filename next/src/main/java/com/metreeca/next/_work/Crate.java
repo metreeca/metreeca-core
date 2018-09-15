@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next.formats;
+package com.metreeca.next._work;
 
 import com.metreeca.form.Shape;
 

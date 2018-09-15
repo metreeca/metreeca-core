@@ -24,6 +24,7 @@ import com.metreeca.form.things.Values;
 import com.metreeca.next.*;
 import com.metreeca.next.formats.*;
 import com.metreeca.next.handlers.Dispatcher;
+import com.metreeca.next._work.Crate;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -153,7 +154,7 @@ public final class Graphs implements Handler {
 				}
 
 				client.accept(request.response().status(Response.OK).body(
-						com.metreeca.next.formats.RDF.Format,
+						_RDF.Format,
 						new Crate(request.item(), GraphsShape, model))
 				);
 
