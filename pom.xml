@@ -99,14 +99,7 @@
 		<maven.deploy.skip>true</maven.deploy.skip> <!-- !!! no public artifact deployment -->
 		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 
-		<version.major>${project.artifact.selectedVersion.majorVersion}</version.major>
-		<version.minor>${project.artifact.selectedVersion.minorVersion}</version.minor>
-
-		<module.caption>${project.name}</module.caption>
-		<module.project>${project.groupId}:${project.artifactId}</module.project>
-		<module.version>${version.major}.${version.minor}</module.version>
-
-		<docs>${maven.multiModuleProjectDirectory}/docs/modules/${module.project}/${module.version}/</docs>
+		<javadocs>${project.basedir}/docs/latest/javadocs</javadocs>
 
 	</properties>
 
@@ -159,7 +152,7 @@
 				<executions>
 					<execution>
 
-						<id>clean-docs-folder</id>
+						<id>clean-javadocs-folder</id>
 						<phase>pre-site</phase>
 
 						<goals>
@@ -169,7 +162,7 @@
 						<configuration>
 							<filesets>
 								<fileset>
-									<directory>${docs}</directory>
+									<directory>${javadocs}</directory>
 								</fileset>
 							</filesets>
 						</configuration>
@@ -243,16 +236,9 @@
 
 				<configuration>
 
-					<outputDirectory>${project.build.directory}/site/javadocs</outputDirectory>
 					<notimestamp>true</notimestamp> <!-- avoid immaterial VCS visible changes -->
 
 					<links>
-
-						<link>http://docs.metreeca.com/modules/com.metreeca:j2ee/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:link/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:mill/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:tray/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:spec/${module.version}/apidocs/</link>
 
 						<link>http://docs.rdf4j.org/javadoc/latest/</link>
 
@@ -264,12 +250,50 @@
 
 					<execution>
 
-						<id>generate-site-javadocs</id>
+						<id>generate-javadocs</id>
 						<phase>site</phase>
 
 						<goals>
 							<goal>javadoc</goal>
 						</goals>
+
+					</execution>
+
+					<execution>
+
+						<id>generate-aggregate-javadocs</id>
+						<inherited>false</inherited>
+						<phase>site</phase>
+
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+
+						<configuration>
+
+							<reportOutputDirectory>${javadocs}</reportOutputDirectory>
+							<destDir>javadocs</destDir>
+
+							<groups>
+								<group>
+									<title>Server Adapters</title>
+									<packages>com.metreeca.j2ee*:com.metreeca.utow*</packages>
+								</group>
+								<group>
+									<title>REST API Framework</title>
+									<packages>com.metreeca.next*</packages>
+								</group>
+								<group>
+									<title>Tooling Framework</title>
+									<packages>com.metreeca.tray*</packages>
+								</group>
+								<group>
+									<title>Shapes Engine</title>
+									<packages>com.metreeca.form*</packages>
+								</group>
+							</groups>
+
+						</configuration>
 
 					</execution>
 
