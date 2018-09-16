@@ -24,6 +24,7 @@ import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.Values;
 import com.metreeca.next.*;
 import com.metreeca.next._work.Crate;
+import com.metreeca.next._work.monads.Target;
 import com.metreeca.next.formats.*;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
@@ -91,7 +92,7 @@ public final class Graphs implements Handler {
 			.post(this::post);
 
 
-	@Override public Lazy<Response> handle(final Request request) {
+	@Override public Target<Response> handle(final Request request) {
 		return delegate.handle(request);
 	}
 
@@ -118,7 +119,7 @@ public final class Graphs implements Handler {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-get
 	 */
-	private Lazy<Response> get(final Request request) {
+	private Target<Response> get(final Request request) {
 		return client -> {
 
 			final boolean catalog=request.query().isEmpty();
@@ -186,7 +187,7 @@ public final class Graphs implements Handler {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-put
 	 */
-	private Lazy<Response> put(final Request request) {
+	private Target<Response> put(final Request request) {
 		return client -> {
 
 			final String target=graph(request);
@@ -262,7 +263,7 @@ public final class Graphs implements Handler {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-delete
 	 */
-	private Lazy<Response> delete(final Request request) {
+	private Target<Response> delete(final Request request) {
 		return client -> {
 
 			final String target=graph(request);
@@ -307,7 +308,7 @@ public final class Graphs implements Handler {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-post
 	 */
-	private Lazy<Response> post(final Request request) {
+	private Target<Response> post(final Request request) {
 		return client -> {
 
 			// !!! support  "multipart/form-data"

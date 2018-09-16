@@ -24,11 +24,11 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.Update;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.metreeca.form.things.Bindings.bindings;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.tray.Tray.tool;
@@ -189,17 +189,16 @@ public final class Tracer implements Wrapper {
 					// add custom info
 
 					if ( !sparql.isEmpty() ) {
-						bindings()
 
-								.set("this", trace)
-								.set("item", item)
-								.set("task", task)
-								.set("user", user)
-								.set("time", time)
+						final Update update=connection.prepareUpdate(SPARQL, sparql, request.base());
 
-								.bind(connection.prepareUpdate(SPARQL, sparql, request.base()))
+						update.setBinding("this", trace);
+						update.setBinding("item", item);
+						update.setBinding("task", task);
+						update.setBinding("user", user);
+						update.setBinding("time", time);
 
-								.execute();
+						update.execute();
 					}
 
 				}

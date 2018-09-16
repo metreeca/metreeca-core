@@ -19,6 +19,7 @@ package com.metreeca.next.handlers;
 
 
 import com.metreeca.next.*;
+import com.metreeca.next._work.monads.Target;
 
 
 /**
@@ -48,7 +49,7 @@ import com.metreeca.next.*;
 	}
 
 
-	@Override public Lazy<Response> handle(final Request request) {
+	@Override public Target<Response> handle(final Request request) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");

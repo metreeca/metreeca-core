@@ -20,6 +20,7 @@ package com.metreeca.next.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.next.*;
+import com.metreeca.next._work.monads.Target;
 import com.metreeca.next.formats.JSON;
 import com.metreeca.next.formats._Output;
 import com.metreeca.next.handlers.Dispatcher;
@@ -66,7 +67,7 @@ import static java.lang.Boolean.parseBoolean;
 			.post(this::process);
 
 
-	@Override public Lazy<Response> handle(final Request request) {
+	@Override public Target<Response> handle(final Request request) {
 		return delegate.handle(request);
 	}
 
@@ -110,7 +111,7 @@ import static java.lang.Boolean.parseBoolean;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Lazy<Response> process(final Request request) {
+	private Target<Response> process(final Request request) {
 		try (final RepositoryConnection connection=graph.connect()) {
 
 			final Operation operation=operation(request, connection);

@@ -17,9 +17,7 @@
 
 package com.metreeca.form.things;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -81,7 +79,7 @@ public final class Sets {
 
 	@SafeVarargs public static <V> Set<V> union(final Collection<V>... collections) {
 		return collections == null ? set() : Stream.of(collections)
-				.filter(collection -> collection != null)
+				.filter(Objects::nonNull)
 				.flatMap(Collection::stream)
 				.distinct()
 				.collect(toCollection(LinkedHashSet::new));

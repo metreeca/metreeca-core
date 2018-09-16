@@ -19,16 +19,17 @@ package com.metreeca.rest.handlers.shape;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
@@ -42,7 +43,6 @@ import java.util.stream.Stream;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.task;
 import static com.metreeca.form.Shape.view;
-import static com.metreeca.form.things.Bindings.bindings;
 import static com.metreeca.form.things.Values.time;
 import static com.metreeca.tray._Tray.tool;
 
@@ -139,17 +139,16 @@ public final class Builder extends Shaper {
 			final Collection<Statement> model=new ArrayList<>();
 
 			try (final RepositoryConnection connection=graph.connect()) {
-				bindings()
 
-						.set("this", request.focus())
-						.set("user", request.user())
-						.set("time", time(true))
+				final GraphQuery query=connection.prepareGraphQuery(QueryLanguage.SPARQL, sparql, request.base());
 
-						.bind(connection.prepareGraphQuery(QueryLanguage.SPARQL, sparql, request.base()))
+				query.setBinding("this", request.focus());
+				query.setBinding("user", request.user());
+				query.setBinding("time", time(true));
 
-						.evaluate(new AbstractRDFHandler() {
-							@Override public void handleStatement(final Statement statement) { model.add(statement); }
-						});
+				query.evaluate(new AbstractRDFHandler() {
+					@Override public void handleStatement(final Statement statement) { model.add(statement); }
+				});
 			}
 
 			return model;

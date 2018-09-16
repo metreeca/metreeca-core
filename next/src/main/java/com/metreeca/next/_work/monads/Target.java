@@ -15,10 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.next;
+package com.metreeca.next._work.monads;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -28,7 +30,7 @@ import java.util.function.Function;
  *
  * @param <T> the type of the generated object
  */
-@FunctionalInterface public interface Lazy<T> {
+@FunctionalInterface public interface Target<T> {
 
 	/**
 	 * Generates the source object.
@@ -49,13 +51,15 @@ import java.util.function.Function;
 	 *
 	 * @throws NullPointerException if {@code mapper} is {@code null}
 	 */
-	public default <R> Lazy<R> map(final Function<T, R> mapper) {
+	public default <R> Target<R> map(final Function<T, R> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
 		}
 
-		return consumer -> accept(t -> consumer.accept(mapper.apply(t)));
+		return consumer -> accept(value -> consumer.accept(
+				requireNonNull(mapper.apply(value), "null mapper return value"))
+		);
 	}
 
 }

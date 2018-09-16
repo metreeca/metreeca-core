@@ -23,8 +23,8 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.Update;
 
-import static com.metreeca.form.things.Bindings.bindings;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.time;
@@ -121,18 +121,15 @@ public final class Processor implements Wrapper {
 					final IRI user=response.request().user();
 					final IRI item=response.item();
 
-					bindings()
+					final Update update=connection.prepareUpdate(QueryLanguage.SPARQL, script, request.base());
 
+					update.setBinding("this", item);
+					update.setBinding("stem", iri(item.getNamespace()));
+					update.setBinding("name", literal(item.getLocalName()));
+					update.setBinding("user", user);
+					update.setBinding("time", time(true));
 
-							.set("this", item)
-							.set("stem", iri(item.getNamespace()))
-							.set("name", literal(item.getLocalName()))
-							.set("user", user)
-							.set("time", time(true))
-
-							.bind(connection.prepareUpdate(QueryLanguage.SPARQL, script, request.base()))
-
-							.execute();
+					update.execute();
 				});
 			}
 
