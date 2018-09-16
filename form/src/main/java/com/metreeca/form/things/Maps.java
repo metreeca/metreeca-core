@@ -84,7 +84,7 @@ public final class Maps {
 		map.putAll(x);
 		map.putAll(y);
 
-		return map;
+		return unmodifiableMap(map);
 	}
 
 

@@ -61,10 +61,15 @@ public final class Lists {
 	//// Operators /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@SafeVarargs public static <V> List<V> concat(final Collection<V>... collections) {
-		return collections == null ? list() : Stream.of(collections)
-				.filter(Objects::nonNull)
-				.flatMap(Collection::stream)
-				.collect(toList());
+
+		if ( collections == null ) {
+			throw new NullPointerException("null collections");
+		}
+
+		return unmodifiableList(Stream.of(collections)
+						.map(Objects::requireNonNull)
+						.flatMap(Collection::stream)
+						.collect(toList()));
 	}
 
 

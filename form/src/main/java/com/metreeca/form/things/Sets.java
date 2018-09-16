@@ -74,15 +74,19 @@ public final class Sets {
 
 		union.addAll(y);
 
-		return union;
+		return unmodifiableSet(union);
 	}
 
 	@SafeVarargs public static <V> Set<V> union(final Collection<V>... collections) {
-		return collections == null ? set() : Stream.of(collections)
-				.filter(Objects::nonNull)
+
+		if ( collections == null ) {
+			throw new NullPointerException("null collections");
+		}
+
+		return unmodifiableSet((Set<V>)Stream.of(collections)
+				.map(Objects::requireNonNull)
 				.flatMap(Collection::stream)
-				.distinct()
-				.collect(toCollection(LinkedHashSet::new));
+				.collect(toCollection(LinkedHashSet::new)));
 	}
 
 	public static <V> Set<V> intersection(final Set<V> x, final Set<V> y) {
@@ -99,7 +103,7 @@ public final class Sets {
 
 		intersection.retainAll(y);
 
-		return intersection;
+		return unmodifiableSet(intersection);
 	}
 
 	public static <V> Set<V> complement(final Set<V> x, final Set<V> y) {
@@ -116,7 +120,7 @@ public final class Sets {
 
 		complement.removeAll(y);
 
-		return complement;
+		return unmodifiableSet(complement);
 	}
 
 
