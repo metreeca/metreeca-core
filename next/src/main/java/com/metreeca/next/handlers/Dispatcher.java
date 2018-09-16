@@ -19,7 +19,7 @@ package com.metreeca.next.handlers;
 
 
 import com.metreeca.next.*;
-import com.metreeca.next._work.monads.Target;
+import com.metreeca.next.Origin;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -125,7 +125,7 @@ public final class Dispatcher implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Target<Response> handle(final Request request) {
+	@Override public Origin<Response> handle(final Request request) {
 		return Optional.ofNullable(mappings.get(request.method()))
 				.orElse(this::unsupported)
 				.handle(request);

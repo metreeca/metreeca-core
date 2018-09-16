@@ -23,7 +23,6 @@ import com.metreeca.form.codecs.JSONAdapter;
 import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.things.Formats;
 import com.metreeca.next.*;
-import com.metreeca.next._work.monads.Result;
 import com.metreeca.next.formats.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -33,29 +32,34 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.json.JsonObject;
 
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.next.Rest.error;
-import static com.metreeca.next._work.monads.Result.value;
 
 import static java.util.Collections.emptySet;
 
 
-public final class Parser implements Wrapper {
+/**
+ * Model-driven RDF body manager.
+ */
+public final class Driver implements Wrapper {
 
 	private Shape shape=and();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Parser shape(final Shape shape) {
+	public Driver shape(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -80,7 +84,7 @@ public final class Parser implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Result<Request, JsonObject> before(final Request request) {
-		return request.body(_Reader.Format).<Result<Request, JsonObject>>map(supplier -> {
+		return request.body(_Reader.Format).map(supplier -> {
 
 			final IRI focus=request.item();
 			final String type=request.header("content-type").orElse("");
@@ -134,19 +138,31 @@ public final class Parser implements Wrapper {
 
 				model.addAll(shape.accept(mode(Form.verify)).accept(new Outliner(focus))); // shape-implied statements
 
-				return value(request.body(_RDF.Format, new Crate(focus, shape, model)));
+				return new Result<Request, JsonObject>() {
+					@Override public <R> R apply(final Function<Request, R> value, final Function<JsonObject, R> error) {
+						return value.apply(request.body(_RDF.Format, new Crate(focus, shape, model)));
+					}
+				};
 
-			} else { // !!! structured response
+			} else { // !!! structured json error report
 
-				return Result.error(error("data-malformed", new RDFParseException("errors parsing content as "
-						+parser.getRDFFormat().getDefaultMIMEType()+":\n\n"
-						+String.join("\n", fatals)
-						+String.join("\n", errors)
-						+String.join("\n", warnings))));
+				return new Result<Request, JsonObject>() {
+					@Override public <R> R apply(final Function<Request, R> value, final Function<JsonObject, R> error) {
+						return error.apply(error("data-malformed", new RDFParseException("errors parsing content as "
+								+parser.getRDFFormat().getDefaultMIMEType()+":\n\n"
+								+String.join("\n", fatals)
+								+String.join("\n", errors)
+								+String.join("\n", warnings))));
+					}
+				};
 
 			}
 
-		}).orElseGet(() -> value(request.body(_RDF.Format, new Crate(request.item(), shape, emptySet()))));
+		}).orElseGet(() -> new Result<Request, JsonObject>() {
+			@Override public <R> R apply(final Function<Request, R> value, final Function<JsonObject, R> error) {
+				return value.apply(request.body(_RDF.Format, new Crate(request.item(), shape, emptySet())));
+			}
+		});
 
 	}
 
@@ -179,6 +195,15 @@ public final class Parser implements Wrapper {
 					});
 
 		}).orElse(response);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static interface Result<V, E> {
+
+		public <R> R apply(final Function<V, R> value, final Function<E, R> error);
+
 	}
 
 }

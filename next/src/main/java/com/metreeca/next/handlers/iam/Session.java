@@ -18,7 +18,7 @@
 package com.metreeca.next.handlers.iam;
 
 import com.metreeca.next.*;
-import com.metreeca.next._work.monads.Target;
+import com.metreeca.next.Origin;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.iam.Roster;
 
@@ -56,14 +56,14 @@ import static java.util.stream.Collectors.toList;
 	private final Dispatcher delegate=new Dispatcher().post(this::evolve);
 
 
-	@Override public Target<Response> handle(final Request request) {
+	@Override public Origin<Response> handle(final Request request) {
 		return delegate.handle(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Target<Response> evolve(final Request request) {
+	private Origin<Response> evolve(final Request request) {
 
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 

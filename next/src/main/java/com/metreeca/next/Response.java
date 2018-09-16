@@ -18,7 +18,6 @@
 package com.metreeca.next;
 
 import com.metreeca.form.things.Values;
-import com.metreeca.next._work.monads.Target;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -31,7 +30,7 @@ import java.util.function.Consumer;
  *
  * <p>Handles state/behaviour for HTTP responses.</p>
  */
-public final class Response extends Message<Response> implements Target<Response> {
+public final class Response extends Message<Response> implements Origin<Response> {
 
 	public static final int OK=200; // https://tools.ietf.org/html/rfc7231#section-6.3.1
 	public static final int Created=201; // https://tools.ietf.org/html/rfc7231#section-6.3.2

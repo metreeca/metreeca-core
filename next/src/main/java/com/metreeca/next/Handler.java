@@ -18,7 +18,6 @@
 package com.metreeca.next;
 
 import com.metreeca.form.Form;
-import com.metreeca.next._work.monads.Target;
 
 
 /**
@@ -93,6 +92,6 @@ import com.metreeca.next._work.monads.Target;
 	 *
 	 * @return a lazy outbound response generated for the managed linked data resource in reaction to {@code request}
 	 */
-	public Target<Response> handle(final Request request);
+	public Origin<Response> handle(final Request request);
 
 }
