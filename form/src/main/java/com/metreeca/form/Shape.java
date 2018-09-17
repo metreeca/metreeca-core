@@ -17,9 +17,9 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.shapes.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -89,6 +89,24 @@ public interface Shape {
 
 
 	//// Parametric Shapes /////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Shape role(final IRI role, final Shape... shapes) {
+		return shape(Form.role, set(role), asList(shapes));
+	}
+
+	public static Shape role(final IRI role, final Collection<Shape> shapes) {
+		return shape(Form.role, set(role), shapes);
+	}
+
+
+	public static Shape role(final Set<IRI> roles, final Shape... shapes) {
+		return shape(Form.role, roles, asList(shapes));
+	}
+
+	public static Shape role(final Set<IRI> roles, final Collection<Shape> shapes) {
+		return shape(Form.role, roles, shapes);
+	}
+
 
 	public static Shape create(final Shape... shapes) { return create(asList(shapes));}
 
@@ -166,7 +184,11 @@ public interface Shape {
 	public static Shape filter(final Collection<Shape> shapes) { return shape(Form.mode, set(Form.filter), shapes); }
 
 
-	public static Shape shape(final IRI variable, final Set<Value> values, final Collection<Shape> shapes) {
+	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Shape... shapes) {
+		return shape(variable, values, asList(shapes));
+	}
+
+	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
 		return shapes.isEmpty() ? when(variable, values)
 				: test(when(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}
