@@ -17,27 +17,26 @@
 
 package com.metreeca.rest.handlers.ldp;
 
+import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.*;
+import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Dispatcher;
 import com.metreeca.rest.handlers.shape.Browser;
 import com.metreeca.rest.handlers.shape.Creator;
-import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
-import static com.metreeca.rest.handlers.shape.Browser.browser;
-import static com.metreeca.rest.handlers.shape.Creator.creator;
-import static com.metreeca.rest.wrappers.Inspector.inspector;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.Values.format;
+import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
+import static com.metreeca.rest.handlers.shape.Browser.browser;
+import static com.metreeca.rest.handlers.shape.Creator.creator;
 
 import static java.util.stream.Collectors.toList;
 
@@ -113,7 +112,8 @@ public final class BasicContainer implements Handler {
 
 		this.dispatcher=dispatcher
 
-				.wrap(inspector().shape(shape));
+				// !!! .wrap(inspector().shape(shape))
+		;
 
 		return this;
 	}

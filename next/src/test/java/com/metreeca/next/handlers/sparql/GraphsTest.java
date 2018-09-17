@@ -91,7 +91,7 @@ import static java.util.Collections.singleton;
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertIsomorphic(First, response.body(_RDF.Format).orElseGet(() -> fail("no RDF body")).model());
+					assertIsomorphic(First, response.body(_RDF.Format).orElseGet(() -> fail("no RDF body")));
 
 				});
 	}

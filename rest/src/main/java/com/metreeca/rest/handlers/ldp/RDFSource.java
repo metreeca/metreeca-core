@@ -17,19 +17,18 @@
 
 package com.metreeca.rest.handlers.ldp;
 
+import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Dispatcher;
 import com.metreeca.rest.handlers.shape.Deleter;
 import com.metreeca.rest.handlers.shape.Relator;
 import com.metreeca.rest.handlers.shape.Updater;
-import com.metreeca.form.Shape;
 
+import static com.metreeca.form.things.Values.format;
 import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
 import static com.metreeca.rest.handlers.shape.Deleter.deleter;
 import static com.metreeca.rest.handlers.shape.Relator.relator;
 import static com.metreeca.rest.handlers.shape.Updater.updater;
-import static com.metreeca.rest.wrappers.Inspector.inspector;
-import static com.metreeca.form.things.Values.format;
 
 
 /**
@@ -77,7 +76,8 @@ public final class RDFSource implements Handler {
 
 		this.dispatcher=dispatcher
 
-				.wrap(inspector().shape(shape));
+				// !!! .wrap(inspector().shape(shape))
+		;
 
 		return this;
 	}

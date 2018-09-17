@@ -23,8 +23,6 @@ import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.Values;
 import com.metreeca.next.*;
-import com.metreeca.next._work.Crate;
-import com.metreeca.next.Responder;
 import com.metreeca.next.formats.*;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
@@ -40,7 +38,8 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -156,9 +155,9 @@ public final class Graphs implements Handler {
 					}
 				}
 
-				request.reply(response -> response.status(Response.OK).body(
-						_RDF.Format,
-						new Crate(request.item(), GraphsShape, model))
+				request.reply(response -> response.status(Response.OK)
+						.body(_RDF.Format, model)
+						.body(_Shape.Format, GraphsShape)
 				).accept(consumer);
 
 			} else {

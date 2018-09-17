@@ -188,7 +188,8 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures message header value.
 	 *
-	 * <p>Existing values are overwritten, except when defining a new cookie with {@code Set-Cookie}.</p>
+	 * <p>Existing values are overwritten, unless the header {@code name} is  {@code Set-Cookie} or is prefixed with a
+	 * plus sign ({@code +}).</p>
 	 *
 	 * @param name  the name of the header whose value is to be configured
 	 * @param value the new value for {@code name}; empty values are ignored
@@ -232,15 +233,16 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures message header values.
 	 *
-	 * <p>Existing values are overwritten, except when defining a new cookie with {@code Set-Cookie}.</p>
+	 * <p>Existing values are overwritten, unless the header {@code name} is  {@code Set-Cookie} or is prefixed with a
+	 * plus sign ({@code +}).</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values}
-	 *                              contains a {@code null} value
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
+	 *                              {@code null} value
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
 	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
@@ -251,15 +253,16 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures message header values.
 	 *
-	 * <p>Existing values are overwritten, except when defining a new cookie with {@code Set-Cookie}.</p>
+	 * <p>Existing values are overwritten, unless the header {@code name} is  {@code Set-Cookie} or is prefixed with a
+	 * plus sign ({@code +}).</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values}
-	 *                              contains a {@code null} value
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
+	 *                              {@code null} value
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
 	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
@@ -280,9 +283,9 @@ public abstract class Message<T extends Message<T>> {
 		final String _name=normalize(name);
 		final Collection<String> _values=normalize(values);
 
-		if ( _name.equals("Set-Cookie") ) {
+		if ( name.startsWith("+") || _name.equals("Set-Cookie") ) {
 
-			headers.compute(_name, (key, value) -> concat(value, _values));
+			headers.compute(_name, (key, value) -> value == null ? _values : concat(value, _values));
 
 		} else if ( _values.isEmpty() ) {
 
@@ -380,7 +383,7 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String normalize(final String name) {
-		return title(name);
+		return title(name.startsWith("+") ? name.substring(1) : name);
 	}
 
 	private Collection<String> normalize(final Collection<String> values) {

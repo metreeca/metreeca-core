@@ -18,9 +18,9 @@
 package com.metreeca.form.codecs;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.shapes.*;
 import com.metreeca.form.Shape;
 import com.metreeca.form.Shift;
+import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Count;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
@@ -30,11 +30,7 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.RDFCollections;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
@@ -53,6 +49,8 @@ public final class ShapeCodec {
 
 	private static final RDFFormat Format=RDFFormat.NTRIPLES;
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Resource encode(final Shape shape, final Collection<Statement> model) {
 
@@ -78,27 +76,6 @@ public final class ShapeCodec {
 		}
 
 		return shape(root, model);
-	}
-
-	public Shape decode(final String spec) { // !!! review/remove
-
-		if ( spec == null ) {
-			throw new NullPointerException("null spec");
-		}
-
-		try {
-
-			final Model model=Rio.parse(new StringReader(spec), "", Format);
-
-			final Resource root=model.subjects().stream()
-					.filter(subject -> !model.contains(null, null, subject))
-					.findFirst().orElseThrow(() -> new IllegalStateException("missing cell value"));
-
-			return decode(root, model);
-
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
 	}
 
 

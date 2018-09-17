@@ -15,8 +15,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * LDP resource handlers.
- */
+package com.metreeca.next.formats;
 
-package com.metreeca.rest.handlers.ldp;
+import com.metreeca.form.Shape;
+
+
+public final class _Shape implements com.metreeca.next.Format<Shape> {
+
+	public static final _Shape Format=new _Shape();
+
+	private _Shape() {} // singleton
+
+}

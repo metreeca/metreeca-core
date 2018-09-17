@@ -56,6 +56,15 @@ final class MessageTest {
 		assertEquals(list("two"), list(message.headers("test-header")));
 	}
 
+	@Test void testHeadersAppendsValues() {
+
+		final TestMessage message=new TestMessage()
+				.header("+test-header", "one")
+				.header("+test-header", "two");
+
+		assertEquals(list("one", "two"), list(message.headers("test-header")));
+	}
+
 	@Test void testHeadersAppendsCookies() {
 
 		final TestMessage message=new TestMessage()
@@ -73,6 +82,8 @@ final class MessageTest {
 		assertEquals(list("one", "two"), list(message.headers("test-header")));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testRepresentationCaching() {
 

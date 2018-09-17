@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.stream.JsonParsingException;
 
 
 /**
@@ -65,6 +66,10 @@ public final class JSON implements Format<JsonObject> {
 					try (final Reader reader=source.get()) {
 
 						return Json.createReader(reader).readObject();
+
+					} catch ( final JsonParsingException e ) {
+
+						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
