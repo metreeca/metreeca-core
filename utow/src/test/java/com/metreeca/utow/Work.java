@@ -36,8 +36,9 @@ public final class Work {
 		final Wrapper wrapper=handler -> request -> handler.handle(request)
 				.map(response -> response.map(_Writer.Format, consumer -> writer -> consumer.accept(upper(writer))));
 
-		final Handler handler=request -> request.response()
-				.status(200).body(JSON.Format, error("ciao", "babbo!"));
+		final Handler handler=request -> request.reply(response -> response
+				.status(200).body(JSON.Format, error("ciao", "babbo!"))
+		);
 
 		run(6800, "localhost", tray -> tray.get(() -> wrapper.wrap(handler)));
 	}

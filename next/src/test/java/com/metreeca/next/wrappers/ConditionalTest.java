@@ -34,7 +34,7 @@ final class ConditionalTest {
 	private static final int WrapperStatus=Response.Accepted;
 
 	private static final Handler Handler=request ->
-			request.response().status(HandlerStatus);
+			request.reply(response -> response.status(HandlerStatus));
 
 	private static final Wrapper Wrapper=handler -> request ->
 			handler.handle(request).map(response -> response.status(WrapperStatus));

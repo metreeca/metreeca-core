@@ -74,8 +74,8 @@ import static java.lang.System.currentTimeMillis;
 
 				} else {
 
-					return request.response().status(Response.Unauthorized)
-							.header("WWW-Authenticate", authenticate(request, "invalid_token"));
+					return request.reply(response -> response.status(Response.Unauthorized)
+							.header("WWW-Authenticate", authenticate(request, "invalid_token")));
 
 				}
 

@@ -43,7 +43,7 @@ final class ProcessorTest {
 
 				.get(() -> new Processor()
 						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-						.wrap((Handler)request -> request.response().status(Response.OK)))
+						.wrap((Handler)request -> request.reply(response -> response.status(Response.OK))))
 
 				.handle(new Request()
 						.method(Request.POST)
@@ -70,9 +70,9 @@ final class ProcessorTest {
 
 				.get(() -> new Processor()
 						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-						.wrap((Handler)request -> request.response()
+						.wrap((Handler)request -> request.reply(response -> response
 								.status(Response.OK)
-								.header("Location", Base+"test")))
+								.header("Location", Base+"test"))))
 
 				.handle(new Request()
 						.method(Request.POST)

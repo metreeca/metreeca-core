@@ -19,7 +19,7 @@ package com.metreeca.next.handlers;
 
 
 import com.metreeca.next.*;
-import com.metreeca.next.Origin;
+import com.metreeca.next.Responder;
 
 
 /**
@@ -49,7 +49,7 @@ import com.metreeca.next.Origin;
 	}
 
 
-	@Override public Origin<Response> handle(final Request request) {
+	@Override public Responder handle(final Request request) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");

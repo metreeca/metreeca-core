@@ -24,6 +24,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
@@ -79,12 +80,23 @@ public final class Request extends Message<Request> {
 	/**
 	 * Creates a response for this request.
 	 *
+	 * @param mapper the mapping function  used to initialize the new response; must return a non-null value
+	 *
 	 * @return a new response {@linkplain Response#request() associated} to this request
+	 *
+	 * @throws NullPointerException if {@code mapper} is null or return a null value
 	 */
-	public Response response() {
-		return new Response(this);
+	public Responder reply(final Function<Response, Response> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return consumer -> consumer.accept(new Response(this).map(mapper));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Checks if this request is safe.

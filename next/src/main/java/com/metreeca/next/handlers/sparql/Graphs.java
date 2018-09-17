@@ -24,7 +24,7 @@ import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.Values;
 import com.metreeca.next.*;
 import com.metreeca.next._work.Crate;
-import com.metreeca.next.Origin;
+import com.metreeca.next.Responder;
 import com.metreeca.next.formats.*;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
@@ -92,7 +92,7 @@ public final class Graphs implements Handler {
 			.post(this::post);
 
 
-	@Override public Origin<Response> handle(final Request request) {
+	@Override public Responder handle(final Request request) {
 		return delegate.handle(request);
 	}
 
@@ -119,8 +119,8 @@ public final class Graphs implements Handler {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-get
 	 */
-	private Origin<Response> get(final Request request) {
-		return client -> {
+	private Responder get(final Request request) {
+		return consumer -> {
 
 			final boolean catalog=request.query().isEmpty();
 
@@ -129,13 +129,13 @@ public final class Graphs implements Handler {
 
 			if ( target == null && !catalog ) {
 
-				client.accept(request.response().status(Response.BadRequest).body(JSON.Format, error(
+				request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
 						"parameter-missing", "missing target graph parameter"
-				)));
+				))).accept(consumer);
 
 			} else if ( !publik && !request.as(Form.root) ) {
 
-				client.accept(refused(request));
+				refused(request).accept(consumer);
 
 			} else if ( catalog ) { // graph catalog
 
@@ -156,10 +156,10 @@ public final class Graphs implements Handler {
 					}
 				}
 
-				client.accept(request.response().status(Response.OK).body(
+				request.reply(response -> response.status(Response.OK).body(
 						_RDF.Format,
 						new Crate(request.item(), GraphsShape, model))
-				);
+				).accept(consumer);
 
 			} else {
 
@@ -171,14 +171,16 @@ public final class Graphs implements Handler {
 				final Resource context=target.isEmpty() ? null : iri(target);
 
 				try (final RepositoryConnection connection=graph.connect()) {
-					client.accept(request.response().status(Response.OK)
+					request.reply(response -> response.status(Response.OK)
 
 							.header("Content-Type", format.getDefaultMIMEType())
 							.header("Content-Disposition", format("attachment; filename=\"%s.%s\"",
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(_Writer.Format, writer -> connection.export(factory.getWriter(writer), context)));
+							.body(_Writer.Format, writer -> connection.export(factory.getWriter(writer), context))
+
+					).accept(consumer);
 				}
 			}
 		};
@@ -187,20 +189,20 @@ public final class Graphs implements Handler {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-put
 	 */
-	private Origin<Response> put(final Request request) {
-		return client -> {
+	private Responder put(final Request request) {
+		return consumer -> {
 
 			final String target=graph(request);
 
 			if ( target == null ) {
 
-				client.accept(request.response().status(Response.BadRequest).body(JSON.Format, error(
+				request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
 						"parameter-missing", "missing target graph parameter"
-				)));
+				))).accept(consumer);
 
 			} else if ( !request.as(Form.root) ) {
 
-				client.accept(refused(request));
+				refused(request).accept(consumer);
 
 			} else {
 
@@ -226,32 +228,34 @@ public final class Graphs implements Handler {
 					connection.clear(context);
 					connection.add(input, request.base(), factory.getRDFFormat(), context);
 
-					client.accept(request.response().status(exists ? Response.NoContent : Response.Created));
+					request.reply(response ->
+							response.status(exists ? Response.NoContent : Response.Created)
+					).accept(consumer);
 
 				} catch ( final IOException e ) {
 
 					trace.warning(this, "unable to read RDF payload", e);
 
-					client.accept(request.response().status(Response.InternalServerError).cause(e).body(JSON.Format, error(
+					request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
 							"payload-unreadable", "I/O while reading RDF payload: see server logs for more detail"
-					)));
+					))).accept(consumer);
 
 				} catch ( final RDFParseException e ) {
 
 					trace.warning(this, "malformed RDF payload", e);
 
-					client.accept(request.response().status(Response.BadRequest).cause(e).body(JSON.Format, error(
+					request.reply(response -> response.status(Response.BadRequest).cause(e).body(JSON.Format, error(
 							"payload-malformed",
 							"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
-					)));
+					))).accept(consumer);
 
 				} catch ( final RepositoryException e ) {
 
 					trace.warning(this, "unable to update graph "+context, e);
 
-					client.accept(request.response().status(Response.InternalServerError).cause(e).body(JSON.Format, error(
+					request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
 							"update-aborted", "unable to update graph: see server logs for more detail"
-					)));
+					))).accept(consumer);
 
 				}
 
@@ -263,20 +267,20 @@ public final class Graphs implements Handler {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-delete
 	 */
-	private Origin<Response> delete(final Request request) {
-		return client -> {
+	private Responder delete(final Request request) {
+		return consumer -> {
 
 			final String target=graph(request);
 
 			if ( target == null ) {
 
-				client.accept(request.response().status(Response.BadRequest).body(JSON.Format, error(
+				request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
 						"parameter-missing", "missing target graph parameter"
-				)));
+				))).accept(consumer);
 
 			} else if ( !request.as(Form.root) ) {
 
-				client.accept(refused(request));
+				refused(request).accept(consumer);
 
 			} else {
 
@@ -288,15 +292,17 @@ public final class Graphs implements Handler {
 
 					connection.clear(context);
 
-					client.accept(request.response().status(exists ? Response.NoContent : Response.NotFound));
+					request.reply(response ->
+							response.status(exists ? Response.NoContent : Response.NotFound)
+					).accept(consumer);
 
 				} catch ( final RepositoryException e ) {
 
 					trace.warning(this, "unable to update graph "+context, e);
 
-					client.accept(request.response().status(Response.InternalServerError).body(JSON.Format, error(
+					request.reply(response -> response.status(Response.InternalServerError).body(JSON.Format, error(
 							"update-aborted", "unable to delete graph: see server logs for more detail"
-					)));
+					))).accept(consumer);
 
 				}
 
@@ -308,8 +314,8 @@ public final class Graphs implements Handler {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-post
 	 */
-	private Origin<Response> post(final Request request) {
-		return client -> {
+	private Responder post(final Request request) {
+		return consumer -> {
 
 			// !!! support  "multipart/form-data"
 			// !!! support graph creation with IRI identifying the underlying Graph Store
@@ -318,13 +324,13 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				client.accept(request.response().status(Response.BadRequest).body(JSON.Format, error(
+				request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
 						"parameter-missing", "missing target graph parameter"
-				)));
+				))).accept(consumer);
 
 			} else if ( !request.as(Form.root) ) {
 
-				client.accept(refused(request));
+				refused(request).accept(consumer);
 
 			} else {
 
@@ -344,33 +350,35 @@ public final class Graphs implements Handler {
 
 						connection.add(input, request.base(), factory.getRDFFormat(), context);
 
-						client.accept(request.response().status(exists ? Response.NoContent : Response.Created));
+						request.reply(response ->
+								response.status(exists ? Response.NoContent : Response.Created)
+						).accept(consumer);
 
 					} catch ( final IOException e ) {
 
 						trace.warning(this, "unable to read RDF payload", e);
 
-						client.accept(request.response().status(Response.InternalServerError).body(JSON.Format, error(
+						request.reply(response -> response.status(Response.InternalServerError).body(JSON.Format, error(
 								"payload-unreadable",
 								"I/O while reading RDF payload: see server logs for more detail"
-						)));
+						))).accept(consumer);
 
 					} catch ( final RDFParseException e ) {
 
 						trace.warning(this, "malformed RDF payload", e);
 
-						client.accept(request.response().status(Response.BadRequest).body(JSON.Format, error(
+						request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
 								"payload-malformed",
 								"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
-						)));
+						))).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						client.accept(request.response().status(Response.InternalServerError).body(JSON.Format, error(
+						request.reply(response -> response.status(Response.InternalServerError).body(JSON.Format, error(
 								"update-aborted", "unable to update graph: see server logs for more detail"
-						)));
+						))).accept(consumer);
 
 					}
 				});

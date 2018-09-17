@@ -18,8 +18,9 @@
 package com.metreeca.next.wrappers;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.next.*;
-import com.metreeca.next.formats.Text;
+import com.metreeca.next.Handler;
+import com.metreeca.next.Message;
+import com.metreeca.next.Wrapper;
 import com.metreeca.tray.sys.Loader;
 
 import java.util.NoSuchElementException;
@@ -95,14 +96,16 @@ import static com.metreeca.tray.Tray.tool;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> handler.handle(request).map(response ->
-				path.isEmpty() || !request.interactive() || response.interactive() ? response : request
-						.response()
-						.status(Response.OK)
-						.header("Content-Type", type)
-						.body(Text.Format, LinkPattern.matcher(text).replaceAll(
-								String.format(LinkReplacement, request.base(), path)
-						)));
+
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		//return request -> handler.handle(request).map(response ->
+		//		path.isEmpty() || !request.interactive() || response.interactive() ? response : request.reply(r ->
+		//				r.status(Response.OK)
+		//						.header("Content-Type", type)
+		//						.body(Text.Format, LinkPattern.matcher(text).replaceAll(
+		//								String.format(LinkReplacement, request.base(), path)
+		//						)))
+		//);
 	}
 
 }

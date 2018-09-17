@@ -30,6 +30,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 
@@ -63,17 +64,23 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Tests if this message is interactive.
+	 * Maps this message.
 	 *
-	 * @return {@code true} if an {@code Accept} or {@code Content-Type} header of this message include a MIME type
-	 * usually associated with an interactive browser-managed HTTP exchanges (e.g. {@code text/html}
+	 * @param mapper the message mapping function; must return a non-null value
+	 * @param <R>    the type of the value returned by {@code mapper}
+	 *
+	 * @return a non-null value obtained by applying {@code mapper} to this message
+	 *
+	 * @throws NullPointerException if {@code mapper} is null or returns a null value
 	 */
-	public boolean interactive() {
-		return Stream.of(headers("accept"), headers("content-type"))
-				.flatMap(Collection::stream)
-				.anyMatch(value -> HTMLPattern.matcher(value).find());
-	}
+	public <R> R map(final Function<T, R> mapper) {
 
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return requireNonNull(mapper.apply(self()), "null mapper return value");
+	}
 
 	/**
 	 * Executes a task on this message.
@@ -93,6 +100,21 @@ public abstract class Message<T extends Message<T>> {
 		task.accept(self());
 
 		return self();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Tests if this message is interactive.
+	 *
+	 * @return {@code true} if an {@code Accept} or {@code Content-Type} header of this message include a MIME type
+	 * usually associated with an interactive browser-managed HTTP exchanges (e.g. {@code text/html}
+	 */
+	public boolean interactive() {
+		return Stream.of(headers("accept"), headers("content-type"))
+				.flatMap(Collection::stream)
+				.anyMatch(value -> HTMLPattern.matcher(value).find());
 	}
 
 

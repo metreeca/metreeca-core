@@ -39,7 +39,7 @@ final class HandlerTest {
 
 			transaction.add("begin");
 
-			consumer.accept(request.response().body(Text.Format, "inside"));
+			request.reply(response -> response.body(Text.Format, "inside")).accept(consumer);
 
 			transaction.add("commit");
 

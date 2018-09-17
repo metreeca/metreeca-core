@@ -152,7 +152,7 @@ public final class Tracer implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> client -> graph.update(connection -> {
+		return request -> consumer -> graph.update(connection -> {
 			handler.handle(request).map(response -> {
 
 				if ( response.success() ) {
@@ -203,9 +203,9 @@ public final class Tracer implements Wrapper {
 
 				}
 
-				return request;
+				return response;
 
-			});
+			}).accept(consumer);
 		});
 	}
 

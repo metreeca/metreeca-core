@@ -35,7 +35,7 @@ final class DispatcherTest {
 	@Test void testHandleOPTIONSByDefault() {
 		new Dispatcher()
 
-				.get((request) -> request.response().status(Response.OK))
+				.get((request) -> request.reply(response -> response.status(Response.OK)))
 
 				.handle(new Request().method(Request.POST))
 

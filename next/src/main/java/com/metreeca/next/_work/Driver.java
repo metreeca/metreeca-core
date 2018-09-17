@@ -76,7 +76,7 @@ public final class Driver implements Wrapper {
 	@Override public Handler wrap(final Handler handler) {
 		return request -> before(request).apply(
 				value -> handler.handle(value).map(this::after),
-				error -> request.response().status(Response.BadRequest).body(JSON.Format, error)
+				error -> request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error))
 		);
 	}
 

@@ -94,7 +94,7 @@ final class RouterTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Handler handler(final String id) {
-		return request -> request.response().body(Text.Format, id);
+		return request -> request.reply(response -> response.body(Text.Format, id));
 	}
 
 }

@@ -20,7 +20,6 @@ package com.metreeca.next.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.next.*;
-import com.metreeca.next.Origin;
 import com.metreeca.next.formats.JSON;
 import com.metreeca.next.formats._Output;
 import com.metreeca.next.handlers.Dispatcher;
@@ -67,7 +66,7 @@ import static java.lang.Boolean.parseBoolean;
 			.post(this::process);
 
 
-	@Override public Origin<Response> handle(final Request request) {
+	@Override public Responder handle(final Request request) {
 		return delegate.handle(request);
 	}
 
@@ -111,7 +110,7 @@ import static java.lang.Boolean.parseBoolean;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Origin<Response> process(final Request request) {
+	private Responder process(final Request request) {
 		try (final RepositoryConnection connection=graph.connect()) {
 
 			final Operation operation=operation(request, connection);
@@ -119,10 +118,10 @@ import static java.lang.Boolean.parseBoolean;
 
 			if ( operation == null ) { // !!! return void description for GET
 
-				return request.response().status(Response.BadRequest).body(JSON.Format, error(
+				return request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
 						"parameter-missing",
 						"missing query/update parameter"
-				));
+				)));
 
 			} else if ( !(publik && operation instanceof Query || request.as(Form.root)) ) {
 
@@ -135,9 +134,10 @@ import static java.lang.Boolean.parseBoolean;
 				final BooleanQueryResultWriterFactory factory=Formats.service(
 						BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
 
-				return request.response().status(Response.OK)
+				return request.reply(response -> response.status(Response.OK)
 						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-						.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(result));
+						.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(result))
+				);
 
 			} else if ( operation instanceof TupleQuery ) {
 
@@ -148,10 +148,10 @@ import static java.lang.Boolean.parseBoolean;
 				final TupleQueryResultWriterFactory factory=Formats.service(
 						TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
 
-				return request.response().status(Response.OK)
+				return request.reply(response -> response.status(Response.OK)
 						.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
 						.body(_Output.Format, output -> {
-							try  {
+							try {
 
 								final TupleQueryResultWriter writer=factory.getWriter(output);
 
@@ -165,7 +165,7 @@ import static java.lang.Boolean.parseBoolean;
 							} finally {
 								result.close();
 							}
-						});
+						}));
 
 			} else if ( operation instanceof GraphQuery ) {
 
@@ -176,7 +176,7 @@ import static java.lang.Boolean.parseBoolean;
 				final RDFWriterFactory factory=Formats.service(
 						RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
 
-				return request.response().status(Response.OK)
+				return request.reply(response -> response.status(Response.OK)
 						.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
 						.body(_Output.Format, output -> {
 
@@ -196,7 +196,7 @@ import static java.lang.Boolean.parseBoolean;
 
 							writer.endRDF();
 
-						});
+						}));
 
 			} else if ( operation instanceof Update ) {
 
@@ -218,61 +218,62 @@ import static java.lang.Boolean.parseBoolean;
 				final BooleanQueryResultWriterFactory factory=Formats.service(
 						BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
 
-				return request.response().status(Response.OK)
+				return request.reply(response -> response.status(Response.OK)
 						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-						.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(true));
+						.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(true))
+				);
 
 			} else {
 
-				return request.response().status(Response.NotImplemented).body(JSON.Format, error(
+				return request.reply(response -> response.status(Response.NotImplemented).body(JSON.Format, error(
 						"operation-unsupported", operation.getClass().getName()
-				));
+				)));
 
 			}
 
 		} catch ( final MalformedQueryException e ) {
 
-			return request.response().status(Response.BadRequest).cause(e).body(JSON.Format, error(
+			return request.reply(response -> response.status(Response.BadRequest).cause(e).body(JSON.Format, error(
 					"query-malformed", e.getMessage()
-			));
+			)));
 
 		} catch ( final IllegalArgumentException e ) {
 
-			return request.response().status(Response.BadRequest).cause(e).body(JSON.Format, error(
+			return request.reply(response -> response.status(Response.BadRequest).cause(e).body(JSON.Format, error(
 					"request-malformed", e.getMessage()
-			));
+			)));
 
 		} catch ( final UnsupportedOperationException e ) {
 
-			return request.response().status(Response.NotImplemented).cause(e).body(JSON.Format, error(
+			return request.reply(response -> response.status(Response.NotImplemented).cause(e).body(JSON.Format, error(
 					"operation-unsupported", e.getMessage()
-			));
+			)));
 
 		} catch ( final QueryEvaluationException e ) {
 
 			// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
 
-			return request.response().status(Response.InternalServerError).cause(e).body(JSON.Format, error(
+			return request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
 					"query-evaluation", e.getMessage()
-			));
+			)));
 
 		} catch ( final UpdateExecutionException e ) {
 
-			return request.response().status(Response.InternalServerError).cause(e).body(JSON.Format, error(
+			return request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
 					"update-evaluation", e.getMessage()
-			));
+			)));
 
 		} catch ( final TupleQueryResultHandlerException e ) {
 
-			return request.response().status(Response.InternalServerError).cause(e).body(JSON.Format, error(
+			return request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
 					"response-error", e.getMessage()
-			));
+			)));
 
 		} catch ( final RuntimeException e ) {
 
-			return request.response().status(Response.InternalServerError).cause(e).body(JSON.Format, error(
+			return request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
 					"repository-error", e.getMessage()
-			));
+			)));
 
 		}
 

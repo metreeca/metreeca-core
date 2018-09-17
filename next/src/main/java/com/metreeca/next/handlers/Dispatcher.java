@@ -19,7 +19,7 @@ package com.metreeca.next.handlers;
 
 
 import com.metreeca.next.*;
-import com.metreeca.next.Origin;
+import com.metreeca.next.Responder;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -125,7 +125,7 @@ public final class Dispatcher implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Origin<Response> handle(final Request request) {
+	@Override public Responder handle(final Request request) {
 		return Optional.ofNullable(mappings.get(request.method()))
 				.orElse(this::unsupported)
 				.handle(request);
@@ -134,16 +134,16 @@ public final class Dispatcher implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Response options(final Request request) {
-		return request.response()
+	private Responder options(final Request request) {
+		return request.reply(response -> response
 				.status(Response.OK)
-				.headers("Allow", mappings.keySet());
+				.headers("Allow", mappings.keySet()));
 	}
 
-	private Response unsupported(final Request request) {
-		return request.response()
+	private Responder unsupported(final Request request) {
+		return request.reply(response -> response
 				.status(Response.MethodNotAllowed)
-				.headers("Allow", mappings.keySet());
+				.headers("Allow", mappings.keySet()));
 	}
 
 }

@@ -22,7 +22,6 @@ import com.metreeca.form.things.Values;
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 
 /**
@@ -30,7 +29,7 @@ import java.util.function.Consumer;
  *
  * <p>Handles state/behaviour for HTTP responses.</p>
  */
-public final class Response extends Message<Response> implements Origin<Response> {
+public final class Response extends Message<Response> {
 
 	public static final int OK=200; // https://tools.ietf.org/html/rfc7231#section-6.3.1
 	public static final int Created=201; // https://tools.ietf.org/html/rfc7231#section-6.3.2
@@ -80,19 +79,8 @@ public final class Response extends Message<Response> implements Origin<Response
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	@Override protected Response self() {
 		return this;
-	}
-
-	@Override public void accept(final Consumer<Response> consumer) {
-
-		if ( consumer == null ) {
-			throw new NullPointerException("null consumer");
-		}
-
-		consumer.accept(this);
 	}
 
 
@@ -107,6 +95,8 @@ public final class Response extends Message<Response> implements Origin<Response
 		return request;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Checks if this response is successful.

@@ -18,7 +18,6 @@
 package com.metreeca.next.handlers.sparql;
 
 import com.metreeca.next.*;
-import com.metreeca.next.Origin;
 import com.metreeca.next.formats.JSON;
 import com.metreeca.next.formats._Output;
 import com.metreeca.next.handlers.Dispatcher;
@@ -45,8 +44,9 @@ public class Proxy implements Handler {
 
 	// !!! support hardwired remote endpoint
 
-	private int timeoutConnect=30; // [s]
-	private int timeoutRead=60; // [s]
+	private static final int timeoutConnect=30; // [s]
+	private static final int timeoutRead=60; // [s]
+
 
 	private final Trace trace=tool(Trace.Factory);
 
@@ -55,34 +55,35 @@ public class Proxy implements Handler {
 			.post(this::process);
 
 
-	@Override public Origin<Response> handle(final Request request) {
+	@Override public Responder handle(final Request request) {
 		return delegate.handle(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Origin<Response> process(final Request request) {
-		return consumer -> {
+	private Responder process(final Request request) {
+		return consumer -> request.reply(response -> {
 			try {
 
-				consumer.accept(out(request.response(), in(request)));
+				return out(response, in(request));
 
 			} catch ( final IOException|RuntimeException e ) {
 
 				trace.warning(this, "failed proxy request", e);
 
-				consumer.accept(request.response()
+				return response
 
 						.status(e instanceof IllegalArgumentException ? Response.BadRequest // !!! review
 								: e instanceof IOException ? Response.BadGateway
-								: Response.InternalServerError)
+								: Response.InternalServerError
+						)
 
 						.cause(e)
-						.body(JSON.Format, error("request-failed", e)));
+						.body(JSON.Format, error("request-failed", e));
 
 			}
-		};
+		}).accept(consumer);
 	}
 
 
