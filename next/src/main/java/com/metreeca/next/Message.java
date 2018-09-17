@@ -89,7 +89,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if {@code task} is {@code null}
+	 * @throws NullPointerException if {@code task} is null
 	 */
 	public T with(final Consumer<T> task) {
 
@@ -138,7 +138,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if {@code headers} is {@code null} or contains either null keys or null values
+	 * @throws NullPointerException if {@code headers} is null or contains either null keys or null values
 	 */
 	public T headers(final Map<String, ? extends Collection<String>> headers) {
 
@@ -174,7 +174,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @return an optional value containing the first value among those returned by {@link #headers(String)}, if one is
 	 * present; an empty optional otherwise
 	 *
-	 * @throws NullPointerException if {@code name} is {@code null}
+	 * @throws NullPointerException if {@code name} is null
 	 */
 	public Optional<String> header(final String name) {
 
@@ -195,7 +195,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code value} is {@code null}
+	 * @throws NullPointerException if either {@code name} or {@code value} is null
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">
 	 * RFC 7230 Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
@@ -239,7 +239,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values}
 	 *                              contains a {@code null} value
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
 	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
@@ -258,7 +258,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values}
 	 *                              contains a {@code null} value
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
 	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
@@ -310,7 +310,7 @@ public abstract class Message<T extends Message<T>> {
 	 * format} or {@linkplain Format#get(Message) derived} by {@code format} from existing representation; an empty
 	 * optional otherwise
 	 *
-	 * @throws NullPointerException if {@code format} is {@code null}
+	 * @throws NullPointerException if {@code format} is null
 	 */
 	@SuppressWarnings("unchecked") public <V> Optional<V> body(final Format<V> format) {
 
@@ -330,7 +330,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code format} or {@code body} is {@code null}
+	 * @throws NullPointerException if either {@code format} or {@code body} is null
 	 */
 	public <V> T body(final Format<V> format, final V value) {
 
@@ -358,7 +358,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code format} or {@code mapper} is {@code null}
+	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
 	 */
 	public <V> T map(final Format<V> format, final Function<V, V> mapper) {
 

@@ -70,7 +70,7 @@ public final class Inspector implements Wrapper {
 	 *
 	 * @return this inspector
 	 *
-	 * @throws NullPointerException if {@code shape} is {@code null}
+	 * @throws NullPointerException if {@code shape} is null
 	 */
 	public Inspector shape(final Shape shape) {
 

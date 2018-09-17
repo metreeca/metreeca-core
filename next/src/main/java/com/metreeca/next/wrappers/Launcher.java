@@ -63,7 +63,7 @@ import static com.metreeca.tray.Tray.tool;
 	 *
 	 * @return this launcher
 	 *
-	 * @throws NullPointerException     if {@code path} is {@code null}
+	 * @throws NullPointerException     if {@code path} is null
 	 * @throws IllegalArgumentException if {@code path} is not absolute
 	 */
 	public Launcher path(final String path) {

@@ -57,7 +57,7 @@ public final class RDFSource implements Handler {
 	 *
 	 * @return this handler
 	 *
-	 * @throws NullPointerException if {@code shape} is {@code null}
+	 * @throws NullPointerException if {@code shape} is null
 	 */
 	public RDFSource shape(final Shape shape) {
 

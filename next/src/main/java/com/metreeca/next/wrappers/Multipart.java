@@ -44,7 +44,7 @@ import com.metreeca.next.Wrapper;
 	 *
 	 * @return this wrapper
 	 *
-	 * @throws NullPointerException if {@code main} is {@code null}
+	 * @throws NullPointerException if {@code main} is null
 	 */
 	public Multipart main(final String main) {
 

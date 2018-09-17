@@ -55,7 +55,7 @@ public final class Rest {
 	 *
 	 * @return a JSON object describing the error condition ({@code { "error": "<error>" } })
 	 *
-	 * @throws NullPointerException if {@code error} is {@code null}
+	 * @throws NullPointerException if {@code error} is null
 	 */
 	public static JsonObject error(final String error) {
 
@@ -77,7 +77,7 @@ public final class Rest {
 	 *
 	 * @return a JSON object describing the error condition ({@code { "error": "<error>", "cause": "<cause>" } })
 	 *
-	 * @throws NullPointerException if either {@code error} or {@code cause} is {@code null}
+	 * @throws NullPointerException if either {@code error} or {@code cause} is null
 	 */
 	public static JsonObject error(final String error, final Throwable cause) {
 
@@ -99,7 +99,7 @@ public final class Rest {
 	 *
 	 * @return a JSON object describing the error condition ({@code { "error": "<error>", "cause": "<cause>" } })
 	 *
-	 * @throws NullPointerException if either {@code error} or {@code cause} is {@code null}
+	 * @throws NullPointerException if either {@code error} or {@code cause} is null
 	 */
 	public static JsonObject error(final String error, final String cause) {
 
@@ -125,7 +125,7 @@ public final class Rest {
 	 *
 	 * @return a JSON object describing the error condition ({@code { "error": "<error>", "cause": <cause> } })
 	 *
-	 * @throws NullPointerException if either {@code error} or {@code cause} is {@code null}
+	 * @throws NullPointerException if either {@code error} or {@code cause} is null
 	 */
 	public static JsonObject error(final String error, final JsonValue cause) {
 

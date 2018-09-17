@@ -37,7 +37,7 @@ import com.metreeca.form.Form;
 	 * {@linkplain Request#user()  user} is anonymous (that it's equal to {@link Form#none}), or a {@value
 	 * Response#Forbidden} status code, otherwise
 	 *
-	 * @throws NullPointerException if {@code request} is {@code null}
+	 * @throws NullPointerException if {@code request} is null
 	 */
 	public static Responder refused(final Request request) {
 
@@ -55,7 +55,7 @@ import com.metreeca.form.Form;
 	 *
 	 * @return a responder providing an empty response with a {@value Response#Unauthorized} status {@code}
 	 *
-	 * @throws NullPointerException if {@code request} is {@code null}
+	 * @throws NullPointerException if {@code request} is null
 	 */
 	public static Responder unauthorized(final Request request) {
 
@@ -73,7 +73,7 @@ import com.metreeca.form.Form;
 	 *
 	 * @return a responder providing an empty response with a {@value Response#Forbidden} status code
 	 *
-	 * @throws NullPointerException if {@code request} is {@code null}
+	 * @throws NullPointerException if {@code request} is null
 	 */
 	public static Responder forbidden(final Request request) {
 

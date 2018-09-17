@@ -48,7 +48,7 @@ public final class Tray {
 	 * @return the shared tool created by {@code factory} or by its plugin replacement if one was {@linkplain
 	 * #set(Supplier, Supplier) specified}
 	 *
-	 * @throws IllegalArgumentException if {@code factory} is {@code null}
+	 * @throws IllegalArgumentException if {@code factory} is null
 	 */
 	public static <T> T tool(final Supplier<T> factory) {
 
@@ -93,7 +93,7 @@ public final class Tray {
 	 * @return the shared tool created by {@code factory} or by its plugin replacement if one was {@linkplain
 	 * #set(Supplier, Supplier) specified}
 	 *
-	 * @throws IllegalArgumentException if {@code factory} is {@code null}
+	 * @throws IllegalArgumentException if {@code factory} is null
 	 */
 	public <T> T get(final Supplier<T> factory) {
 
@@ -144,7 +144,7 @@ public final class Tray {
 	 *
 	 * @return this tool tray
 	 *
-	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is {@code null}
+	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is null
 	 * @throws IllegalStateException    if {@code factory} was already replaced with a plugin or its tool was already
 	 *                                  retrieved
 	 */
@@ -235,7 +235,7 @@ public final class Tray {
 	 *
 	 * @return this tool tray
 	 *
-	 * @throws NullPointerException if {@code task} is {@code null}
+	 * @throws NullPointerException if {@code task} is null
 	 */
 	public Tray run(final Runnable task) {
 

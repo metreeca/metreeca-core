@@ -51,7 +51,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @return this dispatcher
 	 *
-	 * @throws NullPointerException if {@code handler} is {@code null}
+	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Dispatcher get(final Handler handler) {
 		return method(Request.GET, handler);
@@ -64,7 +64,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @return this dispatcher
 	 *
-	 * @throws NullPointerException if {@code handler} is {@code null}
+	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Dispatcher post(final Handler handler) {
 		return method(Request.POST, handler);
@@ -77,7 +77,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @return this dispatcher
 	 *
-	 * @throws NullPointerException if {@code handler} is {@code null}
+	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Dispatcher put(final Handler handler) {
 		return method(Request.PUT, handler);
@@ -90,7 +90,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @return this dispatcher
 	 *
-	 * @throws NullPointerException if {@code handler} is {@code null}
+	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Dispatcher delete(final Handler handler) {
 		return method(Request.DELETE, handler);
@@ -105,7 +105,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @return this dispatcher
 	 *
-	 * @throws NullPointerException if either {@code method} or {@code handler} is {@code null}
+	 * @throws NullPointerException if either {@code method} or {@code handler} is null
 	 */
 	public Dispatcher method(final String method, final Handler handler) {
 

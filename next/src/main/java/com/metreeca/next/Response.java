@@ -67,7 +67,7 @@ public final class Response extends Message<Response> {
 	 *
 	 * @param request the originating request for the new response
 	 *
-	 * @throws NullPointerException if {@code request} is {@code null}
+	 * @throws NullPointerException if {@code request} is null
 	 */
 	public Response(final Request request) {
 
@@ -96,7 +96,7 @@ public final class Response extends Message<Response> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////// ̰///////////////////////////////////////////////
 
 	/**
 	 * Checks if this response is successful.
@@ -178,7 +178,7 @@ public final class Response extends Message<Response> {
 	 *
 	 * @return this response
 	 *
-	 * @throws NullPointerException if {@code cause} is {@code null}
+	 * @throws NullPointerException if {@code cause} is null
 	 */
 	public Response cause(final Throwable cause) {
 

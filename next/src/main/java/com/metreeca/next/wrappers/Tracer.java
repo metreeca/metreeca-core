@@ -71,7 +71,7 @@ public final class Tracer implements Wrapper {
 	 *
 	 * @return this tracer
 	 *
-	 * @throws NullPointerException if {@code task} is {@code null}
+	 * @throws NullPointerException if {@code task} is null
 	 */
 	public Tracer task(final IRI task) {
 
@@ -135,7 +135,7 @@ public final class Tracer implements Wrapper {
 	 *
 	 * @return this tracer
 	 *
-	 * @throws NullPointerException if {@code sparql} is {@code null}
+	 * @throws NullPointerException if {@code sparql} is null
 	 */
 	public Tracer sparql(final String sparql) {
 

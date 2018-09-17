@@ -48,7 +48,7 @@ public final class Conditional implements Wrapper {
 	 *
 	 * @return this conditional wrapper
 	 *
-	 * @throws NullPointerException if {@code predicate} is {@code null}
+	 * @throws NullPointerException if {@code predicate} is null
 	 */
 	public Conditional test(final Predicate<Request> predicate) {
 

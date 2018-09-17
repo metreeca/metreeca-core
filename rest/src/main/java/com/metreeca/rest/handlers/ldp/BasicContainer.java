@@ -95,7 +95,7 @@ public final class BasicContainer implements Handler {
 	 *
 	 * @return this handler
 	 *
-	 * @throws NullPointerException if {@code shape} is {@code null}
+	 * @throws NullPointerException if {@code shape} is null
 	 */
 	public BasicContainer shape(final Shape shape) {
 

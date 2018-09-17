@@ -50,7 +50,7 @@ public final class _Tray {
 	 * @return the shared tool created by {@code factory} or by its plugin replacement if one was {@linkplain
 	 * #set(Supplier, Supplier) specified}
 	 *
-	 * @throws IllegalArgumentException if {@code factory} is {@code null}
+	 * @throws IllegalArgumentException if {@code factory} is null
 	 */
 	public static <T> T tool(final Supplier<T> factory) {
 
@@ -76,7 +76,7 @@ public final class _Tray {
 	 * @param factory the factory to be replaced
 	 * @param plugin  the replacing factory; must return a non-null and thread-safe object
 	 *
-	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is {@code null}
+	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is null
 	 * @throws IllegalStateException    if {@code factory} was already replaced with a plugin or its tool was already
 	 *                                  retrieved
 	 */
@@ -122,7 +122,7 @@ public final class _Tray {
 	 * @return the shared tool created by {@code factory} or by its plugin replacement if one was {@linkplain
 	 * #set(Supplier, Supplier) specified}
 	 *
-	 * @throws IllegalArgumentException if {@code factory} is {@code null}
+	 * @throws IllegalArgumentException if {@code factory} is null
 	 */
 	public <T> T get(final Supplier<T> factory) {
 
@@ -178,7 +178,7 @@ public final class _Tray {
 	 *
 	 * @return this tool tray
 	 *
-	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is {@code null}
+	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is null
 	 * @throws IllegalStateException    if {@code factory} was already replaced with a plugin or its tool was already
 	 *                                  retrieved
 	 */

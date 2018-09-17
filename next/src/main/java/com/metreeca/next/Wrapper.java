@@ -42,7 +42,7 @@ package com.metreeca.next;
 	 *
 	 * @return the combined wrapper obtained by wrapping this wrapper around {@code wrapper}
 	 *
-	 * @throws NullPointerException if {@code wrapper} is {@code null}
+	 * @throws NullPointerException if {@code wrapper} is null
 	 */
 	public default Wrapper wrap(final Wrapper wrapper) {
 

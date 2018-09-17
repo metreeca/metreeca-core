@@ -76,7 +76,7 @@ public final class _RDF implements Task { // !!! rename to avoid clashed with RD
 	 *
 	 * @return this task
 	 *
-	 * @throws IllegalArgumentException if {@code base} is {@code null}
+	 * @throws IllegalArgumentException if {@code base} is null
 	 */
 	public _RDF base(final String base) {
 
@@ -94,7 +94,7 @@ public final class _RDF implements Task { // !!! rename to avoid clashed with RD
 	 *
 	 * @return this task
 	 *
-	 * @throws IllegalArgumentException if {@code format} is {@code null}
+	 * @throws IllegalArgumentException if {@code format} is null
 	 */
 	public _RDF format(final String format) {
 

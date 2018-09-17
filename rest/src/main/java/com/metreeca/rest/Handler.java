@@ -46,7 +46,7 @@ import static com.metreeca.form.things.JSON.object;
 	 * @param request  the incoming request
 	 * @param response the outgoing response
 	 *
-	 * @throws NullPointerException if either {@code request} or {@code response} is {@code null}
+	 * @throws NullPointerException if either {@code request} or {@code response} is null
 	 */
 	public static void refused(final Request request, final Response response) {
 
@@ -73,7 +73,7 @@ import static com.metreeca.form.things.JSON.object;
 	 * @param request  the incoming request
 	 * @param response the outgoing response
 	 *
-	 * @throws NullPointerException if either {@code request} or {@code response} is {@code null}
+	 * @throws NullPointerException if either {@code request} or {@code response} is null
 	 */
 	public static void unauthorized(final Request request, final Response response) {
 
@@ -96,7 +96,7 @@ import static com.metreeca.form.things.JSON.object;
 	 * @param request  the incoming request
 	 * @param response the outgoing response
 	 *
-	 * @throws NullPointerException if either {@code request} or {@code response} is {@code null}
+	 * @throws NullPointerException if either {@code request} or {@code response} is null
 	 */
 	public static void forbidden(final Request request, final Response response) {
 
@@ -144,7 +144,7 @@ import static com.metreeca.form.things.JSON.object;
 	 * @param source the source of the incoming request
 	 * @param target the target of the outgoing response
 	 *
-	 * @throws NullPointerException if either {@code source} or {@code target} is {@code null}
+	 * @throws NullPointerException if either {@code source} or {@code target} is null
 	 */
 	public default void handle(final Consumer<Request.Writer> source, final Consumer<Response.Reader> target) {
 
@@ -168,7 +168,7 @@ import static com.metreeca.form.things.JSON.object;
 	 * @return the combined handler obtained by {@linkplain Wrapper#wrap(Handler) wrapping} {@code wrapper} around this
 	 * handler
 	 *
-	 * @throws NullPointerException if {@code wrapper} is {@code null}
+	 * @throws NullPointerException if {@code wrapper} is null
 	 */
 	public default Handler wrap(final Wrapper wrapper) {
 

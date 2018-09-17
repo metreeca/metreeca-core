@@ -177,7 +177,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this request
 	 *
-	 * @throws NullPointerException if {@code user} is {@code null}
+	 * @throws NullPointerException if {@code user} is null
 	 */
 	public Request user(final IRI user) {
 
@@ -206,7 +206,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this request
 	 *
-	 * @throws NullPointerException if {@code roles} is {@code null} or contains a {@code null} value
+	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
 	 */
 	public Request roles(final Value... roles) {
 		return roles(asList(roles));
@@ -220,7 +220,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this request
 	 *
-	 * @throws NullPointerException if {@code roles} is {@code null} or contains a {@code null} value
+	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
 	 */
 	public Request roles(final Collection<? extends Value> roles) {
 
@@ -254,7 +254,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this request
 	 *
-	 * @throws NullPointerException if {@code method} is {@code null}
+	 * @throws NullPointerException if {@code method} is null
 	 */
 	public Request method(final String method) {
 
@@ -285,7 +285,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this request
 	 *
-	 * @throws NullPointerException     if {@code base} is {@code null}
+	 * @throws NullPointerException     if {@code base} is null
 	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing
 	 *                                  slash
 	 */
@@ -327,7 +327,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this request
 	 *
-	 * @throws NullPointerException     if {@code path} is {@code null}
+	 * @throws NullPointerException     if {@code path} is null
 	 * @throws IllegalArgumentException if {@code path} doesn't include a leading slash
 	 */
 	public Request path(final String path) {
@@ -362,7 +362,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this request
 	 *
-	 * @throws NullPointerException if {@code query} is {@code null}
+	 * @throws NullPointerException if {@code query} is null
 	 */
 	public Request query(final String query) {
 
@@ -394,7 +394,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if {@code parameters} is {@code null} or contains either null keys or null values
+	 * @throws NullPointerException if {@code parameters} is null or contains either null keys or null values
 	 */
 	public Request parameters(final Map<String, ? extends Collection<String>> parameters) {
 
@@ -430,7 +430,7 @@ public final class Request extends Message<Request> {
 	 * @return an optional value containing the first value among those returned by {@link #parameters(String)}, if one
 	 * is present; an empty optional otherwise
 	 *
-	 * @throws NullPointerException if {@code name} is {@code null}
+	 * @throws NullPointerException if {@code name} is null
 	 */
 	public Optional<String> parameter(final String name) {
 
@@ -451,7 +451,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code value} is {@code null}
+	 * @throws NullPointerException if either {@code name} or {@code value} is null
 	 */
 	public Request parameter(final String name, final String value) {
 
@@ -493,7 +493,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values}
 	 *                              contains a {@code null} value
 	 */
 	public Request parameters(final String name, final String... values) {
@@ -510,7 +510,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is {@code null} or if {@code values}
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values}
 	 *                              contains a {@code null} value
 	 */
 	public Request parameters(final String name, final Collection<String> values) {

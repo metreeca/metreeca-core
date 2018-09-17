@@ -84,7 +84,7 @@ public final class _Setup {
 	 *
 	 * @return the global {@linkplain System#getProperties() system} properties
 	 *
-	 * @throws IllegalArgumentException if {@code setup} is {@code null}
+	 * @throws IllegalArgumentException if {@code setup} is null
 	 */
 	public static Properties system(final _Setup setup) {
 
@@ -103,7 +103,7 @@ public final class _Setup {
 	 * @return custom properties read from a user-defined {@linkplain #SetupProperty setup} file, if defined, or from
 	 * the {@value #SetupProperty} file under the default {@linkplain #StorageProperty storage} folder, if found
 	 *
-	 * @throws IllegalArgumentException if {@code setup} is {@code null}
+	 * @throws IllegalArgumentException if {@code setup} is null
 	 */
 	public static Properties custom(final _Setup setup) {
 
@@ -143,7 +143,7 @@ public final class _Setup {
 	 *
 	 * @return the default storage folder
 	 *
-	 * @throws IllegalArgumentException if {@code setup} is {@code null}
+	 * @throws IllegalArgumentException if {@code setup} is null
 	 */
 	public static File storage(final _Setup setup) {
 
@@ -167,7 +167,7 @@ public final class _Setup {
 	 *
 	 * @param loaders setup properties loaders in decreasing precedence order
 	 *
-	 * @throws IllegalArgumentException if either {@code loaders} or one of its elements is {@code null}
+	 * @throws IllegalArgumentException if either {@code loaders} or one of its elements is null
 	 */
 	@SafeVarargs public _Setup(final Function<_Setup, Properties>... loaders) {
 		this(asList(loaders));
@@ -178,7 +178,7 @@ public final class _Setup {
 	 *
 	 * @param loaders setup properties loaders in decreasing precedence order
 	 *
-	 * @throws IllegalArgumentException if either {@code loaders} or one of its elements is {@code null}
+	 * @throws IllegalArgumentException if either {@code loaders} or one of its elements is null
 	 */
 	public _Setup(final Iterable<Function<_Setup, Properties>> loaders) {
 
@@ -284,7 +284,7 @@ public final class _Setup {
 	 *
 	 * @return the value of the given {@code property} or the {@code fallback} value, if {@code property} is not defined
 	 *
-	 * @throws IllegalArgumentException if either {@code property} or {@code fallback} is {@code null}
+	 * @throws IllegalArgumentException if either {@code property} or {@code fallback} is null
 	 */
 	public String get(final String property, final String fallback) {
 
@@ -307,7 +307,7 @@ public final class _Setup {
 	 *
 	 * @return the value of the given {@code property} or the {@code fallback} value, if {@code property} is not defined
 	 *
-	 * @throws IllegalArgumentException if either {@code property} or {@code fallback} is {@code null}
+	 * @throws IllegalArgumentException if either {@code property} or {@code fallback} is null
 	 */
 	public File get(final String property, final File fallback) {
 
