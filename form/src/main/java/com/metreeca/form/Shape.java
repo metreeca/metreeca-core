@@ -90,20 +90,11 @@ public interface Shape {
 
 	//// Parametric Shapes /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Shape role(final IRI role, final Shape... shapes) {
-		return shape(Form.role, set(role), asList(shapes));
-	}
-
-	public static Shape role(final IRI role, final Collection<Shape> shapes) {
-		return shape(Form.role, set(role), shapes);
-	}
-
-
-	public static Shape role(final Set<IRI> roles, final Shape... shapes) {
+	public static Shape role(final Set<? extends Value> roles, final Shape... shapes) {
 		return shape(Form.role, roles, asList(shapes));
 	}
 
-	public static Shape role(final Set<IRI> roles, final Collection<Shape> shapes) {
+	public static Shape role(final Set<? extends Value> roles, final Collection<Shape> shapes) {
 		return shape(Form.role, roles, shapes);
 	}
 

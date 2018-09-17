@@ -84,9 +84,7 @@ public final class JSON implements Format<JsonObject> {
 	@Override public void set(final Message<?> message, final JsonObject value) {
 		message.header("content-type", MIME)
 
-				.body(_Writer.Format, writer -> {
-					Json.createWriter(writer).write(value);
-				});
+				.body(_Writer.Format, writer -> Json.createWriter(writer).write(value));
 	}
 
 }

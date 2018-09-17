@@ -17,13 +17,28 @@
 
 package com.metreeca.next.formats;
 
-import com.metreeca.next.Format;
-import com.metreeca.next.Message;
+import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
+import com.metreeca.form.codecs.JSONAdapter;
+import com.metreeca.form.probes.Outliner;
+import com.metreeca.form.things.Formats;
+import com.metreeca.next.*;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
+import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
+import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.util.*;
+
+import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.things.Lists.list;
 
 
 /**
@@ -47,81 +62,85 @@ import java.util.Optional;
 	 * representation, if present; an empty optional, otherwise
 	 */
 	@Override public Optional<Collection<Statement>> get(final Message<?> message) {
+		return message.body(_Reader.Format).map(supplier -> { // use reader to activate IRI rewriting
 
-		return Optional.empty(); // !!!
+			final Optional<Request> request=(message instanceof Request) ? // !!! replace with visitor
+					Optional.of((Request)message) : Optional.empty();
 
-		//return message.body(_Reader.Format).map(supplier -> { // use reader to activate IRI rewriting
-		//
-		//	final IRI focus=request.item();
-		//	final String type=request.header("content-type").orElse("");
-		//
-		//	final RDFParser parser=Formats
-		//			.service(RDFParserRegistry.getInstance(), RDFFormat.TURTLE, type)
-		//			.getParser();
-		//
-		//	parser.set(JSONAdapter.Shape, message.body(_Shape.Format).orElse(null));
-		//	parser.set(JSONAdapter.Focus, focus);
-		//
-		//	parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
-		//	parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
-		//
-		//	parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
-		//	parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
-		//
-		//	final ParseErrorCollector errorCollector=new ParseErrorCollector();
-		//
-		//	parser.setParseErrorListener(errorCollector);
-		//
-		//	final Collection<Statement> model=new ArrayList<>();
-		//
-		//	parser.setRDFHandler(new AbstractRDFHandler() {
-		//		@Override public void handleStatement(final Statement statement) { model.add(statement); }
-		//	});
-		//
-		//	try (final Reader reader=supplier.get()) {
-		//
-		//		parser.parse(reader, focus.stringValue()); // resolve relative IRIs wrt the focus
-		//
-		//	} catch ( final RDFParseException e ) {
-		//
-		//		if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
-		//			errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
-		//		}
-		//
-		//	} catch ( final IOException e ) {
-		//
-		//		throw new UncheckedIOException(e);
-		//
-		//	}
-		//
-		//	// !!! log warnings/error/fatals
-		//
-		//	final List<String> fatals=errorCollector.getFatalErrors();
-		//	final List<String> errors=errorCollector.getErrors();
-		//	final List<String> warnings=errorCollector.getWarnings();
-		//
-		//	if ( fatals.isEmpty() ) {
-		//
-		//		model.addAll(shape.accept(mode(Form.verify)).accept(new Outliner(focus))); // shape-implied statements
-		//
-		//		// !!! associate model to message
-		//
-		//	} else { // !!! structured json error report
-		//
-		//		// !!! report error
-		//
-		//		//return new Result<Request, JsonObject>() {
-		//		//	@Override public <R> R apply(final Function<Request, R> value, final Function<JsonObject, R> error) {
-		//		//		return error.apply(error("data-malformed", new RDFParseException("errors parsing content as "
-		//		//				+parser.getRDFFormat().getDefaultMIMEType()+":\n\n"
-		//		//				+String.join("\n", fatals)
-		//		//				+String.join("\n", errors)
-		//		//				+String.join("\n", warnings))));
-		//		//	}
-		//		//};
-		//
-		//	}
-		//})
+			final Optional<IRI> focus=request.map(Request::item);
+			final Optional<Shape> shape=message.body(_Shape.Format);
+
+			final String type=request.flatMap(r -> r.header("content-type")).orElse("");
+
+			final RDFParser parser=Formats
+					.service(RDFParserRegistry.getInstance(), RDFFormat.TURTLE, type)
+					.getParser();
+
+			parser.set(JSONAdapter.Shape, shape.orElse(null));
+			parser.set(JSONAdapter.Focus, focus.orElse(null));
+
+			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
+			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
+
+			parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
+			parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
+
+			final ParseErrorCollector errorCollector=new ParseErrorCollector();
+
+			parser.setParseErrorListener(errorCollector);
+
+			final Collection<Statement> model=new ArrayList<>();
+
+			parser.setRDFHandler(new AbstractRDFHandler() {
+				@Override public void handleStatement(final Statement statement) { model.add(statement); }
+			});
+
+			try (final Reader reader=supplier.get()) {
+
+				parser.parse(reader, focus.map(Value::stringValue).orElse("")); // resolve relative IRIs wrt the focus
+
+			} catch ( final RDFParseException e ) {
+
+				if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
+					errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
+				}
+
+			} catch ( final IOException e ) {
+
+				throw new UncheckedIOException(e);
+
+			}
+
+			final List<String> fatals=errorCollector.getFatalErrors();
+			final List<String> errors=errorCollector.getErrors();
+			final List<String> warnings=errorCollector.getWarnings();
+
+			// !!! log warnings/error/fatals
+
+			if ( fatals.isEmpty() ) {
+
+				focus.ifPresent(f -> shape.ifPresent(s ->
+						model.addAll(s.accept(mode(Form.verify)).accept(new Outliner(f))) // shape-implied statements
+				));
+
+				return model;
+
+			} else { // !!! structured json error report
+
+				return list(); // !!! report error
+
+				//return new Result<Request, JsonObject>() {
+				//	@Override public <R> R apply(final Function<Request, R> value, final Function<JsonObject, R> error) {
+				//		return error.apply(error("data-malformed", new RDFParseException("errors parsing content as "
+				//				+parser.getRDFFormat().getDefaultMIMEType()+":\n\n"
+				//				+String.join("\n", fatals)
+				//				+String.join("\n", errors)
+				//				+String.join("\n", warnings))));
+				//	}
+				//};
+
+			}
+		});
 	}
 
 	/**
@@ -129,28 +148,32 @@ import java.util.Optional;
 	 * accepted output stream.
 	 */
 	@Override public void set(final Message<?> message, final Collection<Statement> value) {
-		//message.body(_Writer.Format, writer -> { // use writer to activate IRI rewriting
-		//
-		//	final List<String> types=Formats.types(response.request().headers("Accept"));
-		//
-		//	final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
-		//	final RDFWriterFactory factory=Formats.service(registry, RDFFormat.TURTLE, types);
-		//
-		//	// try to set content type to the actual type requested even if it's not the default one
-		//
-		//	response.header("Content-Type", types.stream()
-		//			.filter(type -> registry.getFileFormatForMIMEType(type).isPresent())
-		//			.findFirst()
-		//			.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()))
-		//
-		//	final RDFWriter rdf=factory.getWriter(writer);
-		//
-		//	rdf.set(JSONAdapter.Shape, message.body(_Shape.Format).orElse(null));
-		//	rdf.set(JSONAdapter.Focus, response.item());
-		//
-		//	Rio.write(value, rdf);
-		//
-		//});
+
+		final Optional<Response> response=(message instanceof Response) ? // !!! replace with visitor
+				Optional.of((Response)message) : Optional.empty();
+
+		final List<String> types=Formats.types(response.map(r -> r.request().headers("Accept")).orElse(list()));
+
+		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
+		final RDFWriterFactory factory=Formats.service(registry, RDFFormat.TURTLE, types);
+
+		// try to set content type to the actual type requested even if it's not the default one
+
+		message.header("Content-Type", types.stream()
+				.filter(type -> registry.getFileFormatForMIMEType(type).isPresent())
+				.findFirst()
+				.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()));
+
+		message.body(_Writer.Format, writer -> { // use writer to activate IRI rewriting
+
+			final RDFWriter rdf=factory.getWriter(writer);
+
+			rdf.set(JSONAdapter.Shape, message.body(_Shape.Format).orElse(null));
+			rdf.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
+
+			Rio.write(value, rdf);
+
+		});
 	}
 
 }

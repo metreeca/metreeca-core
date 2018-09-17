@@ -38,6 +38,7 @@ import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.next.Response.OK;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,8 +50,8 @@ final class DriverTest {
 	private static final Shape NoneShape=required();
 
 	private static final Shape TestShape=and(
-			role(Form.root, RootShape),
-			role(Form.none, NoneShape)
+			role(set(Form.root), RootShape),
+			role(set(Form.none), NoneShape)
 	);
 
 
