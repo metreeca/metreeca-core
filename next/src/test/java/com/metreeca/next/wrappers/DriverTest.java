@@ -17,15 +17,25 @@
 
 package com.metreeca.next.wrappers;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.codecs.ShapeCodec;
+import com.metreeca.next.Handler;
 import com.metreeca.next.Request;
 import com.metreeca.next.formats._RDF;
 import com.metreeca.next.formats._Shape;
 
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static com.metreeca.form.Shape.optional;
+import static com.metreeca.form.Shape.required;
+import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.next.Response.OK;
@@ -35,7 +45,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 final class DriverTest {
 
-	private static final Shape TestShape=and();
+	private static final Shape RootShape=optional();
+	private static final Shape NoneShape=required();
+
+	private static final Shape TestShape=and(
+			role(Form.root, RootShape),
+			role(Form.none, NoneShape)
+	);
+
+
+	private static Request request() {
+		return new Request()
+				.user(Form.root)
+				.roles(Form.root)
+				.method(Request.GET)
+				.base("http://example.org/")
+				.path("/resource");
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +69,7 @@ final class DriverTest {
 	@Test void testIgnoreUndefinedShape() {
 		new Driver()
 
-				.wrap((Request request) -> {
+				.wrap((Handler)request -> {
 
 					assertFalse(request.body(_Shape.Format).isPresent());
 
@@ -51,7 +77,7 @@ final class DriverTest {
 
 				})
 
-				.handle(new Request())
+				.handle(request())
 
 				.accept(response -> {
 
@@ -64,17 +90,15 @@ final class DriverTest {
 	@Test void testConfigureExchangeShape() {
 		new Driver().shape(TestShape)
 
-				.wrap((Request request) -> {
+				.wrap((Handler)request -> {
 
-					assertEquals(TestShape, request.body(_Shape.Format).orElseGet(() -> fail("missing shape")));
+					assertEquals(RootShape, request.body(_Shape.Format).orElseGet(() -> fail("missing shape")));
 
 					return request.reply(response -> response.header("link", "existing"));
 
 				})
 
-				.handle(new Request()
-						.base("http://example.org/")
-						.path("/resource"))
+				.handle(request())
 
 				.accept(response -> {
 
@@ -83,7 +107,7 @@ final class DriverTest {
 							response.headers("link")
 					);
 
-					assertEquals(TestShape, response.body(_Shape.Format).orElseGet(() -> fail("missing shape")));
+					assertEquals(RootShape, response.body(_Shape.Format).orElseGet(() -> fail("missing shape")));
 
 				});
 	}
@@ -91,20 +115,40 @@ final class DriverTest {
 	@Test void testHandleSpecsQuery() {
 		new Driver().shape(TestShape)
 
-				.wrap((Request request) -> request.reply(response -> response))
+				.wrap((Handler)request -> request.reply(response -> response))
 
-				.handle(new Request()
-						.method(Request.GET)
-						.base("http://example.org/")
-						.path("/resource")
-						.query("specs"))
+				.handle(request().query("specs"))
 
 				.accept(response -> {
 
 					assertEquals(OK, response.status());
 
-					assertTrue(new LinkedHashModel(response.body(_RDF.Format).orElseGet(() -> fail("missing RDF body")))
-							.contains(response.item(), LDP.CONSTRAINED_BY, null));
+					final Model model=new LinkedHashModel(response
+							.body(_RDF.Format)
+							.orElseGet(() -> fail("missing RDF body"))
+					);
+
+					final Optional<Resource> specs=model
+							.filter(response.item(), LDP.CONSTRAINED_BY, null)
+							.objects()
+							.stream()
+							.map(v -> (Resource)v)
+							.findFirst();
+
+					final Optional<Resource> relate=specs.flatMap(s -> model
+							.filter(s, Form.relate, null)
+							.objects()
+							.stream()
+							.map(v -> (Resource)v)
+							.findFirst()
+					);
+
+					final Optional<Shape> shape=relate.map(r -> new ShapeCodec().decode(r, model));
+
+					assertTrue(specs.isPresent());
+					assertTrue(relate.isPresent());
+
+					assertEquals(RootShape, shape.orElseGet(() -> fail("missing relate specs")));
 
 				});
 	}

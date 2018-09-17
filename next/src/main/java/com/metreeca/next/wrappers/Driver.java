@@ -144,15 +144,16 @@ public final class Driver implements Wrapper {
 
 					final Shape shape=this.shape
 							.accept(role(request.roles())) // limit shape to user-visible details
-							.accept(mode(Form.verify)) // hide internal filtering specs
-							.accept(new Inferencer())
-							.accept(new Optimizer());
+							.accept(mode(Form.verify)); // hide internal filtering specs
 
 					final ShapeCodec codec=new ShapeCodec();
 
 					for (final IRI task : list(Form.create, Form.relate, Form.update, Form.delete)) {
 
-						final Shape spec=shape.accept(task(task));
+						final Shape spec=shape
+								.accept(task(task))
+								.accept(new Inferencer())
+								.accept(new Optimizer());
 
 						if ( !empty(spec) ) {
 							model.add(statement(specs, task, codec.encode(spec, model)));
@@ -172,13 +173,13 @@ public final class Driver implements Wrapper {
 
 	private Request before(final Request request) {
 		return shape == null ? request : request
-				.body(_Shape.Format, shape);
+				.body(_Shape.Format, shape.accept(role(request.roles()))); // limit shape to user-visible details
 	}
 
 	private Response after(final Response response) {
 		return shape == null ? response : response
-				.header("+link", String.format("<%s?%s>; rel=%s", response.item(), SpecsQuery, LDP.CONSTRAINED_BY)) // !!! append value
-				.body(_Shape.Format, shape);
+				.header("+link", String.format("<%s?%s>; rel=%s", response.item(), SpecsQuery, LDP.CONSTRAINED_BY))
+				.body(_Shape.Format, shape.accept(role(response.request().roles()))); // limit shape to user-visible details
 	}
 
 }
