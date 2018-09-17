@@ -34,7 +34,7 @@ public final class Work {
 	public static void main(final String... args) {
 
 		final Wrapper wrapper=handler -> request -> handler.handle(request)
-				.map(response -> response.map(_Writer.Format, consumer -> writer -> consumer.accept(upper(writer))));
+				.map(response -> response.filter(_Writer.Format, consumer -> writer -> consumer.accept(upper(writer))));
 
 		final Handler handler=request -> request.reply(response -> response
 				.status(200).body(JSON.Format, error("ciao", "babbo!"))

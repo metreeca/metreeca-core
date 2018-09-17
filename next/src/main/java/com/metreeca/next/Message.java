@@ -349,18 +349,19 @@ public abstract class Message<T extends Message<T>> {
 		return self();
 	}
 
+
 	/**
-	 * Maps a representation of the body of this message.
+	 * Filters a representation of the body of this message.
 	 *
-	 * @param format the format of the body representation to be mapped
+	 * @param format the format of the body representation to be filtered
 	 * @param mapper the mapping function for the body representation
-	 * @param <V>    the type of the body representation to be mapped
+	 * @param <V>    the type of the body representation to be filtered
 	 *
 	 * @return this message
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
 	 */
-	public <V> T map(final Format<V> format, final Function<V, V> mapper) {
+	public <V> T filter(final Format<V> format, final Function<V, V> mapper) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
