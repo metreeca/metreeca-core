@@ -132,7 +132,7 @@ public final class Graphs implements Handler {
 						"parameter-missing", "missing target graph parameter"
 				))).accept(consumer);
 
-			} else if ( !publik && !request.as(Form.root) ) {
+			} else if ( !publik && !request.role(Form.root) ) {
 
 				refused(request).accept(consumer);
 
@@ -199,7 +199,7 @@ public final class Graphs implements Handler {
 						"parameter-missing", "missing target graph parameter"
 				))).accept(consumer);
 
-			} else if ( !request.as(Form.root) ) {
+			} else if ( !request.role(Form.root) ) {
 
 				refused(request).accept(consumer);
 
@@ -277,7 +277,7 @@ public final class Graphs implements Handler {
 						"parameter-missing", "missing target graph parameter"
 				))).accept(consumer);
 
-			} else if ( !request.as(Form.root) ) {
+			} else if ( !request.role(Form.root) ) {
 
 				refused(request).accept(consumer);
 
@@ -327,7 +327,7 @@ public final class Graphs implements Handler {
 						"parameter-missing", "missing target graph parameter"
 				))).accept(consumer);
 
-			} else if ( !request.as(Form.root) ) {
+			} else if ( !request.role(Form.root) ) {
 
 				refused(request).accept(consumer);
 

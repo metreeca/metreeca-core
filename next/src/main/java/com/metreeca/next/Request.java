@@ -117,8 +117,8 @@ public final class Request extends Message<Request> {
 	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
 	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
 	 */
-	public boolean as(final IRI... roles) {
-		return as(asList(roles));
+	public boolean role(final IRI... roles) {
+		return role(asList(roles));
 	}
 
 	/**
@@ -129,7 +129,7 @@ public final class Request extends Message<Request> {
 	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
 	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
 	 */
-	public boolean as(final Collection<IRI> roles) {
+	public boolean role(final Collection<IRI> roles) {
 
 		if ( roles == null ) {
 			throw new NullPointerException("null roles");

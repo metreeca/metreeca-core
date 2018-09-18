@@ -38,14 +38,14 @@ import javax.json.stream.JsonParsingException;
 public final class JSON implements Format<JsonObject> {
 
 	/**
-	 * The singleton JSON body format.
-	 */
-	public static final Format<JsonObject> Format=new JSON();
-
-	/**
 	 * The default MIME type for JSON message bodies.
 	 */
 	public static final String MIME="application/json";
+
+	/**
+	 * The singleton JSON body format.
+	 */
+	public static final Format<JsonObject> Format=new JSON();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

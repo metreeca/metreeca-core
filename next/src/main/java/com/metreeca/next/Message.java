@@ -64,6 +64,27 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Casts this message to a specific message type.
+	 *
+	 * @param clazz the target message class
+	 * @param <C> the target message type
+	 *
+	 * @return an optional containing this message cast to the target type, if the this message is an instance of {@code
+	 * clazz}; an empty optional, otherwise
+	 *
+	 * @throws NullPointerException if {@code clazz} is null
+	 */
+	public <C extends Message<?>> Optional<C> as(final Class<C> clazz) {
+
+		if ( clazz == null ) {
+			throw new NullPointerException("null clazz");
+		}
+
+		return clazz.isInstance(this) ? Optional.of(clazz.cast(this)) : Optional.empty();
+	}
+
+
+	/**
 	 * Maps this message.
 	 *
 	 * @param mapper the message mapping function; must return a non-null value

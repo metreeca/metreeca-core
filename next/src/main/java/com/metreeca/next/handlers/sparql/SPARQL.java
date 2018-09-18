@@ -123,7 +123,7 @@ import static java.lang.Boolean.parseBoolean;
 						"missing query/update parameter"
 				)));
 
-			} else if ( !(publik && operation instanceof Query || request.as(Form.root)) ) {
+			} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
 
 				return refused(request);
 

@@ -44,7 +44,7 @@ import static com.metreeca.form.things.Lists.list;
 /**
  * RDF body format.
  */
-@Deprecated public final class _RDF implements Format<Collection<Statement>> {
+public final class _RDF implements Format<Collection<Statement>> {
 
 	/**
 	 * The singleton RDF body format.
@@ -64,7 +64,7 @@ import static com.metreeca.form.things.Lists.list;
 	@Override public Optional<Collection<Statement>> get(final Message<?> message) {
 		return message.body(_Reader.Format).map(supplier -> { // use reader to activate IRI rewriting
 
-			final Optional<Request> request=(message instanceof Request) ? // !!! replace with visitor
+			final Optional<Request> request=(message instanceof Request) ? // !!! replace with typesafe cast
 					Optional.of((Request)message) : Optional.empty();
 
 			final Optional<IRI> focus=request.map(Request::item);
@@ -149,7 +149,7 @@ import static com.metreeca.form.things.Lists.list;
 	 */
 	@Override public void set(final Message<?> message, final Collection<Statement> value) {
 
-		final Optional<Response> response=(message instanceof Response) ? // !!! replace with visitor
+		final Optional<Response> response=(message instanceof Response) ? // !!! replace with typesafe cast
 				Optional.of((Response)message) : Optional.empty();
 
 		final List<String> types=Formats.types(response.map(r -> r.request().headers("Accept")).orElse(list()));

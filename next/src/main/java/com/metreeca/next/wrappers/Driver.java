@@ -128,7 +128,7 @@ public final class Driver implements Wrapper {
 	private Optional<Responder> specs(final Request request) {
 
 		// !!! handle structured query strings
-		// !!! handle HEAD requests on ?specs
+		// !!! handle HEAD requests on ?specs (delegate to Dispatcher)
 		// !!! check resource existence in wrapped container (HEAD request? what about virtual containers?)
 
 		return shape != null && request.method().equals(Request.GET) && request.query().equals(SpecsQuery) ?
