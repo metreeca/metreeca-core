@@ -43,7 +43,7 @@ public final class _Failure implements Format<Failure> {
 			value.error().ifPresent(error -> builder.add("error", error));
 			value.cause().ifPresent(cause -> builder.add("cause", cause));
 
-			response.body(JSON.Format, builder.build());
+			response.body(_JSON.Format, builder.build());
 
 		});
 	}

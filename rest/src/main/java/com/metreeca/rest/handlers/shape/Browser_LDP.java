@@ -15,15 +15,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.ldp;
+package com.metreeca.rest.handlers.shape;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Dispatcher;
-import com.metreeca.rest.handlers.shape.Browser;
-import com.metreeca.rest.handlers.shape.Creator;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
@@ -33,15 +32,11 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shifts.Step.step;
-import static com.metreeca.form.things.Values.format;
-import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
-import static com.metreeca.rest.handlers.shape.Browser.browser;
-import static com.metreeca.rest.handlers.shape.Creator.creator;
 
 import static java.util.stream.Collectors.toList;
 
 
-	/**
+/**
  * Model-driven LDP Basic Container handler.
  *
  * <p>Manages read/write operations for LDP basic containers under the control of a linked data {@linkplain Shape
@@ -49,7 +44,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/TR/ldp/#ldpbc">Linked Data Platform 1.0 - §5.3 Basic</a>
  */
-public final class BasicContainer implements Handler {
+public final class Browser_LDP implements Handler {
 
 	private static final Step Contains=step(LDP.CONTAINS);
 
@@ -84,7 +79,7 @@ public final class BasicContainer implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Handler dispatcher=dispatcher();
+	//private Handler dispatcher=dispatcher();
 
 
 	/**
@@ -96,24 +91,23 @@ public final class BasicContainer implements Handler {
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public BasicContainer shape(final Shape shape) {
+	public Browser_LDP shape(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		final Browser browser=browser(shape);
-		final Creator creator=creator(shape);
-
-		final Dispatcher dispatcher=dispatcher();
-
-		if ( browser.active() ) { dispatcher.get(browser); }
-		if ( creator.active() ) { dispatcher.post(creator); }
-
-		this.dispatcher=dispatcher
-
-				// !!! .wrap(inspector().shape(shape))
-		;
+		//final Browser browser=browser(shape);
+		//final Creator creator=creator(shape);
+		//
+		//final Dispatcher dispatcher=dispatcher();
+		//
+		//if ( browser.active() ) { dispatcher.get(browser); }
+		//if ( creator.active() ) { dispatcher.post(creator); }
+		//
+		//this.dispatcher=dispatcher
+		//
+		//		.wrap(inspector().shape(shape));
 
 		return this;
 	}
@@ -122,25 +116,25 @@ public final class BasicContainer implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public void handle(final Request request, final Response response) {
-		dispatcher.handle(
-
-				writer -> writer.copy(request)
-
-						.done(),
-
-				reader -> response.copy(reader)
-
-						.header("Link",
-
-								format(Link.ShapedContainer)+"; rel=\"type\"",
-								"<http://www.w3.org/ns/ldp#BasicContainer>; rel=\"type\"",
-								"<http://www.w3.org/ns/ldp#Container>; rel=\"type\"",
-								"<http://www.w3.org/ns/ldp#RDFSource>; rel=\"type\"",
-								"<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"")
-
-						.done()
-
-		);
+		//dispatcher.handle(
+		//
+		//		writer -> writer.copy(request)
+		//
+		//				.done(),
+		//
+		//		reader -> response.copy(reader)
+		//
+		//				.header("Link",
+		//
+		//						format(Link.ShapedContainer)+"; rel=\"type\"",
+		//						"<http://www.w3.org/ns/ldp#BasicContainer>; rel=\"type\"",
+		//						"<http://www.w3.org/ns/ldp#Container>; rel=\"type\"",
+		//						"<http://www.w3.org/ns/ldp#RDFSource>; rel=\"type\"",
+		//						"<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"")
+		//
+		//				.done()
+		//
+		//);
 	}
 
 

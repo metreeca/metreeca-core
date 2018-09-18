@@ -24,8 +24,8 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.form.sparql.SPARQLEngine.transactional;
+import static com.metreeca.rest.Handler.refused;
 
 
 /**
@@ -63,7 +63,14 @@ public final class _Transactor implements Wrapper {
 
 	@Override public Handler wrap(final Handler handler) {
 		return (request, response) -> {
-			if ( !transactional(connection) && !request.role(Form.root) ) { refused(request, response); } else {
+
+			// !!! preserver test !!!
+
+			if ( !transactional(connection) && !request.role(Form.root) ) {
+
+				refused(request, response);
+
+			} else {
 
 				if ( !connection.isActive() ) {
 

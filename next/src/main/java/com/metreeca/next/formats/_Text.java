@@ -30,17 +30,17 @@ import static com.metreeca.next.Result.value;
 /**
  * Textual body format.
  */
-public final class Text implements Format<String> {
+public final class _Text implements Format<String> {
 
 	/**
 	 * The singleton textual body format.
 	 */
-	public static final Format<String> Format=new Text();
+	public static final Format<String> Format=new _Text();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Text() {} // singleton
+	private _Text() {} // singleton
 
 
 	/**

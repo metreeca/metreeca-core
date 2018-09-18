@@ -18,7 +18,7 @@
 package com.metreeca.next.handlers;
 
 import com.metreeca.next.Handler;
-import com.metreeca.next.formats.Text;
+import com.metreeca.next.formats._Text;
 
 import org.junit.jupiter.api.Test;
 
@@ -94,7 +94,7 @@ final class RouterTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Handler handler(final String id) {
-		return request -> request.reply(response -> response.body(Text.Format, id));
+		return request -> request.reply(response -> response.body(_Text.Format, id));
 	}
 
 }

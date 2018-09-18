@@ -36,7 +36,7 @@ import static com.metreeca.next.Result.value;
  *
  * @see "https://javaee.github.io/jsonp/"
  */
-public final class JSON implements Format<JsonObject> {
+public final class _JSON implements Format<JsonObject> {
 
 	/**
 	 * The default MIME type for JSON message bodies.
@@ -46,12 +46,12 @@ public final class JSON implements Format<JsonObject> {
 	/**
 	 * The singleton JSON body format.
 	 */
-	public static final Format<JsonObject> Format=new JSON();
+	public static final Format<JsonObject> Format=new _JSON();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSON() {} // singleton
+	private _JSON() {} // singleton
 
 
 	/**

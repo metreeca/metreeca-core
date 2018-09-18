@@ -30,17 +30,17 @@ import static com.metreeca.next.Result.value;
 /**
  * Binary body format.
  */
-public final class Data implements Format<byte[]> {
+public final class _Data implements Format<byte[]> {
 
 	/**
 	 * The singleton binary body format.
 	 */
-	public static final Format<byte[]> Format=new Data();
+	public static final Format<byte[]> Format=new _Data();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Data() {} // singleton
+	private _Data() {} // singleton
 
 
 	/**

@@ -62,7 +62,7 @@ final class BearerTest {
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertFalse(response.body(Text.Format).value().isPresent());
+					assertFalse(response.body(_Text.Format).value().isPresent());
 
 					assertFalse(response
 							.header("WWW-Authenticate")

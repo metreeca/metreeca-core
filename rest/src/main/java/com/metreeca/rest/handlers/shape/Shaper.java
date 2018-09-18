@@ -17,14 +17,13 @@
 
 package com.metreeca.rest.handlers.shape;
 
+import com.metreeca.form.*;
+import com.metreeca.form.codecs.QueryParser;
+import com.metreeca.form.shifts.Step;
+import com.metreeca.form.things.Values;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.form.*;
-import com.metreeca.form.codecs.QueryParser;
-import com.metreeca.form.probes.Outliner;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Values;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
@@ -39,13 +38,12 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import static com.metreeca.form.Shape.empty;
+import static com.metreeca.form.Shape.role;
+import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.rest.Handler.error;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.form.Shape.empty;
-import static com.metreeca.form.Shape.mode;
-import static com.metreeca.form.Shape.role;
-import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.tray._Tray.tool;
 
 import static java.util.stream.Collectors.toList;
@@ -133,12 +131,13 @@ public abstract class Shaper implements Handler {
 
 		}
 
-		if ( model != null ) {
-
-			model.addAll(shape.accept(mode(Form.verify)).accept(new Outliner(focus))); // shape-implied statements
-
-			delegate.accept(model);
-		}
+		// @@@ already handled by RDFFormat.get()
+		//if ( model != null ) {
+		//
+		//	model.addAll(shape.accept(mode(Form.verify)).accept(new Outliner(focus))); // shape-implied statements
+		//
+		//	delegate.accept(model);
+		//}
 
 	}
 
