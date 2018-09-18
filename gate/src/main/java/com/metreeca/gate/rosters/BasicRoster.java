@@ -21,7 +21,7 @@ package com.metreeca.gate.rosters;
 // Salvage key handling and logout to KeyRoster
 
 
-public final class _BasicRoster {
+public final class BasicRoster {
 
 	//private static final String SysAdm="admin"; // !!! configurable?
 	//
@@ -31,7 +31,7 @@ public final class _BasicRoster {
 	//private final String key;
 	//
 	//
-	//public _BasicRoster() {
+	//public BasicRoster() {
 	//
 	//
 	//	final Setup setup=tool(Setup.Factory);

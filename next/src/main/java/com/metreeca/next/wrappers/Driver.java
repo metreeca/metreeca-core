@@ -49,7 +49,7 @@ import static com.metreeca.form.things.Values.statement;
  *
  * <ul>
  *
- * <li>associates the shape model to incoming requests as a {@link _Shape} body;</li
+ * <li>associates the shape model to incoming requests as a {@link _Shape} body;</li>
  *
  * <li>associates the shape model to outgoing responses as a {@link _Shape} body;</li>
  *

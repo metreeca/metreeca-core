@@ -118,19 +118,11 @@ public interface Shape {
 
 	/**
 	 * Marks shapes as server-defined read-only.
-	 *
-	 * @param shapes
-	 *
-	 * @return
 	 */
 	public static Shape server(final Shape... shapes) { return server(asList(shapes)); }
 
 	/**
 	 * Marks shapes as server-defined read-only.
-	 *
-	 * @param shapes
-	 *
-	 * @return
 	 */
 	public static Shape server(final Collection<Shape> shapes) {
 		return shape(Form.task, set(Form.relate, Form.delete), shapes);
@@ -138,19 +130,11 @@ public interface Shape {
 
 	/**
 	 * Marks shapes as client-defined write-once.
-	 *
-	 * @param shapes
-	 *
-	 * @return
 	 */
 	public static Shape client(final Shape... shapes) { return client(asList(shapes)); }
 
 	/**
 	 * Marks shapes as client-defined write-once.
-	 *
-	 * @param shapes
-	 *
-	 * @return
 	 */
 	public static Shape client(final Collection<Shape> shapes) {
 		return shape(Form.task, set(Form.create, Form.relate, Form.delete), shapes);

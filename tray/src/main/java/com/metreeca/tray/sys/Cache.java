@@ -148,7 +148,7 @@ public final class Cache {
 	}
 
 
-	/**
+	/*
 	 * @throws UncheckedIOException if unable to retrieve data from {@code url}
 	 */
 	public <T> T exec(final URL url, final Function<Blob, T> task) throws UncheckedIOException {
@@ -164,7 +164,7 @@ public final class Cache {
 		return exec(url, fetchers.getOrDefault(url.getProtocol(), NullFetcher), task);
 	}
 
-	/**
+	/*
 	 * @throws UncheckedIOException if unable to retrieve data from {@code url}
 	 */
 	public <T> T exec(final URL url, final BiConsumer<URL, Blob> fetcher, final Function<Blob, T> task) throws UncheckedIOException {

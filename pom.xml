@@ -80,12 +80,11 @@
 		<module>j2ee</module>
 		<module>utow</module>
 
+		<module>next</module>
+		<module>gate</module>
 		<module>rest</module>
 		<module>tray</module>
 		<module>form</module>
-
-		<module>next</module>
-		<module>gate</module>
 
 	</modules>
 
@@ -277,7 +276,7 @@
 							<groups>
 								<group>
 									<title>Server Adapters</title>
-									<packages>com.metreeca.j2ee*:com.metreeca.utow*</packages>
+									<packages>com.metreeca.j2ee*</packages>
 								</group>
 								<group>
 									<title>REST API Framework</title>
@@ -292,6 +291,8 @@
 									<packages>com.metreeca.form*</packages>
 								</group>
 							</groups>
+
+							<excludePackageNames>com.metreeca.rest*:com.metreeca.utow*:com.metreeca.gate*</excludePackageNames>
 
 						</configuration>
 

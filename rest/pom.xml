@@ -42,7 +42,6 @@
 			<version>0.0-SNAPSHOT</version>
 		</dependency>
 
-
 		<dependency> <!-- Apache Commons VFS / http://commons.apache.org/proper/commons-vfs/ / required by Spool service -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-vfs2</artifactId>

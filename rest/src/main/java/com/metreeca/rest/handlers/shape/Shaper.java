@@ -88,7 +88,7 @@ public abstract class Shaper implements Handler {
 		}
 	}
 
-	/**
+	/*
 	 * construct and process configured query, merging constraints from the query string
 	 */
 	protected void query(
