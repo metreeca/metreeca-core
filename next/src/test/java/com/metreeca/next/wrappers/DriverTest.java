@@ -72,7 +72,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertFalse(request.body(_Shape.Format).isPresent());
+					assertFalse(request.body(_Shape.Format).value().isPresent());
 
 					return request.reply(response -> response);
 
@@ -83,7 +83,7 @@ final class DriverTest {
 				.accept(response -> {
 
 					assertFalse(response.header("link").isPresent());
-					assertFalse(response.body(_Shape.Format).isPresent());
+					assertFalse(response.body(_Shape.Format).value().isPresent());
 
 				});
 	}
@@ -93,7 +93,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertEquals(RootShape, request.body(_Shape.Format).orElseGet(() -> fail("missing shape")));
+					assertEquals(RootShape, request.body(_Shape.Format).value().orElseGet(() -> fail("missing shape")));
 
 					return request.reply(response -> response.header("link", "existing"));
 
@@ -108,7 +108,7 @@ final class DriverTest {
 							response.headers("link")
 					);
 
-					assertEquals(RootShape, response.body(_Shape.Format).orElseGet(() -> fail("missing shape")));
+					assertEquals(RootShape, response.body(_Shape.Format).value().orElseGet(() -> fail("missing shape")));
 
 				});
 	}
@@ -126,6 +126,7 @@ final class DriverTest {
 
 					final Model model=new LinkedHashModel(response
 							.body(_RDF.Format)
+							.value()
 							.orElseGet(() -> fail("missing RDF body"))
 					);
 

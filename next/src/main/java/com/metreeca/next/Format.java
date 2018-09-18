@@ -17,7 +17,7 @@
 
 package com.metreeca.next;
 
-import java.util.Optional;
+import static com.metreeca.next.Result.error;
 
 
 /**
@@ -32,15 +32,29 @@ public interface Format<V> {
 	/**
 	 * Retrieves the representation of a message body.
 	 *
+	 * <p>Processing failure should be reported using the following HTTP status codes:</p>
+	 *
+	 * <ul>
+	 * <li>{@link Response#UnsupportedMediaType} for missing representations;</li>
+	 * <li>{@link Response#BadRequest} for malformed representations, unless a more specific status code is
+	 * available.</li>
+	 * </ul>
+	 *
+	 * <p>The default implementation reports a failure with the {@link Response#UnsupportedMediaType} status code.</p>
+	 *
 	 * @param message the message whose body representation associated with this format is to be retrieved
 	 *
-	 * @return the optional body representation associated with this format, if it was possible to derive one from
-	 * {@code message}; an empty optional, otherwise
+	 * @return a result providing access to the body representation associated with this format, if it was possible to
+	 * derive one from {@code message}; a result providing access to the processing failure, otherwise
 	 */
-	public default Optional<V> get(final Message<?> message) { return Optional.empty(); }
+	public default Result<V, Failure> get(final Message<?> message) {
+		return error(new Failure(Response.UnsupportedMediaType));
+	}
 
 	/**
 	 * Configures derived message body representations.
+	 *
+	 * <p>The default implementation has no effect.</p>
 	 *
 	 * @param message the message whose body representations derived from {@code value} on the basis of this format are
 	 *                to be configured

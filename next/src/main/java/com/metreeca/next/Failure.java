@@ -30,6 +30,14 @@ import javax.json.JsonValue;
  */
 public final class Failure {
 
+	/**
+	 * The machine readable error tag for failures due to malformed data in message body.
+	 */
+	public static final String BodyMalformed="body-malformed";
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final int status;
 	private final String error;
 	private final JsonValue cause;

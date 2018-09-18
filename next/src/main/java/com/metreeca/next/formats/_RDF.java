@@ -37,8 +37,12 @@ import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.util.*;
 
+import javax.json.Json;
+
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.next.Result.error;
+import static com.metreeca.next.Result.value;
 
 
 /**
@@ -61,14 +65,13 @@ public final class _RDF implements Format<Collection<Statement>> {
 	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link _Input#Format}
 	 * representation, if present; an empty optional, otherwise
 	 */
-	@Override public Optional<Collection<Statement>> get(final Message<?> message) {
-		return message.body(_Reader.Format).map(supplier -> { // use reader to activate IRI rewriting
+	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
+		return message.body(_Reader.Format).value(supplier -> { // use reader to activate IRI rewriting
 
-			final Optional<Request> request=(message instanceof Request) ? // !!! replace with typesafe cast
-					Optional.of((Request)message) : Optional.empty();
+			final Optional<Request> request=message.as(Request.class);
 
 			final Optional<IRI> focus=request.map(Request::item);
-			final Optional<Shape> shape=message.body(_Shape.Format);
+			final Optional<Shape> shape=message.body(_Shape.Format).value();
 
 			final String type=request.flatMap(r -> r.header("content-type")).orElse("");
 
@@ -123,23 +126,22 @@ public final class _RDF implements Format<Collection<Statement>> {
 						model.addAll(s.accept(mode(Form.verify)).accept(new Outliner(f))) // shape-implied statements
 				));
 
-				return model;
+				return value(model);
 
-			} else { // !!! structured json error report
+			} else {
 
-				return list(); // !!! report error
+				return error(new Failure(Response.BadRequest, Failure.BodyMalformed, Json.createObjectBuilder()
 
-				//return new Result<Request, JsonObject>() {
-				//	@Override public <R> R apply(final Function<Request, R> value, final Function<JsonObject, R> error) {
-				//		return error.apply(error("data-malformed", new RDFParseException("errors parsing content as "
-				//				+parser.getRDFFormat().getDefaultMIMEType()+":\n\n"
-				//				+String.join("\n", fatals)
-				//				+String.join("\n", errors)
-				//				+String.join("\n", warnings))));
-				//	}
-				//};
+						.add("format", parser.getRDFFormat().getDefaultMIMEType())
+						.add("fatal", Json.createArrayBuilder(fatals))
+						.add("error", Json.createArrayBuilder(errors))
+						.add("warning", Json.createArrayBuilder(warnings))
+
+						.build()
+				));
 
 			}
+
 		});
 	}
 
@@ -149,8 +151,7 @@ public final class _RDF implements Format<Collection<Statement>> {
 	 */
 	@Override public void set(final Message<?> message, final Collection<Statement> value) {
 
-		final Optional<Response> response=(message instanceof Response) ? // !!! replace with typesafe cast
-				Optional.of((Response)message) : Optional.empty();
+		final Optional<Response> response=message.as(Response.class);
 
 		final List<String> types=Formats.types(response.map(r -> r.request().headers("Accept")).orElse(list()));
 
@@ -168,7 +169,7 @@ public final class _RDF implements Format<Collection<Statement>> {
 
 			final RDFWriter rdf=factory.getWriter(writer);
 
-			rdf.set(JSONAdapter.Shape, message.body(_Shape.Format).orElse(null));
+			rdf.set(JSONAdapter.Shape, message.body(_Shape.Format).value().orElse(null));
 			rdf.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
 
 			Rio.write(value, rdf);

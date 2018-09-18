@@ -45,7 +45,7 @@ final class HandlerTest {
 
 		};
 
-		handler.handle(new Request()).accept(response -> transaction.add(response.body(Text.Format).orElse("")));
+		handler.handle(new Request()).accept(response -> transaction.add(response.body(Text.Format).value().orElse("")));
 
 		assertEquals(asList("begin", "inside", "commit"), transaction);
 	}

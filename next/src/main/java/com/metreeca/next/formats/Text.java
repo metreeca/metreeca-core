@@ -17,13 +17,14 @@
 
 package com.metreeca.next.formats;
 
-import com.metreeca.next.Format;
-import com.metreeca.next.Message;
+import com.metreeca.next.*;
 
-import java.io.*;
-import java.util.Optional;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
 
 import static com.metreeca.form.things.Transputs.text;
+import static com.metreeca.next.Result.value;
 
 
 /**
@@ -46,11 +47,11 @@ public final class Text implements Format<String> {
 	 * @return the optional textual body representation of {@code message}, as retrieved from the reader supplied by its
 	 * {@link _Reader#Format} representation, if present; an empty optional, otherwise
 	 */
-	@Override public Optional<String> get(final Message<?> message) {
-		return message.body(_Reader.Format).map(source -> {
+	@Override public Result<String, Failure> get(final Message<?> message) {
+		return message.body(_Reader.Format).value(source -> {
 			try (final Reader reader=source.get()) {
 
-				return text(reader);
+				return value(text(reader));
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -59,8 +60,8 @@ public final class Text implements Format<String> {
 	}
 
 	/**
-	 * Configures the {@link _Writer#Format} representation of {@code message} to write the textual {@code value} to
-	 * the writer supplied by the accepted writer.
+	 * Configures the {@link _Writer#Format} representation of {@code message} to write the textual {@code value} to the
+	 * writer supplied by the accepted writer.
 	 */
 	@Override public void set(final Message<?> message, final String value) {
 		message.body(_Writer.Format, writer -> {

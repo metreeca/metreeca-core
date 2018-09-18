@@ -26,6 +26,8 @@ import java.io.*;
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import static com.metreeca.next.Result.value;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -47,7 +49,7 @@ final class JSONTest {
 				.header("content-type", JSON.MIME)
 				.body(_Reader.Format, () -> new StringReader(TestJSON.toString()));
 
-		assertEquals(TestJSON, request.body(JSON.Format).orElseGet(() -> fail("no json representation")));
+		assertEquals(TestJSON, request.body(JSON.Format).value().orElseGet(() -> fail("no json representation")));
 	}
 
 	@Test void testRetrieveJSONChecksContentType() {
@@ -55,7 +57,7 @@ final class JSONTest {
 		final Request request=new Request()
 				.body(_Reader.Format, () -> new StringReader(TestJSON.toString()));
 
-		assertFalse(request.body(JSON.Format).isPresent());
+		assertFalse(request.body(JSON.Format).value().isPresent());
 	}
 
 	@Test void testConfigureJSON() {
@@ -64,19 +66,21 @@ final class JSONTest {
 
 		assertEquals(TestJSON, request.body(_Writer.Format)
 
-				.map(client -> {
+				.value(client -> {
 					try (final StringWriter writer=new StringWriter()) {
 
 						client.accept(writer);
 
-						return writer.toString();
+						return value(writer.toString());
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
 				})
 
-				.map(test -> Json.createReader(new StringReader(test)).readObject())
+				.value(test -> value(Json.createReader(new StringReader(test)).readObject()))
+
+				.value()
 
 				.orElseGet(() -> fail("missing outbound representation"))
 

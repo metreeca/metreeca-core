@@ -20,7 +20,6 @@ package com.metreeca.next.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
-import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.Values;
 import com.metreeca.next.*;
 import com.metreeca.next.formats.*;
@@ -43,7 +42,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static com.metreeca.form.Shape.only;
 import static com.metreeca.form.shapes.And.and;
@@ -217,9 +215,9 @@ public final class Graphs implements Handler {
 
 				try (
 						final RepositoryConnection connection=graph.connect();
-						final InputStream input=request.body(_Input.Format)
-								.orElseThrow(() -> new IllegalStateException("missing raw body"))
-								.get();
+						final InputStream input=request.body(_Input.Format).value() // binary format >> no rewriting
+								.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
+								.get()
 				) {
 
 					final boolean exists=exists(connection, context);
@@ -343,7 +341,9 @@ public final class Graphs implements Handler {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
 				graph.update(connection -> {
-					try (final InputStream input=request.body(_Input.Format).map(Supplier::get).orElseGet(Transputs::input)) {
+					try (final InputStream input=request.body(_Input.Format).value() // binary format >> no rewriting
+							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
+							.get()) {
 
 						final boolean exists=exists(connection, context);
 

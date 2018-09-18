@@ -17,17 +17,18 @@
 
 package com.metreeca.next.formats;
 
-import com.metreeca.next.Format;
-import com.metreeca.next.Message;
+import com.metreeca.next.*;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.util.Optional;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.stream.JsonParsingException;
+
+import static com.metreeca.next.Result.error;
+import static com.metreeca.next.Result.value;
 
 
 /**
@@ -57,24 +58,20 @@ public final class JSON implements Format<JsonObject> {
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
 	 * {@link _Reader#Format} representation, if present; an empty optional, otherwise
 	 */
-	@Override public Optional<JsonObject> get(final Message<?> message) {
-		return message.body(_Reader.Format)
+	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
+		return message.headers("content-type").contains(MIME)? message.body(_Reader.Format).value(source -> {
+			try (final Reader reader=source.get()) {
 
-				.filter(source -> message.header("content-type").orElse("").equals(MIME))
+				return value(Json.createReader(reader).readObject());
 
-				.map(source -> {
-					try (final Reader reader=source.get()) {
+			} catch ( final JsonParsingException e ) {
 
-						return Json.createReader(reader).readObject();
+				return error(new Failure(Response.BadRequest, Failure.BodyMalformed, e));
 
-					} catch ( final JsonParsingException e ) {
-
-						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				});
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		}) : error(new Failure(Response.UnsupportedMediaType));
 	}
 
 	/**

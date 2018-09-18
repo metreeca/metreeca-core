@@ -17,15 +17,14 @@
 
 package com.metreeca.next.formats;
 
-import com.metreeca.next.Format;
-import com.metreeca.next.Message;
+import com.metreeca.next.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.util.Optional;
 
 import static com.metreeca.form.things.Transputs.data;
+import static com.metreeca.next.Result.value;
 
 
 /**
@@ -48,11 +47,11 @@ public final class Data implements Format<byte[]> {
 	 * @return the optional binary body representation of {@code message}, as retrieved from the input stream supplied
 	 * by its {@link _Input#Format} representation, if present; an empty optional, otherwise
 	 */
-	@Override public Optional<byte[]> get(final Message<?> message) {
-		return message.body(_Input.Format).map(source -> {
+	@Override public Result<byte[], Failure> get(final Message<?> message) {
+		return message.body(_Input.Format).value(source -> {
 			try (final InputStream input=source.get()) {
 
-				return data(input);
+				return value(data(input));
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

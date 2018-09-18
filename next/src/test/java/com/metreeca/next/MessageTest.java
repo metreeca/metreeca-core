@@ -90,8 +90,8 @@ final class MessageTest {
 		final TestMessage outbound=new TestMessage().body(Text.Format, "text");
 
 		assertEquals(
-				outbound.body(Text.Format).orElseThrow(IllegalStateException::new),
-				outbound.body(Text.Format).orElseThrow(IllegalStateException::new)
+				outbound.body(Text.Format).value().orElseThrow(IllegalStateException::new),
+				outbound.body(Text.Format).value().orElseThrow(IllegalStateException::new)
 		);
 	}
 
