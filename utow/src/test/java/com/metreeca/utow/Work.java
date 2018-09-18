@@ -17,15 +17,15 @@
 
 package com.metreeca.utow;
 
+import com.metreeca.next.Failure;
 import com.metreeca.next.Handler;
 import com.metreeca.next.Wrapper;
-import com.metreeca.next.formats.JSON;
+import com.metreeca.next.formats._Failure;
 import com.metreeca.next.formats._Writer;
 
 import java.io.IOException;
 import java.io.Writer;
 
-import static com.metreeca.next.Rest.error;
 import static com.metreeca.utow.Gateway.run;
 
 
@@ -37,7 +37,7 @@ public final class Work {
 				.map(response -> response.filter(_Writer.Format, consumer -> writer -> consumer.accept(upper(writer))));
 
 		final Handler handler=request -> request.reply(response -> response
-				.status(200).body(JSON.Format, error("ciao", "babbo!"))
+				.body(_Failure.Format, new Failure(222, "ciao", "babbo!"))
 		);
 
 		run(6800, "localhost", tray -> tray.get(() -> wrapper.wrap(handler)));

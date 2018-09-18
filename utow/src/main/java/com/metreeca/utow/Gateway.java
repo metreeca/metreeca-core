@@ -192,7 +192,7 @@ import static com.metreeca.form.things.Transputs.reader;
 
 			try (final StringWriter writer=new StringWriter(1000)) {
 
-				response.body(_Writer.Format).ifPresent(consumer -> consumer.accept(writer));
+				response.body(_Writer.Format).value().ifPresent(consumer -> consumer.accept(writer));
 
 				exchange.getResponseSender().send(writer.toString()); // !!! stream
 

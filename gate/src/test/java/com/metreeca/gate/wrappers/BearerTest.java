@@ -62,7 +62,7 @@ final class BearerTest {
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertFalse(response.body(Text.Format).isPresent());
+					assertFalse(response.body(Text.Format).value().isPresent());
 
 					assertFalse(response
 							.header("WWW-Authenticate")
@@ -127,8 +127,8 @@ final class BearerTest {
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status(), "success reported");
-					assertFalse(response.body(_Output.Format).isPresent(), "no binary body");
-					assertFalse(response.body(_Writer.Format).isPresent(), "no textual body");
+					assertFalse(response.body(_Output.Format).value().isPresent(), "no binary body");
+					assertFalse(response.body(_Writer.Format).value().isPresent(), "no textual body");
 
 					assertFalse(response
 									.header("WWW-Authenticate")

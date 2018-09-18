@@ -18,7 +18,7 @@
 package com.metreeca.next.handlers.sparql;
 
 import com.metreeca.next.*;
-import com.metreeca.next.formats.JSON;
+import com.metreeca.next.formats._Failure;
 import com.metreeca.next.formats._Output;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.sys.Trace;
@@ -28,7 +28,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import static com.metreeca.next.Rest.error;
 import static com.metreeca.tray._Tray.tool;
 
 import static java.util.Arrays.asList;
@@ -72,15 +71,11 @@ public class Proxy implements Handler {
 
 				trace.warning(this, "failed proxy request", e);
 
-				return response
+				final int i=e instanceof IllegalArgumentException ? Response.BadRequest // !!! review
+						: e instanceof IOException ? Response.BadGateway
+						: Response.InternalServerError;
 
-						.status(e instanceof IllegalArgumentException ? Response.BadRequest // !!! review
-								: e instanceof IOException ? Response.BadGateway
-								: Response.InternalServerError
-						)
-
-						.cause(e)
-						.body(JSON.Format, error("request-failed", e));
+				return response .cause(e).body(_Failure.Format, new Failure(i, "request-failed", e));
 
 			}
 		}).accept(consumer);

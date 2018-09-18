@@ -49,7 +49,6 @@ import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.next.Handler.refused;
-import static com.metreeca.next.Rest.error;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
@@ -126,8 +125,8 @@ public final class Graphs implements Handler {
 
 			if ( target == null && !catalog ) {
 
-				request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
-						"parameter-missing", "missing target graph parameter"
+				request.reply(response -> response.body(_Failure.Format, new Failure(
+						Response.BadRequest, "parameter-missing", "missing target graph parameter"
 				))).accept(consumer);
 
 			} else if ( !publik && !request.role(Form.root) ) {
@@ -193,8 +192,8 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
-						"parameter-missing", "missing target graph parameter"
+				request.reply(response -> response.body(_Failure.Format, new Failure(
+						Response.BadRequest, "parameter-missing", "missing target graph parameter"
 				))).accept(consumer);
 
 			} else if ( !request.role(Form.root) ) {
@@ -233,16 +232,17 @@ public final class Graphs implements Handler {
 
 					trace.warning(this, "unable to read RDF payload", e);
 
-					request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
-							"payload-unreadable", "I/O while reading RDF payload: see server logs for more detail"
+					request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+							Response.InternalServerError, "payload-unreadable",
+							"I/O while reading RDF payload: see server logs for more detail"
 					))).accept(consumer);
 
 				} catch ( final RDFParseException e ) {
 
 					trace.warning(this, "malformed RDF payload", e);
 
-					request.reply(response -> response.status(Response.BadRequest).cause(e).body(JSON.Format, error(
-							"payload-malformed",
+					request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+							Response.BadRequest, "payload-malformed",
 							"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
 					))).accept(consumer);
 
@@ -250,7 +250,8 @@ public final class Graphs implements Handler {
 
 					trace.warning(this, "unable to update graph "+context, e);
 
-					request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
+					request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+							Response.InternalServerError,
 							"update-aborted", "unable to update graph: see server logs for more detail"
 					))).accept(consumer);
 
@@ -271,8 +272,8 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
-						"parameter-missing", "missing target graph parameter"
+				request.reply(response -> response.body(_Failure.Format, new Failure(
+						Response.BadRequest, "parameter-missing", "missing target graph parameter"
 				))).accept(consumer);
 
 			} else if ( !request.role(Form.root) ) {
@@ -297,8 +298,8 @@ public final class Graphs implements Handler {
 
 					trace.warning(this, "unable to update graph "+context, e);
 
-					request.reply(response -> response.status(Response.InternalServerError).body(JSON.Format, error(
-							"update-aborted", "unable to delete graph: see server logs for more detail"
+					request.reply(response -> response.body(_Failure.Format, new Failure(
+							Response.InternalServerError, "update-aborted", "unable to delete graph: see server logs for more detail"
 					))).accept(consumer);
 
 				}
@@ -321,8 +322,8 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
-						"parameter-missing", "missing target graph parameter"
+				request.reply(response -> response.body(_Failure.Format, new Failure(
+						Response.BadRequest, "parameter-missing", "missing target graph parameter"
 				))).accept(consumer);
 
 			} else if ( !request.role(Form.root) ) {
@@ -357,8 +358,8 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to read RDF payload", e);
 
-						request.reply(response -> response.status(Response.InternalServerError).body(JSON.Format, error(
-								"payload-unreadable",
+						request.reply(response -> response.body(_Failure.Format, new Failure(
+								Response.InternalServerError, "payload-unreadable",
 								"I/O while reading RDF payload: see server logs for more detail"
 						))).accept(consumer);
 
@@ -366,7 +367,7 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "malformed RDF payload", e);
 
-						request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
+						request.reply(response -> response.body(_Failure.Format, new Failure(Response.BadRequest,
 								"payload-malformed",
 								"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
 						))).accept(consumer);
@@ -375,8 +376,9 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(response -> response.status(Response.InternalServerError).body(JSON.Format, error(
-								"update-aborted", "unable to update graph: see server logs for more detail"
+						request.reply(response -> response.body(_Failure.Format, new Failure(
+								Response.InternalServerError, "update-aborted",
+								"unable to update graph: see server logs for more detail"
 						))).accept(consumer);
 
 					}

@@ -20,7 +20,7 @@ package com.metreeca.next.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.next.*;
-import com.metreeca.next.formats.JSON;
+import com.metreeca.next.formats._Failure;
 import com.metreeca.next.formats._Output;
 import com.metreeca.next.handlers.Dispatcher;
 import com.metreeca.tray.rdf.Graph;
@@ -36,7 +36,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.metreeca.next.Handler.refused;
-import static com.metreeca.next.Rest.error;
 import static com.metreeca.tray._Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;
@@ -118,9 +117,8 @@ import static java.lang.Boolean.parseBoolean;
 
 			if ( operation == null ) { // !!! return void description for GET
 
-				return request.reply(response -> response.status(Response.BadRequest).body(JSON.Format, error(
-						"parameter-missing",
-						"missing query/update parameter"
+				return request.reply(response -> response.body(_Failure.Format, new Failure(
+						Response.BadRequest, "parameter-missing", "missing query/update parameter"
 				)));
 
 			} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
@@ -225,54 +223,54 @@ import static java.lang.Boolean.parseBoolean;
 
 			} else {
 
-				return request.reply(response -> response.status(Response.NotImplemented).body(JSON.Format, error(
-						"operation-unsupported", operation.getClass().getName()
+				return request.reply(response -> response.body(_Failure.Format, new Failure(
+						Response.NotImplemented, "operation-unsupported", operation.getClass().getName()
 				)));
 
 			}
 
 		} catch ( final MalformedQueryException e ) {
 
-			return request.reply(response -> response.status(Response.BadRequest).cause(e).body(JSON.Format, error(
-					"query-malformed", e.getMessage()
+			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+					Response.BadRequest, "query-malformed", e
 			)));
 
 		} catch ( final IllegalArgumentException e ) {
 
-			return request.reply(response -> response.status(Response.BadRequest).cause(e).body(JSON.Format, error(
-					"request-malformed", e.getMessage()
+			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+					Response.BadRequest, "request-malformed", e
 			)));
 
 		} catch ( final UnsupportedOperationException e ) {
 
-			return request.reply(response -> response.status(Response.NotImplemented).cause(e).body(JSON.Format, error(
-					"operation-unsupported", e.getMessage()
+			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+					Response.NotImplemented, "operation-unsupported", e
 			)));
 
 		} catch ( final QueryEvaluationException e ) {
 
 			// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
 
-			return request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
-					"query-evaluation", e.getMessage()
+			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+					Response.InternalServerError, "query-evaluation", e
 			)));
 
 		} catch ( final UpdateExecutionException e ) {
 
-			return request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
-					"update-evaluation", e.getMessage()
+			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+					Response.InternalServerError, "update-evaluation", e
 			)));
 
 		} catch ( final TupleQueryResultHandlerException e ) {
 
-			return request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
-					"response-error", e.getMessage()
+			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+					Response.InternalServerError, "response-error", e
 			)));
 
 		} catch ( final RuntimeException e ) {
 
-			return request.reply(response -> response.status(Response.InternalServerError).cause(e).body(JSON.Format, error(
-					"repository-error", e.getMessage()
+			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+					Response.InternalServerError, "repository-error", e
 			)));
 
 		}
