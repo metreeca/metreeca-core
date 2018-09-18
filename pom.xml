@@ -85,6 +85,7 @@
 		<module>form</module>
 
 		<module>next</module>
+		<module>gate</module>
 
 	</modules>
 
