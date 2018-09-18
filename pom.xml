@@ -81,7 +81,6 @@
 		<module>utow</module>
 
 		<module>rest</module>
-		<module>mill</module>
 		<module>tray</module>
 		<module>form</module>
 
