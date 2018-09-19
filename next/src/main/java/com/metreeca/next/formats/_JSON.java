@@ -17,6 +17,7 @@
 
 package com.metreeca.next.formats;
 
+import com.metreeca.form.Result;
 import com.metreeca.next.*;
 
 import java.io.IOException;
@@ -27,8 +28,8 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.next.Result.error;
-import static com.metreeca.next.Result.value;
+import static com.metreeca.form.Result.error;
+import static com.metreeca.form.Result.value;
 
 
 /**

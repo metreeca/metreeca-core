@@ -26,7 +26,6 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.next.Result.value;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -52,7 +51,6 @@ final class RelatorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
 	@Test void test() { // !!! test CBD
 		new Tray()
 
@@ -62,13 +60,13 @@ final class RelatorTest {
 
 				.handle(request())
 
-		.accept(response -> {
-			response.body(_RDF.Format).value(statements -> {
+				.accept(response -> response.body(_RDF.Format).value(statements -> {
 
-				System.out.println(statements);
+					System.out.println(statements);
 
-				return value(this);});
-		});
+					return null;
+
+				}));
 	}
 
 	//@Test void testRelate() {

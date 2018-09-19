@@ -17,6 +17,7 @@
 
 package com.metreeca.next.formats;
 
+import com.metreeca.form.Result;
 import com.metreeca.next.*;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 
 import static com.metreeca.form.things.Transputs.data;
-import static com.metreeca.next.Result.value;
+import static com.metreeca.form.Result.value;
 
 
 /**

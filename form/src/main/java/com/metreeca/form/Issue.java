@@ -49,6 +49,8 @@ public final class Issue {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Level level; // the severity level
 	private final String message; // a human readable description
 	private final Shape shape; // the shape this issue node was generated from
@@ -84,6 +86,8 @@ public final class Issue {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Level getLevel() {
 		return level;
 	}
@@ -100,6 +104,8 @@ public final class Issue {
 		return unmodifiableSet(values);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Issue

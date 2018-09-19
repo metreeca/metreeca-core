@@ -17,7 +17,9 @@
 
 package com.metreeca.next;
 
-import static com.metreeca.next.Result.error;
+import com.metreeca.form.Result;
+
+import static com.metreeca.form.Result.error;
 
 
 /**

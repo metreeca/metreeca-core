@@ -17,6 +17,8 @@
 
 package com.metreeca.next;
 
+import com.metreeca.form.Result;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,7 +27,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
-import static com.metreeca.next.Result.value;
+import static com.metreeca.form.Result.value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;

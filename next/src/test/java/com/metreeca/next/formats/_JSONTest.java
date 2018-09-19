@@ -26,7 +26,7 @@ import java.io.*;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import static com.metreeca.next.Result.value;
+import static com.metreeca.form.Result.value;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;

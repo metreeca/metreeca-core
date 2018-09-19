@@ -18,6 +18,7 @@
 package com.metreeca.next.formats;
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Result;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.JSONAdapter;
 import com.metreeca.form.probes.Outliner;
@@ -41,8 +42,8 @@ import javax.json.Json;
 
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.next.Result.error;
-import static com.metreeca.next.Result.value;
+import static com.metreeca.form.Result.error;
+import static com.metreeca.form.Result.value;
 
 
 /**
