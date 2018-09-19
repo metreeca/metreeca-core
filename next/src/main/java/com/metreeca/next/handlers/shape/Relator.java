@@ -59,37 +59,38 @@ import static java.util.Collections.singleton;
  *
  * <dl>
  *
- * <dt>request payload</dt>
+ * <dt>Request Payload</dt>
  * <dd>
- *
  * <dl>
  *
  * <dt>{@link _Shape} {optional}</dt>
- * <dd>Marapio</dd>
+ * <dd>An optional linked data shape driving the retrieval process.</dd>
  *
  * </dl>
  * </dd>
  *
- * <dt>response payload</dt>
+ * <dt>Response Payload</dt>
  * <dd>
  * <dl>
  *
  * <dt>{@link _Shape} {optional}</dt>
+ * <dd>If the request includes a shape payload, the response includes the derived shape actually used in the resource
+ * retrieval process, redacted according to request user roles, retrieval task, filtering mode and detail view.</dd>
+ *
  * <dt>{@link _RDF}</dt>
  *
+ * <dd>If the request includes a {@link _Shape} body representation, the response includes the {@linkplain _RDF RDF
+ * description} of the request {@linkplain Request#item() focus item}, as defined by the associated linked data
+ * {@linkplain Shape shape} redacted taking into account the user {@linkplain Request#roles() roles} of the
+ * request.</dd>
+ *
+ * <dd>Otherwise, the  response includes the symmetric concise bounded description of the request focus item, extended
+ * with {@code rdfs:label/comment} annotations for all referenced IRIs.</dd>
+ *
  * </dl>
  * </dd>
  *
  * </dl>
- *
- *
- * <p>If the request includes a {@link _Shape} body representation, the response includes the {@linkplain _RDF RDF
- * description} of the request {@linkplain Request#item() focus item}, as defined by the associated linked data
- * {@linkplain Shape shape} redacted taking into account the user {@linkplain Request#roles() roles} of the
- * request.</p>
- *
- * <p>Otherwise, the  response includes the symmetric concise bounded description of the request focus item, extended
- * with {@code rdfs:label/comment} annotations for all referenced IRIs.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
@@ -133,12 +134,12 @@ public final class Relator implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private Responder shaped(final Request request, final Shape shape) {
 		return request.query(and(all(request.item()), shape)).map( // focused shape
-				query -> shaped(request, shape, query),
+				query -> shaped(request, query),
 				error -> request.reply(response -> response.body(_Failure.Format, error))
 		);
 	}
 
-	private Responder shaped(final Request request, final Shape shape, final Query query) {
+	private Responder shaped(final Request request, final Query query) {
 		return graph.browse(connection -> {
 
 			final IRI focus=request.item();
@@ -150,40 +151,40 @@ public final class Relator implements Handler {
 					.findFirst()
 					.orElseGet(Collections::emptySet);
 
-			if ( !contains(connection, focus) ) {
+			return request.reply(response -> {
+				if ( !contains(connection, focus) ) {
 
-				return request.reply(response -> response.status(Response.NotFound));
+					return response.status(Response.NotFound);
 
-			} else if ( model.isEmpty() ) { // resource known but empty envelope for the current user
+				} else if ( model.isEmpty() ) { // resource known but empty envelope for the current user
 
-				return request.reply(response -> response.status(Response.Forbidden)); // !!! 404 under strict security
+					return response.status(Response.Forbidden); // !!! 404 under strict security
 
-			} else {
+				} else {
 
-				return request.reply(response -> response.status(Response.OK)).map(response -> query.accept(new Query.Probe<Response>() {
+					return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
 
-					@Override public Response visit(final Edges edges) {
-						return response
-								.body(_Shape.Format, edges.getShape())
-								.body(_RDF.Format, model);
+						@Override public Response visit(final Edges edges) {
+							return r.body(_Shape.Format, edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
+									.body(_RDF.Format, model);
 
-					}
+						}
 
-					@Override public Response visit(final Stats stats) {
-						return response
-								.body(_Shape.Format, StatsShape)
-								.body(_RDF.Format, rewrite(model, Form.meta, focus));
-					}
+						@Override public Response visit(final Stats stats) {
+							return r.body(_Shape.Format, StatsShape)
+									.body(_RDF.Format, rewrite(model, Form.meta, focus));
+						}
 
-					@Override public Response visit(final Items items) {
-						return response
-								.body(_Shape.Format, ItemsShape)
-								.body(_RDF.Format, rewrite(model, Form.meta, focus));
-					}
+						@Override public Response visit(final Items items) {
+							return r.body(_Shape.Format, ItemsShape)
+									.body(_RDF.Format, rewrite(model, Form.meta, focus));
+						}
 
-				}));
+					}));
 
-			}
+				}
+
+			});
 
 		});
 	}

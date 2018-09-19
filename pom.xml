@@ -237,6 +237,9 @@
 
 					<notimestamp>true</notimestamp> <!-- avoid immaterial VCS visible changes -->
 
+					<!-- !!! replace with shared assets (https://stackoverflow.com/questions/30507476/maven-javadoc-how-to-include-centralized-resources/30668813#30668813) -->
+					<!--<stylesheetfile>${maven.multiModuleProjectDirectory}/docs/assets/javadocs.css</stylesheetfile>-->
+
 					<links>
 
 						<link>http://docs.rdf4j.org/javadoc/latest/</link>
