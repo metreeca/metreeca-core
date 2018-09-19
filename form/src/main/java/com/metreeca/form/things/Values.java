@@ -582,7 +582,7 @@ public final class Values {
 	}
 
 
-	//// Rewriters /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Rewriters //////////////////////////////////////////////////////////////////////////////////// !!! permute args
 
 	public static Collection<Statement> rewrite(final Collection<Statement> model, final IRI source, final IRI target) {
 		return model.stream().map(statement -> rewrite(statement, source, target)).collect(toList());

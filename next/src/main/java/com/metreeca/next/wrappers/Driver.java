@@ -51,8 +51,6 @@ import static com.metreeca.form.things.Values.statement;
  *
  * <li>associates the shape model to incoming requests as a {@link _Shape} body;</li>
  *
- * <li>associates the shape model to outgoing responses as a {@link _Shape} body;</li>
- *
  * <li>advertises the association between the response focus {@linkplain Response#item() item} and the shape model
  * through a "{@code Link: <resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy}" header;</li>
  *
@@ -172,14 +170,13 @@ public final class Driver implements Wrapper {
 
 
 	private Request before(final Request request) {
-		return shape == null ? request : request
-				.body(_Shape.Format, shape.accept(role(request.roles()))); // limit shape to user-visible details
+		return shape == null ? request : request.body(_Shape.Format, shape);
 	}
 
 	private Response after(final Response response) {
-		return shape == null ? response : response
-				.header("+link", String.format("<%s?%s>; rel=%s", response.item(), SpecsQuery, LDP.CONSTRAINED_BY))
-				.body(_Shape.Format, shape.accept(role(response.request().roles()))); // limit shape to user-visible details
+		return shape == null ? response : response.header("+link",
+				String.format("<%s?%s>; rel=%s", response.request().item(), SpecsQuery, LDP.CONSTRAINED_BY)
+		);
 	}
 
 }

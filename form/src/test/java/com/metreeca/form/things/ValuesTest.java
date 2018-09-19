@@ -86,6 +86,7 @@ public final class ValuesTest {
 
 	private static final Logger logger=Logger.getLogger(ValuesTest.class.getName());
 
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final String Base="http://example.com/";

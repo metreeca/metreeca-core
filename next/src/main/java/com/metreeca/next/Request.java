@@ -17,7 +17,8 @@
 
 package com.metreeca.next;
 
-import com.metreeca.form.Form;
+import com.metreeca.form.*;
+import com.metreeca.form.codecs.QueryParser;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -26,6 +27,10 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.*;
 import java.util.function.Function;
 
+import javax.json.JsonException;
+
+import static com.metreeca.form.Result.error;
+import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
@@ -157,6 +162,35 @@ public final class Request extends Message<Request> {
 	 */
 	public String stem() {
 		return base+path.substring(1)+(path.endsWith("/") ? "" : "/");
+	}
+
+
+	/**
+	 * Retrieves the shape query of this request.
+	 *
+	 * @param shape the base shape for the query
+	 *
+	 * @return a result providing access to the combined query merging constraints from {@code shape} and the request
+	 * {@linkplain #query() query} string, as returned by the {@linkplain QueryParser query parser}; a result providing
+	 * access to the processing failure, otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public Result<Query, Failure> query(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		try {
+
+			return value(new QueryParser(shape).parse(query()));
+
+		} catch ( final JsonException e ) {
+
+			return error(new Failure(Response.BadRequest, "query-malformed", e));
+
+		}
 	}
 
 
@@ -493,8 +527,8 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values}
-	 *                              contains a {@code null} value
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
+	 *                              {@code null} value
 	 */
 	public Request parameters(final String name, final String... values) {
 		return parameters(name, asList(values));
@@ -510,8 +544,8 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values}
-	 *                              contains a {@code null} value
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
+	 *                              {@code null} value
 	 */
 	public Request parameters(final String name, final Collection<String> values) {
 

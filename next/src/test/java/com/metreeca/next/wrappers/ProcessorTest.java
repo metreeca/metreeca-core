@@ -31,9 +31,50 @@ import static com.metreeca.tray.Tray.tool;
 
 final class ProcessorTest {
 
+	//@Test void testShapedRelatePiped() {
+	//	testbed()
+	//
+	//			.handler(() -> relator().shape(ValuesTest.Employee)
+	//
+	//					.pipe((request, model) -> {
+	//
+	//						model.add(statement(request.focus(), RDF.VALUE, RDF.FIRST));
+	//
+	//						return model;
+	//
+	//					})
+	//
+	//					.pipe((request, model) -> {
+	//
+	//						model.add(statement(request.focus(), RDF.VALUE, RDF.REST));
+	//
+	//						return model;
+	//
+	//					}))
+	//
+	//			.request(request -> std(request)
+	//					.user(RDF.NIL)
+	//					.roles(LinkTest.Manager)
+	//					.done())
+	//
+	//			.response(response -> {
+	//
+	//				ValuesTest.assertSubset("items retrieved", asList(
+	//
+	//						statement(response.focus(), RDF.VALUE, RDF.FIRST),
+	//						statement(response.focus(), RDF.VALUE, RDF.REST)
+	//
+	//				), response.rdf());
+	//
+	//			});
+	//
+	//}
+
+
 	@Test void testExecuteUpdateScriptOnRequestFocus() {
 
 		final Tray tray=new Tray();
+		final Graph graph=tray.get(Graph.Factory);
 
 		tray
 
@@ -50,17 +91,18 @@ final class ProcessorTest {
 						.base(Base)
 						.path("/test"))
 
-				.accept(response -> tray.run(() -> tool(Graph.Factory).browse(connection -> {
+				.accept(response -> graph.browse(connection -> {
 					assertIsomorphic("repository updated",
 							decode("<test> rdf:value rdf:first, rdf:rest."),
 							export(connection)
 					);
-				})));
+				}));
 	}
 
 	@Test void testExecuteUpdateScriptOnResponseLocation() {
 
 		final Tray tray=new Tray();
+		final Graph graph=tray.get(Graph.Factory);
 
 		tray
 
@@ -79,12 +121,12 @@ final class ProcessorTest {
 						.base(Base)
 						.path("/"))
 
-				.accept(response -> tray.run(() -> tool(Graph.Factory).browse(connection -> {
+				.accept(response -> graph.browse(connection -> {
 					assertIsomorphic("repository updated",
 							decode("<test> rdf:value rdf:first, rdf:rest."),
 							export(connection)
 					);
-				})));
+				}));
 	}
 
 }

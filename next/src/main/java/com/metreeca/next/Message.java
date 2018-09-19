@@ -335,7 +335,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return a result providing access to the expected representation of the body of this message, if previously
 	 * defined with the same {@code format} or successfully {@linkplain Format#get(Message) derived} by {@code format}
-	 * from existing representations;  a result providing access to the processing failure, otherwise
+	 * from existing representations; a result providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code format} is null
 	 */
