@@ -45,7 +45,7 @@ public final class RDF4JRemote extends Graph {
 
 
 	public RDF4JRemote(final String url, final String usr, final String pwd) {
-		super("RDF4J Remote Store", IsolationLevels.SERIALIZABLE, () -> {
+		super(IsolationLevels.SERIALIZABLE, () -> {
 
 			if ( url == null ) {
 				throw new NullPointerException("null url");

@@ -51,21 +51,11 @@ public abstract class Graph implements AutoCloseable {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String info;
-
 	private final IsolationLevel isolation;
 	private final Repository repository;
 
 
-	protected Graph(final String info, final IsolationLevel isolation, final Supplier<Repository> repository) {
-
-		if ( info == null ) {
-			throw new NullPointerException("null description");
-		}
-
-		if ( info.isEmpty() ) {
-			throw new IllegalArgumentException("empty description");
-		}
+	protected Graph(final IsolationLevel isolation, final Supplier<Repository> repository) {
 
 		if ( isolation == null ) {
 			throw new NullPointerException("null isolation");
@@ -75,15 +65,8 @@ public abstract class Graph implements AutoCloseable {
 			throw new NullPointerException("null repository");
 		}
 
-		this.info=info;
-
 		this.isolation=isolation;
 		this.repository=repository.get();
-	}
-
-
-	public String info() {
-		return info;
 	}
 
 

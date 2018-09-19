@@ -77,7 +77,7 @@ public final class SPARQL extends Graph {
 	}
 
 	public SPARQL(final String query, final String update, final String usr, final String pwd) {
-		super("SPARQL 1.1 Remote Store", IsolationLevels.NONE, () -> { // must be able to see its own changes
+		super(IsolationLevels.NONE, () -> { // must be able to see its own changes
 
 			if ( query == null ) {
 				throw new NullPointerException("null query endpoint URL");

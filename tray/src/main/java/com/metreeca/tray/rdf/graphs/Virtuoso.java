@@ -55,7 +55,7 @@ public final class Virtuoso extends Graph {
 
 
 	public Virtuoso(final String url, final String usr, final String pwd, final String dflt) {
-		super("Virtuoso Remote Store", IsolationLevels.SERIALIZABLE, () -> {
+		super(IsolationLevels.SERIALIZABLE, () -> {
 
 			if ( url == null ) {
 				throw new NullPointerException("null url");

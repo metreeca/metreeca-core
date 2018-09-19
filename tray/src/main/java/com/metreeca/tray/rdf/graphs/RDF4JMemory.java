@@ -33,12 +33,12 @@ public final class RDF4JMemory extends Graph {
 
 
 	public RDF4JMemory() {
-		super("RDF4J Memory Store (Transient)", IsolationLevels.SERIALIZABLE, () ->
+		super(IsolationLevels.SERIALIZABLE, () ->
 				new SailRepository(new MemoryStore()));
 	}
 
 	public RDF4JMemory(final File storage) {
-		super("RDF4J Memory Store (Persistent)", IsolationLevels.SERIALIZABLE, () -> {
+		super(IsolationLevels.SERIALIZABLE, () -> {
 
 			if ( storage == null ) {
 				throw new NullPointerException("null storage");

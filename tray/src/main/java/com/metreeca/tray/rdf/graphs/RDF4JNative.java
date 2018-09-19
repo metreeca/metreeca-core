@@ -47,7 +47,7 @@ public final class RDF4JNative extends Graph {
 
 
 	public RDF4JNative(final File storage) {
-		super("RDF4J Native Store", IsolationLevels.SNAPSHOT, () -> { // !!! SERIALIZABLE breaks persistence
+		super(IsolationLevels.SNAPSHOT, () -> { // !!! SERIALIZABLE breaks persistence
 
 			if ( storage == null ) {
 				throw new NullPointerException("null storage");
