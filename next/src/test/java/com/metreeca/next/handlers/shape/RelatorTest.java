@@ -21,12 +21,22 @@ package com.metreeca.next.handlers.shape;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.next.Request;
 import com.metreeca.next.formats._RDF;
+import com.metreeca.next.formats._Shape;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+
+import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.tray.Tray.tool;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 final class RelatorTest {
@@ -48,25 +58,34 @@ final class RelatorTest {
 	}
 
 
+	private Runnable dataset(final Iterable<Statement> model) {
+		return () -> tool(Graph.Factory).update(connection -> { connection.add(model); });
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	@Test void test() { // !!! test CBD
 		new Tray()
 
-				.run(() -> tool(Graph.Factory).update(connection -> { connection.add(ValuesTest.small()); }))
+				.run(dataset(small()))
 
 				.get(Relator::new)
 
 				.handle(request())
 
-				.accept(response -> response.body(_RDF.Format).value(statements -> {
+				.accept(response -> {
 
-					System.out.println(statements);
+					final Collection<Statement> body=response
+							.body(_RDF.Format).value()
+							.orElseGet(() -> fail("missing RDF body"));
 
-					return null;
+					assertFalse(response.body(_Shape.Format).value().isPresent());
 
-				}));
+					assertTrue(new LinkedHashModel(body).contains(response.item(), null, null));
+
+				});
 	}
 
 	//@Test void testRelate() {

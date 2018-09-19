@@ -84,7 +84,7 @@ public final class Relator implements Handler {
 
 	@Override public Responder handle(final Request request) {
 
-		return request.body(_Shape.Format).result(
+		return request.body(_Shape.Format).map(
 				value -> {
 					throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 					 },

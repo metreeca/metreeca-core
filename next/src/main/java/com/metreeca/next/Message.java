@@ -403,7 +403,7 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null mapper");
 		}
 
-		return body(format).result(
+		return body(format).map(
 				value -> body(format, requireNonNull(mapper.apply(value), "null mapper return value")),
 				error -> self()
 		);
