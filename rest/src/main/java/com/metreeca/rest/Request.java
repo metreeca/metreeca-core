@@ -85,7 +85,6 @@ public final class Request {
 
 	private Map<String, List<String>> parameters=new LinkedHashMap<>();
 	private Map<String, List<String>> headers=new LinkedHashMap<>();
-	private Map<String, List<Part>> parts=new LinkedHashMap<>();
 
 	private Supplier<InputStream> input;
 	private Supplier<Reader> reader;
@@ -200,40 +199,17 @@ public final class Request {
 	}
 
 
-	public List<Part> parts(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return parts.getOrDefault(name, emptyList());
-	}
-
-	public Optional<Part> part(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return parts(name).stream().findFirst();
-	}
-
-
 	private String content() {
-		return part(BodyPart)
-				.map(p -> p.header("Content-Type").orElse(""))
-				.orElseGet(() -> header("Content-Type").orElse(""));
+		return header("Content-Type").orElse("");
 	}
 
 
 	public InputStream input() {
-		return part(BodyPart).map(Part::input)
-				.orElseGet(() -> input != null ? input.get() : reader != null ? Transputs.input(reader.get()) : Transputs.input());
+		return input != null ? input.get() : reader != null ? Transputs.input(reader.get()) : Transputs.input();
 	}
 
 	public Reader reader() {
-		return part(BodyPart).map(Part::reader)
-				.orElseGet(() -> reader != null ? reader.get() : input != null ? Transputs.reader(input.get()) : Transputs.reader());
+		return reader != null ? reader.get() : input != null ? Transputs.reader(input.get()) : Transputs.reader();
 	}
 
 
@@ -361,7 +337,6 @@ public final class Request {
 
 			target.parameters=new LinkedHashMap<>(request.parameters);
 			target.headers=new LinkedHashMap<>(request.headers);
-			target.parts=new LinkedHashMap<>(request.parts);
 
 			target.input=request.input;
 			target.reader=request.reader;
@@ -528,30 +503,6 @@ public final class Request {
 					.distinct()
 					.collect(toList())
 			));
-
-			return this;
-		}
-
-
-		public Writer part(final String name, final Part... parts) {
-			return part(name, asList(parts));
-		}
-
-		public Writer part(final String name, final Collection<Part> parts) {
-
-			if ( name == null ) {
-				throw new NullPointerException("null name");
-			}
-
-			if ( parts == null ) {
-				throw new NullPointerException("null parts");
-			}
-
-			if ( parts.contains(null) ) {
-				throw new NullPointerException("null part");
-			}
-
-			request.parts.put(name, unmodifiableList(new ArrayList<>(parts)));
 
 			return this;
 		}

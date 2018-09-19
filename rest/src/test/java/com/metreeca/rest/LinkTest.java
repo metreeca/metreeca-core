@@ -186,17 +186,6 @@ public final class LinkTest {
 			return this;
 		}
 
-		public Testbed service(final Supplier<Service> service) {
-
-			if ( service == null ) {
-				throw new NullPointerException("null service");
-			}
-
-			tray.lookup(() -> service.get().load());
-
-			return this;
-		}
-
 		public Testbed dataset(final Iterable<Statement> model, final Resource... contexts) {
 
 			if ( model == null ) {
