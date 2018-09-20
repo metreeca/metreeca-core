@@ -3,16 +3,16 @@
  *
  * This file is part of Metreeca.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *  Metreeca is free software: you can redistribute it and/or modify it under the terms
+ *  of the GNU Affero General Public License as published by the Free Software Foundation,
+ *  either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
+ *  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *  See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
- * If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ *  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.next.wrappers;
@@ -32,6 +32,9 @@ import static com.metreeca.tray.Tray.tool;
 /**
  * Single page app launcher (work in progress…).
  *
+ *  and advertises the base LDP server URL to
+ *  * interactive apps through the {@value #BaseCookie} cookie.
+ *
  * <p>Replaces non-interactive responses to {@linkplain Message#interactive() interactive requests} with a relocated
  * version of a (x)html page where absolute {@code href} or {@code src} links are relocated to the page home
  * folder.</p>
@@ -39,6 +42,8 @@ import static com.metreeca.tray.Tray.tool;
  * @deprecated Work in progress
  */
 @Deprecated final class Launcher implements Wrapper {
+
+	private static final String BaseCookie="com.metreeca.rest";
 
 	private static final Pattern LinkPattern=Pattern.compile("\\b(href|src)\\s*=\\s*([\"'])/(.*)\\2");
 	private static final String LinkReplacement="$1=$2%s%s$3$2";
@@ -89,6 +94,7 @@ import static com.metreeca.tray.Tray.tool;
 				.map(Transputs::text)
 				.orElseThrow(() -> new NoSuchElementException("missing app page ["+path+"]"));
 
+
 		return this;
 	}
 
@@ -106,6 +112,14 @@ import static com.metreeca.tray.Tray.tool;
 		//								String.format(LinkReplacement, request.base(), path)
 		//						)))
 		//);
+
+
+		// advertise LDP server base to interactive apps
+
+		//if ( request.interactive() ) {
+		//	response.header("Set-Cookie", BaseCookie+"="+request.base()+";path=/");
+		//}
+
 	}
 
 }

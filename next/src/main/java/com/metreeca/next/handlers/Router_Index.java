@@ -15,7 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest;
+package com.metreeca.next.handlers;
+
+import com.metreeca.next.Handler;
 
 import java.util.*;
 import java.util.function.Function;
@@ -44,9 +46,9 @@ import java.util.function.Supplier;
  *
  * <p>Trailing slashes and question marks in resource paths are ignored.</p>
  */
-public final class Index {
+public final class Router_Index {
 
-	public static final Supplier<Index> Factory=Index::new;
+	public static final Supplier<Router_Index> Factory=Router_Index::new;
 
 
 	private static boolean matches(final String x, final String y) {
@@ -64,7 +66,7 @@ public final class Index {
 	);
 
 
-	private Index() {}
+	private Router_Index() {}
 
 
 	/**
@@ -98,7 +100,7 @@ public final class Index {
 	 *
 	 * @return this index
 	 */
-	public Index insert(final String path, final Handler handler) {
+	public Router_Index insert(final String path, final Handler handler) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
@@ -136,7 +138,7 @@ public final class Index {
 	 *
 	 * @return the value returned by {@code task}
 	 */
-	public <R> R exec(final Function<Index, R> task) {
+	public <R> R exec(final Function<Router_Index, R> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");

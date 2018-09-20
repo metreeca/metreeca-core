@@ -37,7 +37,7 @@ import static java.util.Collections.unmodifiableMap;
 
 	@Override public Handler wrap(final Handler handler) {
 		return request -> handler.handle(request.query().isEmpty() || !request.parameters().isEmpty() ?
-				request : request.parameters(xxx(request.query())
+				request : request.parameters(parse(request.query())
 		));
 	}
 
@@ -47,7 +47,7 @@ import static java.util.Collections.unmodifiableMap;
 	//		? getText() : query);
 
 
-	private static Map<String, List<String>> xxx(final String query) {
+	private static Map<String, List<String>> parse(final String query) {
 
 		final Map<String, List<String>> parameters=new LinkedHashMap<>();
 

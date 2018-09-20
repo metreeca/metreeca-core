@@ -21,10 +21,12 @@ import com.metreeca.form.Form;
 
 
 /**
- * Resource handler.
+ * Resource handler {thread-safe}.
  *
  * <p>Exposes and manages the state of a linked data resource, generating {@linkplain Response responses} in reaction
  * to {@linkplain Request requests}.</p>
+ *
+ * <p>Implementations must be thread-safe.</p>
  */
 @FunctionalInterface public interface Handler {
 

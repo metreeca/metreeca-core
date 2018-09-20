@@ -170,7 +170,9 @@ public final class LinkTest {
 
 		private final _Tray tray=new _Tray();
 
-		private Supplier<Handler> handler=() -> tool(Server.Factory);
+		private Supplier<Handler> handler=() -> {
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		};
 
 		private Consumer<Request.Writer> request;
 

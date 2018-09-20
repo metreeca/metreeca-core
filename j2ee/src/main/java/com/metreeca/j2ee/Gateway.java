@@ -18,14 +18,15 @@
 package com.metreeca.j2ee;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.next.*;
+import com.metreeca.next.Handler;
+import com.metreeca.next.Request;
+import com.metreeca.next.Response;
 import com.metreeca.next.formats.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
 import com.metreeca.tray.sys.Trace;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileUploadBase.IOFileUploadException;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -291,86 +292,86 @@ public abstract class Gateway implements ServletContextListener {
 
 			} else {
 
-				final Map<String, List<String>> parameters=new LinkedHashMap<>();
-				final Map<String, List<Message<?>>> parts=new LinkedHashMap<>();
-
-				for (final FileItem item : items) {
-
-					if ( item.isFormField() ) { // accumulate parameters
-
-						parameters.compute(item.getFieldName(), (key, current) -> {
-
-							List<String> updated=current;
-
-							if ( updated == null ) {
-								updated=new ArrayList<>();
-							}
-
-							try {
-								updated.add(item.getString(Transputs.UTF8.name()));
-							} catch ( final UnsupportedEncodingException unexpected ) {
-								throw new UncheckedIOException(unexpected);
-							}
-
-							return updated;
-
-						});
-
-					} else { // accumulate items
-
-						parts.compute(item.getFieldName(), (key, current) -> {
-
-							List<Message<?>> updated=current;
-
-							if ( updated == null ) {
-								updated=new ArrayList<>();
-							}
-
-							final Message<?> part=new Message<Message>() {
-								@Override protected Message self() { return this; }
-							}; // !!! .filename(item.getName());
-
-							final FileItemHeaders headers=item.getHeaders();
-
-							headers.getHeaderNames().forEachRemaining(name -> {
-
-								final List<String> values=new ArrayList<>();
-
-								headers.getHeaders(name).forEachRemaining(values::add);
-
-								part.headers(name, values);
-
-							});
-
-							updated.add(part
-
-									.body(_Input.Format, () -> {
-										try {
-											return item.getInputStream();
-										} catch ( final IOException e ) {
-											throw new UncheckedIOException(e);
-										}
-									})
-
-									.body(_Reader.Format, () -> { // !!! from input using part/request encoding
-										throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-									}));
-
-							return updated;
-
-						});
-
-					}
-
-				}
-
-				for (final Map.Entry<String, List<String>> parameter : parameters.entrySet()) {
-					request.parameters(parameter.getKey(), parameter.getValue());
-				}
-
-				for (final Map.Entry<String, List<Message<?>>> part : parts.entrySet()) {
-					// !!! request.body(_Parts,Format, ___)// !!! request.part(part.getKey(), part.getValue());
-				}
+				//final Map<String, List<String>> parameters=new LinkedHashMap<>();
+				//final Map<String, List<Message<?>>> parts=new LinkedHashMap<>();
+				//
+				//for (final FileItem item : items) {
+				//
+				//	if ( item.isFormField() ) { // accumulate parameters
+				//
+				//		parameters.compute(item.getFieldName(), (key, current) -> {
+				//
+				//			List<String> updated=current;
+				//
+				//			if ( updated == null ) {
+				//				updated=new ArrayList<>();
+				//			}
+				//
+				//			try {
+				//				updated.add(item.getString(Transputs.UTF8.name()));
+				//			} catch ( final UnsupportedEncodingException unexpected ) {
+				//				throw new UncheckedIOException(unexpected);
+				//			}
+				//
+				//			return updated;
+				//
+				//		});
+				//
+				//	} else { // accumulate items
+				//
+				//		parts.compute(item.getFieldName(), (key, current) -> {
+				//
+				//			List<Message<?>> updated=current;
+				//
+				//			if ( updated == null ) {
+				//				updated=new ArrayList<>();
+				//			}
+				//
+				//			final Message<?> part=new Message<Message>() {
+				//				@Override protected Message self() { return this; }
+				//			}; // !!! .filename(item.getName());
+				//
+				//			final FileItemHeaders headers=item.getHeaders();
+				//
+				//			headers.getHeaderNames().forEachRemaining(name -> {
+				//
+				//				final List<String> values=new ArrayList<>();
+				//
+				//				headers.getHeaders(name).forEachRemaining(values::add);
+				//
+				//				part.headers(name, values);
+				//
+				//			});
+				//
+				//			updated.add(part
+				//
+				//					.body(_Input.Format, () -> {
+				//						try {
+				//							return item.getInputStream();
+				//						} catch ( final IOException e ) {
+				//							throw new UncheckedIOException(e);
+				//						}
+				//					})
+				//
+				//					.body(_Reader.Format, () -> { // !!! from input using part/request encoding
+				//						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+				//					}));
+				//
+				//			return updated;
+				//
+				//		});
+				//
+				//	}
+				//
+				//}
+				//
+				//for (final Map.Entry<String, List<String>> parameter : parameters.entrySet()) {
+				//	request.parameters(parameter.getKey(), parameter.getValue());
+				//}
+				//
+				//for (final Map.Entry<String, List<Message<?>>> part : parts.entrySet()) {
+				//	// !!! request.body(_Parts,Format, ___)// !!! request.part(part.getKey(), part.getValue());
+				//}
 
 				// !!! set input/reader format from main body part
 

@@ -108,6 +108,11 @@ public final class Relator implements Handler {
 	//		"<http://www.w3.org/ns/ldp#Resource>; rel=\"type\""
 	//)
 
+	//if ( status == Response.OK ) {
+	//	response.header("Vary", "Accept", "Prefer", "");
+	//}
+
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@Override public Responder handle(final Request request) {
