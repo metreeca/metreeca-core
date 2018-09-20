@@ -17,8 +17,8 @@
 
 package com.metreeca.tray.rdf;
 
-import com.metreeca.tray.rdf.graphs.*;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.rdf.graphs.RDF4JMemory;
+import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
@@ -28,10 +28,9 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
 
 import java.io.File;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -39,66 +38,24 @@ import static com.metreeca.tray.Tray.tool;
  */
 public abstract class Graph implements AutoCloseable {
 
-	public static final Supplier<Graph> Factory=() -> {
-
-		final Setup setup=tool(Setup.Factory);
-		final String type=setup.get("graph", "memory");
-
-		switch ( type ) {
-
-			case "memory":
-
-				return RDF4JMemory.Factory.get();
-
-			case "native":
-
-				return RDF4JNative.Factory.get();
-
-			case "remote":
-
-				return RDF4JRemote.Factory.get();
-
-			case "sparql":
-
-				return SPARQL.Factory.get();
-
-			case "virtuoso":
-
-				return Virtuoso.Factory.get();
-
-			default:
-
-				throw new UnsupportedOperationException("unknown graph type ["+type+"]");
-
-		}
-	};
+	public static final Supplier<Graph> Factory=RDF4JMemory.Factory;
 
 
-	private static final ThreadLocal<RepositoryConnection> connection=new ThreadLocal<>();
+	private static final ThreadLocal<RepositoryConnection> context=new ThreadLocal<>();
 
 
-	protected static File storage(final Setup setup) {
-		return new File(Setup.storage(setup), "graph");
+	protected static File storage(final _Setup setup) {
+		return new File(_Setup.storage(setup), "graph");
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String info;
-
 	private final IsolationLevel isolation;
 	private final Repository repository;
 
 
-	protected Graph(final String info, final IsolationLevel isolation, final Supplier<Repository> repository) {
-
-		if ( info == null ) {
-			throw new NullPointerException("null description");
-		}
-
-		if ( info.isEmpty() ) {
-			throw new IllegalArgumentException("empty description");
-		}
+	protected Graph(final IsolationLevel isolation, final Supplier<Repository> repository) {
 
 		if ( isolation == null ) {
 			throw new NullPointerException("null isolation");
@@ -108,15 +65,8 @@ public abstract class Graph implements AutoCloseable {
 			throw new NullPointerException("null repository");
 		}
 
-		this.info=info;
-
 		this.isolation=isolation;
 		this.repository=repository.get();
-	}
-
-
-	public String info() {
-		return info;
 	}
 
 
@@ -125,9 +75,122 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// !!! handle isolation levels (review interactions with existing transaction)
+
+
+	public Graph browse(final Consumer<RepositoryConnection> browser) {
+
+		if ( browser == null ) {
+			throw new NullPointerException("null browser");
+		}
+
+		return exec(connection -> {
+
+			browser.accept(connection);
+			return this;
+
+		});
+	}
+
+	public <R> R browse(final Function<RepositoryConnection, R> browser) {
+
+		if ( browser == null ) {
+			throw new NullPointerException("null browser");
+		}
+
+		return exec(browser);
+	}
+
+
+	public Graph update(final Consumer<RepositoryConnection> updater) {
+
+		if ( updater == null ) {
+			throw new NullPointerException("null updater");
+		}
+
+		return update(connection -> {
+
+			updater.accept(connection);
+
+			return this;
+
+		});
+	}
+
+	public <R> R update(final Function<RepositoryConnection, R> updater) {
+
+		if ( updater == null ) {
+			throw new NullPointerException("null updater");
+		}
+
+		return exec(isolation.equals(IsolationLevels.NONE) ? updater : connection -> {
+			if ( connection.isActive() ) {
+
+				return updater.apply(connection);
+
+			} else {
+
+				try {
+
+					if ( !connection.isActive() ) { connection.begin(isolation); }
+
+					final R value=updater.apply(connection);
+
+					if ( connection.isActive() ) { connection.commit(); }
+
+					return value;
+
+				} catch ( final Throwable t ) {
+
+					try { throw t; } finally {
+						if ( connection.isActive() ) { connection.rollback(); }
+					}
+
+				}
+
+			}
+		});
+	}
+
+
+	private <R> R exec(final Function<RepositoryConnection, R> task) {
+
+		final RepositoryConnection shared=context.get();
+
+		if ( shared != null ) {
+
+			return task.apply(shared);
+
+		} else {
+
+			if ( !repository.isInitialized() ) {
+				repository.initialize();
+			}
+
+			try (final RepositoryConnection connection=repository.getConnection()) {
+
+				Graph.context.set(connection);
+
+				return task.apply(connection);
+
+			} finally {
+
+				context.remove();
+
+			}
+
+		}
+	}
+
+
+	//// !!! Legacy API ////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public RepositoryConnection connect() {
 
-		final RepositoryConnection connection=Graph.connection.get();
+		final RepositoryConnection connection=Graph.context.get();
 
 		if ( connection != null ) {
 
@@ -146,14 +209,14 @@ public abstract class Graph implements AutoCloseable {
 			final RepositoryConnection wrapper=new RepositoryConnectionWrapper(repository, repository.getConnection()) {
 
 				@Override public void close() throws RepositoryException {
-					try { super.close(); } finally { Graph.connection.remove(); }
+					try { super.close(); } finally { Graph.context.remove(); }
 				}
 
 			};
 
 			wrapper.setIsolationLevel(isolation);
 
-			Graph.connection.set(wrapper); // !!! ThreadLocal removal relies on connection being closed… review
+			Graph.context.set(wrapper); // !!! ThreadLocal removal relies on connection being closed… review
 
 			return wrapper;
 
@@ -171,79 +234,6 @@ public abstract class Graph implements AutoCloseable {
 		connection.setIsolationLevel(isolation);
 
 		return connection;
-	}
-
-
-	//// !!! Legacy API ////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public <R> R browse(final Function<RepositoryConnection, R> browser) {
-
-		if ( browser == null ) {
-			throw new NullPointerException("null browser");
-		}
-
-		return exec(browser);
-	}
-
-	public <R> R update(final Function<RepositoryConnection, R> updater) {
-
-		if ( updater == null ) {
-			throw new NullPointerException("null updater");
-		}
-
-		return exec(isolation.equals(IsolationLevels.NONE) ? updater : connection -> {
-			if ( connection.isActive() ) {
-
-				return updater.apply(connection);
-
-			} else {
-
-				try {
-
-					connection.begin(isolation);
-
-					final R value=updater.apply(connection);
-
-					connection.commit();
-
-					return value;
-
-				} catch ( final Throwable t ) {
-
-					try { throw t; } finally { connection.rollback(); }
-
-				}
-
-			}
-		});
-	}
-
-
-	private <R> R exec(final Function<RepositoryConnection, R> task) {
-
-		final RepositoryConnection shared=connection.get();
-
-		if ( shared != null ) {
-
-			return task.apply(shared);
-
-		} else {
-
-			if ( !repository.isInitialized() ) {
-				repository.initialize();
-			}
-
-			try (final RepositoryConnection connection=repository.getConnection()) {
-
-				Graph.connection.set(connection);
-
-				return task.apply(connection);
-
-			} finally {
-				connection.remove();
-			}
-
-		}
 	}
 
 }

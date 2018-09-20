@@ -17,9 +17,9 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.shapes.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -90,6 +90,15 @@ public interface Shape {
 
 	//// Parametric Shapes /////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static Shape role(final Set<? extends Value> roles, final Shape... shapes) {
+		return shape(Form.role, roles, asList(shapes));
+	}
+
+	public static Shape role(final Set<? extends Value> roles, final Collection<Shape> shapes) {
+		return shape(Form.role, roles, shapes);
+	}
+
+
 	public static Shape create(final Shape... shapes) { return create(asList(shapes));}
 
 	public static Shape create(final Collection<Shape> shapes) { return shape(Form.task, set(Form.create), shapes); }
@@ -109,19 +118,11 @@ public interface Shape {
 
 	/**
 	 * Marks shapes as server-defined read-only.
-	 *
-	 * @param shapes
-	 *
-	 * @return
 	 */
 	public static Shape server(final Shape... shapes) { return server(asList(shapes)); }
 
 	/**
 	 * Marks shapes as server-defined read-only.
-	 *
-	 * @param shapes
-	 *
-	 * @return
 	 */
 	public static Shape server(final Collection<Shape> shapes) {
 		return shape(Form.task, set(Form.relate, Form.delete), shapes);
@@ -129,19 +130,11 @@ public interface Shape {
 
 	/**
 	 * Marks shapes as client-defined write-once.
-	 *
-	 * @param shapes
-	 *
-	 * @return
 	 */
 	public static Shape client(final Shape... shapes) { return client(asList(shapes)); }
 
 	/**
 	 * Marks shapes as client-defined write-once.
-	 *
-	 * @param shapes
-	 *
-	 * @return
 	 */
 	public static Shape client(final Collection<Shape> shapes) {
 		return shape(Form.task, set(Form.create, Form.relate, Form.delete), shapes);
@@ -166,7 +159,11 @@ public interface Shape {
 	public static Shape filter(final Collection<Shape> shapes) { return shape(Form.mode, set(Form.filter), shapes); }
 
 
-	public static Shape shape(final IRI variable, final Set<Value> values, final Collection<Shape> shapes) {
+	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Shape... shapes) {
+		return shape(variable, values, asList(shapes));
+	}
+
+	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
 		return shapes.isEmpty() ? when(variable, values)
 				: test(when(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}

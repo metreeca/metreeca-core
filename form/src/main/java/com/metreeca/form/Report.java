@@ -59,6 +59,8 @@ public final class Report {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Set<Issue> issues;
 	private final Set<Frame<Report>> frames;
 
@@ -86,6 +88,8 @@ public final class Report {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Set<Issue> getIssues() {
 		return unmodifiableSet(issues);
 	}
@@ -94,6 +98,8 @@ public final class Report {
 		return unmodifiableSet(frames);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Report merge(final Report report) {
 
@@ -106,7 +112,6 @@ public final class Report {
 
 		return trace(issues, frames);
 	}
-
 
 	/**
 	 * Tests if the overall severity of this trace node reaches an expected level.
@@ -164,6 +169,8 @@ public final class Report {
 				.collect(toCollection(LinkedHashSet::new));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Report

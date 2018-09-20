@@ -7,10 +7,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="form" />
+        <module name="gate" />
         <module name="j2ee" />
-        <module name="mill" />
         <module name="rest" />
         <module name="tray" />
+        <module name="utow" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -28,6 +29,7 @@
       <module name="demo" target="1.8" />
       <module name="fore" target="1.8" />
       <module name="form" target="1.8" />
+      <module name="gate" target="1.8" />
       <module name="j2ee" target="1.8" />
       <module name="jeep" target="1.8" />
       <module name="link" target="1.8" />
@@ -35,7 +37,6 @@
       <module name="mesh" target="1.8" />
       <module name="mill" target="1.8" />
       <module name="mill (1)" target="1.8" />
-      <module name="next" target="1.8" />
       <module name="node" target="1.8" />
       <module name="rest" target="1.8" />
       <module name="self" target="1.8" />
@@ -44,6 +45,7 @@
       <module name="tool" target="1.8" />
       <module name="tray" target="1.8" />
       <module name="tray (1)" target="1.8" />
+      <module name="utow" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

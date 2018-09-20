@@ -40,12 +40,14 @@ public final class Stats implements Query {
 			trait(Form.min, maxCount(1)),
 			trait(Form.max, maxCount(1)),
 			trait(Form.stats, and(
-					trait(Step.step(Form.count), maxCount(1)),
-					trait(Step.step(Form.min), maxCount(1)),
-					trait(Step.step(Form.max), maxCount(1))
+					trait(step(Form.count), maxCount(1)),
+					trait(step(Form.min), maxCount(1)),
+					trait(step(Form.max), maxCount(1))
 			))
 	);
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
 
@@ -71,6 +73,8 @@ public final class Stats implements Query {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Shape getShape() {
 		return shape;
 	}
@@ -79,6 +83,8 @@ public final class Stats implements Query {
 		return unmodifiableList(path);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T accept(final Probe<T> probe) {
 

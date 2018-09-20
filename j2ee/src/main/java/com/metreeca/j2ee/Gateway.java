@@ -18,14 +18,15 @@
 package com.metreeca.j2ee;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
-import com.metreeca.tray.sys.Setup;
 import com.metreeca.tray.sys.Trace;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileUploadBase.IOFileUploadException;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -33,53 +34,69 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileCleaningTracker;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.servlet.*;
-import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.metreeca.form.things.Strings.upper;
-import static com.metreeca.rest.Part.part;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.list;
 
 
 /**
- * J2EE/Metreeca gateway.
+ * J2EE gateway.
  *
- * <p>Provides a gateway between a web application managed by Servlet 3.1 container and linked data resource handlers
- * based on the Metreeca {@linkplain com.metreeca.rest linked data framework}:</p>
+ * <p>Provides a gateway between a web application managed by Servlet 3.1 container and resource handlers based on the
+ * Metreeca/Link linked data framework:</p>
  *
  * <ul>
  *
  * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform components required by
  * resource handlers;</li>
  *
- * <li>intercepts HTTP requests and handles them using the {@linkplain Server server} tool provided by the shared tool
- * tray;</li>
+ * <li>intercepts HTTP requests and handles them using a linked data {@linkplain Handler handler} loaded from the
+ * shared tool tray;</li>
  *
- * <li>forwards HTTP requests to the enclosing web application if no response is {@linkplain Response#committed()
- * committed} by the linked data server.</li>
+ * <li>forwards HTTP requests to the enclosing web application if no response is committed by the linked data
+ * server.</li>
  *
  * </ul>
  */
-@WebListener public final class Gateway implements ServletContextListener, Filter {
-
-	private static final String TrayAttribute=Tray.class.getName();
-
+public abstract class Gateway implements ServletContextListener {
 
 	private static final Supplier<ServletFileUpload> Upload=ServletFileUpload::new; // shared file upload tool
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Tray tray=new Tray();
+
+	private final String pattern;
+	private final Function<Tray, Handler> loader;
+
+
+	protected Gateway(final String pattern, final Function<Tray, Handler> loader) {
+
+		if ( pattern == null ) {
+			throw new NullPointerException("null pattern");
+		}
+
+		if ( loader == null ) {
+			throw new NullPointerException("null loader");
+		}
+
+		this.pattern=pattern;
+		this.loader=loader;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,19 +105,15 @@ import static java.util.Collections.list;
 
 		final ServletContext context=event.getServletContext();
 
-		final Tray tray=new Tray();
-
 		try {
 
-			context.setAttribute(TrayAttribute, tray
+			context.addFilter(Gateway.class.getName(), new GatewayFilter(loader.apply(tray // !!! @@@ add server handlers
 
-					.set(Setup.Factory, () -> setup(context))
+					// !!! file storage location
 					.set(Loader.Factory, () -> loader(context))
-					.set(Upload, () -> upload(context))
+					.set(Upload, () -> upload(context))))
 
-
-					.update(() -> ServiceLoader.load(Toolkit.class).forEach(Toolkit::load))
-					.lookup(() -> ServiceLoader.load(Service.class).forEach(Service::load)));
+			).addMappingForUrlPatterns(null, false, pattern);
 
 		} catch ( final Throwable t ) {
 
@@ -108,9 +121,9 @@ import static java.util.Collections.list;
 
 				t.printStackTrace(new PrintWriter(message));
 
-				tray.get(Trace.Factory).error(this, "error during data hub initialization: "+message);
+				tray.get(Trace.Factory).error(this, "error during initialization: "+message);
 
-				context.log("error during data hub initialization", t);
+				context.log("error during initialization", t);
 
 				throw t;
 
@@ -129,45 +142,10 @@ import static java.util.Collections.list;
 
 	@Override public void contextDestroyed(final ServletContextEvent event) {
 
-		final ServletContext context=event.getServletContext();
+		tray.clear();
 
-		try {
-
-			final Tray tray=(Tray)context.getAttribute(TrayAttribute);
-
-			if ( tray != null ) { tray.clear(); }
-
-		} finally {
-			context.removeAttribute(TrayAttribute);
-		}
 	}
 
-
-	private Setup setup(final ServletContext context) {
-		return new Setup(Setup::system, Setup::custom, setup -> {
-
-			try { // defaults from WEB-INF directory, if found
-
-				final Properties properties=new Properties();
-
-				Optional.ofNullable(context.getResource("/WEB-INF/metreeca.properties")).ifPresent(url -> {
-
-					try (final InputStream input=url.openStream()) {
-						properties.load(input);
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(format("unable to load default setup file [%s]", url), e);
-					}
-
-				});
-
-				return properties;
-
-			} catch ( final MalformedURLException unexpected ) {
-				throw new UncheckedIOException(unexpected);
-			}
-
-		});
-	}
 
 	private Loader loader(final ServletContext context) {
 		return path -> {
@@ -204,225 +182,237 @@ import static java.util.Collections.list;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public void init(final FilterConfig config) {}
+	private static final class GatewayFilter implements Filter {
 
-	@Override public void destroy() {}
+		private final Handler handler;
 
 
-	@Override public void doFilter(
-			final ServletRequest request, final ServletResponse response, final FilterChain chain
-	) throws ServletException, IOException {
-
-		final Tray tray=(Tray)request.getServletContext().getAttribute(TrayAttribute);
-
-		if ( tray == null ) {
-			throw new IllegalStateException("no tray in context");
+		private GatewayFilter(final Handler handler) {
+			this.handler=handler;
 		}
 
-		tray.lookup(() -> filter((HttpServletRequest)request, (HttpServletResponse)response));
 
-		if ( !response.isCommitted() ) {
-			chain.doFilter(request, response);
-		}
-	}
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		@Override public void init(final FilterConfig config) {}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private void filter(final HttpServletRequest request, final HttpServletResponse response) {
-		try {
-
-			try { // ;( request.getParts() is not available to filters…
+		@Override public void destroy() {}
 
 
-				final List<FileItem> items=isMultipartContent(request) ? tool(Upload).parseRequest(request) : emptyList();
+		@Override public void doFilter(
+				final ServletRequest request, final ServletResponse response, final FilterChain chain
+		) throws ServletException, IOException {
 
-				tool(Server.Factory).handle(
-
-						writer -> request(writer, request, items), reader -> response(reader, response)
-
-				);
-
-			} catch ( final IOFileUploadException e ) {
-
-				final Throwable cause=e.getCause();
-
-				if ( cause instanceof SocketTimeoutException ) {
-					response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT);
-				} else {
-					throw new UncheckedIOException((IOException)cause);
-				}
-
-			} catch ( final FileUploadException e ) {
-
-				request.getServletContext().log(e.getMessage(), e);
-
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-
+			if ( !filter((HttpServletRequest)request, (HttpServletResponse)response) ) {
+				chain.doFilter(request, response);
 			}
 
-		} catch ( final IOException e ) {
-
-			throw new UncheckedIOException(e);
-
-		}
-	}
-
-
-	private void request(final Request.Writer writer, final HttpServletRequest request, final Collection<FileItem> items) {
-
-		writer.method(upper(request.getMethod()));
-
-		final String target=request.getRequestURL().toString();
-		final String path=request.getRequestURI().substring(request.getContextPath().length());
-		final String base=target.substring(0, target.length()-path.length()+1);
-		final String query=request.getQueryString();
-
-		writer.base(base);
-		writer.path(path);
-		writer.query(query != null ? Transputs.decode(query) : "");
-
-		for (final Map.Entry<String, String[]> parameter : request.getParameterMap().entrySet()) {
-			writer.parameter(parameter.getKey(), asList(parameter.getValue()));
 		}
 
-		for (final String name : list(request.getHeaderNames())) {
-			writer.header(name, list(request.getHeaders(name)));
-		}
 
-		if ( items.isEmpty() ) {
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			writer.body(
+		private boolean filter(final HttpServletRequest request, final HttpServletResponse response) {
+			try {
 
-					() -> {
-						try {
-							return request.getInputStream();
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
-					},
+				try { // ;( request.getParts() is not available to filters…
 
-					() -> {
-						try {
-							return request.getReader();
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
+					final List<FileItem> items=isMultipartContent(request) ? tool(Upload).parseRequest(request) : emptyList();
+
+					handler.handle(request(request, items)).accept(r -> response(response, r));
+
+				} catch ( final IOFileUploadException e ) {
+
+					final Throwable cause=e.getCause();
+
+					if ( cause instanceof SocketTimeoutException ) {
+						response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT);
+					} else {
+						throw new UncheckedIOException((IOException)cause);
 					}
 
-			);
+				} catch ( final FileUploadException e ) {
 
-		} else {
+					request.getServletContext().log(e.getMessage(), e);
 
-			final Map<String, List<String>> parameters=new LinkedHashMap<>();
-			final Map<String, List<Part>> parts=new LinkedHashMap<>();
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 
-			for (final FileItem item : items) {
+				}
 
-				if ( item.isFormField() ) { // accumulate parameters
+				return response.isCommitted();
 
-					parameters.compute(item.getFieldName(), (key, current) -> {
+			} catch ( final IOException e ) {
 
-						List<String> updated=current;
+				throw new UncheckedIOException(e);
 
-						if ( updated == null ) {
-							updated=new ArrayList<>();
-						}
+			}
+		}
 
-						try {
-							updated.add(item.getString(Transputs.UTF8.name()));
-						} catch ( final UnsupportedEncodingException unexpected ) {
-							throw new UncheckedIOException(unexpected);
-						}
 
-						return updated;
+		private Request request(final HttpServletRequest http, final Collection<FileItem> items) {
 
-					});
+			final String target=http.getRequestURL().toString();
+			final String path=http.getRequestURI().substring(http.getContextPath().length());
+			final String base=target.substring(0, target.length()-path.length()+1);
+			final String query=http.getQueryString();
 
-				} else { // accumulate parts
+			final Request request=new Request()
+					.method(http.getMethod())
+					.base(base)
+					.path(path)
+					.query(query != null ? Transputs.decode(query) : ""); // !!! review decoding
 
-					parts.compute(item.getFieldName(), (key, current) -> {
+			for (final Map.Entry<String, String[]> parameter : http.getParameterMap().entrySet()) {
+				request.parameters(parameter.getKey(), asList(parameter.getValue()));
+			}
 
-						List<Part> updated=current;
+			for (final String name : list(http.getHeaderNames())) {
+				request.headers(name, list(http.getHeaders(name)));
+			}
 
-						if ( updated == null ) {
-							updated=new ArrayList<>();
-						}
+			if ( items.isEmpty() ) {
 
-						final Part.Writer part=part().filename(item.getName());
+				return request
 
-						final FileItemHeaders headers=item.getHeaders();
-
-						headers.getHeaderNames().forEachRemaining(name -> {
-
-							final List<String> values=new ArrayList<>();
-
-							headers.getHeaders(name).forEachRemaining(values::add);
-
-							part.header(name, values);
-
-						});
-
-						updated.add(part.input(() -> {
+						.body(_Input.Format, () -> {
 							try {
-								return item.getInputStream();
+								return http.getInputStream();
 							} catch ( final IOException e ) {
 								throw new UncheckedIOException(e);
 							}
-						}));
+						})
 
-						return updated;
+						.body(_Reader.Format, () -> {
+							try {
+								return http.getReader();
+							} catch ( final IOException e ) {
+								throw new UncheckedIOException(e);
+							}
+						});
 
-					});
+			} else {
 
-				}
+				//final Map<String, List<String>> parameters=new LinkedHashMap<>();
+				//final Map<String, List<Message<?>>> parts=new LinkedHashMap<>();
+				//
+				//for (final FileItem item : items) {
+				//
+				//	if ( item.isFormField() ) { // accumulate parameters
+				//
+				//		parameters.compute(item.getFieldName(), (key, current) -> {
+				//
+				//			List<String> updated=current;
+				//
+				//			if ( updated == null ) {
+				//				updated=new ArrayList<>();
+				//			}
+				//
+				//			try {
+				//				updated.add(item.getString(Transputs.UTF8.name()));
+				//			} catch ( final UnsupportedEncodingException unexpected ) {
+				//				throw new UncheckedIOException(unexpected);
+				//			}
+				//
+				//			return updated;
+				//
+				//		});
+				//
+				//	} else { // accumulate items
+				//
+				//		parts.compute(item.getFieldName(), (key, current) -> {
+				//
+				//			List<Message<?>> updated=current;
+				//
+				//			if ( updated == null ) {
+				//				updated=new ArrayList<>();
+				//			}
+				//
+				//			final Message<?> part=new Message<Message>() {
+				//				@Override protected Message self() { return this; }
+				//			}; // !!! .filename(item.getName());
+				//
+				//			final FileItemHeaders headers=item.getHeaders();
+				//
+				//			headers.getHeaderNames().forEachRemaining(name -> {
+				//
+				//				final List<String> values=new ArrayList<>();
+				//
+				//				headers.getHeaders(name).forEachRemaining(values::add);
+				//
+				//				part.headers(name, values);
+				//
+				//			});
+				//
+				//			updated.add(part
+				//
+				//					.body(_Input.Format, () -> {
+				//						try {
+				//							return item.getInputStream();
+				//						} catch ( final IOException e ) {
+				//							throw new UncheckedIOException(e);
+				//						}
+				//					})
+				//
+				//					.body(_Reader.Format, () -> { // !!! from input using part/request encoding
+				//						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+				//					}));
+				//
+				//			return updated;
+				//
+				//		});
+				//
+				//	}
+				//
+				//}
+				//
+				//for (final Map.Entry<String, List<String>> parameter : parameters.entrySet()) {
+				//	request.parameters(parameter.getKey(), parameter.getValue());
+				//}
+				//
+				//for (final Map.Entry<String, List<Message<?>>> part : parts.entrySet()) {
+				//	// !!! request.body(_Parts,Format, ___)// !!! request.part(part.getKey(), part.getValue());
+				//}
+
+				// !!! set input/reader format from main body part
+
+				return request;
 
 			}
-
-			for (final Map.Entry<String, List<String>> parameter : parameters.entrySet()) {
-				writer.parameter(parameter.getKey(), parameter.getValue());
-			}
-
-			for (final Map.Entry<String, List<Part>> part : parts.entrySet()) {
-				writer.part(part.getKey(), part.getValue());
-			}
-
-			writer.body(); // empty body
-
 		}
-	}
 
-	private void response(final Response.Reader reader, final HttpServletResponse response) {
+		private void response(final HttpServletResponse http, final Response response) {
+			if ( response.status() != 0 ) {
 
-		response.setStatus(reader.status());
+				http.setStatus(response.status());
 
-		reader.headers().forEachOrdered(header ->
-				header.getValue().forEach(value -> response.addHeader(header.getKey(), value)));
+				response.headers().forEach((name, values) -> values.forEach(value -> http.addHeader(name, value)));
 
-		if ( reader.binary() ) {
+				response.body(_Output.Format).value().ifPresent(consumer -> {
+					try (final OutputStream output=http.getOutputStream()) {
+						consumer.accept(output);
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
 
-			try (final OutputStream output=response.getOutputStream()) {
-				reader.output(output);
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
+				});
+
+				response.body(_Writer.Format).value().ifPresent(consumer -> {
+					try (final Writer writer=http.getWriter()) {
+						consumer.accept(writer);
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+
+				});
+
+				// !!! @@@ no body: commit???
+
+				//try (final ServletOutputStream output=http.getOutputStream()) {
+				//	output.flush();
+				//} catch ( final IOException e ) {
+				//	throw new UncheckedIOException(e);
+				//}
 			}
-
-		} else if ( reader.textual() ) {
-
-			try (final Writer writer=response.getWriter()) {
-				reader.writer(writer);
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-
-		} else {
-
-			try (final ServletOutputStream output=response.getOutputStream()) {
-				output.flush();
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-
 		}
 
 	}

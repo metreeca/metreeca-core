@@ -18,7 +18,7 @@
 package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.Namespace;
@@ -44,7 +44,7 @@ public final class SPARQL extends Graph {
 
 	public static final Supplier<Graph> Factory=() -> {
 
-		final Setup setup=tool(Setup.Factory);
+		final _Setup setup=tool(_Setup.Factory);
 
 		final String url=setup.get("graph.sparql.url", "");
 		final String query=setup.get("graph.sparql.query", "");
@@ -77,7 +77,7 @@ public final class SPARQL extends Graph {
 	}
 
 	public SPARQL(final String query, final String update, final String usr, final String pwd) {
-		super("SPARQL 1.1 Remote Store", IsolationLevels.NONE, () -> { // must be able to see its own changes
+		super(IsolationLevels.NONE, () -> { // must be able to see its own changes
 
 			if ( query == null ) {
 				throw new NullPointerException("null query endpoint URL");

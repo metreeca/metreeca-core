@@ -19,33 +19,46 @@ package com.metreeca.rest.handlers;
 
 
 import com.metreeca.rest.*;
-
-import static com.metreeca.tray.Tray.tool;
+import com.metreeca.rest.Responder;
 
 
 /**
  * Path-based request router.
  *
- * <p>Delegates request processing to a handler selected from the shared {@linkplain Index#Factory index} tool on the
- * basis of the request HTTP {@linkplain Request#path() path}.</p>
+ * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#path()
+ * path}.</p>
  *
  * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  * opportunity to handle the request.</p>
+ *
+ * @deprecated Work in progress
  */
-public final class Router implements Handler {
+@Deprecated public final class Router implements Handler {
 
-	public static Router router() { return new Router(); }
+	public Router path(final String path, final Handler handler) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		if ( handler == null ) {
+			throw new NullPointerException("null handler");
+		}
+
+		return this;
+	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	@Override public Responder handle(final Request request) {
 
-	private final Index index=tool(Index.Factory);
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
+
+		final String path=request.path();
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public void handle(final Request request, final Response response) {
-		index.lookup(request.path()).ifPresent(handler -> handler.handle(request, response));
+		return null;
 	}
 
 }

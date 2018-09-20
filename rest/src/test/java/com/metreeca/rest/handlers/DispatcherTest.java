@@ -17,39 +17,35 @@
 
 package com.metreeca.rest.handlers;
 
+
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 
-import static com.metreeca.rest.LinkTest.testbed;
-import static com.metreeca.rest.handlers.Dispatcher.dispatcher;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static java.util.Arrays.asList;
 
 
-public class DispatcherTest {
+final class DispatcherTest {
 
-	@Test public void testHandleOPTIONSByDefault() {
-		testbed()
+	@Test void testHandleOPTIONSByDefault() {
+		new Dispatcher()
 
-				.handler(() -> dispatcher().get((request, response) -> response.status(Response.OK).done()))
+				.get((request) -> request.reply(response -> response.status(Response.OK)))
 
-				.request(request -> request
-						.method(Request.POST)
-						.done())
+				.handle(new Request().method(Request.POST))
 
-				.response(response -> {
+				.accept(response -> {
 
-					assertEquals("error reported", Response.MethodNotAllowed, response.status());
+					assertEquals(Response.MethodNotAllowed, response.status(), "error reported");
 
-					assertEquals("allowed method reported",
-							new HashSet<>(asList(Request.OPTIONS, Request.GET)),
-							new HashSet<>(response.headers("Allow")));
+					assertEquals(new HashSet<>(asList(Request.OPTIONS, Request.GET)),
+							new HashSet<>(response.headers("Allow")),
+							"allowed method reported");
 
 				});
 	}

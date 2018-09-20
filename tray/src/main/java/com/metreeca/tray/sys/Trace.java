@@ -84,6 +84,7 @@ public abstract class Trace {
 
 				final LogRecord record=new LogRecord(level.level(), message);
 
+				record.setLoggerName(logger);
 				record.setSourceClassName(logger);
 				record.setSourceMethodName("class"); // !!! support
 				record.setThrown(cause);

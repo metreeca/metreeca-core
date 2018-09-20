@@ -16,7 +16,7 @@
  */
 
 /**
- * Metreeca J2EE adapter.
+ * J2EE adapter.
  */
 
 package com.metreeca.j2ee;

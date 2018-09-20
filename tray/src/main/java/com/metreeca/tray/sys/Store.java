@@ -31,7 +31,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Setup.storage;
+import static com.metreeca.tray.sys._Setup.storage;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.nameUUIDFromBytes;
@@ -46,10 +46,10 @@ public final class Store {
 	 * Store factory.
 	 *
 	 * <p>The default store acquired through this factory stores blobs in the {@code store} folder under the default
-	 * storage folder defined by the {@link Setup#StorageProperty} property.</p>
+	 * storage folder defined by the {@link _Setup#StorageProperty} property.</p>
 	 */
 	public static final Supplier<Store> Factory=() ->
-			new Store(new File(storage(tool(Setup.Factory)), "store"));
+			new Store(new File(storage(tool(_Setup.Factory)), "store"));
 
 
 	/**

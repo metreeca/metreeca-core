@@ -17,45 +17,32 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
-import com.metreeca.form.codecs.JSONAdapter;
-import com.metreeca.form.things.*;
+import com.metreeca.form.*;
+import com.metreeca.form.codecs.QueryParser;
+import com.metreeca.form.things.Values;
 
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.rio.*;
-import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
-import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 
-import java.io.*;
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
 import javax.json.JsonException;
 
-import static com.metreeca.form.things.Strings.title;
+import static com.metreeca.form.Result.error;
+import static com.metreeca.form.Result.value;
+import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 
 /**
  * HTTP request.
  */
-public final class Request {
-
-	/**
-	 * The name of the part containing the main body payload in multipart/form-data requests ({@code {@value}}).
-	 */
-	public static final String BodyPart="body";
+public final class Request extends Message<Request> {
 
 	public static final String GET="GET"; // https://tools.ietf.org/html/rfc7231#section-4.3.1
 	public static final String HEAD="HEAD"; // https://tools.ietf.org/html/rfc7231#section-4.3.2
@@ -83,30 +70,70 @@ public final class Request {
 	private String path="/";
 	private String query="";
 
-	private Map<String, List<String>> parameters=new LinkedHashMap<>();
-	private Map<String, List<String>> headers=new LinkedHashMap<>();
-	private Map<String, List<Part>> parts=new LinkedHashMap<>();
-
-	private Supplier<InputStream> input;
-	private Supplier<Reader> reader;
+	private final Map<String, List<String>> parameters=new LinkedHashMap<>();
 
 
-	private Request() {}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override protected Request self() {
+		return this;
+	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creates a response for this request.
+	 *
+	 * @param mapper the mapping function  used to initialize the new response; must return a non-null value
+	 *
+	 * @return a new response {@linkplain Response#request() associated} to this request
+	 *
+	 * @throws NullPointerException if {@code mapper} is null or return a null value
+	 */
+	public Responder reply(final Function<Response, Response> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return consumer -> consumer.accept(new Response(this).map(mapper));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Checks if this request is safe.
+	 *
+	 * @return {@code true} if this request is <a href="https://tools.ietf.org/html/rfc7231#section-4.2.1">safe</a>,
+	 * that is if it's not expected to cause any state change on the origin server ; {@code false} otherwise
+	 */
 	public boolean safe() {
 		return Safe.contains(method);
 	}
 
-	public boolean interactive() {
-		return method.equals(GET) && headers("Accept").stream().anyMatch(Message::interactive);
-	}
 
-
+	/**
+	 * Checks if this request if performed by a user in a target set of roles.
+	 *
+	 * @param roles the target set if roles to be checked
+	 *
+	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
+	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
+	 */
 	public boolean role(final IRI... roles) {
 		return role(asList(roles));
 	}
 
+	/**
+	 * Checks if this request if performed by a user in a target set of roles.
+	 *
+	 * @param roles the target set if roles to be checked
+	 *
+	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
+	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
+	 */
 	public boolean role(final Collection<IRI> roles) {
 
 		if ( roles == null ) {
@@ -118,55 +145,327 @@ public final class Request {
 
 
 	/**
-	 * Retrieves the identifier of the request user.
+	 * Retrieves the focus item IRI of this request.
 	 *
-	 * @return an IRI uniquely associated with the user or {@link Form#none} if no user is authenticated
+	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
+	 * this request
 	 */
-	public IRI user() { return user; }
-
-
-	/**
-	 * Retrieves the roles attributed to the request user.
-	 *
-	 * @return a set of values uniquely identifying the roles attributed to the {@linkplain #user() user}
-	 */
-	public Set<Value> roles() { return unmodifiableSet(roles); }
-
-
-	public IRI focus() {
+	public IRI item() {
 		return iri(base+path.substring(1));
 	}
 
-
+	/**
+	 * Retrieves the stem IRI of this request.
+	 *
+	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
+	 * this request and appending a trailing slash if one is not already included in {@linkplain #path() path}
+	 */
 	public String stem() {
 		return base+path.substring(1)+(path.endsWith("/") ? "" : "/");
 	}
 
 
-	public String method() { return method; }
+	/**
+	 * Retrieves the shape query of this request.
+	 *
+	 * @param shape the base shape for the query
+	 *
+	 * @return a result providing access to the combined query merging constraints from {@code shape} and the request
+	 * {@linkplain #query() query} string, as returned by the {@linkplain QueryParser query parser}; a result providing
+	 * access to the processing failure, otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public Result<Query, Failure> query(final Shape shape) {
 
-	public String base() { return base; }
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
 
-	public String path() { return path; }
+		try {
 
+			return value(new QueryParser(shape).parse(query()));
+
+		} catch ( final JsonException e ) {
+
+			return error(new Failure(Response.BadRequest, "query-malformed", e));
+
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the identifier of the request user.
+	 *
+	 * @return an absolute IRI identifying the user performing this request or {@link Form#none} if no user is
+	 * authenticated
+	 */
+	public IRI user() { return user; }
+
+	/**
+	 * Configures the the identifier of the request user.
+	 *
+	 * @param user an absolute IRI identifying the user performing this request
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException if {@code user} is null
+	 */
+	public Request user(final IRI user) {
+
+		if ( user == null ) {
+			throw new NullPointerException("null user");
+		}
+
+		this.user=user;
+
+		return this;
+	}
+
+
+	/**
+	 * Retrieves the roles attributed to the request user.
+	 *
+	 * @return a set of values uniquely identifying the roles attributed to the request {@linkplain #user() user}
+	 */
+	public Set<Value> roles() { return unmodifiableSet(roles); }
+
+	/**
+	 * Configures the roles attributed to the request user.
+	 *
+	 * @param roles a collection of values uniquely identifying the roles attributed to the request {@linkplain #user()
+	 *              user}
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
+	 */
+	public Request roles(final Value... roles) {
+		return roles(asList(roles));
+	}
+
+	/**
+	 * Configures the roles attributed to the request user.
+	 *
+	 * @param roles a collection of values uniquely identifying the roles attributed to the request {@linkplain #user()
+	 *              user}
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
+	 */
+	public Request roles(final Collection<? extends Value> roles) {
+
+		if ( roles == null ) {
+			throw new NullPointerException("null roles");
+		}
+
+		if ( roles.contains(null) ) {
+			throw new NullPointerException("null role");
+		}
+
+		this.roles=new LinkedHashSet<>(roles);
+
+		return this;
+	}
+
+
+	/**
+	 * Retrieves the HTTP method of this request.
+	 *
+	 * @return the HTTP method of this request; in upper case
+	 */
+	public String method() {
+		return method;
+	}
+
+	/**
+	 * Configures the HTTP method of this request.
+	 *
+	 * @param method the HTTP method for this request; will be automatically converted to upper case
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException if {@code method} is null
+	 */
+	public Request method(final String method) {
+
+		if ( method == null ) {
+			throw new NullPointerException("null method");
+		}
+
+		this.method=upper(method);
+
+		return this;
+	}
+
+
+	/**
+	 * Retrieves the base IRI of this request.
+	 *
+	 * @return the base IRI of this request, that is the base IRI if the linked data server handling the request;
+	 * includes a trailing slash
+	 */
+	public String base() {
+		return base;
+	}
+
+	/**
+	 * Configures the base IRI of this request.
+	 *
+	 * @param base the base IRI for this request, that is the base IRI if the linked data server handling the request
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException     if {@code base} is null
+	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing
+	 *                                  slash
+	 */
+	public Request base(final String base) {
+
+		if ( base == null ) {
+			throw new NullPointerException("null base");
+		}
+
+		if ( !Values.AbsoluteIRIPattern.matcher(base).matches() ) {
+			throw new IllegalArgumentException("not an absolute base IRI");
+		}
+
+		if ( !base.endsWith("/") ) {
+			throw new IllegalArgumentException("missing trailing / in base IRI");
+		}
+
+		this.base=base;
+
+		return this;
+	}
+
+
+	/**
+	 * Retrieves the resource path of this request.
+	 *
+	 * @return the resource path of this request, that is the absolute server path of the linked data resources this
+	 * request refers to; includes a leading slash
+	 */
+	public String path() {
+		return path;
+	}
+
+	/**
+	 * Configures the resource path of this request.
+	 *
+	 * @param path the resource path of this request, that is the absolute server path of the linked data resources this
+	 *             request refers to
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException     if {@code path} is null
+	 * @throws IllegalArgumentException if {@code path} doesn't include a leading slash
+	 */
+	public Request path(final String path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null resource path");
+		}
+
+		if ( !path.startsWith("/") ) {
+			throw new IllegalArgumentException("missing leading / in resource path");
+		}
+
+		this.path=path;
+
+		return this;
+	}
+
+
+	/**
+	 * Retrieves the query component of this request.
+	 *
+	 * @return the query component this request
+	 */
 	public String query() {
 		return query;
 	}
 
+	/**
+	 * Configures the query component of this request.
+	 *
+	 * @param query the query component of this request
+	 *
+	 * @return this request
+	 *
+	 * @throws NullPointerException if {@code query} is null
+	 */
+	public Request query(final String query) {
 
-	public Stream<Entry<String, List<String>>> parameters() {
-		return parameters.entrySet().stream();
-	}
-
-	public List<String> parameters(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
+		if ( query == null ) {
+			throw new NullPointerException("null query");
 		}
 
-		return parameters.getOrDefault(name, emptyList());
+		this.query=query;
+
+		return this;
 	}
 
+
+	/**
+	 * Retrieves request query parameters.
+	 *
+	 * @return an immutable and possibly empty map from query parameters names to collections of values
+	 */
+	public Map<String, Collection<String>> parameters() {
+		return unmodifiableMap(parameters);
+	}
+
+	/**
+	 * Configures request query parameters.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param parameters a map from parameter names to lists of values
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code parameters} is null or contains either null keys or null values
+	 */
+	public Request parameters(final Map<String, ? extends Collection<String>> parameters) {
+
+		if ( parameters == null ) {
+			throw new NullPointerException("null parameters");
+		}
+
+		parameters.forEach((name, value) -> { // ;( parameters.containsKey()/ContainsValue() can throw NPE
+
+			if ( name == null ) {
+				throw new NullPointerException("null parameter name");
+			}
+
+			if ( value == null ) {
+				throw new NullPointerException("null parameter value");
+			}
+
+		});
+
+		this.parameters.clear();
+
+		parameters.forEach(this::parameters);
+
+		return this;
+	}
+
+
+	/**
+	 * Retrieves request query parameter value.
+	 *
+	 * @param name the name of the query parameter whose value is to be retrieved
+	 *
+	 * @return an optional value containing the first value among those returned by {@link #parameters(String)}, if one
+	 * is present; an empty optional otherwise
+	 *
+	 * @throws NullPointerException if {@code name} is null
+	 */
 	public Optional<String> parameter(final String name) {
 
 		if ( name == null ) {
@@ -176,477 +475,103 @@ public final class Request {
 		return parameters(name).stream().findFirst();
 	}
 
-
-	public Stream<Entry<String, List<String>>> headers() {
-		return headers.entrySet().stream();
-	}
-
-	public List<String> headers(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return headers.getOrDefault(title(name), emptyList());
-	}
-
-	public Optional<String> header(final String name) {
+	/**
+	 * Configures request query parameter value.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param name  the name of the query parameter whose value is to be configured
+	 * @param value the new value for {@code name}
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code value} is null
+	 */
+	public Request parameter(final String name, final String value) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
 		}
 
-		return headers(name).stream().findFirst();
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		return parameters(name, value);
 	}
 
 
-	public List<Part> parts(final String name) {
+	/**
+	 * Retrieves request query parameter values.
+	 *
+	 * @param name the name of the query parameter whose values are to be retrieved
+	 *
+	 * @return an immutable and possibly empty collection of values
+	 */
+	public List<String> parameters(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
 		}
 
-		return parts.getOrDefault(name, emptyList());
+		return unmodifiableList(parameters.getOrDefault(name, list()));
 	}
 
-	public Optional<Part> part(final String name) {
+	/**
+	 * Configures request query parameter values.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param name   the name of the query parameter whose values are to be configured
+	 * @param values a possibly empty collection of values
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
+	 *                              {@code null} value
+	 */
+	public Request parameters(final String name, final String... values) {
+		return parameters(name, asList(values));
+	}
+
+	/**
+	 * Configures request query parameter values.
+	 *
+	 * <p>Existing values are overwritten.</p>
+	 *
+	 * @param name   the name of the query parameter whose values are to be configured
+	 * @param values a possibly empty collection of values
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
+	 *                              {@code null} value
+	 */
+	public Request parameters(final String name, final Collection<String> values) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
 		}
 
-		return parts(name).stream().findFirst();
-	}
-
-
-	private String content() {
-		return part(BodyPart).map(p -> p.header("Content-Type").orElse("")).orElseGet(() -> header("Content-Type").orElse(""));
-	}
-
-
-	public InputStream input() {
-		return part(BodyPart).map(Part::input).orElseGet(() -> input != null ? input.get() : reader != null ? Transputs.input(reader.get()) : Transputs.input());
-	}
-
-	public Reader reader() {
-		return part(BodyPart).map(Part::reader).orElseGet(() -> reader != null ? reader.get() : input != null ? Transputs.reader(input.get()) : Transputs.reader());
-	}
-
-
-	public byte[] data() {
-		try (final InputStream input=input()) {
-			return Transputs.data(input);
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-	public String text() {
-		try (final Reader reader=reader()) {
-			return Transputs.text(reader);
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-
-	public Object json() throws JsonException {
-		return _JSON.decode(text());
-	}
-
-
-	public Collection<Statement> rdf() throws RDFParseException {
-		return rdf(null);
-	}
-
-	public Collection<Statement> rdf(final Shape shape) throws RDFParseException {
-		return rdf(shape, focus());
-	}
-
-	public Collection<Statement> rdf(final Shape shape, final Resource focus) throws RDFParseException {
-
-		final String content=content();
-
-		final RDFParserFactory factory=Formats.service(RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
-		final RDFParser parser=factory.getParser();
-
-		parser.set(JSONAdapter.Shape, shape);
-		parser.set(JSONAdapter.Focus, focus);
-
-		parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
-		parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
-
-		parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
-		parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
-
-		final ParseErrorCollector errorCollector=new ParseErrorCollector();
-
-		parser.setParseErrorListener(errorCollector);
-
-		final Collection<Statement> model=new ArrayList<>();
-
-		parser.setRDFHandler(new AbstractRDFHandler() {
-			@Override public void handleStatement(final Statement statement) {
-				model.add(statement);
-			}
-		});
-
-		try (final Reader reader=reader()) { // use reader to activate IRI rewriting
-
-			parser.parse(reader, focus.stringValue()); // resolve relative IRIs wrt the focus
-
-		} catch ( final RDFParseException e ) {
-
-			if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
-				errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
-			}
-
-		} catch ( final IOException e ) {
-
-			throw new UncheckedIOException(e);
-
+		if ( values == null ) {
+			throw new NullPointerException("null values");
 		}
 
-		// !!! log warnings/error/fatals
+		if ( values.contains(null) ) {
+			throw new NullPointerException("null value");
+		}
 
-		final List<String> fatals=errorCollector.getFatalErrors();
-		final List<String> errors=errorCollector.getErrors();
-		final List<String> warnings=errorCollector.getWarnings();
+		if ( values.isEmpty() ) {
 
-		if ( fatals.isEmpty() ) {
-
-			return model;
+			parameters.remove(name);
 
 		} else {
 
-			throw new RDFParseException("errors parsing content as "+parser.getRDFFormat().getDefaultMIMEType()+":\n\n"+fatals.stream().collect(joining("\n"))+errors.stream().collect(joining("\n"))+warnings.stream().collect(joining("\n")));
+			parameters.put(name, unmodifiableList(new ArrayList<>(values)));
 
 		}
-	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final class Writer {
-
-		private final Request request=new Request();
-
-		private Consumer<Request> source;
-
-
-		Writer(final Consumer<Request> source) {
-			this.source=source;
-		}
-
-
-		public Writer copy(final Request request) {
-
-			if ( request == null ) {
-				throw new NullPointerException("null request");
-			}
-
-			final Request target=this.request;
-
-			target.user=request.user;
-			target.roles=new LinkedHashSet<>(request.roles);
-
-			target.method=request.method;
-			target.base=request.base;
-			target.path=request.path;
-			target.query=request.query;
-
-			target.parameters=new LinkedHashMap<>(request.parameters);
-			target.headers=new LinkedHashMap<>(request.headers);
-			target.parts=new LinkedHashMap<>(request.parts);
-
-			target.input=request.input;
-			target.reader=request.reader;
-
-			return this;
-		}
-
-
-		public Writer user(final IRI user) {
-
-			if ( user == null ) {
-				throw new NullPointerException("null user");
-			}
-
-			request.user=user;
-
-			return this;
-		}
-
-		public Writer roles(final Value... roles) {
-			return roles(asList(roles));
-		}
-
-		public Writer roles(final Collection<? extends Value> roles) {
-
-			if ( roles == null ) {
-				throw new NullPointerException("null roles");
-			}
-
-			if ( roles.contains(null) ) {
-				throw new NullPointerException("null role");
-			}
-
-			request.roles=new LinkedHashSet<>(roles);
-
-			return this;
-		}
-
-
-		public Writer method(final String method) {
-
-			if ( method == null ) {
-				throw new NullPointerException("null method");
-			}
-
-			request.method=upper(method);
-
-			return this;
-		}
-
-		public Writer base(final String base) {
-
-			if ( base == null ) {
-				throw new NullPointerException("null base");
-			}
-
-			if ( !Values.AbsoluteIRIPattern.matcher(base).matches() ) {
-				throw new IllegalArgumentException("not an absolute IRI base");
-			}
-
-			if ( !base.endsWith("/") ) {
-				throw new IllegalArgumentException("missing trailing / in base");
-			}
-
-			request.base=base;
-
-			return this;
-		}
-
-		public Writer path(final String path) {
-
-			if ( path == null ) {
-				throw new NullPointerException("null path");
-			}
-
-			if ( !path.startsWith("/") ) {
-				throw new IllegalArgumentException("missing leading / in path");
-			}
-
-			request.path=path;
-
-			return this;
-		}
-
-		public Writer query(final String query) {
-
-			if ( query == null ) {
-				throw new NullPointerException("null query");
-			}
-
-			request.query=query;
-
-			return this;
-		}
-
-
-		public Writer parameters(final Stream<Entry<String, List<String>>> parameters) {
-
-			if ( parameters == null ) {
-				throw new NullPointerException("null parameters");
-			}
-
-			parameters.forEachOrdered(parameter -> parameter(parameter.getKey(), parameter.getValue()));
-
-			return this;
-		}
-
-		// !!! null value -> expand current value >>> review/document/remove
-
-		public Writer parameter(final String name, final String... values) {
-			return parameter(name, asList(values));
-		}
-
-		public Writer parameter(final String name, final Collection<String> values) {
-
-			if ( name == null ) {
-				throw new NullPointerException("null name");
-			}
-
-			if ( values == null ) {
-				throw new NullPointerException("null values");
-			}
-
-			request.parameters.compute(name, (key, current) -> unmodifiableList(values.stream()
-					.flatMap(value -> value != null ? Stream.of(value) : current != null ? current.stream() : Stream.empty())
-					.collect(toList())
-			));
-
-			return this;
-		}
-
-
-		public Writer headers(final Stream<Entry<String, Collection<String>>> headers) {
-
-			if ( headers == null ) {
-				throw new NullPointerException("null headers");
-			}
-
-			headers.forEachOrdered(header -> header(header.getKey(), header.getValue()));
-
-			return this;
-		}
-
-		public Writer header(final String name, final String... values) {
-			return header(name, asList(values));
-		}
-
-		public Writer header(final String name, final Collection<String> values) {
-
-			if ( name == null ) {
-				throw new NullPointerException("null name");
-			}
-
-			if ( values == null ) {
-				throw new NullPointerException("null values");
-			}
-
-			if ( values.contains(null) ) {
-				throw new NullPointerException("null value");
-			}
-
-			request.headers.compute(title(name), (key, current) -> unmodifiableList(values.stream()
-					.flatMap(value -> value.isEmpty() ? current == null ? Stream.empty() : current.stream() : Stream.of(value))
-					.distinct()
-					.collect(toList())
-			));
-
-			return this;
-		}
-
-
-		public Writer part(final String name, final Part... parts) {
-			return part(name, asList(parts));
-		}
-
-		public Writer part(final String name, final Collection<Part> parts) {
-
-			if ( name == null ) {
-				throw new NullPointerException("null name");
-			}
-
-			if ( parts == null ) {
-				throw new NullPointerException("null parts");
-			}
-
-			if ( parts.contains(null) ) {
-				throw new NullPointerException("null part");
-			}
-
-			request.parts.put(name, unmodifiableList(new ArrayList<>(parts)));
-
-			return this;
-		}
-
-
-		public Writer input(final Supplier<InputStream> input) {
-
-			if ( input == null ) {
-				throw new NullPointerException("null input");
-			}
-
-			request.input=input;
-			request.reader=null;
-
-			return this;
-		}
-
-		public Writer reader(final Supplier<Reader> reader) {
-
-			if ( reader == null ) {
-				throw new NullPointerException("null reader");
-			}
-
-			request.input=null;
-			request.reader=reader;
-
-			return done();
-		}
-
-
-		public Writer body() {
-			return body(Transputs::input, Transputs::reader); // empty body
-		}
-
-		public Writer body(final Supplier<InputStream> data, final Supplier<Reader> text) {
-
-			if ( data == null ) {
-				throw new NullPointerException("null data");
-			}
-
-			if ( text == null ) {
-				throw new NullPointerException("null text");
-			}
-
-			request.input=data;
-			request.reader=text;
-
-			return done();
-		}
-
-
-		public Writer data(final byte... data) {
-
-			if ( data == null ) {
-				throw new NullPointerException("null data");
-			}
-
-			return input(() -> new ByteArrayInputStream(data));
-		}
-
-		public Writer text(final String text) {
-
-			if ( text == null ) {
-				throw new NullPointerException("null text");
-			}
-
-			return reader(() -> new StringReader(text));
-		}
-
-
-		public Writer json(final Object json) throws JsonException {
-
-			if ( json == null ) {
-				throw new NullPointerException("null json");
-			}
-
-			return header("Content-Type", "application/json").text(_JSON.encode(json));
-		}
-
-
-		public Writer done() {
-
-			if ( source == null ) {
-				throw new IllegalStateException("already committed");
-			}
-
-			if ( request.method.isEmpty() ) {
-				throw new IllegalStateException("undefined method");
-			}
-
-			try {
-				source.accept(request);
-			} finally {
-				source=null;
-			}
-
-			return this;
-		}
-
+		return self();
 	}
 
 }

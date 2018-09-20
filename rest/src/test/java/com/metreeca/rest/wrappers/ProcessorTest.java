@@ -17,84 +17,116 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.form.things.ValuesTest;
+import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static com.metreeca.rest.LinkTest.testbed;
-import static com.metreeca.rest.wrappers.Processor.processor;
-import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
-import static com.metreeca.form.things.ValuesTest.export;
-import static com.metreeca.form.things.ValuesTest.decode;
-import static com.metreeca.form.things.ValuesTest.sparql;
+import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.tray.Tray.tool;
 
 
-public final class ProcessorTest {
+final class ProcessorTest {
 
-	@Test public void testExecuteUpdateScriptOnRequestFocus() {
-		testbed()
+	//@Test void testShapedRelatePiped() {
+	//	testbed()
+	//
+	//			.handler(() -> relator().shape(ValuesTest.Employee)
+	//
+	//					.pipe((request, model) -> {
+	//
+	//						model.add(statement(request.focus(), RDF.VALUE, RDF.FIRST));
+	//
+	//						return model;
+	//
+	//					})
+	//
+	//					.pipe((request, model) -> {
+	//
+	//						model.add(statement(request.focus(), RDF.VALUE, RDF.REST));
+	//
+	//						return model;
+	//
+	//					}))
+	//
+	//			.request(request -> std(request)
+	//					.user(RDF.NIL)
+	//					.roles(LinkTest.Manager)
+	//					.done())
+	//
+	//			.response(response -> {
+	//
+	//				ValuesTest.assertSubset("items retrieved", asList(
+	//
+	//						statement(response.focus(), RDF.VALUE, RDF.FIRST),
+	//						statement(response.focus(), RDF.VALUE, RDF.REST)
+	//
+	//				), response.rdf());
+	//
+	//			});
+	//
+	//}
 
-				.dataset(ValuesTest.decode("<test> rdf:value rdf:first."))
 
-				.handler(() -> processor()
+	@Test void testExecuteUpdateScriptOnRequestFocus() {
+
+		final Tray tray=new Tray();
+		final Graph graph=tray.get(Graph.Factory);
+
+		tray
+
+				.run(() -> tool(Graph.Factory).update(connection -> {
+					connection.add(decode("<test> rdf:value rdf:first."));
+				}))
+
+				.get(() -> new Processor()
 						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-						.wrap((request, response) -> response
-								.status(Response.OK)
-								.done()
-						))
+						.wrap((Handler)request -> request.reply(response -> response.status(Response.OK))))
 
-				.request(writer -> writer
+				.handle(new Request()
 						.method(Request.POST)
-						.base(ValuesTest.Base)
-						.path("/test")
-						.done())
+						.base(Base)
+						.path("/test"))
 
-				.response(reader -> {
-
-					try (final RepositoryConnection connect=tool(Graph.Factory).connect()) {
-						assertIsomorphic("repository updated",
-								ValuesTest.decode("<test> rdf:value rdf:first, rdf:rest."),
-								export(connect)
-						);
-					}
-
-				});
+				.accept(response -> graph.browse(connection -> {
+					assertIsomorphic("repository updated",
+							decode("<test> rdf:value rdf:first, rdf:rest."),
+							export(connection)
+					);
+				}));
 	}
 
-	@Test public void testExecuteUpdateScriptOnResponseLocation() {
-		testbed()
+	@Test void testExecuteUpdateScriptOnResponseLocation() {
 
-				.dataset(ValuesTest.decode("<test> rdf:value rdf:first."))
+		final Tray tray=new Tray();
+		final Graph graph=tray.get(Graph.Factory);
 
-				.handler(() -> processor()
+		tray
+
+				.run(() -> tool(Graph.Factory).update(connection -> {
+					connection.add(decode("<test> rdf:value rdf:first."));
+				}))
+
+				.get(() -> new Processor()
 						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-						.wrap((request, response) -> response
+						.wrap((Handler)request -> request.reply(response -> response
 								.status(Response.OK)
-								.header("Location", ValuesTest.Base+"test")
-								.done()
-						))
+								.header("Location", Base+"test"))))
 
-				.request(writer -> writer
+				.handle(new Request()
 						.method(Request.POST)
-						.base(ValuesTest.Base)
-						.path("/")
-						.done())
+						.base(Base)
+						.path("/"))
 
-				.response(reader -> {
-
-					try (final RepositoryConnection connect=tool(Graph.Factory).connect()) {
-						assertIsomorphic("repository updated",
-								ValuesTest.decode("<test> rdf:value rdf:first, rdf:rest."),
-								export(connect)
-						);
-					}
-
-				});
+				.accept(response -> graph.browse(connection -> {
+					assertIsomorphic("repository updated",
+							decode("<test> rdf:value rdf:first, rdf:rest."),
+							export(connection)
+					);
+				}));
 	}
 
 }

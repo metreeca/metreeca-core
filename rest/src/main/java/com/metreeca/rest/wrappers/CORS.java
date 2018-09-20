@@ -17,50 +17,27 @@
 
 package com.metreeca.rest.wrappers;
 
+
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Wrapper;
-import com.metreeca.tray.sys.Setup;
-import com.metreeca.tray.sys.Trace;
-
-import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * CORS request manager (work in progress…).
+ * CORS request manager.
  *
  * <p>Manages CORS HTTP requests.</p>
  *
  * @see <a href="https://fetch.spec.whatwg.org/#cors-protocol">Fetch - § 3.2 CORS protocol</a>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) @ MDN</a>
+ * @deprecated Provisional implementation with unsafe shortcuts; <strong>don't use in production</strong>
  */
-public final class CORS implements Wrapper {
+@Deprecated final class CORS implements Wrapper {
 
 	// !!! https://www.html5rocks.com/static/images/cors_server_flowchart.png
 
-	public static CORS cors() { return new CORS(); }
-
-
-	private final Setup setup=tool(Setup.Factory);
-	private final Trace trace=tool(Trace.Factory);
-
-	private final boolean enabled=setup.get("cors", false);
-
-
-	private CORS() {}
-
-
 	@Override public Handler wrap(final Handler handler) {
-
-		trace.info(this, enabled ? "enabled" : "disabled");
-
-		return enabled ? (request, response) -> handler.handle(
-
-				writer -> writer.copy(request).done(),
-
-				reader -> response.copy(reader)
-						.header("Access-Control-Allow-Origin", request.header("Origin").orElse(""))
-						.done()
-
-		) : handler;
+		return request -> handler.handle(request).map(response -> response
+				.header("Access-Control-Allow-Origin", request.header("Origin").orElse(""))); // !!! ;(
 	}
+
 }

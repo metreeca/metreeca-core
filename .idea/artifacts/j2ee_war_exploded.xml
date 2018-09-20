@@ -8,7 +8,7 @@
         </element>
         <element id="directory" name="lib">
           <element id="archive" name="next-0.0-SNAPSHOT.jar">
-            <element id="module-output" name="next" />
+            <element id="module-output" name="rest" />
           </element>
           <element id="archive" name="tray-0.0-SNAPSHOT.jar">
             <element id="module-output" name="tray" />

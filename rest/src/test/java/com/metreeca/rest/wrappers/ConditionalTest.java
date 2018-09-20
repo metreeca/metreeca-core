@@ -17,66 +17,67 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.Wrapper;
+import com.metreeca.tray.Tray;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static com.metreeca.rest.LinkTest.testbed;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public final class ConditionalTest {
+final class ConditionalTest {
 
 	private static final int HandlerStatus=Response.OK;
 	private static final int WrapperStatus=Response.Accepted;
 
-	private static final Handler Handler=(request, response) -> response.status(HandlerStatus).done();
+	private static final Handler Handler=request ->
+			request.reply(response -> response.status(HandlerStatus));
 
-	private static final Wrapper Wrapper=handler -> (request, response) -> handler.handle(
-			writer -> writer.copy(request).done(),
-			reader -> response.copy(reader).status(WrapperStatus).done()
-	);
+	private static final Wrapper Wrapper=handler -> request ->
+			handler.handle(request).map(response -> response.status(WrapperStatus));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testDelegateHandlerUnconditonally() {
-		testbed()
+	@Test void testDelegateHandlerUnconditionally() {
+		new Tray()
 
-				.handler(() -> new Conditional()
+				.get(() -> new Conditional()
 						.test(request -> false)
 						.wrap(Handler))
 
-				.request(writer -> writer.method(Request.GET).done())
+				.handle(new Request().method(Request.GET))
 
-				.response(reader -> assertEquals("handler delegated", HandlerStatus, reader.status()));
+				.accept(reader -> assertEquals(HandlerStatus, reader.status(), "handler delegated"));
 	}
 
-	@Test public void testDelegateWrapper() {
-		testbed()
+	@Test void testDelegateWrapper() {
+		new Tray()
 
-				.handler(() -> new Conditional()
+				.get(() -> new Conditional()
 						.test(request -> true)
 						.wrap(Wrapper)
 						.wrap(Handler))
 
-				.request(writer -> writer.method(Request.GET).done())
+				.handle(new Request().method(Request.GET))
 
-				.response(reader -> assertEquals("wrapper delegated", WrapperStatus, reader.status()));
+				.accept(reader -> assertEquals(WrapperStatus, reader.status(), "wrapper delegated"));
 	}
 
-	@Test public void testBypassWrapper() {
-		testbed()
+	@Test void testBypassWrapper() {
+		new Tray()
 
-				.handler(() -> new Conditional()
+				.get(() -> new Conditional()
 						.test(request -> false)
 						.wrap(Wrapper)
 						.wrap(Handler))
 
-				.request(writer -> writer.method(Request.GET).done())
+				.handle(new Request().method(Request.GET))
 
-				.response(reader -> assertEquals("wrapper bypassed", HandlerStatus, reader.status()));
+				.accept(reader -> assertEquals(HandlerStatus, reader.status(), "wrapper bypassed"));
 	}
 
 }

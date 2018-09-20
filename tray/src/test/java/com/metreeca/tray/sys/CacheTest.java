@@ -42,7 +42,7 @@ public final class CacheTest {
 
 
 	private void exec(final Consumer<Cache> task) {
-		new Tray().lookup(() -> {
+		new Tray().run(() -> {
 			try {
 				task.accept(new Cache(tmp.newFolder()));
 			} catch ( final IOException e ) {

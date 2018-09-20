@@ -18,11 +18,12 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
+import com.metreeca.rest.Responder;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -33,38 +34,79 @@ import java.util.*;
  */
 public final class Dispatcher implements Handler {
 
-	public static Dispatcher dispatcher() { return new Dispatcher(); }
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private final Map<String, Handler> mappings=new LinkedHashMap<>();
 
 
-	private Dispatcher() {
+	public Dispatcher() {
 		mappings.put(Request.OPTIONS, this::options);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Configures the handler for the GET HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HTTP GET method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is null
+	 */
 	public Dispatcher get(final Handler handler) {
 		return method(Request.GET, handler);
 	}
 
+	/**
+	 * Configures the handler for the POST HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HTTP POST method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is null
+	 */
 	public Dispatcher post(final Handler handler) {
 		return method(Request.POST, handler);
 	}
 
+	/**
+	 * Configures the handler for the PUT HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HTTP PUT method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is null
+	 */
 	public Dispatcher put(final Handler handler) {
 		return method(Request.PUT, handler);
 	}
 
+	/**
+	 * Configures the handler for the DELETE HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HTTP DELETE method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is null
+	 */
 	public Dispatcher delete(final Handler handler) {
 		return method(Request.DELETE, handler);
 	}
 
 
+	/**
+	 * Configures the handler for a HTTP method.
+	 *
+	 * @param method  the HTTP method whose handler is to be configured
+	 * @param handler the handler to be delegated for {@code method}
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if either {@code method} or {@code handler} is null
+	 */
 	public Dispatcher method(final String method, final Handler handler) {
 
 		if ( method == null ) {
@@ -75,35 +117,33 @@ public final class Dispatcher implements Handler {
 			throw new NullPointerException("null handler");
 		}
 
-		mappings.put(normalize(method), handler);
+		mappings.put(method, handler);
 
 		return this;
 	}
 
 
-	@Override public void handle(final Request request, final Response response) {
-		Optional.ofNullable(mappings.get(normalize(request.method())))
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Responder handle(final Request request) {
+		return Optional.ofNullable(mappings.get(request.method()))
 				.orElse(this::unsupported)
-				.handle(request, response);
+				.handle(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String normalize(final String method) {
-		return method.toUpperCase(Locale.ROOT);
+	private Responder options(final Request request) {
+		return request.reply(response -> response
+				.status(Response.OK)
+				.headers("Allow", mappings.keySet()));
 	}
 
-
-	private void options(final Request request, final Response response) {
-		response.status(Response.OK)
-				.header("Allow", mappings.keySet())
-				.done();
-	}
-	private void unsupported(final Request request, final Response response) {
-		response.status(Response.MethodNotAllowed)
-				.header("Allow", mappings.keySet())
-				.done();
+	private Responder unsupported(final Request request) {
+		return request.reply(response -> response
+				.status(Response.MethodNotAllowed)
+				.headers("Allow", mappings.keySet()));
 	}
 
 }

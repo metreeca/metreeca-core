@@ -27,7 +27,8 @@
 	<version>0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Metreeca Model-Driven Linked Data Framework</name>
+	<name>Metreeca Linked Data Framework</name>
+	<description>A declarative model-driven framework for rapid linked data service development.</description>
 	<url>https://github.com/metreeca/metreeca-core</url>
 	<inceptionYear>2013</inceptionYear>
 
@@ -77,9 +78,10 @@
 	<modules>
 
 		<module>j2ee</module>
+		<module>utow</module>
 
 		<module>rest</module>
-		<module>mill</module>
+		<module>gate</module>
 		<module>tray</module>
 		<module>form</module>
 
@@ -95,14 +97,7 @@
 		<maven.deploy.skip>true</maven.deploy.skip> <!-- !!! no public artifact deployment -->
 		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 
-		<version.major>${project.artifact.selectedVersion.majorVersion}</version.major>
-		<version.minor>${project.artifact.selectedVersion.minorVersion}</version.minor>
-
-		<module.caption>${project.name}</module.caption>
-		<module.project>${project.groupId}:${project.artifactId}</module.project>
-		<module.version>${version.major}.${version.minor}</module.version>
-
-		<docs>${maven.multiModuleProjectDirectory}/docs/modules/${module.project}/${module.version}/</docs>
+		<javadocs>${project.basedir}/docs/latest/javadocs</javadocs>
 
 	</properties>
 
@@ -115,14 +110,12 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!--
-				<dependency> &lt;!&ndash; https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api &ndash;&gt;
-					<groupId>org.junit.jupiter</groupId>
-					<artifactId>junit-jupiter-api</artifactId>
-					<version>5.2.0</version>
-					<scope>test</scope>
-				</dependency>
-		-->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.2.0</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency> <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
 			<groupId>org.slf4j</groupId>
@@ -157,7 +150,7 @@
 				<executions>
 					<execution>
 
-						<id>clean-docs-folder</id>
+						<id>clean-javadocs-folder</id>
 						<phase>pre-site</phase>
 
 						<goals>
@@ -167,7 +160,7 @@
 						<configuration>
 							<filesets>
 								<fileset>
-									<directory>${docs}</directory>
+									<directory>${javadocs}</directory>
 								</fileset>
 							</filesets>
 						</configuration>
@@ -241,16 +234,12 @@
 
 				<configuration>
 
-					<outputDirectory>${project.build.directory}/site/javadocs</outputDirectory>
 					<notimestamp>true</notimestamp> <!-- avoid immaterial VCS visible changes -->
 
-					<links>
+					<!-- !!! replace with shared assets (https://stackoverflow.com/questions/30507476/maven-javadoc-how-to-include-centralized-resources/30668813#30668813) -->
+					<!--<stylesheetfile>${maven.multiModuleProjectDirectory}/docs/assets/javadocs.css</stylesheetfile>-->
 
-						<link>http://docs.metreeca.com/modules/com.metreeca:j2ee/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:link/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:mill/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:tray/${module.version}/apidocs/</link>
-						<link>http://docs.metreeca.com/modules/com.metreeca:spec/${module.version}/apidocs/</link>
+					<links>
 
 						<link>http://docs.rdf4j.org/javadoc/latest/</link>
 
@@ -262,12 +251,52 @@
 
 					<execution>
 
-						<id>generate-site-javadocs</id>
+						<id>generate-javadocs</id>
 						<phase>site</phase>
 
 						<goals>
 							<goal>javadoc</goal>
 						</goals>
+
+					</execution>
+
+					<execution>
+
+						<id>generate-aggregate-javadocs</id>
+						<inherited>false</inherited>
+						<phase>site</phase>
+
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+
+						<configuration>
+
+							<reportOutputDirectory>${javadocs}</reportOutputDirectory>
+							<destDir>javadocs</destDir>
+
+							<groups>
+								<group>
+									<title>Server Adapters</title>
+									<packages>com.metreeca.j2ee*</packages>
+								</group>
+								<group>
+									<title>REST API Framework</title>
+									<packages>com.metreeca.next*</packages>
+								</group>
+								<group>
+									<title>Tooling Framework</title>
+									<packages>com.metreeca.tray*</packages>
+								</group>
+								<group>
+									<title>Shapes Engine</title>
+									<packages>com.metreeca.form*</packages>
+								</group>
+							</groups>
+
+							<excludePackageNames>com.metreeca.utow*:com.metreeca.gate*</excludePackageNames>
+
+						</configuration>
 
 					</execution>
 

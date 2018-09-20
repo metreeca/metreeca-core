@@ -19,191 +19,177 @@ package com.metreeca.rest.handlers.shape;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.rest.LinkTest;
-import com.metreeca.rest.LinkTest.Testbed;
+import com.metreeca.form.Shape;
+import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.rest.RestTest;
+import com.metreeca.rest.formats._RDF;
+import com.metreeca.rest.formats._Shape;
+import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.Test;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ValuesTest.assertSubset;
 import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.form.things.ValuesTest.term;
-import static com.metreeca.rest.handlers.shape.Relator.relator;
-import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.tray.Tray.tool;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import static java.util.Arrays.asList;
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-public class RelatorTest {
+final class RelatorTest {
 
-	private Testbed testbed() {
-		return LinkTest.testbed()
-
-				.dataset(small())
-
-				.handler(() -> relator().shape(LinkTest.Employee));
+	private Tray tray() {
+		return new Tray().run(RestTest.dataset(small()));
 	}
 
-
-	private Request.Writer std(final Request.Writer writer) {
-		return writer
+	private Request direct() {
+		return new Request()
 				.method(Request.GET)
+				.base(ValuesTest.Base)
 				.path("/employees/1370");
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test public void testRelate() {
-		testbed()
-
-				.request(request -> std(request)
-						.user(RDF.NIL)
-						.roles(LinkTest.Manager)
-						.done())
-
-				.response(response -> {
-
-					assertEquals("success reported", Response.OK, response.status());
-
-					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
-
-						final Model expected=construct(connection,
-								"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }");
-
-						final Model actual=response.rdf();
-
-						assertSubset("items retrieved", expected, actual);
-
-					}
-
-				});
-	}
-
-	@Test public void testRelateLimited() {
-		testbed()
-
-				.request(request -> std(request)
-						.user(RDF.NIL)
-						.roles(LinkTest.Salesman)
-						.done())
-
-				.response(response -> {
-
-					assertEquals("success reported", Response.OK, response.status());
-
-					try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
-
-						final Model expected=construct(connection,
-								"construct where { <employees/1370> a :Employee; :code ?c }");
-
-						final Model actual=response.rdf();
-
-						assertSubset("items retrieved", expected, actual);
-
-						assertTrue("properties restricted to manager role not included",
-								actual.filter(null, term("seniority"), null).isEmpty());
-
-					}
-
-				});
-	}
-
-	@Test public void testRelatePiped() {
-		testbed()
-
-				.handler(() -> relator().shape(LinkTest.Employee)
-
-						.pipe((request, model) -> {
-
-							model.add(statement(request.focus(), RDF.VALUE, RDF.FIRST));
-
-							return model;
-
-						})
-
-						.pipe((request, model) -> {
-
-							model.add(statement(request.focus(), RDF.VALUE, RDF.REST));
-
-							return model;
-
-						}))
-
-				.request(request -> std(request)
-						.user(RDF.NIL)
-						.roles(LinkTest.Manager)
-						.done())
-
-				.response(response -> {
-
-					assertSubset("items retrieved", asList(
-
-							statement(response.focus(), RDF.VALUE, RDF.FIRST),
-							statement(response.focus(), RDF.VALUE, RDF.REST)
-
-					), response.rdf());
-
-				});
-
+	private Request shaped() {
+		return direct()
+				.roles(ValuesTest.Manager)
+				.body(_Shape.Format, ValuesTest.Employee);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testUnauthorized() {
-		testbed()
+	@Test void testDirectRelate() {
+		tray()
 
-				.request(request -> std(request)
-						.user(Form.none)
-						.done())
+				.get(Relator::new)
 
-				.response(response -> {
+				.handle(direct())
 
-					assertEquals("error reported", Response.Unauthorized, response.status());
+				.accept(response -> {
 
-				});
-	}
+					final Optional<Model> rdfBody=response.body(_RDF.Format).value().map(LinkedHashModel::new);
+					final Optional<Shape> shapeBody=response.body(_Shape.Format).value();
 
-	@Test public void testForbidden() {
-		testbed()
+					assertFalse(shapeBody.isPresent(), "response shape body omitted");
+					assertTrue(rdfBody.isPresent(), "response RDF body included");
 
-				.request(request -> std(request)
-						.user(RDF.NIL)
-						.roles(RDF.FIRST, RDF.REST)
-						.done())
-
-				.response(response -> {
-
-					assertEquals("error reported", Response.Forbidden, response.status());
+					assertTrue(
+							rdfBody.get().contains(response.item(), null, null),
+							"response RDF body contains a resource description"
+					);
 
 				});
 	}
 
-	@Test public void testUnknown() {
-		testbed()
+	@Test void testDirectUnknown() {
+		tray()
 
-				.request(request -> std(request)
-						.user(RDF.NIL)
-						.roles(LinkTest.Salesman)
-						.path("/employees/9999")
-						.done())
+				.get(Relator::new)
 
-				.response(response -> {
+				.handle(direct().path("/employees/9999"))
 
-					assertEquals("error reported", Response.NotFound, response.status());
+				.accept(response -> assertEquals(Response.NotFound, response.status()));
+	}
 
-				});
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testShapedRelate() {
+
+		final Tray tray=tray();
+		final Graph graph=tray.get(Graph.Factory);
+
+		tray.get(Relator::new)
+
+				.handle(shaped())
+
+				.accept(response -> graph.browse(connection -> {
+
+					assertEquals(Response.OK, response.status());
+
+					final Model expected=construct(connection,
+							"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }");
+
+					response.body(_RDF.Format).handle(
+							model -> assertSubset("items retrieved", expected, model),
+							error -> fail("missing RDF body")
+					);
+
+				}));
+	}
+
+	@Test void testShapedRelateLimited() {
+
+		final Tray tray=tray();
+		final Graph graph=tray.get(Graph.Factory);
+
+		tray.get(Relator::new)
+
+				.handle(shaped().roles(ValuesTest.Salesman))
+
+				.accept(response -> graph.browse(connection -> {
+
+					assertEquals(Response.OK, response.status());
+
+					final Model expected=construct(connection,
+							"construct where { <employees/1370> a :Employee; :code ?c }");
+
+					response.body(_RDF.Format).handle(
+							model -> {
+								assertSubset("items retrieved", expected, model);
+								assertTrue(
+										new LinkedHashModel(model).filter(null, term("seniority"), null).isEmpty(), // !!! unwrap
+										"properties restricted to manager role not included"
+								);
+							},
+							error -> fail("missing RDF body")
+					);
+
+				}));
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testShapedForbidden() {
+		tray()
+
+				.get(Relator::new)
+
+				.handle(shaped().body(_Shape.Format, or()))
+
+				.accept(response -> assertEquals(Response.Forbidden, response.status()));
+	}
+
+	@Test void testShapedUnauthorized() {
+		tray()
+
+				.get(Relator::new)
+
+				.handle(shaped().roles(Form.none))
+
+				.accept(response -> assertEquals(Response.Unauthorized, response.status()));
+	}
+
+	@Test void testShapedUnknown() {
+		tray()
+
+				.get(Relator::new)
+
+				.handle(shaped().path("/employees/9999"))
+
+				.accept(response -> assertEquals(Response.NotFound, response.status()));
 	}
 
 }

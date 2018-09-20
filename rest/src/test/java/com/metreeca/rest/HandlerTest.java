@@ -17,141 +17,37 @@
 
 package com.metreeca.rest;
 
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.Test;
+import com.metreeca.rest.formats._Text;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.metreeca.rest.Request.GET;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static java.util.Arrays.asList;
 
 
-public final class HandlerTest {
+final class HandlerTest {
 
-	@Test public void testExecute() {
-
-		final AtomicBoolean committed=new AtomicBoolean();
-
-		final Handler handler=(request, response) -> {
-			try {
-				response.status(Response.OK).done();
-			} finally {
-				committed.set(true);
-			}
-		};
-
-		handler.handle(writer -> writer.method(GET).done(), reader ->
-				assertEquals("request/response paired", GET, reader.request().method()));
-
-		assertTrue("target invoked", committed.get());
-
-	}
-
-	@Test public void testBefore() {
-
-		final AtomicBoolean committed=new AtomicBoolean();
-
-		final Handler handler=(request, response) -> {
-			try {
-				response.status(Response.OK).text("handler/"+request.text());
-			} finally {
-				committed.set(true);
-			}
-		};
-
-		handler
-
-				.wrap(wrapped -> (request, response) -> wrapped.handle(
-						writer -> writer.copy(request).text("before/"+request.text()),
-						reader -> response.copy(reader).done()
-				))
-
-				.handle(
-						writer -> writer.method(GET).text("text"),
-						reader -> assertEquals("wrapped", "handler/before/text", reader.text())
-				);
-
-		assertTrue("target invoked", committed.get());
-
-	}
-
-	@Test public void testAfter() {
-
-		final AtomicBoolean committed=new AtomicBoolean();
-
-		final Handler handler=(request, response) -> {
-			try {
-				response.status(Response.OK).text("handler/"+request.text());
-			} finally {
-				committed.set(true);
-			}
-		};
-
-		handler
-
-				.wrap(wrapped -> (request, response) -> wrapped.handle(
-						writer -> writer.copy(request).done(),
-						reader -> response.copy(reader).text("after/"+reader.text())
-				))
-
-				.handle(
-						writer -> writer.method(GET).text("text"),
-						reader -> assertEquals("wrapped", "after/handler/text", reader.text())
-				);
-
-		assertTrue("target invoked", committed.get());
-
-	}
-
-	@Test public void testReaderPairing() {
-
-		final Handler handler=(request, response) -> response.status(Response.OK).done();
-
-		handler
-
-				.wrap(wrapped -> (request, response) -> wrapped.handle(
-
-						writer -> writer.copy(request).user(RDF.REST).done(),
-
-						reader -> {
-
-							assertEquals("paired with wrapped request", RDF.REST, reader.request().user());
-
-							response.copy(reader).done();
-
-						}
-
-				))
-
-				.handle(
-						writer -> writer.method(GET).user(RDF.FIRST).done(),
-						reader -> assertEquals("paired with original request", RDF.FIRST, reader.request().user())
-				);
-	}
-
-	@Test public void testResultStreaming() {
+	@Test void testResultStreaming() {
 
 		final List<String> transaction=new ArrayList<>();
 
-		final Handler handler=(request, response) -> {
+		final Handler handler=request -> consumer -> {
 
 			transaction.add("begin");
 
-			response.status(Response.OK).text("inside");
+			request.reply(response -> response.body(_Text.Format, "inside")).accept(consumer);
 
 			transaction.add("commit");
 
 		};
 
-		handler.handle(writer -> writer.method(GET).done(), reader -> transaction.add(reader.text()));
+		handler.handle(new Request()).accept(response -> transaction.add(response.body(_Text.Format).value().orElse("")));
 
-		assertEquals("", asList("begin", "inside", "commit"), transaction);
+		assertEquals(asList("begin", "inside", "commit"), transaction);
 	}
 
 }

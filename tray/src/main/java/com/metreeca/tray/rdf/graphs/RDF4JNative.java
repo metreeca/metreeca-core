@@ -18,7 +18,7 @@
 package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Setup;
+import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
@@ -38,7 +38,7 @@ public final class RDF4JNative extends Graph {
 
 	public static final Supplier<Graph> Factory=() -> {
 
-		final Setup setup=tool(Setup.Factory);
+		final _Setup setup=tool(_Setup.Factory);
 
 		final File storage=setup.get("graph.native.storage", storage(setup));
 
@@ -47,7 +47,7 @@ public final class RDF4JNative extends Graph {
 
 
 	public RDF4JNative(final File storage) {
-		super("RDF4J Native Store", IsolationLevels.SNAPSHOT, () -> { // !!! SERIALIZABLE breaks persistence
+		super(IsolationLevels.SNAPSHOT, () -> { // !!! SERIALIZABLE breaks persistence
 
 			if ( storage == null ) {
 				throw new NullPointerException("null storage");

@@ -48,7 +48,7 @@ public final class Conditional implements Wrapper {
 	 *
 	 * @return this conditional wrapper
 	 *
-	 * @throws NullPointerException if {@code predicate} is {@code null}
+	 * @throws NullPointerException if {@code predicate} is null
 	 */
 	public Conditional test(final Predicate<Request> predicate) {
 
@@ -83,13 +83,7 @@ public final class Conditional implements Wrapper {
 
 			final Handler wrapped=wrapper.wrap(handler);
 
-			return (request, response) -> {
-				if ( predicate.test(request) ) {
-					wrapped.handle(request, response);
-				} else {
-					handler.handle(request, response);
-				}
-			};
+			return request -> (predicate.test(request) ? wrapped : handler).handle(request);
 
 		};
 	}

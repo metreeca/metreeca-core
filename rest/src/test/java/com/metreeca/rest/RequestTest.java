@@ -17,21 +17,43 @@
 
 package com.metreeca.rest;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static com.metreeca.form.things.Lists.list;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static java.util.Collections.emptySet;
 
 
-public class RequestTest {
+final class RequestTest {
 
-	@Test(expected=IllegalStateException.class) public void testWriterPreventCommitWithoutMethod() {
-		new Request.Writer(request -> {}).done();
+	@Test void testParametersIgnoreEmptyHeaders() {
+
+		final Request request=new Request()
+				.parameters("parameter", emptySet());
+
+		assertTrue(request.parameters().entrySet().isEmpty());
 	}
 
-	@Test(expected=IllegalStateException.class) public void testWriterPreventDoubleCommit() {
+	@Test void testParametersOverwritesValues() {
 
-		final Request.Writer writer=new Request.Writer(request -> {});
+		final Request request=new Request()
+				.parameter("parameter", "one")
+				.parameter("parameter", "two");
 
-		writer.method(Request.GET).done();
-		writer.done();
+		assertEquals(list("two"), list(request.parameters("parameter")));
+	}
+
+	@Test @Disabled void testBodyHandlesDefaultPart() {
+
+		//final Request request=new Request()
+		//		.part(Request.MainPart, new TestInbound().text("main"))
+		//		.part("part", new TestInbound().text("part"));
+		//
+		//assertEquals("main", request.text().orElse(""));
 
 	}
 

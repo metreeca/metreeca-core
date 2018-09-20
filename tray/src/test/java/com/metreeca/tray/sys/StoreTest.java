@@ -36,7 +36,7 @@ public final class StoreTest {
 
 
 	private void exec(final Consumer<Store> task) {
-		new Tray().lookup(() -> {
+		new Tray().run(() -> {
 			try {
 				task.accept(new Store(tmp.newFolder()));
 			} catch ( final IOException e ) {

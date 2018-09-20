@@ -25,7 +25,7 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.shapes.Alias;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
-import com.metreeca.form.things._JSON;
+import com.metreeca.form.things.JSON;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -120,7 +120,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 		try {
 
-			parse(_JSON.decode(reader), baseURI, focus, driver).count(); // consume values
+			parse(JSON.decode(reader), baseURI, focus, driver).count(); // consume values
 
 		} catch ( final JsonParsingException e ) {
 
