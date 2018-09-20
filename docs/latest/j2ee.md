@@ -1,8 +1,6 @@
 ---
-caption:    "${module.caption}"
-project:    "${module.project}"
-version:    "${module.version}"
-layout:     module
+title:  
+excerpt:
 ---
 
 The J2EE module provides an adapter for deploying apps based on the Metreeca [linked data framework](/modules/com.metreeca:link/${module.version}/) as web 
@@ -25,18 +23,11 @@ Using maven:
     <artifactId>app</artifactId>
     <version>1.0</version>
     <packaging>war</packaging>
-	    
-    <dependency>
-        <groupId>com.metreeca</groupId>
-        <artifactId>link</artifactId>
-        <version>${module.version}</version>
-    </dependency>
- 
+
     <dependency>
         <groupId>com.metreeca</groupId>
         <artifactId>j2ee</artifactId>
         <version>${module.version}</version>
-        <scope>runtime</scope>
     </dependency>
     
     <dependency>
@@ -66,33 +57,4 @@ Then include and configure Metreeca J2EE gateway in `WEB-INF/web.xml` like:
     </filter-mapping>
 
 </web-app>
-```
-
-## Application Components
-
-Standard platform-provided [linked data services](/modules/com.metreeca:link/${module.version}/apidocs/index.html?com/metreeca/link/services/package-summary.html) and custom application-provided [toolkits](/modules/com.metreeca:link/${module.version}/apidocs/index.html?com/metreeca/link/Toolkit.html) and [services](/modules/com.metreeca:link/${module.version}/apidocs/index.html?com/metreeca/link/Service.html) are listed in the `com.metreeca.rest.Tookit`  and `com.metreeca.rest.Service` [service loader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) provider configuration files in the `META-INF/services/` resource directory of the application, as discussed in the [linked data framework](/modules/com.metreeca:link/${module.version}/) docs.
-
-For multi-module Maven projects with overlaid WARs, configure the [WAR plugin](https://maven.apache.org/plugins/maven-war-plugin/) to create separate JARs for each module, in order to avoid possible clashes among multiple provider configuration files from different WAR modules.
-
-```xml
-<plugin>
-
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-war-plugin</artifactId>
-    <version>3.2.0</version>
-
-    <configuration>
-        <archiveClasses>true</archiveClasses>
-    </configuration>
-
-</plugin>
-```
-
-## Configuration Properties
-
-[Configuration properties](/modules/com.metreeca:tray/${module.version}/references/configuration) for standard and custom components may be defined in the `WEB-INF/metreeca.properties` configuration file, e.g.
-
-```properties
-setup.storage=/opt/example/data
-graph=native
 ```
