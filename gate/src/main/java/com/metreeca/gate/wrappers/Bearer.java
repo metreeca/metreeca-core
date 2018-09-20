@@ -19,7 +19,7 @@ package com.metreeca.gate.wrappers;
 
 import com.metreeca.gate.Roster;
 import com.metreeca.gate.Roster.Permit;
-import com.metreeca.next.*;
+import com.metreeca.rest.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

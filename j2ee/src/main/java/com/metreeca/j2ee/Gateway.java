@@ -18,10 +18,10 @@
 package com.metreeca.j2ee;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.next.Handler;
-import com.metreeca.next.Request;
-import com.metreeca.next.Response;
-import com.metreeca.next.formats.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
 import com.metreeca.tray.sys.Trace;

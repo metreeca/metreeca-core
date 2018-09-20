@@ -17,10 +17,12 @@
 
 package com.metreeca.utow;
 
-import com.metreeca.next.*;
-import com.metreeca.next.formats._Input;
-import com.metreeca.next.formats._Reader;
-import com.metreeca.next.formats._Writer;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.formats._Input;
+import com.metreeca.rest.formats._Reader;
+import com.metreeca.rest.formats._Writer;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Trace;
 
@@ -31,14 +33,16 @@ import io.undertow.server.handlers.CanonicalPathHandler;
 import io.undertow.server.handlers.GracefulShutdownHandler;
 import io.undertow.util.HttpString;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.metreeca.form.things.Transputs.reader;
 
 
-/**
+/*
  * Undertow gateway.
  *
  * <p>Provides a gateway between a web application managed by a <a href="http://undertow.io/">Undertow</a> server and

@@ -17,11 +17,11 @@
 
 package com.metreeca.utow;
 
-import com.metreeca.next.Failure;
-import com.metreeca.next.Handler;
-import com.metreeca.next.Wrapper;
-import com.metreeca.next.formats._Failure;
-import com.metreeca.next.formats._Writer;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.formats._Failure;
+import com.metreeca.rest.formats._Writer;
 
 import java.io.IOException;
 import java.io.Writer;

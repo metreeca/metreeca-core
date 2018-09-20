@@ -29,7 +29,7 @@ com.example.app.employees
 com.example.app.products
 com.example.app.customers
 
-com.metreeca.next.handlers.SPARQL
+com.metreeca.rest.handlers.SPARQL
 ```
 
 - Sample Service

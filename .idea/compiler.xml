@@ -9,7 +9,6 @@
         <module name="form" />
         <module name="gate" />
         <module name="j2ee" />
-        <module name="next" />
         <module name="rest" />
         <module name="tray" />
         <module name="utow" />
@@ -38,7 +37,6 @@
       <module name="mesh" target="1.8" />
       <module name="mill" target="1.8" />
       <module name="mill (1)" target="1.8" />
-      <module name="next" target="1.8" />
       <module name="node" target="1.8" />
       <module name="rest" target="1.8" />
       <module name="self" target="1.8" />

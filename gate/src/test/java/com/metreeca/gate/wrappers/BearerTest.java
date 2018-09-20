@@ -20,8 +20,8 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.form.things.Transputs;
 import com.metreeca.gate.Roster;
 import com.metreeca.gate.RosterTest;
-import com.metreeca.next.*;
-import com.metreeca.next.formats.*;
+import com.metreeca.rest.*;
+import com.metreeca.rest.formats.*;
 import com.metreeca.tray.Tray;
 
 import org.junit.jupiter.api.Test;

@@ -18,10 +18,10 @@
 package com.metreeca.gate.handlers;
 
 import com.metreeca.gate.Roster;
-import com.metreeca.next.Handler;
-import com.metreeca.next.Request;
-import com.metreeca.next.Responder;
-import com.metreeca.next.handlers.Dispatcher;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Responder;
+import com.metreeca.rest.handlers.Dispatcher;
 
 import org.eclipse.rdf4j.model.Value;
 

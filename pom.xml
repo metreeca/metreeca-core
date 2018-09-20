@@ -80,9 +80,8 @@
 		<module>j2ee</module>
 		<module>utow</module>
 
-		<module>next</module>
-		<module>gate</module>
 		<module>rest</module>
+		<module>gate</module>
 		<module>tray</module>
 		<module>form</module>
 
@@ -295,7 +294,7 @@
 								</group>
 							</groups>
 
-							<excludePackageNames>com.metreeca.rest*:com.metreeca.utow*:com.metreeca.gate*</excludePackageNames>
+							<excludePackageNames>com.metreeca.utow*:com.metreeca.gate*</excludePackageNames>
 
 						</configuration>
 
