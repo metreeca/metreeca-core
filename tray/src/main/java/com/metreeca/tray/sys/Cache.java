@@ -27,7 +27,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.metreeca.tray._Tray.tool;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys._Setup.storage;
 import static com.metreeca.tray.sys.Trace.clip;
 

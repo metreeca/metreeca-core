@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 import java.io.File;
 import java.util.function.Supplier;
 
-import static com.metreeca.tray._Tray.tool;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.IsolationLevels.SERIALIZABLE;
 
