@@ -32,19 +32,10 @@ import java.util.function.Function;
  * Path-based request router.
  *
  * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#path()
- * path}.</p>
+ * path} according to the following rules:</p>
  *
  * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  * opportunity to handle the request.</p>
- */
-
-/*
- * Linked data handlers index {thread-safe}.
- *
- * <p>Maps linked data resource path patterns to delegated resource {@linkplain Handler handlers}.</p>
- *
- * <p>Linked data {@linkplain Server servers} delegate HTTP requests to handlers selected according to the following
- * rules on the basis of the server-relative {@linkplain Request#path() path} of the requested resource:</p>
  *
  * <ul>
  *
@@ -59,6 +50,7 @@ import java.util.function.Function;
  * </ul>
  *
  * <p>Trailing slashes and question marks in resource paths are ignored.</p>
+
  */
 public final class Router implements Handler {
 
