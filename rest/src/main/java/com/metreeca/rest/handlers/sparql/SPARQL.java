@@ -110,171 +110,172 @@ import static java.lang.Boolean.parseBoolean;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder process(final Request request) {
-		try (final RepositoryConnection connection=graph.connect()) {
+		return consumer -> graph.browse(connection -> {
+			try {
 
-			final Operation operation=operation(request, connection);
-			final String accept=request.header("Accept").orElse("");
+				final Operation operation=operation(request, connection);
+				final String accept=request.header("Accept").orElse("");
 
-			if ( operation == null ) { // !!! return void description for GET
+				if ( operation == null ) { // !!! return void description for GET
 
-				return request.reply(response -> response.body(_Failure.Format, new Failure(
-						Response.BadRequest, "parameter-missing", "missing query/update parameter"
-				)));
+					request.reply(response -> response.body(_Failure.Format, new Failure(
+							Response.BadRequest, "parameter-missing", "missing query/update parameter"
+					))).accept(consumer);
 
-			} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
+				} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
 
-				return refused(request);
+					refused(request).accept(consumer);
 
-			} else if ( operation instanceof BooleanQuery ) {
+				} else if ( operation instanceof BooleanQuery ) {
 
-				final boolean result=((BooleanQuery)operation).evaluate();
+					final boolean result=((BooleanQuery)operation).evaluate();
 
-				final BooleanQueryResultWriterFactory factory=Formats.service(
-						BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+					final BooleanQueryResultWriterFactory factory=Formats.service(
+							BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
 
-				return request.reply(response -> response.status(Response.OK)
-						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-						.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(result))
-				);
+					request.reply(response -> response.status(Response.OK)
+							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
+							.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(result))
+					).accept(consumer);
 
-			} else if ( operation instanceof TupleQuery ) {
+				} else if ( operation instanceof TupleQuery ) {
 
-				// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
+					// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
 
-				final TupleQueryResult result=((TupleQuery)operation).evaluate();
+					final TupleQueryResult result=((TupleQuery)operation).evaluate();
 
-				final TupleQueryResultWriterFactory factory=Formats.service(
-						TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
+					final TupleQueryResultWriterFactory factory=Formats.service(
+							TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
 
-				return request.reply(response -> response.status(Response.OK)
-						.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-						.body(_Output.Format, output -> {
-							try {
+					request.reply(response -> response.status(Response.OK)
+							.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
+							.body(_Output.Format, output -> {
+								try {
 
-								final TupleQueryResultWriter writer=factory.getWriter(output);
+									final TupleQueryResultWriter writer=factory.getWriter(output);
 
-								writer.startDocument();
-								writer.startQueryResult(result.getBindingNames());
+									writer.startDocument();
+									writer.startQueryResult(result.getBindingNames());
 
-								while ( result.hasNext() ) { writer.handleSolution(result.next());}
+									while ( result.hasNext() ) { writer.handleSolution(result.next());}
 
-								writer.endQueryResult();
+									writer.endQueryResult();
 
-							} finally {
-								result.close();
-							}
-						}));
+								} finally {
+									result.close();
+								}
+							})).accept(consumer);
 
-			} else if ( operation instanceof GraphQuery ) {
+				} else if ( operation instanceof GraphQuery ) {
 
-				// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
+					// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
 
-				final GraphQueryResult result=((GraphQuery)operation).evaluate();
+					final GraphQueryResult result=((GraphQuery)operation).evaluate();
 
-				final RDFWriterFactory factory=Formats.service(
-						RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
+					final RDFWriterFactory factory=Formats.service(
+							RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
 
-				return request.reply(response -> response.status(Response.OK)
-						.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-						.body(_Output.Format, output -> {
+					request.reply(response -> response.status(Response.OK)
+							.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
+							.body(_Output.Format, output -> {
 
-							final RDFWriter writer=factory.getWriter(output);
+								final RDFWriter writer=factory.getWriter(output);
 
-							writer.startRDF();
+								writer.startRDF();
 
-							for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
-								writer.handleNamespace(entry.getKey(), entry.getValue());
-							}
+								for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
+									writer.handleNamespace(entry.getKey(), entry.getValue());
+								}
 
-							try {
-								while ( result.hasNext() ) { writer.handleStatement(result.next());}
-							} finally {
-								result.close();
-							}
+								try {
+									while ( result.hasNext() ) { writer.handleStatement(result.next());}
+								} finally {
+									result.close();
+								}
 
-							writer.endRDF();
+								writer.endRDF();
 
-						}));
+							})).accept(consumer);
 
-			} else if ( operation instanceof Update ) {
+				} else if ( operation instanceof Update ) {
 
-				try {
+					try {
 
-					connection.begin();
+						connection.begin();
 
-					((Update)operation).execute();
+						((Update)operation).execute();
 
-					connection.commit();
+						connection.commit();
 
-				} catch ( final Throwable e ) {
+					} catch ( final Throwable e ) {
 
-					connection.rollback();
+						connection.rollback();
 
-					throw e;
+						throw e;
+					}
+
+					final BooleanQueryResultWriterFactory factory=Formats.service(
+							BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+
+					request.reply(response -> response.status(Response.OK)
+							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
+							.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(true))
+					).accept(consumer);
+
+				} else {
+
+					request.reply(response -> response.body(_Failure.Format, new Failure(
+							Response.NotImplemented, "operation-unsupported", operation.getClass().getName()
+					))).accept(consumer);
+
 				}
 
-				final BooleanQueryResultWriterFactory factory=Formats.service(
-						BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+			} catch ( final MalformedQueryException e ) {
 
-				return request.reply(response -> response.status(Response.OK)
-						.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-						.body(_Output.Format, output -> factory.getWriter(output).handleBoolean(true))
-				);
+				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+						Response.BadRequest, "query-malformed", e
+				))).accept(consumer);
 
-			} else {
+			} catch ( final IllegalArgumentException e ) {
 
-				return request.reply(response -> response.body(_Failure.Format, new Failure(
-						Response.NotImplemented, "operation-unsupported", operation.getClass().getName()
-				)));
+				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+						Response.BadRequest, "request-malformed", e
+				))).accept(consumer);
+
+			} catch ( final UnsupportedOperationException e ) {
+
+				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+						Response.NotImplemented, "operation-unsupported", e
+				))).accept(consumer);
+
+			} catch ( final QueryEvaluationException e ) {
+
+				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
+
+				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+						Response.InternalServerError, "query-evaluation", e
+				))).accept(consumer);
+
+			} catch ( final UpdateExecutionException e ) {
+
+				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+						Response.InternalServerError, "update-evaluation", e
+				))).accept(consumer);
+
+			} catch ( final TupleQueryResultHandlerException e ) {
+
+				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+						Response.InternalServerError, "response-error", e
+				))).accept(consumer);
+
+			} catch ( final RuntimeException e ) {
+
+				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+						Response.InternalServerError, "repository-error", e
+				))).accept(consumer);
 
 			}
-
-		} catch ( final MalformedQueryException e ) {
-
-			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-					Response.BadRequest, "query-malformed", e
-			)));
-
-		} catch ( final IllegalArgumentException e ) {
-
-			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-					Response.BadRequest, "request-malformed", e
-			)));
-
-		} catch ( final UnsupportedOperationException e ) {
-
-			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-					Response.NotImplemented, "operation-unsupported", e
-			)));
-
-		} catch ( final QueryEvaluationException e ) {
-
-			// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
-
-			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-					Response.InternalServerError, "query-evaluation", e
-			)));
-
-		} catch ( final UpdateExecutionException e ) {
-
-			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-					Response.InternalServerError, "update-evaluation", e
-			)));
-
-		} catch ( final TupleQueryResultHandlerException e ) {
-
-			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-					Response.InternalServerError, "response-error", e
-			)));
-
-		} catch ( final RuntimeException e ) {
-
-			return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-					Response.InternalServerError, "repository-error", e
-			)));
-
-		}
-
+		});
 	}
 
 

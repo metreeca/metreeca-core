@@ -20,9 +20,7 @@ package com.metreeca.tray.rdf.graphs;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys._Setup;
 
-import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
@@ -30,8 +28,6 @@ import java.io.File;
 import java.util.function.Supplier;
 
 import static com.metreeca.tray.Tray.tool;
-
-import static org.eclipse.rdf4j.IsolationLevels.SERIALIZABLE;
 
 
 public final class RDF4JNative extends Graph {
@@ -47,7 +43,9 @@ public final class RDF4JNative extends Graph {
 
 
 	public RDF4JNative(final File storage) {
-		super(IsolationLevels.SNAPSHOT, () -> { // !!! SERIALIZABLE breaks persistence
+		super(IsolationLevels.SNAPSHOT, () -> {
+
+			// !!! ;(rdf4j) SERIALIZABLE leaks memory like a sieve…  see https://github.com/eclipse/rdf4j/issues/1031
 
 			if ( storage == null ) {
 				throw new NullPointerException("null storage");
@@ -60,21 +58,6 @@ public final class RDF4JNative extends Graph {
 			return new SailRepository(new NativeStore(storage));
 
 		});
-	}
-
-
-	@Override public RepositoryConnection connect(final IsolationLevel isolation) {
-
-		if ( isolation == null ) {
-			throw new NullPointerException("null isolation");
-		}
-
-		final boolean serializable=isolation.isCompatibleWith(SERIALIZABLE);
-
-		// !!! ;(rdf4j) fall back to default isolation if trying to activate SERIALIZABLE (leaks memory like a sieve…)
-		// see https://github.com/eclipse/rdf4j/issues/1031
-
-		return serializable ? connect() : super.connect(isolation);
 	}
 
 }

@@ -138,19 +138,18 @@ public final class Graphs implements Handler {
 				final IRI focus=request.item();
 				final Collection<Statement> model=new ArrayList<>();
 
-				try (
-						final RepositoryConnection connection=graph.connect();
-						final RepositoryResult<Resource> contexts=connection.getContextIDs()
-				) {
-					while ( contexts.hasNext() ) {
+				graph.browse(connection -> {
+					try (final RepositoryResult<Resource> contexts=connection.getContextIDs()) {
+						while ( contexts.hasNext() ) {
 
-						final Resource context=contexts.next();
+							final Resource context=contexts.next();
 
-						model.add(statement(focus, RDF.VALUE, context));
-						model.add(statement(context, RDF.TYPE, VOID.DATASET));
+							model.add(statement(focus, RDF.VALUE, context));
+							model.add(statement(context, RDF.TYPE, VOID.DATASET));
 
+						}
 					}
-				}
+				});
 
 				request.reply(response -> response.status(Response.OK)
 						.body(_RDF.Format, model)
@@ -166,7 +165,7 @@ public final class Graphs implements Handler {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				try (final RepositoryConnection connection=graph.connect()) {
+				graph.browse(connection -> {
 					request.reply(response -> response.status(Response.OK)
 
 							.header("Content-Type", format.getDefaultMIMEType())
@@ -177,7 +176,7 @@ public final class Graphs implements Handler {
 							.body(_Writer.Format, writer -> connection.export(factory.getWriter(writer), context))
 
 					).accept(consumer);
-				}
+				});
 			}
 		};
 	}
@@ -212,51 +211,49 @@ public final class Graphs implements Handler {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
-				try (
-						final RepositoryConnection connection=graph.connect();
-						final InputStream input=request.body(_Input.Format).value() // binary format >> no rewriting
-								.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
-								.get()
-				) {
+				graph.update(connection -> {
+					try (final InputStream input=request.body(_Input.Format).value() // binary format >> no rewriting
+							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
+							.get()) {
 
-					final boolean exists=exists(connection, context);
+						final boolean exists=exists(connection, context);
 
-					connection.clear(context);
-					connection.add(input, request.base(), factory.getRDFFormat(), context);
+						connection.clear(context);
+						connection.add(input, request.base(), factory.getRDFFormat(), context);
 
-					request.reply(response ->
-							response.status(exists ? Response.NoContent : Response.Created)
-					).accept(consumer);
+						request.reply(response ->
+								response.status(exists ? Response.NoContent : Response.Created)
+						).accept(consumer);
 
-				} catch ( final IOException e ) {
+					} catch ( final IOException e ) {
 
-					trace.warning(this, "unable to read RDF payload", e);
+						trace.warning(this, "unable to read RDF payload", e);
 
-					request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-							Response.InternalServerError, "payload-unreadable",
-							"I/O while reading RDF payload: see server logs for more detail"
-					))).accept(consumer);
+						request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+								Response.InternalServerError, "payload-unreadable",
+								"I/O while reading RDF payload: see server logs for more detail"
+						))).accept(consumer);
 
-				} catch ( final RDFParseException e ) {
+					} catch ( final RDFParseException e ) {
 
-					trace.warning(this, "malformed RDF payload", e);
+						trace.warning(this, "malformed RDF payload", e);
 
-					request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-							Response.BadRequest, "payload-malformed",
-							"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
-					))).accept(consumer);
+						request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+								Response.BadRequest, "payload-malformed",
+								"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
+						))).accept(consumer);
 
-				} catch ( final RepositoryException e ) {
+					} catch ( final RepositoryException e ) {
 
-					trace.warning(this, "unable to update graph "+context, e);
+						trace.warning(this, "unable to update graph "+context, e);
 
-					request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-							Response.InternalServerError,
-							"update-aborted", "unable to update graph: see server logs for more detail"
-					))).accept(consumer);
+						request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
+								Response.InternalServerError,
+								"update-aborted", "unable to update graph: see server logs for more detail"
+						))).accept(consumer);
 
-				}
-
+					}
+				});
 			}
 
 		};
@@ -284,26 +281,27 @@ public final class Graphs implements Handler {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				try (final RepositoryConnection connection=graph.connect()) {
+				graph.update(connection -> {
+					try {
 
-					final boolean exists=exists(connection, context);
+						final boolean exists=exists(connection, context);
 
-					connection.clear(context);
+						connection.clear(context);
 
-					request.reply(response ->
-							response.status(exists ? Response.NoContent : Response.NotFound)
-					).accept(consumer);
+						request.reply(response ->
+								response.status(exists ? Response.NoContent : Response.NotFound)
+						).accept(consumer);
 
-				} catch ( final RepositoryException e ) {
+					} catch ( final RepositoryException e ) {
 
-					trace.warning(this, "unable to update graph "+context, e);
+						trace.warning(this, "unable to update graph "+context, e);
 
-					request.reply(response -> response.body(_Failure.Format, new Failure(
-							Response.InternalServerError, "update-aborted", "unable to delete graph: see server logs for more detail"
-					))).accept(consumer);
+						request.reply(response -> response.body(_Failure.Format, new Failure(
+								Response.InternalServerError, "update-aborted", "unable to delete graph: see server logs for more detail"
+						))).accept(consumer);
 
-				}
-
+					}
+				});
 			}
 
 		};

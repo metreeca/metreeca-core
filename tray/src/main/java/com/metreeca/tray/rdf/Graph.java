@@ -24,8 +24,6 @@ import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -38,7 +36,7 @@ import java.util.function.Supplier;
  */
 public abstract class Graph implements AutoCloseable {
 
-	public static final Supplier<Graph> Factory=RDF4JMemory.Factory;
+	public static final Supplier<Graph> Factory=RDF4JMemory::new;
 
 
 	private static final ThreadLocal<RepositoryConnection> context=new ThreadLocal<>();
@@ -75,11 +73,7 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// !!! handle isolation levels (review interactions with existing transaction)
-
 
 	public Graph browse(final Consumer<RepositoryConnection> browser) {
 
@@ -183,57 +177,6 @@ public abstract class Graph implements AutoCloseable {
 			}
 
 		}
-	}
-
-
-	//// !!! Legacy API ////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public RepositoryConnection connect() {
-
-		final RepositoryConnection connection=Graph.context.get();
-
-		if ( connection != null ) {
-
-			return new RepositoryConnectionWrapper(repository, connection) {
-
-				@Override public void close() throws RepositoryException {}
-
-			};
-
-		} else {
-
-			if ( !repository.isInitialized() ) {
-				repository.initialize();
-			}
-
-			final RepositoryConnection wrapper=new RepositoryConnectionWrapper(repository, repository.getConnection()) {
-
-				@Override public void close() throws RepositoryException {
-					try { super.close(); } finally { Graph.context.remove(); }
-				}
-
-			};
-
-			wrapper.setIsolationLevel(isolation);
-
-			Graph.context.set(wrapper); // !!! ThreadLocal removal relies on connection being closed… review
-
-			return wrapper;
-
-		}
-	}
-
-	public RepositoryConnection connect(final IsolationLevel isolation) {
-
-		if ( isolation == null ) {
-			throw new NullPointerException("null isolation");
-		}
-
-		final RepositoryConnection connection=connect();
-
-		connection.setIsolationLevel(isolation);
-
-		return connection;
 	}
 
 }
