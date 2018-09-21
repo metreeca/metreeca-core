@@ -34,6 +34,7 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import java.util.*;
@@ -113,7 +114,6 @@ public final class Relator implements Handler {
 	//}
 
 
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@Override public Responder handle(final Request request) {
 		return request.body(_Shape.Format).map(
@@ -145,7 +145,7 @@ public final class Relator implements Handler {
 	}
 
 	private Responder shaped(final Request request, final Query query) {
-		return graph.browse(connection -> {
+		return consumer -> graph.browse(connection -> {
 
 			final IRI focus=request.item();
 
@@ -156,14 +156,12 @@ public final class Relator implements Handler {
 					.findFirst()
 					.orElseGet(Collections::emptySet);
 
-			return request.reply(response -> {
-				if ( !contains(connection, focus) ) {
+			request.reply(response -> {
+				if ( model.isEmpty() ) {
 
-					return response.status(Response.NotFound);
-
-				} else if ( model.isEmpty() ) { // resource known but empty envelope for the current user
-
-					return response.status(Response.Forbidden); // !!! 404 under strict security
+					return contains(connection, focus)
+							? response.status(Response.Forbidden) // resource known but empty envelope for user
+							: response.status(Response.NotFound); // !!! 404 under strict security
 
 				} else {
 
@@ -188,78 +186,86 @@ public final class Relator implements Handler {
 					}));
 
 				}
-
-			});
+			}).accept(consumer);
 
 		});
 	}
 
 	private Responder direct(final Request request) { // !!! optimize for SPARQL
-		return graph.browse(connection -> {
+		return consumer -> graph.browse(connection -> {
 
 			final IRI focus=request.item();
-			final Collection<Statement> model=new LinkedHashModel();
+			final Collection<Statement> model=cell(connection, focus);
 
-			final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
-			final Collection<Value> visited=new HashSet<>();
+			request.reply(response -> model.isEmpty()
 
-			while ( !pending.isEmpty() ) {
-
-				final Value value=pending.remove();
-
-				if ( visited.add(value) ) {
-					if ( value.equals(focus) || value instanceof BNode ) {
-
-						try (final RepositoryResult<Statement> statements=connection.getStatements(
-								(Resource)value, null, null, true
-						)) {
-							while ( statements.hasNext() ) {
-
-								final Statement statement=statements.next();
-
-								model.add(statement);
-								pending.add(statement.getObject());
-							}
-						}
-
-						try (final RepositoryResult<Statement> statements=connection.getStatements(
-								null, null, value, true
-						)) {
-							while ( statements.hasNext() ) {
-
-								final Statement statement=statements.next();
-
-								model.add(statement);
-								pending.add(statement.getSubject());
-							}
-						}
-
-					} else if ( value instanceof IRI ) {
-
-						try (final RepositoryResult<Statement> statements=connection.getStatements(
-								(Resource)value, RDFS.LABEL, null, true
-						)) {
-							while ( statements.hasNext() ) { model.add(statements.next()); }
-						}
-
-						try (final RepositoryResult<Statement> statements=connection.getStatements(
-								(Resource)value, RDFS.COMMENT, null, true
-						)) {
-							while ( statements.hasNext() ) { model.add(statements.next()); }
-						}
-
-					}
-				}
-
-			}
-
-			return request.reply(response -> model.isEmpty()
 					? response.status(Response.NotFound)
 					: response.status(Response.OK).body(_RDF.Format, model)
-			);
+
+			).accept(consumer);
 
 		});
 
+	}
+
+
+	private Collection<Statement> cell(final RepositoryConnection connection, final IRI focus) {
+
+		final Collection<Statement> model=new LinkedHashModel();
+
+		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
+		final Collection<Value> visited=new HashSet<>();
+
+		while ( !pending.isEmpty() ) {
+
+			final Value value=pending.remove();
+
+			if ( visited.add(value) ) {
+				if ( value.equals(focus) || value instanceof BNode ) {
+
+					try (final RepositoryResult<Statement> statements=connection.getStatements(
+							(Resource)value, null, null, true
+					)) {
+						while ( statements.hasNext() ) {
+
+							final Statement statement=statements.next();
+
+							model.add(statement);
+							pending.add(statement.getObject());
+						}
+					}
+
+					try (final RepositoryResult<Statement> statements=connection.getStatements(
+							null, null, value, true
+					)) {
+						while ( statements.hasNext() ) {
+
+							final Statement statement=statements.next();
+
+							model.add(statement);
+							pending.add(statement.getSubject());
+						}
+					}
+
+				} else if ( value instanceof IRI ) {
+
+					try (final RepositoryResult<Statement> statements=connection.getStatements(
+							(Resource)value, RDFS.LABEL, null, true
+					)) {
+						while ( statements.hasNext() ) { model.add(statements.next()); }
+					}
+
+					try (final RepositoryResult<Statement> statements=connection.getStatements(
+							(Resource)value, RDFS.COMMENT, null, true
+					)) {
+						while ( statements.hasNext() ) { model.add(statements.next()); }
+					}
+
+				}
+			}
+
+		}
+		return model;
 	}
 
 }
