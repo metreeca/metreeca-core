@@ -144,9 +144,8 @@ public final class Tray {
 	 *
 	 * @return this tool tray
 	 *
-	 * @throws IllegalArgumentException if either {@code factory} or {@code pluging} is null
-	 * @throws IllegalStateException    if {@code factory} was already replaced with a plugin or its tool was already
-	 *                                  retrieved
+	 * @throws IllegalArgumentException if either {@code factory} or {@code plugin} is null
+	 * @throws IllegalStateException    if {@code factory} tool was already retrieved
 	 */
 	public <T> Tray set(final Supplier<T> factory, final Supplier<T> plugin) throws IllegalStateException {
 
@@ -159,10 +158,6 @@ public final class Tray {
 		}
 
 		synchronized ( tools ) {
-
-			if ( factories.containsKey(factory) ) {
-				throw new IllegalStateException("factory already replaced with a plugin");
-			}
 
 			if ( tools.containsKey(factory) ) {
 				throw new IllegalStateException("factory already in use");

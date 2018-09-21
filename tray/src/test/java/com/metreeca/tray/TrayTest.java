@@ -112,18 +112,6 @@ final class TrayTest {
 		assertEquals(asList(x, y, z), released, "dependencies released after relying resources");
 	}
 
-
-	@Test void testPreventToolBindingIfAlreadyReplaced() {
-
-		final Tray tray=new Tray();
-		final Supplier<Object> tool=Object::new;
-
-		assertThrows(IllegalStateException.class, () -> tray
-
-				.set(tool, Object::new)
-				.set(tool, Object::new));
-	}
-
 	@Test void testPreventToolBindingIfAlreadyInUse() {
 
 		final Tray tray=new Tray();
