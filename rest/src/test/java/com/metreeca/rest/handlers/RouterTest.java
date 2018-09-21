@@ -50,6 +50,63 @@ final class RouterTest {
 
 	}
 
+	@Test void testIgnoreUnknownPath() {
+		new Router()
+
+				.path("/one", handler(100))
+
+				.handle(new Request()
+						.path("/two"))
+
+				.accept(response -> assertWithMessage("request ignored")
+						.that(response.status()).isEqualTo(0));
+	}
+
+	@Test void testRewriteBaseAndPath() {
+
+		new Router()
+
+				.path("/one", request -> { // exact match
+
+					assertWithMessage("base not rewritten")
+							.that(request.base()).isEqualTo("http://example.org/");
+
+					assertWithMessage("path not rewritten")
+							.that(request.path()).isEqualTo("/one/");
+
+					return request.reply(response -> response.status(Response.OK));
+
+				})
+
+				.handle(new Request()
+						.base("http://example.org/")
+						.path("/one/"))
+
+				.accept(response -> assertWithMessage("request processed")
+						.that(response.status()).isEqualTo(Response.OK));
+
+		new Router()
+
+				.path("/one/*", request -> { // prefix match
+
+					assertWithMessage("base rewritten")
+							.that(request.base()).isEqualTo("http://example.org/one/");
+
+					assertWithMessage("path rewritten")
+							.that(request.path()).isEqualTo("/two/three");
+
+					return request.reply(response -> response.status(Response.OK));
+
+				})
+
+				.handle(new Request()
+						.base("http://example.org/")
+						.path("/one/two/three"))
+
+				.accept(response -> assertWithMessage("request processed")
+						.that(response.status()).isEqualTo(Response.OK));
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -133,54 +190,5 @@ final class RouterTest {
 						.that(response.status()).isEqualTo(500));
 
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testRewriteBaseAndPath() {
-
-		new Router()
-
-				.path("/one", request -> { // exact match
-
-					assertWithMessage("base not rewritten")
-							.that(request.base()).isEqualTo("http://example.org/");
-
-					assertWithMessage("path not rewritten")
-							.that(request.path()).isEqualTo("/one/");
-
-					return request.reply(response -> response.status(Response.OK));
-
-				})
-
-				.handle(new Request()
-						.base("http://example.org/")
-						.path("/one/"))
-
-				.accept(response -> assertWithMessage("request processed")
-						.that(response.status()).isEqualTo(Response.OK));
-
-		new Router()
-
-				.path("/one/*", request -> { // prefix match
-
-					assertWithMessage("base rewritten")
-							.that(request.base()).isEqualTo("http://example.org/one/");
-
-					assertWithMessage("path rewritten")
-							.that(request.path()).isEqualTo("/two/three");
-
-					return request.reply(response -> response.status(Response.OK));
-
-				})
-
-				.handle(new Request()
-						.base("http://example.org/")
-						.path("/one/two/three"))
-
-				.accept(response -> assertWithMessage("request processed")
-						.that(response.status()).isEqualTo(Response.OK));
-	}
-
 
 }

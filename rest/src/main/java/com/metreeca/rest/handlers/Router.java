@@ -22,7 +22,10 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Responder;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Function;
 
 
 /**
@@ -58,17 +61,6 @@ import java.util.*;
  * <p>Trailing slashes and question marks in resource paths are ignored.</p>
  */
 public final class Router implements Handler {
-
-	private static boolean matches(final String x, final String y) {
-		return x.equals(y) || y.endsWith("/") && x.startsWith(y);
-	}
-
-	private static String normalize(final String path) {
-		return path.endsWith("?") || path.endsWith("/") || path.endsWith("/*") ? path.substring(0, path.length()-1) : path;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Map<String, Handler> handlers=new TreeMap<>(Comparator
 			.comparingInt(String::length).reversed() // longest paths first
@@ -129,17 +121,25 @@ public final class Router implements Handler {
 				.stream()
 				.filter(entry -> matches(key, entry.getKey()))
 				.findFirst()
-				.map(entry -> {
-
-					final String p=entry.getKey();
-					final Handler handler=entry.getValue();
-
-					return handler.handle(p.endsWith("/")
-							?request.base(request.base()+p.substring(1)).path(request.path().substring(p.length()-1))
-							: request);
-
-				})
+				.map(entry -> entry.getValue().handle(request.map(rewrite(entry.getKey()))))
 				.orElseGet(() -> request.reply(response -> response));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private boolean matches(final String x, final String y) {
+		return x.equals(y) || y.endsWith("/") && x.startsWith(y);
+	}
+
+	private String normalize(final String path) {
+		return path.endsWith("?") || path.endsWith("/") || path.endsWith("/*") ? path.substring(0, path.length()-1) : path;
+	}
+
+	private Function<Request, Request> rewrite(final String path) {
+		return request -> path.endsWith("/")
+				? request.base(request.base()+path.substring(1)).path(request.path().substring(path.length()-1))
+				: request;
 	}
 
 }
