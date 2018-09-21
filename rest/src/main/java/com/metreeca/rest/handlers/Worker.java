@@ -19,7 +19,8 @@ package com.metreeca.rest.handlers;
 
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.Responder;
+import com.metreeca.rest.formats._Output;
+import com.metreeca.rest.formats._Writer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,7 +31,8 @@ import java.util.Optional;
  * Method-based request worker.
  *
  * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#method()
- * method}.</p>
+ * method}. Provides default user-overridable handling of {@linkplain Request#OPTIONS OPTIONS} and {@linkplain
+ * Request#HEAD HEAD} methods.</p>
  */
 public final class Worker implements Handler {
 
@@ -56,6 +58,7 @@ public final class Worker implements Handler {
 	public Worker get(final Handler handler) {
 		return method(Request.GET, handler);
 	}
+
 
 	/**
 	 * Configures the handler for the POST HTTP method.
@@ -117,6 +120,10 @@ public final class Worker implements Handler {
 			throw new NullPointerException("null handler");
 		}
 
+		if ( method.equals(Request.GET) ) {
+			mappings.putIfAbsent(Request.HEAD, request -> head(request));
+		}
+
 		mappings.put(method, handler);
 
 		return this;
@@ -133,6 +140,13 @@ public final class Worker implements Handler {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Responder head(final Request request) {
+		return handle(request.method(Request.GET)).map(response -> response
+				.body(_Output.Format, output -> {})
+				.body(_Writer.Format, writer -> {})
+		);
+	}
 
 	private Responder options(final Request request) {
 		return request.reply(response -> response

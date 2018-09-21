@@ -103,13 +103,6 @@
 
 	<dependencies> <!-- shared testing dependencies -->
 
-		<dependency> <!-- https://mvnrepository.com/artifact/junit/junit -->
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -117,10 +110,24 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.google.truth.extensions</groupId>
+			<artifactId>truth-java8-extension</artifactId>
+			<version>0.42</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency> <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.25</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency> <!-- !!! to be removed https://mvnrepository.com/artifact/junit/junit -->
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 
