@@ -18,8 +18,11 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
 import com.metreeca.rest.Responder;
+
+import java.util.*;
 
 
 /**
@@ -30,24 +33,85 @@ import com.metreeca.rest.Responder;
  *
  * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  * opportunity to handle the request.</p>
- *
- * @deprecated Work in progress
  */
-@Deprecated public final class Router implements Handler {
 
+/*
+ * Linked data handlers index {thread-safe}.
+ *
+ * <p>Maps linked data resource path patterns to delegated resource {@linkplain Handler handlers}.</p>
+ *
+ * <p>Linked data {@linkplain Server servers} delegate HTTP requests to handlers selected according to the following
+ * rules on the basis of the server-relative {@linkplain Request#path() path} of the requested resource:</p>
+ *
+ * <ul>
+ *
+ * <li>paths with a trailing wildcard (e.g. {@code /container/*}) match any resource path sharing the same prefix
+ * (e.g {@code /container}, {@code /container/resource});</li>
+ *
+ * <li>paths with no trailing wildcard (e.g. {@code /resource}) match resource path exactly (e.g {@code
+ * /resource});</li>
+ *
+ * <li>lexicographically longer and preceding paths take precedence over shorter and following ones.</li>
+ *
+ * </ul>
+ *
+ * <p>Trailing slashes and question marks in resource paths are ignored.</p>
+ */
+public final class Router implements Handler {
+
+	private static boolean matches(final String x, final String y) {
+		return x.equals(y) || y.endsWith("/") && x.startsWith(y);
+	}
+
+	private static String normalize(final String path) {
+		return path.endsWith("?") || path.endsWith("/") || path.endsWith("/*") ? path.substring(0, path.length()-1) : path;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Map<String, Handler> handlers=new TreeMap<>(Comparator
+			.comparingInt(String::length).reversed() // longest paths first
+			.thenComparing(String::compareTo) // then alphabetically
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Adds a handler to this router.
+	 *
+	 * @param path    the path pattern the handler to be added will be bound to; the value is normalized before use
+	 * @param handler the handler to be added to this router at {@code path}
+	 *
+	 * @return this router
+	 *
+	 * @throws NullPointerException     if either {@code path} or {@code handler} is {@code null}
+	 * @throws IllegalArgumentException if {@code path} doesn't include a leading slash
+	 * @throws IllegalStateException    if {@code path} is already bound to a path
+	 */
 	public Router path(final String path, final Handler handler) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
 		}
 
+		if ( !path.startsWith("/") ) {
+			throw new IllegalArgumentException("missing leading / in path {"+path+"}");
+		}
+
 		if ( handler == null ) {
 			throw new NullPointerException("null handler");
+		}
+
+		if ( handlers.putIfAbsent(normalize(path), handler) != null ) {
+			throw new IllegalStateException("path is already mapped {"+path+"}");
 		}
 
 		return this;
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Responder handle(final Request request) {
 
@@ -58,7 +122,24 @@ import com.metreeca.rest.Responder;
 		final String path=request.path();
 
 
-		return null;
+		final String key=normalize(path);
+
+		return handlers
+				.entrySet()
+				.stream()
+				.filter(entry -> matches(key, entry.getKey()))
+				.findFirst()
+				.map(entry -> {
+
+					final String p=entry.getKey();
+					final Handler handler=entry.getValue();
+
+					return handler.handle(p.endsWith("/")
+							?request.base(request.base()+p.substring(1)).path(request.path().substring(p.length()-1))
+							: request);
+
+				})
+				.orElseGet(() -> request.reply(response -> response));
 	}
 
 }

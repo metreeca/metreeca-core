@@ -16,7 +16,7 @@
  */
 
 /**
- * Standard handlers.
+ * Basic handlers.
  */
 
 package com.metreeca.rest.handlers;

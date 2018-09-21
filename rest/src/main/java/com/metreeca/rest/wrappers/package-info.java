@@ -16,7 +16,7 @@
  */
 
 /**
- * Standard wrappers.
+ * Basic wrappers.
  */
 
 package com.metreeca.rest.wrappers;

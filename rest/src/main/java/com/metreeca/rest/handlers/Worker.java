@@ -31,8 +31,10 @@ import java.util.Optional;
  * Method-based request worker.
  *
  * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#method()
- * method}. Provides default user-overridable handling of {@linkplain Request#OPTIONS OPTIONS} and {@linkplain
- * Request#HEAD HEAD} methods.</p>
+ * method}.</p>
+ *
+ * <p>Provides default user-overridable handling of {@linkplain Request#OPTIONS OPTIONS} and {@linkplain Request#HEAD
+ * HEAD} methods.</p>
  */
 public final class Worker implements Handler {
 

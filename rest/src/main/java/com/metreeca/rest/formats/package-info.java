@@ -16,7 +16,7 @@
  */
 
 /**
- * Standard body formats.
+ * Basic body formats.
  */
 
 package com.metreeca.rest.formats;
