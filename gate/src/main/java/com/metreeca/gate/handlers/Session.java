@@ -21,7 +21,7 @@ import com.metreeca.gate.Roster;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Responder;
-import com.metreeca.rest.handlers.Dispatcher;
+import com.metreeca.rest.handlers.Worker;
 
 import org.eclipse.rdf4j.model.Value;
 
@@ -52,7 +52,7 @@ final class Session implements Handler {
 
 	private final Roster roster=tool(Roster.Factory);
 
-	private final Dispatcher delegate=new Dispatcher().post(this::evolve);
+	private final Worker delegate=new Worker().post(this::evolve);
 
 
 	@Override public Responder handle(final Request request) {

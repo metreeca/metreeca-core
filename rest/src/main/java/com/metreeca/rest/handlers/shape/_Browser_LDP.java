@@ -84,7 +84,7 @@ public final class _Browser_LDP {
 	//	//final _Browser browser=browser(shape);
 	//	//final _Creator creator=creator(shape);
 	//	//
-	//	//final Dispatcher dispatcher=dispatcher();
+	//	//final Worker dispatcher=dispatcher();
 	//	//
 	//	//if ( browser.active() ) { dispatcher.get(browser); }
 	//	//if ( creator.active() ) { dispatcher.post(creator); }

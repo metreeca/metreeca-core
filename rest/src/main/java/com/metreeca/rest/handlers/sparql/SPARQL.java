@@ -22,7 +22,7 @@ import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats._Failure;
 import com.metreeca.rest.formats._Output;
-import com.metreeca.rest.handlers.Dispatcher;
+import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -60,7 +60,7 @@ import static java.lang.Boolean.parseBoolean;
 
 	private final Graph graph=tool(Graph.Factory);
 
-	private final Handler delegate=new Dispatcher()
+	private final Handler delegate=new Worker()
 			.get(this::process)
 			.post(this::process);
 

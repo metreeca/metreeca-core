@@ -27,17 +27,17 @@ import java.util.Optional;
 
 
 /**
- * Method-based request dispatcher.
+ * Method-based request worker.
  *
  * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#method()
  * method}.</p>
  */
-public final class Dispatcher implements Handler {
+public final class Worker implements Handler {
 
 	private final Map<String, Handler> mappings=new LinkedHashMap<>();
 
 
-	public Dispatcher() {
+	public Worker() {
 		mappings.put(Request.OPTIONS, this::options);
 	}
 
@@ -53,7 +53,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @throws NullPointerException if {@code handler} is null
 	 */
-	public Dispatcher get(final Handler handler) {
+	public Worker get(final Handler handler) {
 		return method(Request.GET, handler);
 	}
 
@@ -66,7 +66,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @throws NullPointerException if {@code handler} is null
 	 */
-	public Dispatcher post(final Handler handler) {
+	public Worker post(final Handler handler) {
 		return method(Request.POST, handler);
 	}
 
@@ -79,7 +79,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @throws NullPointerException if {@code handler} is null
 	 */
-	public Dispatcher put(final Handler handler) {
+	public Worker put(final Handler handler) {
 		return method(Request.PUT, handler);
 	}
 
@@ -92,7 +92,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @throws NullPointerException if {@code handler} is null
 	 */
-	public Dispatcher delete(final Handler handler) {
+	public Worker delete(final Handler handler) {
 		return method(Request.DELETE, handler);
 	}
 
@@ -107,7 +107,7 @@ public final class Dispatcher implements Handler {
 	 *
 	 * @throws NullPointerException if either {@code method} or {@code handler} is null
 	 */
-	public Dispatcher method(final String method, final Handler handler) {
+	public Worker method(final String method, final Handler handler) {
 
 		if ( method == null ) {
 			throw new NullPointerException("null method");

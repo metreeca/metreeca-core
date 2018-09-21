@@ -23,7 +23,7 @@ import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.*;
-import com.metreeca.rest.handlers.Dispatcher;
+import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -80,7 +80,7 @@ public final class Graphs implements Handler {
 	private final Graph graph=tool(Graph.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
-	private final Dispatcher delegate=new Dispatcher()
+	private final Worker delegate=new Worker()
 
 			.get(this::get)
 			.put(this::put)

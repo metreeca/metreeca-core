@@ -20,7 +20,7 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats._Failure;
 import com.metreeca.rest.formats._Output;
-import com.metreeca.rest.handlers.Dispatcher;
+import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.sys.Trace;
 
 import java.io.*;
@@ -49,7 +49,7 @@ public class Proxy implements Handler {
 
 	private final Trace trace=tool(Trace.Factory);
 
-	private final Handler delegate=new Dispatcher()
+	private final Handler delegate=new Worker()
 			.get(this::process)
 			.post(this::process);
 

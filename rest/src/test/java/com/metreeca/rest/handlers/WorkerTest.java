@@ -30,10 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static java.util.Arrays.asList;
 
 
-final class DispatcherTest {
+final class WorkerTest {
 
 	@Test void testHandleOPTIONSByDefault() {
-		new Dispatcher()
+		new Worker()
 
 				.get((request) -> request.reply(response -> response.status(Response.OK)))
 
