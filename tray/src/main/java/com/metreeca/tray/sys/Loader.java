@@ -55,6 +55,9 @@ import java.util.function.Supplier;
 	 *
 	 * @return an optional input stream for reading the required resource, if one is available at {@code path};  an
 	 * empty optional, otherwise
+	 *
+	 * @throws NullPointerException if {@code path} is null
+	 * @throws IllegalArgumentException if {@code path} syntax is illegal according to source-specific rules
 	 */
 	public Optional<InputStream> load(final String path);
 
