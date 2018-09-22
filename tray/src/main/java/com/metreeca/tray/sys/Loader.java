@@ -23,7 +23,9 @@ import java.util.function.Supplier;
 
 
 /**
- * System resource loader
+ * System resource loader.
+ *
+ * <p>Loads shared resources from a system-specific source.</p>
  */
 @FunctionalInterface public interface Loader {
 
@@ -43,6 +45,17 @@ import java.util.function.Supplier;
 	};
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Loads a shared resource.
+	 *
+	 * @param path the path the system resource should be loaded from; path syntax is source dependent, but a
+	 *             fileystem-like slash-separated hierarchical structure is recommended
+	 *
+	 * @return an optional input stream for reading the required resource, if one is available at {@code path};  an
+	 * empty optional, otherwise
+	 */
 	public Optional<InputStream> load(final String path);
 
 }
