@@ -27,13 +27,19 @@ import java.util.logging.*;
 /**
  * Execution trace log.
  *
- * <p>Concrete implementations must be thread-safe.</p>
+ * <p>Provides access to system-wide logging facilities.</p>
  */
 public abstract class Trace {
 
+	/**
+	 * Severity level for log entries.
+	 */
 	public enum Level {
 
-		Debug(java.util.logging.Level.FINE), Info(java.util.logging.Level.INFO), Warning(java.util.logging.Level.WARNING), Error(java.util.logging.Level.SEVERE);
+		Debug(java.util.logging.Level.FINE),
+		Info(java.util.logging.Level.INFO),
+		Warning(java.util.logging.Level.WARNING),
+		Error(java.util.logging.Level.SEVERE);
 
 		private final java.util.logging.Level level;
 
@@ -44,12 +50,19 @@ public abstract class Trace {
 		private java.util.logging.Level level() {
 			return level;
 		}
+
 	}
 
 
 	private static final int NameLengthLimit=80; // log args length limit
 
 
+	/**
+	 * Trace factory.
+	 *
+	 * <p>The default trace log acquired through this factory logs trace records through the the standard {@linkplain
+	 * LogManager Java logging} facilities.</p>
+	 */
 	public static final Supplier<Trace> Factory=() -> {
 
 		// logging not configured: reset and load compact console configuration
@@ -96,27 +109,49 @@ public abstract class Trace {
 	};
 
 
-	public static String clip(final Object arg) {
-		return clip(arg == null ? null : arg.toString());
+	/**
+	 * Clips the textual representation of an object
+	 *
+	 * @param object the object whose thextal representation is to be clipped
+	 *
+	 * @return the  textual representation of {@code object} clipped to a maximum length limit, or {@code null} if
+	 * {@code object} is null
+	 */
+	public static String clip(final Object object) {
+		return clip(object == null ? null : object.toString());
 	}
 
-	public static String clip(final String arg) {
-		return arg == null || arg.isEmpty() ? "?"
-				: arg.indexOf('\n') >= 0 ? clip(arg.substring(0, arg.indexOf('\n')))
-				: arg.length() > NameLengthLimit ? arg.substring(0, NameLengthLimit/2)+" … "+arg.substring(arg.length()-NameLengthLimit/2)
-				: arg;
+	/**
+	 * Clips a string.
+	 *
+	 * @param string the string to be clipped
+	 *
+	 * @return the input {@code string} clipped to a maximum length limit, or {@code null} if {@code string} is null
+	 */
+	public static String clip(final String string) {
+		return string == null || string.isEmpty() ? "?"
+				: string.indexOf('\n') >= 0 ? clip(string.substring(0, string.indexOf('\n')))
+				: string.length() > NameLengthLimit ? string.substring(0, NameLengthLimit/2)+" … "+string.substring(string.length()-NameLengthLimit/2)
+				: string;
 	}
 
 
-	public static long time(final Runnable runnable) {
+	/**
+	 * Times the execution of a task.
+	 *
+	 * @param task the task whose execution is to be timed
+	 *
+	 * @return the {@code task} execution time in milliseconds
+	 */
+	public static long time(final Runnable task) {
 
-		if ( runnable == null ) {
-			throw new NullPointerException("null runnable");
+		if ( task == null ) {
+			throw new NullPointerException("null task");
 		}
 
 		final long start=System.currentTimeMillis();
 
-		runnable.run();
+		task.run();
 
 		final long stop=System.currentTimeMillis();
 
