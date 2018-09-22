@@ -20,12 +20,14 @@ package com.metreeca.tray.sys;
 import com.metreeca.form.things.Transputs;
 import com.metreeca.tray.Tray;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.TempDirectory;
+import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -36,34 +38,28 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
-public final class CacheTest {
+@ExtendWith(TempDirectory.class) final class CacheTest {
 
 	private static final int SyncDelay=1000;
 
 
-	@Rule public final TemporaryFolder tmp=new TemporaryFolder();
 
-
-	private void exec(final Consumer<Cache> task) {
-		new Tray().exec(() -> {
-			try {
-				task.accept(new Cache().store(new Store().storage(tmp.newFolder())));
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		}).clear();
+	private void exec(final Path tmp, final Consumer<Cache> task) {
+		new Tray().exec(() ->
+				task.accept(new Cache().store(new Store().storage(tmp.toFile())))
+		).clear();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testCacheFileURLs() {
-		exec(cache -> {
+	@Test void testCacheFileURLs(@TempDir final Path tmp) {
+		exec(tmp, cache -> {
 			try {
 
 				final AtomicLong updated=new AtomicLong();
 
-				final File file=tmp.newFile();
+				final File file=new File(tmp.toFile(), "file");
 				final URL url=file.toURI().toURL();
 
 				final String create="created!";
@@ -110,8 +106,8 @@ public final class CacheTest {
 		});
 	}
 
-	@Test public void testCacheHTTPURLs() {
-		exec(cache -> {
+	@Test void testCacheHTTPURLs(@TempDir final Path tmp) {
+		exec(tmp, cache -> {
 
 			final AtomicLong updated=new AtomicLong();
 			final URL url=url("http://example.com/");

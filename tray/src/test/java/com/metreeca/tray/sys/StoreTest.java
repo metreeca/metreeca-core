@@ -19,37 +19,30 @@ package com.metreeca.tray.sys;
 
 import com.metreeca.tray.Tray;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.TempDirectory;
+import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertFalse;
 
-
-public final class StoreTest {
-
-	@Rule public final TemporaryFolder tmp=new TemporaryFolder();
+@ExtendWith(TempDirectory.class) final class StoreTest {
 
 
-	private void exec(final Consumer<Store> task) {
-		new Tray().exec(() -> {
-			try {
-				task.accept(new Store().storage(tmp.newFolder()));
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		}).clear();
+	private void exec(final Path tmp, final Consumer<Store> task) {
+		new Tray().exec(() ->
+				task.accept(new Store().storage(tmp.toFile()))
+		).clear();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testNewBlobsDontExist() {
-		exec(store -> store.exec("http://example.com/", blob -> {
+	@Test void testNewBlobsDontExist(@TempDir final Path tmp) {
+		exec(tmp, store -> store.exec("http://example.com/", blob -> {
 
 			assertFalse("", blob.exists());
 

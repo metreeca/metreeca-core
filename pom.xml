@@ -111,6 +111,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.junit-pioneer</groupId>
+			<artifactId>junit-pioneer</artifactId>
+			<version>0.1.2</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>com.google.truth.extensions</groupId>
 			<artifactId>truth-java8-extension</artifactId>
 			<version>0.42</version>
