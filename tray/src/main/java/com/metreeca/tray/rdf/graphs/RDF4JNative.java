@@ -18,46 +18,47 @@
 package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys._Setup;
 
+import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
+import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
 import java.io.File;
-import java.util.function.Supplier;
-
-import static com.metreeca.tray.Tray.tool;
 
 
 public final class RDF4JNative extends Graph {
 
-	public static final Supplier<Graph> Factory=() -> {
-
-		final _Setup setup=tool(_Setup.Factory);
-
-		final File storage=setup.get("graph.native.storage", storage(setup));
-
-		return new RDF4JNative(storage);
-	};
+	private final SailRepository repository;
 
 
 	public RDF4JNative(final File storage) {
-		super(IsolationLevels.SNAPSHOT, () -> {
 
-			// !!! ;(rdf4j) SERIALIZABLE leaks memory like a sieve…  see https://github.com/eclipse/rdf4j/issues/1031
+		if ( storage == null ) {
+			throw new NullPointerException("null storage");
+		}
 
-			if ( storage == null ) {
-				throw new NullPointerException("null storage");
-			}
+		if ( storage.exists() && !storage.isDirectory() ) {
+			throw new IllegalArgumentException("plain file at storage folder path ["+storage+"]");
+		}
 
-			if ( storage.exists() && storage.isFile() ) {
-				throw new IllegalArgumentException("plain file at storage folder path ["+storage+"]");
-			}
+		this.repository=new SailRepository(new NativeStore(storage));
+	}
 
-			return new SailRepository(new NativeStore(storage));
 
-		});
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override protected Repository repository() {
+		return repository;
+	}
+
+	@Override protected IsolationLevel isolation() {
+
+		// !!! ;(rdf4j) SERIALIZABLE leaks memory like a sieve…
+		// !!! see https://github.com/eclipse/rdf4j/issues/1031
+
+		return IsolationLevels.SNAPSHOT;
 	}
 
 }

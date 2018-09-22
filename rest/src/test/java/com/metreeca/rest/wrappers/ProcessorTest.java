@@ -78,7 +78,7 @@ final class ProcessorTest {
 
 		tray
 
-				.run(() -> tool(Graph.Factory).update(connection -> {
+				.run(() -> tool(Graph.Factory).edit(connection -> {
 					connection.add(decode("<test> rdf:value rdf:first."));
 				}))
 
@@ -91,7 +91,7 @@ final class ProcessorTest {
 						.base(Base)
 						.path("/test"))
 
-				.accept(response -> graph.browse(connection -> {
+				.accept(response -> graph.read(connection -> {
 					assertIsomorphic("repository updated",
 							decode("<test> rdf:value rdf:first, rdf:rest."),
 							export(connection)
@@ -106,7 +106,7 @@ final class ProcessorTest {
 
 		tray
 
-				.run(() -> tool(Graph.Factory).update(connection -> {
+				.run(() -> tool(Graph.Factory).edit(connection -> {
 					connection.add(decode("<test> rdf:value rdf:first."));
 				}))
 
@@ -121,7 +121,7 @@ final class ProcessorTest {
 						.base(Base)
 						.path("/"))
 
-				.accept(response -> graph.browse(connection -> {
+				.accept(response -> graph.read(connection -> {
 					assertIsomorphic("repository updated",
 							decode("<test> rdf:value rdf:first, rdf:rest."),
 							export(connection)

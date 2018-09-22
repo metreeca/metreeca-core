@@ -41,7 +41,7 @@ public final class Store {
 	/**
 	 * Store factory.
 	 *
-	 * <p>By default, creates an uncustomized store.</p>
+	 * <p>By default creates an uncustomized store.</p>
 	 */
 	public static final Supplier<Store> Factory=Store::new;
 
@@ -95,7 +95,7 @@ public final class Store {
 	 *
 	 * @return this blob store
 	 *
-	 * @throws NullPointerException if either {@code id} or {@code task}
+	 * @throws NullPointerException if either {@code id} or {@code task} is null
 	 */
 	public Store exec(final String id, final Consumer<Blob> task) {
 
@@ -121,12 +121,13 @@ public final class Store {
 	 *
 	 * @param id   the identifier of the store blob to be mapped
 	 * @param task the mapping function to be applied to the store blob identified by {@code id}
+	 * @param <V>  the type of the value returned by {@code task}
 	 *
 	 * @return the value returned by {@code task} when applied to the store blob identified by {@code id}
 	 *
-	 * @throws NullPointerException if either {@code id} or {@code task} or {@code task} returns a null value
+	 * @throws NullPointerException if either {@code id} or {@code task} is null or {@code task} returns a null value
 	 */
-	public <T> T exec(final String id, final Function<Blob, T> task) {
+	public <V> V exec(final String id, final Function<Blob, V> task) {
 
 		if ( id == null ) {
 			throw new NullPointerException("null id");

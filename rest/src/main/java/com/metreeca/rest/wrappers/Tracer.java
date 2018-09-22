@@ -152,7 +152,7 @@ public final class Tracer implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> consumer -> graph.update(connection -> {
+		return request -> consumer -> graph.edit(connection -> {
 			handler.handle(request).map(response -> {
 
 				if ( response.success() ) {

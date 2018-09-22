@@ -35,7 +35,7 @@ public final class Server implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return request -> graph.browse(connection -> { // process the request on a single connection
+		return request -> graph.read(connection -> { // process the request on a single connection
 			try {
 
 				return consumer -> request

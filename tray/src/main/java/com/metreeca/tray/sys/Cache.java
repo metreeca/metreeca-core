@@ -48,7 +48,7 @@ public final class Cache {
 	/**
 	 * Cache factory.
 	 *
-	 * <p>By default, creates an uncustomized cache.</p>
+	 * <p>By default creates an uncustomized cache.</p>
 	 */
 	public static final Supplier<Cache> Factory=Cache::new;
 
@@ -79,6 +79,9 @@ public final class Cache {
 
 	/**
 	 * Registers a custom URL fetcher.
+	 *
+	 * <p>Fetchers are expected to test for themselves the caching status of the target URL, calling for instance
+	 * {@link Blob#exists()} and checking other relevant metadata.</p>
 	 *
 	 * @param schema  the URL schema the custom fetcher will be applied to
 	 * @param fetcher the custom fetcher that will be used to retrieve content from URLs with {@code schema}
@@ -154,15 +157,11 @@ public final class Cache {
 	/**
 	 * Executes a task on the content retrieved from a URL using a specific fetcher.
 	 *
-	 * <p>Fetchers are expected to test for themselves the caching status of the target URL, calling for instance {@link
-	 * Blob#exists()} and checking other relavant metadata.</p>
-	 *
 	 * @param url     the URL content is to be retrieved from
-	 * @param fetcher the URL fetcher to be used for retrieving content from {@code url}
+	 * @param fetcher the URL {@linkplain #fetcher(String, BiConsumer) fetcher}f to be used for retrieving content from {@code url}
 	 * @param task    the task to be executed on the content retrieved from {@code url} using {@code fetcher}; takes as
 	 *                argument a store {@linkplain Store.Blob blob} providing access to the (possibly cached) content
-	 *                retrieved from {@code url} using the {@linkplain #fetcher(String, BiConsumer) registered} URL
-	 *                fetcher for its URL schema or an empty blob, if no suitable fetcher is registered
+	 *                retrieved from {@code url} using {@code fetcher}
 	 *
 	 * @throws NullPointerException if any of {@code url}, {@code fetcher} or {@code task} is null or {@code task}
 	 *                              returns a null value

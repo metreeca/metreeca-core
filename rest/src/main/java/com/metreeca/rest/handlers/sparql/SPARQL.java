@@ -110,7 +110,7 @@ import static java.lang.Boolean.parseBoolean;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder process(final Request request) {
-		return consumer -> graph.browse(connection -> {
+		return consumer -> graph.read(connection -> {
 			try {
 
 				final Operation operation=operation(request, connection);

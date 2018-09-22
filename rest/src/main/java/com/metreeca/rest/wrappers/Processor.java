@@ -116,7 +116,7 @@ public final class Processor implements Wrapper {
 		return request -> script.isEmpty() ? handler.handle(request) : handler.handle(request).map(response -> {
 
 			if ( response.success() ) {
-				graph.update(connection -> {
+				graph.edit(connection -> {
 
 					final IRI user=response.request().user();
 					final IRI item=response.item();

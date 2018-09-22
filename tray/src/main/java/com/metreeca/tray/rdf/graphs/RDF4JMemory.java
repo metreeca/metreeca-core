@@ -19,37 +19,46 @@ package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
+import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import java.io.File;
-import java.util.function.Supplier;
 
 
 public final class RDF4JMemory extends Graph {
 
-	public static final Supplier<Graph> Factory=RDF4JMemory::new;
+	private final SailRepository repository;
 
 
 	public RDF4JMemory() {
-		super(IsolationLevels.SERIALIZABLE, () ->
-				new SailRepository(new MemoryStore()));
+		this.repository=new SailRepository(new MemoryStore());
 	}
 
 	public RDF4JMemory(final File storage) {
-		super(IsolationLevels.SERIALIZABLE, () -> {
 
-			if ( storage == null ) {
-				throw new NullPointerException("null storage");
-			}
+		if ( storage == null ) {
+			throw new NullPointerException("null storage");
+		}
 
-			if ( storage.exists() && storage.isFile() ) {
-				throw new IllegalArgumentException("plain file at storage folder path ["+storage+"]");
-			}
+		if ( storage.exists() && !storage.isDirectory() ) {
+			throw new IllegalArgumentException("plain file at storage folder path ["+storage+"]");
+		}
 
-			return new SailRepository(new MemoryStore(storage));
-		});
+		this.repository=new SailRepository(new MemoryStore(storage));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override protected Repository repository() {
+		return repository;
+	}
+
+	@Override protected IsolationLevel isolation() {
+		return IsolationLevels.SERIALIZABLE;
 	}
 
 }

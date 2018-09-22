@@ -27,7 +27,7 @@ import static com.metreeca.tray.Tray.tool;
 public final class RestTest {
 
 	public static Runnable dataset(final Iterable<Statement> model) {
-		return () -> tool(Graph.Factory).update(connection -> { connection.add(model); });
+		return () -> tool(Graph.Factory).edit(connection -> { connection.add(model); });
 	}
 
 

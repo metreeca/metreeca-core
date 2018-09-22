@@ -22,26 +22,40 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.http.HTTPRepository;
+import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
 
-public final class RDF4JRemote extends Graph {
+public final class RDF4JSPARQL extends Graph {
 
-	private final HTTPRepository repository;
+	private final SPARQLRepository repository; // ;( namespace ops silently ignored
 
-	public RDF4JRemote(final String url) {
+
+	public RDF4JSPARQL(final String url) {
 
 		if ( url == null ) {
-			throw new NullPointerException("null url");
+			throw new NullPointerException("null endpoint url");
 		}
 
-		this.repository=new HTTPRepository(url);
-
+		repository=new SPARQLRepository(url);
 	}
+
+	public RDF4JSPARQL(final String query, final String update) {
+
+		if ( query == null ) {
+			throw new NullPointerException("null query endpoint URL");
+		}
+
+		if ( update == null ) {
+			throw new NullPointerException("null update endpoint URL");
+		}
+
+		repository=new SPARQLRepository(query, update);
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public RDF4JRemote credentials(final String usr, final String pwd) {
+	public RDF4JSPARQL credentials(final String usr, final String pwd) {
 
 		if ( usr == null ) {
 			throw new NullPointerException("null usr");
@@ -70,7 +84,7 @@ public final class RDF4JRemote extends Graph {
 	}
 
 	@Override protected IsolationLevel isolation() {
-		return IsolationLevels.SERIALIZABLE;
+		return 	IsolationLevels.NONE;
 	}
 
 }

@@ -18,44 +18,25 @@
 package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys._Setup;
 
+import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
+import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
 import virtuoso.rdf4j.driver.VirtuosoRepository;
 
-import java.util.function.Supplier;
-
-import static com.metreeca.tray.Tray.tool;
-
 
 public final class Virtuoso extends Graph {
 
-	public static final Supplier<Graph> Factory=() -> {
-
-		final _Setup setup=tool(_Setup.Factory);
-
-		final String url=setup.get("graph.virtuoso.url")
-				.orElseThrow(() -> new IllegalArgumentException("missing remote URL property"));
-
-		final String usr=setup.get("graph.virtuoso.usr", "");
-		final String pwd=setup.get("graph.virtuoso.pwd", "");
-
-		final String dflt=setup.get("graph.virtuoso.default", RDF.NIL.stringValue());
-
-		return new Virtuoso(url, usr, pwd, dflt);
-
-	};
+	private final VirtuosoRepository repository;
 
 
 	public Virtuoso(final String url, final String usr, final String pwd, final String dflt) {
-		super(IsolationLevels.SERIALIZABLE, () -> {
 
 			if ( url == null ) {
 				throw new NullPointerException("null url");
@@ -73,39 +54,48 @@ public final class Virtuoso extends Graph {
 				throw new NullPointerException("null default graph IRI");
 			}
 
-			return new VirtuosoRepository(url, usr, pwd, dflt) {
+		this.repository=new VirtuosoRepository(url, usr, pwd, dflt) {
 
-				// ;(virtuoso) define default update graph in the preamble
-				// https://github.com/openlink/virtuoso-opensource/issues/417
+			// ;(virtuoso) define default update graph in the preamble
+			// https://github.com/openlink/virtuoso-opensource/issues/417
 
-				private String rewrite(final String update) {
-					return "define input:default-graph-uri <"+dflt+">\n\n"+update;
-				}
+			private String rewrite(final String update) {
+				return "define input:default-graph-uri <"+dflt+">\n\n"+update;
+			}
 
 
-				@Override public RepositoryConnection getConnection() throws RepositoryException {
-					return new RepositoryConnectionWrapper(this, super.getConnection()) {
+			@Override public RepositoryConnection getConnection() throws RepositoryException {
+				return new RepositoryConnectionWrapper(this, super.getConnection()) {
 
-						@Override public Update prepareUpdate(final String update)
-								throws RepositoryException, MalformedQueryException {
-							return super.prepareUpdate(rewrite(update));
-						}
+					@Override public Update prepareUpdate(final String update)
+							throws RepositoryException, MalformedQueryException {
+						return super.prepareUpdate(rewrite(update));
+					}
 
-						@Override public Update prepareUpdate(final QueryLanguage ql, final String update)
-								throws MalformedQueryException, RepositoryException {
-							return super.prepareUpdate(ql, rewrite(update));
-						}
+					@Override public Update prepareUpdate(final QueryLanguage ql, final String update)
+							throws MalformedQueryException, RepositoryException {
+						return super.prepareUpdate(ql, rewrite(update));
+					}
 
-						@Override public Update prepareUpdate(final QueryLanguage ql, final String update, final String baseURI)
-								throws MalformedQueryException, RepositoryException {
-							return super.prepareUpdate(ql, rewrite(update), baseURI);
-						}
+					@Override public Update prepareUpdate(final QueryLanguage ql, final String update, final String baseURI)
+							throws MalformedQueryException, RepositoryException {
+						return super.prepareUpdate(ql, rewrite(update), baseURI);
+					}
 
-					};
-				}
-			};
+				};
+			}
+		};
+	}
 
-		});
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override protected Repository repository() {
+		return repository;
+	}
+
+	@Override protected IsolationLevel isolation() {
+		return IsolationLevels.SERIALIZABLE;
 	}
 
 }

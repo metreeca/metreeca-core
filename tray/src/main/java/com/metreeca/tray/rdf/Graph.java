@@ -18,120 +18,182 @@
 package com.metreeca.tray.rdf;
 
 import com.metreeca.tray.rdf.graphs.RDF4JMemory;
-import com.metreeca.tray.sys._Setup;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.io.File;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 
 /**
  * Graph store.
+ *
+ * <p>Manages task execution on a RDF {@linkplain Repository repository}.</p>
+ *
+ * <p>Nested task executions on the same graph store from the same thread will share the same connection to the backing
+ * RDF repository through a {@link ThreadLocal} context variable.</p>
  */
 public abstract class Graph implements AutoCloseable {
 
+	/**
+	 * Graph factory.
+	 *
+	 * <p>By default creates a graph backed by a RDF4J Memory store with no persistence.</p>
+	 */
 	public static final Supplier<Graph> Factory=RDF4JMemory::new;
 
 
 	private static final ThreadLocal<RepositoryConnection> context=new ThreadLocal<>();
 
 
-	protected static File storage(final _Setup setup) {
-		return new File(_Setup.storage(setup), "graph");
-	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the backing RDF repository.
+	 *
+	 * @return the backing RDF repository for this graph store; will be initializated and shut down as required by the
+	 * calling code
+	 */
+	protected abstract Repository repository();
+
+	/**
+	 * Retrieves the transaction isolation level.
+	 *
+	 * @return the isolation level for transactions on connection managed by this graph store
+	 */
+	protected abstract IsolationLevel isolation();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final IsolationLevel isolation;
-	private final Repository repository;
-
-
-	protected Graph(final IsolationLevel isolation, final Supplier<Repository> repository) {
-
-		if ( isolation == null ) {
-			throw new NullPointerException("null isolation");
-		}
-
-		if ( repository == null ) {
-			throw new NullPointerException("null repository");
-		}
-
-		this.isolation=isolation;
-		this.repository=repository.get();
-	}
-
 
 	@Override public void close() {
-		repository.shutDown();
+
+		final Repository repository=repository();
+
+		if ( repository.isInitialized() ) {
+			repository.shutDown();
+		}
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Graph browse(final Consumer<RepositoryConnection> browser) {
+	/**
+	 * Executes a task on this graph store.
+	 *
+	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
+	 *             store
+	 *
+	 * @return this graph store
+	 *
+	 * @throws NullPointerException if {@code task} is null
+	 */
+	public Graph read(final Consumer<RepositoryConnection> task) {
 
-		if ( browser == null ) {
-			throw new NullPointerException("null browser");
+		if ( task == null ) {
+			throw new NullPointerException("null task");
 		}
 
 		return exec(connection -> {
 
-			browser.accept(connection);
-			return this;
-
-		});
-	}
-
-	public <R> R browse(final Function<RepositoryConnection, R> browser) {
-
-		if ( browser == null ) {
-			throw new NullPointerException("null browser");
-		}
-
-		return exec(browser);
-	}
-
-
-	public Graph update(final Consumer<RepositoryConnection> updater) {
-
-		if ( updater == null ) {
-			throw new NullPointerException("null updater");
-		}
-
-		return update(connection -> {
-
-			updater.accept(connection);
+			task.accept(connection);
 
 			return this;
 
 		});
 	}
 
-	public <R> R update(final Function<RepositoryConnection, R> updater) {
+	/**
+	 * Executes a task on this graph store.
+	 *
+	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
+	 *             store
+	 * @param <V>  the type of the value returned by {@code task}
+	 *
+	 * @return the value returned by {@code task}
+	 *
+	 * @throws NullPointerException if {@code task} is null or returns a null value
+	 */
+	public <V> V read(final Function<RepositoryConnection, V> task) {
 
-		if ( updater == null ) {
-			throw new NullPointerException("null updater");
+		if ( task == null ) {
+			throw new NullPointerException("null task");
 		}
 
-		return exec(isolation.equals(IsolationLevels.NONE) ? updater : connection -> {
-			if ( connection.isActive() ) {
+		return exec(task);
+	}
 
-				return updater.apply(connection);
+
+	/**
+	 * Executes a task inside a transaction on this graph store.
+	 *
+	 * <p>If a transaction is not already active on the shared repository connection, begins one at the {@linkplain
+	 * #isolation() isolation} level required by this store and commits it on successful task completion; if the task
+	 * throws an exception, the transaction is rolled back and the exception rethrown; in either case,  no action is
+	 * taken if the transaction was already terminated inside the task.</p>
+	 *
+	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
+	 *             store
+	 *
+	 * @return this graph store
+	 *
+	 * @throws NullPointerException if {@code task} is null
+	 */
+	public Graph edit(final Consumer<RepositoryConnection> task) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		return edit(connection -> {
+
+			task.accept(connection);
+
+			return this;
+
+		});
+	}
+
+	/**
+	 * Executes a task inside a transaction on this graph store.
+	 *
+	 * <p>If a transaction is not already active on the shared repository connection, begins one at the {@linkplain
+	 * #isolation() isolation} level required by this store and commits it on successful task completion; if the task
+	 * throws an exception, the transaction is rolled back and the exception rethrown; in either case,  no action is
+	 * taken if the transaction was already terminated inside the task.</p>
+	 *
+	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
+	 *             store
+	 * @param <V>  the type of the value returned by {@code task}
+	 *
+	 * @return the value returned by {@code task}
+	 *
+	 * @throws NullPointerException if {@code task} is null or returns a null value
+	 */
+	public <V> V edit(final Function<RepositoryConnection, V> task) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		return exec(connection -> {
+			if ( connection.isActive() || connection.getIsolationLevel().equals(IsolationLevels.NONE) ) {
+
+				return task.apply(connection);
 
 			} else {
 
 				try {
 
-					if ( !connection.isActive() ) { connection.begin(isolation); }
+					if ( !connection.isActive() ) { connection.begin(isolation()); }
 
-					final R value=updater.apply(connection);
+					final V value=task.apply(connection);
 
 					if ( connection.isActive() ) { connection.commit(); }
 
@@ -150,6 +212,8 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private <R> R exec(final Function<RepositoryConnection, R> task) {
 
 		final RepositoryConnection shared=context.get();
@@ -160,15 +224,15 @@ public abstract class Graph implements AutoCloseable {
 
 		} else {
 
-			if ( !repository.isInitialized() ) {
-				repository.initialize();
-			}
+			final Repository repository=repository();
+
+			if ( !repository.isInitialized() ) { repository.initialize(); }
 
 			try (final RepositoryConnection connection=repository.getConnection()) {
 
 				context.set(connection);
 
-				return task.apply(connection);
+				return requireNonNull(task.apply(connection), "null task return value");
 
 			} finally {
 

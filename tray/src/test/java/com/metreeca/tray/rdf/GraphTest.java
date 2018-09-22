@@ -24,12 +24,12 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
-public final class GraphTest {
+final class GraphTest {
 
-	@Test public void testUpdateVisibilityWithinTransaction() { // !!! automate using assertions
+	@Test void testUpdateVisibilityWithinTransaction() { // !!! automate using assertions
 
 		final Repository repository=new SailRepository(new MemoryStore());
 

@@ -24,6 +24,7 @@ import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
+import com.metreeca.tray.sys.Storage;
 import com.metreeca.tray.sys.Trace;
 
 import org.apache.commons.fileupload.FileItem;
@@ -109,7 +110,7 @@ public abstract class Gateway implements ServletContextListener {
 
 			context.addFilter(Gateway.class.getName(), new GatewayFilter(loader.apply(tray // !!! @@@ add server handlers
 
-					// !!! file storage location
+					.set(Storage.Factory, () -> storage(context))
 					.set(Loader.Factory, () -> loader(context))
 					.set(Upload, () -> upload(context))))
 
@@ -146,6 +147,19 @@ public abstract class Gateway implements ServletContextListener {
 
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Storage storage(final ServletContext context) {
+		return name -> {
+
+			if ( name == null ) {
+				throw new NullPointerException("null name");
+			}
+
+			return new File((File)context.getAttribute(ServletContext.TEMPDIR), name);
+		};
+	}
 
 	private Loader loader(final ServletContext context) {
 		return path -> {
