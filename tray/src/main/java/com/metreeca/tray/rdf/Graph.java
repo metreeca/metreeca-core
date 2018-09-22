@@ -94,7 +94,7 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if {@code task} is null
 	 */
-	public Graph read(final Consumer<RepositoryConnection> task) {
+	public Graph query(final Consumer<RepositoryConnection> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -120,7 +120,7 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if {@code task} is null or returns a null value
 	 */
-	public <V> V read(final Function<RepositoryConnection, V> task) {
+	public <V> V query(final Function<RepositoryConnection, V> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -145,13 +145,13 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if {@code task} is null
 	 */
-	public Graph edit(final Consumer<RepositoryConnection> task) {
+	public Graph update(final Consumer<RepositoryConnection> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
 		}
 
-		return edit(connection -> {
+		return update(connection -> {
 
 			task.accept(connection);
 
@@ -176,7 +176,7 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if {@code task} is null or returns a null value
 	 */
-	public <V> V edit(final Function<RepositoryConnection, V> task) {
+	public <V> V update(final Function<RepositoryConnection, V> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");

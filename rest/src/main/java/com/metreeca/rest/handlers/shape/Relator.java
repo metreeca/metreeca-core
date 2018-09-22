@@ -145,7 +145,7 @@ public final class Relator implements Handler {
 	}
 
 	private Responder shaped(final Request request, final Query query) {
-		return consumer -> graph.read(connection -> {
+		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();
 
@@ -192,7 +192,7 @@ public final class Relator implements Handler {
 	}
 
 	private Responder direct(final Request request) { // !!! optimize for SPARQL
-		return consumer -> graph.read(connection -> {
+		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();
 			final Collection<Statement> model=cell(connection, focus);

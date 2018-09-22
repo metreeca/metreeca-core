@@ -50,7 +50,7 @@ import static com.metreeca.tray.Tray.tool;
 					throw new NullPointerException("null handler");
 				}
 
-				return request -> consumer -> graph.read(connection -> {
+				return request -> consumer -> graph.query(connection -> {
 					handler.handle(request).accept(consumer);
 				});
 			}
@@ -75,7 +75,7 @@ import static com.metreeca.tray.Tray.tool;
 					throw new NullPointerException("null handler");
 				}
 
-				return request -> consumer -> graph.edit(connection -> {
+				return request -> consumer -> graph.update(connection -> {
 					handler.handle(request).accept(consumer);
 				});
 			}

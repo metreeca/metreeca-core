@@ -138,7 +138,7 @@ public final class Graphs implements Handler {
 				final IRI focus=request.item();
 				final Collection<Statement> model=new ArrayList<>();
 
-				graph.read(connection -> {
+				graph.query(connection -> {
 					try (final RepositoryResult<Resource> contexts=connection.getContextIDs()) {
 						while ( contexts.hasNext() ) {
 
@@ -165,7 +165,7 @@ public final class Graphs implements Handler {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				graph.read(connection -> {
+				graph.query(connection -> {
 					request.reply(response -> response.status(Response.OK)
 
 							.header("Content-Type", format.getDefaultMIMEType())
@@ -211,7 +211,7 @@ public final class Graphs implements Handler {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
-				graph.edit(connection -> {
+				graph.update(connection -> {
 					try (final InputStream input=request.body(_Input.Format).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
@@ -281,7 +281,7 @@ public final class Graphs implements Handler {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				graph.edit(connection -> {
+				graph.update(connection -> {
 					try {
 
 						final boolean exists=exists(connection, context);
@@ -339,7 +339,7 @@ public final class Graphs implements Handler {
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
-				graph.edit(connection -> {
+				graph.update(connection -> {
 					try (final InputStream input=request.body(_Input.Format).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {

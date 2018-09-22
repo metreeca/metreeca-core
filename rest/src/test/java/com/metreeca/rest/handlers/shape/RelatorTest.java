@@ -114,7 +114,7 @@ final class RelatorTest {
 
 				.handle(shaped())
 
-				.accept(response -> graph.read(connection -> {
+				.accept(response -> graph.query(connection -> {
 
 					assertEquals(Response.OK, response.status());
 
@@ -138,7 +138,7 @@ final class RelatorTest {
 
 				.handle(shaped().roles(ValuesTest.Salesman))
 
-				.accept(response -> graph.read(connection -> {
+				.accept(response -> graph.query(connection -> {
 
 					assertEquals(Response.OK, response.status());
 
