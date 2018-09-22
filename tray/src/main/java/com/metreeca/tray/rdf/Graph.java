@@ -183,7 +183,7 @@ public abstract class Graph implements AutoCloseable {
 		}
 
 		return exec(connection -> {
-			if ( connection.isActive() || connection.getIsolationLevel().equals(IsolationLevels.NONE) ) {
+			if ( connection.isActive() || IsolationLevels.NONE.equals(connection.getIsolationLevel()) ) {
 
 				return task.apply(connection);
 

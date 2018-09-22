@@ -19,6 +19,7 @@ package com.metreeca.rest;
 
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 
 import static com.metreeca.tray.Tray.tool;
@@ -27,7 +28,11 @@ import static com.metreeca.tray.Tray.tool;
 public final class RestTest {
 
 	public static Runnable dataset(final Iterable<Statement> model) {
-		return () -> tool(Graph.Factory).update(connection -> { connection.add(model); });
+		return dataset(model, (Resource)null);
+	}
+
+	public static Runnable dataset(final Iterable<Statement> model, final Resource... contexts) {
+		return () -> tool(Graph.Factory).update(connection -> { connection.add(model, contexts); });
 	}
 
 

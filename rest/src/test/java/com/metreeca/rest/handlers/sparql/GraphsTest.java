@@ -23,7 +23,6 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats._RDF;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
 
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.rest.RestTest.dataset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -45,39 +44,43 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static java.util.Collections.singleton;
 
 
-@Deprecated final class GraphsTest {
+final class GraphsTest {
 
 	private static final Set<Statement> First=singleton(statement(RDF.NIL, RDF.VALUE, RDF.FIRST));
 	private static final Set<Statement> Rest=singleton(statement(RDF.NIL, RDF.VALUE, RDF.REST));
 
 
 	@Test @Disabled void testGetGraphCatalog() {
-		//LinkTest.testbed().service(Graphs::new)
+		//new Tray()
 		//
-		//		.dataset(First, (Resource)null)
-		//		.dataset(Rest, RDF.NIL)
+		//		.exec(dataset(First, (Resource)null))
+		//		.exec(dataset(Rest, RDF.NIL))
 		//
-		//		.request(request -> request
+		//		.get(Graphs::new)
+		//
+		//		.handle(new Request()
 		//
 		//				.roles(singleton(Form.root))
 		//				.method(Request.GET)
-		//				.base(ValuesTest.Base)
-		//				.path(Graphs.Path)
-		//				.done())
+		//				.base(ValuesTest.Base))
 		//
-		//		.response(response -> ValuesTest.assertIsomorphic(asList(
+		//		.accept(response -> {
 		//
-		//				statement(iri(ValuesTest.Base, Graphs.Path), RDF.VALUE, RDF.NIL),
-		//				statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
+		//			assertIsomorphic(asList(
 		//
-		//		), response.rdf()));
+		//					statement(iri(ValuesTest.Base, Graphs.Path), RDF.VALUE, RDF.NIL),
+		//					statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
+		//
+		//			), response.rdf());
+		//
+		//		});
 	}
 
 
 	@Test void testGetDefaultGraph() {
 		new Tray()
 
-				.exec(() -> tool(Graph.Factory).update(connection -> { connection.add(First); }))
+				.exec(dataset(First))
 
 				.get(Graphs::new)
 
