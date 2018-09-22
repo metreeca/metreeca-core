@@ -25,10 +25,24 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.http.HTTPRepository;
 
 
+/**
+ * RDF4J remote graph store.
+ *
+ * <p>Manages task execution on a remote RDF4J {@link HTTPRepository}.</p>
+ */
 public final class RDF4JRemote extends Graph {
 
 	private final HTTPRepository repository;
 
+
+	/**
+	 * Creates an RDF4J remote graph.
+	 *
+	 * @param url the URL of a remote RDF repository supporting the <a href="http://docs.rdf4j.org/rest-api/">RDF4J
+	 *            Server REST API</a>
+	 *
+	 * @throws NullPointerException if {@code url} is null
+	 */
 	public RDF4JRemote(final String url) {
 
 		if ( url == null ) {
@@ -36,11 +50,22 @@ public final class RDF4JRemote extends Graph {
 		}
 
 		this.repository=new HTTPRepository(url);
-
 	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Configures the credentials for accessing the remote RDF repository.
+	 *
+	 * @param usr the username of the account on the remote RDF repository
+	 * @param pwd the password of the account on the remote RDF repository
+	 *
+	 * @return this graph store
+	 *
+	 * @throws NullPointerException if either {@code usr} or {@code pwd} is {@code null}
+	 * @throws IllegalStateException if the backing remote repository was already initialized
+	 */
 	public RDF4JRemote credentials(final String usr, final String pwd) {
 
 		if ( usr == null ) {
@@ -69,6 +94,9 @@ public final class RDF4JRemote extends Graph {
 		return repository;
 	}
 
+	/**
+	 * @return {@inheritDoc} ({@link IsolationLevels#SERIALIZABLE})
+	 */
 	@Override protected IsolationLevel isolation() {
 		return IsolationLevels.SERIALIZABLE;
 	}

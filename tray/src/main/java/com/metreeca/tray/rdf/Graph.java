@@ -34,7 +34,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Graph store.
  *
- * <p>Manages task execution on a RDF {@linkplain Repository repository}.</p>
+ * <p>Manages task execution on an RDF {@linkplain Repository repository}.</p>
  *
  * <p>Nested task executions on the same graph store from the same thread will share the same connection to the backing
  * RDF repository through a {@link ThreadLocal} context variable.</p>

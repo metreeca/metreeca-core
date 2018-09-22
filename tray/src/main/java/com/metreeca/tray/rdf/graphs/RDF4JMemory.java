@@ -28,15 +28,31 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import java.io.File;
 
 
+/**
+ * RDF4J memory graph store.
+ *
+ * <p>Manages task execution on an RDF4J {@link SailRepository} backed by a {@link MemoryStore}.</p>
+ */
 public final class RDF4JMemory extends Graph {
 
 	private final SailRepository repository;
 
 
+	/**
+	 * Creates an ephemeral RDF4J memory graph.
+	 */
 	public RDF4JMemory() {
 		this.repository=new SailRepository(new MemoryStore());
 	}
 
+	/**
+	 * Creates a persistent RDF4J memory graph.
+	 *
+	 * @param storage the storage folder where the graph is to be persisted
+	 *
+	 * @throws NullPointerException     if {@code storage} is null
+	 * @throws IllegalArgumentException if {@code storage} is not a folder
+	 */
 	public RDF4JMemory(final File storage) {
 
 		if ( storage == null ) {
@@ -57,6 +73,9 @@ public final class RDF4JMemory extends Graph {
 		return repository;
 	}
 
+	/**
+	 * @return {@inheritDoc} ({@link IsolationLevels#SERIALIZABLE})
+	 */
 	@Override protected IsolationLevel isolation() {
 		return IsolationLevels.SERIALIZABLE;
 	}

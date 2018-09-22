@@ -25,11 +25,24 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
 
+/**
+ * RDF4J SPARQL graph store.
+ *
+ * <p>Manages task execution on an RDF4J {@link SPARQLRepository}.</p>
+ */
 public final class RDF4JSPARQL extends Graph {
 
 	private final SPARQLRepository repository; // ;( namespace ops silently ignored
 
 
+	/**
+	 * Creates an RDF4J SPARQL graph.
+	 *
+	 * @param url the URL of a remote SPARQL endpoint supporting <a href="https://www.w3.org/TR/sparql11-protocol/">SPARQL
+	 *            1.1 Protocol</a> query/update operations
+	 *
+	 * @throws NullPointerException if {@code url} is null
+	 */
 	public RDF4JSPARQL(final String url) {
 
 		if ( url == null ) {
@@ -39,6 +52,16 @@ public final class RDF4JSPARQL extends Graph {
 		repository=new SPARQLRepository(url);
 	}
 
+	/**
+	 * Creates an RDF4J SPARQL graph.
+	 *
+	 * @param query the URL of a remote SPARQL endpoint supporting <a href="https://www.w3.org/TR/sparql11-protocol/">SPARQL
+	 *            1.1 Protocol</a> query operations
+	 * @param update the URL of a remote SPARQL endpoint supporting <a href="https://www.w3.org/TR/sparql11-protocol/">SPARQL
+	 *            1.1 Protocol</a> update operations
+	 *
+	 * @throws NullPointerException if either {@code query} or {@code update} is null
+	 */
 	public RDF4JSPARQL(final String query, final String update) {
 
 		if ( query == null ) {
@@ -55,6 +78,17 @@ public final class RDF4JSPARQL extends Graph {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Configures the credentials for accessing the remote RDF repository.
+	 *
+	 * @param usr the username of the account on the remote RDF repository
+	 * @param pwd the password of the account on the remote RDF repository
+	 *
+	 * @return this graph store
+	 *
+	 * @throws NullPointerException if either {@code usr} or {@code pwd} is {@code null}
+	 * @throws IllegalStateException if the backing remote repository was already initialized
+	 */
 	public RDF4JSPARQL credentials(final String usr, final String pwd) {
 
 		if ( usr == null ) {
@@ -83,8 +117,11 @@ public final class RDF4JSPARQL extends Graph {
 		return repository;
 	}
 
+	/**
+	 * @return {@inheritDoc} ({@link IsolationLevels#NONE})
+	 */
 	@Override protected IsolationLevel isolation() {
-		return 	IsolationLevels.NONE;
+		return IsolationLevels.NONE;
 	}
 
 }
