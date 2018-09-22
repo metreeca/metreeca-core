@@ -77,7 +77,7 @@ import static java.util.Collections.singleton;
 	@Test void testGetDefaultGraph() {
 		new Tray()
 
-				.run(() -> tool(Graph.Factory).edit(connection -> { connection.add(First); }))
+				.exec(() -> tool(Graph.Factory).edit(connection -> { connection.add(First); }))
 
 				.get(Graphs::new)
 

@@ -78,7 +78,7 @@ final class ProcessorTest {
 
 		tray
 
-				.run(() -> tool(Graph.Factory).edit(connection -> {
+				.exec(() -> tool(Graph.Factory).edit(connection -> {
 					connection.add(decode("<test> rdf:value rdf:first."));
 				}))
 
@@ -106,7 +106,7 @@ final class ProcessorTest {
 
 		tray
 
-				.run(() -> tool(Graph.Factory).edit(connection -> {
+				.exec(() -> tool(Graph.Factory).edit(connection -> {
 					connection.add(decode("<test> rdf:value rdf:first."));
 				}))
 

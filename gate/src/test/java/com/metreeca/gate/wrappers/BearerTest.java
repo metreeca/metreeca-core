@@ -116,7 +116,7 @@ final class BearerTest {
 	@Test void testAuthorizationGranted() {
 		tray()
 
-				.run(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.get(() -> bearer(handler(Response.OK)))
 
@@ -141,7 +141,7 @@ final class BearerTest {
 	@Test void testAuthorizationBadCredentials() {
 		tray()
 
-				.run(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.get(() -> bearer(handler(Response.OK)))
 
@@ -164,7 +164,7 @@ final class BearerTest {
 	@Test void testAuthorizationForbidden() {
 		tray()
 
-				.run(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.get(() -> bearer(handler(Response.Forbidden)))
 
@@ -187,7 +187,7 @@ final class BearerTest {
 	@Test void testAuthorizationUnauthorized() {
 		tray()
 
-				.run(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.get(() -> bearer(handler(Response.Unauthorized)))
 
@@ -217,7 +217,7 @@ final class BearerTest {
 
 		tray()
 
-				.run(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
+				.exec(() -> tool(Roster.Factory).acquire(RosterTest.This, RosterTest.This)) // acquire token
 
 				.get(() -> bearer(authenticator.wrap(handler(Response.Unauthorized))))
 

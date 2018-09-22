@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class RelatorTest {
 
 	private Tray tray() {
-		return new Tray().run(RestTest.dataset(small()));
+		return new Tray().exec(RestTest.dataset(small()));
 	}
 
 	private Request direct() {

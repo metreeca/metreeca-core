@@ -232,7 +232,7 @@ public final class Tray {
 	 *
 	 * @throws NullPointerException if {@code task} is null
 	 */
-	public Tray run(final Runnable task) {
+	public Tray exec(final Runnable task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
