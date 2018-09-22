@@ -35,19 +35,44 @@ import javax.xml.transform.stream.StreamSource;
 
 /**
  * Saxon XML processor.
+ *
+ * <p>Provides access to shared Saxon XQuery/XSLT processing tools.</p>
  */
 public final class Saxon {
 
-	public static final Supplier<Saxon> Tool=Saxon::new;
+	/**
+	 * The default XQuery language version.
+	 *
+	 */
+	private static final String XQueryVersion="3.1";
+
+	/**
+	 * The default XSLT language version.
+	 */
+	private static final String XSLTVersion="2.0";
+
+	/**
+	 * Saxon XML processor factory.
+	 *
+	 * <p>The default processor acquired through this factory retrieves system resources from the classpath through
+	 * {@link
+	 * ClassLoader#getResourceAsStream(String)}.</p>
+	 */
+	public static final Supplier<Saxon> Factory=Saxon::new;
 
 
 	private static final String identity=Transputs.text(Saxon.class, ".xsl");
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final XQueryCompiler xquery; // thread-safe if not modified once initialized
 	private final XsltCompiler xslt; // thread-safe if not modified once initialized
 
 
+	/**
+	 * Creates a Saxon XML processor.
+	 */
 	public Saxon() {
 
 		final Processor processor=new Processor(false);
@@ -60,9 +85,9 @@ public final class Saxon {
 
 		xquery=processor.newXQueryCompiler();
 
-		xquery.setLanguageVersion("3.1");
+		xquery.setLanguageVersion(XQueryVersion);
 
-		xquery.declareNamespace("usr", Values.Internal);
+		xquery.declareNamespace("app", Values.Internal);
 		xquery.declareNamespace("html", "http://www.w3.org/1999/xhtml");
 		xquery.declareNamespace("rdf", RDF.NAMESPACE);
 		xquery.declareNamespace("rdfs", RDFS.NAMESPACE);
@@ -70,13 +95,34 @@ public final class Saxon {
 
 		xslt=processor.newXsltCompiler();
 
-		xslt.setXsltLanguageVersion("2.0");
+		xslt.setXsltLanguageVersion(XSLTVersion);
 	}
 
 
 	//// wrap compilers to prevent thread-unsafe modifications /////////////////////////////////////////////////////////
 
-	public XQueryExecutable xquery(final String query) {
+	/**
+	 * Compiles XQuery queries.
+	 *
+	 * <p>Presets XQuery language version at {@value XQueryVersion} and defines prefixes for the following default namespaces:</p>
+	 *
+	 * <ul>
+	 *     <li>{@code app} = {@value Values#Internal}</li>
+	 *     <li>{@code html} = "http://www.w3.org/1999/xhtml"</li>
+	 *     <li>{@code rdf} = {@value RDF#NAMESPACE}</li>
+	 *     <li>{@code rdfs} = {@value RDFS#NAMESPACE}</li>
+	 *     <li>{@code xsd} = {@value XMLSchema#NAMESPACE}</li>
+	 * </ul>
+	 *
+	 * @param query the XQuery query to be compiled
+	 *
+	 * @return the compiled {@code xquery} query; empty for the identity query
+	 *
+	 * @throws NullPointerException if {@code query} is null
+	 * @throws SaxonApiUncheckedException if a compilation error occurs
+	 */
+	public XQueryExecutable xquery(final String query) throws SaxonApiUncheckedException {
+
 		if ( query == null ) {
 			throw new NullPointerException("null query");
 		}
@@ -90,7 +136,19 @@ public final class Saxon {
 		}
 	}
 
-	public XsltExecutable xslt(final String transform) {
+	/**
+	 * Compiles XSLT transforms.
+	 *
+	 * <p>Presets XSLT language version at {@value XSLTVersion}.
+	 *
+	 * @param transform the XSLT transform to be compiled; empty for the identity transform
+	 *
+	 * @return the compiled {@code transform}
+	 *
+	 * @throws NullPointerException if {@code transform} is null
+	 * @throws SaxonApiUncheckedException if a compilation error occurs
+	 */
+	public XsltExecutable xslt(final String transform) throws SaxonApiUncheckedException {
 
 		if ( transform == null ) {
 			throw new NullPointerException("null transform");
