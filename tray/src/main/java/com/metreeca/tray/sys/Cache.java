@@ -133,15 +133,18 @@ public final class Cache {
 	 * Executes a task on the content retrieved from a URL.
 	 *
 	 * @param url  the URL content is to be retrieved from
-	 * @param task the task to be executed on the content retrieved from {@code url}; takes as argument a store
+	 * @param task the task to be executed on the contents retrieved from {@code url}; takes as argument a store
 	 *             {@linkplain Store.Blob blob} providing access to the (possibly cached) content retrieved from {@code
 	 *             url} using the {@linkplain #fetcher(String, BiConsumer) registered} URL fetcher for its URL schema or
 	 *             an empty blob, if no suitable fetcher is registered
+	 * @param <V>  the type of the value returned by task
+	 *
+	 * @return the value returned by {@code task} when applied to the contents retrieved from {@code url}
 	 *
 	 * @throws NullPointerException if either {@code url} or {@code task} is null or {@code task} returns a null value
 	 * @throws UncheckedIOException if an I/O error occurred while retrieving content from {@code url}
 	 */
-	public <T> T exec(final URL url, final Function<Blob, T> task) throws UncheckedIOException {
+	public <V> V exec(final URL url, final Function<Blob, V> task) throws UncheckedIOException {
 
 		if ( url == null ) {
 			throw new NullPointerException("null url");
@@ -158,16 +161,20 @@ public final class Cache {
 	 * Executes a task on the content retrieved from a URL using a specific fetcher.
 	 *
 	 * @param url     the URL content is to be retrieved from
-	 * @param fetcher the URL {@linkplain #fetcher(String, BiConsumer) fetcher}f to be used for retrieving content from {@code url}
-	 * @param task    the task to be executed on the content retrieved from {@code url} using {@code fetcher}; takes as
+	 * @param fetcher the URL {@linkplain #fetcher(String, BiConsumer) fetcher}f to be used for retrieving content from
+	 *                {@code url}
+	 * @param task    the task to be executed on the contents retrieved from {@code url} using {@code fetcher}; takes as
 	 *                argument a store {@linkplain Store.Blob blob} providing access to the (possibly cached) content
 	 *                retrieved from {@code url} using {@code fetcher}
+	 * @param <V>     the type of the value returned by task
+	 *
+	 * @return the value returned by {@code task} when applied to the contents retrieved from {@code url}
 	 *
 	 * @throws NullPointerException if any of {@code url}, {@code fetcher} or {@code task} is null or {@code task}
 	 *                              returns a null value
 	 * @throws UncheckedIOException if an I/O error occurred while retrieving content from {@code url}
 	 */
-	public <T> T exec(final URL url, final BiConsumer<URL, Blob> fetcher, final Function<Blob, T> task) throws UncheckedIOException {
+	public <V> V exec(final URL url, final BiConsumer<URL, Blob> fetcher, final Function<Blob, V> task) throws UncheckedIOException {
 
 		if ( url == null ) {
 			throw new NullPointerException("null url");

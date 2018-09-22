@@ -67,8 +67,8 @@ public final class RDF4JNative extends Graph {
 	}
 
 	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT}; {@link IsolationLevels#SERIALIZABLE would cause severe
-	 * memory leaks})
+	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT}; {@link IsolationLevels#SERIALIZABLE} would cause severe
+	 * memory leaks)
 	 *
 	 * @see <a href="https://github.com/eclipse/rdf4j/issues/1031">https://github.com/eclipse/rdf4j/issues/1031</a>
 	 */
