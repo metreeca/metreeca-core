@@ -154,6 +154,9 @@ public final class Cache {
 	/**
 	 * Executes a task on the content retrieved from a URL using a specific fetcher.
 	 *
+	 * <p>Fetchers are expected to test for themselves the caching status of the target URL, calling for instance {@link
+	 * Blob#exists()} and checking other relavant metadata.</p>
+	 *
 	 * @param url     the URL content is to be retrieved from
 	 * @param fetcher the URL fetcher to be used for retrieving content from {@code url}
 	 * @param task    the task to be executed on the content retrieved from {@code url} using {@code fetcher}; takes as
@@ -179,7 +182,7 @@ public final class Cache {
 			throw new NullPointerException("null task");
 		}
 
-		return store.exec(url.toExternalForm()+System.identityHashCode(fetcher), blob -> {
+		return store.exec(url.toExternalForm(), blob -> {
 
 			fetcher.accept(url, blob);
 
