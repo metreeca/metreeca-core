@@ -28,14 +28,16 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys._Setup.storage;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 
 /**
  * URL cache.
+ *
+ * <p>Retrieves and caches remote URL content, delegating storage to a backing {@linkplain Store blob store}.</p>
  */
 public final class Cache {
 
@@ -46,110 +48,95 @@ public final class Cache {
 	/**
 	 * Cache factory.
 	 *
-	 * <p>The default cache acquired through this factory stores retrieved data in the {@code cache} folder under the
-	 * default storage folder defined by the {@link _Setup#StorageProperty} property.</p>
+	 * <p>By default, creates an uncustomized cache.</p>
 	 */
-	public static final Supplier<Cache> Factory=() ->
-			new Cache(new File(storage(tool(_Setup.Factory)), "cache"));
+	public static final Supplier<Cache> Factory=Cache::new;
 
 
-	private static final BiConsumer<URL, Blob> NullFetcher=(url, blob) -> {};
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Store store=new Store().storage(tool(Storage.Factory).area("cache")); // delegate blob store
+
+	private final Map<String, BiConsumer<URL, Blob>> fetchers=new HashMap<>(); // URL schema to fetcher
 
 
-	public static FileFetcher file() {
-		return new FileFetcher();
-	}
-
-	public static HTTPFetcher http() {
-		return new HTTPFetcher();
+	/**
+	 * Creates a new URL cache.
+	 *
+	 * <p>The new cache is {@linkplain #fetcher(String, BiConsumer) configured} with default handlers for {@code file:}
+	 * and {@code http(s):} URL schemas.</p>
+	 */
+	public Cache() {
+		fetchers.put("file", new FileFetcher());
+		fetchers.put("http", new HTTPFetcher());
+		fetchers.put("https", new HTTPFetcher());
+		// !!! data URL support / binary with Base64 decoding
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Store store; // delegate blob store
-
-	private final Map<String, BiConsumer<URL, Blob>> fetchers=new HashMap<>();
-
-	{
-		fetchers.put("file", file());
-		fetchers.put("http", http());
-		fetchers.put("https", http());
-		// !!! data URL support / binary with Base64 decoding
-	}
 
 	/**
-	 * Creates a new URL cache.
+	 * Registers a custom URL fetcher.
 	 *
-	 * @param storage the root storage folder for the new cache
+	 * @param schema  the URL schema the custom fetcher will be applied to
+	 * @param fetcher the custom fetcher that will be used to retrieve content from URLs with {@code schema}
+	 *
+	 * @return this cache
+	 *
+	 * @throws NullPointerException if either {@code schema} or {@code fetcher} is null
 	 */
-	public Cache(final File storage) {
+	public Cache fetcher(final String schema, final BiConsumer<URL, Blob> fetcher) {
 
-		if ( storage == null ) {
-			throw new NullPointerException("null storage");
+		if ( schema == null ) {
+			throw new NullPointerException("null schema");
 		}
 
-		this.store=new Store(storage);
+		if ( fetcher == null ) {
+			throw new NullPointerException("null fetcher");
+		}
+
+		return this;
 	}
 
 	/**
-	 * Creates a new URL cache .
+	 * Configures the backing blob store for this cache.
 	 *
-	 * @param store the backing blob store for the new cache
+	 * <p>Defaults to a blob store storing content to the "{@code cache}" storage area located by the current {@link
+	 * Storage#area(String) storage} tool.</p>
+	 *
+	 * @param store the backing blob store for this cache
+	 *
+	 * @return this cache
+	 *
+	 * @throws NullPointerException if {@code store} is null
 	 */
-	public Cache(final Store store) {
+	public Cache store(final Store store) {
 
 		if ( store == null ) {
 			throw new NullPointerException("null store");
 		}
 
 		this.store=store;
+
+		return this;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public <T> T exec(final String url, final Function<Blob, T> task) throws UncheckedIOException {
-
-		if ( url == null ) {
-			throw new NullPointerException("null url");
-		}
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		try {
-
-			return exec(new URL(url), task);
-
-		} catch ( final MalformedURLException e ) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-	public <T> T exec(final String url, final BiConsumer<URL, Blob> fetcher, final Function<Blob, T> task) throws UncheckedIOException {
-
-		if ( url == null ) {
-			throw new NullPointerException("null url");
-		}
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		try {
-
-			return exec(new URL(url), fetcher, task);
-
-		} catch ( final MalformedURLException e ) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-
-	/*
-	 * @throws UncheckedIOException if unable to retrieve data from {@code url}
+	/**
+	 * Executes a task on the content retrieved from a URL.
+	 *
+	 * @param url  the URL content is to be retrieved from
+	 * @param task the task to be executed on the content retrieved from {@code url}; takes as argument a store
+	 *             {@linkplain Store.Blob blob} providing access to the (possibly cached) content retrieved from {@code
+	 *             url} using the {@linkplain #fetcher(String, BiConsumer) registered} URL fetcher for its URL schema or
+	 *             an empty blob, if no suitable fetcher is registered
+	 *
+	 * @throws NullPointerException if either {@code url} or {@code task} is null or {@code task} returns a null value
+	 * @throws UncheckedIOException if an I/O error occurred while retrieving content from {@code url}
 	 */
 	public <T> T exec(final URL url, final Function<Blob, T> task) throws UncheckedIOException {
 
@@ -161,11 +148,22 @@ public final class Cache {
 			throw new NullPointerException("null task");
 		}
 
-		return exec(url, fetchers.getOrDefault(url.getProtocol(), NullFetcher), task);
+		return exec(url, fetchers.getOrDefault(url.getProtocol(), (_url, _blob) -> {}), task);
 	}
 
-	/*
-	 * @throws UncheckedIOException if unable to retrieve data from {@code url}
+	/**
+	 * Executes a task on the content retrieved from a URL using a specific fetcher.
+	 *
+	 * @param url     the URL content is to be retrieved from
+	 * @param fetcher the URL fetcher to be used for retrieving content from {@code url}
+	 * @param task    the task to be executed on the content retrieved from {@code url} using {@code fetcher}; takes as
+	 *                argument a store {@linkplain Store.Blob blob} providing access to the (possibly cached) content
+	 *                retrieved from {@code url} using the {@linkplain #fetcher(String, BiConsumer) registered} URL
+	 *                fetcher for its URL schema or an empty blob, if no suitable fetcher is registered
+	 *
+	 * @throws NullPointerException if any of {@code url}, {@code fetcher} or {@code task} is null or {@code task}
+	 *                              returns a null value
+	 * @throws UncheckedIOException if an I/O error occurred while retrieving content from {@code url}
 	 */
 	public <T> T exec(final URL url, final BiConsumer<URL, Blob> fetcher, final Function<Blob, T> task) throws UncheckedIOException {
 
@@ -181,31 +179,38 @@ public final class Cache {
 			throw new NullPointerException("null task");
 		}
 
-		return store.exec(url.toExternalForm(), blob -> {
+		return store.exec(url.toExternalForm()+System.identityHashCode(fetcher), blob -> {
 
 			fetcher.accept(url, blob);
 
-			return task.apply(blob);
+			return requireNonNull(task.apply(blob));
 
 		});
 	}
 
 
-	public Cache purge() {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
-
+	/**
+	 * Clears this cache.
+	 *
+	 * <p>Removes cached content from the {@linkplain Store backing store} of this cache.</p>
+	 *
+	 * @return this cache
+	 */
 	public Cache clear() {
 
 		store.clear();
 
 		return this;
-
 	}
 
 
 	//// Fetchers //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * File fetcher.
+	 *
+	 * <p>Fetches content from {@code file:} URLs identifying local files.</p>
+	 */
 	public static final class FileFetcher implements BiConsumer<URL, Blob> {
 
 		private final Trace trace=tool(Trace.Factory);
@@ -237,6 +242,11 @@ public final class Cache {
 
 	}
 
+	/**
+	 * HTTP(S) fetcher.
+	 *
+	 * <p>Fetches content from {@code http(s):} URLs.</p>
+	 */
 	public static final class HTTPFetcher implements BiConsumer<URL, Blob> {
 
 		private final Map<String, String> headers=new LinkedHashMap<>();
@@ -244,6 +254,16 @@ public final class Cache {
 		private final Trace trace=tool(Trace.Factory);
 
 
+		/**
+		 * Adds a custom HTTP header to be included in remote requests
+		 *
+		 * @param name  the name of the custom HTTP header
+		 * @param value the value of the custom HTTP header
+		 *
+		 * @return this fetcher
+		 *
+		 * @throws NullPointerException if either {@code name} or {@code value} is null
+		 */
 		public HTTPFetcher header(final String name, final String value) {
 
 			if ( name == null ) {

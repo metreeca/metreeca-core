@@ -166,7 +166,7 @@ public abstract class Graph implements AutoCloseable {
 
 			try (final RepositoryConnection connection=repository.getConnection()) {
 
-				Graph.context.set(connection);
+				context.set(connection);
 
 				return task.apply(connection);
 

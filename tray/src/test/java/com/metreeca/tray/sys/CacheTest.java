@@ -25,8 +25,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
+import java.net.URL;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+
+import static com.metreeca.form.things.Transputs.url;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,7 +47,7 @@ public final class CacheTest {
 	private void exec(final Consumer<Cache> task) {
 		new Tray().run(() -> {
 			try {
-				task.accept(new Cache(tmp.newFolder()));
+				task.accept(new Cache().store(new Store().storage(tmp.newFolder())));
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
@@ -61,7 +64,7 @@ public final class CacheTest {
 				final AtomicLong updated=new AtomicLong();
 
 				final File file=tmp.newFile();
-				final String url=file.toURI().toString();
+				final URL url=file.toURI().toURL();
 
 				final String create="created!";
 
@@ -91,7 +94,7 @@ public final class CacheTest {
 
 				Transputs.text(new FileWriter(file), update);
 
-				cache.exec(url, blob -> {
+				cache.exec(file.toURI().toURL(), blob -> {
 
 					assertEquals("content updated", update, blob.text());
 
@@ -111,8 +114,9 @@ public final class CacheTest {
 		exec(cache -> {
 
 			final AtomicLong updated=new AtomicLong();
+			final URL url=url("http://example.com/");
 
-			cache.exec("http://example.com/", blob -> {
+			cache.exec(url, blob -> {
 
 				updated.set(blob.updated());
 
@@ -122,7 +126,7 @@ public final class CacheTest {
 
 			});
 
-			cache.exec("http://example.com/", blob -> {
+			cache.exec(url, blob -> {
 
 				try { Thread.sleep(SyncDelay); } catch ( final InterruptedException ignored ) {}
 

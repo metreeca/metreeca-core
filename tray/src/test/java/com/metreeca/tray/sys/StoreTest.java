@@ -38,7 +38,7 @@ public final class StoreTest {
 	private void exec(final Consumer<Store> task) {
 		new Tray().run(() -> {
 			try {
-				task.accept(new Store(tmp.newFolder()));
+				task.accept(new Store().storage(tmp.newFolder()));
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}

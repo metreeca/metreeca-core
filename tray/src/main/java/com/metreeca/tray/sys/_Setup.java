@@ -55,18 +55,6 @@ public final class _Setup {
 	 */
 	public static final String StorageProperty="setup.storage";
 
-	/**
-	 * Setup property for the canonical server base URL ({@value}={URL} || {@code the base URL of the current HTTP
-	 * request}).
-	 */
-	public static final String BaseProperty="setup.base";
-
-	/**
-	 * Setup property for the hardwired system administrator password ({@value}={pwd|digest} || empty = no hardwired
-	 * system administrator).
-	 */
-	public static final String KeyProperty="setup.key";
-
 
 	/**
 	 * Setup factory.

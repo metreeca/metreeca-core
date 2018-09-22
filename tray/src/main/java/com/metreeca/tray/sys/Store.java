@@ -19,61 +19,84 @@ package com.metreeca.tray.sys;
 
 import com.metreeca.form.things.Transputs;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
-
 import java.io.*;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys._Setup.storage;
 
-import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static java.util.UUID.nameUUIDFromBytes;
 
 
 /**
  * Blob store.
+ *
+ * <p>Manages and provide access to persistent content {@linkplain Blob blobs}.</p>
  */
 public final class Store {
 
 	/**
 	 * Store factory.
 	 *
-	 * <p>The default store acquired through this factory stores blobs in the {@code store} folder under the default
-	 * storage folder defined by the {@link _Setup#StorageProperty} property.</p>
+	 * <p>By default, creates an uncustomized store.</p>
 	 */
-	public static final Supplier<Store> Factory=() ->
-			new Store(new File(storage(tool(_Setup.Factory)), "store"));
+	public static final Supplier<Store> Factory=Store::new;
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private File storage=tool(Storage.Factory).area("store"); // the root storage folder for the blob store
+
+	private final Object lock=new Object(); // store access lock
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * The root storage folder for the blob store.
+	 * Configures the storage folder for this blob store.
+	 *
+	 * <p>Defaults to the "{@code store}" area located by the current {@link Storage#area(String) storage} tool.</p>
+	 *
+	 * @param storage a file providing access to the storage folder to be used by this store
+	 *
+	 * @return this store
+	 *
+	 * @throws NullPointerException     if {@code storage} is null
+	 * @throws IllegalArgumentException if {@code storage} identifies an existing file that is not a folder
 	 */
-	private final File storage;
-
-
-	public Store(final File storage) {
+	public Store storage(final File storage) {
 
 		if ( storage == null ) {
 			throw new NullPointerException("null storage");
 		}
 
-		if ( storage.exists() && storage.isFile() ) {
+		if ( storage.exists() && !storage.isDirectory() ) {
 			throw new IllegalArgumentException("plain file at storage folder path ["+storage+"]");
 		}
 
 		this.storage=storage;
 
 		storage.mkdirs();
+
+		return this;
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Executes a task on a store blob.
+	 *
+	 * @param id   the identifier of the store blob the task is to be executed on
+	 * @param task the task to be executed on the store blob identified by {@code id}
+	 *
+	 * @return this blob store
+	 *
+	 * @throws NullPointerException if either {@code id} or {@code task}
+	 */
 	public Store exec(final String id, final Consumer<Blob> task) {
 
 		if ( id == null ) {
@@ -93,6 +116,16 @@ public final class Store {
 		});
 	}
 
+	/**
+	 * Maps a store blob to a value.
+	 *
+	 * @param id   the identifier of the store blob to be mapped
+	 * @param task the mapping function to be applied to the store blob identified by {@code id}
+	 *
+	 * @return the value returned by {@code task} when applied to the store blob identified by {@code id}
+	 *
+	 * @throws NullPointerException if either {@code id} or {@code task} or {@code task} returns a null value
+	 */
 	public <T> T exec(final String id, final Function<Blob, T> task) {
 
 		if ( id == null ) {
@@ -105,7 +138,7 @@ public final class Store {
 
 		// acquire intra-process lock // !!! per-file or per-block
 
-		synchronized ( storage ) {
+		synchronized ( lock ) {
 
 			final File file=new File(storage, nameUUIDFromBytes(id.getBytes(Transputs.UTF8)).toString());
 
@@ -119,7 +152,7 @@ public final class Store {
 			//		final FileLock ignored=channel.lock()
 			//) {
 
-			return task.apply(new Blob(file));
+			return requireNonNull(task.apply(new Blob(file)), "null task return value");
 
 			//} catch ( final IOException e ) {
 			//	throw new UncheckedIOException(e);
@@ -129,13 +162,31 @@ public final class Store {
 	}
 
 
+	/**
+	 * Clears this blob store.
+	 *
+	 * <p>Removes all blobs from this store.</p>
+	 *
+	 * @return this blob store
+	 */
 	public Store clear() {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		synchronized ( lock ) {
+
+			Optional.ofNullable(storage.listFiles()).ifPresent(files -> {
+				for (final File file : files) { file.delete(); }
+			});
+
+			return this;
+
+		}
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Content blob.
+	 */
 	public static final class Blob {
 
 		private final File file;
@@ -146,18 +197,36 @@ public final class Store {
 		}
 
 
+		/**
+		 * Tests if this blob exists.
+		 *
+		 * @return {@code true} if this blob was actually operated on and persisted; {@code false} otherwise
+		 */
 		public boolean exists() {
 			return file.length() > 0;
 		}
 
+		/**
+		 * Retrieves the size of this blob.
+		 *
+		 * @return the size in bytes of the content of this blob or {@code 0}, if this blob doesn't actually {@link
+		 * #exists()}
+		 */
 		public long size() {
 			return file.length();
 		}
 
+		/**
+		 * Retrieves the timestamp of the last update on this blob.
+		 *
+		 * @return the timestamp of the last update on this blob, measured in milliseconds since the epoch (00:00:00
+		 * GMT, January 1, 1970), or <code>0L</code> if this blob oesn't actually {@link #exists()}
+		 */
 		public long updated() {
 			return file.lastModified();
 		}
 
+		/* !!!
 
 		public Map<IRI, Value> metadata() {
 			return Collections.emptyMap(); // !!!
@@ -180,11 +249,19 @@ public final class Store {
 			return this; // !!!
 		}
 
+		*/
 
 		// !!! encoding
 
 
-		public byte[] data() {
+		/**
+		 * Retrieves the binary content of this blob.
+		 *
+		 * @return the binary content of this blob
+		 *
+		 * @throws UncheckedIOException if an I/O error occurs while reading from this blob
+		 */
+		public byte[] data() throws UncheckedIOException {
 			try (final InputStream input=input();) {
 				return Transputs.data(input);
 			} catch ( final IOException e ) {
@@ -192,7 +269,17 @@ public final class Store {
 			}
 		}
 
-		public Blob data(final byte... data) {
+		/**
+		 * Configures the binary content of this blob.
+		 *
+		 * @param data the binary content to be written to this blob
+		 *
+		 * @return this blob
+		 *
+		 * @throws NullPointerException if {@code data} is null
+		 * @throws UncheckedIOException if an I/O error occurs while writing to this blob
+		 */
+		public Blob data(final byte... data) throws UncheckedIOException {
 			try (final OutputStream output=output()) {
 
 				Transputs.data(output, data);
@@ -204,7 +291,17 @@ public final class Store {
 			}
 		}
 
-		public Blob data(final InputStream data) {
+		/**
+		 * Configures the binary content of this blob.
+		 *
+		 * @param data an input stream providing access to the binary content to be written to this blob
+		 *
+		 * @return this blob
+		 *
+		 * @throws NullPointerException if {@code data} is null
+		 * @throws UncheckedIOException if an I/O error occurs while reading from {@code data} or writing to this blob
+		 */
+		public Blob data(final InputStream data) throws UncheckedIOException {
 			try (final OutputStream output=output()) {
 
 				Transputs.data(output, data);
@@ -217,7 +314,14 @@ public final class Store {
 		}
 
 
-		public String text() {
+		/**
+		 * Retrieves the textual content of this blob.
+		 *
+		 * @return the textual content of this blob, as read using the {@linkplain Transputs#UTF8 default encoding}
+		 *
+		 * @throws UncheckedIOException if an I/O error occurs while reading from this blob
+		 */
+		public String text() throws UncheckedIOException {
 			try (final Reader reader=reader();) {
 				return Transputs.text(reader);
 			} catch ( final IOException e ) {
@@ -225,7 +329,18 @@ public final class Store {
 			}
 		}
 
-		public Blob text(final String text) {
+		/**
+		 * Configures the textual content of this blob.
+		 *
+		 * @param text the textual content to be written to this blob using the {@linkplain Transputs#UTF8 default
+		 *             encoding}
+		 *
+		 * @return this blob
+		 *
+		 * @throws NullPointerException if {@code text} is null
+		 * @throws UncheckedIOException if an I/O error occurs while writing to this blob
+		 */
+		public Blob text(final String text) throws UncheckedIOException {
 			try (final Writer writer=writer()) {
 
 				Transputs.text(writer, text);
@@ -237,7 +352,18 @@ public final class Store {
 			}
 		}
 
-		public Blob text(final Reader text) {
+		/**
+		 * Configures the textual content of this blob.
+		 *
+		 * @param text reader providing access to the textual content to be written to this blob using the {@linkplain
+		 *             Transputs#UTF8 default encoding}
+		 *
+		 * @return this blob
+		 *
+		 * @throws NullPointerException if {@code text} is null
+		 * @throws UncheckedIOException if an I/O error occurs while reading from {@code text} or writing to this blob
+		 */
+		public Blob text(final Reader text) throws UncheckedIOException {
 			try (final Writer writer=writer()) {
 
 				Transputs.text(writer, text);
@@ -250,25 +376,38 @@ public final class Store {
 		}
 
 
-		public InputStream input() {
+		/**
+		 * Opens an input stream for this blobs.
+		 *
+		 * @return an input stream supporting direct binary access to this blob
+		 *
+		 * @throws UncheckedIOException if an I/O error occurs while accessing this blob
+		 */
+		public InputStream input() throws UncheckedIOException {
 			try {
 
 				return file.exists() ? new FileInputStream(file) : Transputs.input();
 
-			} catch ( FileNotFoundException e ) {
+			} catch ( final FileNotFoundException e ) {
 
 				throw new UncheckedIOException(e);
 
 			}
 		}
 
-		public OutputStream output() {
-
+		/**
+		 * Opens an output stream for this blobs.
+		 *
+		 * @return an output stream supporting direct binary access to this blob
+		 *
+		 * @throws UncheckedIOException if an I/O error occurs while accessing this blob
+		 */
+		public OutputStream output() throws UncheckedIOException {
 			try {
 
 				return new FileOutputStream(file);
 
-			} catch ( FileNotFoundException e ) {
+			} catch ( final FileNotFoundException e ) {
 
 				throw new UncheckedIOException(e);
 
@@ -276,11 +415,25 @@ public final class Store {
 		}
 
 
-		public Reader reader() {
+		/**
+		 * Opens a reader for this blobs.
+		 *
+		 * @return a reader supporting direct textual access to this blob
+		 *
+		 * @throws UncheckedIOException if an I/O error occurs while accessing this blob
+		 */
+		public Reader reader() throws UncheckedIOException {
 			return Transputs.reader(input());
 		}
 
-		public Writer writer() {
+		/**
+		 * Opens a writer for this blobs.
+		 *
+		 * @return a writer supporting direct textual access to this blob
+		 *
+		 * @throws UncheckedIOException if an I/O error occurs while accessing this blob
+		 */
+		public Writer writer() throws UncheckedIOException {
 			return Transputs.writer(output());
 		}
 

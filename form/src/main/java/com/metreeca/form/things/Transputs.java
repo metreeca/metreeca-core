@@ -18,9 +18,7 @@
 package com.metreeca.form.things;
 
 import java.io.*;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
@@ -44,7 +42,33 @@ public final class Transputs {
 	private static final String EmptyText="";
 
 
-	//// URL Codecs ////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// URLs //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Converts a string into a URL.
+	 *
+	 * @param url the string to be converted into a URL
+	 *
+	 * @return the URL converted from {@code url}
+	 *
+	 * @throws NullPointerException if {@code url} is null
+	 * @throws UncheckedIOException if {@code url} is not a well-formed URL
+	 */
+	public static URL url(final String url) {
+
+		if ( url == null ) {
+			throw new NullPointerException("null url");
+		}
+
+		try {
+
+			return new URL(url);
+
+		} catch ( final MalformedURLException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
 
 	public static String encode(final String text) {
 
