@@ -20,7 +20,6 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._Failure;
 import com.metreeca.rest.formats._Output;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
@@ -118,9 +117,11 @@ import static java.lang.Boolean.parseBoolean;
 
 				if ( operation == null ) { // !!! return void description for GET
 
-					request.reply(response -> response.body(_Failure.Format, new Failure(
-							Response.BadRequest, "parameter-missing", "missing query/update parameter"
-					))).accept(consumer);
+					request.reply(new Failure()
+							.status(Response.BadRequest)
+							.error("parameter-missing")
+							.cause("missing query/update parameter")
+					).accept(consumer);
 
 				} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
 
@@ -224,55 +225,71 @@ import static java.lang.Boolean.parseBoolean;
 
 				} else {
 
-					request.reply(response -> response.body(_Failure.Format, new Failure(
-							Response.NotImplemented, "operation-unsupported", operation.getClass().getName()
-					))).accept(consumer);
+					request.reply(new Failure()
+							.status(Response.NotImplemented)
+							.error("operation-unsupported")
+							.cause(operation.getClass().getName())
+					).accept(consumer);
 
 				}
 
 			} catch ( final MalformedQueryException e ) {
 
-				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-						Response.BadRequest, "query-malformed", e
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.BadRequest)
+						.error("query-malformed")
+						.cause(e)
+				).accept(consumer);
 
 			} catch ( final IllegalArgumentException e ) {
 
-				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-						Response.BadRequest, "request-malformed", e
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.BadRequest)
+						.error("request-malformed")
+						.cause(e)
+				).accept(consumer);
 
 			} catch ( final UnsupportedOperationException e ) {
 
-				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-						Response.NotImplemented, "operation-unsupported", e
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.NotImplemented)
+						.error("operation-unsupported")
+						.cause(e)
+				).accept(consumer);
 
 			} catch ( final QueryEvaluationException e ) {
 
 				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
 
-				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-						Response.InternalServerError, "query-evaluation", e
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.InternalServerError)
+						.error("query-evaluation")
+						.cause(e)
+				).accept(consumer);
 
 			} catch ( final UpdateExecutionException e ) {
 
-				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-						Response.InternalServerError, "update-evaluation", e
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.InternalServerError)
+						.error("update-evaluation")
+						.cause(e)
+				).accept(consumer);
 
 			} catch ( final TupleQueryResultHandlerException e ) {
 
-				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-						Response.InternalServerError, "response-error", e
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.InternalServerError)
+						.error("response-error")
+						.cause(e)
+				).accept(consumer);
 
 			} catch ( final RuntimeException e ) {
 
-				request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-						Response.InternalServerError, "repository-error", e
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.InternalServerError)
+						.error("repository-error")
+						.cause(e)
+				).accept(consumer);
 
 			}
 		});

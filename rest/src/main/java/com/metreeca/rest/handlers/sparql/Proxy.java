@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._Failure;
 import com.metreeca.rest.formats._Output;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.sys.Trace;
@@ -75,7 +74,10 @@ public class Proxy implements Handler {
 						: e instanceof IOException ? Response.BadGateway
 						: Response.InternalServerError;
 
-				return response .cause(e).body(_Failure.Format, new Failure(i, "request-failed", e));
+				return response.map(new Failure()
+						.status(i)
+						.error("request-failed")
+						.cause(e));
 
 			}
 		}).accept(consumer);

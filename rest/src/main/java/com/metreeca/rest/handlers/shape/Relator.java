@@ -26,7 +26,6 @@ import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._Failure;
 import com.metreeca.rest.formats._RDF;
 import com.metreeca.rest.formats._Shape;
 import com.metreeca.tray.rdf.Graph;
@@ -140,7 +139,7 @@ public final class Relator implements Handler {
 	private Responder shaped(final Request request, final Shape shape) {
 		return request.query(and(all(request.item()), shape)).map( // focused shape
 				query -> shaped(request, query),
-				error -> request.reply(response -> response.body(_Failure.Format, error))
+				request::reply
 		);
 	}
 

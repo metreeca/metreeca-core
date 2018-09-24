@@ -131,15 +131,17 @@ public final class _RDF implements Format<Collection<Statement>> {
 
 			} else {
 
-				return error(new Failure(Response.BadRequest, Failure.BodyMalformed, Json.createObjectBuilder()
+				return error(new Failure()
+						.status(Response.BadRequest)
+						.error(Failure.BodyMalformed)
+						.trace(Json.createObjectBuilder()
 
-						.add("format", parser.getRDFFormat().getDefaultMIMEType())
-						.add("fatal", Json.createArrayBuilder(fatals))
-						.add("error", Json.createArrayBuilder(errors))
-						.add("warning", Json.createArrayBuilder(warnings))
+								.add("format", parser.getRDFFormat().getDefaultMIMEType())
+								.add("fatal", Json.createArrayBuilder(fatals))
+								.add("error", Json.createArrayBuilder(errors))
+								.add("warning", Json.createArrayBuilder(warnings))
 
-						.build()
-				));
+								.build()));
 
 			}
 

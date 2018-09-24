@@ -175,17 +175,11 @@ public final class Response extends Message<Response> {
 	/**
 	 * Configures the cause for the status code.
 	 *
-	 * @param cause the throwable causing the selection of the status code
+	 * @param cause the (possibly null) throwable causing the selection of the status code
 	 *
 	 * @return this response
-	 *
-	 * @throws NullPointerException if {@code cause} is null
 	 */
 	public Response cause(final Throwable cause) {
-
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
 
 		this.cause=cause;
 

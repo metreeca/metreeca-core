@@ -1,7 +1,6 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._Failure;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -48,10 +47,11 @@ public final class Server implements Wrapper {
 
 				trace.error(this, format("%s %s > internal error", request.method(), request.item()), e);
 
-				return request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(Response.InternalServerError,
-						"exception-untrapped",
-						"unable to process request: see server logs for details"
-				)));
+				return request.reply(new Failure()
+						.status(Response.InternalServerError)
+						.error("exception-untrapped")
+						.cause("unable to process request: see server logs for details")
+						.cause(e));
 
 			}
 		});

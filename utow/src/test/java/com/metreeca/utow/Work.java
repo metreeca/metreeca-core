@@ -17,10 +17,7 @@
 
 package com.metreeca.utow;
 
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Wrapper;
-import com.metreeca.rest.formats._Failure;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats._Writer;
 
 import java.io.IOException;
@@ -36,8 +33,10 @@ public final class Work {
 		final Wrapper wrapper=handler -> request -> handler.handle(request)
 				.map(response -> response.filter(_Writer.Format, consumer -> writer -> consumer.accept(upper(writer))));
 
-		final Handler handler=request -> request.reply(response -> response
-				.body(_Failure.Format, new Failure(222, "ciao", "babbo!"))
+		final Handler handler=request -> request.reply(new Failure()
+				.status(222)
+				.error("ciao")
+				.cause("babbo!")
 		);
 
 		run(6800, "localhost", tray -> tray.get(() -> wrapper.wrap(handler)));

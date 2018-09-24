@@ -17,18 +17,34 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.rest.formats._JSON;
+
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
 
 /**
  * HTTP processing failure report.
  *
- * <p>Describes an error condition in HTTP request processing.</p>
+ * <p>Defines an error condition in HTTP request processing that can be {@linkplain #apply(Response) transferred} to
+ * the HTTP response like:</p>
+ *
+ * <pre>{@code
+ * <status>
+ * Content-Type: application/json
+ *
+ * {
+ *     "error": "<error>",  # a optional machine readable error type tag
+ *     "cause": "<cause>",  # a optional a human readable error description
+ *     "trace": <trace>     # a optional structured JSON error report
+ * }
+ * }</pre>
  */
-public final class Failure {
+public final class Failure implements Function<Response, Response> {
 
 	/**
 	 * The machine readable error tag for failures due to malformed data in message body.
@@ -38,170 +54,156 @@ public final class Failure {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final int status;
-	private final String error;
-	private final JsonValue cause;
+	private int status=Response.BadRequest;
 
+	private String error;
+	private Throwable cause; // machine readable cause
+	private String label; // human readable cause label
+	private JsonValue trace;
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Creates a failure report.
+	 * Configures the response status.
 	 *
-	 * @param status the HTTP status code associated with this failure report
+	 * @param status the HTTP status code associated with the error condition defined by this failure report
+	 *
+	 * @return this failure report
 	 *
 	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
 	 */
-	public Failure(final int status) {
+	public Failure status(final int status) {
 
 		if ( status < 100 || status > 599 ) {
 			throw new IllegalArgumentException("illegal status code ["+status+"]");
 		}
 
 		this.status=status;
-		this.error=null;
-		this.cause=null;
+
+		return this;
 	}
 
 	/**
-	 * Creates a failure report.
+	 * Configures the error type.
 	 *
-	 * @param status the HTTP status code associated with this failure report
-	 * @param error  a machine readable tag for the error condition
+	 * @param error a machine readable tag for the error condition defined by this failure report
 	 *
-	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
-	 * @throws NullPointerException     if {@code error} is null
+	 * @return this failure report
+	 *
+	 * @throws NullPointerException if {@code error} is null
 	 */
-	public Failure(final int status, final String error) {
-
-		if ( status < 100 || status > 599 ) {
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
+	public Failure error(final String error) {
 
 		if ( error == null ) {
 			throw new NullPointerException("null error");
 		}
 
-		this.status=status;
 		this.error=error;
-		this.cause=null;
+
+		return this;
 	}
 
 	/**
-	 * Creates a failure report.
+	 * Configures the error cause.
 	 *
-	 * @param status the HTTP status code associated with this failure report
-	 * @param error  a machine readable tag for the error condition
-	 * @param cause  the underlying cause of the error condition
+	 * @param cause the underlying throwable that caused the error condition defined by this failure report
 	 *
-	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
-	 * @throws NullPointerException     if either {@code error} or {@code cause} is null
+	 * @return this failure report
+	 *
+	 * @throws NullPointerException if {@code cause} is null
 	 */
-	public Failure(final int status, final String error, final Throwable cause) {
-
-		if ( status < 100 || status > 599 ) {
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( error == null ) {
-			throw new NullPointerException("null error");
-		}
+	public Failure cause(final Throwable cause) {
 
 		if ( cause == null ) {
 			throw new NullPointerException("null cause");
 		}
 
-		this.status=status;
-		this.error=error;
-		this.cause=Json.createValue(Optional.ofNullable(cause.getMessage()).orElseGet(cause::toString));
-	}
-
-	/**
-	 * Creates a failure report.
-	 *
-	 * @param status the HTTP status code associated with this failure report
-	 * @param error  a machine readable tag for the error condition
-	 * @param cause  a human readable description of the underlying cause of the error condition
-	 *
-	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
-	 * @throws NullPointerException     if either {@code error} or {@code cause} is null
-	 */
-	public Failure(final int status, final String error, final String cause) {
-
-		if ( status < 100 || status > 599 ) {
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( error == null ) {
-			throw new NullPointerException("null error");
-		}
-
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
-
-		this.status=status;
-		this.error=error;
-		this.cause=Json.createValue(cause);
-	}
-
-	/**
-	 * Creates a failure report.
-	 *
-	 * @param status the HTTP status code associated with this failure report
-	 * @param error  a machine readable tag for the error condition
-	 * @param cause  a structured JSON report describing the underlying cause of the error condition
-	 *
-	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
-	 * @throws NullPointerException     if either {@code error} or {@code cause} is null
-	 */
-	public Failure(final int status, final String error, final JsonValue cause) {
-
-		if ( status < 100 || status > 599 ) {
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( error == null ) {
-			throw new NullPointerException("null error");
-		}
-
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
-
-		this.status=status;
-		this.error=error;
 		this.cause=cause;
+
+		return this;
+	}
+
+	/**
+	 * Configures the error cause description.
+	 *
+	 * @param cause a human readable description of the error condition defined by this failure report
+	 *
+	 * @return this failure report
+	 *
+	 * @throws NullPointerException if {@code cause} is null
+	 */
+	public Failure cause(final String cause) {
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
+		this.label=cause;
+
+		return this;
+	}
+
+
+	/**
+	 * Configures the error trace.
+	 *
+	 * @param trace a structured JSON report describing the error condition defined by this failure report
+	 *
+	 * @return this failure report
+	 *
+	 * @throws NullPointerException if {@code trace} is null
+	 */
+	public Failure trace(final JsonValue trace) {
+
+		if ( trace == null ) {
+			throw new NullPointerException("null trace");
+		}
+
+		this.trace=trace;
+
+		return this;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves the status code of this failure report.
+	 * Transfers the description of the error condition to an HTTP response.
 	 *
-	 * @return the HTTP status code associated with this failure report
+	 * @param response the response to be updated
+	 *
+	 * @return the update {@code response}
+	 *
+	 * @throws NullPointerException if {@code response} is null
 	 */
-	public int status() {
-		return status;
-	}
+	@Override public Response apply(final Response response) {
 
-	/**
-	 * Retrieves the error tag of this failure report.
-	 *
-	 * @return an optional a machine readable tag for the error condition of this failure report, if one was defined; an
-	 * empty optional, otherwise
-	 */
-	public Optional<String> error() {
-		return Optional.ofNullable(error);
-	}
+		if ( response == null ) {
+			throw new NullPointerException("null response");
+		}
 
-	/**
-	 * Retrieves the underlying cause of this failure report.
-	 *
-	 * @return an optional a structured JSON report describing the underlying cause of the error condition of this
-	 * failure report, if one was defined; an empty optional, otherwise
-	 */
-	public Optional<JsonValue> cause() {
-		return Optional.ofNullable(cause);
+		final JsonObjectBuilder builder=Json.createObjectBuilder();
+
+		if ( error != null ) {
+			builder.add("error", error);
+		}
+
+		if ( label != null ) {
+			builder.add("cause", label);
+		} else if ( cause != null ) {
+			builder.add("cause", Optional.ofNullable(cause.getMessage()).orElseGet(cause::toString));
+		}
+
+		if ( trace != null ) {
+			builder.add("trace", trace);
+		}
+
+		return response
+				.status(status)
+				.cause(cause)
+				.body(_JSON.Format, builder.build());
+
 	}
 
 }

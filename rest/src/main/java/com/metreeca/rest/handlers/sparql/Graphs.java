@@ -125,9 +125,11 @@ public final class Graphs implements Handler {
 
 			if ( target == null && !catalog ) {
 
-				request.reply(response -> response.body(_Failure.Format, new Failure(
-						Response.BadRequest, "parameter-missing", "missing target graph parameter"
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.BadRequest)
+						.error("parameter-missing")
+						.cause("missing target graph parameter")
+				).accept(consumer);
 
 			} else if ( !publik && !request.role(Form.root) ) {
 
@@ -191,9 +193,11 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(response -> response.body(_Failure.Format, new Failure(
-						Response.BadRequest, "parameter-missing", "missing target graph parameter"
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.BadRequest)
+						.error("parameter-missing")
+						.cause("missing target graph parameter")
+				).accept(consumer);
 
 			} else if ( !request.role(Form.root) ) {
 
@@ -229,28 +233,34 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to read RDF payload", e);
 
-						request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-								Response.InternalServerError, "payload-unreadable",
-								"I/O while reading RDF payload: see server logs for more detail"
-						))).accept(consumer);
+						request.reply(new Failure()
+								.status(Response.InternalServerError)
+								.error("payload-unreadable")
+								.cause("I/O while reading RDF payload: see server logs for more detail")
+								.cause(e)
+						).accept(consumer);
 
 					} catch ( final RDFParseException e ) {
 
 						trace.warning(this, "malformed RDF payload", e);
 
-						request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-								Response.BadRequest, "payload-malformed",
-								"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
-						))).accept(consumer);
+						request.reply(new Failure()
+								.status(Response.BadRequest)
+								.error("payload-malformed")
+								.cause("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
+								.cause(e)
+						).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(response -> response.cause(e).body(_Failure.Format, new Failure(
-								Response.InternalServerError,
-								"update-aborted", "unable to update graph: see server logs for more detail"
-						))).accept(consumer);
+						request.reply(new Failure()
+								.status(Response.InternalServerError)
+								.error("update-aborted")
+								.cause("unable to update graph: see server logs for more detail")
+								.cause(e)
+						).accept(consumer);
 
 					}
 				});
@@ -269,9 +279,11 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(response -> response.body(_Failure.Format, new Failure(
-						Response.BadRequest, "parameter-missing", "missing target graph parameter"
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.BadRequest)
+						.error("parameter-missing")
+						.cause("missing target graph parameter")
+				).accept(consumer);
 
 			} else if ( !request.role(Form.root) ) {
 
@@ -296,9 +308,11 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(response -> response.body(_Failure.Format, new Failure(
-								Response.InternalServerError, "update-aborted", "unable to delete graph: see server logs for more detail"
-						))).accept(consumer);
+						request.reply(new Failure()
+								.status(Response.InternalServerError)
+								.error("update-aborted")
+								.cause("unable to delete graph: see server logs for more detail")
+						).accept(consumer);
 
 					}
 				});
@@ -320,9 +334,11 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(response -> response.body(_Failure.Format, new Failure(
-						Response.BadRequest, "parameter-missing", "missing target graph parameter"
-				))).accept(consumer);
+				request.reply(new Failure()
+						.status(Response.BadRequest)
+						.error("parameter-missing")
+						.cause("missing target graph parameter")
+				).accept(consumer);
 
 			} else if ( !request.role(Form.root) ) {
 
@@ -356,28 +372,34 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to read RDF payload", e);
 
-						request.reply(response -> response.body(_Failure.Format, new Failure(
-								Response.InternalServerError, "payload-unreadable",
-								"I/O while reading RDF payload: see server logs for more detail"
-						))).accept(consumer);
+						request.reply(new Failure()
+								.status(Response.InternalServerError)
+								.error("payload-unreadable")
+								.cause("I/O while reading RDF payload: see server logs for more detail")
+								.cause(e)
+						).accept(consumer);
 
 					} catch ( final RDFParseException e ) {
 
 						trace.warning(this, "malformed RDF payload", e);
 
-						request.reply(response -> response.body(_Failure.Format, new Failure(Response.BadRequest,
-								"payload-malformed",
-								"malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage()
-						))).accept(consumer);
+						request.reply(new Failure()
+								.status(Response.BadRequest)
+								.error("payload-malformed")
+								.cause("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
+								.cause(e)
+						).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(response -> response.body(_Failure.Format, new Failure(
-								Response.InternalServerError, "update-aborted",
-								"unable to update graph: see server logs for more detail"
-						))).accept(consumer);
+						request.reply(new Failure()
+								.status(Response.InternalServerError)
+								.error("update-aborted")
+								.cause("unable to update graph: see server logs for more detail")
+								.cause(e)
+						).accept(consumer);
 
 					}
 				});

@@ -188,7 +188,10 @@ public final class Request extends Message<Request> {
 
 		} catch ( final JsonException e ) {
 
-			return error(new Failure(Response.BadRequest, "query-malformed", e));
+			return error(new Failure()
+					.status(Response.BadRequest)
+					.error("query-malformed")
+					.cause(e));
 
 		}
 	}

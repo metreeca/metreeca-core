@@ -26,6 +26,7 @@ import java.io.UncheckedIOException;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.form.Result.error;
@@ -67,12 +68,15 @@ public final class _JSON implements Format<JsonObject> {
 
 			} catch ( final JsonParsingException e ) {
 
-				return error(new Failure(Response.BadRequest, Failure.BodyMalformed, e));
+				return error(new Failure()
+						.status(Response.BadRequest)
+						.error(Failure.BodyMalformed)
+						.trace((JsonValue)e));
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		}) : error(new Failure(Response.UnsupportedMediaType));
+		}) : error(new Failure().status(Response.UnsupportedMediaType));
 	}
 
 	/**

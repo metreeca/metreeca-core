@@ -50,7 +50,7 @@ public interface Format<V> {
 	 * derive one from {@code message}; a result providing access to the processing failure, otherwise
 	 */
 	public default Result<V, Failure> get(final Message<?> message) {
-		return error(new Failure(Response.UnsupportedMediaType));
+		return error(new Failure().status(Response.UnsupportedMediaType));
 	}
 
 	/**
