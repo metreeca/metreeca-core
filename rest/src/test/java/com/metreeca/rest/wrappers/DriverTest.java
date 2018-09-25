@@ -23,7 +23,6 @@ import com.metreeca.form.codecs.ShapeCodec;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -40,6 +39,7 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.formats.ShapeFormat.asShape;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -72,7 +72,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertFalse(request.body(ShapeFormat.asShape).value().isPresent());
+					assertFalse(request.body(asShape).value().isPresent());
 
 					return request.reply(response -> response);
 
@@ -83,7 +83,7 @@ final class DriverTest {
 				.accept(response -> {
 
 					assertFalse(response.header("link").isPresent());
-					assertFalse(response.body(ShapeFormat.asShape).value().isPresent());
+					assertFalse(response.body(asShape).value().isPresent());
 
 				});
 	}
@@ -93,7 +93,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertEquals(RootShape, request.body(ShapeFormat.asShape).value().orElseGet(() -> fail("missing shape")));
+					assertEquals(TestShape, request.body(asShape).value().orElseGet(() -> fail("missing shape")));
 
 					return request.reply(response -> response.header("link", "existing"));
 
@@ -107,8 +107,6 @@ final class DriverTest {
 							list("existing", "<http://example.org/resource?specs>; rel="+LDP.CONSTRAINED_BY),
 							response.headers("link")
 					);
-
-					assertEquals(RootShape, response.body(ShapeFormat.asShape).value().orElseGet(() -> fail("missing shape")));
 
 				});
 	}
