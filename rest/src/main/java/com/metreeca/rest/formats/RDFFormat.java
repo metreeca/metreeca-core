@@ -173,12 +173,12 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 		message.body(asOutput, output -> {
 
-			final RDFWriter rdf=factory.getWriter(output);
+			final RDFWriter writer=factory.getWriter(output);
 
-			rdf.set(JSONAdapter.Shape, message.body(ShapeFormat.asShape).value().orElse(null));
-			rdf.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
+			writer.set(JSONAdapter.Shape, message.body(ShapeFormat.asShape).value().orElse(null));
+			writer.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
 
-			Rio.write(value, rdf);
+			message.body(asRDF).value().ifPresent(model -> Rio.write(model, writer));
 
 		});
 

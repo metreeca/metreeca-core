@@ -19,18 +19,19 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.ReaderFormat;
-import com.metreeca.rest.formats.WriterFormat;
+import com.metreeca.rest.formats.RDFFormat;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
-import java.io.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.metreeca.form.things.Transputs.text;
+import static com.metreeca.form.things.Transputs.encode;
 import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.rest.formats.RDFFormat.asRDF;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -47,22 +48,22 @@ import static java.util.stream.Collectors.toSet;
  * <ul>
  *
  * <li>request {@linkplain Request#user() user}, {@linkplain Request#roles() roles}, {@linkplain Request#base() base},
- * {@linkplain Request#parameters() parameter values}, {@linkplain Request#headers() headers} and {@link ReaderFormat}
- * {@linkplain Request#body(Format) body} payloads;</li>
+ * {@linkplain Request#query() query}, {@linkplain Request#parameters() parameters}, {@linkplain Request#headers()
+ * headers} and {@link RDFFormat} {@linkplain Request#body(Format) body} payloads;</li>
  *
- * <li>response {@linkplain Request#headers() headers} and {@link WriterFormat} {@linkplain Request#body(Format) body}
+ * <li>response {@linkplain Request#headers() headers} and {@link RDFFormat} {@linkplain Request#body(Format) body}
  * payloads;</li>
  *
  * </ul>
  *
- * <p>This wrapper is intended to ensure data portability between development and production environment and may cause
- * severe performance degradation for large payloads: setting the canonical {@linkplain #base(String) base} to the
- * expected public server base effectively disables rewriting in production.</p>
+ * <p><strong>Warning</strong> / This wrapper is intended to ensure data portability between development and production
+ * environment and may cause severe performance degradation for large payloads: setting the canonical {@linkplain
+ * #base(String) base} to the expected public server base effectively disables rewriting in production.</p>
  */
-public final class Rewriter implements Wrapper { // !!! review interactions with multi-part messages
+public final class Rewriter implements Wrapper {
 
 	private static Pattern pattern(final String source) {
-		return Pattern.compile("\\b"+Pattern.quote(source)+"\\b");
+		return Pattern.compile("(^|\\b)"+Pattern.quote(source)+"(\\b|$)");
 	}
 
 
@@ -120,51 +121,77 @@ public final class Rewriter implements Wrapper { // !!! review interactions with
 			final boolean identity=external.isEmpty() || internal.isEmpty() || external.equals(internal);
 
 			return identity ? handler.handle(request) : request
-					.map(r -> rewrite(pattern(external), internal, r))
+					.map(r -> rewrite(external, internal, r))
 					.map(handler::handle)
-					.map(r -> rewrite(pattern(internal), external, r));
+					.map(r -> rewrite(internal, external, r));
 		};
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Request rewrite(final Pattern source, final String target, final Request request) {
+	private Request rewrite(final String source, final String target, final Request request) {
+
+		final Pattern decoded=pattern(source);
+		final Pattern encoded=pattern(encode(source));
+
 		return request
 
-				.user(rewrite(source, target, request.user()))
-				.roles(request.roles().stream().map(value -> rewrite(source, target, value)).collect(toSet()))
+				.user(rewrite(decoded, target, request.user()))
+				.roles(request.roles().stream().map(value -> rewrite(decoded, target, value)).collect(toSet()))
 
-				.base(rewrite(source, target, request.base()))
+				.base(rewrite(decoded, target, request.base()))
 
-				.query(rewrite(source, target, request.query())) // !!! interactions with decoding?
+				.query(rewrite(encoded, encode(target), // encoded variant
+						rewrite(decoded, target, request.query()) // decoded variant
+				))
 
 				.parameters(request.parameters().entrySet().stream().collect(toMap(Map.Entry::getKey, entry ->
-						entry.getValue().stream().map(value -> rewrite(source, target, value)).collect(toList())
+						entry.getValue().stream().map(value -> rewrite(decoded, target, value)).collect(toList())
 				)))
 
 				.headers(request.headers().entrySet().stream().collect(toMap(Map.Entry::getKey, entry ->
-						entry.getValue().stream().map(value -> rewrite(source, target, value)).collect(toList())
+						entry.getValue().stream().map(value -> rewrite(decoded, target, value)).collect(toList())
 				)))
 
-				.filter(ReaderFormat.asReader, supplier -> () -> rewrite(source, target, supplier.get()));
+				.filter(asRDF, model -> rewrite(decoded, target, model));
 	}
 
-	private Response rewrite(final Pattern source, final String target, final Response response) {
+	private Response rewrite(final String source, final String target, final Response response) {
+
+		final Pattern decoded=pattern(source);
+
 		return response
 
 				.headers(response.headers().entrySet().stream().collect(toMap(Map.Entry::getKey, entry ->
-						entry.getValue().stream().map(value -> rewrite(source, target, value)).collect(toList())
+						entry.getValue().stream().map(value -> rewrite(decoded, target, value)).collect(toList())
 				)))
 
-				.filter(WriterFormat.asWriter, consumer -> writer -> consumer.accept(rewrite(source, target, writer)));
+				.filter(asRDF, model -> rewrite(decoded, target, model));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private List<Statement> rewrite(final Pattern source, final String target, final Collection<Statement> model) {
+		return model.stream().map(s -> rewrite(source, target, s)).collect(toList());
+	}
+
+	private Statement rewrite(final Pattern source, final String target, final Statement statement) {
+		return statement == null ? null : statement(
+				rewrite(source, target, statement.getSubject()),
+				rewrite(source, target, statement.getPredicate()),
+				rewrite(source, target, statement.getObject()),
+				rewrite(source, target, statement.getContext())
+		);
+	}
+
 	private Value rewrite(final Pattern source, final String target, final Value value) {
-		return value instanceof IRI ? iri(rewrite(source, target, value.stringValue())) : value;
+		return value instanceof IRI ? rewrite(source, target, (IRI)value) : value;
+	}
+
+	private Resource rewrite(final Pattern source, final String target, final Resource resource) {
+		return resource instanceof IRI ? rewrite(source, target, (IRI)resource) : resource;
 	}
 
 	private IRI rewrite(final Pattern source, final String target, final IRI iri) {
@@ -173,25 +200,6 @@ public final class Rewriter implements Wrapper { // !!! review interactions with
 
 	private String rewrite(final Pattern source, final String target, final CharSequence string) {
 		return string == null ? null : source.matcher(string).replaceAll(target);
-	}
-
-	private Reader rewrite(final Pattern source, final String target, final Reader reader) { // !!! streaming replacement
-		return reader == null ? null : new FilterReader(new StringReader(rewrite(source, target, text(reader)))) {
-
-			@Override public void close() throws IOException { reader.close(); }
-
-		};
-	}
-
-	private Writer rewrite(final Pattern source, final String target, final Writer writer) { // !!! streaming replacement
-		return writer == null ? null : new FilterWriter(new StringWriter()) {
-
-			@Override public void close() throws IOException {
-				writer.write(rewrite(source, target, out.toString()));
-				writer.close();
-			}
-
-		};
 	}
 
 }
