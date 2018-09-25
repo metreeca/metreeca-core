@@ -58,10 +58,10 @@ public final class _JSON implements Format<JsonObject> {
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link _Reader#Format} representation, if present; an empty optional, otherwise
+	 * {@link ReaderFormat#asReader} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
-		return message.headers("content-type").contains(MIME)? message.body(_Reader.Format).value(source -> {
+		return message.headers("content-type").contains(MIME) ? message.body(ReaderFormat.asReader).value(source -> {
 			try (final Reader reader=source.get()) {
 
 				return value(Json.createReader(reader).readObject());
@@ -83,8 +83,8 @@ public final class _JSON implements Format<JsonObject> {
 	 * Configures the {@link _Writer#Format} representation of {@code message} to write the JSON {@code value} to the
 	 * writer supplied by the accepted writer.
 	 */
-	@Override public void set(final Message<?> message, final JsonObject value) {
-		message.header("content-type", MIME)
+	@Override public <T extends Message<T>> T set(final T message, final JsonObject value) {
+		return message.header("content-type", MIME)
 
 				.body(_Writer.Format, writer -> Json.createWriter(writer).write(value));
 	}

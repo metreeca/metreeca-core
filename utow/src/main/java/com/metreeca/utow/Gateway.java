@@ -21,7 +21,7 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats._Input;
-import com.metreeca.rest.formats._Reader;
+import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.rest.formats._Writer;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Trace;
@@ -181,7 +181,7 @@ import static com.metreeca.form.things.Transputs.reader;
 
 				.body(_Input.Format, exchange::getInputStream)
 
-				.body(_Reader.Format, () -> reader(exchange.getInputStream(), exchange.getRequestCharset()));
+				.body(ReaderFormat.asReader, () -> reader(exchange.getInputStream(), exchange.getRequestCharset()));
 	}
 
 	private Consumer<Response> response(final HttpServerExchange exchange) {

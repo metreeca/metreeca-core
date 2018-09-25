@@ -57,7 +57,7 @@ final class BearerTest {
 
 				.handle(new Request()
 						.method(Request.GET)
-						.body(_Reader.Format, Transputs::reader))
+						.body(ReaderFormat.asReader, Transputs::reader))
 
 				.accept(response -> {
 

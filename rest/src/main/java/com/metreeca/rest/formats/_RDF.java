@@ -67,7 +67,7 @@ public final class _RDF implements Format<Collection<Statement>> {
 	 * representation, if present; an empty optional, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(_Reader.Format).value(supplier -> { // use reader to activate IRI rewriting
+		return message.body(ReaderFormat.asReader).value(supplier -> { // use reader to activate IRI rewriting
 
 			final Optional<Request> request=message.as(Request.class);
 
@@ -152,7 +152,7 @@ public final class _RDF implements Format<Collection<Statement>> {
 	 * Configures the {@link _Output#Format} representation of {@code message} to write the RDF {@code value} to the
 	 * accepted output stream.
 	 */
-	@Override public void set(final Message<?> message, final Collection<Statement> value) {
+	@Override public <T extends Message<T>> T set(final T message, final Collection<Statement> value) {
 
 		final Optional<Response> response=message.as(Response.class);
 
@@ -178,6 +178,8 @@ public final class _RDF implements Format<Collection<Statement>> {
 			Rio.write(value, rdf);
 
 		});
+
+		return message;
 	}
 
 }

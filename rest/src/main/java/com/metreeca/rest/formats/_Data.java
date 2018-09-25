@@ -64,8 +64,8 @@ public final class _Data implements Format<byte[]> {
 	 * Configures the {@link _Output#Format} representation of {@code message} to write the binary {@code value} to the
 	 * output stream supplied by the accepted output stream.
 	 */
-	@Override public void set(final Message<?> message, final byte... value) {
-		message.body(_Output.Format, output -> {
+	@Override public <T extends Message<T>> T set(final T message, final byte... value) {
+		return message.body(_Output.Format, output -> {
 			try  {
 
 				output.write(value);

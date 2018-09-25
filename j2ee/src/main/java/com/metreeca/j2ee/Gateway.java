@@ -296,7 +296,7 @@ public abstract class Gateway implements ServletContextListener {
 							}
 						})
 
-						.body(_Reader.Format, () -> {
+						.body(ReaderFormat.asReader, () -> {
 							try {
 								return http.getReader();
 							} catch ( final IOException e ) {
@@ -367,7 +367,7 @@ public abstract class Gateway implements ServletContextListener {
 				//						}
 				//					})
 				//
-				//					.body(_Reader.Format, () -> { // !!! from input using part/request encoding
+				//					.body(ReaderFormat.Format, () -> { // !!! from input using part/request encoding
 				//						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 				//					}));
 				//

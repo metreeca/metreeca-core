@@ -52,7 +52,7 @@ import static java.lang.Boolean.parseBoolean;
  *
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
-@Deprecated public class SPARQL implements Handler {
+public class SPARQL implements Handler {
 
 	private int timeout=60; // endpoint operations timeout [s]
 	private boolean publik; // public availability of the endpoint

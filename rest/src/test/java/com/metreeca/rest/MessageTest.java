@@ -17,21 +17,28 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.Result;
+import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.rest.formats._Text;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.things.Lists.list;
+import java.io.*;
+import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.metreeca.form.Result.value;
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Transputs.text;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import static java.util.Collections.emptySet;
 
-
 final class MessageTest {
 
-	@Test void testHeadersNormalizeHeadreNames() {
+	//// Headers ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testHeadersNormalizeHeaderNames() {
 
 		final TestMessage message=new TestMessage()
 				.headers("test-header", "value");
@@ -83,16 +90,36 @@ final class MessageTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Body //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testRepresentationCaching() {
+	@Test void testBodyCaching() {
 
-		final TestMessage outbound=new TestMessage().body(_Text.Format, "text");
+		final TestMessage message=new TestMessage().body(ReaderFormat.asReader, () -> new StringReader("test"));
 
-		assertEquals(
-				outbound.body(_Text.Format).value().orElseThrow(IllegalStateException::new),
-				outbound.body(_Text.Format).value().orElseThrow(IllegalStateException::new)
-		);
+		final Function<Message<?>, String> accessor=m -> m
+				.body(_Text.Format).map(value -> value, error -> fail("missing test body"));
+
+		assertSame(accessor.apply(message), accessor.apply(message));
+	}
+
+	@Test void testBodySetterIdempotency()  {
+
+		final Message<?> message=new TestMessage().body(TestFormat.asTest, "test");
+
+		assertEquals("test",
+				message.body(TestFormat.asTest).map(value -> value, error -> fail("missing test body")));
+
+	}
+
+	@Test void testBodyOnDemandFiltering()  {
+
+		final Message<?> message=new TestMessage()
+				.filter(TestFormat.asTest, string -> string+"!")
+				.body(ReaderFormat.asReader, () -> new StringReader("test"));
+
+		assertEquals("test!",
+				message.body(TestFormat.asTest).map(value -> value, error -> fail("missing test body")));
+
 	}
 
 
@@ -101,6 +128,28 @@ final class MessageTest {
 	private static final class TestMessage extends Message<TestMessage> {
 
 		@Override protected TestMessage self() { return this; }
+
+	}
+
+	private static final class TestFormat implements Format<String> {
+
+		private static final Format<String> asTest=new TestFormat();
+
+		@Override public Result<String, Failure> get(final Message<?> message) {
+			return message.body(ReaderFormat.asReader).value(supplier -> {
+				try (final Reader reader=supplier.get()) {
+					return value(text(reader));
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+			});
+		}
+
+		@Override public <T extends Message<T>> T set(final T message, final String value) {
+			return message
+					.header("content-type", "text/plain")
+					.body(asTest, value);
+		}
 
 	}
 

@@ -26,16 +26,16 @@ import java.util.function.Supplier;
 /**
  * Inbound raw body format.
  */
-public final class _Reader implements Format<Supplier<Reader>> {
+public final class ReaderFormat implements Format<Supplier<Reader>> {
 
 	/**
 	 * The singleton inbound raw body format.
 	 */
-	public static final _Reader Format=new _Reader();
+	public static final ReaderFormat asReader=new ReaderFormat();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Reader() {} // singleton
+	private ReaderFormat() {} // singleton
 
 }

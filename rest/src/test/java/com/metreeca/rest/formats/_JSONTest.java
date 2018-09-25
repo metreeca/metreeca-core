@@ -47,7 +47,7 @@ final class _JSONTest {
 
 		final Request request=new Request()
 				.header("content-type", _JSON.MIME)
-				.body(_Reader.Format, () -> new StringReader(TestJSON.toString()));
+				.body(ReaderFormat.asReader, () -> new StringReader(TestJSON.toString()));
 
 		assertEquals(TestJSON, request.body(_JSON.Format).value().orElseGet(() -> fail("no json representation")));
 	}
@@ -55,7 +55,7 @@ final class _JSONTest {
 	@Test void testRetrieveJSONChecksContentType() {
 
 		final Request request=new Request()
-				.body(_Reader.Format, () -> new StringReader(TestJSON.toString()));
+				.body(ReaderFormat.asReader, () -> new StringReader(TestJSON.toString()));
 
 		assertFalse(request.body(_JSON.Format).value().isPresent());
 	}

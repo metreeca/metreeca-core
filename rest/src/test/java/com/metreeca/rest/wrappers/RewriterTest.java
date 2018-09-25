@@ -22,7 +22,7 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats._RDF;
-import com.metreeca.rest.formats._Reader;
+import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -152,7 +152,7 @@ final class RewriterTest {
 						.base(External)
 						.path("/s")
 
-						.body(_Reader.Format, () -> new StringReader(ValuesTest.encode(singleton(external("s", "p", "o"))))))
+						.body(ReaderFormat.asReader, () -> new StringReader(ValuesTest.encode(singleton(external("s", "p", "o"))))))
 
 				.accept(response -> {
 

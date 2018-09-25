@@ -18,14 +18,16 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Result;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 
-import static com.metreeca.form.things.Transputs.text;
 import static com.metreeca.form.Result.value;
+import static com.metreeca.form.things.Transputs.text;
 
 
 /**
@@ -44,12 +46,14 @@ public final class _Text implements Format<String> {
 	private _Text() {} // singleton
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * @return the optional textual body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link _Reader#Format} representation, if present; an empty optional, otherwise
+	 * {@link ReaderFormat#asReader} representation, if present; an empty optional, otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
-		return message.body(_Reader.Format).value(source -> {
+		return message.body(ReaderFormat.asReader).value(source -> {
 			try (final Reader reader=source.get()) {
 
 				return value(text(reader));
@@ -64,8 +68,8 @@ public final class _Text implements Format<String> {
 	 * Configures the {@link _Writer#Format} representation of {@code message} to write the textual {@code value} to the
 	 * writer supplied by the accepted writer.
 	 */
-	@Override public void set(final Message<?> message, final String value) {
-		message.body(_Writer.Format, writer -> {
+	@Override public <T extends Message<T>> T set(final T message, final String value) {
+		return message.body(_Writer.Format, writer -> {
 			try {
 
 				writer.write(value);

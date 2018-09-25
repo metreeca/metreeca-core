@@ -764,6 +764,7 @@
         <list>
           <option value="deprecation" />
           <option value="unchecked" />
+          <option value="ObjectEquality" />
         </list>
       </option>
     </inspection_tool>

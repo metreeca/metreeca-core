@@ -19,7 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._Reader;
+import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.rest.formats._Writer;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.toSet;
  * <ul>
  *
  * <li>request {@linkplain Request#user() user}, {@linkplain Request#roles() roles}, {@linkplain Request#base() base},
- * {@linkplain Request#parameters() parameter values}, {@linkplain Request#headers() headers} and {@link _Reader}
+ * {@linkplain Request#parameters() parameter values}, {@linkplain Request#headers() headers} and {@link ReaderFormat}
  * {@linkplain Request#body(Format) body} payloads;</li>
  *
  * <li>response {@linkplain Request#headers() headers} and {@link _Writer} {@linkplain Request#body(Format) body}
@@ -147,7 +147,7 @@ public final class Rewriter implements Wrapper { // !!! review interactions with
 						entry.getValue().stream().map(value -> rewrite(source, target, value)).collect(toList())
 				)))
 
-				.filter(_Reader.Format, supplier -> () -> rewrite(source, target, supplier.get()));
+				.filter(ReaderFormat.asReader, supplier -> () -> rewrite(source, target, supplier.get()));
 	}
 
 	private Response rewrite(final Pattern source, final String target, final Response response) {

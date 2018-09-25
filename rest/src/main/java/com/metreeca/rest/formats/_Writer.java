@@ -40,10 +40,13 @@ public final class _Writer implements Format<Consumer<Writer>> {
 	private _Writer() {} // singleton
 
 
-	@Override public void set(final Message<?> message, final Consumer<Writer> value) {
+	@Override public <T extends Message<T>> T set(final T message, final Consumer<Writer> value) {
+
 		if ( !message.header("content-type").isPresent() ) {
 			message.header("content-type", "text/plain");
 		}
+
+		return message;
 	}
 
 }

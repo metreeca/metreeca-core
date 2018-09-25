@@ -40,10 +40,13 @@ public final class _Output implements Format<Consumer<OutputStream>> {
 	private _Output() {} // singleton
 
 
-	@Override public void set(final Message<?> message, final Consumer<OutputStream> value) {
+	@Override public <T extends Message<T>> T set(final T message, final Consumer<OutputStream> value) {
+
 		if ( !message.header("content-type").isPresent() ) {
 			message.header("content-type", "application/octet-stream");
 		}
+
+		return message;
 	}
 
 }

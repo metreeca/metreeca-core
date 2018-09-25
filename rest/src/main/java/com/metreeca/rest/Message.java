@@ -25,9 +25,10 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.Result.error;
+import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
-import static com.metreeca.form.Result.value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -51,7 +52,8 @@ public abstract class Message<T extends Message<T>> {
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
-	private final Map<Format<?>, Result<Object, Failure>> bodies=new HashMap<>();
+	private final Map<Format<?>, Object> cache=new HashMap<>();
+	private final Map<Format<?>, Function<Message<?>, Result<?, Failure>>> bodies=new HashMap<>();
 
 
 	/**
@@ -339,13 +341,22 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if {@code format} is null
 	 */
-	@SuppressWarnings("unchecked") public <V> Result<V, Failure> body(final Format<V> format) {
+	@SuppressWarnings("unchecked")
+	public <V> Result<V, Failure> body(final Format<V> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
 		}
 
-		return (Result<V, Failure>)bodies.computeIfAbsent(format, key -> (Result<Object, Failure>)format.get(this));
+		final V cached=(V)cache.get(format);
+
+		return cached != null ? value(cached) : bodies.getOrDefault(format, format::get).apply(this).map(
+				v -> {
+					cache.put(format, v);
+					return value((V)v);
+				},
+				e -> error(e)
+		);
 	}
 
 	/**
@@ -359,6 +370,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code body} is null
 	 */
+	@SuppressWarnings({"unchecked", "ObjectEquality"})
 	public <V> T body(final Format<V> format, final V value) {
 
 		if ( format == null ) {
@@ -369,13 +381,27 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
-		bodies.put(format, value(value));
+		final V cached=(V)cache.get(format);
 
-		format.set(this, value);
+		if ( cached == null ) {
 
-		return self();
+			cache.clear();
+			cache.put(format, value);
+
+			bodies.put(format, message -> value(value));
+
+			return format.set(self(), value);
+
+		} else if ( cached == value ) {
+
+			return self();
+
+		} else {
+
+			throw new IllegalStateException("undefined cached"); // !!!
+
+		}
 	}
-
 
 	/**
 	 * Filters a representation of the body of this message.
@@ -393,6 +419,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @throws NullPointerException if either {@code format} or {@code mapper} is null or if {@code mapper} returns a
 	 *                              null value
 	 */
+	@SuppressWarnings("unchecked")
 	public <V> T filter(final Format<V> format, final Function<V, V> mapper) {
 
 		if ( format == null ) {
@@ -403,10 +430,20 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null mapper");
 		}
 
-		return body(format).map(
-				value -> body(format, requireNonNull(mapper.apply(value), "null mapper return value")),
-				error -> self()
-		);
+		cache.clear();
+
+		bodies.compute(format, (_format, getter) -> message -> (
+
+				getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)_format::get
+
+		).apply(message).map(
+
+				v -> value(requireNonNull(mapper.apply((V)v), "null mapper return value")),
+				e -> error(e)
+
+		));
+
+		return self();
 	}
 
 

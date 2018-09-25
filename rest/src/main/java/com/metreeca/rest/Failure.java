@@ -57,8 +57,8 @@ public final class Failure implements Function<Response, Response> {
 	private int status=Response.BadRequest;
 
 	private String error;
-	private Throwable cause; // machine readable cause
 	private String label; // human readable cause label
+	private Throwable cause; // machine readable cause
 	private JsonValue trace;
 
 
@@ -105,26 +105,6 @@ public final class Failure implements Function<Response, Response> {
 	}
 
 	/**
-	 * Configures the error cause.
-	 *
-	 * @param cause the underlying throwable that caused the error condition defined by this failure report
-	 *
-	 * @return this failure report
-	 *
-	 * @throws NullPointerException if {@code cause} is null
-	 */
-	public Failure cause(final Throwable cause) {
-
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
-
-		this.cause=cause;
-
-		return this;
-	}
-
-	/**
 	 * Configures the error cause description.
 	 *
 	 * @param cause a human readable description of the error condition defined by this failure report
@@ -144,6 +124,25 @@ public final class Failure implements Function<Response, Response> {
 		return this;
 	}
 
+	/**
+	 * Configures the error cause.
+	 *
+	 * @param cause the underlying throwable that caused the error condition defined by this failure report
+	 *
+	 * @return this failure report
+	 *
+	 * @throws NullPointerException if {@code cause} is null
+	 */
+	public Failure cause(final Throwable cause) {
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
+		this.cause=cause;
+
+		return this;
+	}
 
 	/**
 	 * Configures the error trace.
