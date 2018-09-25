@@ -42,7 +42,19 @@ final class ConditionalTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testDelegateHandlerUnconditionally() {
+	@Test void testDelegateHandler() {
+		new Tray()
+
+				.get(() -> new Conditional()
+						.test(request -> true)
+						.wrap(Handler))
+
+				.handle(new Request().method(Request.GET))
+
+				.accept(reader -> assertEquals(HandlerStatus, reader.status(), "handler delegated"));
+	}
+
+	@Test void testBypassHandler() {
 		new Tray()
 
 				.get(() -> new Conditional()
@@ -51,7 +63,7 @@ final class ConditionalTest {
 
 				.handle(new Request().method(Request.GET))
 
-				.accept(reader -> assertEquals(HandlerStatus, reader.status(), "handler delegated"));
+				.accept(reader -> assertEquals(0, reader.status(), "handler bypassed"));
 	}
 
 	@Test void testDelegateWrapper() {

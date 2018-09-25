@@ -27,8 +27,8 @@ import java.util.function.Predicate;
 /**
  * Conditional wrapper.
  *
- * <p>Conditionally routes incoming {@linkplain Request requests} through a delegate {@linkplain Wrapper wrapper}
- * according to the outcome of a request {@linkplain #test(Predicate)} predicate}.</p>
+ * <p>Conditionally routes incoming {@linkplain Request requests} through delegate {@linkplain Handler handlers} and
+ * {@linkplain Wrapper wrappers} according to the outcome of a request {@linkplain #test(Predicate)} predicate}.</p>
  */
 public final class Conditional implements Wrapper {
 
@@ -70,7 +70,7 @@ public final class Conditional implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return handler;
+		return request -> predicate.test(request) ? handler.handle(request) : request.reply(response -> response);
 	}
 
 	@Override public Wrapper wrap(final Wrapper wrapper) {
