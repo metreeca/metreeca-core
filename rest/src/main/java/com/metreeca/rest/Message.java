@@ -427,8 +427,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @return this message
 	 *
 	 * @throws NullPointerException  if either {@code format} or {@code body} is null
-	 * @throws IllegalStateException if {@code format} {@linkplain Format#set(Message, Object) setter} attempts to
-	 *                               recursively call this method with a different {@code value}
+	 * @throws IllegalStateException if body representations were already retrieved from this message
 	 */
 	@SuppressWarnings({"unchecked", "ObjectEquality"})
 	public <V> T body(final Format<V> format, final V value) {
@@ -441,26 +440,13 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
-		final V cached=(V)cache.get(format);
-
-		if ( cached == null ) {
-
-			cache.clear();
-			cache.put(format, value); // memo value to handle idempotent setter calls
-
-			bodies.put(format, message -> value(value));
-
-			return format.set(self(), value);
-
-		} else if ( cached == value ) { // idempotent call
-
-			return self();
-
-		} else {
-
-			throw new IllegalStateException("recursive call with different value");
-
+		if ( !cache.isEmpty() ) {
+			throw new IllegalStateException("message body representations already retrieved");
 		}
+
+		bodies.put(format, message -> value(value));
+
+		return format.set(self(), value);
 	}
 
 	/**
@@ -479,6 +465,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code mapper} is null or if {@code mapper} returns a
 	 *                              null value
+	 * @throws IllegalStateException if body representations were already retrieved from this message
 	 */
 	@SuppressWarnings("unchecked")
 	public <V> T filter(final Format<V> format, final Function<V, V> mapper) {
@@ -491,7 +478,9 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null mapper");
 		}
 
-		cache.clear();
+		if ( !cache.isEmpty() ) {
+			throw new IllegalStateException("message body representations already retrieved");
+		}
 
 		bodies.compute(format, (_format, getter) -> message -> (
 

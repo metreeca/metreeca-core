@@ -102,15 +102,6 @@ final class MessageTest {
 		assertSame(accessor.apply(message), accessor.apply(message));
 	}
 
-	@Test void testBodySetterIdempotency()  {
-
-		final Message<?> message=new TestMessage().body(TestFormat.asTest, "test");
-
-		assertEquals("test",
-				message.body(TestFormat.asTest).map(value -> value, error -> fail("missing test body")));
-
-	}
-
 	@Test void testBodyOnDemandFiltering()  {
 
 		final Message<?> message=new TestMessage()

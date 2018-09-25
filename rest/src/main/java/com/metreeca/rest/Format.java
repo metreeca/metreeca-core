@@ -32,7 +32,7 @@ import static com.metreeca.form.Result.error;
 public interface Format<V> {
 
 	/**
-	 * Retrieves the structured body representation of a message.
+	 * Retrieves a structured body representation from a message.
 	 *
 	 * <p>Processing failure should be reported using the following HTTP status codes:</p>
 	 *
@@ -44,7 +44,7 @@ public interface Format<V> {
 	 *
 	 * <p>The default implementation reports a failure with the {@link Response#UnsupportedMediaType} status code.</p>
 	 *
-	 * @param message the message whose structured body representation associated with this format is to be retrieved
+	 * @param message the message the structured body representation associated with this format is to be retrieved from
 	 *
 	 * @return a result providing access to the structured body representation associated with this format, if it was
 	 * possible to derive one from {@code message}; a result providing access to the processing failure, otherwise
@@ -61,12 +61,12 @@ public interface Format<V> {
 	}
 
 	/**
-	 * Configures the structured body representation of a message.
+	 * Configures a message to hold a structured body representation.
 	 *
 	 * <p>The default implementation has no effect.</p>
 	 *
-	 * @param message the message whose structured body representation associated with this format is to be configured
-	 * @param value   the structured body representation to be configured for {@code message}
+	 * @param message the message to be configured to hold a structured body representation associated with this format
+	 * @param value   the structured body representation {@code message} is to be configured to hold
 	 *
 	 * @return the configured {@code message}
 	 * @throws NullPointerException if either {@code message} or {@code value} is null
