@@ -25,12 +25,17 @@ import java.util.function.Consumer;
 
 
 /**
- * Inbound raw body format.
+ * Textual outbound raw body format.
  */
 public final class WriterFormat implements Format<Consumer<Writer>> {
 
 	/**
-	 * The singleton inbound raw body format.
+	 * The default MIME type for textual outbound raw message bodies.
+	 */
+	private static final String MIME="text/plain";
+
+	/**
+	 * The singleton textual outbound raw body format.
 	 */
 	public static final WriterFormat asWriter=new WriterFormat();
 
@@ -42,13 +47,11 @@ public final class WriterFormat implements Format<Consumer<Writer>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
+	 */
 	@Override public <T extends Message<T>> T set(final T message, final Consumer<Writer> value) {
-
-		if ( !message.header("content-type").isPresent() ) {
-			message.header("content-type", "text/plain");
-		}
-
-		return message;
+		return message.header("Content-Type", v -> v.orElse(MIME));
 	}
 
 }

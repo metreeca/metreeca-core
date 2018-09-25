@@ -18,14 +18,16 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Result;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 
-import static com.metreeca.form.things.Transputs.data;
 import static com.metreeca.form.Result.value;
+import static com.metreeca.form.things.Transputs.data;
 
 
 /**
@@ -48,7 +50,7 @@ public final class DataFormat implements Format<byte[]> {
 
 	/**
 	 * @return the optional binary body representation of {@code message}, as retrieved from the input stream supplied
-	 * by its {@link InputFormat#asInput} representation, if present; an empty optional, otherwise
+	 * by its {@link InputFormat} representation, if one is present; an empty optional, otherwise
 	 */
 	@Override public Result<byte[], Failure> get(final Message<?> message) {
 		return message.body(InputFormat.asInput).value(source -> {
@@ -63,12 +65,12 @@ public final class DataFormat implements Format<byte[]> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat#asOutput} representation of {@code message} to write the binary {@code value} to the
-	 * output stream supplied by the accepted output stream.
+	 * Configures the {@link OutputFormat} representation of {@code message} to write the binary {@code value}
+	 * to the output stream supplied by the accepted output stream.
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final byte... value) {
 		return message.body(OutputFormat.asOutput, output -> {
-			try  {
+			try {
 
 				output.write(value);
 

@@ -25,12 +25,17 @@ import java.util.function.Consumer;
 
 
 /**
- * Inbound raw body format.
+ * Binary outbound raw body format.
  */
 public final class OutputFormat implements Format<Consumer<OutputStream>> {
 
 	/**
-	 * The singleton inbound raw body format.
+	 * The default MIME type for binary outbound raw message bodies.
+	 */
+	public static final String MIME="application/octet-stream";
+
+	/**
+	 * The singleton binary inbound raw body format.
 	 */
 	public static final OutputFormat asOutput=new OutputFormat();
 
@@ -42,13 +47,11 @@ public final class OutputFormat implements Format<Consumer<OutputStream>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
+	 */
 	@Override public <T extends Message<T>> T set(final T message, final Consumer<OutputStream> value) {
-
-		if ( !message.header("content-type").isPresent() ) {
-			message.header("content-type", "application/octet-stream");
-		}
-
-		return message;
+		return message.header("Content-Type", v -> v.orElse(MIME));
 	}
 
 }

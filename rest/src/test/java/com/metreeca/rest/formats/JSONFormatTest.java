@@ -27,6 +27,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 
 import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.formats.JSONFormat.asJSON;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +50,7 @@ final class JSONFormatTest {
 				.header("content-type", JSONFormat.MIME)
 				.body(ReaderFormat.asReader, () -> new StringReader(TestJSON.toString()));
 
-		assertEquals(TestJSON, request.body(JSONFormat.asJSON).value().orElseGet(() -> fail("no json representation")));
+		assertEquals(TestJSON, request.body(asJSON).value().orElseGet(() -> fail("no json representation")));
 	}
 
 	@Test void testRetrieveJSONChecksContentType() {
@@ -57,12 +58,12 @@ final class JSONFormatTest {
 		final Request request=new Request()
 				.body(ReaderFormat.asReader, () -> new StringReader(TestJSON.toString()));
 
-		assertFalse(request.body(JSONFormat.asJSON).value().isPresent());
+		assertFalse(request.body(asJSON).value().isPresent());
 	}
 
 	@Test void testConfigureJSON() {
 
-		final Request request=new Request().body(JSONFormat.asJSON, TestJSON);
+		final Request request=new Request().body(asJSON, TestJSON);
 
 		assertEquals(TestJSON, request.body(WriterFormat.asWriter)
 
@@ -89,7 +90,7 @@ final class JSONFormatTest {
 
 	@Test void testConfigureJSONSetsContentType() {
 
-		final Request request=new Request().body(JSONFormat.asJSON, TestJSON);
+		final Request request=new Request().body(asJSON, TestJSON);
 
 		assertEquals(JSONFormat.MIME, request.header("content-type").orElseGet(() -> fail("no content-type header")));
 

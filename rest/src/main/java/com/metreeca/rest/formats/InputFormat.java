@@ -24,12 +24,12 @@ import java.util.function.Supplier;
 
 
 /**
- * Inbound raw body format.
+ * Binary inbound raw body format.
  */
 public final class InputFormat implements Format<Supplier<InputStream>> {
 
 	/**
-	 * The singleton inbound raw body format.
+	 * The singleton binary inbound raw body format.
 	 */
 	public static final InputFormat asInput=new InputFormat();
 

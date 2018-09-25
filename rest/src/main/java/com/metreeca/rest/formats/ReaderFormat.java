@@ -24,12 +24,12 @@ import java.util.function.Supplier;
 
 
 /**
- * Inbound raw body format.
+ * Binary inbound raw body format.
  */
 public final class ReaderFormat implements Format<Supplier<Reader>> {
 
 	/**
-	 * The singleton inbound raw body format.
+	 * The singleton binary inbound raw body format.
 	 */
 	public static final ReaderFormat asReader=new ReaderFormat();
 

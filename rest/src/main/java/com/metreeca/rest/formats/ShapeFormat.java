@@ -20,7 +20,11 @@ package com.metreeca.rest.formats;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.Format;
 
-
+/**
+ * Shape body format.
+ *
+ * <p>Associates a message with an RDF shape describing its expected payload.</p>
+ */
 public final class ShapeFormat implements Format<Shape> {
 
 	public static final ShapeFormat asShape=new ShapeFormat();

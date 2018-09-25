@@ -26,11 +26,12 @@ import java.io.UncheckedIOException;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonValue;
 import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.form.Result.error;
 import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.formats.ReaderFormat.asReader;
+import static com.metreeca.rest.formats.WriterFormat.asWriter;
 
 
 /**
@@ -60,10 +61,11 @@ public final class JSONFormat implements Format<JsonObject> {
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat#asReader} representation, if present; an empty optional, otherwise
+	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal
+	 * to {@value #MIME}; an empty optional, otherwise
 	 */
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
-		return message.headers("content-type").contains(MIME) ? message.body(ReaderFormat.asReader).value(source -> {
+		return message.headers("content-type").contains(MIME) ? message.body(asReader).value(source -> {
 			try (final Reader reader=source.get()) {
 
 				return value(Json.createReader(reader).readObject());
@@ -73,7 +75,7 @@ public final class JSONFormat implements Format<JsonObject> {
 				return error(new Failure()
 						.status(Response.BadRequest)
 						.error(Failure.BodyMalformed)
-						.trace((JsonValue)e));
+						.cause(e));
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -82,13 +84,13 @@ public final class JSONFormat implements Format<JsonObject> {
 	}
 
 	/**
-	 * Configures the {@link WriterFormat#asWriter} representation of {@code message} to write the JSON {@code value} to the
-	 * writer supplied by the accepted writer.
+	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
+	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final JsonObject value) {
-		return message.header("content-type", MIME)
-
-				.body(WriterFormat.asWriter, writer -> Json.createWriter(writer).write(value));
+		return message
+				.header("content-type", MIME)
+				.body(asWriter, writer -> Json.createWriter(writer).write(value));
 	}
 
 }

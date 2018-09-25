@@ -34,16 +34,17 @@ import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.*;
 
 import javax.json.Json;
 
-import static com.metreeca.form.Shape.mode;
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.Result.error;
 import static com.metreeca.form.Result.value;
+import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.rest.formats.OutputFormat.asOutput;
 
 
 /**
@@ -65,18 +66,18 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat#asInput}
+	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
 	 * representation, if present; an empty optional, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(ReaderFormat.asReader).value(supplier -> { // use reader to activate IRI rewriting
+		return message.body(InputFormat.asInput).value(supplier -> {
 
 			final Optional<Request> request=message.as(Request.class);
 
 			final Optional<IRI> focus=request.map(Request::item);
 			final Optional<Shape> shape=message.body(ShapeFormat.asShape).value();
 
-			final String type=request.flatMap(r -> r.header("content-type")).orElse("");
+			final String type=request.flatMap(r -> r.header("Content-Type")).orElse("");
 
 			final RDFParser parser=Formats
 					.service(RDFParserRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, type)
@@ -101,9 +102,9 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 				@Override public void handleStatement(final Statement statement) { model.add(statement); }
 			});
 
-			try (final Reader reader=supplier.get()) {
+			try (final InputStream input=supplier.get()) {
 
-				parser.parse(reader, focus.map(Value::stringValue).orElse("")); // resolve relative IRIs wrt the focus
+				parser.parse(input, focus.map(Value::stringValue).orElse("")); // resolve relative IRIs wrt the focus
 
 			} catch ( final RDFParseException e ) {
 
@@ -151,8 +152,8 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat#asOutput} representation of {@code message} to write the RDF {@code value} to the
-	 * accepted output stream.
+	 * Configures the {@link OutputFormat} representation of {@code message} to write the RDF {@code value} to the
+	 * accepted output stream and sets the {@code Content-Type} header to the MIME type of the selected RDF format.
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final Collection<Statement> value) {
 
@@ -170,9 +171,9 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 				.findFirst()
 				.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()));
 
-		message.body(WriterFormat.asWriter, writer -> { // use writer to activate IRI rewriting
+		message.body(asOutput, output -> {
 
-			final RDFWriter rdf=factory.getWriter(writer);
+			final RDFWriter rdf=factory.getWriter(output);
 
 			rdf.set(JSONAdapter.Shape, message.body(ShapeFormat.asShape).value().orElse(null));
 			rdf.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));

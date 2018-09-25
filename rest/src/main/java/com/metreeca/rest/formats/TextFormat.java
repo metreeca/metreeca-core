@@ -50,7 +50,7 @@ public final class TextFormat implements Format<String> {
 
 	/**
 	 * @return the optional textual body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat#asReader} representation, if present; an empty optional, otherwise
+	 * {@link ReaderFormat} representation, if one is present; an empty optional, otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
 		return message.body(ReaderFormat.asReader).value(source -> {
@@ -65,7 +65,7 @@ public final class TextFormat implements Format<String> {
 	}
 
 	/**
-	 * Configures the {@link WriterFormat#asWriter} representation of {@code message} to write the textual {@code value} to the
+	 * Configures the {@link WriterFormat} representation of {@code message} to write the textual {@code value} to the
 	 * writer supplied by the accepted writer.
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final String value) {
