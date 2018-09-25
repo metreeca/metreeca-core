@@ -78,7 +78,6 @@
 	<modules>
 
 		<module>j2ee</module>
-		<module>utow</module>
 
 		<module>rest</module>
 		<module>gate</module>
