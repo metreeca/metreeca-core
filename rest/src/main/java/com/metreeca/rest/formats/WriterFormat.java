@@ -20,30 +20,32 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
-import java.io.OutputStream;
+import java.io.Writer;
 import java.util.function.Consumer;
 
 
 /**
  * Inbound raw body format.
  */
-public final class _Output implements Format<Consumer<OutputStream>> {
+public final class WriterFormat implements Format<Consumer<Writer>> {
 
 	/**
 	 * The singleton inbound raw body format.
 	 */
-	public static final _Output Format=new _Output();
+	public static final WriterFormat asWriter=new WriterFormat();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Output() {} // singleton
+	private WriterFormat() {} // singleton
 
 
-	@Override public <T extends Message<T>> T set(final T message, final Consumer<OutputStream> value) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T extends Message<T>> T set(final T message, final Consumer<Writer> value) {
 
 		if ( !message.header("content-type").isPresent() ) {
-			message.header("content-type", "application/octet-stream");
+			message.header("content-type", "text/plain");
 		}
 
 		return message;

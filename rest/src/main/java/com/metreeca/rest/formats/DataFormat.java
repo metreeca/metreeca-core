@@ -18,45 +18,43 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Result;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
+import com.metreeca.rest.*;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 
+import static com.metreeca.form.things.Transputs.data;
 import static com.metreeca.form.Result.value;
-import static com.metreeca.form.things.Transputs.text;
 
 
 /**
- * Textual body format.
+ * Binary body format.
  */
-public final class _Text implements Format<String> {
+public final class DataFormat implements Format<byte[]> {
 
 	/**
-	 * The singleton textual body format.
+	 * The singleton binary body format.
 	 */
-	public static final Format<String> Format=new _Text();
+	public static final Format<byte[]> asData=new DataFormat();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Text() {} // singleton
+	private DataFormat() {} // singleton
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional textual body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat#asReader} representation, if present; an empty optional, otherwise
+	 * @return the optional binary body representation of {@code message}, as retrieved from the input stream supplied
+	 * by its {@link InputFormat#asInput} representation, if present; an empty optional, otherwise
 	 */
-	@Override public Result<String, Failure> get(final Message<?> message) {
-		return message.body(ReaderFormat.asReader).value(source -> {
-			try (final Reader reader=source.get()) {
+	@Override public Result<byte[], Failure> get(final Message<?> message) {
+		return message.body(InputFormat.asInput).value(source -> {
+			try (final InputStream input=source.get()) {
 
-				return value(text(reader));
+				return value(data(input));
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -65,14 +63,14 @@ public final class _Text implements Format<String> {
 	}
 
 	/**
-	 * Configures the {@link _Writer#Format} representation of {@code message} to write the textual {@code value} to the
-	 * writer supplied by the accepted writer.
+	 * Configures the {@link OutputFormat#asOutput} representation of {@code message} to write the binary {@code value} to the
+	 * output stream supplied by the accepted output stream.
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final String value) {
-		return message.body(_Writer.Format, writer -> {
-			try {
+	@Override public <T extends Message<T>> T set(final T message, final byte... value) {
+		return message.body(OutputFormat.asOutput, output -> {
+			try  {
 
-				writer.write(value);
+				output.write(value);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

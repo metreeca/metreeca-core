@@ -18,7 +18,7 @@
 package com.metreeca.utow;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._Writer;
+import com.metreeca.rest.formats.WriterFormat;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -31,7 +31,7 @@ public final class Work {
 	public static void main(final String... args) {
 
 		final Wrapper wrapper=handler -> request -> handler.handle(request)
-				.map(response -> response.filter(_Writer.Format, consumer -> writer -> consumer.accept(upper(writer))));
+				.map(response -> response.filter(WriterFormat.asWriter, consumer -> writer -> consumer.accept(upper(writer))));
 
 		final Handler handler=request -> request.reply(new Failure()
 				.status(222)

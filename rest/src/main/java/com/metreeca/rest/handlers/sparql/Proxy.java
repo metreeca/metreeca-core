@@ -18,7 +18,7 @@
 package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._Output;
+import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.sys.Trace;
 
@@ -160,7 +160,7 @@ public class Proxy implements Handler {
 
 		}
 
-		return response.body(_Output.Format, output -> {
+		return response.body(OutputFormat.asOutput, output -> {
 			try (final InputStream in=connect(connection)) {
 
 				final byte[] buffer=new byte[1024];

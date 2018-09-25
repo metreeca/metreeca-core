@@ -18,24 +18,37 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
 
-import java.io.InputStream;
-import java.util.function.Supplier;
+import java.io.OutputStream;
+import java.util.function.Consumer;
 
 
 /**
  * Inbound raw body format.
  */
-public final class _Input implements Format<Supplier<InputStream>> {
+public final class OutputFormat implements Format<Consumer<OutputStream>> {
 
 	/**
 	 * The singleton inbound raw body format.
 	 */
-	public static final _Input Format=new _Input();
+	public static final OutputFormat asOutput=new OutputFormat();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Input() {} // singleton
+	private OutputFormat() {} // singleton
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T extends Message<T>> T set(final T message, final Consumer<OutputStream> value) {
+
+		if ( !message.header("content-type").isPresent() ) {
+			message.header("content-type", "application/octet-stream");
+		}
+
+		return message;
+	}
 
 }

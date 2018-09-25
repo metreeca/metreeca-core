@@ -26,8 +26,8 @@ import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._RDF;
-import com.metreeca.rest.formats._Shape;
+import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
@@ -63,7 +63,7 @@ import static java.util.Collections.singleton;
  * <dd>
  * <dl>
  *
- * <dt>{@link _Shape} {optional}</dt>
+ * <dt>{@link ShapeFormat} {optional}</dt>
  * <dd>An optional linked data shape driving the retrieval process.</dd>
  *
  * </dl>
@@ -73,13 +73,13 @@ import static java.util.Collections.singleton;
  * <dd>
  * <dl>
  *
- * <dt>{@link _Shape} {optional}</dt>
+ * <dt>{@link ShapeFormat} {optional}</dt>
  * <dd>If the request includes a shape payload, the response includes the derived shape actually used in the resource
  * retrieval process, redacted according to request user roles, retrieval task, filtering mode and detail view.</dd>
  *
- * <dt>{@link _RDF}</dt>
+ * <dt>{@link RDFFormat}</dt>
  *
- * <dd>If the request includes a {@link _Shape} body representation, the response includes the {@linkplain _RDF RDF
+ * <dd>If the request includes a {@link ShapeFormat} body representation, the response includes the {@linkplain RDFFormat RDF
  * description} of the request {@linkplain Request#item() focus item}, as defined by the associated linked data
  * {@linkplain Shape shape} redacted taking into account the user {@linkplain Request#roles() roles} of the
  * request.</dd>
@@ -115,7 +115,7 @@ public final class Relator implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@Override public Responder handle(final Request request) {
-		return request.body(_Shape.Format).map(
+		return request.body(ShapeFormat.asShape).map(
 				shape -> {
 
 					final Shape redacted=shape
@@ -167,19 +167,19 @@ public final class Relator implements Handler {
 					return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
 
 						@Override public Response visit(final Edges edges) {
-							return r.body(_Shape.Format, edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
-									.body(_RDF.Format, model);
+							return r.body(ShapeFormat.asShape, edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
+									.body(RDFFormat.asRDF, model);
 
 						}
 
 						@Override public Response visit(final Stats stats) {
-							return r.body(_Shape.Format, StatsShape)
-									.body(_RDF.Format, rewrite(model, Form.meta, focus));
+							return r.body(ShapeFormat.asShape, StatsShape)
+									.body(RDFFormat.asRDF, rewrite(model, Form.meta, focus));
 						}
 
 						@Override public Response visit(final Items items) {
-							return r.body(_Shape.Format, ItemsShape)
-									.body(_RDF.Format, rewrite(model, Form.meta, focus));
+							return r.body(ShapeFormat.asShape, ItemsShape)
+									.body(RDFFormat.asRDF, rewrite(model, Form.meta, focus));
 						}
 
 					}));
@@ -199,7 +199,7 @@ public final class Relator implements Handler {
 			request.reply(response -> model.isEmpty()
 
 					? response.status(Response.NotFound)
-					: response.status(Response.OK).body(_RDF.Format, model)
+					: response.status(Response.OK).body(RDFFormat.asRDF, model)
 
 			).accept(consumer);
 

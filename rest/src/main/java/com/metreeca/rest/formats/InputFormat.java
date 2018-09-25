@@ -18,35 +18,24 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
 
-import java.io.Writer;
-import java.util.function.Consumer;
+import java.io.InputStream;
+import java.util.function.Supplier;
 
 
 /**
  * Inbound raw body format.
  */
-public final class _Writer implements Format<Consumer<Writer>> {
+public final class InputFormat implements Format<Supplier<InputStream>> {
 
 	/**
 	 * The singleton inbound raw body format.
 	 */
-	public static final _Writer Format=new _Writer();
+	public static final InputFormat asInput=new InputFormat();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Writer() {} // singleton
-
-
-	@Override public <T extends Message<T>> T set(final T message, final Consumer<Writer> value) {
-
-		if ( !message.header("content-type").isPresent() ) {
-			message.header("content-type", "text/plain");
-		}
-
-		return message;
-	}
+	private InputFormat() {} // singleton
 
 }

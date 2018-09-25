@@ -18,12 +18,16 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Shape;
+import com.metreeca.rest.Format;
 
 
-public final class _Shape implements com.metreeca.rest.Format<Shape> {
+public final class ShapeFormat implements Format<Shape> {
 
-	public static final _Shape Format=new _Shape();
+	public static final ShapeFormat asShape=new ShapeFormat();
 
-	private _Shape() {} // singleton
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private ShapeFormat() {} // singleton
 
 }

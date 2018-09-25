@@ -49,21 +49,23 @@ import static com.metreeca.form.Result.value;
 /**
  * RDF body format.
  */
-public final class _RDF implements Format<Collection<Statement>> {
+public final class RDFFormat implements Format<Collection<Statement>> {
 
 	/**
 	 * The singleton RDF body format.
 	 */
-	public static final Format<Collection<Statement>> Format=new _RDF();
+	public static final Format<Collection<Statement>> asRDF=new RDFFormat();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _RDF() {} // singleton
+	private RDFFormat() {} // singleton
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link _Input#Format}
+	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat#asInput}
 	 * representation, if present; an empty optional, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
@@ -72,12 +74,12 @@ public final class _RDF implements Format<Collection<Statement>> {
 			final Optional<Request> request=message.as(Request.class);
 
 			final Optional<IRI> focus=request.map(Request::item);
-			final Optional<Shape> shape=message.body(_Shape.Format).value();
+			final Optional<Shape> shape=message.body(ShapeFormat.asShape).value();
 
 			final String type=request.flatMap(r -> r.header("content-type")).orElse("");
 
 			final RDFParser parser=Formats
-					.service(RDFParserRegistry.getInstance(), RDFFormat.TURTLE, type)
+					.service(RDFParserRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, type)
 					.getParser();
 
 			parser.set(JSONAdapter.Shape, shape.orElse(null));
@@ -149,7 +151,7 @@ public final class _RDF implements Format<Collection<Statement>> {
 	}
 
 	/**
-	 * Configures the {@link _Output#Format} representation of {@code message} to write the RDF {@code value} to the
+	 * Configures the {@link OutputFormat#asOutput} representation of {@code message} to write the RDF {@code value} to the
 	 * accepted output stream.
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final Collection<Statement> value) {
@@ -159,7 +161,7 @@ public final class _RDF implements Format<Collection<Statement>> {
 		final List<String> types=Formats.types(response.map(r -> r.request().headers("Accept")).orElse(list()));
 
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
-		final RDFWriterFactory factory=Formats.service(registry, RDFFormat.TURTLE, types);
+		final RDFWriterFactory factory=Formats.service(registry, org.eclipse.rdf4j.rio.RDFFormat.TURTLE, types);
 
 		// try to set content type to the actual type requested even if it's not the default one
 
@@ -168,11 +170,11 @@ public final class _RDF implements Format<Collection<Statement>> {
 				.findFirst()
 				.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()));
 
-		message.body(_Writer.Format, writer -> { // use writer to activate IRI rewriting
+		message.body(WriterFormat.asWriter, writer -> { // use writer to activate IRI rewriting
 
 			final RDFWriter rdf=factory.getWriter(writer);
 
-			rdf.set(JSONAdapter.Shape, message.body(_Shape.Format).value().orElse(null));
+			rdf.set(JSONAdapter.Shape, message.body(ShapeFormat.asShape).value().orElse(null));
 			rdf.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
 
 			Rio.write(value, rdf);

@@ -24,8 +24,8 @@ import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats._RDF;
-import com.metreeca.rest.formats._Shape;
+import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.formats.ShapeFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -49,7 +49,7 @@ import static com.metreeca.form.things.Values.statement;
  *
  * <ul>
  *
- * <li>associates the shape model to incoming requests as a {@link _Shape} body;</li>
+ * <li>associates the shape model to incoming requests as a {@link ShapeFormat} body;</li>
  *
  * <li>advertises the association between the response focus {@linkplain Response#item() item} and the shape model
  * through a "{@code Link: <resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy}" header;</li>
@@ -160,8 +160,8 @@ public final class Driver implements Wrapper {
 					}
 
 					return response.status(Response.OK)
-							// !!! .body(_Shape.Format, ___) provide (recursive) shape for task shapes ;)
-							.body(_RDF.Format, model);
+							// !!! .body(ShapeFormat.Format, ___) provide (recursive) shape for task shapes ;)
+							.body(RDFFormat.asRDF, model);
 
 				})) :
 
@@ -170,7 +170,7 @@ public final class Driver implements Wrapper {
 
 
 	private Request before(final Request request) {
-		return shape == null ? request : request.body(_Shape.Format, shape);
+		return shape == null ? request : request.body(ShapeFormat.asShape, shape);
 	}
 
 	private Response after(final Response response) {

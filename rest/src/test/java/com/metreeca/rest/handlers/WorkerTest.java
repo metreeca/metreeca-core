@@ -21,7 +21,7 @@ package com.metreeca.rest.handlers;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Responder;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats._Text;
+import com.metreeca.rest.formats.TextFormat;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ import static com.google.common.truth.Truth.assertThat;
 final class WorkerTest {
 
 	private Responder handler(final Request request) {
-		return request.reply(response -> response.status(Response.OK).body(_Text.Format, "body"));
+		return request.reply(response -> response.status(Response.OK).body(TextFormat.asText, "body"));
 	}
 
 
@@ -80,8 +80,8 @@ final class WorkerTest {
 					assertThat(response.status()).isEqualTo(Response.OK);
 
 					// !!! empty body
-					//assertThat(response.body(_Output.Format).value()).isEmpty();
-					//assertThat(response.body(_Writer.Format).value()).isEmpty();
+					//assertThat(response.body(OutputFormat.Format).value()).isEmpty();
+					//assertThat(response.body(WriterFormat.Format).value()).isEmpty();
 
 				});
 	}

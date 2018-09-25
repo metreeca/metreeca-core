@@ -21,7 +21,7 @@ import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats._RDF;
+import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.tray.Tray;
 
@@ -135,14 +135,14 @@ final class RewriterTest {
 
 				.get(() -> (Handler)request -> {
 
-					request.body(_RDF.Format).handle(
+					request.body(RDFFormat.asRDF).handle(
 							model -> assertIsomorphic("request rdf rewritten",
 									singleton(internal("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
 					);
 
 					return request.reply(response -> response.status(Response.OK)
-							.body(_RDF.Format, singleton(internal("s", "p", "o"))));
+							.body(RDFFormat.asRDF, singleton(internal("s", "p", "o"))));
 				})
 
 				.handle(new Request()
@@ -156,7 +156,7 @@ final class RewriterTest {
 
 				.accept(response -> {
 
-					response.body(_RDF.Format).handle(
+					response.body(RDFFormat.asRDF).handle(
 							model -> assertIsomorphic("response rdf rewritten",
 									singleton(external("s", "p", "o")), model),
 							error -> fail("missing RDF payload")

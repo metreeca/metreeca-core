@@ -18,6 +18,6 @@
 package com.metreeca.rest.formats;
 
 
-final class _RDFTest {
+final class RDFFormatTest {
 
 }

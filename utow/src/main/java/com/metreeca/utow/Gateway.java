@@ -20,9 +20,9 @@ package com.metreeca.utow;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats._Input;
+import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.formats.ReaderFormat;
-import com.metreeca.rest.formats._Writer;
+import com.metreeca.rest.formats.WriterFormat;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Trace;
 
@@ -179,7 +179,7 @@ import static com.metreeca.form.things.Transputs.reader;
 						request.headers(header.getHeaderName().toString(), header)
 				))
 
-				.body(_Input.Format, exchange::getInputStream)
+				.body(InputFormat.asInput, exchange::getInputStream)
 
 				.body(ReaderFormat.asReader, () -> reader(exchange.getInputStream(), exchange.getRequestCharset()));
 	}
@@ -195,7 +195,7 @@ import static com.metreeca.form.things.Transputs.reader;
 
 			try (final StringWriter writer=new StringWriter(1000)) {
 
-				response.body(_Writer.Format).value().ifPresent(consumer -> consumer.accept(writer));
+				response.body(WriterFormat.asWriter).value().ifPresent(consumer -> consumer.accept(writer));
 
 				exchange.getResponseSender().send(writer.toString()); // !!! stream
 

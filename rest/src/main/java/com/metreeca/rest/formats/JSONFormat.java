@@ -38,7 +38,7 @@ import static com.metreeca.form.Result.value;
  *
  * @see "https://javaee.github.io/jsonp/"
  */
-public final class _JSON implements Format<JsonObject> {
+public final class JSONFormat implements Format<JsonObject> {
 
 	/**
 	 * The default MIME type for JSON message bodies.
@@ -48,13 +48,15 @@ public final class _JSON implements Format<JsonObject> {
 	/**
 	 * The singleton JSON body format.
 	 */
-	public static final Format<JsonObject> Format=new _JSON();
+	public static final Format<JsonObject> asJSON=new JSONFormat();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _JSON() {} // singleton
+	private JSONFormat() {} // singleton
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
@@ -80,13 +82,13 @@ public final class _JSON implements Format<JsonObject> {
 	}
 
 	/**
-	 * Configures the {@link _Writer#Format} representation of {@code message} to write the JSON {@code value} to the
+	 * Configures the {@link WriterFormat#asWriter} representation of {@code message} to write the JSON {@code value} to the
 	 * writer supplied by the accepted writer.
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final JsonObject value) {
 		return message.header("content-type", MIME)
 
-				.body(_Writer.Format, writer -> Json.createWriter(writer).write(value));
+				.body(WriterFormat.asWriter, writer -> Json.createWriter(writer).write(value));
 	}
 
 }

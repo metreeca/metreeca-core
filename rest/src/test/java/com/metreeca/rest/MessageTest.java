@@ -19,7 +19,7 @@ package com.metreeca.rest;
 
 import com.metreeca.form.Result;
 import com.metreeca.rest.formats.ReaderFormat;
-import com.metreeca.rest.formats._Text;
+import com.metreeca.rest.formats.TextFormat;
 
 import org.junit.jupiter.api.Test;
 
@@ -97,7 +97,7 @@ final class MessageTest {
 		final TestMessage message=new TestMessage().body(ReaderFormat.asReader, () -> new StringReader("test"));
 
 		final Function<Message<?>, String> accessor=m -> m
-				.body(_Text.Format).map(value -> value, error -> fail("missing test body"));
+				.body(TextFormat.asText).map(value -> value, error -> fail("missing test body"));
 
 		assertSame(accessor.apply(message), accessor.apply(message));
 	}

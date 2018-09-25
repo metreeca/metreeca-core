@@ -22,8 +22,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.ShapeCodec;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.formats._RDF;
-import com.metreeca.rest.formats._Shape;
+import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.formats.ShapeFormat;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -72,7 +72,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertFalse(request.body(_Shape.Format).value().isPresent());
+					assertFalse(request.body(ShapeFormat.asShape).value().isPresent());
 
 					return request.reply(response -> response);
 
@@ -83,7 +83,7 @@ final class DriverTest {
 				.accept(response -> {
 
 					assertFalse(response.header("link").isPresent());
-					assertFalse(response.body(_Shape.Format).value().isPresent());
+					assertFalse(response.body(ShapeFormat.asShape).value().isPresent());
 
 				});
 	}
@@ -93,7 +93,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertEquals(RootShape, request.body(_Shape.Format).value().orElseGet(() -> fail("missing shape")));
+					assertEquals(RootShape, request.body(ShapeFormat.asShape).value().orElseGet(() -> fail("missing shape")));
 
 					return request.reply(response -> response.header("link", "existing"));
 
@@ -108,7 +108,7 @@ final class DriverTest {
 							response.headers("link")
 					);
 
-					assertEquals(RootShape, response.body(_Shape.Format).value().orElseGet(() -> fail("missing shape")));
+					assertEquals(RootShape, response.body(ShapeFormat.asShape).value().orElseGet(() -> fail("missing shape")));
 
 				});
 	}
@@ -125,7 +125,7 @@ final class DriverTest {
 					assertEquals(OK, response.status());
 
 					final Model model=new LinkedHashModel(response
-							.body(_RDF.Format)
+							.body(RDFFormat.asRDF)
 							.value()
 							.orElseGet(() -> fail("missing RDF body"))
 					);

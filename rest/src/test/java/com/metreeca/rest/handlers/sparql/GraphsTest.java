@@ -21,7 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats._RDF;
+import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Statement;
@@ -94,7 +94,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertIsomorphic(First, response.body(_RDF.Format).value().orElseGet(() -> fail("no RDF body")));
+					assertIsomorphic(First, response.body(RDFFormat.asRDF).value().orElseGet(() -> fail("no RDF body")));
 
 				});
 	}

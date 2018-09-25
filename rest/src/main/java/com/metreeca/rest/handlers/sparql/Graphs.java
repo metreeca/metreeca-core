@@ -23,6 +23,7 @@ import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.*;
+import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -154,16 +155,16 @@ public final class Graphs implements Handler {
 				});
 
 				request.reply(response -> response.status(Response.OK)
-						.body(_RDF.Format, model)
-						.body(_Shape.Format, GraphsShape)
+						.body(RDFFormat.asRDF, model)
+						.body(ShapeFormat.asShape, GraphsShape)
 				).accept(consumer);
 
 			} else {
 
 				final RDFWriterFactory factory=Formats.service(
-						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, accept);
+						RDFWriterRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, accept);
 
-				final RDFFormat format=factory.getRDFFormat();
+				final org.eclipse.rdf4j.rio.RDFFormat format=factory.getRDFFormat();
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
@@ -175,7 +176,7 @@ public final class Graphs implements Handler {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(_Writer.Format, writer -> connection.export(factory.getWriter(writer), context))
+							.body(WriterFormat.asWriter, writer -> connection.export(factory.getWriter(writer), context))
 
 					).accept(consumer);
 				});
@@ -212,11 +213,11 @@ public final class Graphs implements Handler {
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
 				final RDFParserFactory factory=Formats.service(
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
+						RDFParserRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
 				graph.update(connection -> {
-					try (final InputStream input=request.body(_Input.Format).value() // binary format >> no rewriting
+					try (final InputStream input=request.body(InputFormat.asInput).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
 
@@ -353,10 +354,10 @@ public final class Graphs implements Handler {
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
+						RDFParserRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, content);
 
 				graph.update(connection -> {
-					try (final InputStream input=request.body(_Input.Format).value() // binary format >> no rewriting
+					try (final InputStream input=request.body(InputFormat.asInput).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
 
