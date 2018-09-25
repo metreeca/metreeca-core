@@ -19,12 +19,13 @@ package com.metreeca.rest.handlers;
 
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.OutputFormat;
-import com.metreeca.rest.formats.WriterFormat;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static com.metreeca.rest.formats.OutputFormat.asOutput;
+import static com.metreeca.rest.formats.WriterFormat.asWriter;
 
 
 /**
@@ -145,8 +146,8 @@ public final class Worker implements Handler {
 
 	private Responder head(final Request request) {
 		return handle(request.method(Request.GET)).map(response -> response
-				.body(OutputFormat.asOutput, output -> {})
-				.body(WriterFormat.asWriter, writer -> {})
+				.body(asOutput, output -> {})
+				.body(asWriter, writer -> {})
 		);
 	}
 

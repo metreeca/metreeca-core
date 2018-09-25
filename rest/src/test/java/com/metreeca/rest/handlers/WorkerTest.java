@@ -21,10 +21,13 @@ package com.metreeca.rest.handlers;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Responder;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.TextFormat;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.io.*;
+
+import static com.metreeca.rest.formats.OutputFormat.asOutput;
+import static com.metreeca.rest.formats.WriterFormat.asWriter;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -32,7 +35,27 @@ import static com.google.common.truth.Truth.assertThat;
 final class WorkerTest {
 
 	private Responder handler(final Request request) {
-		return request.reply(response -> response.status(Response.OK).body(TextFormat.asText, "body"));
+		return request.reply(response -> response
+
+				.status(Response.OK)
+
+				.body(asWriter, writer -> {
+					try {
+						writer.write("body");
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				})
+
+				.body(asOutput, output -> {
+					try {
+						output.write("body".getBytes());
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				})
+
+		);
 	}
 
 
@@ -68,7 +91,7 @@ final class WorkerTest {
 				});
 	}
 
-	@Test @Disabled void testHandleHEADByDefault() {
+	@Test void testHandleHEADByDefault() {
 		new Worker()
 
 				.get(this::handler)
@@ -79,9 +102,31 @@ final class WorkerTest {
 
 					assertThat(response.status()).isEqualTo(Response.OK);
 
-					// !!! empty body
-					//assertThat(response.body(OutputFormat.Format).value()).isEmpty();
-					//assertThat(response.body(WriterFormat.Format).value()).isEmpty();
+					assertThat(response.body(asOutput).<byte[]>map(
+							v -> {
+
+								final ByteArrayOutputStream output=new ByteArrayOutputStream();
+
+								v.accept(output);
+
+								return output.toByteArray();
+
+							},
+							e -> new byte[0]
+					)).isEmpty();
+
+					assertThat(response.body(asWriter).<String>map(
+							v -> {
+
+								final StringWriter output=new StringWriter();
+
+								v.accept(output);
+
+								return output.toString();
+
+							},
+							e -> ""
+					)).isEmpty();
 
 				});
 	}
