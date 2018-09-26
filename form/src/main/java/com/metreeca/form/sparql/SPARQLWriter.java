@@ -54,10 +54,12 @@ import static java.util.stream.Collectors.toSet;
 
 final class SPARQLWriter {
 
-	private static final Logger logger=Logger.getLogger(SPARQLWriter.class.getName()); // !!! migrate logging to Graph?
+	private static final Logger logger=Logger.getLogger(SPARQLWriter.class.getName()); // !!! migrate logging to Trace?
 
 
-	private final RepositoryConnection connection; // !!! as argument
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final RepositoryConnection connection;
 
 
 	public SPARQLWriter(final RepositoryConnection connection) {
@@ -69,6 +71,8 @@ final class SPARQLWriter {
 		this.connection=connection;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Report process(final Shape shape, final Iterable<Statement> model, final Value... focus) {
 
@@ -92,6 +96,8 @@ final class SPARQLWriter {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private String compile(final SPARQL sparql) {
 
 		final String query=sparql.compile();
@@ -103,9 +109,6 @@ final class SPARQLWriter {
 		return query;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	// support patterns for Custom shape validation // !!! refactor
 
 	private static final java.util.regex.Pattern ValuesPattern=java.util.regex.Pattern.compile(
@@ -115,6 +118,8 @@ final class SPARQLWriter {
 	private static final java.util.regex.Pattern TailPattern=java.util.regex.Pattern.compile(
 			"(.*)(\\s*}\\s*)", java.util.regex.Pattern.DOTALL);
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Validate constraints on a focus value set.

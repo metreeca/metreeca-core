@@ -18,24 +18,22 @@
 package com.metreeca.form.sparql;
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Count;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.*;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.MaxLength;
-import com.metreeca.form.shapes.MinLength;
+import com.metreeca.form.things.Values;
+import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -59,11 +57,12 @@ import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
-import static com.metreeca.form.shifts.Step.step;
+import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Values.integer;
-import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
+import static com.metreeca.form.things.ValuesTest.item;
+import static com.metreeca.form.things.ValuesTest.term;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -88,7 +87,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testEdgesEmptyResultSet() {
 
-		final Map<Value, Collection<Statement>> matches=edges(trait(RDF.TYPE, All.all(RDF.NIL)));
+		final Map<Value, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(RDF.NIL)));
 
 		assertTrue("empty focus", matches.isEmpty());
 
@@ -96,7 +95,7 @@ public class SPARQLReaderTest {
 
 	@Test public void testEdgesEmptyProjection() {
 
-		final Map<Value, Collection<Statement>> matches=edges(clazz(ValuesTest.term("Product")));
+		final Map<Value, Collection<Statement>> matches=edges(clazz(term("Product")));
 
 		assertEquals("matching focus", focus(
 
@@ -110,15 +109,15 @@ public class SPARQLReaderTest {
 
 	@Test public void testEdgesMatching() {
 
-		final Map<Value, Collection<Statement>> matches=edges(trait(RDF.TYPE, All.all(ValuesTest.term("Product"))));
+		final Map<Value, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(term("Product"))));
 
-		Assert.assertEquals("matching focus", focus(
+		assertEquals("matching focus", focus(
 
 				"select * where { ?product a :Product }"
 
-		), Sets.set(matches.keySet()));
+		), set(matches.keySet()));
 
-		ValuesTest.assertIsomorphic("matching model", model(
+		assertIsomorphic("matching model", model(
 
 				"construct where { ?product a :Product }"
 
@@ -131,34 +130,34 @@ public class SPARQLReaderTest {
 		final String query="construct { ?product a :Product }"
 				+" where { ?product a :Product; rdfs:label ?label; :line ?line }";
 
-		final Shape shape=trait(RDF.TYPE, All.all(ValuesTest.term("Product")));
+		final Shape shape=trait(RDF.TYPE, all(term("Product")));
 
 		// convert to lists to assert ordering
 
-		Assert.assertEquals("default (on value)",
+		assertEquals("default (on value)",
 
-				Lists.list(model(query+" order by ?product")),
-				Lists.list(model(edges(shape))));
+				list(model(query+" order by ?product")),
+				list(model(edges(shape))));
 
-		Assert.assertEquals("custom increasing",
+		assertEquals("custom increasing",
 
-				Lists.list(model(query+" order by ?label")),
-				Lists.list(model(edges(shape, increasing(Step.step(RDFS.LABEL))))));
+				list(model(query+" order by ?label")),
+				list(model(edges(shape, increasing(Step.step(RDFS.LABEL))))));
 
-		Assert.assertEquals("custom decreasing",
+		assertEquals("custom decreasing",
 
-				Lists.list(model(query+" order by desc(?label)")),
-				Lists.list(model(edges(shape, decreasing(Step.step(RDFS.LABEL))))));
+				list(model(query+" order by desc(?label)")),
+				list(model(edges(shape, decreasing(Step.step(RDFS.LABEL))))));
 
-		Assert.assertEquals("custom combined",
+		assertEquals("custom combined",
 
-				Lists.list(model(query+" order by ?line ?label")),
-				Lists.list(model(edges(shape, increasing(Step.step(ValuesTest.term("line"))), increasing(Step.step(RDFS.LABEL))))));
+				list(model(query+" order by ?line ?label")),
+				list(model(edges(shape, increasing(Step.step(term("line"))), increasing(Step.step(RDFS.LABEL))))));
 
-		Assert.assertEquals("custom on root",
+		assertEquals("custom on root",
 
-				Lists.list(model(query+" order by desc(?product)")),
-				Lists.list(model(edges(shape, decreasing()))));
+				list(model(query+" order by desc(?product)")),
+				list(model(edges(shape, decreasing()))));
 
 	}
 
@@ -167,11 +166,11 @@ public class SPARQLReaderTest {
 
 	@Test public void testStatsEmptyResultSet() {
 
-		final Map<Value, Collection<Statement>> matches=stats(trait(RDF.TYPE, All.all(RDF.NIL)));
+		final Map<Value, Collection<Statement>> matches=stats(trait(RDF.TYPE, all(RDF.NIL)));
 
-		Assert.assertEquals("meta focus", Sets.set(Form.meta), matches.keySet());
+		assertEquals("meta focus", set(Form.meta), matches.keySet());
 
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("prefix spec: <"+Form.Namespace+"> construct { spec:meta spec:count 0 } where {}"),
 
@@ -180,9 +179,9 @@ public class SPARQLReaderTest {
 
 	@Test public void testStatsEmptyProjection() {
 
-		final Map<Value, Collection<Statement>> matches=stats(clazz(ValuesTest.term("Product")));
+		final Map<Value, Collection<Statement>> matches=stats(clazz(term("Product")));
 
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("prefix spec: <"+Form.Namespace+">\n"
 						+"\n"
@@ -211,9 +210,9 @@ public class SPARQLReaderTest {
 
 	@Test public void testStatsRootConstraints() {
 
-		final Map<Value, Collection<Statement>> matches=stats(All.all(ValuesTest.item("employees/1370")), Step.step(ValuesTest.term("account")));
+		final Map<Value, Collection<Statement>> matches=stats(all(item("employees/1370")), Step.step(term("account")));
 
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("prefix spec: <"+Form.Namespace+">\n"
 						+"\n"
@@ -245,11 +244,11 @@ public class SPARQLReaderTest {
 
 	@Test public void testItemsEmptyResultSet() {
 
-		final Map<Value, Collection<Statement>> matches=items(trait(RDF.TYPE, All.all(RDF.NIL)));
+		final Map<Value, Collection<Statement>> matches=items(trait(RDF.TYPE, all(RDF.NIL)));
 
-		Assert.assertEquals(Sets.set(Form.meta), matches.keySet());
+		assertEquals(set(Form.meta), matches.keySet());
 
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct {} where {}"),
 
@@ -258,9 +257,9 @@ public class SPARQLReaderTest {
 
 	@Test public void testItemsEmptyProjection() {
 
-		final Map<Value, Collection<Statement>> matches=items(clazz(ValuesTest.term("Product")));
+		final Map<Value, Collection<Statement>> matches=items(clazz(term("Product")));
 
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("prefix spec: <"+Form.Namespace+">\n"
 						+"\n"
@@ -285,9 +284,9 @@ public class SPARQLReaderTest {
 
 	@Test public void testItemsRootConstraints() {
 
-		final Map<Value, Collection<Statement>> matches=items(All.all(ValuesTest.item("employees/1370")), Step.step(ValuesTest.term("account")));
+		final Map<Value, Collection<Statement>> matches=items(all(item("employees/1370")), Step.step(term("account")));
 
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("prefix spec: <"+Form.Namespace+">\n"
 						+"\n"
@@ -316,44 +315,44 @@ public class SPARQLReaderTest {
 	//// Constraints ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test public void testClassConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct where { ?product a :Product }"),
 
 				model(edges(and(
-						clazz(ValuesTest.term("Product")),
+						clazz(term("Product")),
 						trait(RDF.TYPE)
 				))));
 	}
 
 	@Test public void testDirectUniversalConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { ?root :product ?product } where {\n"
 						+"\t?root :product ?product, <products/S10_2016>, <products/S24_2022>\n"
 						+"}"),
 
 				model(edges(trait(
-						ValuesTest.term("product"),
-						All.all(ValuesTest.item("products/S10_2016"), ValuesTest.item("products/S24_2022"))
+						term("product"),
+						all(item("products/S10_2016"), item("products/S24_2022"))
 				))));
 	}
 
 	@Test public void testInverseUniversalConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { ?product :customer ?customer } where {\n"
 						+"\t?customer ^:customer ?product, <products/S10_2016>, <products/S24_2022>.\n"
 						+"}"),
 
 				model(edges(trait(
-						Step.step(ValuesTest.term("customer"), true),
-						All.all(ValuesTest.item("products/S10_2016"), ValuesTest.item("products/S24_2022"))
+						Step.step(term("customer"), true),
+						all(item("products/S10_2016"), item("products/S24_2022"))
 				))));
 	}
 
 	@Test public void testRootUniversalConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { ?product a ?type } where {\n"
 						+"\n"
@@ -364,44 +363,44 @@ public class SPARQLReaderTest {
 						+"}"),
 
 				model(edges(and(
-						All.all(ValuesTest.item("products/S18_2248"), ValuesTest.item("products/S24_3969")),
+						all(item("products/S18_2248"), item("products/S24_3969")),
 						trait(RDF.TYPE)
 				))));
 	}
 
 	@Test public void testSingletonUniversalConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { ?customer :product ?product } where {\n"
 						+"\t?customer :product ?product, <products/S10_2016>\n"
 						+"}"),
 
-				model(edges(trait(ValuesTest.term("product"), All.all(ValuesTest.item("products/S10_2016"))))));
+				model(edges(trait(term("product"), all(item("products/S10_2016"))))));
 	}
 
 	@Test public void testExistentialConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { ?item :product ?product } where {\n"
 						+"\t?item :product ?product, ?value filter (?value in (<products/S18_2248>, <products/S24_3969>))\n"
 						+"}"),
 
-				model(edges(trait(ValuesTest.term("product"), any(ValuesTest.item("products/S18_2248"), ValuesTest.item("products/S24_3969"))))));
+				model(edges(trait(term("product"), any(item("products/S18_2248"), item("products/S24_3969"))))));
 	}
 
 	@Test public void testSingletonExistentialConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct where { <products/S18_2248> rdfs:label ?label }"),
 
 				model(edges(and(
-						any(ValuesTest.item("products/S18_2248")),
+						any(item("products/S18_2248")),
 						trait(RDFS.LABEL)
 				))));
 	}
 
 	@Test public void testMinExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { \n"
 						+"\n"
@@ -413,11 +412,11 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				model(edges(trait(ValuesTest.term("sell"), MinExclusive.minExclusive(Values.literal(BigDecimal.valueOf(100.17)))))));
+				model(edges(trait(term("sell"), MinExclusive.minExclusive(Values.literal(BigDecimal.valueOf(100.17)))))));
 	}
 
 	@Test public void testMaxExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { \n"
 						+"\n"
@@ -429,11 +428,11 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				model(edges(trait(ValuesTest.term("sell"), maxExclusive(Values.literal(BigDecimal.valueOf(100.17)))))));
+				model(edges(trait(term("sell"), maxExclusive(Values.literal(BigDecimal.valueOf(100.17)))))));
 	}
 
 	@Test public void testMinInclusiveConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { \n"
 						+"\n"
@@ -445,11 +444,11 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				model(edges(trait(ValuesTest.term("sell"), MinInclusive.minInclusive(Values.literal(BigDecimal.valueOf(100)))))));
+				model(edges(trait(term("sell"), MinInclusive.minInclusive(Values.literal(BigDecimal.valueOf(100)))))));
 	}
 
 	@Test public void testMaxInclusiveConstraint() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { \n"
 						+"\n"
@@ -461,11 +460,11 @@ public class SPARQLReaderTest {
 						+"\t\n"
 						+"}"),
 
-				model(edges(trait(ValuesTest.term("sell"), maxInclusive(Values.literal(BigDecimal.valueOf(100)))))));
+				model(edges(trait(term("sell"), maxInclusive(Values.literal(BigDecimal.valueOf(100)))))));
 	}
 
 	@Test public void testPattern() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { \n"
 						+"\n"
@@ -481,7 +480,7 @@ public class SPARQLReaderTest {
 	}
 
 	@Test public void testLike() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { \n"
 						+"\n"
@@ -497,7 +496,7 @@ public class SPARQLReaderTest {
 	}
 
 	@Test public void testMinLength() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { \n"
 						+"\n"
@@ -509,11 +508,11 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				model(edges(trait(ValuesTest.term("sell"), MinLength.minLength(5)))));
+				model(edges(trait(term("sell"), MinLength.minLength(5)))));
 	}
 
 	@Test public void testMaxLength() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct { \n"
 						+"\n"
@@ -525,14 +524,14 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"}"),
 
-				model(edges(trait(ValuesTest.term("sell"), MaxLength.maxLength(5)))));
+				model(edges(trait(term("sell"), MaxLength.maxLength(5)))));
 	}
 
 
 	//// Derivates /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test public void testDerivateEdge() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct {\n"
 						+"\n"
@@ -545,15 +544,15 @@ public class SPARQLReaderTest {
 						+"}"),
 
 				model(edges(and(
-						trait(RDF.TYPE, All.all(ValuesTest.term("Product"))),
-						virtual(trait(ValuesTest.term("price")), Step.step(ValuesTest.term("sell")))
+						trait(RDF.TYPE, all(term("Product"))),
+						virtual(trait(term("price")), Step.step(term("sell")))
 				))));
 	}
 
 	// !!! nested expressions
 
 	@Ignore @Test public void testDerivateInternalFiltering() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct {\n"
 						+"\n"
@@ -566,16 +565,16 @@ public class SPARQLReaderTest {
 						+"}"),
 
 				model(edges(and(
-						trait(RDF.TYPE, All.all(ValuesTest.term("Product"))),
+						trait(RDF.TYPE, all(term("Product"))),
 						virtual(
-								trait(ValuesTest.term("price"), MinInclusive.minInclusive(Values.literal(Values.integer(200)))),
-								Step.step(ValuesTest.term("sell"))
+								trait(term("price"), MinInclusive.minInclusive(Values.literal(Values.integer(200)))),
+								Step.step(term("sell"))
 						)
 				))));
 	}
 
 	@Ignore @Test public void testDerivateExternalFiltering() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct {\n"
 						+"\n"
@@ -588,19 +587,19 @@ public class SPARQLReaderTest {
 						+"}"),
 
 				model(edges(and(
-						trait(RDF.TYPE, All.all(ValuesTest.term("Product"))),
-						virtual(trait(ValuesTest.term("price")), Step.step(ValuesTest.term("sell"))),
-						trait(ValuesTest.term("price"), MinInclusive.minInclusive(Values.literal(Values.integer(200))))
+						trait(RDF.TYPE, all(term("Product"))),
+						virtual(trait(term("price")), Step.step(term("sell"))),
+						trait(term("price"), MinInclusive.minInclusive(Values.literal(Values.integer(200))))
 				))));
 	}
 
 
 	@Ignore @Test public void testDerivateSorting() {
-		Assert.assertEquals(
+		assertEquals(
 
 				// convert to lists to assert ordering
 
-				Lists.list(model("construct {\n"
+				list(model("construct {\n"
 						+"\n"
 						+"\t?product a :Product; :price ?price.\n"
 						+"\n"
@@ -610,16 +609,16 @@ public class SPARQLReaderTest {
 						+"\n"
 						+"} order by ?price")),
 
-				Lists.list(model(edges(and(
+				list(model(edges(and(
 
-						trait(RDF.TYPE, All.all(ValuesTest.term("Product"))),
-						virtual(trait(ValuesTest.term("price")), Step.step(ValuesTest.term("sell")))
+						trait(RDF.TYPE, all(term("Product"))),
+						virtual(trait(term("price")), Step.step(term("sell")))
 
-				))), increasing(Step.step(ValuesTest.term("price")))));
+				))), increasing(Step.step(term("price")))));
 	}
 
 	@Ignore @Test public void testDerivateStats() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model(stats(trait(RDF.TYPE), Step.step(RDF.TYPE))),
 
@@ -629,7 +628,7 @@ public class SPARQLReaderTest {
 	}
 
 	@Ignore @Test public void testDerivateItems() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model(items(trait(RDF.TYPE), Step.step(RDF.TYPE))),
 
@@ -642,7 +641,7 @@ public class SPARQLReaderTest {
 	//// Aggregates ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test public void testAggregateCount() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct {\n"
 						+"\n"
@@ -659,13 +658,13 @@ public class SPARQLReaderTest {
 						+"}"),
 
 				model(edges(and(
-						trait(RDF.TYPE, All.all(ValuesTest.term("Employee"))),
-						virtual(trait(ValuesTest.term("subordinates")), Count.count(Step.step(ValuesTest.term("subordinate"))))
+						trait(RDF.TYPE, all(term("Employee"))),
+						virtual(trait(term("subordinates")), Count.count(Step.step(term("subordinate"))))
 				))));
 	}
 
 	@Test public void testAggregateCountOnSingleton() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct {\n"
 						+"\n"
@@ -682,8 +681,8 @@ public class SPARQLReaderTest {
 						+"}"),
 
 				model(edges(and(
-						All.all(ValuesTest.item("product-lines/ships")),
-						virtual(trait(ValuesTest.term("size")), Count.count(Step.step(ValuesTest.term("product"))))
+						all(item("product-lines/ships")),
+						virtual(trait(term("size")), Count.count(Step.step(term("product"))))
 				))));
 	}
 
@@ -697,7 +696,7 @@ public class SPARQLReaderTest {
 	//// Layout ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test public void testUseIndependentPatternsAndFilters() {
-		ValuesTest.assertIsomorphic(
+		assertIsomorphic(
 
 				model("construct {\n"
 						+"\n"
@@ -710,8 +709,8 @@ public class SPARQLReaderTest {
 						+"}"),
 
 				model(edges(and(
-						trait(ValuesTest.term("employee")),
-						com.metreeca.form.shapes.Test.test(filter(), trait(ValuesTest.term("employee"), any(ValuesTest.item("employees/1002"), ValuesTest.item("employees/1188"))))
+						trait(term("employee")),
+						test(filter(), trait(term("employee"), any(item("employees/1002"), item("employees/1188"))))
 				))));
 	}
 
@@ -719,22 +718,22 @@ public class SPARQLReaderTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Map<Value, Collection<Statement>> edges(final Shape shape, final Query.Order... orders) {
-		return process(new Edges(shape, Lists.list(orders), 0, 0));
+		return process(new Edges(shape, list(orders), 0, 0));
 	}
 
 	private Map<Value, Collection<Statement>> stats(final Shape shape, final Step... path) {
-		return process(new Stats(shape, Lists.list(path)));
+		return process(new Stats(shape, list(path)));
 	}
 
 	private Map<Value, Collection<Statement>> items(final Shape shape, final Step... path) {
-		return process(new Items(shape, Lists.list(path)));
+		return process(new Items(shape, list(path)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Collection<Statement> model(final Map<Value, Collection<Statement>> matches) {
-		return matches.values().stream().reduce(Lists.list(), (x, y) -> Lists.concat(x, y));
+		return matches.values().stream().reduce(list(), (x, y) -> concat(x, y));
 	}
 
 	private Map<Value, Collection<Statement>> process(final Query query) {

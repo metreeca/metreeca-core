@@ -60,7 +60,9 @@ final class SPARQLReader {
 	private static final Logger logger=Logger.getLogger(SPARQLReader.class.getName()); // !!! migrate logging to Graph?
 
 
-	private final RepositoryConnection connection; // !!! as argument?
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final RepositoryConnection connection;
 
 
 	public SPARQLReader(final RepositoryConnection connection) {
@@ -72,6 +74,8 @@ final class SPARQLReader {
 		this.connection=connection;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Map<Value, Collection<Statement>> process(final Query query) {
 
