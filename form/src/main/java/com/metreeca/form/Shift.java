@@ -38,7 +38,7 @@ public interface Shift {
 		public V visit(final Table table) { return fallback(table); }
 
 
-		protected V fallback(final Shift t) {
+		protected V fallback(final Shift shift) {
 			return null;
 		}
 

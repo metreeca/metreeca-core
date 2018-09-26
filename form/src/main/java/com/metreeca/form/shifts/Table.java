@@ -40,10 +40,12 @@ public final class Table implements Shift {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Map<Trait, Shift> fields;
 
 
-	public Table(final Map<Trait, Shift> fields) {
+	private Table(final Map<Trait, Shift> fields) {
 
 		if ( fields == null ) {
 			throw new NullPointerException("null fields");
@@ -62,10 +64,14 @@ public final class Table implements Shift {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Map<Trait, Shift> getFields() {
 		return unmodifiableMap(fields);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T accept(final Probe<T> probe) {
 
