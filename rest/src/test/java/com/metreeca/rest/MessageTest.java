@@ -136,10 +136,8 @@ final class MessageTest {
 			});
 		}
 
-		@Override public <T extends Message<T>> T set(final T message, final String value) {
-			return message
-					.header("content-type", "text/plain")
-					.body(asTest, value);
+		@Override public <T extends Message<T>> T set(final T message) {
+			return message.header("content-type", "text/plain");
 		}
 
 	}

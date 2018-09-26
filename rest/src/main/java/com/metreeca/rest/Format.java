@@ -44,7 +44,8 @@ public interface Format<V> {
 	 *
 	 * <p>The default implementation reports a failure with the {@link Response#UnsupportedMediaType} status code.</p>
 	 *
-	 * @param message the message the structured body representation associated with this format is to be retrieved from
+	 * @param message the message the structured body representation associated with this format is to be retrieved
+	 *                from
 	 *
 	 * @return a result providing access to the structured body representation associated with this format, if it was
 	 * possible to derive one from {@code message}; a result providing access to the processing failure, otherwise
@@ -66,19 +67,15 @@ public interface Format<V> {
 	 * <p>The default implementation has no effect.</p>
 	 *
 	 * @param message the message to be configured to hold a structured body representation associated with this format
-	 * @param value   the structured body representation {@code message} is to be configured to hold
 	 *
 	 * @return the configured {@code message}
-	 * @throws NullPointerException if either {@code message} or {@code value} is null
+	 *
+	 * @throws NullPointerException if {@code message} is null
 	 */
-	public default <T extends Message<T>> T set(final T message, final V value) {
+	public default <T extends Message<T>> T set(final T message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
 		}
 
 		return message;

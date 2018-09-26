@@ -155,7 +155,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the RDF {@code value} to the
 	 * accepted output stream and sets the {@code Content-Type} header to the MIME type of the selected RDF format.
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final Collection<Statement> value) {
+	@Override public <T extends Message<T>> T set(final T message) {
 
 		final Optional<Response> response=message.as(Response.class);
 

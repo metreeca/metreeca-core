@@ -28,6 +28,7 @@ import java.io.UncheckedIOException;
 
 import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Transputs.data;
+import static com.metreeca.rest.formats.OutputFormat.asOutput;
 
 
 /**
@@ -65,19 +66,19 @@ public final class DataFormat implements Format<byte[]> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the binary {@code value}
-	 * to the output stream supplied by the accepted output stream.
+	 * Configures the {@link OutputFormat} representation of {@code message} to write the binary {@code value} to the
+	 * output stream supplied by the accepted output stream.
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final byte... value) {
-		return message.body(OutputFormat.asOutput, output -> {
+	@Override public <T extends Message<T>> T set(final T message) {
+		return message._body(asOutput, _message -> _message.body(asData).value(data -> value(output -> {
 			try {
 
-				output.write(value);
+				output.write(data);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		});
+		})));
 	}
 
 }

@@ -53,7 +53,7 @@ public abstract class Message<T extends Message<T>> {
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
 	private final Map<Format<?>, Object> cache=new HashMap<>();
-	private final Map<Format<?>, Function<Message<?>, Result<?, Failure>>> bodies=new HashMap<>();
+	private final Map<Format<?>, Function<T, Result<?, Failure>>> bodies=new HashMap<>();
 
 
 	/**
@@ -408,7 +408,7 @@ public abstract class Message<T extends Message<T>> {
 
 		final V cached=(V)cache.get(format);
 
-		return cached != null ? value(cached) : bodies.getOrDefault(format, format::get).apply(this).map(
+		return cached != null ? value(cached) : bodies.getOrDefault(format, format::get).apply(self()).map(
 				v -> {
 					cache.put(format, v);
 					return value((V)v);
@@ -440,13 +440,26 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
+		return _body(format, message -> value(value));
+	}
+
+	public <V> T _body(final Format<V> format, final Function<T, Result<V, Failure>> body) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		if ( body == null ) {
+			throw new NullPointerException("null body");
+		}
+
 		if ( !cache.isEmpty() ) {
 			throw new IllegalStateException("message body representations already retrieved");
 		}
 
-		bodies.put(format, message -> value(value));
+		bodies.put(format, (Function<T, Result<?, Failure>>)(Object)body); // !!! @@@
 
-		return format.set(self(), value);
+		return format.set(self());
 	}
 
 	/**
@@ -463,8 +476,8 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code format} or {@code mapper} is null or if {@code mapper} returns a
-	 *                              null value
+	 * @throws NullPointerException  if either {@code format} or {@code mapper} is null or if {@code mapper} returns a
+	 *                               null value
 	 * @throws IllegalStateException if body representations were already retrieved from this message
 	 */
 	@SuppressWarnings("unchecked")
@@ -484,7 +497,7 @@ public abstract class Message<T extends Message<T>> {
 
 		bodies.compute(format, (_format, getter) -> message -> (
 
-				getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)_format::get
+				getter != null ? getter : (Function<T, Result<?, Failure>>)_format::get
 
 		).apply(message).map(
 

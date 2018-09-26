@@ -87,10 +87,12 @@ public final class JSONFormat implements Format<JsonObject> {
 	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
 	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final JsonObject value) {
+	@Override public <T extends Message<T>> T set(final T message) {
 		return message
 				.header("content-type", MIME)
-				.body(asWriter, writer -> Json.createWriter(writer).write(value));
+				._body(asWriter, _message -> _message.body(asJSON).value(
+						json -> value(writer -> Json.createWriter(writer).write(json))
+				));
 	}
 
 }
