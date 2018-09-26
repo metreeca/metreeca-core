@@ -63,7 +63,7 @@ import static java.util.stream.Collectors.toSet;
 public final class Rewriter implements Wrapper {
 
 	private static Pattern pattern(final String source) {
-		return Pattern.compile("(^|\\b)"+Pattern.quote(source)+"(\\b|$)");
+		return Pattern.compile("\\b"+Pattern.quote(source));
 	}
 
 
