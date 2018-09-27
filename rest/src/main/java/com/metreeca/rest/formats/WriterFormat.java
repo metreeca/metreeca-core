@@ -60,7 +60,7 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final Consumer<Supplier<Writer>> value) {
-		return message.header("Content-Type", v -> v.orElse(MIME));
+		return message.header("~Content-Type", MIME);
 	}
 
 }

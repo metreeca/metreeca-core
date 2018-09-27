@@ -60,7 +60,7 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final Consumer<Supplier<OutputStream>> value) {
-		return message.header("Content-Type", v -> v.orElse(MIME));
+		return message.header("~Content-Type", MIME);
 	}
 
 }
