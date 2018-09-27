@@ -235,7 +235,7 @@ final class RewriterTest {
 
 								final ByteArrayOutputStream buffer=new ByteArrayOutputStream();
 
-								value.accept(buffer);
+								value.accept(() -> buffer);
 
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
 										.named("rewritten response json")

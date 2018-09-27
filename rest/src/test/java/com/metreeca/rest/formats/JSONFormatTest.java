@@ -70,7 +70,7 @@ final class JSONFormatTest {
 				.value(client -> {
 					try (final StringWriter writer=new StringWriter()) {
 
-						client.accept(writer);
+						client.accept(() -> writer);
 
 						return value(writer.toString());
 

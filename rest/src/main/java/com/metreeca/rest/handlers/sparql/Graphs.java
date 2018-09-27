@@ -38,8 +38,7 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -176,7 +175,13 @@ public final class Graphs implements Handler {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(WriterFormat.asWriter, writer -> connection.export(factory.getWriter(writer), context))
+							.body(WriterFormat.asWriter, _target -> {
+								try(final Writer writer=_target.get()) {
+									connection.export(factory.getWriter(writer), context);
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
+								}
+							})
 
 					).accept(consumer);
 				});

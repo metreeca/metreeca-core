@@ -22,13 +22,10 @@ import com.metreeca.rest.Failure;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Transputs.text;
-import static com.metreeca.rest.formats.WriterFormat.asWriter;
 
 
 /**
@@ -69,16 +66,16 @@ public final class TextFormat implements Format<String> {
 	 * Configures the {@link WriterFormat} representation of {@code message} to write the textual {@code value} to the
 	 * writer supplied by the accepted writer.
 	 */
-	@Override public <T extends Message<T>> T set(final T message) {
-		return message._body(asWriter, _message -> _message.body(asText).value(text -> value(writer -> {
-			try {
+	public <T extends Message<T>> T set(final T message, final String value) {
+		return message.body(WriterFormat.asWriter, target -> {
+			try (final Writer writer=target.get()){
 
-				writer.write(text);
+				writer.write(value);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		})));
+		});
 	}
 
 }

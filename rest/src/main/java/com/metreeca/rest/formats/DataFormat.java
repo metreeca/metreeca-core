@@ -22,13 +22,10 @@ import com.metreeca.rest.Failure;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Transputs.data;
-import static com.metreeca.rest.formats.OutputFormat.asOutput;
 
 
 /**
@@ -69,16 +66,16 @@ public final class DataFormat implements Format<byte[]> {
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the binary {@code value} to the
 	 * output stream supplied by the accepted output stream.
 	 */
-	@Override public <T extends Message<T>> T set(final T message) {
-		return message._body(asOutput, _message -> _message.body(asData).value(data -> value(output -> {
-			try {
+	public <T extends Message<T>> T set(final T message, final byte... value) {
+		return message.body(OutputFormat.asOutput, target -> {
+			try (final OutputStream output=target.get()) {
 
-				output.write(data);
+				output.write(value);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		})));
+		});
 	}
 
 }
