@@ -17,14 +17,14 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.formats.JSONFormat;
-
 import java.util.Optional;
 import java.util.function.Function;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
+
+import static com.metreeca.rest.formats.JSONFormat.json;
 
 
 /**
@@ -201,7 +201,8 @@ public final class Failure implements Function<Response, Response> {
 		return response
 				.status(status)
 				.cause(cause)
-				.body(JSONFormat.asJSON, builder.build());
+				.body(json())
+				.set(builder.build());
 
 	}
 

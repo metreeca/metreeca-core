@@ -20,7 +20,6 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 
@@ -38,6 +37,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.metreeca.rest.Handler.refused;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;
@@ -139,7 +139,7 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, target -> {
+							.body(output()).set(target -> {
 								try (final OutputStream output=target.get()) {
 
 									factory.getWriter(output).handleBoolean(result);
@@ -161,7 +161,7 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, target -> {
+							.body(output()).set(target -> {
 								try (final OutputStream output=target.get()) {
 
 									final TupleQueryResultWriter writer=factory.getWriter(output);
@@ -191,7 +191,7 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, target -> {
+							.body(output()).set(target -> {
 								try (final OutputStream output=target.get()) {
 
 									final RDFWriter writer=factory.getWriter(output);
@@ -237,7 +237,7 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, target -> {
+							.body(output()).set(target -> {
 								try (final OutputStream output=target.get()) {
 									factory.getWriter(output).handleBoolean(true);
 								} catch ( final IOException e ) {

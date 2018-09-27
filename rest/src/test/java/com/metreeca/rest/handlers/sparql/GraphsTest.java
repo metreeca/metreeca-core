@@ -21,7 +21,6 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Statement;
@@ -37,6 +36,7 @@ import java.util.stream.Collectors;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.rest.RestTest.dataset;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -94,7 +94,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertIsomorphic(First, response.body(RDFFormat.asRDF).value().orElseGet(() -> fail("no RDF body")));
+					assertIsomorphic(First, response.body(rdf()).get().value().orElseGet(() -> fail("no RDF body")));
 
 				});
 	}

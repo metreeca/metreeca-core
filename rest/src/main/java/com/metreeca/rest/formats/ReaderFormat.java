@@ -18,31 +18,42 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Result;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
+import com.metreeca.rest.*;
 
 import java.io.Reader;
 import java.util.function.Supplier;
 
+import static com.metreeca.form.Result.error;
+
 
 /**
- * Binary inbound raw body format.
+ * Textual input body format.
  */
 public final class ReaderFormat implements Format<Supplier<Reader>> {
 
 	/**
-	 * The singleton binary inbound raw body format.
+	 * Creates a textual input body format.
+	 *
+	 * @return a new textual input body format
 	 */
-	public static final ReaderFormat asReader=new ReaderFormat();
+	public static ReaderFormat reader() {
+		return new ReaderFormat();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private ReaderFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return error(new Failure().status(Response.UnsupportedMediaType));
 	}
 
-	private ReaderFormat() {} // singleton
+	@Override public <T extends Message<T>> T set(final T message) {
+		return message;
+	}
 
 }

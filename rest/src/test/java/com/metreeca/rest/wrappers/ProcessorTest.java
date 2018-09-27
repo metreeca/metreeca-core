@@ -32,7 +32,7 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
-import static com.metreeca.rest.formats.RDFFormat.asRDF;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.Assert.fail;
@@ -45,7 +45,7 @@ final class ProcessorTest {
 
 	private Handler echo() {
 		return request -> request.reply(response ->
-				request.body(asRDF).map(v -> response.body(asRDF, v), e -> response).status(Response.OK)
+				request.body(rdf()).get().map(v -> response.body(rdf()).set(v), e -> response).status(Response.OK)
 		);
 	}
 
@@ -85,10 +85,10 @@ final class ProcessorTest {
 
 				.handle(new Request()
 
-						.body(asRDF, emptyList()))
+						.body(rdf()).set(emptyList()))
 
 				.accept(response -> {
-					response.body(asRDF).handle(
+					response.body(rdf()).get().handle(
 							model -> assertSubset("items retrieved", asList(
 									statement(response.item(), RDF.VALUE, RDF.FIRST),
 									statement(response.item(), RDF.VALUE, RDF.REST)
@@ -110,7 +110,7 @@ final class ProcessorTest {
 
 				.handle(new Request()) // no RDF payload
 
-				.accept(response -> response.body(asRDF).handle(
+				.accept(response -> response.body(rdf()).get().handle(
 						model -> fail("unexpected RDF payload"),
 						error -> {}
 				));
@@ -131,10 +131,10 @@ final class ProcessorTest {
 
 				.handle(new Request()
 
-						.body(asRDF, emptyList()))
+						.body(rdf()).set(emptyList()))
 
 				.accept(response -> {
-					response.body(asRDF).handle(
+					response.body(rdf()).get().handle(
 							model -> assertSubset("items retrieved", asList(
 									statement(response.item(), RDF.VALUE, RDF.FIRST),
 									statement(response.item(), RDF.VALUE, RDF.REST)
@@ -156,7 +156,7 @@ final class ProcessorTest {
 
 				.handle(new Request()) // no RDF payload
 
-				.accept(response -> response.body(asRDF).handle(
+				.accept(response -> response.body(rdf()).get().handle(
 						model -> fail("unexpected RDF payload"),
 						error -> {}
 				));

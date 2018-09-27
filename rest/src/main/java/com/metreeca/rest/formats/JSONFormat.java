@@ -28,8 +28,8 @@ import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.form.Result.error;
 import static com.metreeca.form.Result.value;
-import static com.metreeca.rest.formats.ReaderFormat.asReader;
-import static com.metreeca.rest.formats.WriterFormat.asWriter;
+import static com.metreeca.rest.formats.ReaderFormat.reader;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 
 
 /**
@@ -44,15 +44,15 @@ public final class JSONFormat implements Format<JsonObject> {
 	 */
 	public static final String MIME="application/json";
 
-	/**
-	 * The singleton JSON body format.
-	 */
-	public static final Format<JsonObject> asJSON=new JSONFormat();
+
+	public static JSONFormat json() {
+		return new JSONFormat();
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSONFormat() {} // singleton
+	private JSONFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ public final class JSONFormat implements Format<JsonObject> {
 	 * to {@value #MIME}; an empty optional, otherwise
 	 */
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
-		return message.headers("content-type").contains(MIME) ? message.body(asReader).value(source -> {
+		return message.headers("content-type").contains(MIME) ? message.body(reader()).get().value(source -> {
 			try (final Reader reader=source.get()) {
 
 				return value(Json.createReader(reader).readObject());
@@ -85,18 +85,18 @@ public final class JSONFormat implements Format<JsonObject> {
 	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
 	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
 	 */
-	public <T extends Message<T>> T set(final T message, final JsonObject value) {
+	@Override public <T extends Message<T>> T set(final T message) {
 		return message
 				.header("content-type", MIME)
-				.body(asWriter, target -> {
+				.body(writer()).chain(consumer -> message.body(json()).get().value(json -> value(target -> {
 					try (final Writer writer=target.get()) {
 
-						Json.createWriter(writer).write(value);
+						Json.createWriter(writer).write(json);
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-				});
+				})));
 	}
 
 }

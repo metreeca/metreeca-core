@@ -33,7 +33,7 @@ import java.util.function.BiFunction;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.time;
-import static com.metreeca.rest.formats.RDFFormat.asRDF;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Objects.requireNonNull;
@@ -61,7 +61,7 @@ public final class Processor implements Wrapper {
 	 * Inserts a pre-processing RDF filter.
 	 *
 	 * <p>The filter is chained after previously inserted pre-processing filters and executed on incoming requests and
-	 * their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise./p>
+	 * their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
 	 * @param filter the RDF pre-processing filter to be inserted; takes as argument an incoming request and its
 	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -86,7 +86,7 @@ public final class Processor implements Wrapper {
 	 *
 	 * <p>The filter is chained after previously inserted post-processing filters and executed on {@linkplain
 	 * Response#success() successful} outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is
-	 * present, or ignored, otherwise./p>
+	 * present, or ignored, otherwise.</p>
 	 *
 	 * @param filter the RDF post-processing filter to be inserted; takes as argument a successful outgoing response and
 	 *               its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -200,7 +200,7 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-		return message.filter(asRDF, statements ->
+		return message.body(rdf()).map(statements ->
 				(filter == null) ? statements : filter.apply(message, new LinkedHashModel(statements)));
 	}
 

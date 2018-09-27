@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.sys.Trace;
 
@@ -27,6 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
@@ -160,7 +160,7 @@ public class Proxy implements Handler {
 
 		}
 
-		return response.body(OutputFormat.asOutput, target -> {
+		return response.body(output()).set(target -> {
 			try (
 					final OutputStream output=target.get();
 					final InputStream input=connect(connection)

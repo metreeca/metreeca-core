@@ -23,31 +23,42 @@ import com.metreeca.form.Result;
 /**
  * Message body format.
  *
- * <p>Manages the conversion between raw and structured  message body representations.</p>
+ * <p>Manages the conversion between raw and structured message bodies.</p>
  *
- * @param <V> the type of the structured message body representation managed by the format
+ * @param <V> the type of the structured message body managed by the format
  */
-@FunctionalInterface public interface Format<V> {
+public interface Format<V> {
 
 	/**
-	 * Retrieves a structured body representation from a message.
+	 * Retrieves a structured body from a message.
 	 *
 	 * <p>Processing failure should be reported using the following HTTP status codes:</p>
 	 *
 	 * <ul>
-	 * <li>{@link Response#UnsupportedMediaType} for missing representations;</li>
-	 * <li>{@link Response#BadRequest} for malformed representations, unless a more specific status code is
-	 * available.</li>
+	 * <li>{@link Response#UnsupportedMediaType} for missing bodies;</li>
+	 * <li>{@link Response#BadRequest} for malformed bodies, unless a more specific status code is available.</li>
 	 * </ul>
 	 *
-	 * @param message the message the structured body representation managed by this format is to be retrieved
-	 *                from
+	 * @param message the message the structured body managed by this format is to be retrieved from
 	 *
-	 * @return a result providing access to the structured body representation managed by this format, if it was
-	 * possible to derive one from {@code message}; a result providing access to the processing failure, otherwise
+	 * @return a result providing access to the structured body managed by this format, if it was possible to derive one
+	 * from {@code message}; a result providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
 	public Result<V, Failure> get(final Message<?> message);
+
+	/**
+	 * Configures a message to hold a structured body.
+	 *
+	 * <p>The default implementation has no effect.</p>
+	 *
+	 * @param message the message to be configured to hold a structured body managed by this format
+	 *
+	 * @return the configured {@code message}
+	 *
+	 * @throws NullPointerException if {@code message} is null
+	 */
+	public <T extends Message<T>> T set(final T message);
 
 }

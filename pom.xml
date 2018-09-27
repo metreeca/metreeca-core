@@ -294,7 +294,7 @@
 								</group>
 								<group>
 									<title>REST API Framework</title>
-									<packages>com.metreeca.next*</packages>
+									<packages>com.metreeca.rest*</packages>
 								</group>
 								<group>
 									<title>Tooling Framework</title>

@@ -26,12 +26,12 @@ import com.metreeca.tray.rdf.Graph;
  * <p>Executes the wrapped handler inside a SPARQL transaction on the connection provided by the shared {@linkplain
  * Graph#Factory graph} tool.</p>
  */
-public final class _Transactor  {
+public final class _Transactor {
 
-//if ( !transactional(connection) && !request.role(Form.root) ) { // !!! preserver test !!!
-//
-//		refused(request, response);
-//
-//	}
+	//if ( !transactional(connection) && !request.role(Form.root) ) { // !!! preserver test !!!
+	//
+	//		refused(request, response);
+	//
+	//	}
 
 }

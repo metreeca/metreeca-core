@@ -17,10 +17,7 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
 import org.junit.jupiter.api.Test;

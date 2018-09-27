@@ -24,6 +24,7 @@ import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -43,10 +44,9 @@ import static com.metreeca.form.things.Transputs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
-import static com.metreeca.rest.formats.InputFormat.asInput;
-import static com.metreeca.rest.formats.OutputFormat.asOutput;
-import static com.metreeca.rest.formats.RDFFormat.asRDF;
-import static com.metreeca.rest.formats.ShapeFormat.asShape;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
@@ -166,14 +166,14 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
-					request.body(asRDF).handle(
+					request.body(rdf()).get().handle(
 							model -> assertIsomorphic("request rdf rewritten",
 									singleton(internal("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
 					);
 
 					return request.reply(response -> response.status(Response.OK)
-							.body(asRDF, singleton(internal("s", "p", "o"))));
+							.body(rdf()).set(singleton(internal("s", "p", "o"))));
 				}))
 
 				.handle(new Request()
@@ -181,11 +181,11 @@ final class RewriterTest {
 						.base(External)
 						.path("/s")
 
-						.body(asRDF, singleton(external("s", "p", "o"))))
+						.body(rdf()).set(singleton(external("s", "p", "o"))))
 
 				.accept(response -> {
 
-					response.body(asRDF).handle(
+					response.body(rdf()).get().handle(
 							model -> assertIsomorphic("response rdf rewritten",
 									singleton(external("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
@@ -199,15 +199,15 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
-					request.body(asRDF).handle(
+					request.body(rdf()).get().handle(
 							model -> assertIsomorphic("request json rewritten",
 									singleton(internal("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
 					);
 
 					return request.reply(response -> response.status(Response.OK)
-							.body(asShape, TestShape)
-							.body(asRDF, singleton(internal("s", "p", "o"))));
+							.body(ShapeFormat.shape()).set(TestShape)
+							.body(rdf()).set(singleton(internal("s", "p", "o"))));
 				}))
 
 				.handle(new Request()
@@ -218,9 +218,9 @@ final class RewriterTest {
 						.header("content-type", "application/json")
 						.header("accept", "application/json")
 
-						.body(asShape, TestShape)
+						.body(ShapeFormat.shape()).set(TestShape)
 
-						.body(asInput, () -> new ByteArrayInputStream(
+						.body(input()).set(() -> new ByteArrayInputStream(
 								Json.createObjectBuilder()
 										.add("p", "o")
 										.build()
@@ -230,7 +230,7 @@ final class RewriterTest {
 
 				.accept(response -> {
 
-					response.body(asOutput).handle(
+					response.body(output()).get().handle(
 							value -> {
 
 								final ByteArrayOutputStream buffer=new ByteArrayOutputStream();

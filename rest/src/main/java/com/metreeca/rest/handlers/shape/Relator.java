@@ -47,6 +47,7 @@ import static com.metreeca.form.sparql.SPARQLEngine.contains;
 import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.unauthorized;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -79,9 +80,9 @@ import static java.util.Collections.singleton;
  *
  * <dt>{@link RDFFormat}</dt>
  *
- * <dd>If the request includes a {@link ShapeFormat} body representation, the response includes the {@linkplain RDFFormat RDF
- * description} of the request {@linkplain Request#item() focus item}, as defined by the associated linked data
- * {@linkplain Shape shape} redacted taking into account the user {@linkplain Request#roles() roles} of the
+ * <dd>If the request includes a {@link ShapeFormat} body representation, the response includes the {@linkplain
+ * RDFFormat RDF description} of the request {@linkplain Request#item() focus item}, as defined by the associated linked
+ * data {@linkplain Shape shape} redacted taking into account the user {@linkplain Request#roles() roles} of the
  * request.</dd>
  *
  * <dd>Otherwise, the  response includes the symmetric concise bounded description of the request focus item, extended
@@ -115,7 +116,7 @@ public final class Relator implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@Override public Responder handle(final Request request) {
-		return request.body(ShapeFormat.asShape).map(
+		return request.body(ShapeFormat.shape()).get().map(
 				shape -> {
 
 					final Shape redacted=shape
@@ -167,19 +168,19 @@ public final class Relator implements Handler {
 					return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
 
 						@Override public Response visit(final Edges edges) {
-							return r.body(ShapeFormat.asShape, edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
-									.body(RDFFormat.asRDF, model);
+							return r.body(ShapeFormat.shape()).set(edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
+									.body(rdf()).set(model);
 
 						}
 
 						@Override public Response visit(final Stats stats) {
-							return r.body(ShapeFormat.asShape, StatsShape)
-									.body(RDFFormat.asRDF, rewrite(model, Form.meta, focus));
+							return r.body(ShapeFormat.shape()).set(StatsShape)
+									.body(rdf()).set(rewrite(model, Form.meta, focus));
 						}
 
 						@Override public Response visit(final Items items) {
-							return r.body(ShapeFormat.asShape, ItemsShape)
-									.body(RDFFormat.asRDF, rewrite(model, Form.meta, focus));
+							return r.body(ShapeFormat.shape()).set(ItemsShape)
+									.body(rdf()).set(rewrite(model, Form.meta, focus));
 						}
 
 					}));
@@ -199,7 +200,7 @@ public final class Relator implements Handler {
 			request.reply(response -> model.isEmpty()
 
 					? response.status(Response.NotFound)
-					: response.status(Response.OK).body(RDFFormat.asRDF, model)
+					: response.status(Response.OK).body(rdf()).set(model)
 
 			).accept(consumer);
 

@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
-import static com.metreeca.rest.formats.OutputFormat.asOutput;
-import static com.metreeca.rest.formats.WriterFormat.asWriter;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -39,16 +39,16 @@ final class WorkerTest {
 
 				.status(Response.OK)
 
-				.body(asWriter, target -> {
-					try (final Writer writer=target.get()){
+				.body(writer()).set(target -> {
+					try (final Writer writer=target.get()) {
 						writer.write("body");
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
 				})
 
-				.body(asOutput, target -> {
-					try (final OutputStream output=target.get()){
+				.body(output()).set(target -> {
+					try (final OutputStream output=target.get()) {
 						output.write("body".getBytes());
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
@@ -102,7 +102,7 @@ final class WorkerTest {
 
 					assertThat(response.status()).isEqualTo(Response.OK);
 
-					assertThat(response.body(asOutput).<byte[]>map(
+					assertThat(response.body(output()).get().<byte[]>map(
 							v -> {
 
 								final ByteArrayOutputStream output=new ByteArrayOutputStream();
@@ -115,7 +115,7 @@ final class WorkerTest {
 							e -> new byte[0]
 					)).isEmpty();
 
-					assertThat(response.body(asWriter).<String>map(
+					assertThat(response.body(writer()).get().<String>map(
 							v -> {
 
 								final StringWriter output=new StringWriter();

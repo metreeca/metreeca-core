@@ -18,7 +18,6 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.Result;
-import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.rest.formats.TextFormat;
 
 import org.junit.jupiter.api.Test;
@@ -29,11 +28,13 @@ import java.util.function.Function;
 import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Transputs.text;
+import static com.metreeca.rest.formats.ReaderFormat.reader;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import static java.util.Collections.emptySet;
+
 
 final class MessageTest {
 
@@ -107,22 +108,22 @@ final class MessageTest {
 
 	@Test void testBodyCaching() {
 
-		final TestMessage message=new TestMessage().body(ReaderFormat.asReader, () -> new StringReader("test"));
+		final TestMessage message=new TestMessage().body(reader()).set(() -> new StringReader("test"));
 
 		final Function<Message<?>, String> accessor=m -> m
-				.body(TextFormat.asText).map(value -> value, error -> fail("missing test body"));
+				.body(TextFormat.text()).get().map(value -> value, error -> fail("missing test body"));
 
 		assertSame(accessor.apply(message), accessor.apply(message));
 	}
 
-	@Test void testBodyOnDemandFiltering()  {
+	@Test void testBodyOnDemandFiltering() {
 
 		final Message<?> message=new TestMessage()
-				.filter(TestFormat.asTest, string -> string+"!")
-				.body(ReaderFormat.asReader, () -> new StringReader("test"));
+				.body(new TestFormat()).map(string -> string+"!")
+				.body(reader()).set(() -> new StringReader("test"));
 
 		assertEquals("test!",
-				message.body(TestFormat.asTest).map(value -> value, error -> fail("missing test body")));
+				message.body(new TestFormat()).get().map(value -> value, error -> fail("missing test body")));
 
 	}
 
@@ -137,10 +138,8 @@ final class MessageTest {
 
 	private static final class TestFormat implements Format<String> {
 
-		private static final Format<String> asTest=new TestFormat();
-
 		@Override public Result<String, Failure> get(final Message<?> message) {
-			return message.body(ReaderFormat.asReader).value(supplier -> {
+			return message.body(reader()).get().value(supplier -> {
 				try (final Reader reader=supplier.get()) {
 					return value(text(reader));
 				} catch ( final IOException e ) {
@@ -149,7 +148,7 @@ final class MessageTest {
 			});
 		}
 
-		public <T extends Message<T>> T set(final T message) {
+		@Override public <T extends Message<T>> T set(final T message) {
 			return message.header("content-type", "text/plain");
 		}
 

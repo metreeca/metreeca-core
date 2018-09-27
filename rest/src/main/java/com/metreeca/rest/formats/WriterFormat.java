@@ -30,7 +30,7 @@ import static com.metreeca.form.Result.value;
 
 
 /**
- * Textual outbound raw body format.
+ * Textual output body format.
  */
 public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 
@@ -40,18 +40,25 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 	private static final String MIME="text/plain";
 
 	/**
-	 * The singleton textual outbound raw body format.
+	 * Creates a textual output body format.
+	 *
+	 * @return a new textual output body format
 	 */
-	public static final WriterFormat asWriter=new WriterFormat();
+	public static WriterFormat writer() {
+		return new WriterFormat();
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private WriterFormat() {} // singleton
+	private WriterFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * @return a result providing access to a consumer taking no action on the supplied writer provider
+	 */
 	@Override public Result<Consumer<Supplier<Writer>>, Failure> get(final Message<?> message) {
 		return value(target -> {});
 	}
@@ -59,7 +66,7 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 	/**
 	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
 	 */
-	public <T extends Message<T>> T set(final T message) {
+	@Override public <T extends Message<T>> T set(final T message) {
 		return message.header("~Content-Type", MIME);
 	}
 

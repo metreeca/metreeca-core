@@ -36,10 +36,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.things.ValuesTest.assertSubset;
-import static com.metreeca.form.things.ValuesTest.construct;
-import static com.metreeca.form.things.ValuesTest.small;
-import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.form.things.ValuesTest.*;
 
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +60,7 @@ final class RelatorTest {
 	private Request shaped() {
 		return direct()
 				.roles(ValuesTest.Manager)
-				.body(ShapeFormat.asShape, ValuesTest.Employee);
+				.body(ShapeFormat.shape()).set(ValuesTest.Employee);
 	}
 
 
@@ -78,8 +75,8 @@ final class RelatorTest {
 
 				.accept(response -> {
 
-					final Optional<Model> rdfBody=response.body(RDFFormat.asRDF).value().map(LinkedHashModel::new);
-					final Optional<Shape> shapeBody=response.body(ShapeFormat.asShape).value();
+					final Optional<Model> rdfBody=response.body(RDFFormat.rdf()).get().value().map(LinkedHashModel::new);
+					final Optional<Shape> shapeBody=response.body(ShapeFormat.shape()).get().value();
 
 					assertFalse(shapeBody.isPresent(), "response shape body omitted");
 					assertTrue(rdfBody.isPresent(), "response RDF body included");
@@ -121,7 +118,7 @@ final class RelatorTest {
 					final Model expected=construct(connection,
 							"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }");
 
-					response.body(RDFFormat.asRDF).handle(
+					response.body(RDFFormat.rdf()).get().handle(
 							model -> assertSubset("items retrieved", expected, model),
 							error -> fail("missing RDF body")
 					);
@@ -145,7 +142,7 @@ final class RelatorTest {
 					final Model expected=construct(connection,
 							"construct where { <employees/1370> a :Employee; :code ?c }");
 
-					response.body(RDFFormat.asRDF).handle(
+					response.body(RDFFormat.rdf()).get().handle(
 							model -> {
 								assertSubset("items retrieved", expected, model);
 								assertTrue(
@@ -167,7 +164,7 @@ final class RelatorTest {
 
 				.get(Relator::new)
 
-				.handle(shaped().body(ShapeFormat.asShape, or()))
+				.handle(shaped().body(ShapeFormat.shape()).set(or()))
 
 				.accept(response -> assertEquals(Response.Forbidden, response.status()));
 	}

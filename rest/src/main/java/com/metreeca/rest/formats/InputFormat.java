@@ -18,32 +18,46 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Result;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
+import com.metreeca.rest.*;
 
 import java.io.InputStream;
 import java.util.function.Supplier;
 
+import static com.metreeca.form.Result.error;
+
 
 /**
- * Binary inbound raw body format.
+ * Raw binary input body format.
  */
 public final class InputFormat implements Format<Supplier<InputStream>> {
 
 	/**
-	 * The singleton binary inbound raw body format.
+	 * Creates a raw binary input body format.
+	 *
+	 * @return a new raw binary input body format
 	 */
-	public static final InputFormat asInput=new InputFormat();
+	public static InputFormat input() {
+		return new InputFormat();
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private InputFormat() {}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * @return a result providing access to the raw binary input body of {@code message}, if one was explicitly set for
+	 * {@code message}; an error describing the processing failure, otherwise
+	 */
 	@Override public Result<Supplier<InputStream>, Failure> get(final Message<?> message) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return error(new Failure().status(Response.UnsupportedMediaType));
 	}
 
-	private InputFormat() {} // singleton
+	@Override public <T extends Message<T>> T set(final T message) {
+		return message;
+	}
 
 }

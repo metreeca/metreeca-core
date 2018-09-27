@@ -24,8 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.metreeca.rest.formats.OutputFormat.asOutput;
-import static com.metreeca.rest.formats.WriterFormat.asWriter;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 
 
 /**
@@ -146,8 +146,8 @@ public final class Worker implements Handler {
 
 	private Responder head(final Request request) {
 		return handle(request.method(Request.GET)).map(response -> response
-				.body(asOutput, output -> {})
-				.body(asWriter, writer -> {})
+				.body(output()).set(target -> {})
+				.body(writer()).set(target -> {})
 		);
 	}
 

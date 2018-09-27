@@ -60,8 +60,8 @@ import static com.metreeca.form.shifts.Table.table;
 import static com.metreeca.form.things.Transputs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.rest.formats.RDFFormat.asRDF;
-import static com.metreeca.rest.formats.ShapeFormat.asShape;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -170,8 +170,8 @@ public final class Rewriter implements Wrapper {
 				.parameters(decoded.rewrite(request.parameters()))
 				.headers(decoded.rewrite(request.headers()))
 
-				.filter(asShape, decoded::rewrite)
-				.filter(asRDF, model -> decoded.rewrite(model, decoded::rewrite));
+				.body(shape()).map(decoded::rewrite)
+				.body(rdf()).map(model -> decoded.rewrite(model, decoded::rewrite));
 	}
 
 	private Response rewrite(final String source, final String target, final Response response) {
@@ -186,8 +186,8 @@ public final class Rewriter implements Wrapper {
 
 				.headers(decoded.rewrite(response.headers()))
 
-				.filter(asShape, decoded::rewrite)
-				.filter(asRDF, model -> decoded.rewrite(model, decoded::rewrite));
+				.body(shape()).map(decoded::rewrite)
+				.body(rdf()).map(model -> decoded.rewrite(model, decoded::rewrite));
 	}
 
 

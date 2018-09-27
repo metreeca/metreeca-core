@@ -30,7 +30,7 @@ import static com.metreeca.form.Result.value;
 
 
 /**
- * Binary outbound raw body format.
+ * Raw binary output body format.
  */
 public final class OutputFormat implements Format<Consumer<Supplier<OutputStream>>> {
 
@@ -39,19 +39,27 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 	 */
 	public static final String MIME="application/octet-stream";
 
+
 	/**
-	 * The singleton binary inbound raw body format.
+	 * Creates a raw binary output body format.
+	 *
+	 * @return a new raw binary output body format
 	 */
-	public static final OutputFormat asOutput=new OutputFormat();
+	public static OutputFormat output() {
+		return new OutputFormat();
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private OutputFormat() {} // singleton
+	private OutputFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * @return a result providing access to a consumer taking no action on the supplied output stream provider
+	 */
 	@Override public Result<Consumer<Supplier<OutputStream>>, Failure> get(final Message<?> message) {
 		return value(target -> {});
 	}
@@ -59,7 +67,7 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 	/**
 	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
 	 */
-	public <T extends Message<T>> T set(final T message, final Consumer<Supplier<OutputStream>> value) {
+	@Override public <T extends Message<T>> T set(final T message) {
 		return message.header("~Content-Type", MIME);
 	}
 

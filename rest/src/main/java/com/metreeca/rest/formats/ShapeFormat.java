@@ -19,9 +19,9 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.form.Result;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
+import com.metreeca.rest.*;
+
+import static com.metreeca.form.Result.error;
 
 
 /**
@@ -31,15 +31,24 @@ import com.metreeca.rest.Message;
  */
 public final class ShapeFormat implements Format<Shape> {
 
-	public static final ShapeFormat asShape=new ShapeFormat();
+	public static ShapeFormat shape() {
+		return new ShapeFormat();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private ShapeFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Result<Shape, Failure> get(final Message<?> message) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return error(new Failure().status(Response.UnsupportedMediaType));
 	}
 
-	private ShapeFormat() {} // singleton
+	@Override public <T extends Message<T>> T set(final T message) {
+		return message;
+	}
 
 }

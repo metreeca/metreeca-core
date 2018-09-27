@@ -38,7 +38,7 @@ import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.rest.formats.RDFFormat.asRDF;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 
 /**
@@ -177,7 +177,7 @@ public final class Driver implements Wrapper {
 
 					return response.status(Response.OK)
 							// !!! .body(asShape, ___) provide (recursive) shape for task shapes ;)
-							.body(asRDF, model);
+							.body(rdf()).set(model);
 
 				})) :
 
@@ -186,7 +186,7 @@ public final class Driver implements Wrapper {
 
 
 	private Request before(final Request request) {
-		return shape == null ? request : request.body(ShapeFormat.asShape, shape);
+		return shape == null ? request : request.body(ShapeFormat.shape()).set(shape);
 	}
 
 	private Response after(final Response response) {
