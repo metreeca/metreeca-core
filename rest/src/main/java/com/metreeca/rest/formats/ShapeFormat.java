@@ -17,8 +17,12 @@
 
 package com.metreeca.rest.formats;
 
+import com.metreeca.form.Result;
 import com.metreeca.form.Shape;
+import com.metreeca.rest.Failure;
 import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
+
 
 /**
  * Shape body format.
@@ -31,6 +35,10 @@ public final class ShapeFormat implements Format<Shape> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Result<Shape, Failure> get(final Message<?> message) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
 
 	private ShapeFormat() {} // singleton
 

@@ -17,7 +17,10 @@
 
 package com.metreeca.rest.formats;
 
+import com.metreeca.form.Result;
+import com.metreeca.rest.Failure;
 import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
 
 import java.io.InputStream;
 import java.util.function.Supplier;
@@ -35,6 +38,11 @@ public final class InputFormat implements Format<Supplier<InputStream>> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	@Override public Result<Supplier<InputStream>, Failure> get(final Message<?> message) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
 
 	private InputFormat() {} // singleton
 

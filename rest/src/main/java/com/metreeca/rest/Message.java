@@ -52,7 +52,7 @@ public abstract class Message<T extends Message<T>> {
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
 	private final Map<Format<?>, Object> cache=new HashMap<>();
-	private final Map<Format<?>, Function<T, Result<?, Failure>>> bodies=new HashMap<>();
+	private final Map<Format<?>, Format<?>> bodies=new HashMap<>();
 
 
 	/**
@@ -387,7 +387,7 @@ public abstract class Message<T extends Message<T>> {
 
 		final V cached=(V)cache.get(format);
 
-		return cached != null ? value(cached) : bodies.getOrDefault(format, format::get).apply(self()).map(
+		return cached != null ? value(cached) : bodies.getOrDefault(format, format).get(self()).map(
 				v -> {
 					cache.put(format, v);
 					return value((V)v);
@@ -435,9 +435,9 @@ public abstract class Message<T extends Message<T>> {
 			throw new IllegalStateException("message body representations already retrieved");
 		}
 
-		bodies.put(format, (Function<T, Result<?, Failure>>)(Object)body); // !!! @@@
+		bodies.put(format, (Format<?>)body);
 
-		return format.set(self());
+		return self();
 	}
 
 	/**
@@ -473,14 +473,9 @@ public abstract class Message<T extends Message<T>> {
 			throw new IllegalStateException("message body representations already retrieved");
 		}
 
-		bodies.compute(format, (_format, getter) -> message -> (
+		bodies.compute(format, (k, v) -> message -> (v != null ? v : k).get(message).value(
 
-				getter != null ? getter : (Function<T, Result<?, Failure>>)_format::get
-
-		).apply(message).map(
-
-				v -> value(requireNonNull(mapper.apply((V)v), "null mapper return value")),
-				e -> error(e)
+				value -> value(requireNonNull(mapper.apply((V)value), "null mapper return value"))
 
 		));
 

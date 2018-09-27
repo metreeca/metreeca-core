@@ -19,17 +19,15 @@ package com.metreeca.rest;
 
 import com.metreeca.form.Result;
 
-import static com.metreeca.form.Result.error;
-
 
 /**
  * Message body format.
  *
- * <p>Manages the conversion between structured and raw message body representations.</p>
+ * <p>Manages the conversion between raw and structured  message body representations.</p>
  *
  * @param <V> the type of the structured message body representation managed by the format
  */
-public interface Format<V> {
+@FunctionalInterface public interface Format<V> {
 
 	/**
 	 * Retrieves a structured body representation from a message.
@@ -42,43 +40,14 @@ public interface Format<V> {
 	 * available.</li>
 	 * </ul>
 	 *
-	 * <p>The default implementation reports a failure with the {@link Response#UnsupportedMediaType} status code.</p>
-	 *
-	 * @param message the message the structured body representation associated with this format is to be retrieved
+	 * @param message the message the structured body representation managed by this format is to be retrieved
 	 *                from
 	 *
-	 * @return a result providing access to the structured body representation associated with this format, if it was
+	 * @return a result providing access to the structured body representation managed by this format, if it was
 	 * possible to derive one from {@code message}; a result providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public default Result<V, Failure> get(final Message<?> message) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		return error(new Failure().status(Response.UnsupportedMediaType));
-	}
-
-	/**
-	 * Configures a message to hold a structured body representation.
-	 *
-	 * <p>The default implementation has no effect.</p>
-	 *
-	 * @param message the message to be configured to hold a structured body representation associated with this format
-	 *
-	 * @return the configured {@code message}
-	 *
-	 * @throws NullPointerException if {@code message} is null
-	 */
-	public default <T extends Message<T>> T set(final T message) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		return message;
-	}
+	public Result<V, Failure> get(final Message<?> message);
 
 }
