@@ -24,7 +24,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Result.error;
 import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
@@ -42,6 +41,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
  */
+@SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {
 
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
@@ -193,8 +193,9 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures message header value.
 	 *
-	 * <p>Existing values are overwritten, unless the header {@code name} is {@code Set-Cookie} or is prefixed with a
-	 * plus sign ({@code +}).</p>
+	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
+	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name  the name of the header whose value is to be configured
 	 * @param value the new value for {@code name}; empty values are ignored
@@ -216,35 +217,6 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		return headers(name, value);
-	}
-
-	/**
-	 * Maps message header value.
-	 *
-	 * <p>Existing values are overwritten, unless the header {@code name} is {@code Set-Cookie} or is prefixed with a
-	 * plus sign ({@code +}).</p>
-	 *
-	 * @param name   the name of the header whose value is to be mapped
-	 * @param mapper the mapping function for the header value; takes as argument the optional {@linkplain
-	 *               #header(String) current header value} and returns the mapped header value or an empty string, if
-	 *               mapping produced no values
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code name} or {@code mapper} is null or {@code mapper} returns a null
-	 *                              value
-	 */
-	public T header(final String name, final Function<Optional<String>, String> mapper) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return header(name, requireNonNull(mapper.apply(header(name)), "null mapper return value"));
 	}
 
 
@@ -287,8 +259,9 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures message header values.
 	 *
-	 * <p>Existing values are overwritten, unless the header {@code name} is {@code Set-Cookie} or is prefixed with a
-	 * plus sign ({@code +}).</p>
+	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
+	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
@@ -317,7 +290,11 @@ public abstract class Message<T extends Message<T>> {
 		final String _name=normalize(name);
 		final Collection<String> _values=normalize(values);
 
-		if ( name.startsWith("+") || _name.equals("Set-Cookie") ) {
+		if ( name.startsWith("~") ) {
+
+			headers.computeIfAbsent(_name, key -> _values.isEmpty() ? null : _values);
+
+		} else if ( name.startsWith("+") || _name.equals("Set-Cookie") ) {
 
 			headers.compute(_name, (key, value) -> value == null ? _values : concat(value, _values));
 
@@ -332,35 +309,6 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		return self();
-	}
-
-	/**
-	 * Maps message header values.
-	 *
-	 * <p>Existing values are overwritten, unless the header {@code name} is {@code Set-Cookie} or is prefixed with a
-	 * plus sign ({@code +}).</p>
-	 *
-	 * @param name   the name of the header whose values is to be mapped
-	 * @param mapper the mapping function for the header values; takes as argument the collection of {@linkplain
-	 *               #headers(String) current header values} and returns the mapped header values or an empty
-	 *               collection, if mapping produced no values
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code name} or {@code mapper} is null or {@code mapper} returns a null
-	 *                              value
-	 */
-	public T headers(final String name, final Function<Collection<String>, Collection<String>> mapper) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return headers(name, requireNonNull(mapper.apply(headers(name)), "null mapper return value"));
 	}
 
 
@@ -378,7 +326,6 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if {@code format} is null
 	 */
-	@SuppressWarnings("unchecked")
 	public <V> Result<V, Failure> body(final Format<V> format) {
 
 		if ( format == null ) {
@@ -387,13 +334,13 @@ public abstract class Message<T extends Message<T>> {
 
 		final V cached=(V)cache.get(format);
 
-		return cached != null ? value(cached) : bodies.getOrDefault(format, format).get(self()).map(
-				v -> {
-					cache.put(format, v);
-					return value((V)v);
-				},
-				e -> error(e)
-		);
+		return cached != null ? value(cached) : bodies.getOrDefault(format, format).get(self()).value(value -> {
+
+			cache.put(format, value);
+
+			return value((V)value);
+
+		});
 	}
 
 	/**
@@ -421,7 +368,7 @@ public abstract class Message<T extends Message<T>> {
 		return _body(format, message -> value(value));
 	}
 
-	public <V> T _body(final Format<V> format, final Function<T, Result<V, Failure>> body) {
+	public <V> T _body(final Format<V> format, final Format<V> body) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
@@ -435,7 +382,7 @@ public abstract class Message<T extends Message<T>> {
 			throw new IllegalStateException("message body representations already retrieved");
 		}
 
-		bodies.put(format, (Format<?>)body);
+		bodies.put(format, body);
 
 		return self();
 	}
@@ -458,7 +405,6 @@ public abstract class Message<T extends Message<T>> {
 	 *                               null value
 	 * @throws IllegalStateException if body representations were already retrieved from this message
 	 */
-	@SuppressWarnings("unchecked")
 	public <V> T filter(final Format<V> format, final Function<V, V> mapper) {
 
 		if ( format == null ) {
@@ -486,7 +432,7 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String normalize(final String name) {
-		return title(name.startsWith("+") ? name.substring(1) : name);
+		return title(name.startsWith("~") || name.startsWith("+") ? name.substring(1) : name);
 	}
 
 	private Collection<String> normalize(final Collection<String> values) {

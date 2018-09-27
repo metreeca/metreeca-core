@@ -30,6 +30,7 @@ import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Transputs.text;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import static java.util.Collections.emptySet;
@@ -61,6 +62,18 @@ final class MessageTest {
 				.header("test-header", "two");
 
 		assertEquals(list("two"), list(message.headers("test-header")));
+	}
+
+	@Test void testDefaultsValues() {
+
+		final TestMessage message=new TestMessage()
+				.header("+present", "one")
+				.header("~present", "two")
+				.header("~missing", "two");
+
+		assertThat(message.header("present")).hasValue("one");
+		assertThat(message.header("missing")).hasValue("two");
+
 	}
 
 	@Test void testHeadersAppendsValues() {
