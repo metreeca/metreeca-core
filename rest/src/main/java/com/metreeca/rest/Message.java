@@ -399,7 +399,8 @@ public abstract class Message<T extends Message<T>> {
 			return format.set(self());
 		}
 
-		public T map(final Function<V, V> mapper) {
+
+		public T filter(final Function<V, V> mapper) {
 
 			if ( mapper == null ) {
 				throw new NullPointerException("null mapper");
@@ -416,6 +417,10 @@ public abstract class Message<T extends Message<T>> {
 
 			if ( mapper == null ) {
 				throw new NullPointerException("null mapper");
+			}
+
+			if ( !cache.isEmpty() ) {
+				throw new IllegalStateException("message body already retrieved");
 			}
 
 			pipes.compute(tag, (_tag, getter) -> message -> (getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)format::get)

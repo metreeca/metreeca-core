@@ -119,7 +119,7 @@ final class MessageTest {
 	@Test void testBodyOnDemandFiltering() {
 
 		final Message<?> message=new TestMessage()
-				.body(new TestFormat()).map(string -> string+"!")
+				.body(new TestFormat()).filter(string -> string+"!")
 				.body(reader()).set(() -> new StringReader("test"));
 
 		assertEquals("test!",
