@@ -20,7 +20,6 @@ package com.metreeca.rest;
 import com.metreeca.form.Result;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -106,26 +105,6 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		return requireNonNull(mapper.apply(self()), "null mapper return value");
-	}
-
-	/**
-	 * Executes a task on this message.
-	 *
-	 * @param task the task to be executed on this message
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if {@code task} is null
-	 */
-	public T with(final Consumer<T> task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		task.accept(self());
-
-		return self();
 	}
 
 
@@ -429,7 +408,6 @@ public abstract class Message<T extends Message<T>> {
 	 * @throws NullPointerException  if either {@code format} or {@code body} is null
 	 * @throws IllegalStateException if body representations were already retrieved from this message
 	 */
-	@SuppressWarnings({"unchecked", "ObjectEquality"})
 	public <V> T body(final Format<V> format, final V value) {
 
 		if ( format == null ) {
