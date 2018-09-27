@@ -33,9 +33,7 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.*;
 
 import javax.json.Json;
@@ -171,15 +169,19 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 				.findFirst()
 				.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()));
 
-		message.body(asOutput, output -> {
+		message.body(asOutput, target -> {
+			try (final OutputStream output=target.get()) {
 
-			final RDFWriter writer=factory.getWriter(output);
+				final RDFWriter writer=factory.getWriter(output);
 
-			writer.set(JSONAdapter.Shape, message.body(ShapeFormat.asShape).value().orElse(null));
-			writer.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
+				writer.set(JSONAdapter.Shape, message.body(ShapeFormat.asShape).value().orElse(null));
+				writer.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
 
-			message.body(asRDF).value().ifPresent(model -> Rio.write(model, writer));
+				message.body(asRDF).value().ifPresent(model -> Rio.write(model, writer));
 
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
 		});
 
 		return message;

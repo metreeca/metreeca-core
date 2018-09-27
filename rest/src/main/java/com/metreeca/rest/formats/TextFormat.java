@@ -22,9 +22,7 @@ import com.metreeca.rest.Failure;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Transputs.text;
@@ -69,8 +67,8 @@ public final class TextFormat implements Format<String> {
 	 * writer supplied by the accepted writer.
 	 */
 	@Override public <T extends Message<T>> T set(final T message, final String value) {
-		return message.body(WriterFormat.asWriter, writer -> {
-			try {
+		return message.body(WriterFormat.asWriter, target -> {
+			try (final Writer writer=target.get()){
 
 				writer.write(value);
 

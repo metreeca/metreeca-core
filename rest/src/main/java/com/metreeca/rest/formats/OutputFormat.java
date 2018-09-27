@@ -17,17 +17,22 @@
 
 package com.metreeca.rest.formats;
 
+import com.metreeca.form.Result;
+import com.metreeca.rest.Failure;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static com.metreeca.form.Result.value;
 
 
 /**
  * Binary outbound raw body format.
  */
-public final class OutputFormat implements Format<Consumer<OutputStream>> {
+public final class OutputFormat implements Format<Consumer<Supplier<OutputStream>>> {
 
 	/**
 	 * The default MIME type for binary outbound raw message bodies.
@@ -47,10 +52,14 @@ public final class OutputFormat implements Format<Consumer<OutputStream>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Override public Result<Consumer<Supplier<OutputStream>>, Failure> get(final Message<?> message) {
+		return value(target -> {});
+	}
+
 	/**
 	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final Consumer<OutputStream> value) {
+	@Override public <T extends Message<T>> T set(final T message, final Consumer<Supplier<OutputStream>> value) {
 		return message.header("Content-Type", v -> v.orElse(MIME));
 	}
 

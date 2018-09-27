@@ -31,6 +31,9 @@ import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.*;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -136,7 +139,15 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, output -> factory.getWriter(output).handleBoolean(result))
+							.body(OutputFormat.asOutput, target -> {
+								try (final OutputStream output=target.get()) {
+
+									factory.getWriter(output).handleBoolean(result);
+
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
+								}
+							})
 					).accept(consumer);
 
 				} else if ( operation instanceof TupleQuery ) {
@@ -150,8 +161,8 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, output -> {
-								try {
+							.body(OutputFormat.asOutput, target -> {
+								try (final OutputStream output=target.get()) {
 
 									final TupleQueryResultWriter writer=factory.getWriter(output);
 
@@ -162,6 +173,8 @@ public class SPARQL implements Handler {
 
 									writer.endQueryResult();
 
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
 								} finally {
 									result.close();
 								}
@@ -178,24 +191,28 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, output -> {
+							.body(OutputFormat.asOutput, target -> {
+								try (final OutputStream output=target.get()) {
 
-								final RDFWriter writer=factory.getWriter(output);
+									final RDFWriter writer=factory.getWriter(output);
 
-								writer.startRDF();
+									writer.startRDF();
 
-								for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
-									writer.handleNamespace(entry.getKey(), entry.getValue());
+									for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
+										writer.handleNamespace(entry.getKey(), entry.getValue());
+									}
+
+									try {
+										while ( result.hasNext() ) { writer.handleStatement(result.next());}
+									} finally {
+										result.close();
+									}
+
+									writer.endRDF();
+
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
 								}
-
-								try {
-									while ( result.hasNext() ) { writer.handleStatement(result.next());}
-								} finally {
-									result.close();
-								}
-
-								writer.endRDF();
-
 							})).accept(consumer);
 
 				} else if ( operation instanceof Update ) {
@@ -220,7 +237,13 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, output -> factory.getWriter(output).handleBoolean(true))
+							.body(OutputFormat.asOutput, target -> {
+								try (final OutputStream output=target.get()) {
+									factory.getWriter(output).handleBoolean(true);
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
+								}
+							})
 					).accept(consumer);
 
 				} else {

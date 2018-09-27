@@ -20,9 +20,7 @@ package com.metreeca.rest.formats;
 import com.metreeca.form.Result;
 import com.metreeca.rest.*;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -90,7 +88,15 @@ public final class JSONFormat implements Format<JsonObject> {
 	@Override public <T extends Message<T>> T set(final T message, final JsonObject value) {
 		return message
 				.header("content-type", MIME)
-				.body(asWriter, writer -> Json.createWriter(writer).write(value));
+				.body(asWriter, target -> {
+					try (final Writer writer=target.get()) {
+
+						Json.createWriter(writer).write(value);
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 	}
 
 }

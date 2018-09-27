@@ -160,12 +160,15 @@ public class Proxy implements Handler {
 
 		}
 
-		return response.body(OutputFormat.asOutput, output -> {
-			try (final InputStream in=connect(connection)) {
+		return response.body(OutputFormat.asOutput, target -> {
+			try (
+					final OutputStream output=target.get();
+					final InputStream input=connect(connection)
+			) {
 
 				final byte[] buffer=new byte[1024];
 
-				for (int i; (i=in.read(buffer)) >= 0; ) {
+				for (int i; (i=input.read(buffer)) >= 0; ) {
 					output.write(buffer, 0, i);
 				}
 

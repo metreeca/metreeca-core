@@ -39,16 +39,16 @@ final class WorkerTest {
 
 				.status(Response.OK)
 
-				.body(asWriter, writer -> {
-					try {
+				.body(asWriter, target -> {
+					try (final Writer writer=target.get()){
 						writer.write("body");
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
 				})
 
-				.body(asOutput, output -> {
-					try {
+				.body(asOutput, target -> {
+					try (final OutputStream output=target.get()){
 						output.write("body".getBytes());
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
@@ -107,7 +107,7 @@ final class WorkerTest {
 
 								final ByteArrayOutputStream output=new ByteArrayOutputStream();
 
-								v.accept(output);
+								v.accept(() -> output);
 
 								return output.toByteArray();
 
@@ -120,7 +120,7 @@ final class WorkerTest {
 
 								final StringWriter output=new StringWriter();
 
-								v.accept(output);
+								v.accept(() -> output);
 
 								return output.toString();
 
