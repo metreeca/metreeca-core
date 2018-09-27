@@ -41,7 +41,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
  *
  * <p>Creates an audit trail record in the shared {@linkplain Graph#Factory graph} tool on {@linkplain
  * Response#success() successful} request processing by the wrapped handler. Standard records are structured according
- * to the following template and may be extended using a custom SPARQL Update {@linkplain #sparql(String) script}.</p>
+ * to the following template and may be extended using a custom SPARQL Update {@linkplain #update(String) script}.</p>
  *
  * <pre>{@code      @prefix : <app://rest.metreeca.com/terms#>
  *
@@ -55,7 +55,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 public final class Tracer implements Wrapper {
 
 	private IRI task=RDF.NIL;
-	private String sparql="";
+	private String update="";
 
 	private final Graph graph=tool(Graph.Factory);
 
@@ -131,19 +131,19 @@ public final class Tracer implements Wrapper {
 	 *
 	 * </table>
 	 *
-	 * @param sparql the SPARQL Update script for extending the generated audit trail records
+	 * @param update the SPARQL Update script for extending the generated audit trail records
 	 *
 	 * @return this tracer
 	 *
-	 * @throws NullPointerException if {@code sparql} is null
+	 * @throws NullPointerException if {@code update} is null
 	 */
-	public Tracer sparql(final String sparql) {
+	public Tracer update(final String update) {
 
-		if ( sparql == null ) {
-			throw new NullPointerException("null sparql");
+		if ( update == null ) {
+			throw new NullPointerException("null update script");
 		}
 
-		this.sparql=sparql;
+		this.update=update;
 
 		return this;
 	}
@@ -188,9 +188,9 @@ public final class Tracer implements Wrapper {
 
 					// add custom info
 
-					if ( !sparql.isEmpty() ) {
+					if ( !update.isEmpty() ) {
 
-						final Update update=connection.prepareUpdate(SPARQL, sparql, request.base());
+						final Update update=connection.prepareUpdate(SPARQL, this.update, request.base());
 
 						update.setBinding("this", trace);
 						update.setBinding("item", item);
