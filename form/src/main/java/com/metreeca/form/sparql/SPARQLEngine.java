@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Report.trace;
+import static com.metreeca.form.Report.report;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
@@ -96,7 +96,7 @@ public final class SPARQLEngine { // !!! migrate from utility class to processor
 
 		// extend validation report with statements outside shape envelope
 
-		return outliers.isEmpty() ? report : trace(concat(report.getIssues(), outliers.stream()
+		return outliers.isEmpty() ? report : report(concat(report.getIssues(), outliers.stream()
 				.map(outlier -> issue(Issue.Level.Error, "unexpected statement "+outlier, shape))
 				.collect(toList())
 		), report.getFrames());

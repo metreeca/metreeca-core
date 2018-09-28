@@ -42,19 +42,19 @@ public final class Report {
 	private static final Report empty=new Report(Sets.set(), Sets.set());
 
 
-	public static Report trace() {
+	public static Report report() {
 		return empty;
 	}
 
-	public static Report trace(final Issue... issues) {
+	public static Report report(final Issue... issues) {
 		return new Report(Sets.set(issues), Sets.set());
 	}
 
-	@SafeVarargs public static Report trace(final Collection<Issue> issues, final Frame<Report>... frames) {
+	@SafeVarargs public static Report report(final Collection<Issue> issues, final Frame<Report>... frames) {
 		return new Report(issues, Sets.set(frames));
 	}
 
-	public static Report trace(final Collection<Issue> issues, final Collection<Frame<Report>> frames) {
+	public static Report report(final Collection<Issue> issues, final Collection<Frame<Report>> frames) {
 		return new Report(issues, frames);
 	}
 
@@ -108,9 +108,9 @@ public final class Report {
 		}
 
 		final Set<Issue> issues=union(getIssues(), report.getIssues());
-		final Collection<Frame<Report>> frames=frames(union(getFrames(), report.getFrames()), reducing(trace(), Report::merge));
+		final Collection<Frame<Report>> frames=frames(union(getFrames(), report.getFrames()), reducing(report(), Report::merge));
 
-		return trace(issues, frames);
+		return report(issues, frames);
 	}
 
 	/**
@@ -155,7 +155,7 @@ public final class Report {
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toCollection(LinkedHashSet::new));
 
-		return issues.isEmpty() && frames.isEmpty() ? Optional.empty() : Optional.of(trace(issues, frames));
+		return issues.isEmpty() && frames.isEmpty() ? Optional.empty() : Optional.of(report(issues, frames));
 	}
 
 	/**
