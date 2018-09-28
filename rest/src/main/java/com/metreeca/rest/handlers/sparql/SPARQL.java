@@ -120,7 +120,7 @@ public class SPARQL implements Handler {
 
 				if ( operation == null ) { // !!! return void description for GET
 
-					request.reply(new Failure()
+					request.reply(new Failure<>()
 							.status(Response.BadRequest)
 							.error("parameter-missing")
 							.cause("missing query/update parameter")
@@ -248,7 +248,7 @@ public class SPARQL implements Handler {
 
 				} else {
 
-					request.reply(new Failure()
+					request.reply(new Failure<>()
 							.status(Response.NotImplemented)
 							.error("operation-unsupported")
 							.cause(operation.getClass().getName())
@@ -258,7 +258,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final MalformedQueryException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.BadRequest)
 						.error("query-malformed")
 						.cause(e)
@@ -266,7 +266,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final IllegalArgumentException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.BadRequest)
 						.error("request-malformed")
 						.cause(e)
@@ -274,7 +274,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final UnsupportedOperationException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.NotImplemented)
 						.error("operation-unsupported")
 						.cause(e)
@@ -284,7 +284,7 @@ public class SPARQL implements Handler {
 
 				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.InternalServerError)
 						.error("query-evaluation")
 						.cause(e)
@@ -292,7 +292,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final UpdateExecutionException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.InternalServerError)
 						.error("update-evaluation")
 						.cause(e)
@@ -300,7 +300,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final TupleQueryResultHandlerException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.InternalServerError)
 						.error("response-error")
 						.cause(e)
@@ -308,7 +308,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final RuntimeException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.InternalServerError)
 						.error("repository-error")
 						.cause(e)

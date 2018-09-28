@@ -17,7 +17,6 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Result;
 import com.metreeca.rest.formats.TextFormat;
 
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.util.function.Function;
 
-import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.Result.value;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Transputs.text;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -110,8 +109,10 @@ final class MessageTest {
 
 		final TestMessage message=new TestMessage().body(reader()).set(() -> new StringReader("test"));
 
-		final Function<Message<?>, String> accessor=m -> m
-				.body(TextFormat.text()).get().map(value -> value, error -> fail("missing test body"));
+		final Function<Message<?>, String> accessor=m -> {
+			return ((Result<String>)m
+					.body(TextFormat.text())).map(value -> value, error -> fail("missing test body"));
+		};
 
 		assertSame(accessor.apply(message), accessor.apply(message));
 	}
@@ -119,11 +120,11 @@ final class MessageTest {
 	@Test void testBodyOnDemandFiltering() {
 
 		final Message<?> message=new TestMessage()
-				.body(TestFormat.test()).filter(string -> string+"!")
+				.body(TestFormat.test()).pipe(string -> string+"!")
 				.body(reader()).set(() -> new StringReader("test"));
 
 		assertEquals("test!",
-				message.body(TestFormat.test()).get().map(value -> value, error -> fail("missing test body")));
+				((Result<String>)message.body(TestFormat.test())).map(value -> value, error -> fail("missing test body")));
 
 	}
 
@@ -144,8 +145,8 @@ final class MessageTest {
 		private static TestFormat test() { return Instance; }
 
 
-		@Override public Result<String, Failure> get(final Message<?> message) {
-			return message.body(reader()).get().value(supplier -> {
+		@Override public Result<String> get(final Message<?> message) {
+			return message.body(reader()).flatMap(supplier -> {
 				try (final Reader reader=supplier.get()) {
 					return value(text(reader));
 				} catch ( final IOException e ) {

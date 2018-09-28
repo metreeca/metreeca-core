@@ -17,13 +17,11 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Result;
+import com.metreeca.rest.Result;
 import com.metreeca.rest.*;
 
 import java.io.Reader;
 import java.util.function.Supplier;
-
-import static com.metreeca.form.Result.error;
 
 
 /**
@@ -51,8 +49,8 @@ public final class ReaderFormat implements Format<Supplier<Reader>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
-		return error(new Failure().status(Response.UnsupportedMediaType));
+	@Override public Result<Supplier<Reader>> get(final Message<?> message) {
+		return new Failure<Supplier<Reader>>().status(Response.UnsupportedMediaType);
 	}
 
 	@Override public <T extends Message<T>> T set(final T message) {

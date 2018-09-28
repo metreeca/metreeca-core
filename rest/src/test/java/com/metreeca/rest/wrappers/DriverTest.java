@@ -20,8 +20,7 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.ShapeCodec;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.ShapeFormat;
 
 import org.eclipse.rdf4j.model.Model;
@@ -72,7 +71,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertFalse(request.body(ShapeFormat.shape()).get().value().isPresent());
+					assertFalse(request.body(ShapeFormat.shape()).get().isPresent());
 
 					return request.reply(response -> response);
 
@@ -83,7 +82,7 @@ final class DriverTest {
 				.accept(response -> {
 
 					assertFalse(response.header("link").isPresent());
-					assertFalse(response.body(ShapeFormat.shape()).get().value().isPresent());
+					assertFalse(response.body(ShapeFormat.shape()).get().isPresent());
 
 				});
 	}
@@ -93,7 +92,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertEquals(TestShape, request.body(ShapeFormat.shape()).get().value().orElseGet(() -> fail("missing shape")));
+					assertEquals(TestShape, request.body(ShapeFormat.shape()).get().orElseGet(() -> fail("missing shape")));
 
 					return request.reply(response -> response.header("link", "existing"));
 
@@ -125,7 +124,6 @@ final class DriverTest {
 					final Model model=new LinkedHashModel(response
 							.body(rdf())
 							.get()
-							.value()
 							.orElseGet(() -> fail("missing RDF body"))
 					);
 

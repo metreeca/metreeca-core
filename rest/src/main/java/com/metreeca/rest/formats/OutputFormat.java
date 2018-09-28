@@ -17,8 +17,7 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Result;
-import com.metreeca.rest.Failure;
+import com.metreeca.rest.Result;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
@@ -26,7 +25,7 @@ import java.io.OutputStream;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.Result.value;
 
 
 /**
@@ -63,7 +62,7 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 	/**
 	 * @return a result providing access to a consumer taking no action on the supplied output stream provider
 	 */
-	@Override public Result<Consumer<Supplier<OutputStream>>, Failure> get(final Message<?> message) {
+	@Override public Result<Consumer<Supplier<OutputStream>>> get(final Message<?> message) {
 		return value(target -> {});
 	}
 

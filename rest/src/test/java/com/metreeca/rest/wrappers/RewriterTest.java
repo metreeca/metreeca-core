@@ -21,9 +21,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
 
@@ -166,7 +164,7 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
-					request.body(rdf()).get().handle(
+					request.body(rdf()).use(
 							model -> assertIsomorphic("request rdf rewritten",
 									singleton(internal("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
@@ -185,7 +183,7 @@ final class RewriterTest {
 
 				.accept(response -> {
 
-					response.body(rdf()).get().handle(
+					response.body(rdf()).use(
 							model -> assertIsomorphic("response rdf rewritten",
 									singleton(external("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
@@ -199,7 +197,7 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
-					request.body(rdf()).get().handle(
+					request.body(rdf()).use(
 							model -> assertIsomorphic("request json rewritten",
 									singleton(internal("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
@@ -230,7 +228,7 @@ final class RewriterTest {
 
 				.accept(response -> {
 
-					response.body(output()).get().handle(
+					response.body(output()).use(
 							value -> {
 
 								final ByteArrayOutputStream buffer=new ByteArrayOutputStream();

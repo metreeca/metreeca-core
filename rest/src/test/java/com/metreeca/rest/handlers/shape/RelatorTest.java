@@ -21,9 +21,7 @@ package com.metreeca.rest.handlers.shape;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.RestTest;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
@@ -75,8 +73,8 @@ final class RelatorTest {
 
 				.accept(response -> {
 
-					final Optional<Model> rdfBody=response.body(RDFFormat.rdf()).get().value().map(LinkedHashModel::new);
-					final Optional<Shape> shapeBody=response.body(ShapeFormat.shape()).get().value();
+					final Optional<Model> rdfBody=response.body(RDFFormat.rdf()).get().map(LinkedHashModel::new);
+					final Optional<Shape> shapeBody=response.body(ShapeFormat.shape()).get();
 
 					assertFalse(shapeBody.isPresent(), "response shape body omitted");
 					assertTrue(rdfBody.isPresent(), "response RDF body included");
@@ -118,7 +116,7 @@ final class RelatorTest {
 					final Model expected=construct(connection,
 							"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }");
 
-					response.body(RDFFormat.rdf()).get().handle(
+					response.body(RDFFormat.rdf()).use(
 							model -> assertSubset("items retrieved", expected, model),
 							error -> fail("missing RDF body")
 					);
@@ -142,7 +140,7 @@ final class RelatorTest {
 					final Model expected=construct(connection,
 							"construct where { <employees/1370> a :Employee; :code ?c }");
 
-					response.body(RDFFormat.rdf()).get().handle(
+					response.body(RDFFormat.rdf()).use(
 							model -> {
 								assertSubset("items retrieved", expected, model);
 								assertTrue(

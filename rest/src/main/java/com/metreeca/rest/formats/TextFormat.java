@@ -17,15 +17,14 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Result;
+import com.metreeca.rest.Result;
 import com.metreeca.form.things.Transputs;
-import com.metreeca.rest.Failure;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
 import java.io.*;
 
-import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
@@ -59,8 +58,8 @@ public final class TextFormat implements Format<String> {
 	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
 	 * supplied by its {@link ReaderFormat} body, if one is present; an empty result, otherwise
 	 */
-	@Override public Result<String, Failure> get(final Message<?> message) {
-		return message.body(reader()).get().value(source -> {
+	@Override public Result<String> get(final Message<?> message) {
+		return message.body(reader()).flatMap(source -> {
 			try (final Reader reader=source.get()) {
 
 				return value(Transputs.text(reader));
@@ -76,7 +75,7 @@ public final class TextFormat implements Format<String> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(writer()).chain(consumer -> message.body(text()).get().value(bytes -> value(target -> {
+		return message.body(writer()).flatPipe(consumer -> message.body(text()).map(bytes -> target -> {
 			try (final Writer output=target.get()) {
 
 				output.write(bytes);
@@ -84,7 +83,7 @@ public final class TextFormat implements Format<String> {
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		})));
+		}));
 	}
 
 }

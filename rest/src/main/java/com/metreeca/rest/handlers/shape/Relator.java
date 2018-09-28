@@ -116,7 +116,7 @@ public final class Relator implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@Override public Responder handle(final Request request) {
-		return request.body(ShapeFormat.shape()).get().map(
+		return ((Result<Shape>)request.body(ShapeFormat.shape())).map(
 				shape -> {
 
 					final Shape redacted=shape

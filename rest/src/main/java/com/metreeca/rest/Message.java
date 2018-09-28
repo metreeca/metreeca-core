@@ -17,16 +17,14 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Result;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
+import static com.metreeca.rest.Result.value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -52,7 +50,7 @@ public abstract class Message<T extends Message<T>> {
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
 	private final Map<Format<?>, Object> cache=new HashMap<>();
-	private final Map<Format<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
+	private final Map<Format<?>, Function<Message<?>, Result<?>>> pipes=new HashMap<>();
 
 
 	/**
@@ -358,7 +356,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @param <V> the type of the data structure exposed by the message body
 	 */
-	public final class Body<V> { // !!! refactor
+	public final class Body<V> implements Result<V> {
 
 		private final Format<V> format;
 
@@ -367,19 +365,6 @@ public abstract class Message<T extends Message<T>> {
 			this.format=format;
 		}
 
-
-		public Result<V, Failure> get() {
-
-			final V cached=(V)cache.get(format);
-
-			return cached != null ? value(cached) : pipes.getOrDefault(format, format::get).apply(self()).value(value -> {
-
-				cache.put(format, value);
-
-				return value((V)value);
-
-			});
-		}
 
 		public T set(final V value) {
 
@@ -397,7 +382,7 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 
-		public T filter(final Function<V, V> mapper) {
+		public T pipe(final Function<V, V> mapper) {
 
 			if ( mapper == null ) {
 				throw new NullPointerException("null mapper");
@@ -407,10 +392,10 @@ public abstract class Message<T extends Message<T>> {
 				throw new IllegalStateException("message body already retrieved");
 			}
 
-			return chain(v -> value(mapper.apply(v)));
+			return flatPipe(v -> value(mapper.apply(v)));
 		}
 
-		public T chain(final Function<V, Result<V, Failure>> mapper) {
+		public T flatPipe(final Function<V, Result<V>> mapper) {
 
 			if ( mapper == null ) {
 				throw new NullPointerException("null mapper");
@@ -420,10 +405,39 @@ public abstract class Message<T extends Message<T>> {
 				throw new IllegalStateException("message body already retrieved");
 			}
 
-			pipes.compute(format, (_tag, getter) -> message -> (getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)format::get)
-					.apply(message).value(o -> mapper.apply((V)o)));
+			pipes.compute(format, (_format, getter) -> message ->
+					(getter != null ? getter : (Function<Message<?>, Result<?>>)format::get)
+							.apply(message)
+							.flatMap(value -> mapper.apply((V)value)));
 
 			return self();
+		}
+
+
+		@Override public <R> R map(final Function<V, R> success, final Function<Failure<V>, R> failure) {
+
+			if ( success == null ) {
+				throw new NullPointerException("null success mapper");
+			}
+
+			if ( failure == null ) {
+				throw new NullPointerException("null failure mapper");
+			}
+
+			final V cached=(V)cache.get(format);
+
+			return cached != null ? success.apply(cached) : pipes.getOrDefault(format, format::get)
+					.apply(self())
+					.map(
+							v -> {
+
+								cache.put(format, v);
+
+								return success.apply((V)v);
+
+							},
+							f -> failure.apply((Failure<V>)f)
+					);
 		}
 
 	}

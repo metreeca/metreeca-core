@@ -29,8 +29,7 @@ import java.util.function.Function;
 
 import javax.json.JsonException;
 
-import static com.metreeca.form.Result.error;
-import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.Result.value;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
@@ -176,7 +175,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public Result<Query, Failure> query(final Shape shape) {
+	public Result<Query> query(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -188,10 +187,10 @@ public final class Request extends Message<Request> {
 
 		} catch ( final JsonException e ) {
 
-			return error(new Failure()
+			return new Failure<Query>()
 					.status(Response.BadRequest)
 					.error("query-malformed")
-					.cause(e));
+					.cause(e);
 
 		}
 	}

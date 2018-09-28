@@ -17,8 +17,6 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Result;
-
 
 /**
  * Message body format.
@@ -46,7 +44,7 @@ public interface Format<V> {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public Result<V, Failure> get(final Message<?> message);
+	public Result<V> get(final Message<?> message);
 
 	/**
 	 * Configures a message to hold a structured body.

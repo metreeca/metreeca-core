@@ -18,9 +18,7 @@
 package com.metreeca.j2ee;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.WriterFormat;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
@@ -37,6 +35,7 @@ import org.apache.commons.io.FileCleaningTracker;
 import java.io.*;
 import java.net.SocketTimeoutException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -404,7 +403,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				response.headers().forEach((name, values) -> values.forEach(value -> http.addHeader(name, value)));
 
-				response.body(output()).get().value().ifPresent(consumer -> consumer.accept(() -> {
+				response.body(output()).get().ifPresent(consumer -> consumer.accept(() -> {
 					try {
 						return http.getOutputStream();
 					} catch ( final IOException e ) {
@@ -412,7 +411,7 @@ public abstract class Gateway implements ServletContextListener {
 					}
 				}));
 
-				response.body(WriterFormat.writer()).get().value().ifPresent(consumer -> consumer.accept(() -> {
+				response.body(WriterFormat.writer()).get().ifPresent(consumer -> consumer.accept(() -> {
 					try {
 						return http.getWriter();
 					} catch ( final IOException e ) {

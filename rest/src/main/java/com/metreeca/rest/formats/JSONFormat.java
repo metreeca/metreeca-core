@@ -17,7 +17,6 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Result;
 import com.metreeca.rest.*;
 
 import java.io.*;
@@ -26,8 +25,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.form.Result.error;
-import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
@@ -65,23 +63,23 @@ public final class JSONFormat implements Format<JsonObject> {
 	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal
 	 * to {@value #MIME}; an empty optional, otherwise
 	 */
-	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
-		return message.headers("content-type").contains(MIME) ? message.body(reader()).get().value(source -> {
+	@Override public Result<JsonObject> get(final Message<?> message) {
+		return message.headers("content-type").contains(MIME) ? message.body(reader()).flatMap(source -> {
 			try (final Reader reader=source.get()) {
 
 				return value(Json.createReader(reader).readObject());
 
 			} catch ( final JsonParsingException e ) {
 
-				return error(new Failure()
+				return new Failure<JsonObject>()
 						.status(Response.BadRequest)
 						.error(Failure.BodyMalformed)
-						.cause(e));
+						.cause(e);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		}) : error(new Failure().status(Response.UnsupportedMediaType));
+		}) : new Failure<JsonObject>().status(Response.UnsupportedMediaType);
 	}
 
 	/**
@@ -91,7 +89,7 @@ public final class JSONFormat implements Format<JsonObject> {
 	@Override public <T extends Message<T>> T set(final T message) {
 		return message
 				.header("content-type", MIME)
-				.body(writer()).chain(consumer -> message.body(json()).get().value(json -> value(target -> {
+				.body(writer()).flatPipe(consumer -> message.body(json()).map(json -> target -> {
 					try (final Writer writer=target.get()) {
 
 						Json.createWriter(writer).write(json);
@@ -99,7 +97,7 @@ public final class JSONFormat implements Format<JsonObject> {
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-				})));
+				}));
 	}
 
 }

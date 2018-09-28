@@ -200,7 +200,7 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-		return message.body(rdf()).filter(statements ->
+		return message.body(rdf()).pipe(statements ->
 				(filter == null) ? statements : filter.apply(message, new LinkedHashModel(statements)));
 	}
 

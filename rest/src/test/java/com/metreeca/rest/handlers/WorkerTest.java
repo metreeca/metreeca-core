@@ -18,13 +18,13 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Responder;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.WriterFormat.writer;
@@ -102,7 +102,7 @@ final class WorkerTest {
 
 					assertThat(response.status()).isEqualTo(Response.OK);
 
-					assertThat(response.body(output()).get().<byte[]>map(
+					assertThat(((Result<Consumer<Supplier<OutputStream>>>)response.body(output())).<byte[]>map(
 							v -> {
 
 								final ByteArrayOutputStream output=new ByteArrayOutputStream();
@@ -115,7 +115,7 @@ final class WorkerTest {
 							e -> new byte[0]
 					)).isEmpty();
 
-					assertThat(response.body(writer()).get().<String>map(
+					assertThat(((Result<Consumer<Supplier<Writer>>>)response.body(writer())).<String>map(
 							v -> {
 
 								final StringWriter output=new StringWriter();

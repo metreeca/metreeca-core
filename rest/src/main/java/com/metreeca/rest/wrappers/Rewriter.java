@@ -170,8 +170,8 @@ public final class Rewriter implements Wrapper {
 				.parameters(decoded.rewrite(request.parameters()))
 				.headers(decoded.rewrite(request.headers()))
 
-				.body(shape()).filter(decoded::rewrite)
-				.body(rdf()).filter(model -> decoded.rewrite(model, decoded::rewrite));
+				.body(shape()).pipe(decoded::rewrite)
+				.body(rdf()).pipe(model -> decoded.rewrite(model, decoded::rewrite));
 	}
 
 	private Response rewrite(final String source, final String target, final Response response) {
@@ -186,8 +186,8 @@ public final class Rewriter implements Wrapper {
 
 				.headers(decoded.rewrite(response.headers()))
 
-				.body(shape()).filter(decoded::rewrite)
-				.body(rdf()).filter(model -> decoded.rewrite(model, decoded::rewrite));
+				.body(shape()).pipe(decoded::rewrite)
+				.body(rdf()).pipe(model -> decoded.rewrite(model, decoded::rewrite));
 	}
 
 

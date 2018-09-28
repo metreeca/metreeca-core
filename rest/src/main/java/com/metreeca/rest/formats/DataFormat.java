@@ -17,15 +17,14 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Result;
+import com.metreeca.rest.Result;
 import com.metreeca.form.things.Transputs;
-import com.metreeca.rest.Failure;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
 import java.io.*;
 
-import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -60,8 +59,8 @@ public final class DataFormat implements Format<byte[]> {
 	 * stream supplied by its {@link InputFormat} body, if one is available; an error describing the processing failure,
 	 * otherwise
 	 */
-	@Override public Result<byte[], Failure> get(final Message<?> message) {
-		return message.body(input()).get().value(source -> {
+	@Override public Result<byte[]> get(final Message<?> message) {
+		return message.body(input()).flatMap(source -> {
 			try (final InputStream input=source.get()) {
 
 				return value(Transputs.data(input));
@@ -77,7 +76,7 @@ public final class DataFormat implements Format<byte[]> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(output()).chain(consumer -> message.body(data()).get().value(bytes -> value(target -> {
+		return message.body(output()).flatPipe(consumer -> message.body(data()).map(bytes -> target -> {
 			try (final OutputStream output=target.get()) {
 
 				output.write(bytes);
@@ -85,7 +84,7 @@ public final class DataFormat implements Format<byte[]> {
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		})));
+		}));
 	}
 
 }

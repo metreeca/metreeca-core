@@ -26,7 +26,7 @@ import java.io.*;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
@@ -52,7 +52,7 @@ final class JSONFormatTest {
 				.header("content-type", JSONFormat.MIME)
 				.body(reader()).set(() -> new StringReader(TestJSON.toString()));
 
-		assertEquals(TestJSON, request.body(json()).get().value().orElseGet(() -> fail("no json representation")));
+		assertEquals(TestJSON, request.body(json()).get().orElseGet(() -> fail("no json representation")));
 	}
 
 	@Test void testRetrieveJSONChecksContentType() {
@@ -60,16 +60,16 @@ final class JSONFormatTest {
 		final Request request=new Request()
 				.body(reader()).set(() -> new StringReader(TestJSON.toString()));
 
-		assertFalse(request.body(json()).get().value().isPresent());
+		assertFalse(request.body(json()).get().isPresent());
 	}
 
 	@Test void testConfigureJSON() {
 
 		final Request request=new Request().body(json()).set(TestJSON);
 
-		assertEquals(TestJSON, request.body(writer()).get()
+		assertEquals(TestJSON, request.body(writer())
 
-				.value(client -> {
+				.flatMap(client -> {
 					try (final StringWriter writer=new StringWriter()) {
 
 						client.accept(() -> writer);
@@ -81,9 +81,9 @@ final class JSONFormatTest {
 					}
 				})
 
-				.value(test -> value(Json.createReader(new StringReader(test)).readObject()))
+				.flatMap(test -> value(Json.createReader(new StringReader(test)).readObject()))
 
-				.value()
+				.get()
 
 				.orElseGet(() -> fail("missing outbound representation"))
 

@@ -18,7 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Result;
+import com.metreeca.rest.Result;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.JSONAdapter;
 import com.metreeca.form.probes.Outliner;
@@ -38,8 +38,7 @@ import java.util.*;
 
 import javax.json.Json;
 
-import static com.metreeca.form.Result.error;
-import static com.metreeca.form.Result.value;
+import static com.metreeca.rest.Result.value;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -73,13 +72,13 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
 	 * representation, if present; an empty optional, otherwise
 	 */
-	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(input()).get().value(supplier -> {
+	@Override public Result<Collection<Statement>> get(final Message<?> message) {
+		return message.body(input()).flatMap(supplier -> {
 
 			final Optional<Request> request=message.as(Request.class);
 
 			final Optional<IRI> focus=request.map(Request::item);
-			final Optional<Shape> shape=message.body(shape()).get().value();
+			final Optional<Shape> shape=message.body(shape()).get();
 
 			final String type=request.flatMap(r -> r.header("Content-Type")).orElse("");
 
@@ -138,7 +137,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 			} else {
 
-				return error(new Failure()
+				return new Failure<Collection<Statement>>()
 						.status(Response.BadRequest)
 						.error(Failure.BodyMalformed)
 						.trace(Json.createObjectBuilder()
@@ -148,7 +147,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 								.add("error", Json.createArrayBuilder(errors))
 								.add("warning", Json.createArrayBuilder(warnings))
 
-								.build()));
+								.build());
 
 			}
 
@@ -176,12 +175,12 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 						.filter(type -> registry.getFileFormatForMIMEType(type).isPresent())
 						.findFirst()
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()))
-				.body(output()).chain(consumer -> message.body(rdf()).get().value(rdf -> value(target -> {
+				.body(output()).flatPipe(consumer -> message.body(rdf()).map(rdf -> target -> {
 					try (final OutputStream output=target.get()) {
 
 						final RDFWriter writer=factory.getWriter(output);
 
-						writer.set(JSONAdapter.Shape, message.body(shape()).get().value().orElse(null));
+						writer.set(JSONAdapter.Shape, message.body(shape()).get().orElse(null));
 						writer.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
 
 						Rio.write(rdf, writer);
@@ -189,7 +188,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-				})));
+				}));
 	}
 
 }
