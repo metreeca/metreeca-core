@@ -354,6 +354,10 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * <p>Provides a type-safe interface for structured message bodies managed by {@linkplain Format formats}.</p>
 	 *
+	 * <p>A body is associated to a message through a message body {@linkplain Format format}, responsible for
+	 * retrieving its structured value and configuring the message as a holder for structured values of the specific
+	 * format-managed type.</p>
+	 *
 	 * @param <V> the type of the data structure exposed by the message body
 	 */
 	public final class Body<V> implements Result<V> {
@@ -366,6 +370,24 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 
+		/**
+		 * Configures the structured message body.
+		 *
+		 * <p>Future calls to {@link Message#body(Format)} with the same format associated to this message body will
+		 * return a message body holding the specified structured value, rather than the structured value {@linkplain
+		 * Format#get(Message) retrieved} by the format associated to this body.</p>
+		 *
+		 * <p>The message this body belongs to is {@linkplain Format#set(Message) configured} for holding the
+		 * structured value according to the format associated to this body.</p>
+		 *
+		 * @param value the structured value for this body
+		 *
+		 * @return the message this body belongs to
+		 *
+		 * @throws NullPointerException  if {@code value} is null
+		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
+		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
+		 */
 		public T set(final V value) {
 
 			if ( value == null ) {
@@ -382,6 +404,21 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 
+		/**
+		 * Filters the structured value of this body.
+		 *
+		 * <p>Future calls to getter {@linkplain Result result} methods on this body will pipe the structured value
+		 * either explicitly {@linkplain #set(Object) set} or {@linkplain Format#get(Message) retrieved} on demand by
+		 * the format associated to this body through a filtering function.</p>
+		 *
+		 * @param mapper the value filtering function
+		 *
+		 * @return the message this body belongs to
+		 *
+		 * @throws NullPointerException  if {@code mapper} is null
+		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
+		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
+		 */
 		public T pipe(final Function<V, V> mapper) {
 
 			if ( mapper == null ) {
@@ -395,6 +432,21 @@ public abstract class Message<T extends Message<T>> {
 			return flatPipe(v -> value(mapper.apply(v)));
 		}
 
+		/**
+		 * Filters the structured value of this body.
+		 *
+		 * <p>Future calls to getter {@linkplain Result result} methods on this body will pipe the structured value
+		 * either explicitly {@linkplain #set(Object) set} or {@linkplain Format#get(Message) retrieved} on demand by
+		 * the format associated to this body through a result-returning filtering function.</p>
+		 *
+		 * @param mapper the value filtering function
+		 *
+		 * @return the message this body belongs to
+		 *
+		 * @throws NullPointerException  if {@code mapper} is null
+		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
+		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
+		 */
 		public T flatPipe(final Function<V, Result<V>> mapper) {
 
 			if ( mapper == null ) {
@@ -414,6 +466,12 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 
+		/**
+		 * {@inheritDoc}
+		 *
+		 * <p>Successfully retrieved structured values handled to the {@code success} mapper are cached for future
+		 * reuse.</p>
+		 */
 		@Override public <R> R map(final Function<V, R> success, final Function<Failure<V>, R> failure) {
 
 			if ( success == null ) {
