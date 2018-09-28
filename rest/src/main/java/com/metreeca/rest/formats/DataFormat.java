@@ -17,14 +17,13 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Result;
 import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
+import com.metreeca.rest.Result;
 
 import java.io.*;
 
-import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -60,10 +59,10 @@ public final class DataFormat implements Format<byte[]> {
 	 * otherwise
 	 */
 	@Override public Result<byte[]> get(final Message<?> message) {
-		return message.body(input()).flatMap(source -> {
+		return message.body(input()).map(source -> {
 			try (final InputStream input=source.get()) {
 
-				return value(Transputs.data(input));
+				return Transputs.data(input);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
