@@ -26,12 +26,14 @@ import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
+import static com.metreeca.rest.formats.JSONFormat.json;
+
 
 /**
- * HTTP processing failure report.
+ * HTTP processing failure.
  *
- * <p>Defines an error condition in HTTP request processing that can be {@linkplain #apply(Response) transferred} to
- * the HTTP response like:</p>
+ * <p>Reports an error condition in an HTTP request processing operation that can be {@linkplain #apply(Response)
+ * transferred} to the {@linkplain JSONFormat JSON} body of an HTTP response like:</p>
  *
  * <pre>{@code
  * <status>
@@ -43,8 +45,11 @@ import javax.json.JsonValue;
  *     "trace": <trace>     # a optional structured JSON error report
  * }
  * }</pre>
+ *
+ * @param <V> the type of the result value expected from the failed operation
  */
-public final class Failure implements Function<Response, Response> {
+@SuppressWarnings("unchecked")
+public final class Failure<V> implements Result<V>, Function<Response, Response> {
 
 	/**
 	 * The machine readable error tag for failures due to malformed data in message body.
@@ -62,18 +67,30 @@ public final class Failure implements Function<Response, Response> {
 	private JsonValue trace;
 
 
+	/**
+	 * Casts this failure to a different expected result value.
+	 *
+	 * @param <R> the type of the expected target result value
+	 *
+	 * @return this failure cast to the expected result type
+	 */
+	public <R> Failure<R> as() {
+		return (Failure<R>)this;
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Configures the response status.
 	 *
-	 * @param status the HTTP status code associated with the error condition defined by this failure report
+	 * @param status the HTTP status code associated with the error condition defined by this failure
 	 *
-	 * @return this failure report
+	 * @return this failure
 	 *
 	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
 	 */
-	public Failure status(final int status) {
+	public Failure<V> status(final int status) {
 
 		if ( status < 100 || status > 599 ) {
 			throw new IllegalArgumentException("illegal status code ["+status+"]");
@@ -87,13 +104,13 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error type.
 	 *
-	 * @param error a machine readable tag for the error condition defined by this failure report
+	 * @param error a machine readable tag for the error condition defined by this failure
 	 *
-	 * @return this failure report
+	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code error} is null
 	 */
-	public Failure error(final String error) {
+	public Failure<V> error(final String error) {
 
 		if ( error == null ) {
 			throw new NullPointerException("null error");
@@ -107,13 +124,13 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error cause description.
 	 *
-	 * @param cause a human readable description of the error condition defined by this failure report
+	 * @param cause a human readable description of the error condition defined by this failure
 	 *
-	 * @return this failure report
+	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
-	public Failure cause(final String cause) {
+	public Failure<V> cause(final String cause) {
 
 		if ( cause == null ) {
 			throw new NullPointerException("null cause");
@@ -127,13 +144,13 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error cause.
 	 *
-	 * @param cause the underlying throwable that caused the error condition defined by this failure report
+	 * @param cause the underlying throwable that caused the error condition defined by this failure
 	 *
-	 * @return this failure report
+	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
-	public Failure cause(final Throwable cause) {
+	public Failure<V> cause(final Throwable cause) {
 
 		if ( cause == null ) {
 			throw new NullPointerException("null cause");
@@ -147,13 +164,13 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error trace.
 	 *
-	 * @param trace a structured JSON report describing the error condition defined by this failure report
+	 * @param trace a structured JSON report describing the error condition defined by this failure
 	 *
-	 * @return this failure report
+	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code trace} is null
 	 */
-	public Failure trace(final JsonValue trace) {
+	public Failure<V> trace(final JsonValue trace) {
 
 		if ( trace == null ) {
 			throw new NullPointerException("null trace");
@@ -166,6 +183,20 @@ public final class Failure implements Function<Response, Response> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	@Override public <R> R map(final Function<V, R> success, final Function<Failure<V>, R> failure) {
+
+		if ( success == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		if ( failure == null ) {
+			throw new NullPointerException("null error");
+		}
+
+		return failure.apply(this);
+	}
 
 	/**
 	 * Transfers the description of the error condition to an HTTP response.
@@ -201,7 +232,8 @@ public final class Failure implements Function<Response, Response> {
 		return response
 				.status(status)
 				.cause(cause)
-				.body(JSONFormat.asJSON, builder.build());
+				.body(json())
+				.set(builder.build());
 
 	}
 

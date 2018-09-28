@@ -39,7 +39,7 @@ import java.util.regex.Matcher;
 
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Report.trace;
+import static com.metreeca.form.Report.report;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.compare;
@@ -54,10 +54,12 @@ import static java.util.stream.Collectors.toSet;
 
 final class SPARQLWriter {
 
-	private static final Logger logger=Logger.getLogger(SPARQLWriter.class.getName()); // !!! migrate logging to Graph?
+	private static final Logger logger=Logger.getLogger(SPARQLWriter.class.getName()); // !!! migrate logging to Trace?
 
 
-	private final RepositoryConnection connection; // !!! as argument
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final RepositoryConnection connection;
 
 
 	public SPARQLWriter(final RepositoryConnection connection) {
@@ -69,6 +71,8 @@ final class SPARQLWriter {
 		this.connection=connection;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Report process(final Shape shape, final Iterable<Statement> model, final Value... focus) {
 
@@ -92,6 +96,8 @@ final class SPARQLWriter {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private String compile(final SPARQL sparql) {
 
 		final String query=sparql.compile();
@@ -103,9 +109,6 @@ final class SPARQLWriter {
 		return query;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	// support patterns for Custom shape validation // !!! refactor
 
 	private static final java.util.regex.Pattern ValuesPattern=java.util.regex.Pattern.compile(
@@ -115,6 +118,8 @@ final class SPARQLWriter {
 	private static final java.util.regex.Pattern TailPattern=java.util.regex.Pattern.compile(
 			"(.*)(\\s*}\\s*)", java.util.regex.Pattern.DOTALL);
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Validate constraints on a focus value set.
@@ -130,7 +135,7 @@ final class SPARQLWriter {
 
 
 		@Override protected Report fallback(final Shape shape) {
-			return trace();
+			return Report.report();
 		}
 
 
@@ -140,13 +145,13 @@ final class SPARQLWriter {
 
 
 		@Override public Report visit(final MinCount minCount) {
-			return focus.size() >= minCount.getLimit() ? trace() : trace(issue(
+			return focus.size() >= minCount.getLimit() ? Report.report() : Report.report(issue(
 					Issue.Level.Error, "invalid item count", minCount, focus
 			));
 		}
 
 		@Override public Report visit(final MaxCount maxCount) {
-			return focus.size() <= maxCount.getLimit() ? trace() : trace(issue(
+			return focus.size() <= maxCount.getLimit() ? Report.report() : Report.report(issue(
 					Issue.Level.Error, "invalid item count", maxCount, focus
 			));
 		}
@@ -155,14 +160,14 @@ final class SPARQLWriter {
 
 			final Set<Value> values=in.getValues();
 
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !values.contains(value))
 					.map(value -> issue(Issue.Level.Error, "out of range value", in, value))
 					.collect(toList()));
 		}
 
 		@Override public Report visit(final All all) {
-			return trace(all.getValues().stream()
+			return Report.report(all.getValues().stream()
 					.filter(value -> !focus.contains(value))
 					.map(value -> issue(Issue.Level.Error, "missing required value", all, value))
 					.collect(toList()));
@@ -172,20 +177,20 @@ final class SPARQLWriter {
 			return any.getValues().stream()
 					.filter(focus::contains)
 					.findAny()
-					.map(values -> trace())
-					.orElseGet(() -> trace(issue(Issue.Level.Error, "missing alternative value", any, focus)));
+					.map(values -> Report.report())
+					.orElseGet(() -> Report.report(issue(Issue.Level.Error, "missing alternative value", any, focus)));
 		}
 
 
 		@Override public Report visit(final Datatype datatype) {
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !is(value, datatype.getIRI()))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid datatype", datatype, value))
 					.collect(toList()));
 		}
 
 		@Override public Report visit(final Clazz clazz) {
-			if ( focus.isEmpty() ) { return trace(); } else {
+			if ( focus.isEmpty() ) { return Report.report(); } else {
 
 				final Collection<Issue> issues=new ArrayList<>();
 
@@ -220,36 +225,36 @@ final class SPARQLWriter {
 					}
 				});
 
-				return trace(issues, focus.stream()
-						.map(value -> frame(value, Frame.slot(Step.step(RDF.TYPE), trace(emptySet(), frame(clazz.getIRI())))))
+				return report(issues, focus.stream()
+						.map(value -> frame(value, Frame.slot(Step.step(RDF.TYPE), Report.report(emptySet(), frame(clazz.getIRI())))))
 						.collect(toList()));
 			}
 		}
 
 
 		@Override public Report visit(final MinExclusive minExclusive) {
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !(compare(value, minExclusive.getValue()) > 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", minExclusive, value))
 					.collect(toList()));
 		}
 
 		@Override public Report visit(final MaxExclusive maxExclusive) {
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !(compare(value, maxExclusive.getValue()) < 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", maxExclusive, value))
 					.collect(toList()));
 		}
 
 		@Override public Report visit(final MinInclusive minInclusive) {
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !(compare(value, minInclusive.getValue()) >= 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", minInclusive, value))
 					.collect(toList()));
 		}
 
 		@Override public Report visit(final MaxInclusive maxInclusive) {
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !(compare(value, maxInclusive.getValue()) <= 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", maxInclusive, value))
 					.collect(toList()));
@@ -266,7 +271,7 @@ final class SPARQLWriter {
 
 			// match the whole string: don't use compiled.asPredicate() (implemented using .find())
 
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !compiled.matcher(text(value)).matches())
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", pattern, value))
 					.collect(toList()));
@@ -280,7 +285,7 @@ final class SPARQLWriter {
 					.compile(expression)
 					.asPredicate();
 
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !predicate.test(text(value)))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", like, value))
 					.collect(toList()));
@@ -290,7 +295,7 @@ final class SPARQLWriter {
 
 			final int limit=maxLength.getLimit();
 
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !(text(value).length() <= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", maxLength, value))
 					.collect(toList()));
@@ -300,7 +305,7 @@ final class SPARQLWriter {
 
 			final int limit=minLength.getLimit();
 
-			return trace(focus.stream()
+			return Report.report(focus.stream()
 					.filter(value -> !(text(value).length() >= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", minLength, value))
 					.collect(toList()));
@@ -308,7 +313,7 @@ final class SPARQLWriter {
 
 
 		@Override public Report visit(final Custom custom) {
-			if ( focus.isEmpty() ) { return trace(); } else {
+			if ( focus.isEmpty() ) { return Report.report(); } else {
 
 				final Collection<Issue> issues=new ArrayList<>();
 
@@ -368,7 +373,7 @@ final class SPARQLWriter {
 
 				});
 
-				return trace(issues);
+				return Report.report(issues);
 
 			}
 		}
@@ -379,7 +384,7 @@ final class SPARQLWriter {
 			final Step step=trait.getStep();
 			final Shape shape=trait.getShape();
 
-			return trace(Sets.set(), focus.stream().map(value -> { // for each focus value
+			return report(Sets.set(), focus.stream().map(value -> { // for each focus value
 
 				// compute the new focus set expanding the trait shift from the focus value
 
@@ -406,7 +411,7 @@ final class SPARQLWriter {
 
 				// return trait validation results
 
-				return frame(value, Frame.slot(step, trace(issues, Lists.concat(frames, placeholders))));
+				return frame(value, Frame.slot(step, report(issues, Lists.concat(frames, placeholders))));
 
 			}).collect(toList()));
 
@@ -416,13 +421,13 @@ final class SPARQLWriter {
 		@Override public Report visit(final And and) {
 			return and.getShapes().stream()
 					.map(shape -> shape.accept(this))
-					.reduce(trace(), Report::merge);
+					.reduce(Report.report(), Report::merge);
 		}
 
 		@Override public Report visit(final Or or) {
 			return or.getShapes().stream()
 					.map(shape -> shape.accept(this))
-					.reduce(trace(), Report::merge);
+					.reduce(Report.report(), Report::merge);
 		}
 
 		@Override public Report visit(final Test test) {

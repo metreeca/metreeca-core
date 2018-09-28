@@ -17,68 +17,62 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Result;
-
-import static com.metreeca.form.Result.error;
-
 
 /**
  * Message body format.
  *
- * <p>Manages the conversion between structured and raw message body representations.</p>
+ * <p>Manages the conversion between raw and structured message bodies.</p>
  *
- * @param <V> the type of the structured message body representation managed by the format
+ * @param <V> the type of the structured message body managed by the format
  */
 public interface Format<V> {
 
 	/**
-	 * Retrieves the structured body representation of a message.
+	 * Retrieves a structured body from a message.
 	 *
 	 * <p>Processing failure should be reported using the following HTTP status codes:</p>
 	 *
 	 * <ul>
-	 * <li>{@link Response#UnsupportedMediaType} for missing representations;</li>
-	 * <li>{@link Response#BadRequest} for malformed representations, unless a more specific status code is
-	 * available.</li>
+	 * <li>{@link Response#UnsupportedMediaType} for missing bodies;</li>
+	 * <li>{@link Response#BadRequest} for malformed bodies, unless a more specific status code is available.</li>
 	 * </ul>
 	 *
-	 * <p>The default implementation reports a failure with the {@link Response#UnsupportedMediaType} status code.</p>
+	 * <p>The default implementation returns a failure reporting the {@link Response#UnsupportedMediaType} status,
+	 * unless explicitly {@linkplain Message.Body#set(Object) overridden}</p>
 	 *
-	 * @param message the message whose structured body representation associated with this format is to be retrieved
+	 * @param message the message the structured body managed by this format is to be retrieved from
 	 *
-	 * @return a result providing access to the structured body representation associated with this format, if it was
-	 * possible to derive one from {@code message}; a result providing access to the processing failure, otherwise
+	 * @return a result providing access to the structured body managed by this format, if it was possible to derive one
+	 * from {@code message}; a result providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public default Result<V, Failure> get(final Message<?> message) {
+	public default Result<V> get(final Message<?> message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
 		}
 
-		return error(new Failure().status(Response.UnsupportedMediaType));
+		return new Failure<V>().status(Response.UnsupportedMediaType);
 	}
 
 	/**
-	 * Configures the structured body representation of a message.
+	 * Configures a message to hold a structured body.
 	 *
 	 * <p>The default implementation has no effect.</p>
 	 *
-	 * @param message the message whose structured body representation associated with this format is to be configured
-	 * @param value   the structured body representation to be configured for {@code message}
+	 * <p>The default implementation has no effects.</p>
+	 *
+	 * @param message the message to be configured to hold a structured body managed by this format
 	 *
 	 * @return the configured {@code message}
-	 * @throws NullPointerException if either {@code message} or {@code value} is null
+	 *
+	 * @throws NullPointerException if {@code message} is null
 	 */
-	public default <T extends Message<T>> T set(final T message, final V value) {
+	public default <T extends Message<T>> T set(final T message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
 		}
 
 		return message;

@@ -17,25 +17,32 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Format;
+import com.metreeca.rest.*;
 
 import java.io.InputStream;
 import java.util.function.Supplier;
 
 
 /**
- * Binary inbound raw body format.
+ * Raw binary input body format.
  */
 public final class InputFormat implements Format<Supplier<InputStream>> {
 
+	private static final InputFormat Instance=new InputFormat();
+
+
 	/**
-	 * The singleton binary inbound raw body format.
+	 * Retrieves the raw binary input body format.
+	 *
+	 * @return the singleton raw binary input body format instance
 	 */
-	public static final InputFormat asInput=new InputFormat();
+	public static InputFormat input() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private InputFormat() {} // singleton
+	private InputFormat() {}
 
 }

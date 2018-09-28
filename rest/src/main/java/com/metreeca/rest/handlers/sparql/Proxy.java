@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.sys.Trace;
 
@@ -27,6 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
@@ -74,7 +74,7 @@ public class Proxy implements Handler {
 						: e instanceof IOException ? Response.BadGateway
 						: Response.InternalServerError;
 
-				return response.map(new Failure()
+				return response.map(new Failure<>()
 						.status(i)
 						.error("request-failed")
 						.cause(e));
@@ -160,12 +160,15 @@ public class Proxy implements Handler {
 
 		}
 
-		return response.body(OutputFormat.asOutput, output -> {
-			try (final InputStream in=connect(connection)) {
+		return response.body(output()).set(target -> {
+			try (
+					final OutputStream output=target.get();
+					final InputStream input=connect(connection)
+			) {
 
 				final byte[] buffer=new byte[1024];
 
-				for (int i; (i=in.read(buffer)) >= 0; ) {
+				for (int i; (i=input.read(buffer)) >= 0; ) {
 					output.write(buffer, 0, i);
 				}
 

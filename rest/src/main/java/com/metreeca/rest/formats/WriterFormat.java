@@ -17,41 +17,60 @@
 
 package com.metreeca.rest.formats;
 
+import com.metreeca.rest.Result;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
 import java.io.Writer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static com.metreeca.rest.Result.value;
 
 
 /**
- * Textual outbound raw body format.
+ * Textual output body format.
  */
-public final class WriterFormat implements Format<Consumer<Writer>> {
+public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
+
+	private static final WriterFormat Instance=new WriterFormat();
+
 
 	/**
 	 * The default MIME type for textual outbound raw message bodies.
 	 */
 	private static final String MIME="text/plain";
 
+
 	/**
-	 * The singleton textual outbound raw body format.
+	 * Retrieves the textual output body format.
+	 *
+	 * @return the singleton textual output body format instance
 	 */
-	public static final WriterFormat asWriter=new WriterFormat();
+	public static WriterFormat writer() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private WriterFormat() {} // singleton
+	private WriterFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * @return a result providing access to a consumer taking no action on the supplied writer provider
+	 */
+	@Override public Result<Consumer<Supplier<Writer>>> get(final Message<?> message) {
+		return value(target -> {});
+	}
 
 	/**
 	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final Consumer<Writer> value) {
-		return message.header("Content-Type", v -> v.orElse(MIME));
+	@Override public <T extends Message<T>> T set(final T message) {
+		return message.header("~Content-Type", MIME);
 	}
 
 }

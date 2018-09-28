@@ -17,12 +17,12 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.formats.TextFormat;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.metreeca.rest.formats.TextFormat.text;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,13 +39,15 @@ final class HandlerTest {
 
 			transaction.add("begin");
 
-			request.reply(response -> response.body(TextFormat.asText, "inside")).accept(consumer);
+			request.reply(response -> response.body(text()).set("inside")).accept(consumer);
 
 			transaction.add("commit");
 
 		};
 
-		handler.handle(new Request()).accept(response -> transaction.add(response.body(TextFormat.asText).value().orElse("")));
+		handler.handle(new Request()).accept(response -> {
+			transaction.add(response.body(text()).get().orElse(""));
+		});
 
 		assertEquals(asList("begin", "inside", "commit"), transaction);
 	}

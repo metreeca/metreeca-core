@@ -18,7 +18,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Result;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.JSONAdapter;
 import com.metreeca.form.probes.Outliner;
@@ -33,18 +32,19 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.*;
 
 import javax.json.Json;
 
-import static com.metreeca.form.Result.error;
-import static com.metreeca.form.Result.value;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.rest.formats.OutputFormat.asOutput;
+import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
+
+import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
 
 /**
@@ -52,35 +52,43 @@ import static com.metreeca.rest.formats.OutputFormat.asOutput;
  */
 public final class RDFFormat implements Format<Collection<Statement>> {
 
+	private static final RDFFormat Instance=new RDFFormat();
+
+
 	/**
-	 * The singleton RDF body format.
+	 * Retrieves the RDF body format.
+	 *
+	 * @return the singleton RDF body format instance
 	 */
-	public static final Format<Collection<Statement>> asRDF=new RDFFormat();
+	public static RDFFormat rdf() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private RDFFormat() {} // singleton
+	private RDFFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
-	 * representation, if present; an empty optional, otherwise
+	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
+	 * status, otherwise
 	 */
-	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(InputFormat.asInput).value(supplier -> {
+	@Override public Result<Collection<Statement>> get(final Message<?> message) {
+		return message.body(input()).flatMap(supplier -> {
 
 			final Optional<Request> request=message.as(Request.class);
 
 			final Optional<IRI> focus=request.map(Request::item);
-			final Optional<Shape> shape=message.body(ShapeFormat.asShape).value();
+			final Optional<Shape> shape=message.body(shape()).get();
 
 			final String type=request.flatMap(r -> r.header("Content-Type")).orElse("");
 
 			final RDFParser parser=Formats
-					.service(RDFParserRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, type)
+					.service(RDFParserRegistry.getInstance(), TURTLE, type)
 					.getParser();
 
 			parser.set(JSONAdapter.Shape, shape.orElse(null));
@@ -134,7 +142,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 			} else {
 
-				return error(new Failure()
+				return new Failure<Collection<Statement>>()
 						.status(Response.BadRequest)
 						.error(Failure.BodyMalformed)
 						.trace(Json.createObjectBuilder()
@@ -144,7 +152,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 								.add("error", Json.createArrayBuilder(errors))
 								.add("warning", Json.createArrayBuilder(warnings))
 
-								.build()));
+								.build());
 
 			}
 
@@ -153,36 +161,41 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 	/**
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the RDF {@code value} to the
-	 * accepted output stream and sets the {@code Content-Type} header to the MIME type of the selected RDF format.
+	 * accepted output stream and sets the {@code Content-Type} header to the MIME type of the RDF serialization
+	 * selected according to the {@code Accept} header of the request associated to the message, if one is present, or
+	 * to {@code "text/turtle"}, otherwise.
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final Collection<Statement> value) {
+	@Override public <T extends Message<T>> T set(final T message) {
 
 		final Optional<Response> response=message.as(Response.class);
 
 		final List<String> types=Formats.types(response.map(r -> r.request().headers("Accept")).orElse(list()));
 
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
-		final RDFWriterFactory factory=Formats.service(registry, org.eclipse.rdf4j.rio.RDFFormat.TURTLE, types);
+		final RDFWriterFactory factory=Formats.service(registry, TURTLE, types);
 
-		// try to set content type to the actual type requested even if it's not the default one
+		return message
 
-		message.header("Content-Type", types.stream()
-				.filter(type -> registry.getFileFormatForMIMEType(type).isPresent())
-				.findFirst()
-				.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()));
+				// try to set content type to the actual type requested even if it's not the default one
 
-		message.body(asOutput, output -> {
+				.header("Content-Type", types.stream()
+						.filter(type -> registry.getFileFormatForMIMEType(type).isPresent())
+						.findFirst()
+						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()))
+				.body(output()).flatPipe(consumer -> message.body(rdf()).map(rdf -> target -> {
+					try (final OutputStream output=target.get()) {
 
-			final RDFWriter rdf=factory.getWriter(output);
+						final RDFWriter writer=factory.getWriter(output);
 
-			rdf.set(JSONAdapter.Shape, message.body(ShapeFormat.asShape).value().orElse(null));
-			rdf.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
+						writer.set(JSONAdapter.Shape, message.body(shape()).get().orElse(null));
+						writer.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
 
-			Rio.write(value, rdf);
+						Rio.write(rdf, writer);
 
-		});
-
-		return message;
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				}));
 	}
 
 }

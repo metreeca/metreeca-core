@@ -17,24 +17,54 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.Shape;
+import com.metreeca.form.Shift;
+import com.metreeca.form.shapes.*;
+import com.metreeca.form.shifts.Count;
+import com.metreeca.form.shifts.Step;
+import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.ReaderFormat;
-import com.metreeca.rest.formats.WriterFormat;
+import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.formats.ShapeFormat;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
-import java.io.*;
+import java.util.Collection;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static com.metreeca.form.things.Transputs.text;
+import static com.metreeca.form.shapes.All.all;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Any.any;
+import static com.metreeca.form.shapes.Clazz.clazz;
+import static com.metreeca.form.shapes.Custom.custom;
+import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Default.dflt;
+import static com.metreeca.form.shapes.Group.group;
+import static com.metreeca.form.shapes.Hint.hint;
+import static com.metreeca.form.shapes.In.in;
+import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
+import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
+import static com.metreeca.form.shapes.MinExclusive.minExclusive;
+import static com.metreeca.form.shapes.MinInclusive.minInclusive;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Test.test;
+import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Virtual.virtual;
+import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.shifts.Count.count;
+import static com.metreeca.form.shifts.Step.step;
+import static com.metreeca.form.shifts.Table.table;
+import static com.metreeca.form.things.Transputs.encode;
 import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -47,26 +77,19 @@ import static java.util.stream.Collectors.toSet;
  * <ul>
  *
  * <li>request {@linkplain Request#user() user}, {@linkplain Request#roles() roles}, {@linkplain Request#base() base},
- * {@linkplain Request#parameters() parameter values}, {@linkplain Request#headers() headers} and {@link ReaderFormat}
- * {@linkplain Request#body(Format) body} payloads;</li>
+ * {@linkplain Request#query() query}, {@linkplain Request#parameters() parameters}, {@linkplain Request#headers()
+ * headers}, {@link ShapeFormat} and {@link RDFFormat} {@linkplain Request#body(Format) body} payloads;</li>
  *
- * <li>response {@linkplain Request#headers() headers} and {@link WriterFormat} {@linkplain Request#body(Format) body}
- * payloads;</li>
+ * <li>response {@linkplain Request#item() focus item}, {@linkplain Request#headers() headers}, {@link ShapeFormat} and
+ * {@link RDFFormat} {@linkplain Request#body(Format) body} payloads;</li>
  *
  * </ul>
  *
- * <p>This wrapper is intended to ensure data portability between development and production environment and may cause
- * severe performance degradation for large payloads: setting the canonical {@linkplain #base(String) base} to the
- * expected public server base effectively disables rewriting in production.</p>
+ * <p><strong>Warning</strong> / This wrapper is intended to ensure data portability between development and production
+ * environment and may cause severe performance degradation for large payloads: setting the canonical {@linkplain
+ * #base(String) base} to the expected public server base effectively disables rewriting in production.</p>
  */
-public final class Rewriter implements Wrapper { // !!! review interactions with multi-part messages
-
-	private static Pattern pattern(final String source) {
-		return Pattern.compile("\\b"+Pattern.quote(source)+"\\b");
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+public final class Rewriter implements Wrapper {
 
 	private String base;
 
@@ -81,7 +104,7 @@ public final class Rewriter implements Wrapper { // !!! review interactions with
 	 * @return this rewriter
 	 *
 	 * @throws NullPointerException     if {@code base} is null
-	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or ends with a legal {@linkplain
+	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or ends with a {@linkplain
 	 *                                  Character#isUnicodeIdentifierPart(char) Unicode identifier character}
 	 */
 	public Rewriter base(final String base) {
@@ -120,78 +143,230 @@ public final class Rewriter implements Wrapper { // !!! review interactions with
 			final boolean identity=external.isEmpty() || internal.isEmpty() || external.equals(internal);
 
 			return identity ? handler.handle(request) : request
-					.map(r -> rewrite(pattern(external), internal, r))
+					.map(r -> rewrite(external, internal, r))
 					.map(handler::handle)
-					.map(r -> rewrite(pattern(internal), external, r));
+					.map(r -> rewrite(internal, external, r));
 		};
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Request rewrite(final Pattern source, final String target, final Request request) {
+	private Request rewrite(final String source, final String target, final Request request) {
+
+		final Engine decoded=new Engine(source, target);
+		final Engine encoded=new Engine(encode(source), encode(target));
+
 		return request
 
-				.user(rewrite(source, target, request.user()))
-				.roles(request.roles().stream().map(value -> rewrite(source, target, value)).collect(toSet()))
+				.user(decoded.rewrite(request.user()))
+				.roles(decoded.rewrite(request.roles(), decoded::rewrite))
 
-				.base(rewrite(source, target, request.base()))
+				.base(decoded.rewrite(request.base()))
 
-				.query(rewrite(source, target, request.query())) // !!! interactions with decoding?
+				.query(decoded.rewrite(request.query())) // decoded variant
+				.query(encoded.rewrite(request.query())) // encoded variant
 
-				.parameters(request.parameters().entrySet().stream().collect(toMap(Map.Entry::getKey, entry ->
-						entry.getValue().stream().map(value -> rewrite(source, target, value)).collect(toList())
-				)))
+				.parameters(decoded.rewrite(request.parameters()))
+				.headers(decoded.rewrite(request.headers()))
 
-				.headers(request.headers().entrySet().stream().collect(toMap(Map.Entry::getKey, entry ->
-						entry.getValue().stream().map(value -> rewrite(source, target, value)).collect(toList())
-				)))
-
-				.filter(ReaderFormat.asReader, supplier -> () -> rewrite(source, target, supplier.get()));
+				.body(shape()).pipe(decoded::rewrite)
+				.body(rdf()).pipe(model -> decoded.rewrite(model, decoded::rewrite));
 	}
 
-	private Response rewrite(final Pattern source, final String target, final Response response) {
+	private Response rewrite(final String source, final String target, final Response response) {
+
+		final Engine decoded=new Engine(source, target);
+
 		return response
 
-				.headers(response.headers().entrySet().stream().collect(toMap(Map.Entry::getKey, entry ->
-						entry.getValue().stream().map(value -> rewrite(source, target, value)).collect(toList())
-				)))
+				// ;( force response focus rewriting even if location is not already set
 
-				.filter(WriterFormat.asWriter, consumer -> writer -> consumer.accept(rewrite(source, target, writer)));
+				.header("Location", response.item().stringValue())
+
+				.headers(decoded.rewrite(response.headers()))
+
+				.body(shape()).pipe(decoded::rewrite)
+				.body(rdf()).pipe(model -> decoded.rewrite(model, decoded::rewrite));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Value rewrite(final Pattern source, final String target, final Value value) {
-		return value instanceof IRI ? iri(rewrite(source, target, value.stringValue())) : value;
-	}
+	private static final class Engine {
 
-	private IRI rewrite(final Pattern source, final String target, final IRI iri) {
-		return iri == null ? null : iri(rewrite(source, target, iri.toString()));
-	}
+		private final Pattern source;
+		private final String target;
 
-	private String rewrite(final Pattern source, final String target, final CharSequence string) {
-		return string == null ? null : source.matcher(string).replaceAll(target);
-	}
+		private final ShapeEngine shapes;
+		private final ShiftEngine shifts;
 
-	private Reader rewrite(final Pattern source, final String target, final Reader reader) { // !!! streaming replacement
-		return reader == null ? null : new FilterReader(new StringReader(rewrite(source, target, text(reader)))) {
 
-			@Override public void close() throws IOException { reader.close(); }
+		private Engine(final String source, final String target) {
 
-		};
-	}
+			this.source=Pattern.compile("\\b"+Pattern.quote(source));
+			this.target=target;
 
-	private Writer rewrite(final Pattern source, final String target, final Writer writer) { // !!! streaming replacement
-		return writer == null ? null : new FilterWriter(new StringWriter()) {
+			this.shapes=new ShapeEngine();
+			this.shifts=new ShiftEngine();
+		}
 
-			@Override public void close() throws IOException {
-				writer.write(rewrite(source, target, out.toString()));
-				writer.close();
+
+		private Shape rewrite(final Shape shape) {
+			return shape.accept(shapes);
+		}
+
+		private Shift rewrite(final Shift shift) {
+			return shift.accept(shifts);
+		}
+
+
+		private <T> Collection<T> rewrite(final Collection<T> collection, final Function<T, T> rewriter) {
+			return collection.stream().map(rewriter).collect(toList());
+		}
+
+		private Map<String, Collection<String>> rewrite(final Map<String, Collection<String>> map) {
+			return map.entrySet().stream().collect(toMap(
+					Map.Entry::getKey, entry -> rewrite(entry.getValue(), this::rewrite)
+			));
+		}
+
+
+		private Statement rewrite(final Statement statement) {
+			return statement == null ? null : statement(
+					rewrite(statement.getSubject()),
+					rewrite(statement.getPredicate()),
+					rewrite(statement.getObject()),
+					rewrite(statement.getContext())
+			);
+		}
+
+		private Value rewrite(final Value value) {
+			return value instanceof IRI ? rewrite((IRI)value) : value;
+		}
+
+		private Resource rewrite(final Resource resource) {
+			return resource instanceof IRI ? rewrite((IRI)resource) : resource;
+		}
+
+		private IRI rewrite(final IRI iri) {
+			return iri == null ? null : iri(rewrite(iri.toString()));
+		}
+
+		private String rewrite(final CharSequence string) {
+			return string == null ? null : source.matcher(string).replaceAll(target);
+		}
+
+
+		//// !!! as interfaces /////////////////////////////////////////////////////////////////////////////////////////
+
+		private final class ShapeEngine extends Shape.Probe<Shape> {
+
+			@Override public Datatype visit(final Datatype datatype) {
+				return datatype(rewrite(datatype.getIRI()));
 			}
 
-		};
+			@Override public Clazz visit(final Clazz clazz) {
+				return clazz(rewrite(clazz.getIRI()));
+			}
+
+			@Override public MinExclusive visit(final MinExclusive minExclusive) {
+				return minExclusive(rewrite(minExclusive.getValue()));
+			}
+
+			@Override public MaxExclusive visit(final MaxExclusive maxExclusive) {
+				return maxExclusive(rewrite(maxExclusive.getValue()));
+			}
+
+			@Override public MinInclusive visit(final MinInclusive minInclusive) {
+				return minInclusive(rewrite(minInclusive.getValue()));
+			}
+
+			@Override public MaxInclusive visit(final MaxInclusive maxInclusive) {
+				return maxInclusive(rewrite(maxInclusive.getValue()));
+			}
+
+			@Override public Custom visit(final Custom custom) {
+				return custom(custom.getLevel(), custom.getMessage(), rewrite(custom.getQuery()));
+			}
+
+			@Override public In visit(final In in) {
+				return in(rewrite(in.getValues(), Engine.this::rewrite));
+			}
+
+			@Override public All visit(final All all) {
+				return all(rewrite(all.getValues(), Engine.this::rewrite));
+			}
+
+			@Override public Any visit(final Any any) {
+				return any(rewrite(any.getValues(), Engine.this::rewrite));
+			}
+
+			@Override public Trait visit(final Trait trait) {
+				return trait(shifts.visit(trait.getStep()), rewrite(trait.getShape()));
+			}
+
+			@Override public Virtual visit(final Virtual virtual) {
+				return virtual(shapes.visit(virtual.getTrait()), rewrite(virtual.getShift()));
+			}
+
+			@Override public And visit(final And and) {
+				return and(and.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
+			}
+
+			@Override public Or visit(final Or or) {
+				return or(or.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
+			}
+
+			@Override public Test visit(final Test test) {
+				return test(rewrite(test.getTest()), rewrite(test.getPass()), rewrite(test.getFail()));
+			}
+
+			@Override public When visit(final When when) {
+				return when(rewrite(when.getIRI()), rewrite(when.getValues(), Engine.this::rewrite));
+			}
+
+			@Override public Default visit(final Default dflt) {
+				return dflt(rewrite(dflt.getValue()));
+			}
+
+			@Override public Hint visit(final Hint hint) {
+				return hint(rewrite(hint.getIRI()));
+			}
+
+			@Override public Group visit(final Group group) {
+				return group(rewrite(group.getShape()));
+			}
+
+			@Override protected Shape fallback(final Shape shape) {
+				return shape;
+			}
+
+		}
+
+		private final class ShiftEngine extends Shift.Probe<Shift> {
+
+			@Override public Step visit(final Step step) {
+				return step(rewrite(step.getIRI()), step.isInverse());
+			}
+
+			@Override public Count visit(final Count count) {
+				return count(count.getShift().accept(this));
+			}
+
+			@Override public Table visit(final Table table) {
+				return table(table.getFields().entrySet().stream().collect(toMap(
+						entry -> shapes.visit(entry.getKey()),
+						entry -> rewrite(entry.getValue())
+				)));
+			}
+
+			@Override protected Shift fallback(final Shift shift) {
+				return shift;
+			}
+
+		}
+
 	}
 
 }

@@ -17,59 +17,158 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+import java.util.function.BiFunction;
+
+import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
+
+import static org.junit.Assert.fail;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 
 
 final class ProcessorTest {
 
-	//@Test void testShapedRelatePiped() {
-	//	testbed()
-	//
-	//			.handler(() -> relator().shape(ValuesTest.Employee)
-	//
-	//					.pipe((request, model) -> {
-	//
-	//						model.add(statement(request.focus(), RDF.VALUE, RDF.FIRST));
-	//
-	//						return model;
-	//
-	//					})
-	//
-	//					.pipe((request, model) -> {
-	//
-	//						model.add(statement(request.focus(), RDF.VALUE, RDF.REST));
-	//
-	//						return model;
-	//
-	//					}))
-	//
-	//			.request(request -> std(request)
-	//					.user(RDF.NIL)
-	//					.roles(LinkTest.Manager)
-	//					.done())
-	//
-	//			.response(response -> {
-	//
-	//				ValuesTest.assertSubset("items retrieved", asList(
-	//
-	//						statement(response.focus(), RDF.VALUE, RDF.FIRST),
-	//						statement(response.focus(), RDF.VALUE, RDF.REST)
-	//
-	//				), response.rdf());
-	//
-	//			});
-	//
-	//}
+	private Handler echo() {
+		return request -> request.reply(response -> {
+			return ((Result<Collection<Statement>>)request.body(rdf())).map(v -> response.body(rdf()).set(v), e -> response).status(Response.OK);
+				}
+		);
+	}
 
+
+	private BiFunction<Request, Model, Model> pre(final Value value) {
+		return (request, model) -> {
+
+			model.add(statement(request.item(), RDF.VALUE, value));
+
+			return model;
+
+		};
+	}
+
+	private BiFunction<Response, Model, Model> post(final Value value) {
+		return (response, model) -> {
+
+			model.add(statement(response.item(), RDF.VALUE, value));
+
+			return model;
+
+		};
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testProcessRequestRDFPayload() {
+		new Tray()
+
+				.get(() -> new Processor() // multiple filters to test piping
+
+						.pre(pre(RDF.FIRST))
+						.pre(pre(RDF.REST)))
+
+				.wrap(echo())
+
+				.handle(new Request()
+
+						.body(rdf()).set(emptyList()))
+
+				.accept(response -> {
+					response.body(rdf()).use(
+							model -> assertSubset("items retrieved", asList(
+									statement(response.item(), RDF.VALUE, RDF.FIRST),
+									statement(response.item(), RDF.VALUE, RDF.REST)
+							), model),
+							error -> fail("missing RDF payload")
+					);
+
+				});
+	}
+
+	@Test void testIgnoreMissingRequestRDFPayload() {
+		new Tray()
+
+				.get(() -> new Processor()
+
+						.pre(pre(RDF.FIRST)))
+
+				.wrap(echo())
+
+				.handle(new Request()) // no RDF payload
+
+				.accept(response -> {
+					response.body(rdf()).use(
+							model -> fail("unexpected RDF payload"),
+							error -> {}
+					);
+				});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testProcessResponseRDFPayload() {
+		new Tray()
+
+				.get(() -> new Processor() // multiple filters to test piping
+
+						.post(post(RDF.FIRST))
+						.post(post(RDF.REST)))
+
+				.wrap(echo())
+
+				.handle(new Request()
+
+						.body(rdf()).set(emptyList()))
+
+				.accept(response -> {
+					response.body(rdf()).use(
+							model -> assertSubset("items retrieved", asList(
+									statement(response.item(), RDF.VALUE, RDF.FIRST),
+									statement(response.item(), RDF.VALUE, RDF.REST)
+							), model),
+							error -> fail("missing RDF payload")
+					);
+
+				});
+	}
+
+	@Test void testIgnoreMissingResponseRDFPayload() {
+		new Tray()
+
+				.get(() -> new Processor()
+
+						.post(post(RDF.FIRST)))
+
+				.wrap(echo())
+
+				.handle(new Request()) // no RDF payload
+
+				.accept(response -> {
+					response.body(rdf()).use(
+							model -> fail("unexpected RDF payload"),
+							error -> {}
+					);
+				});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testExecuteUpdateScriptOnRequestFocus() {
 
@@ -83,7 +182,7 @@ final class ProcessorTest {
 				}))
 
 				.get(() -> new Processor()
-						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
+						.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
 						.wrap((Handler)request -> request.reply(response -> response.status(Response.OK))))
 
 				.handle(new Request()
@@ -111,7 +210,7 @@ final class ProcessorTest {
 				}))
 
 				.get(() -> new Processor()
-						.script(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
+						.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
 						.wrap((Handler)request -> request.reply(response -> response
 								.status(Response.OK)
 								.header("Location", Base+"test"))))

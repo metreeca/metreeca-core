@@ -50,7 +50,6 @@ import java.util.function.Function;
  * </ul>
  *
  * <p>Trailing slashes and question marks in resource paths are ignored.</p>
-
  */
 public final class Router implements Handler {
 
@@ -94,6 +93,7 @@ public final class Router implements Handler {
 
 		return this;
 	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -17,21 +17,17 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Result;
 import com.metreeca.rest.*;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.form.Result.error;
-import static com.metreeca.form.Result.value;
-import static com.metreeca.rest.formats.ReaderFormat.asReader;
-import static com.metreeca.rest.formats.WriterFormat.asWriter;
+import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.formats.ReaderFormat.reader;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 
 
 /**
@@ -41,20 +37,28 @@ import static com.metreeca.rest.formats.WriterFormat.asWriter;
  */
 public final class JSONFormat implements Format<JsonObject> {
 
+	private static final JSONFormat Instance=new JSONFormat();
+
+
 	/**
 	 * The default MIME type for JSON message bodies.
 	 */
 	public static final String MIME="application/json";
 
+
 	/**
-	 * The singleton JSON body format.
+	 * Retrieves the JSON body format.
+	 *
+	 * @return the singleton JSON body format instance
 	 */
-	public static final Format<JsonObject> asJSON=new JSONFormat();
+	public static JSONFormat json() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSONFormat() {} // singleton
+	private JSONFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,35 +66,43 @@ public final class JSONFormat implements Format<JsonObject> {
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
 	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal
-	 * to {@value #MIME}; an empty optional, otherwise
+	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
-	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
-		return message.headers("content-type").contains(MIME) ? message.body(asReader).value(source -> {
+	@Override public Result<JsonObject> get(final Message<?> message) {
+		return message.headers("content-type").contains(MIME) ? message.body(reader()).flatMap(source -> {
 			try (final Reader reader=source.get()) {
 
 				return value(Json.createReader(reader).readObject());
 
 			} catch ( final JsonParsingException e ) {
 
-				return error(new Failure()
+				return new Failure<JsonObject>()
 						.status(Response.BadRequest)
 						.error(Failure.BodyMalformed)
-						.cause(e));
+						.cause(e);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		}) : error(new Failure().status(Response.UnsupportedMediaType));
+		}) : new Failure<JsonObject>().status(Response.UnsupportedMediaType);
 	}
 
 	/**
 	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
 	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final JsonObject value) {
+	@Override public <T extends Message<T>> T set(final T message) {
 		return message
 				.header("content-type", MIME)
-				.body(asWriter, writer -> Json.createWriter(writer).write(value));
+				.body(writer()).flatPipe(consumer -> message.body(json()).map(json -> target -> {
+					try (final Writer writer=target.get()) {
+
+						Json.createWriter(writer).write(json);
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				}));
 	}
 
 }

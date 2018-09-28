@@ -44,10 +44,12 @@ public final class Group implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Shape shape;
 
 
-	public Group(final Shape shape) {
+	private Group(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -57,10 +59,14 @@ public final class Group implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Shape getShape() {
 		return shape;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T accept(final Probe<T> probe) {
 
@@ -84,4 +90,5 @@ public final class Group implements Shape {
 	@Override public String toString() {
 		return "group("+shape+")";
 	}
+
 }

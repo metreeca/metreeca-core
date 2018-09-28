@@ -17,10 +17,7 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
 import org.junit.jupiter.api.Test;
@@ -42,7 +39,19 @@ final class ConditionalTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testDelegateHandlerUnconditionally() {
+	@Test void testDelegateHandler() {
+		new Tray()
+
+				.get(() -> new Conditional()
+						.test(request -> true)
+						.wrap(Handler))
+
+				.handle(new Request().method(Request.GET))
+
+				.accept(reader -> assertEquals(HandlerStatus, reader.status(), "handler delegated"));
+	}
+
+	@Test void testBypassHandler() {
 		new Tray()
 
 				.get(() -> new Conditional()
@@ -51,7 +60,7 @@ final class ConditionalTest {
 
 				.handle(new Request().method(Request.GET))
 
-				.accept(reader -> assertEquals(HandlerStatus, reader.status(), "handler delegated"));
+				.accept(reader -> assertEquals(0, reader.status(), "handler bypassed"));
 	}
 
 	@Test void testDelegateWrapper() {

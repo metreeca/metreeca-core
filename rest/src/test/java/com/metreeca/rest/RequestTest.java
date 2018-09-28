@@ -17,7 +17,6 @@
 
 package com.metreeca.rest;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.things.Lists.list;
@@ -47,14 +46,14 @@ final class RequestTest {
 		assertEquals(list("two"), list(request.parameters("parameter")));
 	}
 
-	@Test @Disabled void testBodyHandlesDefaultPart() {
-
-		//final Request request=new Request()
-		//		.part(Request.MainPart, new TestInbound().text("main"))
-		//		.part("part", new TestInbound().text("part"));
-		//
-		//assertEquals("main", request.text().orElse(""));
-
-	}
+	//@Test void testBodyHandlesDefaultPart() {
+	//
+	//	//final Request request=new Request()
+	//	//		.part(Request.MainPart, new TestInbound().text("main"))
+	//	//		.part("part", new TestInbound().text("part"));
+	//	//
+	//	//assertEquals("main", request.text().orElse(""));
+	//
+	//}
 
 }

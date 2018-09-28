@@ -20,6 +20,7 @@ package com.metreeca.rest.formats;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.Format;
 
+
 /**
  * Shape body format.
  *
@@ -27,11 +28,21 @@ import com.metreeca.rest.Format;
  */
 public final class ShapeFormat implements Format<Shape> {
 
-	public static final ShapeFormat asShape=new ShapeFormat();
+	private static final ShapeFormat Instance=new ShapeFormat();
+
+
+	/**
+	 * Retrieves the shape body format.
+	 *
+	 * @return the singleton shape body format instance
+	 */
+	public static ShapeFormat shape() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private ShapeFormat() {} // singleton
+	private ShapeFormat() {}
 
 }

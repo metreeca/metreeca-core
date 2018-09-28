@@ -17,17 +17,15 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Result;
-import com.metreeca.rest.Failure;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
+import com.metreeca.rest.Result;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
+import java.io.*;
 
-import static com.metreeca.form.Result.value;
-import static com.metreeca.form.things.Transputs.text;
+import static com.metreeca.rest.formats.ReaderFormat.reader;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 
 
 /**
@@ -35,28 +33,34 @@ import static com.metreeca.form.things.Transputs.text;
  */
 public final class TextFormat implements Format<String> {
 
+	private static final TextFormat Instance=new TextFormat();
+
+
 	/**
-	 * The singleton textual body format.
-	 */
-	public static final Format<String> asText=new TextFormat();
+	 * Retrieves the textual format.
+	 *
+	 * @return the singleton textual format instance
+	 */public static TextFormat text() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private TextFormat() {} // singleton
+	private TextFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional textual body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present; an empty optional, otherwise
+	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
+	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error, otherwise
 	 */
-	@Override public Result<String, Failure> get(final Message<?> message) {
-		return message.body(ReaderFormat.asReader).value(source -> {
+	@Override public Result<String> get(final Message<?> message) {
+		return message.body(reader()).map(source -> {
 			try (final Reader reader=source.get()) {
 
-				return value(text(reader));
+				return Transputs.text(reader);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -65,19 +69,19 @@ public final class TextFormat implements Format<String> {
 	}
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the textual {@code value} to the
-	 * writer supplied by the accepted writer.
+	 * Configures the {@link WriterFormat} body of {@code message} to write the textual {@code value} to the output
+	 * stream supplied by the accepted output stream supplier.
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final String value) {
-		return message.body(WriterFormat.asWriter, writer -> {
-			try {
+	@Override public <T extends Message<T>> T set(final T message) {
+		return message.body(writer()).flatPipe(consumer -> message.body(text()).map(bytes -> target -> {
+			try (final Writer output=target.get()) {
 
-				writer.write(value);
+				output.write(bytes);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		});
+		}));
 	}
 
 }

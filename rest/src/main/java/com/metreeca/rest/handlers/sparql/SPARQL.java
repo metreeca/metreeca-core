@@ -20,7 +20,6 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 
@@ -31,10 +30,14 @@ import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.*;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.metreeca.rest.Handler.refused;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;
@@ -117,7 +120,7 @@ public class SPARQL implements Handler {
 
 				if ( operation == null ) { // !!! return void description for GET
 
-					request.reply(new Failure()
+					request.reply(new Failure<>()
 							.status(Response.BadRequest)
 							.error("parameter-missing")
 							.cause("missing query/update parameter")
@@ -136,7 +139,15 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, output -> factory.getWriter(output).handleBoolean(result))
+							.body(output()).set(target -> {
+								try (final OutputStream output=target.get()) {
+
+									factory.getWriter(output).handleBoolean(result);
+
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
+								}
+							})
 					).accept(consumer);
 
 				} else if ( operation instanceof TupleQuery ) {
@@ -150,8 +161,8 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, output -> {
-								try {
+							.body(output()).set(target -> {
+								try (final OutputStream output=target.get()) {
 
 									final TupleQueryResultWriter writer=factory.getWriter(output);
 
@@ -162,6 +173,8 @@ public class SPARQL implements Handler {
 
 									writer.endQueryResult();
 
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
 								} finally {
 									result.close();
 								}
@@ -178,24 +191,28 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, output -> {
+							.body(output()).set(target -> {
+								try (final OutputStream output=target.get()) {
 
-								final RDFWriter writer=factory.getWriter(output);
+									final RDFWriter writer=factory.getWriter(output);
 
-								writer.startRDF();
+									writer.startRDF();
 
-								for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
-									writer.handleNamespace(entry.getKey(), entry.getValue());
+									for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
+										writer.handleNamespace(entry.getKey(), entry.getValue());
+									}
+
+									try {
+										while ( result.hasNext() ) { writer.handleStatement(result.next());}
+									} finally {
+										result.close();
+									}
+
+									writer.endRDF();
+
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
 								}
-
-								try {
-									while ( result.hasNext() ) { writer.handleStatement(result.next());}
-								} finally {
-									result.close();
-								}
-
-								writer.endRDF();
-
 							})).accept(consumer);
 
 				} else if ( operation instanceof Update ) {
@@ -220,12 +237,18 @@ public class SPARQL implements Handler {
 
 					request.reply(response -> response.status(Response.OK)
 							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-							.body(OutputFormat.asOutput, output -> factory.getWriter(output).handleBoolean(true))
+							.body(output()).set(target -> {
+								try (final OutputStream output=target.get()) {
+									factory.getWriter(output).handleBoolean(true);
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
+								}
+							})
 					).accept(consumer);
 
 				} else {
 
-					request.reply(new Failure()
+					request.reply(new Failure<>()
 							.status(Response.NotImplemented)
 							.error("operation-unsupported")
 							.cause(operation.getClass().getName())
@@ -235,7 +258,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final MalformedQueryException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.BadRequest)
 						.error("query-malformed")
 						.cause(e)
@@ -243,7 +266,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final IllegalArgumentException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.BadRequest)
 						.error("request-malformed")
 						.cause(e)
@@ -251,7 +274,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final UnsupportedOperationException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.NotImplemented)
 						.error("operation-unsupported")
 						.cause(e)
@@ -261,7 +284,7 @@ public class SPARQL implements Handler {
 
 				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.InternalServerError)
 						.error("query-evaluation")
 						.cause(e)
@@ -269,7 +292,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final UpdateExecutionException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.InternalServerError)
 						.error("update-evaluation")
 						.cause(e)
@@ -277,7 +300,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final TupleQueryResultHandlerException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.InternalServerError)
 						.error("response-error")
 						.cause(e)
@@ -285,7 +308,7 @@ public class SPARQL implements Handler {
 
 			} catch ( final RuntimeException e ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.InternalServerError)
 						.error("repository-error")
 						.cause(e)

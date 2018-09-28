@@ -18,10 +18,8 @@
 package com.metreeca.j2ee;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.*;
+import com.metreeca.rest.*;
+import com.metreeca.rest.formats.WriterFormat;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
 import com.metreeca.tray.sys.Storage;
@@ -37,6 +35,7 @@ import org.apache.commons.io.FileCleaningTracker;
 import java.io.*;
 import java.net.SocketTimeoutException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -44,6 +43,9 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
@@ -288,7 +290,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				return request
 
-						.body(InputFormat.asInput, () -> {
+						.body(input()).set(() -> {
 							try {
 								return http.getInputStream();
 							} catch ( final IOException e ) {
@@ -296,7 +298,7 @@ public abstract class Gateway implements ServletContextListener {
 							}
 						})
 
-						.body(ReaderFormat.asReader, () -> {
+						.body(reader()).set(() -> {
 							try {
 								return http.getReader();
 							} catch ( final IOException e ) {
@@ -401,23 +403,21 @@ public abstract class Gateway implements ServletContextListener {
 
 				response.headers().forEach((name, values) -> values.forEach(value -> http.addHeader(name, value)));
 
-				response.body(OutputFormat.asOutput).value().ifPresent(consumer -> {
-					try (final OutputStream output=http.getOutputStream()) {
-						consumer.accept(output);
+				response.body(output()).get().ifPresent(consumer -> consumer.accept(() -> {
+					try {
+						return http.getOutputStream();
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
+				}));
 
-				});
-
-				response.body(WriterFormat.asWriter).value().ifPresent(consumer -> {
-					try (final Writer writer=http.getWriter()) {
-						consumer.accept(writer);
+				response.body(WriterFormat.writer()).get().ifPresent(consumer -> consumer.accept(() -> {
+					try {
+						return http.getWriter();
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-
-				});
+				}));
 
 				// !!! @@@ no body: commit???
 

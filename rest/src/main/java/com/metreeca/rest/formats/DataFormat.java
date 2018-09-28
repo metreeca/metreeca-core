@@ -17,17 +17,16 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Result;
-import com.metreeca.rest.Failure;
+import com.metreeca.rest.Result;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 
-import static com.metreeca.form.Result.value;
-import static com.metreeca.form.things.Transputs.data;
+import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 
 
 /**
@@ -35,28 +34,36 @@ import static com.metreeca.form.things.Transputs.data;
  */
 public final class DataFormat implements Format<byte[]> {
 
+	private static final DataFormat Instance=new DataFormat();
+
+
 	/**
-	 * The singleton binary body format.
+	 * Retrieves the binary body format.
+	 *
+	 * @return the singleton binary body format instance
 	 */
-	public static final Format<byte[]> asData=new DataFormat();
+	private static DataFormat data() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private DataFormat() {} // singleton
+	private DataFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional binary body representation of {@code message}, as retrieved from the input stream supplied
-	 * by its {@link InputFormat} representation, if one is present; an empty optional, otherwise
+	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
+	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing error,
+	 * otherwise
 	 */
-	@Override public Result<byte[], Failure> get(final Message<?> message) {
-		return message.body(InputFormat.asInput).value(source -> {
+	@Override public Result<byte[]> get(final Message<?> message) {
+		return message.body(input()).flatMap(source -> {
 			try (final InputStream input=source.get()) {
 
-				return value(data(input));
+				return value(Transputs.data(input));
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -65,19 +72,19 @@ public final class DataFormat implements Format<byte[]> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the binary {@code value}
-	 * to the output stream supplied by the accepted output stream.
+	 * Configures the {@link OutputFormat} body of {@code message} to write the binary {@code value} to the output
+	 * stream supplied by the accepted output stream supplier.
 	 */
-	@Override public <T extends Message<T>> T set(final T message, final byte... value) {
-		return message.body(OutputFormat.asOutput, output -> {
-			try {
+	@Override public <T extends Message<T>> T set(final T message) {
+		return message.body(output()).flatPipe(consumer -> message.body(data()).map(bytes -> target -> {
+			try (final OutputStream output=target.get()) {
 
-				output.write(value);
+				output.write(bytes);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		});
+		}));
 	}
 
 }

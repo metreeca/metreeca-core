@@ -17,24 +17,36 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.Shape;
+import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ReaderFormat;
+import com.metreeca.rest.*;
+import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
+import javax.json.Json;
+
+import static com.metreeca.form.Shape.required;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.things.Transputs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -45,6 +57,8 @@ final class RewriterTest {
 
 	private static final String External=ValuesTest.Base;
 	private static final String Internal="app://test/";
+
+	private static final Shape TestShape=trait(internal("p"), and(required(), datatype(Values.IRIType)));
 
 
 	private static IRI external(final String name) {
@@ -71,92 +85,105 @@ final class RewriterTest {
 		assertThrows(IllegalArgumentException.class, () -> new Rewriter().base("/example.org/"));
 	}
 
-
-	//// IRI Rewriting /////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//@Test public void testHeadRewriting() {
-	//	LinkTest.testbed()
-	//
-	//			.toolkit(() -> setup())
-	//
-	//			.request(request -> request
-	//
-	//					.user(external("user"))
-	//					.roles(external("role"))
-	//
-	//					.method(Request.GET)
-	//
-	//					.base(External)
-	//					.path("/path")
-	//
-	//					.query(external("request").toString())
-	//					.parameter("request", external("request").toString())
-	//
-	//					.header("request", "request="+external("request"))
-	//
-	//					.done())
-	//
-	//			.handler(() -> server((request, response) -> {
-	//
-	//				assertEquals("user rewritten", internal("user"), request.user());
-	//				assertEquals("roles rewritten", singleton(internal("role")), request.roles());
-	//
-	//				assertEquals("base rewritten", Internal, request.base());
-	//				assertEquals("focus rewritten", internal("path"), request.focus());
-	//
-	//				assertEquals("query rewritten", internal("request").toString(), request.query());
-	//
-	//				assertEquals("parameters rewritten",
-	//						internal("request").toString(),
-	//						request.parameter("request").orElse(""));
-	//
-	//				assertEquals("request headers rewritten",
-	//						"request="+internal("request"),
-	//						request.header("request").orElse(""));
-	//
-	//				response.status(Response.OK)
-	//						.header("response", "response="+internal("response"))
-	//						.done();
-	//
-	//			}))
-	//
-	//			.response(response -> {
-	//
-	//				Assert.assertEquals("response headers rewritten",
-	//						"response="+external("response"),
-	//						response.header("response").orElse(""));
-	//
-	//			});
-	//}
-
-	@Test void testReaderRewriting() {
-
+	@Test void testHeadRewriting() {
 		new Tray()
 
-				.get(() -> (Handler)request -> {
+				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
-					request.body(RDFFormat.asRDF).handle(
+					assertThat(request.user()).named("rewritten user").isEqualTo(internal("user"));
+					assertThat(request.roles()).named("rewritten roles").containsExactly(internal("role"));
+
+					assertThat(request.base()).named("rewritten base").isEqualTo(Internal);
+					assertThat(request.item()).named("rewritten item").isEqualTo(internal("path"));
+
+					assertThat(request.query()).named("rewritten query").isEqualTo(internal("request").toString());
+
+					assertThat(request.parameters("request"))
+							.named("rewritten parameter")
+							.containsExactly(internal("request").toString());
+
+					assertThat(request.headers("request"))
+							.named("rewritten header")
+							.containsExactly("request="+internal("request"));
+
+					return request.reply(response -> response.status(Response.OK)
+							.header("response", "response="+internal("response")));
+
+				}))
+
+				.handle(new Request()
+
+						.user(external("user"))
+						.roles(external("role"))
+
+						.method(Request.GET)
+
+						.base(External)
+						.path("/path")
+
+						.query(external("request").toString())
+						.parameter("request", external("request").toString())
+
+						.header("request", "request="+external("request"))
+				)
+
+				.accept(response -> {
+
+					assertThat(response.headers("response"))
+							.named("rewritten response header")
+							.containsExactly("response="+external("response"));
+
+				});
+	}
+
+	@Test void testHeadEncodedRewriting() {
+		new Tray()
+
+				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+
+					assertThat(request.query())
+							.named("rewritten encoded query")
+							.isEqualTo(encode(internal("request").toString()));
+
+					return request.reply(response -> response.status(Response.OK));
+
+				}))
+
+				.handle(new Request()
+
+						.base(External)
+						.query(encode(external("request").toString()))
+
+				)
+
+				.accept(response -> {});
+	}
+
+	@Test void testRDFRewriting() {
+		new Tray()
+
+				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+
+					request.body(rdf()).use(
 							model -> assertIsomorphic("request rdf rewritten",
 									singleton(internal("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
 					);
 
 					return request.reply(response -> response.status(Response.OK)
-							.body(RDFFormat.asRDF, singleton(internal("s", "p", "o"))));
-				})
+							.body(rdf()).set(singleton(internal("s", "p", "o"))));
+				}))
 
 				.handle(new Request()
-
-						.method(Request.PUT)
 
 						.base(External)
 						.path("/s")
 
-						.body(ReaderFormat.asReader, () -> new StringReader(ValuesTest.encode(singleton(external("s", "p", "o"))))))
+						.body(rdf()).set(singleton(external("s", "p", "o"))))
 
 				.accept(response -> {
 
-					response.body(RDFFormat.asRDF).handle(
+					response.body(rdf()).use(
 							model -> assertIsomorphic("response rdf rewritten",
 									singleton(external("s", "p", "o")), model),
 							error -> fail("missing RDF payload")
@@ -165,69 +192,61 @@ final class RewriterTest {
 				});
 	}
 
-	@Test void testRDFRewriting() {
+	@Test void testJSONRewriting() {
+		new Tray()
 
+				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+
+					request.body(rdf()).use(
+							model -> assertIsomorphic("request json rewritten",
+									singleton(internal("s", "p", "o")), model),
+							error -> fail("missing RDF payload")
+					);
+
+					return request.reply(response -> response.status(Response.OK)
+							.body(ShapeFormat.shape()).set(TestShape)
+							.body(rdf()).set(singleton(internal("s", "p", "o"))));
+				}))
+
+				.handle(new Request()
+
+						.base(External)
+						.path("/s")
+
+						.header("content-type", "application/json")
+						.header("accept", "application/json")
+
+						.body(ShapeFormat.shape()).set(TestShape)
+
+						.body(input()).set(() -> new ByteArrayInputStream(
+								Json.createObjectBuilder()
+										.add("p", "o")
+										.build()
+										.toString()
+										.getBytes(Transputs.UTF8))))
+
+
+				.accept(response -> {
+
+					response.body(output()).use(
+							value -> {
+
+								final ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+
+								value.accept(() -> buffer);
+
+								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
+										.named("rewritten response json")
+										.isEqualTo(Json.createObjectBuilder()
+												.add("this", External+"s")
+												.add("p", External+"o")
+												.build());
+
+							},
+							error -> fail("missing output body")
+					);
+
+				});
 	}
-
-	//@Test public void testJSONRewriting() {
-	//	LinkTest.testbed()
-	//
-	//			.toolkit(() -> setup())
-	//
-	//			.request(request -> request
-	//
-	//					.method(Request.PUT)
-	//
-	//					.base(External)
-	//					.path("/s")
-	//
-	//					.header("content-type", "application/json")
-	//					.header("accept", "application/json")
-	//
-	//					.text(LinkTest.json("{ 'p': 'o' }")))
-	//
-	//			.handler(() -> server((request, response) -> {
-	//
-	//				final Shape shape=trait(internal("p"), and(required(), datatype(Values.IRIType)));
-	//				final IRI focus=internal("o");
-	//
-	//				assertIsomorphic("request json rewritten",
-	//						request.rdf(shape, internal("s")),
-	//						singleton(statement(internal("s"), internal("p"), focus)));
-	//
-	//				response.status(Response.OK)
-	//						.rdf(singleton(internal("s", "p", "o")),
-	//								shape);
-	//
-	//			}))
-	//
-	//			.response(response -> {
-	//
-	//				Assert.assertEquals("response json rewritten",
-	//						JSON.decode(LinkTest.json("{ 'this': '"+external("s")+"', 'p': '"+external("o")+"' }")),
-	//						response.json());
-	//
-	//			});
-	//}
-
-
-	//@org.junit.Test public void testRewriteReader() throws IOException {
-	//
-	//	final Reader external=new StringReader("<"+external("test")+">");
-	//	final Reader internal=rewriter(External, Internal).internal(external);
-	//
-	//	assertEquals("reader rewritten", "<"+internal("test")+">", Transputs.text(internal));
-	//}
-
-	//@org.junit.Test public void testRewriteWriter() throws IOException {
-	//
-	//	final StringWriter external=new StringWriter();
-	//
-	//	try (final Writer internal=rewriter(External, Internal).external(external)) {
-	//		internal.write("<"+internal("test")+">");
-	//	}
-	//
-	//	assertEquals("writer rewritten", "<"+external("test")+">", external.toString());
-	//}
 
 }

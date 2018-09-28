@@ -53,12 +53,12 @@ public class ReportTest {
 
 	@Test public void testAssess() {
 
-		assertFalse("no issues", Report.trace(Sets.set()).assess(Issue.Level.Info));
+		assertFalse("no issues", Report.report(Sets.set()).assess(Issue.Level.Info));
 
-		assertTrue("matching issue", Report.trace(list(warning)).assess(Issue.Level.Warning));
-		assertFalse("no matching issue", Report.trace(list(warning)).assess(Issue.Level.Error));
+		assertTrue("matching issue", Report.report(list(warning)).assess(Issue.Level.Warning));
+		assertFalse("no matching issue", Report.report(list(warning)).assess(Issue.Level.Error));
 
-		assertTrue("matching frame", Report.trace(Lists.list(), set(
+		assertTrue("matching frame", Report.report(Lists.list(), set(
 				frame(RDF.NIL, slot(Step.step(RDF.VALUE), new Report(set(error), Sets.set())))
 		)).assess(Issue.Level.Error));
 
@@ -66,10 +66,10 @@ public class ReportTest {
 
 	@Test public void testPrune() {
 
-		final Frame<Report> first=frame(x, slot(Step.step(RDF.FIRST), Report.trace(info)));
-		final Frame<Report> rest=frame(x, slot(Step.step(RDF.REST), Report.trace(warning)));
+		final Frame<Report> first=frame(x, slot(Step.step(RDF.FIRST), Report.report(info)));
+		final Frame<Report> rest=frame(x, slot(Step.step(RDF.REST), Report.report(warning)));
 
-		final Report report=Report.trace(Sets.set(info, warning, error), Sets.set(first, rest))
+		final Report report=Report.report(Sets.set(info, warning, error), Sets.set(first, rest))
 				.prune(Issue.Level.Warning)
 				.orElse(null);
 
@@ -134,7 +134,7 @@ public class ReportTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@SafeVarargs private final Report trace(final Frame<Report>... traces) {
-		return Report.trace(Sets.set(), Sets.set(traces));
+		return Report.report(Sets.set(), Sets.set(traces));
 	}
 
 }

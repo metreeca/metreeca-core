@@ -24,18 +24,24 @@ import java.util.function.Supplier;
 
 
 /**
- * Binary inbound raw body format.
+ * Textual input body format.
  */
 public final class ReaderFormat implements Format<Supplier<Reader>> {
 
+	private static final ReaderFormat Instance=new ReaderFormat();
+
 	/**
-	 * The singleton binary inbound raw body format.
+	 * Retrieves the textual input body format.
+	 *
+	 * @return the singleton textual input body format instance
 	 */
-	public static final ReaderFormat asReader=new ReaderFormat();
+	public static ReaderFormat reader() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private ReaderFormat() {} // singleton
+	private ReaderFormat() {}
 
 }

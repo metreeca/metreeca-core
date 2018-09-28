@@ -17,18 +17,14 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Result;
-
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Result.error;
-import static com.metreeca.form.Result.value;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
+import static com.metreeca.rest.Result.value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -43,6 +39,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
  */
+@SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {
 
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
@@ -53,7 +50,7 @@ public abstract class Message<T extends Message<T>> {
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
 	private final Map<Format<?>, Object> cache=new HashMap<>();
-	private final Map<Format<?>, Function<Message<?>, Result<?, Failure>>> bodies=new HashMap<>();
+	private final Map<Format<?>, Function<Message<?>, Result<?>>> pipes=new HashMap<>();
 
 
 	/**
@@ -106,26 +103,6 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		return requireNonNull(mapper.apply(self()), "null mapper return value");
-	}
-
-	/**
-	 * Executes a task on this message.
-	 *
-	 * @param task the task to be executed on this message
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if {@code task} is null
-	 */
-	public T with(final Consumer<T> task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		task.accept(self());
-
-		return self();
 	}
 
 
@@ -214,8 +191,9 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures message header value.
 	 *
-	 * <p>Existing values are overwritten, unless the header {@code name} is {@code Set-Cookie} or is prefixed with a
-	 * plus sign ({@code +}).</p>
+	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
+	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name  the name of the header whose value is to be configured
 	 * @param value the new value for {@code name}; empty values are ignored
@@ -237,35 +215,6 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		return headers(name, value);
-	}
-
-	/**
-	 * Maps message header value.
-	 *
-	 * <p>Existing values are overwritten, unless the header {@code name} is {@code Set-Cookie} or is prefixed with a
-	 * plus sign ({@code +}).</p>
-	 *
-	 * @param name   the name of the header whose value is to be mapped
-	 * @param mapper the mapping function for the header value; takes as argument the optional {@linkplain
-	 *               #header(String) current header value} and returns the mapped header value or an empty string, if
-	 *               mapping produced no values
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code name} or {@code mapper} is null or {@code mapper} returns a null
-	 *                              value
-	 */
-	public T header(final String name, final Function<Optional<String>, String> mapper) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return header(name, requireNonNull(mapper.apply(header(name)), "null mapper return value"));
 	}
 
 
@@ -308,8 +257,9 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures message header values.
 	 *
-	 * <p>Existing values are overwritten, unless the header {@code name} is {@code Set-Cookie} or is prefixed with a
-	 * plus sign ({@code +}).</p>
+	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
+	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
@@ -338,7 +288,11 @@ public abstract class Message<T extends Message<T>> {
 		final String _name=normalize(name);
 		final Collection<String> _values=normalize(values);
 
-		if ( name.startsWith("+") || _name.equals("Set-Cookie") ) {
+		if ( name.startsWith("~") ) {
+
+			headers.computeIfAbsent(_name, key -> _values.isEmpty() ? null : _values);
+
+		} else if ( name.startsWith("+") || _name.equals("Set-Cookie") ) {
 
 			headers.compute(_name, (key, value) -> value == null ? _values : concat(value, _values));
 
@@ -355,163 +309,33 @@ public abstract class Message<T extends Message<T>> {
 		return self();
 	}
 
-	/**
-	 * Maps message header values.
-	 *
-	 * <p>Existing values are overwritten, unless the header {@code name} is {@code Set-Cookie} or is prefixed with a
-	 * plus sign ({@code +}).</p>
-	 *
-	 * @param name   the name of the header whose values is to be mapped
-	 * @param mapper the mapping function for the header values; takes as argument the collection of {@linkplain
-	 *               #headers(String) current header values} and returns the mapped header values or an empty
-	 *               collection, if mapping produced no values
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code name} or {@code mapper} is null or {@code mapper} returns a null
-	 *                              value
-	 */
-	public T headers(final String name, final Function<Collection<String>, Collection<String>> mapper) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return headers(name, requireNonNull(mapper.apply(headers(name)), "null mapper return value"));
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves a representation of the body of this message.
+	 * Retrieves a structured of this message body.
 	 *
-	 * @param format the format of the body representation to be retrieved
-	 * @param <V>    the type of the body representation to be retrieved
+	 * @param format the body format managing the required body representation
+	 * @param <V>    the type of the structured message body managed by the format
 	 *
-	 * @return a result providing access to the expected representation of the body of this message, if previously
-	 * defined with the same {@code format} or successfully {@linkplain Format#get(Message) derived} by {@code format}
-	 * from existing representations; a result providing access to the processing failure, otherwise
+	 * @return a structured message body for this message
 	 *
 	 * @throws NullPointerException if {@code format} is null
 	 */
-	@SuppressWarnings("unchecked")
-	public <V> Result<V, Failure> body(final Format<V> format) {
+	public <V> Body<V> body(final Format<V> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
 		}
 
-		final V cached=(V)cache.get(format);
-
-		return cached != null ? value(cached) : bodies.getOrDefault(format, format::get).apply(this).map(
-				v -> {
-					cache.put(format, v);
-					return value((V)v);
-				},
-				e -> error(e)
-		);
-	}
-
-	/**
-	 * Configures a representation of the body of this message.
-	 *
-	 * @param format the format of the body representation to be configured
-	 * @param value  the body representation of the body to be configured using {@code format}
-	 * @param <V>    the type of the body representation to be configured
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException  if either {@code format} or {@code body} is null
-	 * @throws IllegalStateException if {@code format} {@linkplain Format#set(Message, Object) setter} attempts to
-	 *                               recursively call this method with a different {@code value}
-	 */
-	@SuppressWarnings({"unchecked", "ObjectEquality"})
-	public <V> T body(final Format<V> format, final V value) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		final V cached=(V)cache.get(format);
-
-		if ( cached == null ) {
-
-			cache.clear();
-			cache.put(format, value); // memo value to handle idempotent setter calls
-
-			bodies.put(format, message -> value(value));
-
-			return format.set(self(), value);
-
-		} else if ( cached == value ) { // idempotent call
-
-			return self();
-
-		} else {
-
-			throw new IllegalStateException("recursive call with different value");
-
-		}
-	}
-
-	/**
-	 * Filters a representation of the body of this message.
-	 *
-	 * <p>Replaces the current body representation of this message associated to a given format with a new
-	 * representation generated by filtering it with a mapping function; if this message has no body representation
-	 * associated to the given format, one is retrieved on demand using the format {@linkplain Format#get(Message)
-	 * getter}.</p>
-	 *
-	 * @param format the format of the body representation to be filtered
-	 * @param mapper the mapping function for the body representation
-	 * @param <V>    the type of the body representation to be filtered
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code format} or {@code mapper} is null or if {@code mapper} returns a
-	 *                              null value
-	 */
-	@SuppressWarnings("unchecked")
-	public <V> T filter(final Format<V> format, final Function<V, V> mapper) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		cache.clear();
-
-		bodies.compute(format, (_format, getter) -> message -> (
-
-				getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)_format::get
-
-		).apply(message).map(
-
-				v -> value(requireNonNull(mapper.apply((V)v), "null mapper return value")),
-				e -> error(e)
-
-		));
-
-		return self();
+		return new Body<>(format);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String normalize(final String name) {
-		return title(name.startsWith("+") ? name.substring(1) : name);
+		return title(name.startsWith("~") || name.startsWith("+") ? name.substring(1) : name);
 	}
 
 	private Collection<String> normalize(final Collection<String> values) {
@@ -520,6 +344,160 @@ public abstract class Message<T extends Message<T>> {
 				.filter(value -> !value.isEmpty())
 				.distinct()
 				.collect(toList());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * HTTP message body.
+	 *
+	 * <p>Provides a type-safe interface for structured message bodies managed by {@linkplain Format formats}.</p>
+	 *
+	 * <p>A body is associated to a message through a message body {@linkplain Format format}, responsible for
+	 * retrieving its structured value and configuring the message as a holder for structured values of the specific
+	 * format-managed type.</p>
+	 *
+	 * @param <V> the type of the data structure exposed by the message body
+	 */
+	public final class Body<V> implements Result<V> {
+
+		private final Format<V> format;
+
+
+		private Body(final Format<V> format) {
+			this.format=format;
+		}
+
+
+		/**
+		 * Configures the structured message body.
+		 *
+		 * <p>Future calls to {@link Message#body(Format)} with the same format associated to this message body will
+		 * return a message body holding the specified structured value, rather than the structured value {@linkplain
+		 * Format#get(Message) retrieved} by the format associated to this body.</p>
+		 *
+		 * <p>The message this body belongs to is {@linkplain Format#set(Message) configured} for holding the
+		 * structured value according to the format associated to this body.</p>
+		 *
+		 * @param value the structured value for this body
+		 *
+		 * @return the message this body belongs to
+		 *
+		 * @throws NullPointerException  if {@code value} is null
+		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
+		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
+		 */
+		public T set(final V value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			if ( !cache.isEmpty() ) {
+				throw new IllegalStateException("message body retrieved");
+			}
+
+			pipes.put(format, message -> value(value));
+
+			return format.set(self());
+		}
+
+
+		/**
+		 * Filters the structured value of this body.
+		 *
+		 * <p>Future calls to getter {@linkplain Result result} methods on this body will pipe the structured value
+		 * either explicitly {@linkplain #set(Object) set} or {@linkplain Format#get(Message) retrieved} on demand by
+		 * the format associated to this body through a filtering function.</p>
+		 *
+		 * @param mapper the value filtering function
+		 *
+		 * @return the message this body belongs to
+		 *
+		 * @throws NullPointerException  if {@code mapper} is null
+		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
+		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
+		 */
+		public T pipe(final Function<V, V> mapper) {
+
+			if ( mapper == null ) {
+				throw new NullPointerException("null mapper");
+			}
+
+			if ( !cache.isEmpty() ) {
+				throw new IllegalStateException("message body already retrieved");
+			}
+
+			return flatPipe(v -> value(mapper.apply(v)));
+		}
+
+		/**
+		 * Filters the structured value of this body.
+		 *
+		 * <p>Future calls to getter {@linkplain Result result} methods on this body will pipe the structured value
+		 * either explicitly {@linkplain #set(Object) set} or {@linkplain Format#get(Message) retrieved} on demand by
+		 * the format associated to this body through a result-returning filtering function.</p>
+		 *
+		 * @param mapper the value filtering function
+		 *
+		 * @return the message this body belongs to
+		 *
+		 * @throws NullPointerException  if {@code mapper} is null
+		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
+		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
+		 */
+		public T flatPipe(final Function<V, Result<V>> mapper) {
+
+			if ( mapper == null ) {
+				throw new NullPointerException("null mapper");
+			}
+
+			if ( !cache.isEmpty() ) {
+				throw new IllegalStateException("message body already retrieved");
+			}
+
+			pipes.compute(format, (_format, getter) -> message ->
+					(getter != null ? getter : (Function<Message<?>, Result<?>>)format::get)
+							.apply(message)
+							.flatMap(value -> mapper.apply((V)value)));
+
+			return self();
+		}
+
+
+		/**
+		 * {@inheritDoc}
+		 *
+		 * <p>Successfully retrieved structured values handled to the {@code success} mapper are cached for future
+		 * reuse.</p>
+		 */
+		@Override public <R> R map(final Function<V, R> success, final Function<Failure<V>, R> failure) {
+
+			if ( success == null ) {
+				throw new NullPointerException("null success mapper");
+			}
+
+			if ( failure == null ) {
+				throw new NullPointerException("null failure mapper");
+			}
+
+			final V cached=(V)cache.get(format);
+
+			return cached != null ? success.apply(cached) : pipes.getOrDefault(format, format::get)
+					.apply(self())
+					.map(
+							v -> {
+
+								cache.put(format, v);
+
+								return success.apply((V)v);
+
+							},
+							f -> failure.apply((Failure<V>)f)
+					);
+		}
+
 	}
 
 }

@@ -32,8 +32,7 @@ import static com.metreeca.tray.Tray.tool;
 /**
  * Single page app launcher (work in progress…).
  *
- *  and advertises the base LDP server URL to
- *  * interactive apps through the {@value #BaseCookie} cookie.
+ * and advertises the base LDP server URL to * interactive apps through the {@value #BaseCookie} cookie.
  *
  * <p>Replaces non-interactive responses to {@linkplain Message#interactive() interactive requests} with a relocated
  * version of a (x)html page where absolute {@code href} or {@code src} links are relocated to the page home

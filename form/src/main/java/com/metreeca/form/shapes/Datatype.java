@@ -39,18 +39,6 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Datatype implements Shape {
 
-	public static Datatype datatype(final IRI iri) {
-		return new Datatype(iri);
-	}
-
-	public static Optional<IRI> datatype(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.accept(new DatatypeProbe()));
-	}
-
-
-	private final IRI iri;
-
-
 	/**
 	 * Creates a type value constraint.
 	 *
@@ -61,20 +49,38 @@ public final class Datatype implements Shape {
 	 *
 	 * @param iri the expected extended datatype
 	 */
-	public Datatype(final IRI iri) {
+	public static Datatype datatype(final IRI iri) {
 
 		if ( iri == null ) {
 			throw new NullPointerException("null iri");
 		}
 
+		return new Datatype(iri);
+	}
+
+	public static Optional<IRI> datatype(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.accept(new DatatypeProbe()));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final IRI iri;
+
+
+	private Datatype(final IRI iri) {
 		this.iri=iri;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public IRI getIRI() {
 		return iri;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T accept(final Probe<T> probe) {
 

@@ -80,7 +80,6 @@
 		<module>j2ee</module>
 
 		<module>rest</module>
-		<module>gate</module>
 		<module>tray</module>
 		<module>form</module>
 
@@ -295,7 +294,7 @@
 								</group>
 								<group>
 									<title>REST API Framework</title>
-									<packages>com.metreeca.next*</packages>
+									<packages>com.metreeca.rest*</packages>
 								</group>
 								<group>
 									<title>Tooling Framework</title>

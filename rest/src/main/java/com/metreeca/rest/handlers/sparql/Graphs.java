@@ -22,8 +22,6 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.*;
-import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -38,11 +36,11 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.metreeca.form.Shape.only;
 import static com.metreeca.form.shapes.And.and;
@@ -50,6 +48,10 @@ import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Handler.refused;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
@@ -126,7 +128,7 @@ public final class Graphs implements Handler {
 
 			if ( target == null && !catalog ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
 						.cause("missing target graph parameter")
@@ -155,8 +157,8 @@ public final class Graphs implements Handler {
 				});
 
 				request.reply(response -> response.status(Response.OK)
-						.body(RDFFormat.asRDF, model)
-						.body(ShapeFormat.asShape, GraphsShape)
+						.body(rdf()).set(model)
+						.body(shape()).set(GraphsShape)
 				).accept(consumer);
 
 			} else {
@@ -176,7 +178,13 @@ public final class Graphs implements Handler {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(WriterFormat.asWriter, writer -> connection.export(factory.getWriter(writer), context))
+							.body(writer()).set(_target -> {
+								try (final Writer writer=_target.get()) {
+									connection.export(factory.getWriter(writer), context);
+								} catch ( final IOException e ) {
+									throw new UncheckedIOException(e);
+								}
+							})
 
 					).accept(consumer);
 				});
@@ -194,7 +202,7 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
 						.cause("missing target graph parameter")
@@ -217,7 +225,7 @@ public final class Graphs implements Handler {
 				);
 
 				graph.update(connection -> {
-					try (final InputStream input=request.body(InputFormat.asInput).value() // binary format >> no rewriting
+					try (final InputStream input=request.body(input()).get() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
 
@@ -234,7 +242,7 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to read RDF payload", e);
 
-						request.reply(new Failure()
+						request.reply(new Failure<>()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
 								.cause("I/O while reading RDF payload: see server logs for more detail")
@@ -245,7 +253,7 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "malformed RDF payload", e);
 
-						request.reply(new Failure()
+						request.reply(new Failure<>()
 								.status(Response.BadRequest)
 								.error("payload-malformed")
 								.cause("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
@@ -256,7 +264,7 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
+						request.reply(new Failure<>()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
 								.cause("unable to update graph: see server logs for more detail")
@@ -280,7 +288,7 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
 						.cause("missing target graph parameter")
@@ -309,7 +317,7 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
+						request.reply(new Failure<>()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
 								.cause("unable to delete graph: see server logs for more detail")
@@ -335,7 +343,7 @@ public final class Graphs implements Handler {
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
+				request.reply(new Failure<>()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
 						.cause("missing target graph parameter")
@@ -357,7 +365,7 @@ public final class Graphs implements Handler {
 						RDFParserRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, content);
 
 				graph.update(connection -> {
-					try (final InputStream input=request.body(InputFormat.asInput).value() // binary format >> no rewriting
+					try (final InputStream input=request.body(input()).get() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
 
@@ -373,7 +381,7 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to read RDF payload", e);
 
-						request.reply(new Failure()
+						request.reply(new Failure<>()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
 								.cause("I/O while reading RDF payload: see server logs for more detail")
@@ -384,7 +392,7 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "malformed RDF payload", e);
 
-						request.reply(new Failure()
+						request.reply(new Failure<>()
 								.status(Response.BadRequest)
 								.error("payload-malformed")
 								.cause("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
@@ -395,7 +403,7 @@ public final class Graphs implements Handler {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
+						request.reply(new Failure<>()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
 								.cause("unable to update graph: see server logs for more detail")
