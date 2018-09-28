@@ -17,8 +17,7 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Result;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Format;
 
 import java.io.Reader;
 import java.util.function.Supplier;
@@ -31,11 +30,10 @@ public final class ReaderFormat implements Format<Supplier<Reader>> {
 
 	private static final ReaderFormat Instance=new ReaderFormat();
 
-
 	/**
-	 * Creates a textual input body format.
+	 * Retrieves the textual input body format.
 	 *
-	 * @return a new textual input body format
+	 * @return the singleton textual input body format instance
 	 */
 	public static ReaderFormat reader() {
 		return Instance;
@@ -45,16 +43,5 @@ public final class ReaderFormat implements Format<Supplier<Reader>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private ReaderFormat() {}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Result<Supplier<Reader>> get(final Message<?> message) {
-		return new Failure<Supplier<Reader>>().status(Response.UnsupportedMediaType);
-	}
-
-	@Override public <T extends Message<T>> T set(final T message) {
-		return message;
-	}
 
 }

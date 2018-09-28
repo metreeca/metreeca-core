@@ -46,6 +46,11 @@ public final class JSONFormat implements Format<JsonObject> {
 	public static final String MIME="application/json";
 
 
+	/**
+	 * Retrieves the JSON body format.
+	 *
+	 * @return the singleton JSON body format instance
+	 */
 	public static JSONFormat json() {
 		return Instance;
 	}
@@ -61,7 +66,7 @@ public final class JSONFormat implements Format<JsonObject> {
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
 	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal
-	 * to {@value #MIME}; an empty optional, otherwise
+	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<JsonObject> get(final Message<?> message) {
 		return message.headers("content-type").contains(MIME) ? message.body(reader()).flatMap(source -> {

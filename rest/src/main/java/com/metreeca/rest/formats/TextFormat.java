@@ -17,14 +17,13 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Result;
 import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
+import com.metreeca.rest.Result;
 
 import java.io.*;
 
-import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
@@ -38,11 +37,10 @@ public final class TextFormat implements Format<String> {
 
 
 	/**
-	 * Creates a textual body format.
+	 * Retrieves the textual format.
 	 *
-	 * @return a new textual body format
-	 */
-	public static TextFormat text() {
+	 * @return the singleton textual format instance
+	 */public static TextFormat text() {
 		return Instance;
 	}
 
@@ -56,13 +54,13 @@ public final class TextFormat implements Format<String> {
 
 	/**
 	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
-	 * supplied by its {@link ReaderFormat} body, if one is present; an empty result, otherwise
+	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error, otherwise
 	 */
 	@Override public Result<String> get(final Message<?> message) {
-		return message.body(reader()).flatMap(source -> {
+		return message.body(reader()).map(source -> {
 			try (final Reader reader=source.get()) {
 
-				return value(Transputs.text(reader));
+				return Transputs.text(reader);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

@@ -26,7 +26,6 @@ import java.io.*;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
@@ -69,19 +68,19 @@ final class JSONFormatTest {
 
 		assertEquals(TestJSON, request.body(writer())
 
-				.flatMap(client -> {
+				.map(client -> {
 					try (final StringWriter writer=new StringWriter()) {
 
 						client.accept(() -> writer);
 
-						return value(writer.toString());
+						return writer.toString();
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
 				})
 
-				.flatMap(test -> value(Json.createReader(new StringReader(test)).readObject()))
+				.map(test -> Json.createReader(new StringReader(test)).readObject())
 
 				.get()
 

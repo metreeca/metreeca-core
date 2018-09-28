@@ -38,9 +38,9 @@ public final class DataFormat implements Format<byte[]> {
 
 
 	/**
-	 * Creates a binary body format.
+	 * Retrieves the binary body format.
 	 *
-	 * @return a new binary body format
+	 * @return the singleton binary body format instance
 	 */
 	private static DataFormat data() {
 		return Instance;
@@ -56,7 +56,7 @@ public final class DataFormat implements Format<byte[]> {
 
 	/**
 	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
-	 * stream supplied by its {@link InputFormat} body, if one is available; an error describing the processing failure,
+	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing error,
 	 * otherwise
 	 */
 	@Override public Result<byte[]> get(final Message<?> message) {

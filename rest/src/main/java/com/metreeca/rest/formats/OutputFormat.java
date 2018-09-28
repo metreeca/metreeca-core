@@ -43,9 +43,9 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 
 
 	/**
-	 * Creates a raw binary output body format.
+	 * Retrieves the raw binary output body format.
 	 *
-	 * @return a new raw binary output body format
+	 * @return the singleton raw binary output body format instance
 	 */
 	public static OutputFormat output() {
 		return Instance;

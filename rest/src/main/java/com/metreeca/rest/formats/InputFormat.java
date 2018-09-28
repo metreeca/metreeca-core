@@ -17,7 +17,6 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Result;
 import com.metreeca.rest.*;
 
 import java.io.InputStream;
@@ -33,9 +32,9 @@ public final class InputFormat implements Format<Supplier<InputStream>> {
 
 
 	/**
-	 * Creates a raw binary input body format.
+	 * Retrieves the raw binary input body format.
 	 *
-	 * @return a new raw binary input body format
+	 * @return the singleton raw binary input body format instance
 	 */
 	public static InputFormat input() {
 		return Instance;
@@ -45,20 +44,5 @@ public final class InputFormat implements Format<Supplier<InputStream>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private InputFormat() {}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * @return a result providing access to the raw binary input body of {@code message}, if one was explicitly set for
-	 * {@code message}; an error describing the processing failure, otherwise
-	 */
-	@Override public Result<Supplier<InputStream>> get(final Message<?> message) {
-		return new Failure<Supplier<InputStream>>().status(Response.UnsupportedMediaType);
-	}
-
-	@Override public <T extends Message<T>> T set(final T message) {
-		return message;
-	}
 
 }

@@ -37,6 +37,9 @@ public interface Format<V> {
 	 * <li>{@link Response#BadRequest} for malformed bodies, unless a more specific status code is available.</li>
 	 * </ul>
 	 *
+	 * <p>The default implementation returns a failure reporting the {@link Response#UnsupportedMediaType} status,
+	 * unless explicitly {@linkplain Message.Body#set(Object) overridden}</p>
+	 *
 	 * @param message the message the structured body managed by this format is to be retrieved from
 	 *
 	 * @return a result providing access to the structured body managed by this format, if it was possible to derive one
@@ -44,12 +47,21 @@ public interface Format<V> {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public Result<V> get(final Message<?> message);
+	public default Result<V> get(final Message<?> message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		return new Failure<V>().status(Response.UnsupportedMediaType);
+	}
 
 	/**
 	 * Configures a message to hold a structured body.
 	 *
 	 * <p>The default implementation has no effect.</p>
+	 *
+	 * <p>The default implementation has no effects.</p>
 	 *
 	 * @param message the message to be configured to hold a structured body managed by this format
 	 *
@@ -57,6 +69,13 @@ public interface Format<V> {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public <T extends Message<T>> T set(final T message);
+	public default <T extends Message<T>> T set(final T message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		return message;
+	}
 
 }

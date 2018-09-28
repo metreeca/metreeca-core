@@ -41,10 +41,11 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 	 */
 	private static final String MIME="text/plain";
 
+
 	/**
-	 * Creates a textual output body format.
+	 * Retrieves the textual output body format.
 	 *
-	 * @return a new textual output body format
+	 * @return the singleton textual output body format instance
 	 */
 	public static WriterFormat writer() {
 		return Instance;

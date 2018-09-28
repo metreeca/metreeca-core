@@ -18,7 +18,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Form;
-import com.metreeca.rest.Result;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.JSONAdapter;
 import com.metreeca.form.probes.Outliner;
@@ -38,9 +37,9 @@ import java.util.*;
 
 import javax.json.Json;
 
-import static com.metreeca.rest.Result.value;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
@@ -56,6 +55,11 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	private static final RDFFormat Instance=new RDFFormat();
 
 
+	/**
+	 * Retrieves the RDF body format.
+	 *
+	 * @return the singleton RDF body format instance
+	 */
 	public static RDFFormat rdf() {
 		return Instance;
 	}
@@ -70,7 +74,8 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 	/**
 	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
-	 * representation, if present; an empty optional, otherwise
+	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
+	 * status, otherwise
 	 */
 	@Override public Result<Collection<Statement>> get(final Message<?> message) {
 		return message.body(input()).flatMap(supplier -> {
@@ -156,7 +161,9 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 	/**
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the RDF {@code value} to the
-	 * accepted output stream and sets the {@code Content-Type} header to the MIME type of the selected RDF format.
+	 * accepted output stream and sets the {@code Content-Type} header to the MIME type of the RDF serialization
+	 * selected according to the {@code Accept} header of the request associated to the message, if one is present, or
+	 * to {@code "text/turtle"}, otherwise.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
 
