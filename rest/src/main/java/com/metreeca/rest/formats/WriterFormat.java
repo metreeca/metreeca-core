@@ -34,6 +34,9 @@ import static com.metreeca.form.Result.value;
  */
 public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 
+	private static final WriterFormat Instance=new WriterFormat();
+
+
 	/**
 	 * The default MIME type for textual outbound raw message bodies.
 	 */
@@ -45,7 +48,7 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 	 * @return a new textual output body format
 	 */
 	public static WriterFormat writer() {
-		return new WriterFormat();
+		return Instance;
 	}
 
 

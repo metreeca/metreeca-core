@@ -119,11 +119,11 @@ final class MessageTest {
 	@Test void testBodyOnDemandFiltering() {
 
 		final Message<?> message=new TestMessage()
-				.body(new TestFormat()).filter(string -> string+"!")
+				.body(TestFormat.test()).filter(string -> string+"!")
 				.body(reader()).set(() -> new StringReader("test"));
 
 		assertEquals("test!",
-				message.body(new TestFormat()).get().map(value -> value, error -> fail("missing test body")));
+				message.body(TestFormat.test()).get().map(value -> value, error -> fail("missing test body")));
 
 	}
 
@@ -137,6 +137,12 @@ final class MessageTest {
 	}
 
 	private static final class TestFormat implements Format<String> {
+
+		private static final TestFormat Instance=new TestFormat();
+
+
+		private static TestFormat test() { return Instance; }
+
 
 		@Override public Result<String, Failure> get(final Message<?> message) {
 			return message.body(reader()).get().value(supplier -> {

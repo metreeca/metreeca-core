@@ -31,8 +31,11 @@ import static com.metreeca.form.Result.error;
  */
 public final class ShapeFormat implements Format<Shape> {
 
+	private static final ShapeFormat Instance=new ShapeFormat();
+
+
 	public static ShapeFormat shape() {
-		return new ShapeFormat();
+		return Instance;
 	}
 
 

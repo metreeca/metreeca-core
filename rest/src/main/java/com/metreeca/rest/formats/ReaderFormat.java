@@ -31,13 +31,16 @@ import static com.metreeca.form.Result.error;
  */
 public final class ReaderFormat implements Format<Supplier<Reader>> {
 
+	private static final ReaderFormat Instance=new ReaderFormat();
+
+
 	/**
 	 * Creates a textual input body format.
 	 *
 	 * @return a new textual input body format
 	 */
 	public static ReaderFormat reader() {
-		return new ReaderFormat();
+		return Instance;
 	}
 
 

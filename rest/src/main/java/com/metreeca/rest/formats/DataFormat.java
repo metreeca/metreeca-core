@@ -35,13 +35,16 @@ import static com.metreeca.rest.formats.OutputFormat.output;
  */
 public final class DataFormat implements Format<byte[]> {
 
+	private static final DataFormat Instance=new DataFormat();
+
+
 	/**
 	 * Creates a binary body format.
 	 *
 	 * @return a new binary body format
 	 */
 	private static DataFormat data() {
-		return new DataFormat();
+		return Instance;
 	}
 
 

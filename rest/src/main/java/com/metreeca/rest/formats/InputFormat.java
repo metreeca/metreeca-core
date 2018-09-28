@@ -31,13 +31,16 @@ import static com.metreeca.form.Result.error;
  */
 public final class InputFormat implements Format<Supplier<InputStream>> {
 
+	private static final InputFormat Instance=new InputFormat();
+
+
 	/**
 	 * Creates a raw binary input body format.
 	 *
 	 * @return a new raw binary input body format
 	 */
 	public static InputFormat input() {
-		return new InputFormat();
+		return Instance;
 	}
 
 

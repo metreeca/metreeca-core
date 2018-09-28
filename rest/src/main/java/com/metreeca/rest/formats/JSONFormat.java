@@ -39,6 +39,9 @@ import static com.metreeca.rest.formats.WriterFormat.writer;
  */
 public final class JSONFormat implements Format<JsonObject> {
 
+	private static final JSONFormat Instance=new JSONFormat();
+
+
 	/**
 	 * The default MIME type for JSON message bodies.
 	 */
@@ -46,7 +49,7 @@ public final class JSONFormat implements Format<JsonObject> {
 
 
 	public static JSONFormat json() {
-		return new JSONFormat();
+		return Instance;
 	}
 
 

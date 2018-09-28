@@ -54,8 +54,11 @@ import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
  */
 public final class RDFFormat implements Format<Collection<Statement>> {
 
+	private static final RDFFormat Instance=new RDFFormat();
+
+
 	public static RDFFormat rdf() {
-		return new RDFFormat();
+		return Instance;
 	}
 
 

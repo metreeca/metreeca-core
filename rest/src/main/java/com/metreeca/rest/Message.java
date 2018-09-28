@@ -51,8 +51,8 @@ public abstract class Message<T extends Message<T>> {
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
-	private final Map<Class<?>, Object> cache=new HashMap<>();
-	private final Map<Class<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
+	private final Map<Format<?>, Object> cache=new HashMap<>();
+	private final Map<Format<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
 
 
 	/**
@@ -360,24 +360,21 @@ public abstract class Message<T extends Message<T>> {
 	 */
 	public final class Body<V> { // !!! refactor
 
-		private final Class<?> tag;
 		private final Format<V> format;
 
 
 		private Body(final Format<V> format) {
-
-			this.tag=format.getClass();
 			this.format=format;
 		}
 
 
 		public Result<V, Failure> get() {
 
-			final V cached=(V)cache.get(tag);
+			final V cached=(V)cache.get(format);
 
-			return cached != null ? value(cached) : pipes.getOrDefault(tag, format::get).apply(self()).value(value -> {
+			return cached != null ? value(cached) : pipes.getOrDefault(format, format::get).apply(self()).value(value -> {
 
-				cache.put(tag, value);
+				cache.put(format, value);
 
 				return value((V)value);
 
@@ -394,7 +391,7 @@ public abstract class Message<T extends Message<T>> {
 				throw new IllegalStateException("message body retrieved");
 			}
 
-			pipes.put(tag, message -> value(value));
+			pipes.put(format, message -> value(value));
 
 			return format.set(self());
 		}
@@ -423,7 +420,7 @@ public abstract class Message<T extends Message<T>> {
 				throw new IllegalStateException("message body already retrieved");
 			}
 
-			pipes.compute(tag, (_tag, getter) -> message -> (getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)format::get)
+			pipes.compute(format, (_tag, getter) -> message -> (getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)format::get)
 					.apply(message).value(o -> mapper.apply((V)o)));
 
 			return self();

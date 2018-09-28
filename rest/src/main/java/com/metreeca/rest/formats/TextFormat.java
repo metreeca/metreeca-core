@@ -35,13 +35,16 @@ import static com.metreeca.rest.formats.WriterFormat.writer;
  */
 public final class TextFormat implements Format<String> {
 
+	private static final TextFormat Instance=new TextFormat();
+
+
 	/**
 	 * Creates a textual body format.
 	 *
 	 * @return a new textual body format
 	 */
 	public static TextFormat text() {
-		return new TextFormat();
+		return Instance;
 	}
 
 

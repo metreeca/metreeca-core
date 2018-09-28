@@ -34,6 +34,9 @@ import static com.metreeca.form.Result.value;
  */
 public final class OutputFormat implements Format<Consumer<Supplier<OutputStream>>> {
 
+	private static final OutputFormat Instance=new OutputFormat();
+
+
 	/**
 	 * The default MIME type for binary outbound raw message bodies.
 	 */
@@ -46,7 +49,7 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 	 * @return a new raw binary output body format
 	 */
 	public static OutputFormat output() {
-		return new OutputFormat();
+		return Instance;
 	}
 
 
