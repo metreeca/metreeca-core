@@ -80,6 +80,7 @@
 		<module>j2ee</module>
 
 		<module>rest</module>
+		<module>gate</module>
 		<module>tray</module>
 		<module>form</module>
 
