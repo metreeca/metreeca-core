@@ -77,6 +77,25 @@ public interface Result<V> {
 	}
 
 	/**
+	 * Handles the operation returned value.
+	 *
+	 * @param success a consumer accepting the operation returned value; invoked only if a value was actually returned
+	 *                by the operation
+	 *
+	 * @return this result
+	 *
+	 * @throws NullPointerException if {@code success} or is null
+	 */
+	public default Result<V> use(final Consumer<V> success) {
+
+		if ( success == null ) {
+			throw new NullPointerException("null success consumer");
+		}
+
+		return use(success, failure -> {});
+	}
+
+	/**
 	 * Maps the operation returned value.
 	 *
 	 * @param mapper the value mapping function

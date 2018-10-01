@@ -48,9 +48,9 @@ import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
-import static com.metreeca.rest.formats.WriterFormat.writer;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
@@ -120,7 +120,7 @@ public final class Graphs implements Handler {
 	private Responder get(final Request request) {
 		return consumer -> {
 
-			final boolean catalog=request.query().isEmpty();
+			final boolean catalog=request.parameters().isEmpty();
 
 			final String target=graph(request);
 			final Iterable<String> accept=request.headers("Accept");
@@ -177,9 +177,9 @@ public final class Graphs implements Handler {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(writer()).set(_target -> {
-								try (final Writer writer=_target.get()) {
-									connection.export(factory.getWriter(writer), context);
+							.body(output()).set(_target -> {
+								try (final OutputStream output=_target.get()) {
+									connection.export(factory.getWriter(output), context);
 								} catch ( final IOException e ) {
 									throw new UncheckedIOException(e);
 								}

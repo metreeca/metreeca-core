@@ -30,31 +30,50 @@ import java.util.Collection;
 
 import static com.metreeca.form.things.ValuesTest.encode;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.truth.Fact.fact;
+import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 
 import static java.util.Arrays.asList;
 
 
-public final class ModelsTest extends Subject<ModelsTest, Model> {
+public final class ModelSubject extends Subject<ModelSubject, Model> {
 
-	public static ModelsTest assertThat(final Collection<Statement> model) {
+	public static ModelSubject assertThat(final Collection<Statement> model) {
 		return assertThat(model == null ? null : new LinkedHashModel(model));
 	}
 
-	public static ModelsTest assertThat(final Model model) {
-		return assertAbout(ModelsTest::new).that(model);
+	public static ModelSubject assertThat(final Model model) {
+		return assertAbout(ModelSubject::new).that(model);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private ModelsTest(final FailureMetadata metadata, final Model subject) {
+	private ModelSubject(final FailureMetadata metadata, final Model subject) {
 		super(metadata, subject);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public void isEmpty() {
+		if (!actual().isEmpty()) {
+			failWithActual(simpleFact("expected to be empty"));
+		}
+	}
+
+	public void isNotEmpty() {
+		if (actual().isEmpty()) {
+			failWithoutActual(simpleFact("expected not to be empty"));
+		}
+	}
+
+	public void hasSize(final int size) {
+		checkArgument(size >= 0, "size (%s) must be >= 0", size);
+		check("size()").that(actual().size()).isEqualTo(size);
+	}
 
 	public void isIsomorphicTo(final Statement... model) {
 		isIsomorphicTo(model == null ? null : asList(model));
@@ -69,14 +88,14 @@ public final class ModelsTest extends Subject<ModelsTest, Model> {
 		if ( model == null ) {
 
 			if ( actual() != null ) {
-				failWithoutActual(fact("expected", format(actual())), fact("but was", format(model)));
+				failWithoutActual(fact("expected", format(model)), fact("but was", format(actual())));
 			}
 
 		} else {
 
 			if ( actual() == null || !Models.isomorphic(actual(), model) ) {
 
-				failWithoutActual(fact("expected", format(actual())), fact("but was", format(model)));
+				failWithoutActual(fact("expected", format(model)), fact("but was", format(actual())));
 
 			}
 

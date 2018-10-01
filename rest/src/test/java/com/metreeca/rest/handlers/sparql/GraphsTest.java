@@ -18,34 +18,40 @@
 package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.form.Form;
+import com.metreeca.form.things.ModelSubject;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.io.ByteArrayInputStream;
+import java.util.*;
 
-import static com.metreeca.form.things.ModelsTest.assertThat;
+import static com.metreeca.form.things.ModelSubject.assertThat;
+import static com.metreeca.form.things.Sets.union;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.ValuesTest.encode;
+import static com.metreeca.form.things.ValuesTest.export;
+import static com.metreeca.rest.ResponseSubject.assertThat;
 import static com.metreeca.rest.RestTest.dataset;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.tray.Tray.tool;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
+import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toCollection;
 
 
 final class GraphsTest {
@@ -53,229 +59,624 @@ final class GraphsTest {
 	private static final Set<Statement> First=singleton(statement(RDF.NIL, RDF.VALUE, RDF.FIRST));
 	private static final Set<Statement> Rest=singleton(statement(RDF.NIL, RDF.VALUE, RDF.REST));
 
-	private Collection<Statement> rdf(final Response response) {
-		return response.body(RDFFormat.rdf()).get().orElseGet(() -> fail("missing RDF body"));
-	}
 
+	private Tray with(final Runnable... datasets) {
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		final Tray tray=new Tray();
 
-	// !!! only root unless public
-
-	@Test void testGetGraphCatalog() {
-		new Tray()
-
-				.exec(dataset(First, (Resource)null))
-				.exec(dataset(Rest, RDF.NIL))
-
-				.get(Graphs::new)
-
-				.handle(new Request()
-
-						.roles(singleton(Form.root))
-						.method(Request.GET)
-						.base(ValuesTest.Base))
-
-				.accept(response -> {
-
-					assertThat(response.status()).isEqualTo(Response.OK);
-
-					assertThat(rdf(response)).isIsomorphicTo(
-							statement(iri(ValuesTest.Base), RDF.VALUE, RDF.NIL),
-							statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
-					);
-
-				});
-	}
-
-
-	@Test void testGetDefaultGraph() {
-		new Tray()
-
-				.exec(dataset(First))
-
-				.get(Graphs::new)
-
-				.handle(new Request()
-
-						.roles(Form.root)
-						.method(Request.GET)
-						.base(ValuesTest.Base)
-						.parameter("default", ""))
-
-				.accept(response -> {
-
-					assertEquals(Response.OK, response.status());
-					assertThat(rdf(response)).isIsomorphicTo(First);
-
-				});
-	}
-
-	@Test @Disabled void testGetNamedGraph() {
-		//LinkTest.testbed().service(Graphs::new)
-		//
-		//		.dataset(First, RDF.NIL)
-		//
-		//		.request(request -> request
-		//
-		//				.roles(singleton(Form.root))
-		//				.method(Request.GET)
-		//				.base(ValuesTest.Base)
-		//				.path(Graphs.Path)
-		//				.query("graph="+RDF.NIL)
-		//				.done())
-		//
-		//		.response(response -> ValuesTest.assertIsomorphic(First, response.rdf()));
-	}
-
-
-	@Test @Disabled void testPutDefaultGraph() {
-		//LinkTest.testbed().service(Graphs::new)
-		//
-		//		.dataset(First, (Resource)null)
-		//
-		//		.request(request -> request
-		//
-		//				.roles(singleton(Form.root))
-		//				.method(Request.PUT)
-		//				.base(ValuesTest.Base)
-		//				.path(Graphs.Path)
-		//				.query("default")
-		//				.text(ValuesTest.encode(Rest)))
-		//
-		//		.response(response -> {
-		//			try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
-		//				ValuesTest.assertIsomorphic(Rest, ValuesTest.export(connection, (Resource)null));
-		//			}
-		//		});
-	}
-
-	@Test @Disabled void testPutNamedGraph() {
-		//LinkTest.testbed().service(Graphs::new)
-		//
-		//		.dataset(First, RDF.NIL)
-		//
-		//		.request(request -> request
-		//
-		//				.roles(singleton(Form.root))
-		//				.method(Request.PUT)
-		//				.base(ValuesTest.Base)
-		//				.path(Graphs.Path)
-		//				.query("graph="+RDF.NIL)
-		//				.text(ValuesTest.encode(Rest)))
-		//
-		//		.response(response -> {
-		//			try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
-		//				ValuesTest.assertIsomorphic(Rest, strip(ValuesTest.export(connection, RDF.NIL)));
-		//			}
-		//		});
-	}
-
-
-	@Test void testPostDefaultGraph() {
-		//LinkTest.testbed().service(Graphs::new)
-		//
-		//		.dataset(First, (Resource)null)
-		//
-		//		.request(request -> request
-		//
-		//				.roles(singleton(Form.root))
-		//				.method(Request.POST)
-		//				.base(ValuesTest.Base)
-		//				.path(Graphs.Path)
-		//				.query("default")
-		//				.text(ValuesTest.encode(Rest)))
-		//
-		//		.response(response -> {
-		//			try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
-		//				ValuesTest.assertIsomorphic(merge(First, Rest), ValuesTest.export(connection, (Resource)null));
-		//			}
-		//		});
-	}
-
-	@Test @Disabled void testPostNamedGraph() {
-		//LinkTest.testbed().service(Graphs::new)
-		//
-		//		.dataset(First, RDF.NIL)
-		//
-		//		.request(request -> request
-		//
-		//				.roles(singleton(Form.root))
-		//				.method(Request.POST)
-		//				.base(ValuesTest.Base)
-		//				.path(Graphs.Path)
-		//				.query("graph="+RDF.NIL)
-		//				.text(ValuesTest.encode(Rest)))
-		//
-		//		.response(response -> {
-		//			try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
-		//				ValuesTest.assertIsomorphic(merge(First, Rest), strip(ValuesTest.export(connection, RDF.NIL)));
-		//			}
-		//		});
-	}
-
-
-	@Test @Disabled void testDeleteDefaultGraph() {
-		//LinkTest.testbed().service(Graphs::new)
-		//
-		//		.dataset(First, (Resource)null)
-		//
-		//		.request(request -> request
-		//
-		//				.roles(singleton(Form.root))
-		//				.method(Request.DELETE)
-		//				.base(ValuesTest.Base)
-		//				.path(Graphs.Path)
-		//				.query("default")
-		//				.done())
-		//
-		//		.response(response -> {
-		//			try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
-		//				assertTrue("empty default graph", ValuesTest.export(connection, (Resource)null).isEmpty());
-		//			}
-		//		});
-	}
-
-
-	@Test @Disabled void testDeleteNamedGraph() {
-		//LinkTest.testbed().service(Graphs::new)
-		//
-		//		.dataset(First, RDF.NIL)
-		//
-		//		.request(request -> request
-		//
-		//				.roles(singleton(Form.root))
-		//				.method(Request.DELETE)
-		//				.base(ValuesTest.Base)
-		//				.path(Graphs.Path)
-		//				.query("graph="+RDF.NIL)
-		//				.done())
-		//
-		//		.response(response -> {
-		//			try (final RepositoryConnection connection=tool(Graph.Factory).connect()) {
-		//				assertTrue("empty default graph", ValuesTest.export(connection, RDF.NIL).isEmpty());
-		//			}
-		//		});
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@SafeVarargs private final Collection<Statement> merge(final Collection<Statement>... models) {
-
-		final Collection<Statement> merged=new HashSet<>();
-
-		for (final Collection<Statement> model : models) {
-			merged.addAll(model);
+		for (final Runnable dataset : datasets) {
+			tray.exec(dataset);
 		}
 
-		return merged;
+		return tray;
 	}
 
-	private Set<Statement> strip(final Collection<Statement> model) { // strip context info
-		return model.stream()
-				.map(s -> statement(s.getSubject(), s.getPredicate(), s.getObject()))
-				.collect(Collectors.toSet());
+
+	private Model catalog() {
+		return new LinkedHashModel(asList(
+				statement(iri(ValuesTest.Base), RDF.VALUE, RDF.NIL),
+				statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
+		));
+	}
+
+	private Model dflt() {
+		return tool(Graph.Factory).query(connection -> {
+
+			return export(connection, (Resource)null);
+
+		});
+	}
+
+	private Model named() {
+		return tool(Graph.Factory).query(connection -> {
+
+			return export(connection, RDF.NIL).stream()
+					.map(s -> statement(s.getSubject(), s.getPredicate(), s.getObject())) // strip context info
+					.collect(toCollection(LinkedHashModel::new));
+
+		});
+	}
+
+
+	private Runnable named(final Iterable<Statement> model) {
+		return dataset(model, RDF.NIL);
+	}
+
+	private Runnable dflt(final Iterable<Statement> model) {
+		return dataset(model, (Resource)null);
+	}
+
+
+	private Graphs endpoint() {
+		return new Graphs();
+	}
+
+	private Request request() {
+		return new Request().base(ValuesTest.Base);
+	}
+
+
+	private Graphs _private(final Graphs endpoint) {
+		return endpoint;
+	}
+
+	private Graphs _public(final Graphs endpoint) {
+		return endpoint.publik(true);
+	}
+
+
+	private Request anonymous(final Request request) {
+		return request;
+	}
+
+	private Request authenticated(final Request request) {
+		return request.roles(Form.root);
+	}
+
+
+	private Request catalog(final Request request) {
+		return request.method(Request.GET);
+	}
+
+	private Request get(final Request request) {
+		return request.method(Request.GET);
+	}
+
+	private Request put(final Request request) {
+		return request.method(Request.PUT).body(input()).set(() ->
+				new ByteArrayInputStream(encode(Rest).getBytes(Transputs.UTF8))
+		);
+	}
+
+	private Request delete(final Request request) {
+		return request.method(Request.DELETE);
+	}
+
+	private Request post(final Request request) {
+		return request.method(Request.POST).body(input()).set(() ->
+				new ByteArrayInputStream(encode(Rest).getBytes(Transputs.UTF8))
+		);
+	}
+
+
+	private Request dflt(final Request request) {
+		return request.parameter("default", "");
+	}
+
+	private Request named(final Request request) {
+		return request.parameter("graph", RDF.NIL.stringValue());
+	}
+
+
+
+	//// Catalog ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testGETCatalogPrivateAnonymous() {
+		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(catalog(request())))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+
+				}));
+	}
+
+	@Test void testGETCatalogPrivateAuthorized() {
+		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(catalog(request())))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(catalog());
+
+				}));
+	}
+
+	@Test void testGETCatalogPublicAnonymous() {
+		with(dflt(First), named(Rest)).exec(() ->  _public(endpoint())
+
+				.handle(anonymous(catalog(request())))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(catalog());
+
+				}));
+	}
+
+	@Test void testGETCatalogPublicAuthorized() {
+		with(dflt(First), named(Rest)).exec(() ->  _public(endpoint())
+
+				.handle(authenticated(catalog(request())))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf()).isIsomorphicTo(catalog());
+
+				}));
+	}
+
+
+	//// GET ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testGETDefaultPrivateAnonymous() {
+		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(dflt(get(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+
+				}));
+	}
+
+	@Test void testGETDefaultPrivateAuthenticated() {
+		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(dflt(get(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testGETDefaultPublicAnonymous() {
+		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+
+				.handle(anonymous(dflt(get(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testGETDefaultPublicAuthenticated() {
+		with(dflt(First), named(Rest)).exec(() ->  _public(endpoint())
+
+				.handle(authenticated(dflt(get(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(First);
+
+				}));
+	}
+
+
+	@Test void testGETNamedPrivateAnonymous() {
+		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(named(get(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isEmpty();
+
+				}));
+	}
+
+	@Test void testGETNamedPrivateAuthenticated() {
+		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(named(get(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(Rest);
+
+				}));
+	}
+
+	@Test void testGETNamedPublicAnonymous() {
+		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+
+				.handle(anonymous(named(get(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(Rest);
+
+				}));
+	}
+
+	@Test void testGETNamedPublicAuthenticated() {
+		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+
+				.handle(authenticated(named(get(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.OK);
+					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(Rest);
+
+				}));
+	}
+
+
+	//// PUT ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testPUTDefaultPrivateAnonymous() {
+		with(dflt(First)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(dflt(put(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testPUTDefaultPrivateAuthenticated() {
+		with(dflt(First)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(dflt(put(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(Rest);
+
+				}));
+	}
+
+	@Test void testPUTDefaultPublicAnonymous() {
+		with(dflt(First)).exec(() -> _public(endpoint())
+
+				.handle(anonymous(dflt(put(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testPUTDefaultPublicAuthenticated() {
+		with(dflt(First)).exec(() -> _public(endpoint())
+
+				.handle(authenticated(dflt(put(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(Rest);
+
+				}));
+	}
+
+
+	@Test void testPUTNamedPrivateAnonymous() {
+		with(named(First)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(named(put(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testPUTNamedPrivateAuthenticated() {
+		with(named(First)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(named(put(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(Rest);
+
+				}));
+	}
+
+	@Test void testPUTNamedPublicAnonymous() {
+		with(named(First)).exec(() -> _public(endpoint())
+
+				.handle(anonymous(named(put(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testPUTNamedPublicAuthenticated() {
+		with(named(First)).exec(() -> _public(endpoint())
+
+				.handle(authenticated(named(put(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(Rest);
+
+				}));
+	}
+
+
+	//// DELETE ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testDELETEDefaultPrivateAnonymous() {
+		with(dflt(First)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(dflt(delete(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testDELETEDefaultPrivateAuthenticated() {
+		with(dflt(First)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(dflt(delete(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isEmpty();
+
+				}));
+	}
+
+	@Test void testDELETEDefaultPublicAnonymous() {
+		with(dflt(First)).exec(() -> _public(endpoint())
+
+				.handle(anonymous(dflt(delete(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testDELETEDefaultPublicAuthenticated() {
+		with(dflt(First)).exec(() -> _public(endpoint())
+
+				.handle(authenticated(dflt(delete(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isEmpty();
+
+				}));
+	}
+
+
+	@Test void testDELETENamedPrivateAnonymous() {
+		with(named(First)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(named(delete(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testDELETENamedPrivateAuthenticated() {
+		with(named(First)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(named(delete(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isEmpty();
+
+				}));
+	}
+
+	@Test void testDELETENamedPublicAnonymous() {
+		with(named(First)).exec(() -> _public(endpoint())
+
+				.handle(anonymous(named(delete(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testDELETENamedPublicAuthenticated() {
+		with(named(First)).exec(() -> _public(endpoint())
+
+				.handle(authenticated(named(delete(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isEmpty();
+
+				}));
+	}
+
+
+	//// POST ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testPOSTDefaultPrivateAnonymous() {
+		with(dflt(First)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(dflt(post(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testPOSTDefaultPrivateAuthenticated() {
+		with(dflt(First)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(dflt(post(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(union(First, Rest));
+
+				}));
+	}
+
+	@Test void testPOSTDefaultPublicAnonymous() {
+		with(dflt(First)).exec(() -> _public(endpoint())
+
+				.handle(anonymous(dflt(post(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testPOSTDefaultPublicAuthenticated() {
+		with(dflt(First)).exec(() -> _public(endpoint())
+
+				.handle(authenticated(dflt(post(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(dflt()).isIsomorphicTo(union(First, Rest));
+
+				}));
+	}
+
+
+	@Test void testPOSTNamedPrivateAnonymous() {
+		with(named(First)).exec(() -> _private(endpoint())
+
+				.handle(anonymous(named(post(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testPOSTNamedPrivateAuthenticated() {
+		with(named(First)).exec(() -> _private(endpoint())
+
+				.handle(authenticated(named(post(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(union(First, Rest));
+
+				}));
+	}
+
+	@Test void testPOSTNamedPublicAnonymous() {
+		with(named(First)).exec(() -> _public(endpoint())
+
+				.handle(anonymous(named(post(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).hasStatus(Response.Unauthorized);
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(First);
+
+				}));
+	}
+
+	@Test void testPOSTNamedPublicAuthenticated() {
+		with(named(First)).exec(() -> _public(endpoint())
+
+				.handle(authenticated(named(post(request()))))
+
+				.accept(response -> {
+
+					assertThat(response).isSuccess();
+					assertThat(response).hasEmptyBody();
+					assertThat(named()).isIsomorphicTo(union(First, Rest));
+
+				}));
 	}
 
 }
