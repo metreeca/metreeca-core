@@ -121,25 +121,26 @@ public final class ResponseSubject extends Subject<ResponseSubject, Response> {
 		return body(format, ModelSubject::assertThat);
 	}
 
-	public <V, S extends Subject<S, ?extends V>> S body(final Format<V> format, final Function<V, S> subject) {
+	public <V, S extends Subject<S, ? extends V>> S body(final Format<V> format, final Function<V, S> subject) {
 
-		final Response response=actual(); // !!! handle null
+		// !!! handle null actual()
+		// !!! handle textual body
 
+		return actual()
 
-		return response.body(input()).set(() -> { // !!! handle textual body
+				.body(input())
+				.set(() -> {
 
-			final ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+					final ByteArrayOutputStream buffer=new ByteArrayOutputStream();
 
-			response.body(output()).use(consumer -> consumer.accept(() -> buffer));
+					actual().body(output()).use(consumer -> consumer.accept(() -> buffer));
 
-			return new ByteArrayInputStream(buffer.toByteArray());
+					return new ByteArrayInputStream(buffer.toByteArray());
 
-		}).body(format).map(
+				})
 
-
-				subject,
-				failure -> Assertions.fail("unable to get body")
-		);
+				.body(format)
+				.map(subject, failure -> Assertions.fail("unable to get body"));
 	}
 
 }

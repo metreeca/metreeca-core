@@ -38,7 +38,7 @@ import static java.util.Arrays.asList;
  * <p>Forwards SPARQL queries to the remote endpoint defined by the {@code endpoint} query parameter of the incoming
  * request.</p>
  */
-public class Proxy implements Handler {
+public final class Proxy implements Handler {
 
 	// !!! support hardwired remote endpoint
 

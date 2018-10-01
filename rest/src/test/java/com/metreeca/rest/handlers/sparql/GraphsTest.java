@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.things.ModelSubject;
 import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
@@ -35,7 +34,7 @@ import org.eclipse.rdf4j.model.vocabulary.VOID;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
-import java.util.*;
+import java.util.Set;
 
 import static com.metreeca.form.things.ModelSubject.assertThat;
 import static com.metreeca.form.things.Sets.union;
@@ -192,7 +191,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(catalog());
+					assertThat(response).body(rdf()).isIsomorphicTo(catalog());
 
 				}));
 	}
@@ -205,7 +204,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(catalog());
+					assertThat(response).body(rdf()).isIsomorphicTo(catalog());
 
 				}));
 	}
@@ -247,7 +246,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(First);
+					assertThat(response).body(rdf()).isIsomorphicTo(First);
 
 				}));
 	}
@@ -260,7 +259,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(First);
+					assertThat(response).body(rdf()).isIsomorphicTo(First);
 
 				}));
 	}
@@ -273,7 +272,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(First);
+					assertThat(response).body(rdf()).isIsomorphicTo(First);
 
 				}));
 	}
@@ -287,7 +286,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isEmpty();
+					assertThat(response).body(rdf()).isEmpty();
 
 				}));
 	}
@@ -300,7 +299,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(Rest);
+					assertThat(response).body(rdf()).isIsomorphicTo(Rest);
 
 				}));
 	}
@@ -313,7 +312,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(Rest);
+					assertThat(response).body(rdf()).isIsomorphicTo(Rest);
 
 				}));
 	}
@@ -326,7 +325,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf(), success -> ModelSubject.assertThat(success)).isIsomorphicTo(Rest);
+					assertThat(response).body(rdf()).isIsomorphicTo(Rest);
 
 				}));
 	}
