@@ -33,6 +33,8 @@ import static com.metreeca.form.things.ValuesTest.encode;
 import static com.google.common.truth.Fact.fact;
 import static com.google.common.truth.Truth.assertAbout;
 
+import static java.util.Arrays.asList;
+
 
 public final class ModelsTest extends Subject<ModelsTest, Model> {
 
@@ -53,6 +55,14 @@ public final class ModelsTest extends Subject<ModelsTest, Model> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public void isIsomorphicTo(final Statement... model) {
+		isIsomorphicTo(model == null ? null : asList(model));
+	}
+
+	public void isIsomorphicTo(final Collection<Statement> model) {
+		isIsomorphicTo(model == null ? null : new LinkedHashModel(model));
+	}
 
 	public void isIsomorphicTo(final Model model) {
 
