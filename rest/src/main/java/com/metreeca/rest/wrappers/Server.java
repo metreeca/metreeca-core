@@ -4,11 +4,21 @@ import com.metreeca.rest.*;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
+import org.eclipse.rdf4j.model.IRI;
+
+import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.*;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Request.GET;
+import static com.metreeca.rest.Request.POST;
+import static com.metreeca.rest.formats.TextFormat.text;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
+import static java.util.Collections.unmodifiableMap;
 
 
 /**
@@ -20,6 +30,7 @@ import static java.lang.String.format;
 public final class Server implements Wrapper {
 
 	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=.*$");
+	private static final Pattern URLEncodedPattern=Pattern.compile("application/x-www-form-urlencoded\\b");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,9 +49,15 @@ public final class Server implements Wrapper {
 			try {
 
 				return consumer -> request
-						.map(this::preprocessor)
+
+						.map(this::query)
+						.map(this::form)
+
 						.map(handler::handle)
-						.map(this::postprocessor)
+
+						.map(this::logging)
+						.map(this::charset)
+
 						.accept(consumer);
 
 			} catch ( final RuntimeException e ) {
@@ -58,24 +75,41 @@ public final class Server implements Wrapper {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Pre-Processing ////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Request preprocessor(final Request request) {
-		return request;
+	private Request query(final Request request) { // parse parameters from query string
+		return request.parameters().isEmpty() && request.method().equals(GET)
+				? request.parameters(parse(request.query()))
+				: request;
 	}
 
-	private Response postprocessor(final Response response) {
+	private Request form(final Request request) { // parse parameters from encoded form body, ignoring charset parameter
+		return request.parameters().isEmpty()
+				&& request.method().equals(POST)
+				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
+				? request.parameters(parse(request.body(text()).get().orElse("")))
+				: request;
+	}
+
+
+	//// Post-Processing ///////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Response logging(final Response response) { // log request outcome
 
 		final Request request=response.request();
+		final String method=request.method();
+		final IRI item=request.item();
+
 		final int status=response.status();
 		final Throwable cause=response.cause().orElse(null);
 
-		// log response outcome
-
 		trace.entry(status < 400 ? Trace.Level.Info : status < 500 ? Trace.Level.Warning : Trace.Level.Error,
-				this, format("%s %s > %d", request.method(), request.item(), status), cause);
+				this, format("%s %s > %d", method, item, status), cause);
 
-		// if no charset is specified, add a default one to prevent the container from adding its own…
+		return response;
+	}
+
+	private Response charset(final Response response) { // prevent the container from adding its default charset…
 
 		response.header("Content-Type")
 				.filter(type -> !CharsetPattern.matcher(type).find())
@@ -83,7 +117,46 @@ public final class Server implements Wrapper {
 				.ifPresent(type -> response.header("Content-Type", type+";charset=UTF-8"));
 
 		return response;
+	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static Map<String, List<String>> parse(final String query) {
+
+		final Map<String, List<String>> parameters=new LinkedHashMap<>();
+
+		final int length=query.length();
+
+		for (int head=0, tail; head < length; head=tail+1) {
+			try {
+
+				final int equal=query.indexOf('=', head);
+				final int ampersand=query.indexOf('&', head);
+
+				tail=(ampersand >= 0) ? ampersand : length;
+
+				final boolean split=equal >= 0 && equal < tail;
+
+				final String label=URLDecoder.decode(query.substring(head, split ? equal : tail), "UTF-8");
+				final String value=URLDecoder.decode(query.substring(split ? equal+1 : tail, tail), "UTF-8");
+
+				parameters.compute(label, (name, values) -> {
+
+					final List<String> strings=(values != null) ? values : new ArrayList<>();
+
+					strings.add(value);
+
+					return strings;
+
+				});
+
+			} catch ( final UnsupportedEncodingException unexpected ) {
+				throw new UncheckedIOException(unexpected);
+			}
+		}
+
+		return unmodifiableMap(parameters);
 	}
 
 }

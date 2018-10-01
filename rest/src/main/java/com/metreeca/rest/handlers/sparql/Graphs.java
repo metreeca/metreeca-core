@@ -40,7 +40,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static com.metreeca.form.Shape.only;
 import static com.metreeca.form.shapes.And.and;
@@ -164,9 +163,9 @@ public final class Graphs implements Handler {
 			} else {
 
 				final RDFWriterFactory factory=Formats.service(
-						RDFWriterRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, accept);
+						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, accept);
 
-				final org.eclipse.rdf4j.rio.RDFFormat format=factory.getRDFFormat();
+				final RDFFormat format=factory.getRDFFormat();
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
@@ -221,7 +220,7 @@ public final class Graphs implements Handler {
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
 				final RDFParserFactory factory=Formats.service(
-						RDFParserRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, content // !!! review fallback handling
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
 				graph.update(connection -> {
@@ -362,7 +361,7 @@ public final class Graphs implements Handler {
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
-						RDFParserRegistry.getInstance(), org.eclipse.rdf4j.rio.RDFFormat.TURTLE, content);
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
 				graph.update(connection -> {
 					try (final InputStream input=request.body(input()).get() // binary format >> no rewriting

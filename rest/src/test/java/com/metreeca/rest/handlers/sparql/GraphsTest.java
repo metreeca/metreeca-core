@@ -19,11 +19,15 @@ package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.tray.Tray;
 
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.VOID;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -32,47 +36,56 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.metreeca.form.things.ModelsTest.assertThat;
+import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.rest.RestTest.dataset;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import static java.util.Collections.singleton;
 
 
-@Disabled final class GraphsTest {
+final class GraphsTest {
 
 	private static final Set<Statement> First=singleton(statement(RDF.NIL, RDF.VALUE, RDF.FIRST));
 	private static final Set<Statement> Rest=singleton(statement(RDF.NIL, RDF.VALUE, RDF.REST));
 
+	private Collection<Statement> rdf(final Response response) {
+		return response.body(RDFFormat.rdf()).get().orElseGet(() -> fail("missing RDF body"));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// !!! only root unless public
 
 	@Test void testGetGraphCatalog() {
-		//new Tray()
-		//
-		//		.exec(dataset(First, (Resource)null))
-		//		.exec(dataset(Rest, RDF.NIL))
-		//
-		//		.get(Graphs::new)
-		//
-		//		.handle(new Request()
-		//
-		//				.roles(singleton(Form.root))
-		//				.method(Request.GET)
-		//				.base(ValuesTest.Base))
-		//
-		//		.accept(response -> {
-		//
-		//			assertIsomorphic(asList(
-		//
-		//					statement(iri(ValuesTest.Base, Graphs.Path), RDF.VALUE, RDF.NIL),
-		//					statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
-		//
-		//			), response.rdf());
-		//
-		//		});
+		new Tray()
+
+				.exec(dataset(First, (Resource)null))
+				.exec(dataset(Rest, RDF.NIL))
+
+				.get(Graphs::new)
+
+				.handle(new Request()
+
+						.roles(singleton(Form.root))
+						.method(Request.GET)
+						.base(ValuesTest.Base))
+
+				.accept(response -> {
+
+					assertThat(response.status()).isEqualTo(Response.OK);
+
+					assertThat(rdf(response)).isIsomorphicTo(
+							statement(iri(ValuesTest.Base), RDF.VALUE, RDF.NIL),
+							statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
+					);
+
+				});
 	}
 
 
@@ -88,12 +101,12 @@ import static java.util.Collections.singleton;
 						.roles(Form.root)
 						.method(Request.GET)
 						.base(ValuesTest.Base)
-						.query("default"))
+						.parameter("default", ""))
 
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertIsomorphic(First, response.body(rdf()).get().orElseGet(() -> fail("no RDF body")));
+					assertThat(rdf(response)).isIsomorphicTo(First);
 
 				});
 	}

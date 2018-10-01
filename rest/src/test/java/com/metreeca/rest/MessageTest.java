@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.util.function.Function;
 
-import static com.metreeca.rest.Result.value;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Transputs.text;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -146,9 +145,9 @@ final class MessageTest {
 
 
 		@Override public Result<String> get(final Message<?> message) {
-			return message.body(reader()).flatMap(supplier -> {
+			return message.body(reader()).map(supplier -> {
 				try (final Reader reader=supplier.get()) {
-					return value(text(reader));
+					return text(reader);
 				} catch ( final IOException e ) {
 					throw new UncheckedIOException(e);
 				}
