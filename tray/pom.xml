@@ -75,10 +75,6 @@
 
 			<plugin> <!-- http://maven.apache.org/plugins/maven-install-plugin/install-file-mojo.html -->
 
-				<!-- install virtuoso RDF4J provider in the local maven repository -->
-				<!-- download stable jars from http://vos.openlinksw.com/owiki/wiki/VOS/VOSDownload#For%20RDF4J%202.x -->
-				<!-- download develop jars from https://github.com/openlink/virtuoso-opensource/tree/develop/7/binsrc/rdf4j -->
-
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
 				<version>2.5.1</version>
@@ -86,6 +82,10 @@
 				<executions>
 
 					<execution>
+
+						<!-- install virtuoso RDF4J provider in the local maven repository -->
+						<!-- download stable jars from http://vos.openlinksw.com/owiki/wiki/VOS/VOSDownload#For%20RDF4J%202.x -->
+						<!-- download develop jars from https://github.com/openlink/virtuoso-opensource/tree/develop/7/binsrc/rdf4j -->
 
 						<id>install-virtuoso-rdf4j-provider</id>
 						<phase>validate</phase>
@@ -124,6 +124,39 @@
 				</executions>
 
 			</plugin>
+
+			<plugin> <!-- https://maven.apache.org/plugins/maven-dependency-plugin -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.1.1</version>
+
+				<executions>
+					<execution>
+
+						<!-- copy local dependencies to the main jar -->
+
+						<id>copy-dependencies</id>
+						<phase>prepare-package</phase>
+
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+
+						<configuration>
+
+							<includeGroupIds>virtuoso.openlinksw.com</includeGroupIds>
+							<includeScope>runtime</includeScope>
+
+							<outputDirectory>${project.build.directory}/classes/</outputDirectory>
+
+						</configuration>
+
+					</execution>
+				</executions>
+
+			</plugin>
+
 		</plugins>
 	</build>
 
