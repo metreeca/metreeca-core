@@ -39,11 +39,19 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>next</artifactId>
+			<artifactId>rest</artifactId>
 			<version>0.0-SNAPSHOT</version>
 		</dependency>
 
 		<!-- testing -->
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>rest</artifactId>
+			<version>0.0-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.metreeca</groupId>

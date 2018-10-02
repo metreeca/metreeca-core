@@ -21,11 +21,13 @@ import com.metreeca.form.things.Transputs;
 import com.metreeca.gate.Roster;
 import com.metreeca.gate.RosterTest;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.*;
 import com.metreeca.tray.Tray;
 
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.ReaderFormat.reader;
+import static com.metreeca.rest.formats.TextFormat.text;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,12 +59,12 @@ final class BearerTest {
 
 				.handle(new Request()
 						.method(Request.GET)
-						.body(ReaderFormat.asReader, Transputs::reader))
+						.body(reader()).set(Transputs::reader))
 
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertFalse(response.body(TextFormat.asText).value().isPresent());
+					assertFalse(response.body(text()).get().isPresent());
 
 					assertFalse(response
 							.header("WWW-Authenticate")
@@ -124,18 +126,10 @@ final class BearerTest {
 						.method(Request.GET)
 						.header("Authorization", "Bearer this"))
 
-				.accept(response -> {
-
-					assertEquals(Response.OK, response.status(), "success reported");
-					assertFalse(response.body(OutputFormat.asOutput).value().isPresent(), "no binary body");
-					assertFalse(response.body(WriterFormat.asWriter).value().isPresent(), "no textual body");
-
-					assertFalse(response
-									.header("WWW-Authenticate")
-									.isPresent(),
-							"challenge not included");
-
-				});
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.describedAs("challenge not included").doesNotHaveHeader("WWW-Authenticate")
+						.hasEmptyBody());
 	}
 
 	@Test void testAuthorizationBadCredentials() {
