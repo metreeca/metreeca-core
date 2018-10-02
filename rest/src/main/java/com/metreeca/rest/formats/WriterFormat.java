@@ -17,9 +17,9 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Result;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
+import com.metreeca.rest.Result;
 
 import java.io.Writer;
 import java.util.function.Consumer;

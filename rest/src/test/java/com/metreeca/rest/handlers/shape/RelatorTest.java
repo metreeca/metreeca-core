@@ -21,25 +21,29 @@ package com.metreeca.rest.handlers.shape;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.RestTest;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.things.ModelAssert.assertThat;
+import static com.metreeca.form.things.ValuesTest.construct;
+import static com.metreeca.form.things.ValuesTest.small;
+import static com.metreeca.form.things.ValuesTest.term;
 
-import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 final class RelatorTest {
@@ -117,7 +121,7 @@ final class RelatorTest {
 							"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }");
 
 					response.body(RDFFormat.rdf()).use(
-							model -> assertSubset("items retrieved", expected, model),
+							model -> assertThat(model).as("items retrieved").hasSubset((Collection<Statement>)expected),
 							error -> fail("missing RDF body")
 					);
 
@@ -142,7 +146,8 @@ final class RelatorTest {
 
 					response.body(RDFFormat.rdf()).use(
 							model -> {
-								assertSubset("items retrieved", expected, model);
+								assertThat(model).as("items retrieved").hasSubset((Collection<Statement>)expected);
+
 								assertTrue(
 										new LinkedHashModel(model).filter(null, term("seniority"), null).isEmpty(), // !!! unwrap
 										"properties restricted to manager role not included"

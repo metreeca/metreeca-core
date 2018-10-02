@@ -33,15 +33,13 @@ import java.util.function.Consumer;
 
 import static com.metreeca.form.things.Transputs.url;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith(TempDirectory.class) final class CacheTest {
 
 	private static final int SyncDelay=1000;
-
 
 
 	private void exec(final Path tmp, final Consumer<Cache> task) {
@@ -80,7 +78,7 @@ import static org.junit.Assert.assertTrue;
 
 					try { Thread.sleep(SyncDelay); } catch ( final InterruptedException ignored ) {}
 
-					assertEquals("content cached", updated.get(), blob.updated());
+					assertThat(updated.get()).as("content cached").isEqualTo(blob.updated());
 
 					return this;
 
@@ -94,7 +92,7 @@ import static org.junit.Assert.assertTrue;
 
 					assertEquals("content updated", update, blob.text());
 
-					assertTrue("timestamp updated", updated.get() < blob.updated());
+					assertThat(updated.get()).as("timestamp updated").isLessThan(blob.updated());
 
 					return this;
 
@@ -116,7 +114,7 @@ import static org.junit.Assert.assertTrue;
 
 				updated.set(blob.updated());
 
-				assertFalse("content retrieved", blob.text().isEmpty());
+				assertThat(blob.text()).as("content retrieved").isEmpty();
 
 				return this;
 
@@ -126,7 +124,7 @@ import static org.junit.Assert.assertTrue;
 
 				try { Thread.sleep(SyncDelay); } catch ( final InterruptedException ignored ) {}
 
-				assertEquals("content cached", updated.get(), blob.updated());
+				assertThat(updated.get()).as("content cached").isEqualTo(blob.updated());
 
 				return this;
 

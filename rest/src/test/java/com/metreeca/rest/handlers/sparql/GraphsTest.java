@@ -36,13 +36,13 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.util.Set;
 
-import static com.metreeca.form.things.ModelSubject.assertThat;
+import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.union;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.encode;
 import static com.metreeca.form.things.ValuesTest.export;
-import static com.metreeca.rest.ResponseSubject.assertThat;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.RestTest.dataset;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -167,7 +167,6 @@ final class GraphsTest {
 	}
 
 
-
 	//// Catalog ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testGETCatalogPrivateAnonymous() {
@@ -197,7 +196,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETCatalogPublicAnonymous() {
-		with(dflt(First), named(Rest)).exec(() ->  _public(endpoint())
+		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
 
 				.handle(anonymous(catalog(request())))
 
@@ -210,7 +209,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETCatalogPublicAuthorized() {
-		with(dflt(First), named(Rest)).exec(() ->  _public(endpoint())
+		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
 
 				.handle(authenticated(catalog(request())))
 
@@ -265,7 +264,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETDefaultPublicAuthenticated() {
-		with(dflt(First), named(Rest)).exec(() ->  _public(endpoint())
+		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
 
 				.handle(authenticated(dflt(get(request()))))
 

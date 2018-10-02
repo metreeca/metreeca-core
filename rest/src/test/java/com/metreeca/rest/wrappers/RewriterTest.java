@@ -18,10 +18,10 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.things.Transputs;
-import com.metreeca.form.things.Values;
-import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.*;
+import com.metreeca.form.things.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
 
@@ -38,17 +38,17 @@ import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.Transputs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static java.util.Collections.singleton;
 
@@ -90,20 +90,20 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
-					assertThat(request.user()).named("rewritten user").isEqualTo(internal("user"));
-					assertThat(request.roles()).named("rewritten roles").containsExactly(internal("role"));
+					assertThat(request.user()).as("rewritten user").isEqualTo(internal("user"));
+					assertThat(request.roles()).as("rewritten roles").containsExactly(internal("role"));
 
-					assertThat(request.base()).named("rewritten base").isEqualTo(Internal);
-					assertThat(request.item()).named("rewritten item").isEqualTo(internal("path"));
+					assertThat(request.base()).as("rewritten base").isEqualTo(Internal);
+					assertThat(request.item()).as("rewritten item").isEqualTo(internal("path"));
 
-					assertThat(request.query()).named("rewritten query").isEqualTo(internal("request").toString());
+					assertThat(request.query()).as("rewritten query").isEqualTo(internal("request").toString());
 
 					assertThat(request.parameters("request"))
-							.named("rewritten parameter")
+							.as("rewritten parameter")
 							.containsExactly(internal("request").toString());
 
 					assertThat(request.headers("request"))
-							.named("rewritten header")
+							.as("rewritten header")
 							.containsExactly("request="+internal("request"));
 
 					return request.reply(response -> response.status(Response.OK)
@@ -130,7 +130,7 @@ final class RewriterTest {
 				.accept(response -> {
 
 					assertThat(response.headers("response"))
-							.named("rewritten response header")
+							.as("rewritten response header")
 							.containsExactly("response="+external("response"));
 
 				});
@@ -142,7 +142,7 @@ final class RewriterTest {
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
 					assertThat(request.query())
-							.named("rewritten encoded query")
+							.as("rewritten encoded query")
 							.isEqualTo(encode(internal("request").toString()));
 
 					return request.reply(response -> response.status(Response.OK));
@@ -165,8 +165,9 @@ final class RewriterTest {
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
 					request.body(rdf()).use(
-							model -> assertIsomorphic("request rdf rewritten",
-									singleton(internal("s", "p", "o")), model),
+							model -> ModelAssert.assertThat(internal("s", "p", "o"))
+									.as("request rdf rewritten")
+									.isIsomorphicTo(model),
 							error -> fail("missing RDF payload")
 					);
 
@@ -184,8 +185,7 @@ final class RewriterTest {
 				.accept(response -> {
 
 					response.body(rdf()).use(
-							model -> assertIsomorphic("response rdf rewritten",
-									singleton(external("s", "p", "o")), model),
+							model -> assertThat(singleton(external("s", "p", "o"))).as("response rdf rewritten").isIsomorphicTo(model),
 							error -> fail("missing RDF payload")
 					);
 
@@ -198,8 +198,7 @@ final class RewriterTest {
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
 					request.body(rdf()).use(
-							model -> assertIsomorphic("request json rewritten",
-									singleton(internal("s", "p", "o")), model),
+							model -> assertThat(singleton(internal("s", "p", "o"))).as("request json rewritten").isIsomorphicTo(model),
 							error -> fail("missing RDF payload")
 					);
 
@@ -236,7 +235,7 @@ final class RewriterTest {
 								value.accept(() -> buffer);
 
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
-										.named("rewritten response json")
+										.as("rewritten response json")
 										.isEqualTo(Json.createObjectBuilder()
 												.add("this", External+"s")
 												.add("p", External+"o")

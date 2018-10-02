@@ -17,80 +17,85 @@
 
 package com.metreeca.form.shapes;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Test.test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
 
 
-public class MinCountTest {
+final class MinCountTest {
 
-	@org.junit.Test public void testInspectMinCount() {
+	@Test void testInspectMinCount() {
 
 		final MinCount count=MinCount.minCount(10);
 
-		assertTrue("defined", MinCount.minCount(count)
+		assertThat(MinCount.minCount(count)
 				.filter(limit -> limit.equals(count.getLimit()))
-				.isPresent());
+				.isPresent()).as("defined").isTrue();
 	}
 
-	@org.junit.Test public void testInspectConjunction() {
+	@Test void testInspectConjunction() {
 
 		final MinCount x=MinCount.minCount(10);
 		final MinCount y=MinCount.minCount(100);
 
-		assertTrue("all defined", MinCount.minCount(And.and(x, y))
-				.filter(limit -> limit.equals(max(x.getLimit(), y.getLimit())))
-				.isPresent());
+		assertThat(MinCount.minCount(and(x, y))
+				.filter(limit1 -> limit1.equals(max(x.getLimit(), y.getLimit())))
+				.isPresent()).as("all defined").isTrue();
 
-		assertTrue("some defined", MinCount.minCount(And.and(x, And.and()))
+		assertThat(MinCount.minCount(and(x, and()))
 				.filter(limit -> limit.equals(x.getLimit()))
-				.isPresent());
+				.isPresent()).as("some defined").isTrue();
 
-		assertFalse("none defined", MinCount.minCount(And.and(And.and(), And.and()))
-				.isPresent());
+		assertThat(MinCount.minCount(and(and(), and()))
+				.isPresent()).as("none defined").isFalse();
 
 	}
 
-	@org.junit.Test public void testInspectDisjunction() {
+	@Test void testInspectDisjunction() {
 
 		final MinCount x=MinCount.minCount(10);
 		final MinCount y=MinCount.minCount(100);
 
-		assertTrue("all defined", MinCount.minCount(Or.or(x, y))
-				.filter(limit -> limit.equals(min(x.getLimit(), y.getLimit())))
-				.isPresent());
+		assertThat(MinCount.minCount(or(x, y))
+				.filter(limit1 -> limit1.equals(min(x.getLimit(), y.getLimit())))
+				.isPresent()).as("all defined").isTrue();
 
-		assertTrue("some defined", MinCount.minCount(Or.or(x, And.and()))
+		assertThat(MinCount.minCount(or(x, and()))
 				.filter(limit -> limit.equals(x.getLimit()))
-				.isPresent());
+				.isPresent()).as("some defined").isTrue();
 
-		assertFalse("none defined", MinCount.minCount(Or.or(And.and(), And.and()))
-				.isPresent());
+		assertThat(MinCount.minCount(or(and(), and()))
+				.isPresent()).as("none defined").isFalse();
 
 	}
 
-	@org.junit.Test public void testOption() {
+	@Test void testOption() {
 
 		final MinCount x=MinCount.minCount(10);
 		final MinCount y=MinCount.minCount(100);
 
-		assertTrue("all defined", MinCount.minCount(Test.test(And.and(), x, y))
-				.filter(limit -> limit.equals(min(x.getLimit(), y.getLimit())))
-				.isPresent());
+		assertThat(MinCount.minCount(test(and(), x, y))
+				.filter(limit1 -> limit1.equals(min(x.getLimit(), y.getLimit())))
+				.isPresent()).as("all defined").isTrue();
 
-		assertTrue("some defined", MinCount.minCount(Test.test(And.and(), x, And.and()))
+		assertThat(MinCount.minCount(test(and(), x, and()))
 				.filter(limit -> limit.equals(x.getLimit()))
-				.isPresent());
+				.isPresent()).as("some defined").isTrue();
 
-		assertFalse("none defined", MinCount.minCount(Test.test(And.and(), And.and(), And.and()))
-				.isPresent());
+		assertThat(MinCount.minCount(test(and(), and(), and()))
+				.isPresent()).as("none defined").isFalse();
 
 	}
 
-	@org.junit.Test public void testInspectOtherShape() {
-		assertFalse("not defined", MinCount.minCount(And.and()).isPresent());
+	@Test void testInspectOtherShape() {
+		assertThat(MinCount.minCount(and()).isPresent()).as("not defined").isFalse();
 	}
 
 }

@@ -189,7 +189,7 @@ public final class ShapeCodec {
 				: types.contains(Form.multiple) ? multiple(root, model)
 				: types.contains(Form.only) ? only(root, model)
 
-				:  types.contains(Form.Trait) ? trait(root, model)
+				: types.contains(Form.Trait) ? trait(root, model)
 				: types.contains(Form.Virtual) ? virtual(root, model)
 
 				: types.contains(Form.And) ? and(root, model)

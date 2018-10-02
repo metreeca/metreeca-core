@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.rest.ResponseSubject.assertThat;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.RestTest.dataset;
 
 import static java.util.Collections.singleton;

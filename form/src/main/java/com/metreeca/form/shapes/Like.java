@@ -25,7 +25,8 @@ import com.metreeca.form.Shape;
  *
  * <p>States that the lexical representation of each term in the focus set matches the given full-text keywords.</p>
  *
- * <p>sequences of word characters are matched case-insensitively as word stemsin the order the appear within keywords; non-word characters are ignored.</p>
+ * <p>sequences of word characters are matched case-insensitively as word stemsin the order the appear within keywords;
+ * non-word characters are ignored.</p>
  */
 public final class Like implements Shape {
 

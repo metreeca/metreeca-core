@@ -5,4 +5,4 @@ remote_theme: metreeca/docs
 exclude: [Gemfile, Gemfile.lock]
 
 plugins:
-  - jekyll-redirect-from
+- jekyll-redirect-from

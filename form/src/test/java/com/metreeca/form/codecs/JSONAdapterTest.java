@@ -28,9 +28,6 @@ import java.util.Map;
 
 import javax.json.*;
 
-import static com.metreeca.form.things.Values.bnode;
-import static com.metreeca.form.things.Values.format;
-
 
 public abstract class JSONAdapterTest {
 

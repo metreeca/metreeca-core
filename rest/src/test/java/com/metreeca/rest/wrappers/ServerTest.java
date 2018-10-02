@@ -23,10 +23,11 @@ import com.metreeca.tray.Tray;
 
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.TextFormat.text;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -42,8 +43,8 @@ final class ServerTest {
 				.wrap((Handler)request -> {
 
 					assertThat(request.parameters()).containsExactly(
-							"one", singletonList("1"),
-							"two", asList("2", "2")
+							entry("one", singletonList("1")),
+							entry("two", asList("2", "2"))
 					);
 
 					return request.reply(response -> response.status(OK));
@@ -63,8 +64,8 @@ final class ServerTest {
 				.wrap((Handler)request -> {
 
 					assertThat(request.parameters()).containsExactly(
-							"one", singletonList("1"),
-							"two", asList("2", "2")
+							entry("one", singletonList("1")),
+							entry("two", asList("2", "2"))
 					);
 
 					return request.reply(response -> response.status(OK));
@@ -85,7 +86,7 @@ final class ServerTest {
 				.wrap((Handler)request -> {
 
 					assertThat(request.parameters()).containsExactly(
-							"existing", singletonList("true")
+							entry("existing", singletonList("true"))
 					);
 
 					return request.reply(response -> response.status(OK));

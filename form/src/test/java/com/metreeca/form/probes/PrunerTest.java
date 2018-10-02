@@ -17,86 +17,86 @@
 
 package com.metreeca.form.probes;
 
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
+import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Test.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class PrunerTest {
+final class PrunerTest {
 
-	@org.junit.Test public void testConstraint() {
+	@Test void testConstraint() {
 
-		Assert.assertEquals("MinCount", MinCount.minCount(1), prune(MinCount.minCount(1)));
-		assertEquals("MaxCount", maxCount(1), prune(maxCount(1)));
+		assertThat((Object)MinCount.minCount(1)).as("MinCount").isEqualTo(prune(MinCount.minCount(1)));
+		assertThat((Object)maxCount(1)).as("MaxCount").isEqualTo(prune(maxCount(1)));
 
-		Assert.assertEquals("Clazz", Clazz.clazz(RDF.NIL), prune(Clazz.clazz(RDF.NIL)));
-		Assert.assertEquals("Type", Datatype.datatype(RDF.NIL), prune(Datatype.datatype(RDF.NIL)));
+		assertThat((Object)Clazz.clazz(RDF.NIL)).as("Clazz").isEqualTo(prune(Clazz.clazz(RDF.NIL)));
+		assertThat((Object)Datatype.datatype(RDF.NIL)).as("Type").isEqualTo(prune(Datatype.datatype(RDF.NIL)));
 
-		assertEquals("Universal", All.all(RDF.NIL), prune(All.all(RDF.NIL)));
-		assertEquals("Universal", Any.any(RDF.NIL), prune(Any.any(RDF.NIL)));
+		assertThat((Object)All.all(RDF.NIL)).as("Universal").isEqualTo(prune(All.all(RDF.NIL)));
+		assertThat((Object)Any.any(RDF.NIL)).as("Universal").isEqualTo(prune(Any.any(RDF.NIL)));
 
-		Assert.assertEquals("MinInclusive", MinInclusive.minInclusive(RDF.NIL), prune(MinInclusive.minInclusive(RDF.NIL)));
-		Assert.assertEquals("MaxInclusive", MaxInclusive.maxInclusive(RDF.NIL), prune(MaxInclusive.maxInclusive(RDF.NIL)));
-		Assert.assertEquals("MinExclusive", MinExclusive.minExclusive(RDF.NIL), prune(MinExclusive.minExclusive(RDF.NIL)));
-		Assert.assertEquals("MaxExclusive", MaxExclusive.maxExclusive(RDF.NIL), prune(MaxExclusive.maxExclusive(RDF.NIL)));
+		assertThat((Object)MinInclusive.minInclusive(RDF.NIL)).as("MinInclusive").isEqualTo(prune(MinInclusive.minInclusive(RDF.NIL)));
+		assertThat((Object)MaxInclusive.maxInclusive(RDF.NIL)).as("MaxInclusive").isEqualTo(prune(MaxInclusive.maxInclusive(RDF.NIL)));
+		assertThat((Object)MinExclusive.minExclusive(RDF.NIL)).as("MinExclusive").isEqualTo(prune(MinExclusive.minExclusive(RDF.NIL)));
+		assertThat((Object)MaxExclusive.maxExclusive(RDF.NIL)).as("MaxExclusive").isEqualTo(prune(MaxExclusive.maxExclusive(RDF.NIL)));
 
-		Assert.assertEquals("Pattern", Pattern.pattern("pattern"), prune(Pattern.pattern("pattern")));
-		Assert.assertEquals("Like", Like.like("pattern"), prune(Like.like("pattern")));
-		Assert.assertEquals("MinLength", MinLength.minLength(1), prune(MinLength.minLength(1)));
-		Assert.assertEquals("MaxLength", MaxLength.maxLength(1), prune(MaxLength.maxLength(1)));
-
-	}
-
-	@org.junit.Test public void testTrait() {
-
-		Assert.assertEquals("dead", And.and(), prune(Trait.trait(RDF.VALUE)));
-		assertEquals("live", Trait.trait(RDF.VALUE, maxCount(1)), prune(Trait.trait(RDF.VALUE, maxCount(1))));
+		assertThat((Object)Pattern.pattern("pattern")).as("Pattern").isEqualTo(prune(Pattern.pattern("pattern")));
+		assertThat((Object)Like.like("pattern")).as("Like").isEqualTo(prune(Like.like("pattern")));
+		assertThat((Object)MinLength.minLength(1)).as("MinLength").isEqualTo(prune(MinLength.minLength(1)));
+		assertThat((Object)MaxLength.maxLength(1)).as("MaxLength").isEqualTo(prune(MaxLength.maxLength(1)));
 
 	}
 
-	@org.junit.Test public void testVirtual() {
+	@Test void testTrait() {
 
-		Assert.assertEquals("dead", And.and(), prune(Virtual.virtual(Trait.trait(RDF.VALUE), Step.step(RDF.NIL))));
-
-		Assert.assertEquals("live", Virtual.virtual(Trait.trait(RDF.VALUE, maxCount(1)), Step.step(RDF.NIL)),
-				prune(Virtual.virtual(Trait.trait(RDF.VALUE, maxCount(1)), Step.step(RDF.NIL))));
+		assertThat((Object)and()).as("dead").isEqualTo(prune(Trait.trait(RDF.VALUE)));
+		assertThat((Object)Trait.trait(RDF.VALUE, maxCount(1))).as("live").isEqualTo(prune(Trait.trait(RDF.VALUE, maxCount(1))));
 
 	}
 
-	@org.junit.Test public void testConjunction() {
+	@Test void testVirtual() {
 
-		Assert.assertEquals("empty", And.and(), prune(And.and()));
-		Assert.assertEquals("dead", And.and(), prune(And.and(And.and())));
+		assertThat((Object)and()).as("dead").isEqualTo(prune(Virtual.virtual(Trait.trait(RDF.VALUE), Step.step(RDF.NIL))));
 
-		Assert.assertEquals("live", and(maxCount(1)), prune(and(maxCount(1))));
-
-	}
-
-	@org.junit.Test public void testDisjunction() {
-
-		Assert.assertEquals("empty", And.and(), prune(Or.or()));
-		Assert.assertEquals("dead", And.and(), prune(Or.or(Or.or())));
-
-		Assert.assertEquals("live", or(maxCount(1)), prune(or(maxCount(1))));
+		assertThat((Object)Virtual.virtual(Trait.trait(RDF.VALUE, maxCount(1)), Step.step(RDF.NIL))).as("live").isEqualTo(prune(Virtual.virtual(Trait.trait(RDF.VALUE, maxCount(1)), Step.step(RDF.NIL))));
 
 	}
 
-	@org.junit.Test public void testOptions() {
+	@Test void testConjunction() {
 
-		Assert.assertEquals("empty", And.and(), prune(Or.or()));
-		Assert.assertEquals("dead", And.and(), prune(Or.or(Or.or())));
+		assertThat((Object)and()).as("empty").isEqualTo(prune(and()));
+		assertThat((Object)and()).as("dead").isEqualTo(prune(and(and())));
 
-		Assert.assertEquals("live", Test.test(Or.or(), maxCount(1), And.and()), prune(Test.test(Or.or(), maxCount(1), Or.or()))); // test shape is not pruned
+		assertThat((Object)and(maxCount(1))).as("live").isEqualTo(prune(and(maxCount(1))));
+
+	}
+
+	@Test void testDisjunction() {
+
+		assertThat((Object)and()).as("empty").isEqualTo(prune(or()));
+		assertThat((Object)and()).as("dead").isEqualTo(prune(or(or())));
+
+		assertThat((Object)or(maxCount(1))).as("live").isEqualTo(prune(or(maxCount(1))));
+
+	}
+
+	@Test void testOptions() {
+
+		assertThat((Object)and()).as("empty").isEqualTo(prune(or()));
+		assertThat((Object)and()).as("dead").isEqualTo(prune(or(or())));
+
+		// test shape is not pruned
+		assertThat((Object)test(or(), maxCount(1), and())).as("live").isEqualTo(prune(test(or(), maxCount(1), or())));
 
 	}
 

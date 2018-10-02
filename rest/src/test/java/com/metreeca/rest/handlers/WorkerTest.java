@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class WorkerTest {

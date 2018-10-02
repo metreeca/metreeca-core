@@ -17,7 +17,9 @@
 
 package com.metreeca.form.things;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;

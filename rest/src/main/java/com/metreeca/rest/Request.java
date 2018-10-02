@@ -17,7 +17,9 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Form;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.QueryParser;
 import com.metreeca.form.things.Values;
 
@@ -29,10 +31,10 @@ import java.util.function.Function;
 
 import javax.json.JsonException;
 
-import static com.metreeca.rest.Result.value;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.rest.Result.value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;

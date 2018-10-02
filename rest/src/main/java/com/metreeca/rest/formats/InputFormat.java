@@ -17,7 +17,7 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Format;
 
 import java.io.InputStream;
 import java.util.function.Supplier;

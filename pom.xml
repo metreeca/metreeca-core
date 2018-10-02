@@ -108,7 +108,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
+		<dependency> <!-- !!! to be removed once tempdir is migrated to core -->
 			<groupId>org.junit-pioneer</groupId>
 			<artifactId>junit-pioneer</artifactId>
 			<version>0.1.2</version>
@@ -116,9 +116,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.truth.extensions</groupId>
-			<artifactId>truth-java8-extension</artifactId>
-			<version>0.42</version>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.11.1</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -126,13 +126,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.25</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency> <!-- !!! to be removed https://mvnrepository.com/artifact/junit/junit -->
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 

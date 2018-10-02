@@ -18,7 +18,9 @@
 package com.metreeca.j2ee;
 
 import com.metreeca.form.things.Transputs;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.WriterFormat;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
@@ -35,7 +37,6 @@ import org.apache.commons.io.FileCleaningTracker;
 import java.io.*;
 import java.net.SocketTimeoutException;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 

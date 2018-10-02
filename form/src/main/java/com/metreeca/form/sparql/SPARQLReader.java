@@ -18,7 +18,6 @@
 package com.metreeca.form.sparql;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Optimizer;
@@ -26,6 +25,7 @@ import com.metreeca.form.probes.Pruner;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
+import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;

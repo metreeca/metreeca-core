@@ -42,7 +42,6 @@ public final class Saxon {
 
 	/**
 	 * The default XQuery language version.
-	 *
 	 */
 	private static final String XQueryVersion="3.1";
 
@@ -55,8 +54,7 @@ public final class Saxon {
 	 * Saxon XML processor factory.
 	 *
 	 * <p>The default processor acquired through this factory retrieves system resources from the classpath through
-	 * {@link
-	 * ClassLoader#getResourceAsStream(String)}.</p>
+	 * {@link ClassLoader#getResourceAsStream(String)}.</p>
 	 */
 	public static final Supplier<Saxon> Factory=Saxon::new;
 
@@ -104,21 +102,22 @@ public final class Saxon {
 	/**
 	 * Compiles XQuery queries.
 	 *
-	 * <p>Presets XQuery language version at {@value XQueryVersion} and defines prefixes for the following default namespaces:</p>
+	 * <p>Presets XQuery language version at {@value XQueryVersion} and defines prefixes for the following default
+	 * namespaces:</p>
 	 *
 	 * <ul>
-	 *     <li>{@code app} = {@value Values#Internal}</li>
-	 *     <li>{@code html} = "http://www.w3.org/1999/xhtml"</li>
-	 *     <li>{@code rdf} = {@value RDF#NAMESPACE}</li>
-	 *     <li>{@code rdfs} = {@value RDFS#NAMESPACE}</li>
-	 *     <li>{@code xsd} = {@value XMLSchema#NAMESPACE}</li>
+	 * <li>{@code app} = {@value Values#Internal}</li>
+	 * <li>{@code html} = "http://www.w3.org/1999/xhtml"</li>
+	 * <li>{@code rdf} = {@value RDF#NAMESPACE}</li>
+	 * <li>{@code rdfs} = {@value RDFS#NAMESPACE}</li>
+	 * <li>{@code xsd} = {@value XMLSchema#NAMESPACE}</li>
 	 * </ul>
 	 *
 	 * @param query the XQuery query to be compiled
 	 *
 	 * @return the compiled {@code xquery} query; empty for the identity query
 	 *
-	 * @throws NullPointerException if {@code query} is null
+	 * @throws NullPointerException       if {@code query} is null
 	 * @throws SaxonApiUncheckedException if a compilation error occurs
 	 */
 	public XQueryExecutable xquery(final String query) throws SaxonApiUncheckedException {
@@ -145,7 +144,7 @@ public final class Saxon {
 	 *
 	 * @return the compiled {@code transform}
 	 *
-	 * @throws NullPointerException if {@code transform} is null
+	 * @throws NullPointerException       if {@code transform} is null
 	 * @throws SaxonApiUncheckedException if a compilation error occurs
 	 */
 	public XsltExecutable xslt(final String transform) throws SaxonApiUncheckedException {

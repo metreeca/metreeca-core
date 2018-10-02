@@ -45,31 +45,31 @@ public final class Virtuoso extends Graph {
 	/**
 	 * Creates a Virtuoso graph.
 	 *
-	 * @param url the <a href="http://docs.openlinksw.com/virtuoso/jdbcurl4mat/">JDBC URL</a> of a remote Virtuoso server
-	 *
-	 * @param usr the username of the account on the remote Virtuoso server
-	 * @param pwd the password of the account on the remote Virtuoso server
-	 * @param dflt    the IRI of the default graph for update operations on the remote Virtuoso server
+	 * @param url  the <a href="http://docs.openlinksw.com/virtuoso/jdbcurl4mat/">JDBC URL</a> of a remote Virtuoso
+	 *             server
+	 * @param usr  the username of the account on the remote Virtuoso server
+	 * @param pwd  the password of the account on the remote Virtuoso server
+	 * @param dflt the IRI of the default graph for update operations on the remote Virtuoso server
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
 	public Virtuoso(final String url, final String usr, final String pwd, final IRI dflt) {
 
-			if ( url == null ) {
-				throw new NullPointerException("null url");
-			}
+		if ( url == null ) {
+			throw new NullPointerException("null url");
+		}
 
-			if ( usr == null ) {
-				throw new NullPointerException("null usr");
-			}
+		if ( usr == null ) {
+			throw new NullPointerException("null usr");
+		}
 
-			if ( pwd == null ) {
-				throw new NullPointerException("null pwd");
-			}
+		if ( pwd == null ) {
+			throw new NullPointerException("null pwd");
+		}
 
-			if ( dflt == null ) {
-				throw new NullPointerException("null default graph IRI");
-			}
+		if ( dflt == null ) {
+			throw new NullPointerException("null default graph IRI");
+		}
 
 		this.repository=new VirtuosoRepository(url, usr, pwd, dflt.toString()) {
 

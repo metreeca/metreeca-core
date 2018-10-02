@@ -17,28 +17,28 @@
 
 package com.metreeca.form.things;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.things.Strings.normalize;
 import static com.metreeca.form.things.Strings.title;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public final class StringsTest {
+final class StringsTest {
 
-	@Test public void testTitle() {
+	@Test void testTitle() {
 
-		assertEquals("words capitalized", "One-Two", title("one-two"));
-		assertEquals("acronyms preserved", "WWW-Two", title("WWW-two"));
+		assertThat((Object)"One-Two").as("words capitalized").isEqualTo(title("one-two"));
+		assertThat((Object)"WWW-Two").as("acronyms preserved").isEqualTo(title("WWW-two"));
 
 	}
 
-	@Test public void testNormalize() {
+	@Test void testNormalize() {
 
-		assertEquals("leading whitespaces trimmed", "head", normalize("\t \nhead"));
-		assertEquals("trailing whitespaces trimmed", "tail", normalize("tail\t \n"));
-		assertEquals("embedded whitespaces compacted", "head tail", normalize("head\t \ntail"));
+		assertThat((Object)"head").as("leading whitespaces trimmed").isEqualTo(normalize("\t \nhead"));
+		assertThat((Object)"tail").as("trailing whitespaces trimmed").isEqualTo(normalize("tail\t \n"));
+		assertThat((Object)"head tail").as("embedded whitespaces compacted").isEqualTo(normalize("head\t \ntail"));
 
 	}
 

@@ -17,85 +17,85 @@
 
 package com.metreeca.form.sparql;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
 
 
-public final class SPARQLBuilderTest {
+final class SPARQLBuilderTest {
 
-	@Test public void testIgnoreNullArguments() {
+	@Test void testIgnoreNullArguments() {
 
-		assertEquals("null argument", "", write(null));
-
-	}
-
-
-	@Test public void testWriteLiterals() {
-
-		assertEquals("textual literal", "string", write("string"));
-		assertEquals("numeric literal", "123", write(123));
-
-	}
-
-	@Test public void testWriteStructures() {
-
-		assertEquals("array", "abc", write(new String[] {"a", "b", "c"}));
-		assertEquals("iterable", "abc", write(asList("a", "b", "c")));
-		assertEquals("stream", "abc", write(Stream.of("a", "b", "c")));
-		assertEquals("supplier", "abc", write((Supplier<Object>)() -> "abc"));
-
-	}
-
-	@Test public void testWriteNestedStructures() {
-
-		assertEquals("nested stream", "abcde", write(Stream.of("a", Stream.of("b", "c", "d"), "e")));
-		assertEquals("nested iterable", "abcde", write(asList("a", asList("b", "c", "d"), "e")));
-		assertEquals("nested array", "abcde", write(asList("a", new String[] {"b", "c", "d"}, "e")));
+		assertThat((Object)"").as("null argument").isEqualTo(write(null));
 
 	}
 
 
-	@Test public void testIndentBraceBlocks() {
+	@Test void testWriteLiterals() {
 
-		assertEquals("indented block", "{\n    uno\n}\ndue", write("{\nuno\n}\ndue"));
-		assertEquals("inline block", "{ {\n    uno\n} }\ndue", write("{ {\nuno\n} }\ndue"));
-
-	}
-
-	@Test public void testIndentMarkedBlocks() {
-
-		assertEquals("indented block", "<\n    uno\n>\ndue", write("<\n\tuno\n\b>\ndue"));
-		assertEquals("inline block", "< <\n    uno\n> >\ndue", write("<\t <\nuno\b\n> >\ndue"));
+		assertThat((Object)"string").as("textual literal").isEqualTo(write("string"));
+		assertThat((Object)"123").as("numeric literal").isEqualTo(write(123));
 
 	}
 
+	@Test void testWriteStructures() {
 
-	@Test public void testCollapseSpaces() {
-
-		assertEquals("leading", "text", write(" text"));
-		assertEquals("inside", "uno due", write("uno  due"));
-
-	}
-
-	@Test public void testCollapseNewlines() {
-
-		assertEquals("single", "uno\ndue", write("uno\ndue"));
-		assertEquals("multiple", "uno\n\ndue", write("uno\n\n\ndue"));
-		assertEquals("leading feed", "uno\n\ndue", write("uno\f\ndue"));
-		assertEquals("trailing feed", "uno\n\ndue", write("uno\n\fdue"));
+		assertThat((Object)"abc").as("array").isEqualTo(write(new String[] {"a", "b", "c"}));
+		assertThat((Object)"abc").as("iterable").isEqualTo(write(asList("a", "b", "c")));
+		assertThat((Object)"abc").as("stream").isEqualTo(write(Stream.of("a", "b", "c")));
+		assertThat((Object)"abc").as("supplier").isEqualTo(write((Supplier<Object>)() -> "abc"));
 
 	}
 
-	@Test public void testInsertNewlines() {
+	@Test void testWriteNestedStructures() {
 
-		assertEquals("single", "uno\n\ndue", write("uno\fdue"));
-		assertEquals("multiple", "uno\n\ndue", write("uno\f\f\fdue"));
+		assertThat((Object)"abcde").as("nested stream").isEqualTo(write(Stream.of("a", Stream.of("b", "c", "d"), "e")));
+		assertThat((Object)"abcde").as("nested iterable").isEqualTo(write(asList("a", asList("b", "c", "d"), "e")));
+		assertThat((Object)"abcde").as("nested array").isEqualTo(write(asList("a", new String[] {"b", "c", "d"}, "e")));
+
+	}
+
+
+	@Test void testIndentBraceBlocks() {
+
+		assertThat((Object)"{\n    uno\n}\ndue").as("indented block").isEqualTo(write("{\nuno\n}\ndue"));
+		assertThat((Object)"{ {\n    uno\n} }\ndue").as("inline block").isEqualTo(write("{ {\nuno\n} }\ndue"));
+
+	}
+
+	@Test void testIndentMarkedBlocks() {
+
+		assertThat((Object)"<\n    uno\n>\ndue").as("indented block").isEqualTo(write("<\n\tuno\n\b>\ndue"));
+		assertThat((Object)"< <\n    uno\n> >\ndue").as("inline block").isEqualTo(write("<\t <\nuno\b\n> >\ndue"));
+
+	}
+
+
+	@Test void testCollapseSpaces() {
+
+		assertThat((Object)"text").as("leading").isEqualTo(write(" text"));
+		assertThat((Object)"uno due").as("inside").isEqualTo(write("uno  due"));
+
+	}
+
+	@Test void testCollapseNewlines() {
+
+		assertThat((Object)"uno\ndue").as("single").isEqualTo(write("uno\ndue"));
+		assertThat((Object)"uno\n\ndue").as("multiple").isEqualTo(write("uno\n\n\ndue"));
+		assertThat((Object)"uno\n\ndue").as("leading feed").isEqualTo(write("uno\f\ndue"));
+		assertThat((Object)"uno\n\ndue").as("trailing feed").isEqualTo(write("uno\n\fdue"));
+
+	}
+
+	@Test void testInsertNewlines() {
+
+		assertThat((Object)"uno\n\ndue").as("single").isEqualTo(write("uno\fdue"));
+		assertThat((Object)"uno\n\ndue").as("multiple").isEqualTo(write("uno\f\f\fdue"));
 
 	}
 

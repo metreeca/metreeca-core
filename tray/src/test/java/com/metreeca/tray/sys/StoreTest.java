@@ -27,7 +27,8 @@ import org.junitpioneer.jupiter.TempDirectory.TempDir;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @ExtendWith(TempDirectory.class) final class StoreTest {
 
@@ -44,7 +45,7 @@ import static org.junit.Assert.assertFalse;
 	@Test void testNewBlobsDontExist(@TempDir final Path tmp) {
 		exec(tmp, store -> store.exec("http://example.com/", blob -> {
 
-			assertFalse("", blob.exists());
+			assertThat(blob.exists()).isFalse();
 
 		}));
 	}

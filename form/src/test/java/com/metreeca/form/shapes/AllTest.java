@@ -20,47 +20,44 @@ package com.metreeca.form.shapes;
 import com.metreeca.form.things.Sets;
 import com.metreeca.form.things.Values;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.things.Sets.union;
-import static com.metreeca.form.things.Values.literal;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class AllTest {
+final class AllTest {
 
-	@Test public void testInspectExistential() {
+	@Test void testInspectExistential() {
 
 		final All all=All.all(Values.literal(1), Values.literal(2), Values.literal(3));
 
-		assertTrue("defined", all(all)
+		assertThat(all(all)
 				.filter(values -> values.equals(all.getValues()))
-				.isPresent());
+				.isPresent()).as("defined").isTrue();
 	}
 
-	@Test public void testInspectConjunction() {
+	@Test void testInspectConjunction() {
 
 		final All x=All.all(Values.literal(1), Values.literal(2), Values.literal(3));
 		final All y=All.all(Values.literal(2), Values.literal(3), Values.literal(4));
 
-		assertTrue("all defined", all(And.and(x, y))
-				.filter(values -> values.equals(Sets.union(x.getValues(), y.getValues())))
-				.isPresent());
+		assertThat(all(And.and(x, y))
+				.filter(values1 -> values1.equals(Sets.union(x.getValues(), y.getValues())))
+				.isPresent()).as("all defined").isTrue();
 
-		assertTrue("some defined", all(And.and(x, And.and()))
+		assertThat(all(And.and(x, And.and()))
 				.filter(values -> values.equals(x.getValues()))
-				.isPresent());
+				.isPresent()).as("some defined").isTrue();
 
-		assertFalse("none defined", all(And.and(And.and(), And.and()))
-				.isPresent());
+		assertThat(all(And.and(And.and(), And.and()))
+				.isPresent()).as("none defined").isFalse();
 
 	}
 
-	@Test public void testInspectOtherShape() {
-		assertFalse("not defined", all(And.and()).isPresent());
+	@Test void testInspectOtherShape() {
+		assertThat(all(And.and()).isPresent()).as("not defined").isFalse();
 	}
 
 }

@@ -40,7 +40,8 @@ public final class TextFormat implements Format<String> {
 	 * Retrieves the textual format.
 	 *
 	 * @return the singleton textual format instance
-	 */public static TextFormat text() {
+	 */
+	public static TextFormat text() {
 		return Instance;
 	}
 
@@ -54,7 +55,8 @@ public final class TextFormat implements Format<String> {
 
 	/**
 	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
-	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error, otherwise
+	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
+	 * otherwise
 	 */
 	@Override public Result<String> get(final Message<?> message) {
 		return message.body(reader()).map(source -> {

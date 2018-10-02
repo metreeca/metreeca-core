@@ -23,8 +23,7 @@ import com.metreeca.rest.Response;
 
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
@@ -58,8 +57,7 @@ final class RouterTest {
 				.handle(new Request()
 						.path("/two"))
 
-				.accept(response -> assertWithMessage("request ignored")
-						.that(response.status()).isEqualTo(0));
+				.accept(response -> assertThat(response.status()).as("request ignored").isEqualTo(0));
 	}
 
 	@Test void testRewriteBaseAndPath() {
@@ -68,11 +66,9 @@ final class RouterTest {
 
 				.path("/one", request -> { // exact match
 
-					assertWithMessage("base not rewritten")
-							.that(request.base()).isEqualTo("http://example.org/");
 
-					assertWithMessage("path not rewritten")
-							.that(request.path()).isEqualTo("/one/");
+					assertThat(request.base()).as("base not rewritten").isEqualTo("http://example.org/");
+					assertThat(request.path()).as("path not rewritten").isEqualTo("/one/");
 
 					return request.reply(response -> response.status(Response.OK));
 
@@ -82,18 +78,16 @@ final class RouterTest {
 						.base("http://example.org/")
 						.path("/one/"))
 
-				.accept(response -> assertWithMessage("request processed")
-						.that(response.status()).isEqualTo(Response.OK));
+				.accept(response ->
+						assertThat(response.status()).as("request processed").isEqualTo(Response.OK));
 
 		new Router()
 
 				.path("/one/*", request -> { // prefix match
 
-					assertWithMessage("base rewritten")
-							.that(request.base()).isEqualTo("http://example.org/one/");
 
-					assertWithMessage("path rewritten")
-							.that(request.path()).isEqualTo("/two/three");
+					assertThat(request.base()).as("base rewritten").isEqualTo("http://example.org/one/");
+					assertThat(request.path()).as("path rewritten").isEqualTo("/two/three");
 
 					return request.reply(response -> response.status(Response.OK));
 
@@ -103,8 +97,8 @@ final class RouterTest {
 						.base("http://example.org/")
 						.path("/one/two/three"))
 
-				.accept(response -> assertWithMessage("request processed")
-						.that(response.status()).isEqualTo(Response.OK));
+				.accept(response ->
+						assertThat(response.status()).as("request processed").isEqualTo(Response.OK));
 	}
 
 
@@ -118,24 +112,21 @@ final class RouterTest {
 				.path("/two/", handler(200));// trailing slash
 
 		router.handle(new Request().path("/one")).accept(response ->
-				assertWithMessage("exact match without trailing slash")
-						.that(response.status()).isEqualTo(100));
+
+				assertThat(response.status()).as("exact match without trailing slash").isEqualTo(100));
 
 		router.handle(new Request().path("/one/")).accept(response ->
-				assertWithMessage("exact match with trailing slash")
-						.that(response.status()).isEqualTo(100));
+
+				assertThat(response.status()).as("exact match with trailing slash").isEqualTo(100));
 
 		router.handle(new Request().path("/two")).accept(response ->
-				assertWithMessage("exact match without trailing slash")
-						.that(response.status()).isEqualTo(200));
+				assertThat(response.status()).as("exact match without trailing slash").isEqualTo(200));
 
 		router.handle(new Request().path("/two/")).accept(response ->
-				assertWithMessage("exact match with trailing slash")
-						.that(response.status()).isEqualTo(200));
+				assertThat(response.status()).as("exact match with trailing slash").isEqualTo(200));
 
 		router.handle(new Request().path("/three/")).accept(response ->
-				assertWithMessage("no match")
-						.that(response.status()).isEqualTo(0));
+				assertThat(response.status()).as("no match").isEqualTo(0));
 	}
 
 	@Test void testMatchLongestPrefix() {
@@ -146,12 +137,11 @@ final class RouterTest {
 				.path("/one/two/*", handler(200));// trailing slash
 
 		router.handle(new Request().path("/one/zero")).accept(response ->
-				assertWithMessage("prefix match")
-						.that(response.status()).isEqualTo(100));
+				assertThat(response.status()).as("prefix match").isEqualTo(100));
 
 		router.handle(new Request().path("/one/two/zero"))
-				.accept(response -> assertWithMessage("longest prefix match")
-						.that(response.status()).isEqualTo(200));
+				.accept(response ->
+						assertThat(response.status()).as("longest prefix match").isEqualTo(200));
 
 	}
 
@@ -178,16 +168,16 @@ final class RouterTest {
 				.path("/one/*", handler(500));// trailing slash
 
 		router.handle(new Request().path("/one"))
-				.accept(response -> assertWithMessage("collection match")
-						.that(response.status()).isEqualTo(100));
+				.accept(response ->
+						assertThat(response.status()).as("collection match").isEqualTo(100));
 
 		router.handle(new Request().path("/one/"))
-				.accept(response -> assertWithMessage("collection match trailing slash")
-						.that(response.status()).isEqualTo(100));
+				.accept(response ->
+						assertThat(response.status()).as("collection match trailing slash").isEqualTo(100));
 
 		router.handle(new Request().path("/one/two"))
-				.accept(response -> assertWithMessage("resource match")
-						.that(response.status()).isEqualTo(500));
+				.accept(response ->
+						assertThat(response.status()).as("resource match").isEqualTo(500));
 
 	}
 

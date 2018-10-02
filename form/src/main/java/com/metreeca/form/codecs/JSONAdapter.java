@@ -38,9 +38,8 @@ public final class JSONAdapter {
 	/**
 	 * The plain <a href="http://www.json.org/">JSON</a> file format.
 	 *
-	 * The file extension {@code .json} is recommend for JSON documents.
-	 * The media type is {@code application/json}.
-	 * The character encoding is {@code UTF-8}.
+	 * The file extension {@code .json} is recommend for JSON documents. The media type is {@code application/json}. The
+	 * character encoding is {@code UTF-8}.
 	 */
 	public static final RDFFormat JSONFormat=new RDFFormat("JSON",
 			asList("application/json", "text/json"),

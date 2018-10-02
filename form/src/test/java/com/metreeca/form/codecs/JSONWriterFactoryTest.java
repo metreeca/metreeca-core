@@ -18,32 +18,32 @@
 package com.metreeca.form.codecs;
 
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class JSONWriterFactoryTest {
+final class JSONWriterFactoryTest {
 
-	@Test public void testFormatRegisteredWithRegistry() {
+	@Test void testFormatRegisteredWithRegistry() {
 
-		assertTrue("by mime type", RDFWriterRegistry.getInstance()
+		assertThat(RDFWriterRegistry.getInstance()
 				.getFileFormatForMIMEType(JSONAdapter.JSONFormat.getDefaultMIMEType())
-				.filter(format -> format.equals(JSONAdapter.JSONFormat))
-				.isPresent());
+				.filter(format1 -> format1.equals(JSONAdapter.JSONFormat))
+				.isPresent()).as("by mime type").isTrue();
 
-		assertTrue("by extension", RDFWriterRegistry.getInstance()
+		assertThat(RDFWriterRegistry.getInstance()
 				.getFileFormatForFileName("test."+JSONAdapter.JSONFormat.getDefaultFileExtension())
 				.filter(format -> format.equals(JSONAdapter.JSONFormat))
-				.isPresent());
+				.isPresent()).as("by extension").isTrue();
 
 	}
 
-	@Test public void testFactoryRegisteredWithRegistry() {
-		assertTrue("factory registered", RDFWriterRegistry.getInstance()
+	@Test void testFactoryRegisteredWithRegistry() {
+		assertThat(RDFWriterRegistry.getInstance()
 				.get(JSONAdapter.JSONFormat)
 				.filter(factory -> factory instanceof JSONWriterFactory)
-				.isPresent());
+				.isPresent()).as("factory registered").isTrue();
 
 	}
 
