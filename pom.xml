@@ -257,17 +257,6 @@
 
 					<execution>
 
-						<id>generate-javadocs</id>
-						<phase>site</phase>
-
-						<goals>
-							<goal>javadoc</goal>
-						</goals>
-
-					</execution>
-
-					<execution>
-
 						<id>generate-aggregate-javadocs</id>
 						<inherited>false</inherited>
 						<phase>site</phase>
@@ -300,7 +289,7 @@
 								</group>
 							</groups>
 
-							<excludePackageNames>com.metreeca.utow*:com.metreeca.gate*</excludePackageNames>
+							<excludePackageNames/> <!-- colon-separated patterns -->
 
 						</configuration>
 
@@ -343,68 +332,6 @@
 						</goals>
 
 					</execution>
-				</executions>
-
-			</plugin>
-
-			<plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
-
-				<executions>
-					<execution>
-
-						<id>generate-module-docs</id>
-						<phase>site</phase>
-
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-
-						<configuration>
-
-							<outputDirectory>${basedir}/target/site</outputDirectory>
-
-							<resources>
-								<resource>
-									<directory>${basedir}/src/docs</directory>
-									<filtering>true</filtering>
-									<excludes>
-										<exclude>**/_*</exclude>
-										<exclude>**/*.graffle</exclude>
-									</excludes>
-								</resource>
-							</resources>
-
-						</configuration>
-
-					</execution>
-
-					<execution>
-
-						<id>collect-module-docs</id>
-						<phase>post-site</phase>
-
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-
-						<configuration>
-
-							<outputDirectory>${docs}</outputDirectory>
-
-							<resources>
-								<resource>
-									<directory>${basedir}/target/site</directory>
-									<filtering>false</filtering>
-								</resource>
-							</resources>
-
-						</configuration>
-					</execution>
-
 				</executions>
 
 			</plugin>

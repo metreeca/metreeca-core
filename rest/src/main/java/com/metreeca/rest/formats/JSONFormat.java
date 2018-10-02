@@ -20,6 +20,7 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.*;
 
 import java.io.*;
+import java.util.regex.Pattern;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -45,6 +46,11 @@ public final class JSONFormat implements Format<JsonObject> {
 	 */
 	public static final String MIME="application/json";
 
+	/**
+	 * A pattern matching JSON-based MIME types, for instance {@code application/ld+json}.
+	 */
+	public static final Pattern MIMEPattern=Pattern.compile("^application/(.*\\+)?json$");
+
 
 	/**
 	 * Retrieves the JSON body format.
@@ -69,22 +75,25 @@ public final class JSONFormat implements Format<JsonObject> {
 	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<JsonObject> get(final Message<?> message) {
-		return message.headers("content-type").contains(MIME) ? message.body(reader()).flatMap(source -> {
-			try (final Reader reader=source.get()) {
+		return message.headers("Content-Type").stream().anyMatch(type -> MIMEPattern.matcher(type).matches())
+				? message.body(reader())
+				.flatMap(source -> {
+					try (final Reader reader=source.get()) {
 
-				return value(Json.createReader(reader).readObject());
+						return value(Json.createReader(reader).readObject());
 
-			} catch ( final JsonParsingException e ) {
+					} catch ( final JsonParsingException e ) {
 
-				return new Failure<JsonObject>()
-						.status(Response.BadRequest)
-						.error(Failure.BodyMalformed)
-						.cause(e);
+						return new Failure<JsonObject>()
+								.status(Response.BadRequest)
+								.error(Failure.BodyMalformed)
+								.cause(e);
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		}) : new Failure<JsonObject>().status(Response.UnsupportedMediaType);
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				})
+				: new Failure<JsonObject>().status(Response.UnsupportedMediaType);
 	}
 
 	/**

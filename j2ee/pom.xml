@@ -38,7 +38,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>next</artifactId>
+			<artifactId>rest</artifactId>
 			<version>0.0-SNAPSHOT</version>
 		</dependency>
 

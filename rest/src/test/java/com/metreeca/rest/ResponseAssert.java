@@ -18,20 +18,20 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.things.ModelAssert;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.formats.RDFFormat;
 
-import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.Assert;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.*;
 
 import java.io.*;
 import java.util.function.Function;
 
-import static com.metreeca.form.things.Transputs.data;
-import static com.metreeca.form.things.Transputs.text;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public final class ResponseAssert extends AbstractAssert<ResponseAssert, Response> {
@@ -76,39 +76,18 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 
 		isNotNull();
 
-		actual.body(output()).use(
-				consumer -> {
+		final int data=data().length;
 
-					final ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+		if ( data > 0 ) {
+			failWithMessage("expected empty body but had binary body of length <%d>", data);
+		}
 
-					consumer.accept(() -> buffer);
+		final int text=text().length();
 
-					final int length=data(new ByteArrayInputStream(buffer.toByteArray())).length;
+		if ( text > 0 ) {
+			failWithMessage("expected empty body but had textual body of length <%d>", text);
+		}
 
-					if ( length > 0 ) {
-						failWithMessage("expected empty body but had binary body of length <%d>", length);
-					}
-
-				},
-				failure -> failWithMessage("expected response")
-		);
-
-		actual.body(writer()).use(
-				consumer -> {
-
-					final StringWriter buffer=new StringWriter();
-
-					consumer.accept(() -> buffer);
-
-					final int length=text(new StringReader(buffer.toString())).length();
-
-					if ( length > 0 ) {
-						failWithMessage("expected empty body but had textual body of length <%d>", length);
-					}
-
-				},
-				failure -> failWithMessage("expected response")
-		);
 
 		return this;
 	}
@@ -116,30 +95,73 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public <V> ObjectAssert<V> body(final Format<V> format) {
+		return body(format, Assertions::assertThat);
+	}
+
 	public ModelAssert body(final RDFFormat format) {
 		return body(format, ModelAssert::assertThat);
 	}
 
-	public <V, A extends Assert<A, ? extends V>> A body(final Format<V> format, final Function<V, A> subject) {
+	public <V, A extends Assert<A, ? extends V>> A body(final Format<V> format, final Function<V, A> mapper) {
 
-		// !!! handle null actual()
-		// !!! handle textual body
+		isNotNull();
 
 		return actual
 
 				.body(input())
-				.set(() -> {
+				.set(() -> { // cache binary body
 
-					final ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+					final byte[] data=data();
+					final String text=text();
 
-					actual.body(output()).use(consumer -> consumer.accept(() -> buffer));
+					return data.length > 0 ? new ByteArrayInputStream(data)
+							: !text.isEmpty() ? Transputs.input(new StringReader(text))
+							: Transputs.input();
 
-					return new ByteArrayInputStream(buffer.toByteArray());
+				})
+
+				.body(reader())
+				.set(() -> { // cache textual body
+
+					final byte[] data=data();
+					final String text=text();
+
+					return !text.isEmpty() ? new StringReader(text)
+							:data.length > 0 ? Transputs.reader(new ByteArrayInputStream(data))
+							:  Transputs.reader();
 
 				})
 
 				.body(format)
-				.map(subject, failure -> Assertions.fail("unable to get body"));
+				.map(mapper, failure -> fail("unable to retrieve body ("+failure+")"));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private byte[] data() {
+		try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
+
+			actual.body(output()).use(consumer -> consumer.accept(() -> buffer));
+
+			return buffer.toByteArray();
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	private String text() {
+		try (final StringWriter buffer=new StringWriter()) {
+
+			actual.body(writer()).use(consumer -> consumer.accept(() -> buffer));
+
+			return buffer.toString();
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 }

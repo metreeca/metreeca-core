@@ -104,8 +104,6 @@ public final class Router implements Handler {
 		}
 
 		final String path=request.path();
-
-
 		final String key=normalize(path);
 
 		return handlers
@@ -114,14 +112,14 @@ public final class Router implements Handler {
 				.filter(entry -> matches(key, entry.getKey()))
 				.findFirst()
 				.map(entry -> entry.getValue().handle(request.map(rewrite(entry.getKey()))))
-				.orElseGet(() -> request.reply(response -> response));
+				.orElseGet(() -> request.reply(response -> response)); // null response >> managed by the container
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private boolean matches(final String x, final String y) {
-		return x.equals(y) || y.endsWith("/") && x.startsWith(y);
+	private boolean matches(final String path, final String pattern) {
+		return path.equals(pattern) || pattern.endsWith("/") && path.startsWith(pattern);
 	}
 
 	private String normalize(final String path) {

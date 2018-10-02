@@ -22,6 +22,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -68,7 +69,7 @@ import static java.lang.String.format;
  *
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public final class Graphs implements Handler {
+public final class Graphs extends Delegator {
 
 	private static final Shape GraphsShape=trait(RDF.VALUE, and(
 			trait(RDF.TYPE, only(VOID.DATASET))
@@ -82,16 +83,13 @@ public final class Graphs implements Handler {
 	private final Graph graph=tool(Graph.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
-	private final Worker delegate=new Worker()
 
-			.get(this::get)
-			.put(this::put)
-			.delete(this::delete)
-			.post(this::post);
-
-
-	@Override public Responder handle(final Request request) {
-		return delegate.handle(request);
+	public Graphs() {
+		delegate(new Worker()
+				.get(this::get)
+				.put(this::put)
+				.delete(this::delete)
+				.post(this::post));
 	}
 
 

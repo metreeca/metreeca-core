@@ -17,11 +17,9 @@
 
 package com.metreeca.j2ee;
 
-import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.WriterFormat;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
 import com.metreeca.tray.sys.Storage;
@@ -47,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
@@ -111,7 +110,7 @@ public abstract class Gateway implements ServletContextListener {
 
 		try {
 
-			context.addFilter(Gateway.class.getName(), new GatewayFilter(loader.apply(tray // !!! @@@ add server handlers
+			context.addFilter(Gateway.class.getName(), new GatewayFilter(loader.apply(tray
 
 					.set(Storage.Factory, () -> storage(context))
 					.set(Loader.Factory, () -> loader(context))
@@ -277,7 +276,7 @@ public abstract class Gateway implements ServletContextListener {
 					.method(http.getMethod())
 					.base(base)
 					.path(path)
-					.query(query != null ? Transputs.decode(query) : ""); // !!! review decoding
+					.query(query != null ? query : "");
 
 			for (final Map.Entry<String, String[]> parameter : http.getParameterMap().entrySet()) {
 				request.parameters(parameter.getKey(), asList(parameter.getValue()));
@@ -412,7 +411,7 @@ public abstract class Gateway implements ServletContextListener {
 					}
 				}));
 
-				response.body(WriterFormat.writer()).get().ifPresent(consumer -> consumer.accept(() -> {
+				response.body(writer()).get().ifPresent(consumer -> consumer.accept(() -> {
 					try {
 						return http.getWriter();
 					} catch ( final IOException e ) {
@@ -420,13 +419,14 @@ public abstract class Gateway implements ServletContextListener {
 					}
 				}));
 
-				// !!! @@@ no body: commit???
+				if ( response.status() > 0 && !http.isCommitted()) { // flush if not already committed by bodies
+					try {
+						http.flushBuffer();
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				}
 
-				//try (final ServletOutputStream output=http.getOutputStream()) {
-				//	output.flush();
-				//} catch ( final IOException e ) {
-				//	throw new UncheckedIOException(e);
-				//}
 			}
 		}
 

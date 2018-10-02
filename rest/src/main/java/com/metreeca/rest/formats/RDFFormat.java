@@ -36,6 +36,7 @@ import java.io.*;
 import java.util.*;
 
 import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
@@ -142,17 +143,18 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 			} else {
 
+				final JsonObjectBuilder trace=Json.createObjectBuilder()
+
+						.add("format", parser.getRDFFormat().getDefaultMIMEType());
+
+				if ( !fatals.isEmpty() ) { trace.add("fatals", Json.createArrayBuilder(fatals)); }
+				if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
+				if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
+
 				return new Failure<Collection<Statement>>()
 						.status(Response.BadRequest)
 						.error(Failure.BodyMalformed)
-						.trace(Json.createObjectBuilder()
-
-								.add("format", parser.getRDFFormat().getDefaultMIMEType())
-								.add("fatal", Json.createArrayBuilder(fatals))
-								.add("error", Json.createArrayBuilder(errors))
-								.add("warning", Json.createArrayBuilder(warnings))
-
-								.build());
+						.trace(trace.build());
 
 			}
 

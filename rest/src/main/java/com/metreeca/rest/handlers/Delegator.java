@@ -25,28 +25,32 @@ import com.metreeca.rest.Responder;
 /**
  * Delegating handler.
  *
- * <p>Delegates request processing to a delegate handler, usually assembled as a combination of other handlers and
- * wrappers.</p>
+ * <p>Delegates request processing to a {@linkplain #delegate(Handler) delegate} handler, usually assembled as a
+ * combination of other handlers and wrappers.</p>
  */
-public abstract class Combo implements Handler {
+public abstract class Delegator implements Handler {
 
-	private final Handler delegate;
+	private Handler delegate=request -> request.reply(response -> response);
 
 
 	/**
-	 * Creates a combo handler.
+	 * Configures the delegate handler.
 	 *
 	 * @param delegate the handler request processing is to be delegated to
 	 *
+	 * @return this delegator
+	 *
 	 * @throws NullPointerException if {@code delegate} is null
 	 */
-	protected Combo(final Handler delegate) {
+	protected Delegator delegate(final Handler delegate) {
 
 		if ( delegate == null ) {
 			throw new NullPointerException("null delegate");
 		}
 
 		this.delegate=delegate;
+
+		return this;
 	}
 
 
