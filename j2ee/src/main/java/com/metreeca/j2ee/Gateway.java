@@ -17,7 +17,6 @@
 
 package com.metreeca.j2ee;
 
-import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -277,7 +276,7 @@ public abstract class Gateway implements ServletContextListener {
 					.method(http.getMethod())
 					.base(base)
 					.path(path)
-					.query(query != null ? Transputs.decode(query) : ""); // !!! review decoding
+					.query(query != null ? query : "");
 
 			for (final Map.Entry<String, String[]> parameter : http.getParameterMap().entrySet()) {
 				request.parameters(parameter.getKey(), asList(parameter.getValue()));

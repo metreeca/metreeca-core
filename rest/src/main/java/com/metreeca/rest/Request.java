@@ -21,6 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.QueryParser;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -185,7 +186,7 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return value(new QueryParser(shape).parse(query()));
+			return value(new QueryParser(shape).parse(Transputs.decode(query())));
 
 		} catch ( final JsonException e ) {
 
