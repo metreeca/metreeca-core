@@ -24,6 +24,7 @@ import com.metreeca.rest.formats.RDFFormat;
 import org.assertj.core.api.*;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.function.Function;
 
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -71,6 +72,42 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 
 		return this;
 	}
+
+
+	public ResponseAssert hasHeader(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		isNotNull();
+
+		final Collection<String> values=actual.headers(name);
+
+		if ( values.isEmpty() ) {
+			failWithMessage("expected response to have <%s> headers but has none", name);
+		}
+
+		return this;
+	}
+
+	public ResponseAssert doesNotHaveHeader(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		isNotNull();
+
+		final Collection<String> values=actual.headers(name);
+
+		if ( !values.isEmpty() ) {
+			failWithMessage("expected response to have no <%s> headers but has <%s>", name, values);
+		}
+
+		return this;
+	}
+
 
 	public ResponseAssert hasEmptyBody() {
 
