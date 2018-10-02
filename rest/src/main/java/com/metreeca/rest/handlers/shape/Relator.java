@@ -115,6 +115,7 @@ public final class Relator implements Handler {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public Responder handle(final Request request) {
 		return ((Result<Shape>)request.body(ShapeFormat.shape())).map(
 				shape -> {
@@ -137,6 +138,7 @@ public final class Relator implements Handler {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private Responder shaped(final Request request, final Shape shape) {
 		return request.query(and(all(request.item()), shape)).map( // focused shape
 				query -> shaped(request, query),
@@ -209,6 +211,8 @@ public final class Relator implements Handler {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private Collection<Statement> cell(final RepositoryConnection connection, final IRI focus) {
 
 		final Collection<Statement> model=new LinkedHashModel();
@@ -265,6 +269,7 @@ public final class Relator implements Handler {
 			}
 
 		}
+
 		return model;
 	}
 
