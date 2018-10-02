@@ -17,89 +17,92 @@
 
 package com.metreeca.form.probes;
 
+import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Values;
-import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.literal;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public final class InferencerTest {
+final class InferencerTest {
 
-	@org.junit.Test public void testHint() {
+	@Test void testHint() {
 
 		assertImplies("hinted shapes are resources",
 				Hint.hint(RDF.NIL), Datatype.datatype(Values.ResoureType));
 
 	}
 
-	@org.junit.Test public void testUniversal() {
+	@Test void testUniversal() {
 		assertImplies("minimum focus size is equal to the size of the required value set",
-				All.all(Values.literal(1), Values.literal(2)), MinCount.minCount(2));
+				All.all(literal(1), literal(2)), MinCount.minCount(2));
 	}
 
-	@org.junit.Test public void testExistential() {
+	@Test void testExistential() {
 		assertImplies("minimum focus size is 1",
-				Any.any(Values.literal(1), Values.literal(2)), MinCount.minCount(1));
+				Any.any(literal(1), literal(2)), MinCount.minCount(1));
 	}
 
-	@org.junit.Test public void testType() { // !!! improve testing of multiple implications
+	@Test void testType() { // !!! improve testing of multiple implications
 
 		assertImplies("xsd:boolean has closed range",
-				Datatype.datatype(XMLSchema.BOOLEAN), And.and(maxCount(1), In.in(Values.literal(false), Values.literal(true))));
+				Datatype.datatype(XMLSchema.BOOLEAN), and(maxCount(1), In.in(literal(false), literal(true))));
 
 		assertImplies("xsd:boolean has exclusive values",
-				Datatype.datatype(XMLSchema.BOOLEAN), And.and(maxCount(1), In.in(Values.literal(false), Values.literal(true))));
+				Datatype.datatype(XMLSchema.BOOLEAN), and(maxCount(1), In.in(literal(false), literal(true))));
 
 	}
 
-	@org.junit.Test public void testClazz() {
+	@Test void testClazz() {
 		assertImplies("classed values are resources",
-				Clazz.clazz(RDF.NIL), Datatype.datatype(Values.ResoureType));
+				clazz(RDF.NIL), Datatype.datatype(Values.ResoureType));
 	}
 
-	@org.junit.Test public void testRange() {
+	@Test void testRange() {
 
 		assertImplies("maximum focus size is equal to the size of the allowed value set",
-				In.in(Values.literal(1), Values.literal(2.0)), maxCount(2));
+				In.in(literal(1), literal(2.0)), maxCount(2));
 
 		assertImplies("if unique, focus values share the datatype of the allowed value set",
-				In.in(Values.literal(1), Values.literal(2)), And.and(maxCount(2), Datatype.datatype(XMLSchema.INT)));
+				In.in(literal(1), literal(2)), and(maxCount(2), Datatype.datatype(XMLSchema.INT)));
 
 	}
 
-	@org.junit.Test public void testTrait() {
+	@Test void testTrait() {
 
 		assertImplies("trait subjects are resources",
 				trait(Step.step(RDF.VALUE)), Datatype.datatype(Values.ResoureType));
 
 		assertImplies("reverse trait objects are resources",
-				trait(Step.step(RDF.VALUE, true)), Datatype.datatype(Values.ResoureType), (s, i) -> trait(s.getStep(), And.and(s.getShape(), i)));
+				trait(Step.step(RDF.VALUE, true)), Datatype.datatype(Values.ResoureType), (s, i) -> trait(s.getStep(), and(s.getShape(), i)));
 
 		assertImplies("both subject and object of a rdf:type trait are resources",
 				trait(Step.step(RDF.TYPE)), Datatype.datatype(Values.ResoureType),
-				(s, i) -> And.and(trait(s.getStep(), And.and(s.getShape(), i)), i));
+				(s, i) -> and(trait(s.getStep(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",
-				trait(RDF.VALUE, Clazz.clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
-				(s, i) -> And.and(trait(s.getStep(), And.and(And.and(s.getShape(), i), Datatype.datatype(Values.ResoureType))), Datatype.datatype(Values.ResoureType)));
+				trait(RDF.VALUE, clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
+				(s, i) -> and(trait(s.getStep(), and(and(s.getShape(), i), Datatype.datatype(Values.ResoureType))), Datatype.datatype(Values.ResoureType)));
 	}
 
-	@Ignore @org.junit.Test public void testVirtual() {
+	@Disabled @Test void testVirtual() {
 
 		assertImplies("virtual traits are expanded",
 				Virtual.virtual(trait(RDF.VALUE), Step.step(RDF.NIL)), Datatype.datatype(Values.ResoureType),
@@ -108,32 +111,32 @@ public final class InferencerTest {
 	}
 
 
-	@org.junit.Test public void testConjunction() {
-		assertImplies("nested shapes are expanded", And.and(Clazz.clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
-				(s, i) -> And.and(Lists.concat(s.getShapes(), Lists.list(i)))); // outer and() stripped by optimization
+	@Test void testConjunction() {
+		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
+				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer and() stripped by optimization
 	}
 
-	@org.junit.Test public void testDisjunction() {
-		assertImplies("nested shapes are expanded", Or.or(Clazz.clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
-				(s, i) -> And.and(Lists.concat(s.getShapes(), Lists.list(i)))); // outer or() stripped by optimization
+	@Test void testDisjunction() {
+		assertImplies("nested shapes are expanded", Or.or(clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
+				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer or() stripped by optimization
 	}
 
-	@org.junit.Test public void testOption() {
+	@Test void testOption() {
 		assertImplies("nested shapes are expanded",
-				Test.test(Clazz.clazz(RDF.NIL), Clazz.clazz(RDF.NIL), Clazz.clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
-				(s, i) -> Test.test(And.and(s.getTest(), i), And.and(s.getPass(), i), And.and(s.getFail(), i)));
+				test(clazz(RDF.NIL), clazz(RDF.NIL), clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
+				(s, i) -> test(and(s.getTest(), i), and(s.getPass(), i), and(s.getFail(), i)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private void assertImplies(final String message, final Shape shape, final Shape inferred) {
-		assertEquals(message, optimize(And.and(shape, inferred)), expand(shape));
+		assertThat((Object)optimize(and(shape, inferred))).as(message).isEqualTo(expand(shape));
 	}
 
 	private <S extends Shape, I extends Shape> void assertImplies(
 			final String message, final S shape, final I inferred, final BiFunction<S, I, Shape> mapper) {
-		assertEquals(message, optimize(mapper.apply(shape, inferred)), expand(shape));
+		assertThat((Object)optimize(mapper.apply(shape, inferred))).as(message).isEqualTo(expand(shape));
 	}
 
 

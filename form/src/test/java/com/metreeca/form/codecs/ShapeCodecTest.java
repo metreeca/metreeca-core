@@ -17,23 +17,21 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
-import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import static com.metreeca.form.shapes.Alias.alias;
-import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Default.dflt;
@@ -46,18 +44,15 @@ import static com.metreeca.form.shapes.Notes.notes;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.shapes.Placeholder.placeholder;
-import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
-import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.things.Values.literal;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public final class ShapeCodecTest {
+final class ShapeCodecTest {
 
-	@Test public void testAnnotations() {
+	@Test void testAnnotations() {
 
 		assertCoded("alias", alias("alias"));
 		assertCoded("label", Label.label("label"));
@@ -69,7 +64,7 @@ public final class ShapeCodecTest {
 
 	}
 
-	@Test public void testGlobals() {
+	@Test void testGlobals() {
 
 		assertCoded("minCount", MinCount.minCount(10));
 		assertCoded("maxCount", maxCount(10));
@@ -79,7 +74,7 @@ public final class ShapeCodecTest {
 
 	}
 
-	@Test public void testLocals() {
+	@Test void testLocals() {
 
 		assertCoded("type", Datatype.datatype(RDF.NIL));
 		assertCoded("class", Clazz.clazz(RDF.NIL));
@@ -95,7 +90,7 @@ public final class ShapeCodecTest {
 
 	}
 
-	@Test public void testStructurals() {
+	@Test void testStructurals() {
 
 		assertCoded("direct trait", trait(RDF.VALUE));
 		assertCoded("inverse trait", trait(Step.step(RDF.VALUE, true)));
@@ -105,7 +100,7 @@ public final class ShapeCodecTest {
 
 	}
 
-	@Test public void testLogicals() {
+	@Test void testLogicals() {
 
 		assertCoded("empty conjunction", and());
 		assertCoded("singleton conjunction", and(MinCount.minCount(1)));
@@ -133,7 +128,7 @@ public final class ShapeCodecTest {
 
 		try {
 
-			assertEquals(message, shape, codec.decode(codec.encode(shape, model), model));
+			assertThat((Object)shape).as(message).isEqualTo(codec.decode(codec.encode(shape, model), model));
 
 		} finally {
 			Rio.write(model, System.out, RDFFormat.TURTLE);

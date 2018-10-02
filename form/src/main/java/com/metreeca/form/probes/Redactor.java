@@ -18,8 +18,6 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.shapes.Test;
-import com.metreeca.form.shapes.When;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 

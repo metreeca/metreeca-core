@@ -17,7 +17,6 @@
 
 package com.metreeca.form.probes;
 
-import com.metreeca.form.shapes.Test;
 import com.metreeca.form.Shape;
 import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;

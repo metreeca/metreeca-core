@@ -17,6 +17,8 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -24,19 +26,15 @@ import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Values;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Test;
 
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
 
 import javax.json.JsonException;
 
-import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
@@ -49,17 +47,15 @@ import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Values.literal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.TEN;
 
 
-public class QueryParserTest {
+final class QueryParserTest {
 
 	private static final Literal One=Values.literal(ONE);
 	private static final Literal Ten=Values.literal(TEN);
@@ -73,209 +69,171 @@ public class QueryParserTest {
 	);
 
 
-	@org.junit.Test public void testParseEmptyString() {
+	@Test void testParseEmptyString() {
 
 		final Shape shape=and();
 
 		graph("", shape, edges -> {
 
-			assertEquals("base shape", shape, edges.getShape());
+			assertThat((Object)shape).as("base shape").isEqualTo(edges.getShape());
 
-			Assert.assertEquals("no offset", 0, edges.getOffset());
-			Assert.assertEquals("no limit", 0, edges.getLimit());
+			assertThat((Object)0).as("no offset").isEqualTo(edges.getOffset());
+			assertThat((Object)0).as("no limit").isEqualTo(edges.getLimit());
 
 		});
 	}
 
-	@org.junit.Test public void testParsePaths() {
+	@Test void testParsePaths() {
 
-		stats("{ \"stats\": \"\" }", shape, stats ->
-				Assert.assertEquals("empty path", Lists.list(), stats.getPath()));
+		stats("{ \"stats\": \"\" }", shape, stats -> assertThat(Lists.list()).as("empty path").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \""+RDF.FIRST+"\" }", shape, stats ->
-				Assert.assertEquals("direct naked iri", Lists.list(first), stats.getPath()));
+		stats("{ \"stats\": \""+RDF.FIRST+"\" }", shape, stats -> assertThat(Lists.list(first)).as("direct naked iri").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"^"+RDF.FIRST+"\" }", shape, stats ->
-				Assert.assertEquals("inverse naked iri", Lists.list(first.invert()), stats.getPath()));
+		stats("{ \"stats\": \"^"+RDF.FIRST+"\" }", shape, stats -> assertThat(Lists.list(first.invert())).as("inverse naked iri").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"<"+RDF.FIRST+">\" }", shape, stats ->
-				Assert.assertEquals("direct brackets iri", Lists.list(first), stats.getPath()));
+		stats("{ \"stats\": \"<"+RDF.FIRST+">\" }", shape, stats -> assertThat(Lists.list(first)).as("direct brackets iri").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"^<"+RDF.FIRST+">\" }", shape, stats ->
-				Assert.assertEquals("inverse brackets iri", Lists.list(first.invert()), stats.getPath()));
+		stats("{ \"stats\": \"^<"+RDF.FIRST+">\" }", shape, stats -> assertThat(Lists.list(first.invert())).as("inverse brackets iri").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"<"+RDF.FIRST+">/<"+RDF.REST+">\" }", shape, stats ->
-				Assert.assertEquals("iri slash path", Lists.list(first, rest), stats.getPath()));
+		stats("{ \"stats\": \"<"+RDF.FIRST+">/<"+RDF.REST+">\" }", shape, stats -> assertThat(Lists.list(first, rest)).as("iri slash path").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"first\" }", shape, stats ->
-				Assert.assertEquals("direct alias", Lists.list(first), stats.getPath()));
+		stats("{ \"stats\": \"first\" }", shape, stats -> assertThat(Lists.list(first)).as("direct alias").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"firstOf\" }", shape, stats ->
-				Assert.assertEquals("inverse alias", Lists.list(first.invert()), stats.getPath()));
+		stats("{ \"stats\": \"firstOf\" }", shape, stats -> assertThat(Lists.list(first.invert())).as("inverse alias").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"first/rest\" }", shape, stats ->
-				Assert.assertEquals("alias slash path", Lists.list(first, rest), stats.getPath()));
+		stats("{ \"stats\": \"first/rest\" }", shape, stats -> assertThat(Lists.list(first, rest)).as("alias slash path").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"firstOf.rest\" }", shape, stats ->
-				Assert.assertEquals("alias dot path", Lists.list(first.invert(), rest), stats.getPath()));
+		stats("{ \"stats\": \"firstOf.rest\" }", shape, stats -> assertThat(Lists.list(first.invert(), rest)).as("alias dot path").isEqualTo(stats.getPath()));
 
 	}
 
 
-	@org.junit.Test public void testParseSortingCriteria() {
+	@Test void testParseSortingCriteria() {
 
-		graph("{ \"order\": \"\" }", shape, edges ->
-				assertEquals("empty path", Lists.list(Query.increasing()), edges.getOrders()));
+		graph("{ \"order\": \"\" }", shape, edges -> assertThat(Lists.list(Query.increasing())).as("empty path").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"+\" }", shape, edges ->
-				assertEquals("empty path increasing", Lists.list(Query.increasing()), edges.getOrders()));
+		graph("{ \"order\": \"+\" }", shape, edges -> assertThat(Lists.list(Query.increasing())).as("empty path increasing").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"-\" }", shape, edges ->
-				assertEquals("empty path decreasing", Lists.list(Query.decreasing()), edges.getOrders()));
+		graph("{ \"order\": \"-\" }", shape, edges -> assertThat(Lists.list(Query.decreasing())).as("empty path decreasing").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"first.rest\" }", shape, edges ->
-				assertEquals("path", Lists.list(Query.increasing(first, rest)), edges.getOrders()));
+		graph("{ \"order\": \"first.rest\" }", shape, edges -> assertThat(Lists.list(Query.increasing(first, rest))).as("path").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"+first.rest\" }", shape, edges ->
-				assertEquals("path increasing", Lists.list(Query.increasing(first, rest)), edges.getOrders()));
+		graph("{ \"order\": \"+first.rest\" }", shape, edges -> assertThat(Lists.list(Query.increasing(first, rest))).as("path increasing").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"-first.rest\" }", shape, edges ->
-				assertEquals("path decreasing", Lists.list(Query.decreasing(first, rest)), edges.getOrders()));
+		graph("{ \"order\": \"-first.rest\" }", shape, edges -> assertThat(Lists.list(Query.decreasing(first, rest))).as("path decreasing").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": [] }", shape, edges ->
-				Assert.assertEquals("empty list", Lists.list(), edges.getOrders()));
+		graph("{ \"order\": [] }", shape, edges -> assertThat(Lists.list()).as("empty list").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": [\"+first\", \"-first.rest\"] }", shape, edges ->
-				Assert.assertEquals("list", Lists.list(Query.increasing(first), Query.decreasing(first, rest)), edges.getOrders()));
+		graph("{ \"order\": [\"+first\", \"-first.rest\"] }", shape, edges -> assertThat(Lists.list(Query.increasing(first), Query.decreasing(first, rest))).as("list").isEqualTo(edges.getOrders()));
 
 	}
 
-	@org.junit.Test public void testParseSimpleFilters() {
+	@Test void testParseSimpleFilters() {
 
-		graph("{ \"filter\": { \">>\": 1 } }", shape, edges ->
-				assertEquals("min count", filter(shape, minCount(1)), edges.getShape()));
+		graph("{ \"filter\": { \">>\": 1 } }", shape, edges -> assertThat((Object)filter(shape, minCount(1))).as("min count").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"<<\": 1 } }", shape, edges ->
-				assertEquals("max count", filter(shape, maxCount(1)), edges.getShape()));
+		graph("{ \"filter\": { \"<<\": 1 } }", shape, edges -> assertThat((Object)filter(shape, maxCount(1))).as("max count").isEqualTo(edges.getShape()));
 
 
-		graph("{ \"filter\": { \">=\": 1 } }", shape, edges ->
-				assertEquals("min inclusive", filter(shape, MinInclusive.minInclusive(One)), edges.getShape()));
+		graph("{ \"filter\": { \">=\": 1 } }", shape, edges -> assertThat((Object)filter(shape, MinInclusive.minInclusive(One))).as("min inclusive").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"<=\": 1 } }", shape, edges ->
-				assertEquals("max inclusive", filter(shape, maxInclusive(One)), edges.getShape()));
+		graph("{ \"filter\": { \"<=\": 1 } }", shape, edges -> assertThat((Object)filter(shape, maxInclusive(One))).as("max inclusive").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \">\": 1 } }", shape, edges ->
-				assertEquals("min exclusive", filter(shape, MinExclusive.minExclusive(One)), edges.getShape()));
+		graph("{ \"filter\": { \">\": 1 } }", shape, edges -> assertThat((Object)filter(shape, MinExclusive.minExclusive(One))).as("min exclusive").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"<\": 1 } }", shape, edges ->
-				assertEquals("max exclusive", filter(shape, maxExclusive(One)), edges.getShape()));
+		graph("{ \"filter\": { \"<\": 1 } }", shape, edges -> assertThat((Object)filter(shape, maxExclusive(One))).as("max exclusive").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"~\": \"words\" } }", shape, edges ->
-				assertEquals("like", filter(shape, like("words")), edges.getShape()));
+		graph("{ \"filter\": { \"~\": \"words\" } }", shape, edges -> assertThat((Object)filter(shape, like("words"))).as("like").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"*\": \"pattern\" } }", shape, edges ->
-				assertEquals("pattern", filter(shape, pattern("pattern")), edges.getShape()));
+		graph("{ \"filter\": { \"*\": \"pattern\" } }", shape, edges -> assertThat((Object)filter(shape, pattern("pattern"))).as("pattern").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \">#\": 123 } }", shape, edges ->
-				assertEquals("min length", filter(shape, MinLength.minLength(123)), edges.getShape()));
+		graph("{ \"filter\": { \">#\": 123 } }", shape, edges -> assertThat((Object)filter(shape, MinLength.minLength(123))).as("min length").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"#<\": 123 } }", shape, edges ->
-				assertEquals("max length", filter(shape, maxLength(123)), edges.getShape()));
+		graph("{ \"filter\": { \"#<\": 123 } }", shape, edges -> assertThat((Object)filter(shape, maxLength(123))).as("max length").isEqualTo(edges.getShape()));
 
 
-		graph("{ \"filter\": { \"@\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil\" } }", shape, edges ->
-				assertEquals("class", filter(shape, clazz(RDF.NIL)), edges.getShape()));
+		graph("{ \"filter\": { \"@\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil\" } }", shape, edges -> assertThat((Object)filter(shape, clazz(RDF.NIL))).as("class").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"^\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil\" } }", shape, edges ->
-				assertEquals("type", filter(shape, datatype(RDF.NIL)), edges.getShape()));
+		graph("{ \"filter\": { \"^\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil\" } }", shape, edges -> assertThat((Object)filter(shape, datatype(RDF.NIL))).as("type").isEqualTo(edges.getShape()));
 
 
-		graph("{ \"filter\": { \"?\": [] } }", shape, edges ->
-				assertEquals("existential (empty)", filter(shape, and()), edges.getShape()));
+		graph("{ \"filter\": { \"?\": [] } }", shape, edges -> assertThat((Object)filter(shape, and())).as("existential (empty)").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"?\": { \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" } } }", shape, edges ->
-				assertEquals("existential (singleton)", filter(shape, any(RDF.FIRST)), edges.getShape()));
+		graph("{ \"filter\": { \"?\": { \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" } } }", shape, edges -> assertThat((Object)filter(shape, any(RDF.FIRST))).as("existential (singleton)").isEqualTo(edges.getShape()));
 
 		graph("{ \"filter\": { \"?\": [\n"
 				+"\t{ \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" },\n"
 				+"\t{ \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest\" }\n"
-				+"] } }", shape, edges ->
-				assertEquals("existential (multiple)", filter(shape, any(RDF.FIRST, RDF.REST)), edges.getShape()));
+				+"] } }", shape, edges -> assertThat((Object)filter(shape, any(RDF.FIRST, RDF.REST))).as("existential (multiple)").isEqualTo(edges.getShape()));
 
 
-		graph("{ \"filter\": { \"!\": [] } }", shape, edges ->
-				assertEquals("universal (empty)", filter(shape, and()), edges.getShape()));
+		graph("{ \"filter\": { \"!\": [] } }", shape, edges -> assertThat((Object)filter(shape, and())).as("universal (empty)").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"!\": { \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" } } }", shape, edges ->
-				assertEquals("universal (singleton)", filter(shape, All.all(RDF.FIRST)), edges.getShape()));
+		graph("{ \"filter\": { \"!\": { \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" } } }", shape, edges -> assertThat((Object)filter(shape, All.all(RDF.FIRST))).as("universal (singleton)").isEqualTo(edges.getShape()));
 
 		graph("{ \"filter\": { \"!\": [\n"
 				+"\t{ \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" },\n"
 				+"\t{ \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest\" }\n"
-				+"] } }", shape, edges ->
-				assertEquals("universal (multiple)", filter(shape, All.all(RDF.FIRST, RDF.REST)), edges.getShape()));
+				+"] } }", shape, edges -> assertThat((Object)filter(shape, All.all(RDF.FIRST, RDF.REST))).as("universal (multiple)").isEqualTo(edges.getShape()));
 
 	}
 
-	@org.junit.Test public void testParseStructuredFilters() {
+	@Test void testParseStructuredFilters() {
 
-		graph("{\n\t\"filter\": {}\n}", shape, edges ->
-				assertEquals("empty filter", filter(shape, and()), edges.getShape()));
+		graph("{\n\t\"filter\": {}\n}", shape, edges -> assertThat((Object)filter(shape, and())).as("empty filter").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"first.rest\": { \">=\": 1 } } }", shape, edges ->
-				assertEquals("nested filter", filter(shape, trait(first, trait(rest, MinInclusive.minInclusive(One)))), edges.getShape()));
+		graph("{ \"filter\": { \"first.rest\": { \">=\": 1 } } }", shape, edges -> assertThat((Object)filter(shape, trait(first, trait(rest, MinInclusive.minInclusive(One))))).as("nested filter").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"first.rest\": 1 } }", shape, edges ->
-				assertEquals("nested filter singleton shorthand", filter(shape, trait(first, trait(rest, any(One)))), edges.getShape()));
+		graph("{ \"filter\": { \"first.rest\": 1 } }", shape, edges -> assertThat((Object)filter(shape, trait(first, trait(rest, any(One))))).as("nested filter singleton shorthand").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"first.rest\": [1, 10] } }", shape, edges ->
-				assertEquals("nested filter multiple shorthand", filter(shape, trait(first, trait(rest, any(One, Ten)))), edges.getShape()));
+		graph("{ \"filter\": { \"first.rest\": [1, 10] } }", shape, edges -> assertThat((Object)filter(shape, trait(first, trait(rest, any(One, Ten))))).as("nested filter multiple shorthand").isEqualTo(edges.getShape()));
 
 	}
 
 
-	@org.junit.Test public void testParseEdgesQuery() {
+	@Test void testParseEdgesQuery() {
 
 		graph("{ \"filter\": {}, \"offset\": 1, \"limit\": 2 }", shape, edges -> {
 
-			assertEquals("shape", filter(shape, and()), edges.getShape());
-			Assert.assertEquals("offset", 1, edges.getOffset());
-			Assert.assertEquals("limit", 2, edges.getLimit());
+			assertThat((Object)filter(shape, and())).as("shape").isEqualTo(edges.getShape());
+			assertThat((Object)1).as("offset").isEqualTo(edges.getOffset());
+			assertThat((Object)2).as("limit").isEqualTo(edges.getLimit());
 
 		});
 
 	}
 
-	@org.junit.Test public void testParseStatsQuery() {
+	@Test void testParseStatsQuery() {
 
 		stats("{ \"filter\": {}, \"stats\": \"\" }", shape, stats -> {
 
-			assertEquals("shape", filter(shape, and()), stats.getShape());
-			Assert.assertEquals("path", Lists.list(), stats.getPath());
+			assertThat((Object)filter(shape, and())).as("shape").isEqualTo(stats.getShape());
+			assertThat(Lists.list()).as("path").isEqualTo(stats.getPath());
 
 		});
 
 	}
 
-	@org.junit.Test public void testParseItemsQuery() {
+	@Test void testParseItemsQuery() {
 
 		items("{ \"filter\": {}, \"items\": \"\" }", shape, items -> {
 
-			assertEquals("shape", filter(shape, and()), items.getShape());
-			Assert.assertEquals("path", Lists.list(), items.getPath());
+			assertThat((Object)filter(shape, and())).as("shape").isEqualTo(items.getShape());
+			assertThat(Lists.list()).as("path").isEqualTo(items.getPath());
 
 		});
 
 	}
 
 
-	@org.junit.Test(expected=JsonException.class) public void testRejectNullFilters() {
-		graph("{ \"filter\": null }", shape, edges -> {});
+	@Test void testRejectNullFilters() {
+		assertThatExceptionOfType(JsonException.class)
+				.isThrownBy(() -> graph("{ \"filter\": null }", shape, edges -> {}));
 	}
 
-	@org.junit.Test(expected=JsonException.class) public void testRejectNullValues() {
-		graph("{ \"filter\": { \"first\": null } }", shape, edges -> {});
+	@Test void testRejectNullValues() {
+		assertThatExceptionOfType(JsonException.class)
+				.isThrownBy(() -> graph("{ \"filter\": { \"first\": null } }", shape, edges -> {}));
 	}
 
 
@@ -316,11 +274,11 @@ public class QueryParserTest {
 
 
 	private void test(final String json, final Shape shape, final Query.Probe<Boolean> probe) {
-		assertTrue("query processed", new QueryParser(shape).parse(json).accept(probe));
+		assertThat(new QueryParser(shape).parse(json).accept(probe)).as("query processed").isTrue();
 	}
 
 	private Shape filter(final Shape shape, final Shape filter) {
-		return and(shape, Test.test(Shape.filter(), filter));
+		return and(shape, com.metreeca.form.shapes.Test.test(Shape.filter(), filter));
 	}
 
 }

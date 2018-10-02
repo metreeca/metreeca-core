@@ -24,8 +24,8 @@ import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.shapes.Alias;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Values;
 import com.metreeca.form.things.JSON;
+import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -45,6 +45,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import javax.json.JsonException;
 import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.form.shapes.All.all;
@@ -126,6 +127,10 @@ public final class JSONParser extends AbstractRDFParser {
 
 			throw new RDFParseException(e.getMessage(),
 					e.getLocation().getLineNumber(), e.getLocation().getColumnNumber());
+
+		} catch ( final JsonException e ) {
+
+			throw new RDFParseException(e.getMessage(), e);
 
 		}
 

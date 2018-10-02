@@ -18,87 +18,85 @@
 package com.metreeca.form;
 
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.*;
-import com.metreeca.form.shapes.And;
-import com.metreeca.form.things.Sets;
+import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Frame.slot;
+import static com.metreeca.form.Issue.issue;
+import static com.metreeca.form.Report.report;
+import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.ValuesTest.assertIsomorphic;
 import static com.metreeca.form.things.ValuesTest.decode;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class ReportTest {
+final class ReportTest {
 
 	private final IRI x=ValuesTest.item("x");
 	private final IRI y=ValuesTest.item("y");
 	private final IRI z=ValuesTest.item("z");
 
-	private final Issue info=Issue.issue(Issue.Level.Info, "info", And.and());
-	private final Issue warning=Issue.issue(Issue.Level.Warning, "warning", And.and());
-	private final Issue error=Issue.issue(Issue.Level.Error, "error", And.and());
+	private final Issue info=issue(Issue.Level.Info, "info", and());
+	private final Issue warning=issue(Issue.Level.Warning, "warning", and());
+	private final Issue error=issue(Issue.Level.Error, "error", and());
 
 
-	@Test public void testAssess() {
+	@Test void testAssess() {
 
-		assertFalse("no issues", Report.report(Sets.set()).assess(Issue.Level.Info));
+		assertThat(report(set()).assess(Issue.Level.Info)).as("no issues").isFalse();
 
-		assertTrue("matching issue", Report.report(list(warning)).assess(Issue.Level.Warning));
-		assertFalse("no matching issue", Report.report(list(warning)).assess(Issue.Level.Error));
+		assertThat(report(list(warning)).assess(Issue.Level.Warning)).as("matching issue").isTrue();
+		assertThat(report(list(warning)).assess(Issue.Level.Error)).as("no matching issue").isFalse();
 
-		assertTrue("matching frame", Report.report(Lists.list(), set(
-				frame(RDF.NIL, slot(Step.step(RDF.VALUE), new Report(set(error), Sets.set())))
-		)).assess(Issue.Level.Error));
+		assertThat(report(list(), set(
+				frame(RDF.NIL, slot(Step.step(RDF.VALUE), new Report(set(error), set())))
+		)).assess(Issue.Level.Error)).as("matching frame").isTrue();
 
 	}
 
-	@Test public void testPrune() {
+	@Test void testPrune() {
 
-		final Frame<Report> first=frame(x, slot(Step.step(RDF.FIRST), Report.report(info)));
-		final Frame<Report> rest=frame(x, slot(Step.step(RDF.REST), Report.report(warning)));
+		final Frame<Report> first=frame(x, slot(Step.step(RDF.FIRST), report(info)));
+		final Frame<Report> rest=frame(x, slot(Step.step(RDF.REST), report(warning)));
 
-		final Report report=Report.report(Sets.set(info, warning, error), Sets.set(first, rest))
+		final Report report=report(set(info, warning, error), set(first, rest))
 				.prune(Issue.Level.Warning)
 				.orElse(null);
 
-		assertEquals("pruned issues", Sets.set(warning, error), report.getIssues());
-		assertEquals("pruned frames", set(rest), report.getFrames());
+		assertThat(set(warning, error)).as("pruned issues").isEqualTo(report.getIssues());
+		assertThat(set(rest)).as("pruned frames").isEqualTo(report.getFrames());
 
 	}
 
-	@Test public void testOutline() {
+	@Test void testOutline() {
 
-		ValuesTest.assertIsomorphic("direct edge", ValuesTest.decode("<x> rdf:value <y>."), trace(
+		assertThat(decode("<x> rdf:value <y>.")).as("direct edge").isIsomorphicTo(trace(
 
 				frame(x, slot(Step.step(RDF.VALUE), trace(frame(y))))
 
 		).outline());
 
-		ValuesTest.assertIsomorphic("inverse edge", ValuesTest.decode("<y> rdf:value <x>."), trace(
+		assertThat(decode("<y> rdf:value <x>.")).as("inverse edge").isIsomorphicTo(trace(
 
 				frame(x, slot(Step.step(RDF.VALUE, true), trace(frame(y))))
 
 		).outline());
 
-		ValuesTest.assertIsomorphic("multiple traces", ValuesTest.decode("<x> rdf:value <y>, <z>."), trace(
+		assertThat(decode("<x> rdf:value <y>, <z>.")).as("multiple traces").isIsomorphicTo(trace(
 
 				frame(x, slot(Step.step(RDF.VALUE), trace(frame(y), frame(z))))
 
 		).outline());
 
-		ValuesTest.assertIsomorphic("multiple edges", ValuesTest.decode("<x> rdf:first <y>; rdf:rest <z>."), trace(
+		assertThat(decode("<x> rdf:first <y>; rdf:rest <z>.")).as("multiple edges").isIsomorphicTo(trace(
 
 				frame(x,
 
@@ -108,19 +106,19 @@ public class ReportTest {
 
 		).outline());
 
-		ValuesTest.assertIsomorphic("illegal direct edge", Sets.set(), trace(
+		assertThat(set()).as("illegal direct edge").isIsomorphicTo(trace(
 
 				frame(Values.literal("x"), slot(Step.step(RDF.VALUE), trace(frame(y))))
 
 		).outline());
 
-		ValuesTest.assertIsomorphic("illegal inverse edge", Sets.set(), trace(
+		assertThat(set()).as("illegal inverse edge").isIsomorphicTo(trace(
 
 				frame(x, slot(Step.step(RDF.VALUE, true), trace(frame(Values.literal("y")))))
 
 		).outline());
 
-		ValuesTest.assertIsomorphic("nested edges", ValuesTest.decode("<x> rdf:value <y>. <y> rdf:value <z>."), trace(
+		assertThat(decode("<x> rdf:value <y>. <y> rdf:value <z>.")).as("nested edges").isIsomorphicTo(trace(
 
 				frame(x, slot(Step.step(RDF.VALUE),
 						trace(frame(y, slot(Step.step(RDF.VALUE),
@@ -134,7 +132,7 @@ public class ReportTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@SafeVarargs private final Report trace(final Frame<Report>... traces) {
-		return Report.report(Sets.set(), Sets.set(traces));
+		return report(set(), set(traces));
 	}
 
 }

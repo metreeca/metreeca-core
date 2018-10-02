@@ -55,10 +55,10 @@ public final class RDF4JSPARQL extends Graph {
 	/**
 	 * Creates an RDF4J SPARQL graph.
 	 *
-	 * @param query the URL of a remote SPARQL endpoint supporting <a href="https://www.w3.org/TR/sparql11-protocol/">SPARQL
-	 *            1.1 Protocol</a> query operations
+	 * @param query  the URL of a remote SPARQL endpoint supporting <a href="https://www.w3.org/TR/sparql11-protocol/">SPARQL
+	 *               1.1 Protocol</a> query operations
 	 * @param update the URL of a remote SPARQL endpoint supporting <a href="https://www.w3.org/TR/sparql11-protocol/">SPARQL
-	 *            1.1 Protocol</a> update operations
+	 *               1.1 Protocol</a> update operations
 	 *
 	 * @throws NullPointerException if either {@code query} or {@code update} is null
 	 */
@@ -86,7 +86,7 @@ public final class RDF4JSPARQL extends Graph {
 	 *
 	 * @return this graph store
 	 *
-	 * @throws NullPointerException if either {@code usr} or {@code pwd} is {@code null}
+	 * @throws NullPointerException  if either {@code usr} or {@code pwd} is {@code null}
 	 * @throws IllegalStateException if the backing remote repository was already initialized
 	 */
 	public RDF4JSPARQL credentials(final String usr, final String pwd) {

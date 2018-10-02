@@ -17,9 +17,9 @@
 
 package com.metreeca.form.sparql;
 
-import com.metreeca.form.shapes.All;
 import com.metreeca.form.*;
 import com.metreeca.form.queries.Edges;
+import com.metreeca.form.shapes.All;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
@@ -31,7 +31,6 @@ import java.util.Map;
 
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Report.report;
-import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
 

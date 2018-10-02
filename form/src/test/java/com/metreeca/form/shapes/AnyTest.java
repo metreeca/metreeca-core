@@ -20,47 +20,45 @@ package com.metreeca.form.shapes;
 import com.metreeca.form.things.Sets;
 import com.metreeca.form.things.Values;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
-import static com.metreeca.form.things.Values.literal;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class AnyTest {
+final class AnyTest {
 
-	@Test public void testInspectUniversal() {
+	@Test void testInspectUniversal() {
 
 		final Any any=any(Values.literal(1), Values.literal(2), Values.literal(3));
 
-		assertTrue("defined", any(any)
+		assertThat(any(any)
 				.filter(values -> values.equals(any.getValues()))
-				.isPresent());
+				.isPresent()).as("defined").isTrue();
 	}
 
-	@Test public void testInspectConjunction() {
+	@Test void testInspectConjunction() {
 
 		final Any x=any(Values.literal(1), Values.literal(2), Values.literal(3));
 		final Any y=any(Values.literal(2), Values.literal(3), Values.literal(4));
 
-		assertTrue("all defined", any(and(x, y))
-				.filter(values -> values.equals(Sets.intersection(x.getValues(), y.getValues())))
-				.isPresent());
+		assertThat(any(and(x, y))
+				.filter(values1 -> values1.equals(Sets.intersection(x.getValues(), y.getValues())))
+				.isPresent()).as("all defined").isTrue();
 
-		assertTrue("some defined", any(and(x, And.and()))
+		assertThat(any(and(x, And.and()))
 				.filter(values -> values.equals(x.getValues()))
-				.isPresent());
+				.isPresent()).as("some defined").isTrue();
 
-		assertFalse("none defined", any(and(And.and(), And.and()))
-				.isPresent());
+		assertThat(any(and(And.and(), And.and()))
+				.isPresent()).as("none defined").isFalse();
 
 	}
 
-	@Test public void testInspectOtherShape() {
-		assertFalse("not defined", any(And.and()).isPresent());
+	@Test void testInspectOtherShape() {
+		assertThat(any(And.and()).isPresent()).as("not defined").isFalse();
 	}
 
 }

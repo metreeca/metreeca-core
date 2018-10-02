@@ -18,9 +18,9 @@
 package com.metreeca.form.queries;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
+import com.metreeca.form.shifts.Step;
 
 import java.util.ArrayList;
 import java.util.List;

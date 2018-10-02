@@ -37,7 +37,8 @@ import static java.util.stream.Collectors.joining;
 /**
  * Parametric logical constraint.
  *
- * <p>States that the focus set meets this shape only if at least one of the values of an externally defined variable is
+ * <p>States that the focus set meets this shape only if at least one of the values of an externally defined variable
+ * is
  * included in a given set of target values.</p>
  *
  * @see com.metreeca.form.probes.Redactor

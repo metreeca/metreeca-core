@@ -17,58 +17,45 @@
 
 package com.metreeca.form.probes;
 
+import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.All;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.things.ValuesTest.decode;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class OutlinerTest {
 
 	@Test public void testOutlineClasses() {
-		Assert.assertEquals("classes",
-				ValuesTest.decode("rdf:first a rdfs:Resource."),
-				outline(and(All.all(RDF.FIRST), clazz(RDFS.RESOURCE))));
+		assertThat((Object)ValuesTest.decode("rdf:first a rdfs:Resource.")).as("classes").isEqualTo(outline(and(All.all(RDF.FIRST), clazz(RDFS.RESOURCE))));
 	}
 
 	@Test public void testOutlineSubjectExistentials() {
-		assertEquals("subject existentials",
-				ValuesTest.decode("rdf:first rdf:value rdf:nil. rdf:rest rdf:value rdf:nil."),
-				outline(and(All.all(RDF.FIRST, RDF.REST), trait(RDF.VALUE, All.all(RDF.NIL)))));
+		assertThat((Object)ValuesTest.decode("rdf:first rdf:value rdf:nil. rdf:rest rdf:value rdf:nil.")).as("subject existentials").isEqualTo(outline(and(All.all(RDF.FIRST, RDF.REST), trait(RDF.VALUE, All.all(RDF.NIL)))));
 	}
 
 	@Test public void testOutlineObjectExistentials() {
-		assertEquals("object existentials",
-				ValuesTest.decode("rdf:nil rdf:value rdf:first, rdf:rest."),
-				outline(and(All.all(RDF.NIL), trait(RDF.VALUE, All.all(RDF.FIRST, RDF.REST)))));
+		assertThat((Object)ValuesTest.decode("rdf:nil rdf:value rdf:first, rdf:rest.")).as("object existentials").isEqualTo(outline(and(All.all(RDF.NIL), trait(RDF.VALUE, All.all(RDF.FIRST, RDF.REST)))));
 	}
 
 	@Test public void testOutlineConjunctions() {
-		assertEquals("value union",
-				ValuesTest.decode("rdf:nil rdf:value rdf:first."),
-				outline(and(All.all(RDF.NIL), and(trait(RDF.VALUE, All.all(RDF.FIRST))))));
+		assertThat((Object)ValuesTest.decode("rdf:nil rdf:value rdf:first.")).as("value union").isEqualTo(outline(and(All.all(RDF.NIL), and(trait(RDF.VALUE, All.all(RDF.FIRST))))));
 	}
 
 	@Test public void testOutlineNestedConjunctions() {
-		assertEquals("value union",
-				ValuesTest.decode("rdf:nil rdf:value rdf:first, rdf:rest."),
-				outline(and(All.all(RDF.NIL), trait(RDF.VALUE, and(All.all(RDF.FIRST), All.all(RDF.REST))))));
+		assertThat((Object)ValuesTest.decode("rdf:nil rdf:value rdf:first, rdf:rest.")).as("value union").isEqualTo(outline(and(All.all(RDF.NIL), trait(RDF.VALUE, and(All.all(RDF.FIRST), All.all(RDF.REST))))));
 	}
 
 

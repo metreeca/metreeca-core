@@ -17,15 +17,14 @@
 
 package com.metreeca.form.sparql;
 
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Count;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.Shift;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Pruner;
 import com.metreeca.form.shapes.*;
+import com.metreeca.form.shifts.Count;
+import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -34,7 +33,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Lists.list;
@@ -101,13 +99,13 @@ abstract class SPARQL { // ! refactor
 
 	protected List<String> template(final Shape shape, final Collection<Statement> template) {
 		return shape.accept(new TemplateProbe(shape))
-						.collect(toCollection(() -> template))
-						.stream()
-						.flatMap(statement -> Stream.of(statement.getSubject(), statement.getObject()))
-						.filter(value -> value instanceof BNode)
-						.map(value -> ((BNode)value).getID())
+				.collect(toCollection(() -> template))
+				.stream()
+				.flatMap(statement -> Stream.of(statement.getSubject(), statement.getObject()))
+				.filter(value -> value instanceof BNode)
+				.map(value -> ((BNode)value).getID())
 				.distinct()
-						.sorted()
+				.sorted()
 				.collect(toList());
 	}
 

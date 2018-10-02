@@ -17,8 +17,8 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Shape;
 import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.shifts.Step;

@@ -63,7 +63,7 @@ public final class RDF4JRemote extends Graph {
 	 *
 	 * @return this graph store
 	 *
-	 * @throws NullPointerException if either {@code usr} or {@code pwd} is {@code null}
+	 * @throws NullPointerException  if either {@code usr} or {@code pwd} is {@code null}
 	 * @throws IllegalStateException if the backing remote repository was already initialized
 	 */
 	public RDF4JRemote credentials(final String usr, final String pwd) {

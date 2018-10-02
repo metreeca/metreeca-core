@@ -18,29 +18,27 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.When;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
-import static com.metreeca.form.shapes.When.when;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 
 
-public class RedactorTest {
+final class RedactorTest {
 
 	private static final Redactor empty=new Redactor(emptyMap());
 
@@ -49,47 +47,43 @@ public class RedactorTest {
 	private static final Redactor any=new Redactor(singletonMap(RDF.VALUE, singleton(Form.any)));
 
 
-	@Test public void testIgnoreUnconditionalShapes() {
+	@Test void testIgnoreUnconditionalShapes() {
 
 		final Shape shape=and();
 
-		assertEquals("unconditional shape", shape, shape.accept(empty));
+		assertThat((Object)shape).as("unconditional shape").isEqualTo(shape.accept(empty));
 
 	}
 
-	@Test public void testIgnoreUndefinedConditions() {
+	@Test void testIgnoreUndefinedConditions() {
 
 		final When when=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertEquals("undefined variable", when, when.accept(empty));
+		assertThat((Object)when).as("undefined variable").isEqualTo(when.accept(empty));
 
 	}
 
-	@Test public void testReplaceDefinedConditions() {
+	@Test void testReplaceDefinedConditions() {
 
 		final When when=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertEquals("included value", and(), when.accept(first));
-		assertEquals("excluded value", or(), when.accept(rest));
-		assertEquals("wildcard value", and(), when.accept(any));
+		assertThat((Object)and()).as("included value").isEqualTo(when.accept(first));
+		assertThat((Object)or()).as("excluded value").isEqualTo(when.accept(rest));
+		assertThat((Object)and()).as("wildcard value").isEqualTo(when.accept(any));
 
 	}
 
-	@Test public void testRedactNestedShapes() {
+	@Test void testRedactNestedShapes() {
 
 		final When nested=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertEquals("trait",
-				trait(RDF.VALUE, and()),
-				trait(RDF.VALUE, nested).accept(first));
+		assertThat((Object)trait(RDF.VALUE, and())).as("trait").isEqualTo(trait(RDF.VALUE, nested).accept(first));
 
-		assertEquals("virtual",
-				virtual(trait(RDF.VALUE, and()), Step.step(RDF.NIL)),
-				virtual(trait(RDF.VALUE, nested), Step.step(RDF.NIL)).accept(first));
+		assertThat((Object)virtual(trait(RDF.VALUE, and()), Step.step(RDF.NIL))).as("virtual").isEqualTo(virtual(trait(RDF.VALUE, nested), Step.step(RDF.NIL)).accept(first));
 
-		assertEquals("conjunction", and(and()), and(nested).accept(first));
-		assertEquals("disjunction", or(and()), or(nested).accept(first));
-		Assert.assertEquals("option", com.metreeca.form.shapes.Test.test(and(), and(), and()), com.metreeca.form.shapes.Test.test(and(), and(), nested).accept(first));
+		assertThat((Object)and(and())).as("conjunction").isEqualTo(and(nested).accept(first));
+		assertThat((Object)or(and())).as("disjunction").isEqualTo(or(nested).accept(first));
+		assertThat((Object)test(and(), and(), and())).as("option").isEqualTo(test(and(), and(), nested).accept(first));
 
 	}
 

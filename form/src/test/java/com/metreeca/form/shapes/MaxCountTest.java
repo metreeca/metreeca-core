@@ -17,82 +17,86 @@
 
 package com.metreeca.form.shapes;
 
-import static com.metreeca.form.shapes.MaxCount.maxCount;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Test.test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
 
 
-public class MaxCountTest {
+final class MaxCountTest {
 
-	@org.junit.Test public void testInspectMaxCount() {
+	@Test void testInspectMaxCount() {
 
 		final MaxCount count=maxCount(10);
 
-		assertTrue("defined", maxCount(count)
+		assertThat(maxCount(count)
 				.filter(limit -> limit.equals(count.getLimit()))
-				.isPresent());
+				.isPresent()).as("defined").isTrue();
 	}
 
-	@org.junit.Test public void testInspectConjunction() {
+	@Test void testInspectConjunction() {
 
 		final MaxCount x=maxCount(10);
 		final MaxCount y=maxCount(100);
 
-		assertTrue("all defined", maxCount(And.and(x, y))
-				.filter(limit -> limit.equals(min(x.getLimit(), y.getLimit())))
-				.isPresent());
+		assertThat(maxCount(and(x, y))
+				.filter(limit1 -> limit1.equals(min(x.getLimit(), y.getLimit())))
+				.isPresent()).as("all defined").isTrue();
 
-		assertTrue("some defined", maxCount(And.and(x, And.and()))
+		assertThat(maxCount(and(x, and()))
 				.filter(limit -> limit.equals(x.getLimit()))
-				.isPresent());
+				.isPresent()).as("some defined").isTrue();
 
-		assertFalse("none defined", maxCount(And.and(And.and(), And.and()))
-				.isPresent());
+		assertThat(maxCount(and(and(), and()))
+				.isPresent()).as("none defined").isFalse();
 
 	}
 
-	@org.junit.Test public void testInspectDisjunction() {
+	@Test void testInspectDisjunction() {
 
 		final MaxCount x=maxCount(10);
 		final MaxCount y=maxCount(100);
 
-		assertTrue("all defined", maxCount(Or.or(x, y))
-				.filter(limit -> limit.equals(max(x.getLimit(), y.getLimit())))
-				.isPresent());
+		assertThat(maxCount(or(x, y))
+				.filter(limit1 -> limit1.equals(max(x.getLimit(), y.getLimit())))
+				.isPresent()).as("all defined").isTrue();
 
-		assertTrue("some defined", maxCount(Or.or(x, And.and()))
+		assertThat(maxCount(or(x, and()))
 				.filter(limit -> limit.equals(x.getLimit()))
-				.isPresent());
+				.isPresent()).as("some defined").isTrue();
 
-		assertFalse("none defined", maxCount(Or.or(And.and(), And.and()))
-				.isPresent());
+		assertThat(maxCount(or(and(), and()))
+				.isPresent()).as("none defined").isFalse();
 
 	}
 
-	@org.junit.Test public void testOption() {
+	@Test void testOption() {
 
 		final MaxCount x=maxCount(10);
 		final MaxCount y=maxCount(100);
 
-		assertTrue("all defined", maxCount(Test.test(And.and(), x, y))
-				.filter(limit -> limit.equals(max(x.getLimit(), y.getLimit())))
-				.isPresent());
+		assertThat(maxCount(test(and(), x, y))
+				.filter(limit1 -> limit1.equals(max(x.getLimit(), y.getLimit())))
+				.isPresent()).as("all defined").isTrue();
 
-		assertTrue("some defined", maxCount(Test.test(And.and(), x, And.and()))
+		assertThat(maxCount(test(and(), x, and()))
 				.filter(limit -> limit.equals(x.getLimit()))
-				.isPresent());
+				.isPresent()).as("some defined").isTrue();
 
-		assertFalse("none defined", maxCount(Test.test(And.and(), And.and(), And.and()))
-				.isPresent());
+		assertThat(maxCount(test(and(), and(), and()))
+				.isPresent()).as("none defined").isFalse();
 
 	}
 
-	@org.junit.Test public void testInspectOtherShape() {
-		assertFalse("not defined", maxCount(And.and()).isPresent());
+	@Test void testInspectOtherShape() {
+		assertThat(maxCount(and()).isPresent()).as("not defined").isFalse();
 	}
 
 }

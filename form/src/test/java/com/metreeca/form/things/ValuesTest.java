@@ -23,7 +23,6 @@ import com.metreeca.form.Shape;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
-import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
@@ -32,7 +31,6 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
-import org.junit.ComparisonFailure;
 
 import java.io.*;
 import java.net.URL;
@@ -380,78 +378,6 @@ public final class ValuesTest {
 		}
 
 		return repository::getConnection;
-	}
-
-
-	//// Model Assertions //////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Asserts that expected and actual statement collections are isomorphic.
-	 *
-	 * @param expected the expected statement collection
-	 * @param actual   the actual statement collection
-	 */
-	public static void assertIsomorphic(
-			final Collection<Statement> expected, final Collection<Statement> actual) {
-		assertIsomorphic("", expected, actual);
-	}
-
-	public static void assertIsomorphic(final String message,
-			final Collection<Statement> expected, final Collection<Statement> actual) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		if ( expected == null ) {
-			throw new NullPointerException("null expected");
-		}
-
-		if ( actual == null ) {
-			throw new NullPointerException("null actual");
-		}
-
-		if ( !Models.isomorphic(expected, actual) ) {
-			throw new ComparisonFailure(
-					message+(message.isEmpty() ? "" : ": ")+"not isomorphic",
-					encode(new TreeModel(expected), RDFFormat.NTRIPLES),
-					encode(new TreeModel(actual), RDFFormat.NTRIPLES));
-		}
-	}
-
-
-	/**
-	 * Asserts that the expected statement collection is a subset of the actual one.
-	 *
-	 * @param expected the expected statement collection
-	 * @param actual   the actual statement collection
-	 */
-	public static void assertSubset(
-			final Collection<Statement> expected, final Collection<Statement> actual) {
-		assertSubset("", expected, actual);
-	}
-
-	public static void assertSubset(final String message,
-			final Collection<Statement> expected, final Collection<Statement> actual) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		if ( expected == null ) {
-			throw new NullPointerException("null expected");
-		}
-
-		if ( actual == null ) {
-			throw new NullPointerException("null actual");
-		}
-
-		if ( !Models.isSubset(expected, actual) ) {
-			throw new ComparisonFailure(
-					message+(message.isEmpty() ? "" : ": ")+"not subsumed",
-					encode(new TreeModel(expected), RDFFormat.NTRIPLES),
-					encode(new TreeModel(actual), RDFFormat.NTRIPLES));
-		}
 	}
 
 

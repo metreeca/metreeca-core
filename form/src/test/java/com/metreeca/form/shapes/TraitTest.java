@@ -18,61 +18,60 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Maps;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Trait.traits;
 import static com.metreeca.form.shapes.Virtual.virtual;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Collections.singletonMap;
 
 
-public class TraitTest {
+final class TraitTest {
 
-	@Test public void testInspectTraits() {
+	@Test void testInspectTraits() {
 
 		final Trait trait=trait(RDF.VALUE, and());
 
-		assertEquals("singleton trait map", singletonMap(trait.getStep(), trait.getShape()), traits(trait));
+		assertThat(singletonMap(trait.getStep(), trait.getShape())).as("singleton trait map").isEqualTo(traits(trait));
 
 	}
 
-	@Test public void testInspectVirtuals() {
+	@Test void testInspectVirtuals() {
 
 		final Virtual virtual=virtual(trait(RDF.VALUE), Step.step(RDF.NIL));
 
-		assertEquals("singleton trait map", traits(virtual.getTrait()), traits(virtual));
+		assertThat((Object)traits(virtual.getTrait())).as("singleton trait map").isEqualTo(traits(virtual));
 
 	}
 
-	@Test public void testInspectConjunctions() {
+	@Test void testInspectConjunctions() {
 
 		final Trait x=trait(RDF.VALUE, and());
 		final Trait y=trait(RDF.TYPE, and());
 		final Trait z=trait(RDF.TYPE, maxCount(1));
 
-		assertEquals("union trait map", Maps.map(
-				Maps.entry(x.getStep(), x.getShape()),
-				Maps.entry(y.getStep(), y.getShape())
-		), traits(and(x, y)));
+		assertThat(map(
+				entry(x.getStep(), x.getShape()),
+				entry(y.getStep(), y.getShape())
+		)).as("union trait map").isEqualTo(traits(and(x, y)));
 
-		assertEquals("merged trait map", map(
-				Maps.entry(y.getStep(), and(y.getShape(), z.getShape()))
-		), traits(and(y, z)));
+		assertThat(map(
+				entry(y.getStep(), and(y.getShape(), z.getShape()))
+		)).as("merged trait map").isEqualTo(traits(and(y, z)));
 
 	}
 
-	@Test public void testInspectOtherShapes() {
-		assertTrue("no traits", traits(and()).isEmpty());
+	@Test void testInspectOtherShapes() {
+		assertThat(traits(and()).isEmpty()).as("no traits").isTrue();
 	}
 
 }

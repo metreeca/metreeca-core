@@ -46,14 +46,4 @@ final class RequestTest {
 		assertEquals(list("two"), list(request.parameters("parameter")));
 	}
 
-	//@Test void testBodyHandlesDefaultPart() {
-	//
-	//	//final Request request=new Request()
-	//	//		.part(Request.MainPart, new TestInbound().text("main"))
-	//	//		.part("part", new TestInbound().text("part"));
-	//	//
-	//	//assertEquals("main", request.text().orElse(""));
-	//
-	//}
-
 }

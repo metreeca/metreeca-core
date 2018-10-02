@@ -17,11 +17,11 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.Or;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Or;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -29,8 +29,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -45,43 +44,33 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shifts.Step.step;
-import static com.metreeca.form.things.Values.bnode;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.ValuesTest.decode;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public final class JSONWriterTest extends JSONAdapterTest {
+final class JSONWriterTest extends JSONAdapterTest {
 
 	//// Objects ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testNoObjects() {
-		Assert.assertEquals("no objects",
-				json(array()),
-				json(ValuesTest.decode("")));
+	@Test void testNoObjects() {
+		assertThat((Object)json(array())).as("no objects").isEqualTo(json(ValuesTest.decode("")));
 	}
 
-	@Test public void testBlankObjects() {
-		assertEquals("blank objects",
-				json(array(object(
-						field("this", "_:x"),
-						field(value, array("x"))
-				))),
-				json(ValuesTest.decode("_:x rdf:value 'x'.")));
+	@Test void testBlankObjects() {
+		assertThat((Object)json(array(object(
+				field("this", "_:x"),
+				field(value, array("x"))
+		)))).as("blank objects").isEqualTo(json(ValuesTest.decode("_:x rdf:value 'x'.")));
 	}
 
-	@Test public void testNamedObjects() {
-		assertEquals("named objects",
-				json(array(object(
-						field("this", "http://example.com/x"),
-						field(value, array("x"))
-				))),
-				json(ValuesTest.decode("<x> rdf:value 'x'.")));
+	@Test void testNamedObjects() {
+		assertThat((Object)json(array(object(
+				field("this", "http://example.com/x"),
+				field(value, array("x"))
+		)))).as("named objects").isEqualTo(json(ValuesTest.decode("<x> rdf:value 'x'.")));
 	}
 
-	@Test public void testTypedObjects() {
+	@Test void testTypedObjects() {
 
 		assertEquivalent("boolean", json(blanks(true)), json(ValuesTest.decode("_:focus rdf:value true .")));
 		assertEquivalent("string", json(blanks("string")), json(ValuesTest.decode("[] rdf:value 'string' .")));
@@ -110,19 +99,17 @@ public final class JSONWriterTest extends JSONAdapterTest {
 
 	//// Focus /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testWriteOnlyFocusNode() {
-		assertEquals("focus node only",
-				json(object(
-						field("this", "http://example.com/x"),
-						field(value, array("x"))
-				)),
-				json(
-						ValuesTest.decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
-						Values.iri("http://example.com/x")
-				));
+	@Test void testWriteOnlyFocusNode() {
+		assertThat((Object)json(object(
+				field("this", "http://example.com/x"),
+				field(value, array("x"))
+		))).as("focus node only").isEqualTo(json(
+				ValuesTest.decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
+				Values.iri("http://example.com/x")
+		));
 	}
 
-	@Test public void testHandleUnknownFocusNode() {
+	@Test void testHandleUnknownFocusNode() {
 		assertEquivalent("unknown focus",
 				json(object()),
 				json(
@@ -134,65 +121,59 @@ public final class JSONWriterTest extends JSONAdapterTest {
 
 	//// Shared References /////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testExpandSharedTrees() {
-		assertEquals("expanded shared trees",
-				json(object(
-						field("this", "http://example.com/x"),
-						field(value, array(
-								object(
-										field("this", "http://example.com/w"),
-										field(value, array(object(field("this", "http://example.com/z"))))
-								),
-								object(
-										field("this", "http://example.com/y"),
-										field(value, array(object(field("this", "http://example.com/z"))))
-								)
-						))
-				)),
-				json(
-						ValuesTest.decode("<x> rdf:value <w>, <y>. <w> rdf:value <z>. <y> rdf:value <z>."),
-						Values.iri("http://example.com/x")
-				));
+	@Test void testExpandSharedTrees() {
+		assertThat((Object)json(object(
+				field("this", "http://example.com/x"),
+				field(value, array(
+						object(
+								field("this", "http://example.com/w"),
+								field(value, array(object(field("this", "http://example.com/z"))))
+						),
+						object(
+								field("this", "http://example.com/y"),
+								field(value, array(object(field("this", "http://example.com/z"))))
+						)
+				))
+		))).as("expanded shared trees").isEqualTo(json(
+				ValuesTest.decode("<x> rdf:value <w>, <y>. <w> rdf:value <z>. <y> rdf:value <z>."),
+				Values.iri("http://example.com/x")
+		));
 	}
 
-	@Test public void testHandleNamedLoops() {
-		assertEquals("named loops",
-				json(object(
-						field("this", "http://example.com/x"),
-						field(value, array(
-								object(
-										field("this", "http://example.com/y"),
-										field(value, array(object(field("this", "http://example.com/x"))))
-								)
-						))
-				)),
-				json(
-						ValuesTest.decode("<x> rdf:value <y>. <y> rdf:value <x>."),
-						Values.iri("http://example.com/x")
-				));
+	@Test void testHandleNamedLoops() {
+		assertThat((Object)json(object(
+				field("this", "http://example.com/x"),
+				field(value, array(
+						object(
+								field("this", "http://example.com/y"),
+								field(value, array(object(field("this", "http://example.com/x"))))
+						)
+				))
+		))).as("named loops").isEqualTo(json(
+				ValuesTest.decode("<x> rdf:value <y>. <y> rdf:value <x>."),
+				Values.iri("http://example.com/x")
+		));
 	}
 
-	@Test public void testHandleBlankLoops() {
-		assertEquals("named loops",
-				json(object(
-						field("this", "_:x"),
-						field(value, array(
-								object(
-										field("this", "_:y"),
-										field(value, array(object(field("this", "_:x"))))
-								)
-						))
-				)),
-				json(
-						ValuesTest.decode("_:x rdf:value _:y. _:y rdf:value _:x."),
-						Values.bnode("x")
-				));
+	@Test void testHandleBlankLoops() {
+		assertThat((Object)json(object(
+				field("this", "_:x"),
+				field(value, array(
+						object(
+								field("this", "_:y"),
+								field(value, array(object(field("this", "_:x"))))
+						)
+				))
+		))).as("named loops").isEqualTo(json(
+				ValuesTest.decode("_:x rdf:value _:y. _:y rdf:value _:x."),
+				Values.bnode("x")
+		));
 	}
 
 
 	//// Aliases ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testAliasTraits() {
+	@Test void testAliasTraits() {
 
 		assertEquivalent("direct inferred",
 				json(object(field("value", array(object())))),
@@ -220,7 +201,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 
 	}
 
-	@Test public void testAliasNestedTraits() {
+	@Test void testAliasNestedTraits() {
 
 		assertEquivalent("aliased nested trait",
 				json(object(field("value", array(object(field("alias", array(object()))))))),
@@ -232,7 +213,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 
 	}
 
-	@Test public void testHandleAliasClashes() {
+	@Test void testHandleAliasClashes() {
 		assertEquivalent("clashing aliases",
 				json(object(
 						field(value, array(object())),
@@ -248,7 +229,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 				));
 	}
 
-	@Test public void testIgnoreReservedAliases() {
+	@Test void testIgnoreReservedAliases() {
 		assertEquivalent("reserved alias",
 				json(object(field("value", array(object())))),
 				json(
@@ -261,7 +242,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test public void testConsiderDisjunctiveDefinitions() {
+	@Test void testConsiderDisjunctiveDefinitions() {
 		assertEquivalent("simplified literal with known datatype",
 				json(object(
 						field("first", "x"),
@@ -277,22 +258,20 @@ public final class JSONWriterTest extends JSONAdapterTest {
 				));
 	}
 
-	@Test public void testWriteNamedReverseLinks() {
-		assertEquals("named reverse links",
-				json(object(
-						field("this", "http://example.com/x"),
-						field("valueOf", array(object(
-								field("this", "http://example.com/y")
-						)))
-				)),
-				json(
-						ValuesTest.decode("<y> rdf:value <x> ."),
-						Values.iri("http://example.com/x"),
-						trait(Step.step(RDF.VALUE, true))
-				));
+	@Test void testWriteNamedReverseLinks() {
+		assertThat((Object)json(object(
+				field("this", "http://example.com/x"),
+				field("valueOf", array(object(
+						field("this", "http://example.com/y")
+				)))
+		))).as("named reverse links").isEqualTo(json(
+				ValuesTest.decode("<y> rdf:value <x> ."),
+				Values.iri("http://example.com/x"),
+				trait(Step.step(RDF.VALUE, true))
+		));
 	}
 
-	@Test public void testWriteBlankReverseLinks() {
+	@Test void testWriteBlankReverseLinks() {
 		assertEquivalent("blank reverse links",
 				json(object(field("valueOf", array(object())))),
 				json(
@@ -302,7 +281,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 				));
 	}
 
-	@Test public void testOmitNullValues() {
+	@Test void testOmitNullValues() {
 		assertEquivalent("omitted empty array",
 				json(object()),
 				json(
@@ -313,7 +292,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 
 	}
 
-	@Test public void testOmitEmptyArrays() {
+	@Test void testOmitEmptyArrays() {
 		assertEquivalent("omitted empty array",
 				json(object()),
 				json(
@@ -324,7 +303,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 
 	}
 
-	@Test public void testWriteObjectInsteadOfArrayIfNotRepeatable() {
+	@Test void testWriteObjectInsteadOfArrayIfNotRepeatable() {
 		assertEquivalent("simplified unrepeatable value",
 				json(object(field("value", "x"))),
 				json(
@@ -334,7 +313,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 				));
 	}
 
-	@Test public void testInlineProvedLeafIRIs() {
+	@Test void testInlineProvedLeafIRIs() {
 		assertEquivalent("simplified leaf IRI",
 				json(object(field("value", RDF.NIL.stringValue()))),
 				json(
@@ -344,7 +323,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 				));
 	}
 
-	@Test public void testInlineProvedTypedLiterals() {
+	@Test void testInlineProvedTypedLiterals() {
 		assertEquivalent("simplified literal with known datatype",
 				json(object(field("value", "2016-08-11"))),
 				json(
@@ -354,25 +333,21 @@ public final class JSONWriterTest extends JSONAdapterTest {
 				));
 	}
 
-	@Test public void testOmitThisForUnreferencedProvedBlanks() {
+	@Test void testOmitThisForUnreferencedProvedBlanks() {
 
-		assertEquals("unreferenced proved blank",
-				json(object(field("value", array(object())))),
-				json(
-						ValuesTest.decode("_:x rdf:value _:y ."),
-						Values.bnode("x"),
-						and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
-				));
+		assertThat((Object)json(object(field("value", array(object()))))).as("unreferenced proved blank").isEqualTo(json(
+				ValuesTest.decode("_:x rdf:value _:y ."),
+				Values.bnode("x"),
+				and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
+		));
 
-		assertEquals("back-referenced proved blank",
-				json(object(
-						field("this", "_:x"),
-						field("value", array(object(field("this", "_:x")))))),
-				json(
-						ValuesTest.decode("_:x rdf:value _:x ."),
-						Values.bnode("x"),
-						and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
-				));
+		assertThat((Object)json(object(
+				field("this", "_:x"),
+				field("value", array(object(field("this", "_:x"))))))).as("back-referenced proved blank").isEqualTo(json(
+				ValuesTest.decode("_:x rdf:value _:x ."),
+				Values.bnode("x"),
+				and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
+		));
 
 	}
 
@@ -408,7 +383,7 @@ public final class JSONWriterTest extends JSONAdapterTest {
 
 
 	private void assertEquivalent(final String message, final JsonValue expected, final JsonValue actual) {
-		assertEquals(message, strip(expected), strip(actual));
+		assertThat((Object)strip(expected)).as(message).isEqualTo(strip(actual));
 	}
 
 

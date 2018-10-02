@@ -67,9 +67,9 @@ public final class Lists {
 		}
 
 		return unmodifiableList(Stream.of(collections)
-						.map(Objects::requireNonNull)
-						.flatMap(Collection::stream)
-						.collect(toList()));
+				.map(Objects::requireNonNull)
+				.flatMap(Collection::stream)
+				.collect(toList()));
 	}
 
 

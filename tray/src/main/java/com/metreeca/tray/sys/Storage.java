@@ -53,7 +53,7 @@ import java.util.function.Supplier;
 	 *
 	 * @return a file providing access to the named storage area
 	 *
-	 * @throws NullPointerException if {@code name} is null
+	 * @throws NullPointerException     if {@code name} is null
 	 * @throws IllegalArgumentException if {@code name} is not a valid system-specific filename
 	 */
 	public File area(final String name);

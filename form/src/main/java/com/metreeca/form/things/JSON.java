@@ -88,6 +88,8 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 		try (final JsonParser parser=parsers.createParser(reader)) {
 			return json(parser, parser.next());
+ 		} catch ( final NoSuchElementException e ) {
+			throw new JsonException("unexpected end of file", e);
 		}
 	}
 

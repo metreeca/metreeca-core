@@ -20,7 +20,8 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.ShapeCodec;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
 import com.metreeca.rest.formats.ShapeFormat;
 
 import org.eclipse.rdf4j.model.Model;

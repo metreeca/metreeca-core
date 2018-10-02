@@ -30,12 +30,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Java6Assertions.fail;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -45,7 +46,7 @@ final class ProcessorTest {
 
 	private Handler echo() {
 		return request -> request.reply(response -> {
-			return ((Result<Collection<Statement>>)request.body(rdf())).map(v -> response.body(rdf()).set(v), e -> response).status(Response.OK);
+					return ((Result<Collection<Statement>>)request.body(rdf())).map(v -> response.body(rdf()).set(v), e -> response).status(Response.OK);
 				}
 		);
 	}
@@ -90,10 +91,10 @@ final class ProcessorTest {
 
 				.accept(response -> {
 					response.body(rdf()).use(
-							model -> assertSubset("items retrieved", asList(
+							model -> assertThat(model).as("items retrieved").hasSubset(asList(
 									statement(response.item(), RDF.VALUE, RDF.FIRST),
 									statement(response.item(), RDF.VALUE, RDF.REST)
-							), model),
+							)),
 							error -> fail("missing RDF payload")
 					);
 
@@ -138,10 +139,10 @@ final class ProcessorTest {
 
 				.accept(response -> {
 					response.body(rdf()).use(
-							model -> assertSubset("items retrieved", asList(
+							model -> assertThat(model).as("items retrieved").hasSubset(asList(
 									statement(response.item(), RDF.VALUE, RDF.FIRST),
 									statement(response.item(), RDF.VALUE, RDF.REST)
-							), model),
+							)),
 							error -> fail("missing RDF payload")
 					);
 
@@ -191,10 +192,9 @@ final class ProcessorTest {
 						.path("/test"))
 
 				.accept(response -> graph.query(connection -> {
-					assertIsomorphic("repository updated",
-							decode("<test> rdf:value rdf:first, rdf:rest."),
-							export(connection)
-					);
+
+					assertThat((Collection<Statement>)decode("<test> rdf:value rdf:first, rdf:rest.")).as("repository updated").isIsomorphicTo((Collection<Statement>)export(connection));
+
 				}));
 	}
 
@@ -221,10 +221,9 @@ final class ProcessorTest {
 						.path("/"))
 
 				.accept(response -> graph.query(connection -> {
-					assertIsomorphic("repository updated",
-							decode("<test> rdf:value rdf:first, rdf:rest."),
-							export(connection)
-					);
+
+					assertThat((Collection<Statement>)decode("<test> rdf:value rdf:first, rdf:rest.")).as("repository updated").isIsomorphicTo((Collection<Statement>)export(connection));
+
 				}));
 	}
 

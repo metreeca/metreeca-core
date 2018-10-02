@@ -18,10 +18,10 @@
 package com.metreeca.form.queries;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Values;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
+import com.metreeca.form.shifts.Step;
+import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
@@ -32,7 +32,6 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shifts.Step.step;
 
 import static java.util.Collections.unmodifiableList;
 

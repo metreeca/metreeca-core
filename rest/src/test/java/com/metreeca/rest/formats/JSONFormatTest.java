@@ -30,7 +30,7 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -59,7 +59,7 @@ final class JSONFormatTest {
 		final Request request=new Request()
 				.body(reader()).set(() -> new StringReader(TestJSON.toString()));
 
-		assertFalse(request.body(json()).get().isPresent());
+		assertThat(request.body(json()).get().isPresent()).isFalse();
 	}
 
 	@Test void testConfigureJSON() {
