@@ -29,7 +29,7 @@ import static com.metreeca.rest.Result.value;
 
 
 /**
- * Textual output body format.
+ * Raw textual output body format.
  */
 public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 
@@ -43,7 +43,7 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 
 
 	/**
-	 * Retrieves the textual output body format.
+	 * Retrieves the raw textual output body format.
 	 *
 	 * @return the singleton textual output body format instance
 	 */
