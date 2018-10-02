@@ -20,6 +20,7 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 
@@ -55,20 +56,18 @@ import static java.lang.Boolean.parseBoolean;
  *
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
-public final class SPARQL implements Handler {
+public final class SPARQL extends Delegator {
 
 	private int timeout=60; // endpoint operations timeout [s]
 	private boolean publik; // public availability of the endpoint
 
 	private final Graph graph=tool(Graph.Factory);
 
-	private final Handler delegate=new Worker()
-			.get(this::process)
-			.post(this::process);
 
-
-	@Override public Responder handle(final Request request) {
-		return delegate.handle(request);
+	public SPARQL() {
+		delegate(new Worker()
+				.get(this::process)
+				.post(this::process));
 	}
 
 
