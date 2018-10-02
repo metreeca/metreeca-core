@@ -22,9 +22,7 @@ import com.metreeca.rest.formats.JSONFormat;
 import java.util.Optional;
 import java.util.function.Function;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
+import javax.json.*;
 
 import static com.metreeca.rest.formats.JSONFormat.json;
 
@@ -213,6 +211,25 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 			throw new NullPointerException("null response");
 		}
 
+		return response
+				.status(status)
+				.cause(cause)
+				.body(json())
+				.set(ticket());
+
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public String toString() {
+		return String.format("%d %s", status, ticket());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private JsonObject ticket() {
+
 		final JsonObjectBuilder builder=Json.createObjectBuilder();
 
 		if ( error != null ) {
@@ -229,12 +246,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 			builder.add("trace", trace);
 		}
 
-		return response
-				.status(status)
-				.cause(cause)
-				.body(json())
-				.set(builder.build());
-
+		return builder.build();
 	}
 
 }
