@@ -23,7 +23,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.RestTest;
+import com.metreeca.rest.HandlerAssert;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
 final class RelatorTest {
 
 	private Tray tray() {
-		return new Tray().exec(RestTest.dataset(small()));
+		return new Tray().exec(HandlerAssert.dataset(small()));
 	}
 
 	private Request direct() {

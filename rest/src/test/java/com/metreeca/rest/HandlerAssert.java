@@ -17,37 +17,25 @@
 
 package com.metreeca.rest;
 
-import org.junit.jupiter.api.Test;
+import com.metreeca.tray.rdf.Graph;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 
-import static com.metreeca.rest.formats.TextFormat.text;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.metreeca.tray.Tray.tool;
 
 
-final class HandlerTest {
+public final class HandlerAssert {
 
-	@Test void testResultStreaming() {
-
-		final Collection<String> transaction=new ArrayList<>();
-
-		final Handler handler=request -> consumer -> {
-
-			transaction.add("begin");
-
-			request.reply(response -> response.body(text()).set("inside")).accept(consumer);
-
-			transaction.add("commit");
-
-		};
-
-		handler.handle(new Request()).accept(response -> {
-			transaction.add(response.body(text()).get().orElse(""));
-		});
-
-		assertThat(transaction).containsExactly("begin", "inside", "commit");
+	public static Runnable dataset(final Iterable<Statement> model) {
+		return dataset(model, (Resource)null);
 	}
+
+	public static Runnable dataset(final Iterable<Statement> model, final Resource... contexts) {
+		return () -> tool(Graph.Factory).update(connection -> { connection.add(model, contexts); });
+	}
+
+
+	private HandlerAssert() {} // utility
 
 }
