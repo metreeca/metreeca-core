@@ -18,7 +18,6 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Maps;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
@@ -28,6 +27,7 @@ import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Trait.traits;
 import static com.metreeca.form.shapes.Virtual.virtual;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,12 +60,12 @@ final class TraitTest {
 		final Trait z=trait(RDF.TYPE, maxCount(1));
 
 		assertThat(map(
-				Maps.entry(x.getStep(), x.getShape()),
-				Maps.entry(y.getStep(), y.getShape())
+				entry(x.getStep(), x.getShape()),
+				entry(y.getStep(), y.getShape())
 		)).as("union trait map").isEqualTo(traits(and(x, y)));
 
 		assertThat(map(
-				Maps.entry(y.getStep(), and(y.getShape(), z.getShape()))
+				entry(y.getStep(), and(y.getShape(), z.getShape()))
 		)).as("merged trait map").isEqualTo(traits(and(y, z)));
 
 	}

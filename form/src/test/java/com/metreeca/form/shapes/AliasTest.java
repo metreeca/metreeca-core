@@ -18,17 +18,19 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Maps;
-import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.shapes.Alias.alias;
 import static com.metreeca.form.shapes.Alias.aliases;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Group.group;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.Values.iri;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,55 +52,59 @@ final class AliasTest {
 	}
 
 	@Test void testRetrieveUserDefinedAlias() {
-		assertThat(singletonMap(Value, "alias")).as("user-defined").isEqualTo(aliases(trait(Value, Alias.alias("alias"))));
+		assertThat(singletonMap(Value, "alias")).as("user-defined").isEqualTo(aliases(trait(Value, alias("alias"))));
 	}
 
 	@Test void testPreferUserDefinedAliases() {
-		assertThat(Maps.map(Maps.entry(Value, "alias"))).as("user-defined").isEqualTo(aliases(and(trait(Value, Alias.alias("alias")), trait(Value))));
+		assertThat(map(entry(Value, "alias"))).as("user-defined").isEqualTo(aliases(and(trait(Value, alias("alias")), trait(Value))));
 	}
 
 
 	@Test void testRetrieveAliasFromNestedShapes() {
 
-		assertThat(Maps.map(Maps.entry(Value, "alias"))).as("group").isEqualTo(aliases(group(trait(Value, Alias.alias("alias")))));
+		assertThat(map(entry(Value, "alias"))).as("group").isEqualTo(aliases(group(trait(Value, alias("alias")))));
 
-		assertThat(Maps.map(Maps.entry(Value, "value"))).as("system-guessed virtual").isEqualTo(aliases(virtual(trait(Value), Step.step(RDF.NIL))));
+		assertThat(map(entry(Value, "value"))).as("system-guessed virtual").isEqualTo(aliases(virtual(trait(Value), Step.step(RDF.NIL))));
 
-		assertThat(Maps.map(Maps.entry(Value, "alias"))).as("user-defined virtual").isEqualTo(aliases(virtual(trait(Value, Alias.alias("alias")), Step.step(RDF.NIL))));
+		assertThat(map(entry(Value, "alias"))).as("user-defined virtual").isEqualTo(aliases(virtual(trait(Value, alias("alias")), Step.step(RDF.NIL))));
 
-		assertThat(Maps.map(Maps.entry(Value, "alias"))).as("conjunction").isEqualTo(aliases(trait(Value, and(Alias.alias("alias")))));
+		assertThat(map(entry(Value, "alias"))).as("conjunction").isEqualTo(aliases(trait(Value, and(alias("alias")))));
 
 	}
 
 	@Test void testMergeDuplicateTraits() {
 
 		// nesting required to prevent and() from collapsing duplicates
-		assertThat(Maps.map(Maps.entry(Value, "value"))).as("system-guessed").isEqualTo(aliases(and(trait(Value), and(trait(Value)))));
+		assertThat(map(entry(Value, "value"))).as("system-guessed").isEqualTo(aliases(and(trait(Value), and(trait(Value)))));
 
 		// nesting required to prevent and() from collapsing duplicates
-		assertThat(Maps.map(Maps.entry(Value, "alias"))).as("user-defined").isEqualTo(aliases(and(trait(Value, Alias.alias("alias")), and(trait(Value, Alias.alias("alias"))))));
+		assertThat(map(entry(Value, "alias"))).as("user-defined")
+				.isEqualTo(aliases(and(trait(Value, alias("alias")), and(trait(Value, alias("alias"))))));
 
 	}
 
 
 	@Test void testHandleMultipleAliases() {
 
-		assertThat(Maps.map(Maps.entry(Value, "value"))).as("clashing").isEqualTo(aliases(trait(Value, and(Alias.alias("one"), Alias.alias("two")))));
+		assertThat(map(entry(Value, "value"))).as("clashing").isEqualTo(aliases(trait(Value, and(alias("one"), alias("two")))));
 
-		assertThat(Maps.map(Maps.entry(Value, "one"))).as("repeated").isEqualTo(aliases(trait(Value, and(Alias.alias("one"), Alias.alias("one")))));
+		assertThat(map(entry(Value, "one"))).as("repeated").isEqualTo(aliases(trait(Value, and(alias("one"), alias("one")))));
 
 	}
 
 	@Test void testMergeAliases() {
-		assertThat(Maps.map(Maps.entry(Step.step(RDF.TYPE), "type"), Maps.entry(Value, "value"))).as("merged").isEqualTo(aliases(and(trait(RDF.TYPE), trait(Value))));
+		assertThat(map(entry(Step.step(RDF.TYPE), "type"), entry(Value, "value")))
+				.as("merged")
+				.isEqualTo(aliases(and(trait(RDF.TYPE), trait(Value))));
 	}
 
 	@Test void testIgnoreClashingAliases() {
 
-		assertThat(aliases(and(trait(Value), trait(Values.iri("urn:example:value")))).isEmpty()).as("different traits").isTrue();
+		assertThat(aliases(and(trait(Value), trait(iri("urn:example:value")))).isEmpty()).as("different traits").isTrue();
 
 		// fall back to system-guess alias
-		assertThat(Maps.map(Maps.entry(Value, "value"))).as("same trait").isEqualTo(aliases(and(trait(Value, Alias.alias("one")), trait(Value, Alias.alias("two")))));
+		assertThat(map(entry(Value, "value"))).as("same trait")
+				.isEqualTo(aliases(and(trait(Value, alias("one")), trait(Value, alias("two")))));
 
 	}
 
@@ -106,7 +112,7 @@ final class AliasTest {
 
 		assertThat(aliases(trait(Value), singleton("value")).isEmpty()).as("ignore reserved system-guessed aliases").isTrue();
 
-		assertThat(singletonMap(Value, "value")).as("ignore reserved user-defined aliases").isEqualTo(aliases(trait(Value, Alias.alias("reserved")), singleton("reserved")));
+		assertThat(singletonMap(Value, "value")).as("ignore reserved user-defined aliases").isEqualTo(aliases(trait(Value, alias("reserved")), singleton("reserved")));
 
 	}
 
