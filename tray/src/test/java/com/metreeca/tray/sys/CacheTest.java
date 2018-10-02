@@ -17,7 +17,6 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.form.things.Transputs;
 import com.metreeca.tray.Tray;
 
 import org.junit.jupiter.api.Test;
@@ -31,10 +30,10 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+import static com.metreeca.form.things.Transputs.text;
 import static com.metreeca.form.things.Transputs.url;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith(TempDirectory.class) final class CacheTest {
@@ -62,13 +61,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 				final String create="created!";
 
-				Transputs.text(new FileWriter(file), create);
+				text(new FileWriter(file), create);
 
 				cache.exec(url, blob -> {
 
 					updated.set(blob.updated());
 
-					assertEquals("content retrieved", create, blob.text());
+					assertThat(blob.text()).as("content retrieved").isEqualTo(create);
 
 					return this;
 
@@ -86,12 +85,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 				final String update="updated!";
 
-				Transputs.text(new FileWriter(file), update);
+				text(new FileWriter(file), update);
 
 				cache.exec(file.toURI().toURL(), blob -> {
 
-					assertEquals("content updated", update, blob.text());
-
+					assertThat(blob.text()).as("content updated").isEqualTo(update);
 					assertThat(updated.get()).as("timestamp updated").isLessThan(blob.updated());
 
 					return this;
@@ -114,7 +112,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 				updated.set(blob.updated());
 
-				assertThat(blob.text()).as("content retrieved").isEmpty();
+				assertThat(blob.text()).as("content retrieved").isNotEmpty();
 
 				return this;
 
