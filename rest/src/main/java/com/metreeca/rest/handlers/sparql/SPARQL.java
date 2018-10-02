@@ -116,7 +116,6 @@ public final class SPARQL implements Handler {
 			try {
 
 				final Operation operation=operation(request, connection);
-				final String accept=request.header("Accept").orElse("");
 
 				if ( operation == null ) { // !!! return void description for GET
 
@@ -132,119 +131,19 @@ public final class SPARQL implements Handler {
 
 				} else if ( operation instanceof BooleanQuery ) {
 
-					final boolean result=((BooleanQuery)operation).evaluate();
-
-					final BooleanQueryResultWriterFactory factory=Formats.service(
-							BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
-
-					request.reply(response -> response.status(Response.OK)
-							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-							.body(output()).set(target -> {
-								try (final OutputStream output=target.get()) {
-
-									factory.getWriter(output).handleBoolean(result);
-
-								} catch ( final IOException e ) {
-									throw new UncheckedIOException(e);
-								}
-							})
-					).accept(consumer);
+					process(request, (BooleanQuery)operation).accept(consumer);
 
 				} else if ( operation instanceof TupleQuery ) {
 
-					// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
-
-					final TupleQueryResult result=((TupleQuery)operation).evaluate();
-
-					final TupleQueryResultWriterFactory factory=Formats.service(
-							TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
-
-					request.reply(response -> response.status(Response.OK)
-							.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-							.body(output()).set(target -> {
-								try (final OutputStream output=target.get()) {
-
-									final TupleQueryResultWriter writer=factory.getWriter(output);
-
-									writer.startDocument();
-									writer.startQueryResult(result.getBindingNames());
-
-									while ( result.hasNext() ) { writer.handleSolution(result.next());}
-
-									writer.endQueryResult();
-
-								} catch ( final IOException e ) {
-									throw new UncheckedIOException(e);
-								} finally {
-									result.close();
-								}
-							})).accept(consumer);
+					process(request, (TupleQuery)operation).accept(consumer);
 
 				} else if ( operation instanceof GraphQuery ) {
 
-					// ;( execute outside body callback to avoid exceptions after response is committed // !!! review
-
-					final GraphQueryResult result=((GraphQuery)operation).evaluate();
-
-					final RDFWriterFactory factory=Formats.service(
-							RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
-
-					request.reply(response -> response.status(Response.OK)
-							.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-							.body(output()).set(target -> {
-								try (final OutputStream output=target.get()) {
-
-									final RDFWriter writer=factory.getWriter(output);
-
-									writer.startRDF();
-
-									for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
-										writer.handleNamespace(entry.getKey(), entry.getValue());
-									}
-
-									try {
-										while ( result.hasNext() ) { writer.handleStatement(result.next());}
-									} finally {
-										result.close();
-									}
-
-									writer.endRDF();
-
-								} catch ( final IOException e ) {
-									throw new UncheckedIOException(e);
-								}
-							})).accept(consumer);
+					process(request, (GraphQuery)operation).accept(consumer);
 
 				} else if ( operation instanceof Update ) {
 
-					try {
-
-						connection.begin();
-
-						((Update)operation).execute();
-
-						connection.commit();
-
-					} catch ( final Throwable e ) {
-
-						connection.rollback();
-
-						throw e;
-					}
-
-					final BooleanQueryResultWriterFactory factory=Formats.service(
-							BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
-
-					request.reply(response -> response.status(Response.OK)
-							.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-							.body(output()).set(target -> {
-								try (final OutputStream output=target.get()) {
-									factory.getWriter(output).handleBoolean(true);
-								} catch ( final IOException e ) {
-									throw new UncheckedIOException(e);
-								}
-							})
-					).accept(consumer);
+					process(request, (Update)operation, connection).accept(consumer);
 
 				} else {
 
@@ -318,7 +217,6 @@ public final class SPARQL implements Handler {
 		});
 	}
 
-
 	private Operation operation(final Request request, final RepositoryConnection connection) {
 
 		final String query=request.parameter("query").orElse("");
@@ -348,6 +246,135 @@ public final class SPARQL implements Handler {
 
 		return operation;
 
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Responder process(final Request request, final BooleanQuery query) {
+
+		final boolean result=query.evaluate();
+
+		final String accept=request.header("Accept").orElse("");
+
+		final BooleanQueryResultWriterFactory factory=Formats.service(
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+
+		return request.reply(response -> response.status(Response.OK)
+				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
+				.body(output()).set(target -> {
+					try (final OutputStream output=target.get()) {
+
+						factory.getWriter(output).handleBoolean(result);
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				})
+		);
+	}
+
+	private Responder process(final Request request, final TupleQuery query) {
+
+
+		final TupleQueryResult result=query.evaluate();
+
+		final String accept=request.header("Accept").orElse("");
+
+		final TupleQueryResultWriterFactory factory=Formats.service(
+				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
+
+		return request.reply(response -> response.status(Response.OK)
+				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
+				.body(output()).set(target -> {
+					try (final OutputStream output=target.get()) {
+
+						final TupleQueryResultWriter writer=factory.getWriter(output);
+
+						writer.startDocument();
+						writer.startQueryResult(result.getBindingNames());
+
+						while ( result.hasNext() ) { writer.handleSolution(result.next());}
+
+						writer.endQueryResult();
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					} finally {
+						result.close();
+					}
+				}));
+	}
+
+	private Responder process(final Request request, final GraphQuery query) {
+
+		final GraphQueryResult result=query.evaluate();
+
+		final String accept=request.header("Accept").orElse("");
+
+		final RDFWriterFactory factory=Formats.service(
+				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
+
+		return request.reply(response -> response.status(Response.OK)
+				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
+				.body(output()).set(target -> {
+					try (final OutputStream output=target.get()) {
+
+						final RDFWriter writer=factory.getWriter(output);
+
+						writer.startRDF();
+
+						for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
+							writer.handleNamespace(entry.getKey(), entry.getValue());
+						}
+
+						try {
+							while ( result.hasNext() ) { writer.handleStatement(result.next());}
+						} finally {
+							result.close();
+						}
+
+						writer.endRDF();
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				}));
+	}
+
+	private Responder process(final Request request, final Update update, final RepositoryConnection connection) {
+
+		try {
+
+			connection.begin();
+
+			update.execute();
+
+			connection.commit();
+
+		} catch ( final Throwable e ) {
+
+			connection.rollback();
+
+			throw e;
+
+		}
+
+		final String accept=request.header("Accept").orElse("");
+
+		final BooleanQueryResultWriterFactory factory=Formats.service(
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+
+		return request.reply(response -> response.status(Response.OK)
+				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
+				.body(output()).set(target -> {
+					try (final OutputStream output=target.get()) {
+						factory.getWriter(output).handleBoolean(true);
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				})
+		);
 	}
 
 }
