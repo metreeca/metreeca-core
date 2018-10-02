@@ -29,7 +29,7 @@
 		<version>0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>next</artifactId>
+	<artifactId>rest</artifactId>
 	<version>0.0-SNAPSHOT</version>
 
 	<name>Metreeca REST API Framework</name>

@@ -299,7 +299,7 @@
 								</group>
 							</groups>
 
-							<excludePackageNames/>
+							<excludePackageNames/> <!-- colon-separated patterns -->
 
 						</configuration>
 
