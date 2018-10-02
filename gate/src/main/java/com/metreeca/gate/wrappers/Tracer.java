@@ -19,6 +19,7 @@ package com.metreeca.gate.wrappers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Values;
+import com.metreeca.gate.Gate;
 import com.metreeca.rest.*;
 import com.metreeca.tray.rdf.Graph;
 
@@ -178,11 +179,11 @@ public final class Tracer implements Wrapper {
 
 					final Collection<Statement> model=new ArrayList<>();
 
-					model.add(statement(trace, RDF.TYPE, Rest.Trace));
-					model.add(statement(trace, Rest.item, item));
-					model.add(statement(trace, Rest.task, task));
-					model.add(statement(trace, Rest.user, user));
-					model.add(statement(trace, Rest.time, time));
+					model.add(statement(trace, RDF.TYPE, Gate.Trace));
+					model.add(statement(trace, Gate.item, item));
+					model.add(statement(trace, Gate.task, task));
+					model.add(statement(trace, Gate.user, user));
+					model.add(statement(trace, Gate.time, time));
 
 					connection.add(model);
 
