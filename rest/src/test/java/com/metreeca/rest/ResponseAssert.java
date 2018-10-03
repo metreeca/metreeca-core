@@ -32,7 +32,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 
 public final class ResponseAssert extends AbstractAssert<ResponseAssert, Response> {
@@ -109,7 +109,7 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 	}
 
 
-	public ResponseAssert hasEmptyBody() {
+	public ResponseAssert doesNotHaveBody() {
 
 		isNotNull();
 
@@ -129,20 +129,6 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 		return this;
 	}
 
-	public ResponseAssert hasBody(final Format<?> format) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		isNotNull();
-
-		return actual.body(format).map(
-				value -> this,
-				error -> fail("expected response to have <%s> body but has none")
-		);
-	}
-
 	public ResponseAssert doesNotHaveBody(final Format<?> format) {
 
 		if ( format == null ) {
@@ -158,25 +144,39 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public ResponseAssert hasBody(final Format<?> format) {
 
-	public <V> ObjectAssert<V> body(final Format<V> format) {
-		return body(format, Assertions::assertThat);
-	}
-
-	public ModelAssert body(final RDFFormat format) {
-		return body(format, ModelAssert::assertThat);
-	}
-
-	public <V, A extends Assert<A, ? extends V>> A body(final Format<V> format, final Function<V, A> mapper) {
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
 
 		isNotNull();
 
-		return actual
+		return actual.body(format).map(value -> this, error -> fail(
+				"expected response to have <%s> body but was unable to retrieve one <%s>", error
+		));
+	}
 
 
-				.body(format)
-				.map(mapper, failure -> fail("unable to retrieve body ("+failure+")"));
+	public <V> ObjectAssert<V> hasBodyThat(final Format<V> format) {
+		return hasBodyThat(format, Assertions::assertThat);
+	}
+
+	public ModelAssert hasBodyThat(final RDFFormat format) {
+		return hasBodyThat(format, ModelAssert::assertThat);
+	}
+
+	public <V, A extends Assert<A, ? extends V>> A hasBodyThat(final Format<V> format, final Function<V, A> mapper) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		isNotNull();
+
+		return actual.body(format).map(mapper, error -> fail(
+				"expected response to have <%s> body but was unable to retrieve one <%s>", error
+		));
 	}
 
 

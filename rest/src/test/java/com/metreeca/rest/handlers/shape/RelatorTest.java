@@ -22,24 +22,20 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.Model;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.rest.HandlerAssert.dataset;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
-
-import static org.assertj.core.api.Assertions.fail;
 
 
 final class RelatorTest {
@@ -62,7 +58,7 @@ final class RelatorTest {
 	private Request shaped() {
 		return direct()
 				.roles(ValuesTest.Manager)
-				.body(ShapeFormat.shape()).set(ValuesTest.Employee);
+				.body(shape()).set(ValuesTest.Employee);
 	}
 
 
@@ -75,10 +71,10 @@ final class RelatorTest {
 
 				.accept(response -> assertThat(response)
 
-						.hasBody(rdf())
-						.doesNotHaveBody(ShapeFormat.shape())
+						.hasStatus(Response.OK)
+						.doesNotHaveBody(shape())
 
-						.body(rdf())
+						.hasBodyThat(rdf())
 						.as("response RDF body contains a resource description")
 						.hasStatement(response.item(), null, null)));
 	}
@@ -102,15 +98,17 @@ final class RelatorTest {
 
 				.accept(response -> tool(Graph.Factory).query(connection -> {
 
-					assertThat(response).hasStatus(Response.OK);
+					assertThat(response)
 
-					final Model expected=construct(connection,
-							"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }");
+							.hasStatus(Response.OK)
 
-					response.body(rdf()).use(
-							model -> assertThat(model).as("items retrieved").hasSubset(expected),
-							error -> fail("missing RDF body")
-					);
+							.hasBody(shape())
+
+							.hasBodyThat(rdf())
+							.as("items retrieved")
+							.hasSubset(construct(connection,
+									"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }"
+							));
 
 				}))
 		);
@@ -127,7 +125,7 @@ final class RelatorTest {
 
 							.hasStatus(Response.OK)
 
-							.body(rdf())
+							.hasBodyThat(rdf())
 
 							.as("items retrieved")
 							.hasSubset(construct(connection,
@@ -147,7 +145,7 @@ final class RelatorTest {
 	@Test void testShapedForbidden() {
 		tray(() -> new Relator()
 
-				.handle(shaped().body(ShapeFormat.shape()).set(or()))
+				.handle(shaped().body(shape()).set(or()))
 
 				.accept(response -> assertThat(response).hasStatus(Response.Forbidden))
 

@@ -177,7 +177,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 
 				}));
 	}
@@ -190,7 +190,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(catalog());
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(catalog());
 
 				}));
 	}
@@ -203,7 +203,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(catalog());
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(catalog());
 
 				}));
 	}
@@ -216,7 +216,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(catalog());
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(catalog());
 
 				}));
 	}
@@ -232,7 +232,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 
 				}));
 	}
@@ -245,7 +245,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(First);
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(First);
 
 				}));
 	}
@@ -258,7 +258,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(First);
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(First);
 
 				}));
 	}
@@ -271,7 +271,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(First);
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(First);
 
 				}));
 	}
@@ -285,7 +285,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).body(rdf()).isEmpty();
+					assertThat(response).hasBodyThat(rdf()).isEmpty();
 
 				}));
 	}
@@ -298,7 +298,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(Rest);
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(Rest);
 
 				}));
 	}
@@ -311,7 +311,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(Rest);
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(Rest);
 
 				}));
 	}
@@ -324,7 +324,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).body(rdf()).isIsomorphicTo(Rest);
+					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(Rest);
 
 				}));
 	}
@@ -340,7 +340,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(First);
 
 				}));
@@ -354,7 +354,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(Rest);
 
 				}));
@@ -368,7 +368,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(First);
 
 				}));
@@ -382,7 +382,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(Rest);
 
 				}));
@@ -397,7 +397,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(First);
 
 				}));
@@ -411,7 +411,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(Rest);
 
 				}));
@@ -425,7 +425,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(First);
 
 				}));
@@ -439,7 +439,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(Rest);
 
 				}));
@@ -456,7 +456,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(First);
 
 				}));
@@ -470,7 +470,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isEmpty();
 
 				}));
@@ -484,7 +484,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(First);
 
 				}));
@@ -498,7 +498,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isEmpty();
 
 				}));
@@ -513,7 +513,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(First);
 
 				}));
@@ -527,7 +527,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isEmpty();
 
 				}));
@@ -541,7 +541,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(First);
 
 				}));
@@ -555,7 +555,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isEmpty();
 
 				}));
@@ -572,7 +572,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(First);
 
 				}));
@@ -586,7 +586,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(union(First, Rest));
 
 				}));
@@ -600,7 +600,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(First);
 
 				}));
@@ -614,7 +614,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(dflt()).isIsomorphicTo(union(First, Rest));
 
 				}));
@@ -629,7 +629,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(First);
 
 				}));
@@ -643,7 +643,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(union(First, Rest));
 
 				}));
@@ -657,7 +657,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(First);
 
 				}));
@@ -671,7 +671,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response).isSuccess();
-					assertThat(response).hasEmptyBody();
+					assertThat(response).doesNotHaveBody();
 					assertThat(named()).isIsomorphicTo(union(First, Rest));
 
 				}));

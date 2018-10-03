@@ -50,6 +50,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		super(new TreeModel(actual), ModelAssert.class);
 	}
 
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public ModelAssert isEmpty() {
