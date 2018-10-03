@@ -43,7 +43,6 @@ import java.util.*;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
-import static com.metreeca.form.sparql.SPARQLEngine.contains;
 import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
@@ -115,8 +114,8 @@ public final class Relator extends Actor {
 
 			final IRI focus=request.item();
 
-			final Collection<Statement> model=SPARQLEngine
-					.browse(connection, query)
+			final Collection<Statement> model=new SPARQLEngine(connection)
+					.browse(query)
 					.values()
 					.stream()
 					.findFirst()
@@ -125,7 +124,14 @@ public final class Relator extends Actor {
 			request.reply(response -> {
 				if ( model.isEmpty() ) {
 
-					return contains(connection, focus)
+					// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
+					// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
+					// !!! optimize using a single query if working on a remote repository
+
+					final boolean contains=connection.hasStatement(focus, null, null, true)
+							|| connection.hasStatement(null, null, focus, true);
+
+					return contains
 							? response.status(Response.Forbidden) // resource known but empty envelope for user
 							: response.status(Response.NotFound); // !!! 404 under strict security
 
