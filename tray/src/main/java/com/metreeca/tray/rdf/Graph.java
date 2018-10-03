@@ -20,7 +20,6 @@ package com.metreeca.tray.rdf;
 import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 
 import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -165,8 +164,8 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * <p>If a transaction is not already active on the shared repository connection, begins one at the {@linkplain
 	 * #isolation() isolation} level required by this store and commits it on successful task completion; if the task
-	 * throws an exception, the transaction is rolled back and the exception rethrown; in either case,  no action is
-	 * taken if the transaction was already terminated inside the task.</p>
+	 * throws an exception, the transaction is rolled back and the exception rethrown; in either case no action is
+	 * taken if the transaction was already closed inside the task.</p>
 	 *
 	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
 	 *             store
@@ -183,7 +182,7 @@ public abstract class Graph implements AutoCloseable {
 		}
 
 		return exec(connection -> {
-			if ( connection.isActive() || IsolationLevels.NONE.equals(connection.getIsolationLevel()) ) {
+			if ( connection.isActive() ) {
 
 				return task.apply(connection);
 
@@ -191,7 +190,7 @@ public abstract class Graph implements AutoCloseable {
 
 				try {
 
-					if ( !connection.isActive() ) { connection.begin(isolation()); }
+					if ( !connection.isActive() ) { connection.begin(); }
 
 					final V value=task.apply(connection);
 
@@ -229,6 +228,8 @@ public abstract class Graph implements AutoCloseable {
 			if ( !repository.isInitialized() ) { repository.initialize(); }
 
 			try (final RepositoryConnection connection=repository.getConnection()) {
+
+				connection.setIsolationLevel(isolation());
 
 				context.set(connection);
 

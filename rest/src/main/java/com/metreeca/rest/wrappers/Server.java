@@ -37,6 +37,8 @@ public final class Server implements Wrapper {
 	private final Trace trace=tool(Trace.Factory);
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public Handler wrap(final Handler handler) {
 
 		if ( handler == null ) {

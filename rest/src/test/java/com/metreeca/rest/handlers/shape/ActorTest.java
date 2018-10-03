@@ -17,12 +17,56 @@
 
 package com.metreeca.rest.handlers.shape;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.metreeca.form.Form;
+import com.metreeca.form.Query;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Responder;
+import com.metreeca.rest.Response;
+import com.metreeca.tray.Tray;
+
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Test;
+
+import static com.metreeca.rest.ResponseAssert.assertThat;
 
 
 final class ActorTest {
 
-	// !!! restrict unsafe methods on non-transactional graph to root, unless disables
-	// !!! restrict direct calls to known roles, unless public
+	// !!! test on shapes
+
+	@Test void testDirectEnforceRoleBasedAccessControl() {
+		exec(() -> acccess(RDF.NIL).accept(response -> assertThat(response).hasStatus(Response.OK)));
+		exec(() -> acccess(RDF.FIRST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.OK)));
+		exec(() -> acccess(RDF.REST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.Unauthorized)));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private void exec(final Runnable task) {
+		new Tray().exec(task).clear();
+	}
+
+	private Responder acccess(final IRI effective, final IRI... permitted) {
+		return new TestActor().roles(permitted).handle(new Request().roles(effective));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class TestActor extends Actor<TestActor> {
+
+		private TestActor() { super(Form.relate, Form.detail); }
+
+		@Override protected Responder shaped(final Request request, final Query query) {
+			return request.reply(response -> response.status(Response.OK));
+		}
+
+		@Override protected Responder direct(final Request request, final Query query) {
+			return request.reply(response -> response.status(Response.OK));
+		}
+
+	}
 
 }

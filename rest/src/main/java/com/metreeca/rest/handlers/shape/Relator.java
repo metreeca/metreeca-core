@@ -92,19 +92,14 @@ import static java.util.Collections.singleton;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Relator extends Actor {
+public final class Relator extends Actor<Relator> {
 
 	private final Graph graph=tool(Graph.Factory);
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//* @see <a href="https://www.w3.org/TR/ldp/#ldprs">Linked Data Platform 1.0 - §4.3 RDF Source</a>
-
-	//	.headers("Link",
-	//		"<http://www.w3.org/ns/ldp#RDFSource>; rel=\"type\"",
-	//		"<http://www.w3.org/ns/ldp#Resource>; rel=\"type\""
-	//)
+	public Relator() {
+		super(Form.relate, Form.detail);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +158,7 @@ public final class Relator extends Actor {
 		});
 	}
 
-	@Override protected Responder direct(final Request request) {
+	@Override protected Responder direct(final Request request, final Query query) {
 		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();

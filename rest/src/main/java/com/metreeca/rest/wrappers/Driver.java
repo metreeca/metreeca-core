@@ -190,9 +190,9 @@ public final class Driver implements Wrapper {
 	}
 
 	private Response after(final Response response) {
-		return shape == null ? response : response.header("+link",
-				String.format("<%s?%s>; rel=%s", response.request().item(), SpecsQuery, LDP.CONSTRAINED_BY)
-		);
+		return shape == null ? response : response.header("+Link", String.format(
+				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, LDP.CONSTRAINED_BY
+		));
 	}
 
 }
