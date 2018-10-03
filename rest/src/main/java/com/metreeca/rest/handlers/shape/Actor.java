@@ -37,8 +37,6 @@ import java.io.UncheckedIOException;
 import java.util.*;
 
 import static com.metreeca.form.Shape.*;
-import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Sets.intersection;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.rest.Handler.forbidden;
@@ -177,7 +175,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 					return empty(redacted) ? forbidden(request)
 							: empty(authorized) ? refused(request)
-							: query(request, authorized).map(query -> shaped(request, query), request::reply);
+							: shaped(request, authorized);
 
 				},
 				error -> {
@@ -185,7 +183,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 					final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
 
 					return refused ? refused(request)
-							: query(request, and()).map(query -> direct(request, query), request::reply);
+							: direct(request);
 
 				}
 
@@ -204,18 +202,11 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 	}
 
 
-	// !!! (doc) construct and process configured query, merging constraints from the query string
-
-	private Result<Query> query(final Request request, final Shape shape) {
-		return request.query(and(all(request.item()), shape)); // focused shape // !!! review
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected abstract Responder shaped(final Request request, final Query query);
+	protected abstract Responder shaped(final Request request, final Shape shape);
 
-	protected abstract Responder direct(final Request request, final Query query);
+	protected abstract Responder direct(final Request request);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

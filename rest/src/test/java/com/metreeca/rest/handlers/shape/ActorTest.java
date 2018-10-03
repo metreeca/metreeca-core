@@ -18,7 +18,7 @@
 package com.metreeca.rest.handlers.shape;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Responder;
 import com.metreeca.rest.Response;
@@ -59,11 +59,11 @@ final class ActorTest {
 
 		private TestActor() { super(Form.relate, Form.detail); }
 
-		@Override protected Responder shaped(final Request request, final Query query) {
+		@Override protected Responder shaped(final Request request, final Shape shape) {
 			return request.reply(response -> response.status(Response.OK));
 		}
 
-		@Override protected Responder direct(final Request request, final Query query) {
+		@Override protected Responder direct(final Request request) {
 			return request.reply(response -> response.status(Response.OK));
 		}
 

@@ -43,8 +43,11 @@ import java.util.*;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
+import static com.metreeca.form.shapes.All.all;
+import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -104,61 +107,64 @@ public final class Relator extends Actor<Relator> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override protected Responder shaped(final Request request, final Query query) {
+	@Override protected Responder shaped(final Request request, final Shape shape) {
 		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();
 
-			final Collection<Statement> model=new SPARQLEngine(connection)
-					.browse(query)
-					.values()
-					.stream()
-					.findFirst()
-					.orElseGet(Collections::emptySet);
+			request.query(and(shape, all(focus))).map(query -> { // focused shape
 
-			request.reply(response -> {
-				if ( model.isEmpty() ) {
+				final Collection<Statement> model=new SPARQLEngine(connection)
+						.browse(query)
+						.values()
+						.stream()
+						.findFirst()
+						.orElseGet(Collections::emptySet);
 
-					// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
-					// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
-					// !!! optimize using a single query if working on a remote repository
+				return request.reply(response -> {
+					if ( model.isEmpty() ) {
 
-					final boolean contains=connection.hasStatement(focus, null, null, true)
-							|| connection.hasStatement(null, null, focus, true);
+						// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
+						// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
+						// !!! optimize using a single query if working on a remote repository
 
-					return contains
-							? response.status(Response.Forbidden) // resource known but empty envelope for user
-							: response.status(Response.NotFound); // !!! 404 under strict security
+						final boolean contains=connection.hasStatement(focus, null, null, true)
+								|| connection.hasStatement(null, null, focus, true);
 
-				} else {
+						return contains
+								? response.status(Response.Forbidden) // resource known but empty envelope for user
+								: response.status(Response.NotFound); // !!! 404 under strict security
 
-					return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
+					} else {
 
-						@Override public Response visit(final Edges edges) {
-							return r.body(ShapeFormat.shape()).set(edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
-									.body(rdf()).set(model);
+						return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
 
-						}
+							@Override public Response visit(final Edges edges) {
+								return r.body(shape()).set(edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
+										.body(rdf()).set(model);
+							}
 
-						@Override public Response visit(final Stats stats) {
-							return r.body(ShapeFormat.shape()).set(StatsShape)
-									.body(rdf()).set(rewrite(model, Form.meta, focus));
-						}
+							@Override public Response visit(final Stats stats) {
+								return r.body(shape()).set(StatsShape)
+										.body(rdf()).set(rewrite(model, Form.meta, focus));
+							}
 
-						@Override public Response visit(final Items items) {
-							return r.body(ShapeFormat.shape()).set(ItemsShape)
-									.body(rdf()).set(rewrite(model, Form.meta, focus));
-						}
+							@Override public Response visit(final Items items) {
+								return r.body(shape()).set(ItemsShape)
+										.body(rdf()).set(rewrite(model, Form.meta, focus));
+							}
 
-					}));
+						}));
 
-				}
-			}).accept(consumer);
+					}
+				});
+
+			}, request::reply).accept(consumer);
 
 		});
 	}
 
-	@Override protected Responder direct(final Request request, final Query query) {
+	@Override protected Responder direct(final Request request) {
 		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();
