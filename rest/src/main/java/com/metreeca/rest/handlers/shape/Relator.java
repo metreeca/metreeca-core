@@ -25,7 +25,9 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.sparql.SPARQLEngine;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Responder;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.rdf.Graph;
@@ -38,15 +40,11 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import java.util.*;
 
-import static com.metreeca.form.Shape.*;
+import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
-import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.sparql.SPARQLEngine.contains;
 import static com.metreeca.form.things.Values.rewrite;
-import static com.metreeca.rest.Handler.forbidden;
-import static com.metreeca.rest.Handler.unauthorized;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
@@ -95,7 +93,7 @@ import static java.util.Collections.singleton;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Relator implements Handler {
+public final class Relator extends Actor {
 
 	private final Graph graph=tool(Graph.Factory);
 
@@ -109,44 +107,10 @@ public final class Relator implements Handler {
 	//		"<http://www.w3.org/ns/ldp#Resource>; rel=\"type\""
 	//)
 
-	//if ( status == Response.OK ) {
-	//	response.header("Vary", "Accept", "Prefer", "");
-	//}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Responder handle(final Request request) {
-		return request.body(ShapeFormat.shape()).map(
-				shape -> {
-
-					final Shape redacted=shape
-							.accept(task(Form.relate))
-							.accept(view(Form.detail));
-
-					final Shape authorized=redacted
-							.accept(role(request.roles()));
-
-					return empty(redacted) ? forbidden(request)
-							: empty(authorized) ? unauthorized(request)
-							: shaped(request, authorized);
-
-				},
-				error -> direct(request)
-		);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Responder shaped(final Request request, final Shape shape) {
-		return request.query(and(all(request.item()), shape)).map( // focused shape
-				query -> shaped(request, query),
-				request::reply
-		);
-	}
-
-	private Responder shaped(final Request request, final Query query) {
+	@Override protected Responder shaped(final Request request, final Query query) {
 		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();
@@ -193,7 +157,7 @@ public final class Relator implements Handler {
 		});
 	}
 
-	private Responder direct(final Request request) {
+	@Override protected Responder direct(final Request request) {
 		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();

@@ -17,13 +17,74 @@
 
 package com.metreeca.rest.handlers.shape;
 
-public abstract class _Shaper {
+import com.metreeca.form.Form;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
+import com.metreeca.rest.*;
+import com.metreeca.rest.formats.ShapeFormat;
+import com.metreeca.tray.sys.Trace;
 
-	//private final Trace trace=tool(Trace.Factory);
-	//
-	//
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//
+import static com.metreeca.form.Shape.*;
+import static com.metreeca.form.shapes.All.all;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.rest.Handler.forbidden;
+import static com.metreeca.rest.Handler.unauthorized;
+import static com.metreeca.tray.Tray.tool;
+
+
+public abstract class Actor implements Handler {
+
+	private final Trace trace=tool(Trace.Factory);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Responder handle(final Request request) {
+		return request.body(ShapeFormat.shape()).map(
+				shape -> {
+
+					final Shape redacted=shape
+							.accept(task(Form.relate))
+							.accept(view(Form.detail));
+
+					final Shape authorized=redacted
+							.accept(role(request.roles()));
+
+					return empty(redacted) ? forbidden(request)
+							: empty(authorized) ? unauthorized(request)
+							: shaped(request, authorized);
+
+				},
+				error -> direct(request)
+
+		).map(response -> {
+
+			if ( response.success() ) {
+				response.headers("+Vary", "Accept", "Prefer");
+			}
+
+			return response;
+
+		});
+	}
+
+	private Responder shaped(final Request request, final Shape shape) {
+		return request.query(and(all(request.item()), shape)).map( // focused shape
+				query -> shaped(request, query),
+				request::reply
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	protected abstract Responder shaped(Request request, Query query);
+
+	protected abstract Responder direct(Request request);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	//protected void authorize(
 	//		final Request request, final Response response,
 	//		final Shape shape, final Consumer<Shape> delegate
