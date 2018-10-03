@@ -1,7 +1,6 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -35,7 +34,6 @@ public final class Server implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Graph graph=tool(Graph.Factory);
 	private final Trace trace=tool(Trace.Factory);
 
 
@@ -45,7 +43,7 @@ public final class Server implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return request -> graph.query(connection -> { // process the request on a single connection
+		return request -> {
 			try {
 
 				return consumer -> request
@@ -71,7 +69,7 @@ public final class Server implements Wrapper {
 						.cause(e));
 
 			}
-		});
+		};
 	}
 
 

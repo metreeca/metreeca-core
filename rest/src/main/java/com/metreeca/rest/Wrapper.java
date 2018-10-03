@@ -18,11 +18,6 @@
 package com.metreeca.rest;
 
 
-import com.metreeca.tray.rdf.Graph;
-
-import static com.metreeca.tray.Tray.tool;
-
-
 /**
  * Handler wrapper {thread-safe}.
  *
@@ -32,59 +27,6 @@ import static com.metreeca.tray.Tray.tool;
  * <p>Implementations must be thread-safe.</p>
  */
 @FunctionalInterface public interface Wrapper {
-
-	/**
-	 * Creates a graph reading context.
-	 *
-	 * @return a wrapper that executes nested handlers using a single connection to the the system {@linkplain
-	 * Graph#Factory graph database}
-	 */
-	public static Wrapper reader() {
-		return new Wrapper() {
-
-			private final Graph graph=tool(Graph.Factory);
-
-			@Override public Handler wrap(final Handler handler) {
-
-				if ( handler == null ) {
-					throw new NullPointerException("null handler");
-				}
-
-				return request -> consumer -> graph.query(connection -> {
-					handler.handle(request).accept(consumer);
-				});
-			}
-
-		};
-	}
-
-	/**
-	 * Creates a graph writing context.
-	 *
-	 * @return a wrapper that executes nested handlers inside a single transaction on the the system {@linkplain
-	 * Graph#Factory graph database}
-	 */
-	public static Wrapper writer() {
-		return new Wrapper() {
-
-			private final Graph graph=tool(Graph.Factory);
-
-			@Override public Handler wrap(final Handler handler) {
-
-				if ( handler == null ) {
-					throw new NullPointerException("null handler");
-				}
-
-				return request -> consumer -> graph.update(connection -> {
-					handler.handle(request).accept(consumer);
-				});
-			}
-
-		};
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Wraps a handler.
