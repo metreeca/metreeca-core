@@ -24,7 +24,7 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * ???.
+ * Graph connection manager.
  *
  * <p>Executes wrapped handlers inside a shared connection to the the system {@linkplain Graph#Factory graph
  * database}.</p>

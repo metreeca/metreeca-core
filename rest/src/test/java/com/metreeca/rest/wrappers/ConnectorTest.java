@@ -159,7 +159,7 @@ final class ConnectorTest {
 
 					tool(Graph.Factory).query(connection -> {
 						assertThat(connection.hasStatement(data, true))
-								.as("transaction committed").isFalse();
+								.as("transaction rolled back").isFalse();
 					});
 
 				})

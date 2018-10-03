@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public final class ResponseAssert extends AbstractAssert<ResponseAssert, Response> {
 
 	public static ResponseAssert assertThat(final Response response) {
-		return new ResponseAssert(response);
+		return new ResponseAssert(response).cache();
 	}
 
 
@@ -129,6 +129,34 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 		return this;
 	}
 
+	public ResponseAssert hasBody(final Format<?> format) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		isNotNull();
+
+		return actual.body(format).map(
+				value -> this,
+				error -> fail("expected response to have <%s> body but has none")
+		);
+	}
+
+	public ResponseAssert doesNotHaveBody(final Format<?> format) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		isNotNull();
+
+		return actual.body(format).map(
+				value -> fail("expected response to have no <%s> body but has one"),
+				error -> this
+		);
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -146,29 +174,6 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 
 		return actual
 
-				.body(input())
-				.set(() -> { // cache binary body
-
-					final byte[] data=data();
-					final String text=text();
-
-					return data.length > 0 ? new ByteArrayInputStream(data)
-							: !text.isEmpty() ? Transputs.input(new StringReader(text))
-							: Transputs.input();
-
-				})
-
-				.body(reader())
-				.set(() -> { // cache textual body
-
-					final byte[] data=data();
-					final String text=text();
-
-					return !text.isEmpty() ? new StringReader(text)
-							:data.length > 0 ? Transputs.reader(new ByteArrayInputStream(data))
-							:  Transputs.reader();
-
-				})
 
 				.body(format)
 				.map(mapper, failure -> fail("unable to retrieve body ("+failure+")"));
@@ -176,6 +181,40 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private ResponseAssert cache() {
+
+		if ( actual != null ) {
+			actual
+
+					.body(input())
+					.set(() -> { // cache binary body
+
+						final byte[] data=data();
+						final String text=text();
+
+						return data.length > 0 ? new ByteArrayInputStream(data)
+								: !text.isEmpty() ? Transputs.input(new StringReader(text))
+								: Transputs.input();
+
+					})
+
+					.body(reader())
+					.set(() -> { // cache textual body
+
+						final byte[] data=data();
+						final String text=text();
+
+						return !text.isEmpty() ? new StringReader(text)
+								: data.length > 0 ? Transputs.reader(new ByteArrayInputStream(data))
+								: Transputs.reader();
+
+					});
+		}
+
+		return this;
+	}
+
 
 	private byte[] data() {
 		try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {

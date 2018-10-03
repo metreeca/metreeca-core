@@ -19,38 +19,38 @@ package com.metreeca.rest.handlers.shape;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.HandlerAssert;
-import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collection;
-import java.util.Optional;
 
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.rest.HandlerAssert.dataset;
+import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.tray.Tray.tool;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.fail;
 
 
 final class RelatorTest {
 
-	private Tray tray() {
-		return new Tray().exec(HandlerAssert.dataset(small()));
+	private void tray(final Runnable task) {
+		new Tray()
+				.exec(dataset(small()))
+				.exec(task)
+				.clear();
 	}
+
 
 	private Request direct() {
 		return new Request()
@@ -69,127 +69,109 @@ final class RelatorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDirectRelate() {
-		tray()
-
-				.get(Relator::new)
+		tray(() -> new Relator()
 
 				.handle(direct())
 
-				.accept(response -> {
+				.accept(response -> assertThat(response)
 
-					final Optional<Model> rdfBody=response.body(RDFFormat.rdf()).get().map(LinkedHashModel::new);
-					final Optional<Shape> shapeBody=response.body(ShapeFormat.shape()).get();
+						.hasBody(rdf())
+						.doesNotHaveBody(ShapeFormat.shape())
 
-					assertFalse(shapeBody.isPresent(), "response shape body omitted");
-					assertTrue(rdfBody.isPresent(), "response RDF body included");
-
-					assertTrue(
-							rdfBody.get().contains(response.item(), null, null),
-							"response RDF body contains a resource description"
-					);
-
-				});
+						.body(rdf())
+						.as("response RDF body contains a resource description")
+						.hasStatement(response.item(), null, null)));
 	}
 
 	@Test void testDirectUnknown() {
-		tray()
-
-				.get(Relator::new)
+		tray(() -> new Relator()
 
 				.handle(direct().path("/employees/9999"))
 
-				.accept(response -> assertEquals(Response.NotFound, response.status()));
+				.accept(response -> assertThat(response).hasStatus(Response.NotFound))
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testShapedRelate() {
-
-		final Tray tray=tray();
-		final Graph graph=tray.get(Graph.Factory);
-
-		tray.get(Relator::new)
+		tray(() -> new Relator()
 
 				.handle(shaped())
 
-				.accept(response -> graph.query(connection -> {
+				.accept(response -> tool(Graph.Factory).query(connection -> {
 
-					assertEquals(Response.OK, response.status());
+					assertThat(response).hasStatus(Response.OK);
 
 					final Model expected=construct(connection,
 							"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }");
 
-					response.body(RDFFormat.rdf()).use(
-							model -> assertThat(model).as("items retrieved").hasSubset((Collection<Statement>)expected),
+					response.body(rdf()).use(
+							model -> assertThat(model).as("items retrieved").hasSubset(expected),
 							error -> fail("missing RDF body")
 					);
 
-				}));
+				}))
+		);
 	}
 
 	@Test void testShapedRelateLimited() {
-
-		final Tray tray=tray();
-		final Graph graph=tray.get(Graph.Factory);
-
-		tray.get(Relator::new)
+		tray(() -> new Relator()
 
 				.handle(shaped().roles(ValuesTest.Salesman))
 
-				.accept(response -> graph.query(connection -> {
+				.accept(response -> tool(Graph.Factory).query(connection -> {
 
-					assertEquals(Response.OK, response.status());
+					assertThat(response)
 
-					final Model expected=construct(connection,
-							"construct where { <employees/1370> a :Employee; :code ?c }");
+							.hasStatus(Response.OK)
 
-					response.body(RDFFormat.rdf()).use(
-							model -> {
-								assertThat(model).as("items retrieved").hasSubset((Collection<Statement>)expected);
+							.body(rdf())
 
-								assertTrue(
-										new LinkedHashModel(model).filter(null, term("seniority"), null).isEmpty(), // !!! unwrap
-										"properties restricted to manager role not included"
-								);
-							},
-							error -> fail("missing RDF body")
-					);
+							.as("items retrieved")
+							.hasSubset(construct(connection,
+									"construct where { <employees/1370> a :Employee; :code ?c }"
+							))
 
-				}));
+							.as("properties restricted to manager role not included")
+							.doesNotHaveStatement(null, term("seniority"), null);
+
+				}))
+		);
 	}
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testShapedForbidden() {
-		tray()
-
-				.get(Relator::new)
+		tray(() -> new Relator()
 
 				.handle(shaped().body(ShapeFormat.shape()).set(or()))
 
-				.accept(response -> assertEquals(Response.Forbidden, response.status()));
+				.accept(response -> assertThat(response).hasStatus(Response.Forbidden))
+
+		);
 	}
 
 	@Test void testShapedUnauthorized() {
-		tray()
-
-				.get(Relator::new)
+		tray(() -> new Relator()
 
 				.handle(shaped().roles(Form.none))
 
-				.accept(response -> assertEquals(Response.Unauthorized, response.status()));
+				.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
+
+		);
 	}
 
 	@Test void testShapedUnknown() {
-		tray()
-
-				.get(Relator::new)
+		tray(() -> new Relator()
 
 				.handle(shaped().path("/employees/9999"))
 
-				.accept(response -> assertEquals(Response.NotFound, response.status()));
+				.accept(response -> assertThat(response).hasStatus(Response.NotFound))
+
+		);
 	}
 
 }

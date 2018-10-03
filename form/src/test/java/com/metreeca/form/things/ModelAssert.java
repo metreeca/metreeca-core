@@ -18,17 +18,15 @@
 package com.metreeca.form.things;
 
 import org.assertj.core.api.AbstractAssert;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.util.Models;
-import org.eclipse.rdf4j.rio.RDFFormat;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static com.metreeca.form.things.ValuesTest.encode;
+import static com.metreeca.form.things.Values.format;
 
 
 public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
@@ -49,7 +47,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private ModelAssert(final Model actual) {
-		super(actual, ModelAssert.class);
+		super(new TreeModel(actual), ModelAssert.class);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,16 +84,20 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 	}
 
 	/**
-	 * Asserts that expected and actual statement collections are isomorphic.
+	 * Asserts that actual and expected statement collections are isomorphic.
 	 *
 	 * @param expected the expected statement collection
 	 */
 	public ModelAssert isIsomorphicTo(final Model expected) {
 
+		if ( expected == null ) {
+			throw new NullPointerException("null expected");
+		}
+
 		isNotNull();
 
 		if ( !Models.isomorphic(actual, expected) ) {
-			failWithMessage("expected <%s> to be isomorphic to <%s>", format(actual), format(expected));
+			failWithMessage("expected <%s> to be isomorphic to <%s>", format(actual), format(new TreeModel(expected)));
 		}
 
 		return this;
@@ -117,20 +119,52 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 	 */
 	public ModelAssert hasSubset(final Model expected) {
 
+		if ( expected == null ) {
+			throw new NullPointerException("null expected");
+		}
+
 		isNotNull();
 
 		if ( !Models.isSubset(expected, actual) ) {
-			failWithMessage("expected <%s> to have subset <%s>", format(actual), format(expected));
+			failWithMessage("expected <%s> to have subset <%s>", format(actual), format(new TreeModel(expected)));
 		}
 
 		return this;
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Asserts that the actual statement collection contains a statement matching a given pattern.
+	 */
+	public ModelAssert hasStatement(final Resource subject, final IRI predicate, final Value object) {
 
-	private String format(final Model model) {
-		return model == null ? "null model" : encode(new TreeModel(model), RDFFormat.NTRIPLES);
+		isNotNull();
+
+		final Model matching=actual.filter(subject, predicate, object);
+
+		if ( matching.isEmpty() ) {
+			failWithMessage("expected <%s> to contain no statements matching <%s %s %s> but has none",
+					format(subject), format(predicate), format(object), format(actual));
+		}
+
+		return this;
+	}
+
+	/**
+	 * Asserts that the actual statement collection does not contain a statement matching a given pattern.
+	 */
+	public ModelAssert doesNotHaveStatement(final Resource subject, final IRI predicate, final Value object) {
+
+		isNotNull();
+
+		final Model matching=actual.filter(subject, predicate, object);
+
+		if ( !matching.isEmpty() ) {
+			failWithMessage("expected <%s> to contain no statements matching <%s %s %s> but has <%s>",
+					format(subject), format(predicate), format(object), format(actual), format(matching));
+		}
+
+		return this;
 	}
 
 }

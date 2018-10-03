@@ -56,7 +56,7 @@ import static java.util.Collections.singleton;
 /**
  * Resource relator.
  *
- * <p>Handles retrieval requests on linked data resources</p>
+ * <p>Handles retrieval requests on linked data resources.</p>
  *
  * <dl>
  *
@@ -117,7 +117,7 @@ public final class Relator implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Responder handle(final Request request) {
-		return ((Result<Shape>)request.body(ShapeFormat.shape())).map(
+		return request.body(ShapeFormat.shape()).map(
 				shape -> {
 
 					final Shape redacted=shape
@@ -193,7 +193,7 @@ public final class Relator implements Handler {
 		});
 	}
 
-	private Responder direct(final Request request) { // !!! optimize for SPARQL
+	private Responder direct(final Request request) {
 		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();
@@ -207,13 +207,12 @@ public final class Relator implements Handler {
 			).accept(consumer);
 
 		});
-
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> cell(final RepositoryConnection connection, final IRI focus) {
+	private Collection<Statement> cell(final RepositoryConnection connection, final IRI focus) { // !!! optimize for SPARQL
 
 		final Collection<Statement> model=new LinkedHashModel();
 
