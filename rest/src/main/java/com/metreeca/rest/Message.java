@@ -53,14 +53,7 @@ public abstract class Message<T extends Message<T>> {
 	private final Map<Format<?>, Function<Message<?>, Result<?>>> pipes=new HashMap<>();
 
 
-	/**
-	 * Retrieves this message.
-	 *
-	 * <p>This method is required to support the abstract fluent API through the self-bound abstract class pattern.</p>
-	 *
-	 * @return this message
-	 */
-	protected abstract T self();
+	private T self() { return (T)this; }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

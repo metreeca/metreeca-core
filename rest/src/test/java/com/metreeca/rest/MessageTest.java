@@ -130,11 +130,7 @@ final class MessageTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TestMessage extends Message<TestMessage> {
-
-		@Override protected TestMessage self() { return this; }
-
-	}
+	private static final class TestMessage extends Message<TestMessage> {}
 
 	private static final class TestFormat implements Format<String> {
 
