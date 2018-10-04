@@ -38,6 +38,8 @@ import static java.util.stream.Collectors.toList;
  * HTTP message.
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
+ *
+ * @param <T> the self-bounded message type supporting fluent setters
  */
 @SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {

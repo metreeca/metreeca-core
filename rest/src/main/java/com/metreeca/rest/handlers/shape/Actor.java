@@ -29,12 +29,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.function.Function;
 
@@ -43,7 +38,6 @@ import javax.json.*;
 import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Sets.intersection;
-import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
@@ -60,12 +54,29 @@ import static java.util.stream.Collectors.groupingBy;
  *
  * <p>Handles a specific action on a linked data resource.</p>
  *
- * <p>Access to the managed resource action is public, unless explicitly  {@linkplain #roles(Value...) limited} to
- * specific user roles.</p>
+ * <p>The abstract base:</p>
  *
- * - vary header
+ * <ul>
  *
- * - link headers
+ * <li>looks for a {@linkplain ShapeFormat shape} body in incoming requests and redact it according to task/view
+ * parameters {@linkplain #handler(IRI, IRI, Function) provided} by the concrete implementation;</li>
+ *
+ * <li>enforces role-based access control; Access to the managed resource action is public, unless explicitly
+ * {@linkplain #roles(Value...) limited} to
+ * * specific user roles;</li>
+ *
+ * <li>adds default LDP {@code Link} response headers for RDF sources.</li>
+ *
+ * </ul>
+ *
+ * <dl>
+ *
+ * <dt>Request {@link ShapeFormat} body {optional}</dt>
+ * <dd>An optional linked data shape driving action processing.</dd>
+ *
+ * </dl>
+ *
+ * @param <T> the self-bounded message type supporting fluent setters
  *
  * @see <a href="https://www.w3.org/TR/ldp/#ldprs">Linked Data Platform 1.0 - §4.3 RDF Source</a>
  */
@@ -150,7 +161,34 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Creates a shape-driven action handler.
+	 *
+	 * @param task   a IRI identifying the {@linkplain Form#task task} to be performed by the generated handler
+	 * @param view   a IRI identifying the {@linkplain Form#view view} level for the generated handler
+	 * @param action a function mapping a resource shape to a resource responder; the possibly empty input shape is
+	 *               retrieved from the request {@linkplain ShapeFormat shape} body, if one is available, and redacted
+	 *               according to {@code task} and {@code view} parameters and the roles of the user performing the
+	 *               request; {@code mode} redaction is left to final shape consumers
+	 *
+	 * @return an handler for the specified shape driven action
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
 	protected Handler handler(final IRI task, final IRI view, final Function<Shape, Responder> action) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		if ( view == null ) {
+			throw new NullPointerException("null view");
+		}
+
+		if ( action == null ) {
+			throw new NullPointerException("null action");
+		}
+
 		return request -> request.body(ShapeFormat.shape()).map(
 
 				shape -> {  // !!! look for ldp:contains sub-shapes?
@@ -177,31 +215,30 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 				}
 
-		).map(response -> {
-
-			return response.headers("Link",
-					link(LDP.RDF_SOURCE, "type"),
-					link(LDP.RESOURCE, "type")
-			);
-
-		});
+		).map(response -> response.headers("Link",
+				link(LDP.RDF_SOURCE, "type"),
+				link(LDP.RESOURCE, "type")
+		));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected Collection<Statement> trace(final Collection<Statement> model) {
-		try (final StringWriter writer=new StringWriter()) {
 
-			Rio.write(model, new TurtleWriter(writer));
+		return model; // !!! enable once tracing with message suppliers is implemented
 
-			trace.debug(this, "processing model\n"+indent(writer, true));
-
-			return model;
-
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
+		//try (final StringWriter writer=new StringWriter()) {
+		//
+		//	Rio.write(model, new TurtleWriter(writer));
+		//
+		//	trace.debug(this, "processing model\n"+indent(writer, true));
+		//
+		//	return model;
+		//
+		//} catch ( final IOException e ) {
+		//	throw new UncheckedIOException(e);
+		//}
 	}
 
 

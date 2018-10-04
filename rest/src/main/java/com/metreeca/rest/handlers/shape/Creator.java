@@ -22,6 +22,8 @@ import com.metreeca.form.*;
 import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
+import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -32,6 +34,8 @@ import java.util.Collections;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import javax.json.JsonValue;
+
 import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.rewrite;
@@ -41,6 +45,42 @@ import static com.metreeca.tray.Tray.tool;
 import static java.util.UUID.randomUUID;
 
 
+/**
+ * Resource creator.
+ *
+ * <p>Handles creation requests on linked data resource collections.</p>
+ *
+ * <p>On successful resource creation, the IRI of the newly created resource is advertised through the {@code Location}
+ * HTTP response header.</p>
+ *
+ * <dl>
+ *
+ * <dt>Request {@link ShapeFormat} body {optional}</dt>
+ * <dd>An optional linked data shape driving the creation process.</dd>
+ *
+ * <dt>Request {@link RDFFormat} body</dt>
+ * <dd>The RDF content to be assigned to the newly created resource; must describe the new resource using
+ * the request {@linkplain Request#item() focus item} as subject.</dd>
+ *
+ * <dd>If the request includes a {@link ShapeFormat} body representation, it is redacted taking into account the user
+ * {@linkplain Request#roles() roles} of the request and used to validate the request RDF body; validation errors are
+ * reported with a {@linkplain Response#UnprocessableEntity} status code and a structured {@linkplain
+ * Failure#trace(JsonValue) trace} element.</dd>
+ *
+ * <dd>On successful body validation, the newly created resource is assigned a unique IRI based on the stem of the
+ * request {@linkplain Request#item() focus item} and a name provided by either the default {@linkplain #uuid()
+ * UUID-based} or a {@linkplain #slug(BiFunction) custom-provided} slug generator.</dd>
+ *
+ * <dd>In both cases, resource description content is stored into the system {@linkplain Graph#Factory graph}
+ * database.</dd>
+ *
+ * <dd>Shapeless resource creation is not yet supported and is reported with a {@linkplain Response#NotImplemented}
+ * HTTP status code.</dd>
+ *
+ * </dl>
+ *
+ * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
+ */
 public final class Creator extends Actor<Creator> {
 
 	/*
@@ -60,13 +100,27 @@ public final class Creator extends Actor<Creator> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Configures the slug generation function.
+	 *
+	 * @param slug a function mapping from the creation request and its RDF body to the name to be assigned to the newly
+	 *             created resource; must return a non-null and non-empty value
+	 *
+	 * @return this creator
+	 *
+	 * @throws NullPointerException if {@code slug} is null
+	 */
 	public Creator slug(final BiFunction<Request, Collection<Statement>, String> slug) {
 
 		if ( slug == null ) {
 			throw new NullPointerException("null slug");
 		}
 
-		this.slug=slug;
+		synchronized ( lock ) {
+
+			this.slug=slug;
+
+		}
 
 		return this;
 	}
@@ -103,8 +157,18 @@ public final class Creator extends Actor<Creator> {
 
 			synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
 
+				final String slug=this.slug.apply(request, model);
+
+				if ( slug == null ) {
+					throw new NullPointerException("null slug");
+				}
+
+				if ( slug.isEmpty() ) {
+					throw new IllegalArgumentException("empty slug");
+				}
+
 				final IRI source=request.item();
-				final IRI target=iri(request.stem(), slug.apply(request, model));
+				final IRI target=iri(request.stem(), slug);
 
 				model.addAll(shape // add implied statements
 						.accept(mode(Form.verify))
@@ -144,10 +208,30 @@ public final class Creator extends Actor<Creator> {
 
 	//// Slug Functions ////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Generates a random UUID-based slug.
+	 *
+	 * @return a random UUID-based slug
+	 */
 	public static BiFunction<Request, Collection<Statement>, String> uuid() {
 		return (request, model) -> randomUUID().toString();
 	}
 
+	/**
+	 * Generates a sequential auto-incrementing slug.
+	 *
+	 * <p><strong>Warning</strong> / Missing native SPARQL support for auto-incrementing ids, auto-incrementing slug
+	 * calls are serialized in the system {@linkplain Graph#Factory graph} database using an internal lock object: this
+	 * strategy may fail for distributed containers or concurrent updates on teh SPARQL endpoint not managed by the
+	 * framework.</p>
+	 *
+	 * @param shape a shape matching all the items in the auto-increment collection
+	 *
+	 * @return an auto-incrementing numeric slug uniquely identifying a new resource in the collection matched by {@code
+	 * shape}
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
 	public static BiFunction<Request, Collection<Statement>, String> auto(final Shape shape) {
 
 		if ( shape == null ) {

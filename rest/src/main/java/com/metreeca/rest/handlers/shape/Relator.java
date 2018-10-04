@@ -61,25 +61,15 @@ import static java.util.Collections.singleton;
  *
  * <dl>
  *
- * <dt>Request Payload</dt>
- * <dd>
- * <dl>
- *
- * <dt>{@link ShapeFormat} {optional}</dt>
+ * <dt>Request {@link ShapeFormat} body {optional}</dt>
  * <dd>An optional linked data shape driving the retrieval process.</dd>
  *
- * </dl>
- * </dd>
- *
- * <dt>Response Payload</dt>
- * <dd>
- * <dl>
- *
- * <dt>{@link ShapeFormat} {optional}</dt>
+ * <dt>Response {@link ShapeFormat} body {optional}</dt>
  * <dd>If the request includes a shape payload, the response includes the derived shape actually used in the resource
- * retrieval process, redacted according to request user roles, retrieval task, filtering mode and detail view.</dd>
+ * retrieval process, redacted according to request user roles, {@code relate} task, {@code filter} mode and {@code
+ * detail} view.</dd>
  *
- * <dt>{@link RDFFormat}</dt>
+ * <dt>Response {@link RDFFormat} body</dt>
  *
  * <dd>If the request includes a {@link ShapeFormat} body representation, the response includes the {@linkplain
  * RDFFormat RDF description} of the request {@linkplain Request#item() focus item}, as defined by the associated linked
@@ -89,8 +79,8 @@ import static java.util.Collections.singleton;
  * <dd>Otherwise, the  response includes the symmetric concise bounded description of the request focus item, extended
  * with {@code rdfs:label/comment} annotations for all referenced IRIs.</dd>
  *
- * </dl>
- * </dd>
+ * <dd>In both cases, resource description content is retrieved  from the system {@linkplain Graph#Factory graph}
+ * database.</dd>
  *
  * </dl>
  *
