@@ -31,6 +31,7 @@ import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.tray.sys.Trace.clip;
 
 import static org.assertj.core.api.Assertions.fail;
 
@@ -113,16 +114,18 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 
 		isNotNull();
 
-		final int data=data().length;
+		final byte[] data=data();
+		final String text=text();
 
-		if ( data > 0 ) {
-			failWithMessage("expected empty body but had binary body of length <%d>", data);
+		if ( data.length > 0 ) {
+			failWithMessage("expected empty body but had binary body of length <%d>", data.length);
 		}
 
-		final int text=text().length();
-
-		if ( text > 0 ) {
-			failWithMessage("expected empty body but had textual body of length <%d>", text);
+		if ( !text.isEmpty() ) {
+			failWithMessage(
+					"expected empty body but had textual body of length <%d> (%s)",
+					text.length(), clip(text)
+			);
 		}
 
 
