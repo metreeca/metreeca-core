@@ -451,8 +451,7 @@ public abstract class Message<T extends Message<T>> {
 			}
 
 			pipes.compute(format, (_format, getter) -> message ->
-					(getter != null ? getter : (Function<Message<?>, Result<?>>)format::get)
-							.apply(message)
+					(getter != null ? getter : (Function<Message<?>, Result<?>>)format::get).apply(message)
 							.flatMap(value -> mapper.apply((V)value)));
 
 			return self();
@@ -477,18 +476,19 @@ public abstract class Message<T extends Message<T>> {
 
 			final V cached=(V)cache.get(format);
 
-			return cached != null ? success.apply(cached) : pipes.getOrDefault(format, format::get)
-					.apply(self())
-					.map(
-							v -> {
+			return cached != null ? success.apply(cached) : pipes.getOrDefault(format, format::get).apply(self()).map(
 
-								cache.put(format, v);
+					v -> {
 
-								return success.apply((V)v);
+						cache.put(format, v);
 
-							},
-							f -> failure.apply((Failure<V>)f)
-					);
+						return success.apply((V)v);
+
+					},
+
+					f -> failure.apply((Failure<V>)f)
+
+			);
 		}
 
 	}

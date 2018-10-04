@@ -270,8 +270,9 @@ final class GraphsTest {
 
 				.accept(response -> {
 
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(First);
+					assertThat(response)
+							.hasStatus(Response.OK)
+							.hasBodyThat(rdf()).isIsomorphicTo(First);
 
 				}));
 	}

@@ -18,6 +18,7 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.things.ModelAssert;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.formats.DataFormat;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.TextFormat;
@@ -27,10 +28,9 @@ import org.assertj.core.api.*;
 import java.io.*;
 import java.util.Collection;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -39,13 +39,46 @@ import static com.metreeca.tray.sys.Trace.clip;
 
 import static org.assertj.core.api.Assertions.fail;
 
-import static java.lang.String.format;
-
 
 public final class ResponseAssert extends AbstractAssert<ResponseAssert, Response> {
 
 	public static ResponseAssert assertThat(final Response response) {
-		return new ResponseAssert(response).cache();
+
+		if ( response != null ) {
+
+			final Cache cache=new Cache(response);
+
+			if ( !response.body(input()).get().isPresent() ) {
+				response.body(input()).set(cache::input); // cache binary body
+			}
+
+			if ( !response.body(reader()).get().isPresent() ) {
+				response.body(reader()).set(cache::reader); // cache textual body
+			}
+
+			final StringBuilder builder=new StringBuilder(1000);
+
+			builder.append(response.status()).append('\n');
+
+			response.headers().forEach((name, values) -> values.forEach(value ->
+					builder.append(name).append(": ").append(value).append('\n')
+			));
+
+			builder.append('\n');
+
+			response.body(TextFormat.text()).use(text -> {
+				if ( !text.isEmpty() ) { builder.append(text.length() > 1000 ? text.substring(1000)+"…" : text); }
+			});
+
+			Logger.getLogger(response.getClass().getName()).log(
+					response.success() ? Level.INFO : Level.WARNING,
+					builder.toString(),
+					response.cause().orElse(null)
+			);
+
+		}
+
+		return new ResponseAssert(response);
 	}
 
 
@@ -120,20 +153,20 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 
 		isNotNull();
 
-		final byte[] data=data();
-		final String text=text();
+		actual.body(DataFormat.data()).get().ifPresent(data -> {
+			if ( data.length > 0 ) {
+				failWithMessage("expected empty body but had binary body of length <%d>", data.length);
+			}
+		});
 
-		if ( data.length > 0 ) {
-			failWithMessage("expected empty body but had binary body of length <%d>", data.length);
-		}
-
-		if ( !text.isEmpty() ) {
-			failWithMessage(
-					"expected empty body but had textual body of length <%d> (%s)",
-					text.length(), clip(text)
-			);
-		}
-
+		actual.body(TextFormat.text()).get().ifPresent(text -> {
+			if ( !text.isEmpty() ) {
+				failWithMessage(
+						"expected empty body but had textual body of length <%d> (%s)",
+						text.length(), clip(text)
+				);
+			}
+		});
 
 		return this;
 	}
@@ -162,7 +195,8 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 		isNotNull();
 
 		return actual.body(format).map(value -> this, error -> fail(
-				"expected response to have <%s> body but was unable to retrieve one <%s>", error
+				"expected response to have a <%s> body but was unable to retrieve one (%s)",
+				format.getClass().getSimpleName(), error
 		));
 	}
 
@@ -175,7 +209,7 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 		return hasBodyThat(format, ModelAssert::assertThat);
 	}
 
-	public <V, A extends Assert<A, ? extends V>> A hasBodyThat(final Format<V> format, final Function<V, A> mapper) {
+	private <V, A extends Assert<A, ? extends V>> A hasBodyThat(final Format<V> format, final Function<V, A> mapper) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
@@ -184,89 +218,78 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 		isNotNull();
 
 		return actual.body(format).map(mapper, error -> fail(
-				"expected response to have <%s> body but was unable to retrieve one <%s>", error
+				"expected response to have a <%s> body but was unable to retrieve one (%s)",
+				format.getClass().getSimpleName(), error
 		));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private ResponseAssert cache() {
+	private static final class Cache {
 
-		if ( actual != null ) {
+		private final Response response;
 
-			actual
+		private byte[] data;
+		private String text;
 
-					.body(input())
-					.set(new Supplier<InputStream>() { // cache binary body
 
-						private byte[] data;
-
-						@Override public InputStream get() {
-							return new ByteArrayInputStream(data != null ? data : (data=data()));
-						}
-
-					})
-
-					.body(reader())
-					.set(new Supplier<Reader>() { // cache textual body
-
-						private String text;
-
-						@Override public Reader get() {
-							return new StringReader(text != null ? text : (text=text()));
-						}
-
-					});
-
-			final StringBuilder builder=new StringBuilder(1000);
-
-			builder.append("response status").append(actual.status()).append('\n');
-
-			actual.headers().forEach((name, values) -> values.forEach(value ->
-					builder.append(name).append(": ").append(value).append('\n')
-			));
-
-			builder.append('\n');
-
-			actual.body(DataFormat.data()).use(data -> {
-				if ( data().length > 0 ) { builder.append(format("<binary body of length %d>", data.length)); }
-			});
-
-			actual.body(TextFormat.text()).use(text -> {
-				if ( !text.isEmpty() ) { builder.append(text); }
-			});
-
-			Logger.getGlobal().info(indent(builder.toString()));
-
+		private Cache(final Response response) {
+			this.response=response;
 		}
 
-		return this;
-	}
 
+		private ByteArrayInputStream input() {
 
-	private byte[] data() {
-		try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
+			final byte[] data=data();
+			final String text=text();
 
-			actual.body(output()).use(consumer -> consumer.accept(() -> buffer));
-
-			return buffer.toByteArray();
-
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
+			return new ByteArrayInputStream(data.length == 0 ? text.getBytes(Transputs.UTF8) : data);
 		}
-	}
 
-	private String text() {
-		try (final StringWriter buffer=new StringWriter()) {
+		private StringReader reader() {
 
-			actual.body(writer()).use(consumer -> consumer.accept(() -> buffer));
+			final String text=text();
+			final byte[] data=data();
 
-			return buffer.toString();
-
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
+			return new StringReader(text.isEmpty() ? new String(data, Transputs.UTF8) : text);
 		}
+
+
+		private String text() {
+
+			if ( text == null ) {
+				try (final StringWriter buffer=new StringWriter()) {
+
+					response.body(writer()).use(consumer -> consumer.accept(() -> buffer));
+
+					text=buffer.toString();
+
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+			}
+
+			return text;
+		}
+
+		private byte[] data() {
+
+			if ( data == null ) {
+				try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
+
+					response.body(output()).use(consumer -> consumer.accept(() -> buffer));
+
+					data=buffer.toByteArray();
+
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+			}
+
+			return data;
+		}
+
 	}
 
 }
