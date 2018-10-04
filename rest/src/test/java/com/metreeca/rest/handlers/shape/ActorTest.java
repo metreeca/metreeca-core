@@ -26,29 +26,41 @@ import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.things.ValuesTest.small;
+import static com.metreeca.rest.HandlerAssert.dataset;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 
 
 final class ActorTest {
 
-	// !!! test on shapes
+	private void exec(final Runnable task) {
+		new Tray()
+				.exec(dataset(small()))
+				.exec(task)
+				.clear();
+	}
+
+
+	//// Direct ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDirectEnforceRoleBasedAccessControl() {
-		exec(() -> acccess(RDF.NIL).accept(response -> assertThat(response).hasStatus(Response.OK)));
-		exec(() -> acccess(RDF.FIRST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.OK)));
-		exec(() -> acccess(RDF.REST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.Unauthorized)));
+		exec(() -> access(RDF.NIL).accept(response2 -> assertThat(response2).hasStatus(Response.OK)));
+		exec(() -> access(RDF.FIRST, RDF.FIRST).accept(response1 -> assertThat(response1).hasStatus(Response.OK)));
+		exec(() -> access(RDF.REST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.Unauthorized)));
 	}
+
+
+	//// Driven ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Disabled @Test void testDrivenEnforceRoleBasedAccessControl() { }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void exec(final Runnable task) {
-		new Tray().exec(task).clear();
-	}
-
-	private Responder acccess(final IRI effective, final IRI... permitted) {
+	private Responder access(final IRI effective, final IRI... permitted) {
 		return new TestActor().roles(permitted).handle(new Request().roles(effective));
 	}
 

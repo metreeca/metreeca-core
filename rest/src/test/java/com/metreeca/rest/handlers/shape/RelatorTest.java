@@ -40,13 +40,12 @@ import static com.metreeca.tray.Tray.tool;
 
 final class RelatorTest {
 
-	private void tray(final Runnable task) {
+	private void exec(final Runnable task) {
 		new Tray()
 				.exec(dataset(small()))
 				.exec(task)
 				.clear();
 	}
-
 
 	private Request direct() {
 		return new Request()
@@ -55,17 +54,17 @@ final class RelatorTest {
 				.path("/employees/1370");
 	}
 
-	private Request shaped() {
+	private Request driven() {
 		return direct()
 				.roles(ValuesTest.Manager)
 				.body(shape()).set(ValuesTest.Employee);
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Direct ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDirectRelate() {
-		tray(() -> new Relator()
+		exec(() -> new Relator()
 
 				.handle(direct())
 
@@ -80,7 +79,7 @@ final class RelatorTest {
 	}
 
 	@Test void testDirectUnknown() {
-		tray(() -> new Relator()
+		exec(() -> new Relator()
 
 				.handle(direct().path("/employees/9999"))
 
@@ -89,12 +88,12 @@ final class RelatorTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Driven ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testShapedRelate() {
-		tray(() -> new Relator()
+	@Test void testDrivenRelate() {
+		exec(() -> new Relator()
 
-				.handle(shaped())
+				.handle(driven())
 
 				.accept(response -> tool(Graph.Factory).query(connection -> {
 
@@ -114,10 +113,10 @@ final class RelatorTest {
 		);
 	}
 
-	@Test void testShapedRelateLimited() {
-		tray(() -> new Relator()
+	@Test void testDrivenRelateLimited() {
+		exec(() -> new Relator()
 
-				.handle(shaped().roles(ValuesTest.Salesman))
+				.handle(driven().roles(ValuesTest.Salesman))
 
 				.accept(response -> tool(Graph.Factory).query(connection -> {
 
@@ -140,32 +139,30 @@ final class RelatorTest {
 	}
 
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	@Test void testDrivenForbidden() {
+		exec(() -> new Relator()
 
-	@Test void testShapedForbidden() {
-		tray(() -> new Relator()
-
-				.handle(shaped().body(shape()).set(or()))
+				.handle(driven().body(shape()).set(or()))
 
 				.accept(response -> assertThat(response).hasStatus(Response.Forbidden))
 
 		);
 	}
 
-	@Test void testShapedUnauthorized() {
-		tray(() -> new Relator()
+	@Test void testDrivenUnauthorized() {
+		exec(() -> new Relator()
 
-				.handle(shaped().roles(Form.none))
+				.handle(driven().roles(Form.none))
 
 				.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
 
 		);
 	}
 
-	@Test void testShapedUnknown() {
-		tray(() -> new Relator()
+	@Test void testDrivenUnknown() {
+		exec(() -> new Relator()
 
-				.handle(shaped().path("/employees/9999"))
+				.handle(driven().path("/employees/9999"))
 
 				.accept(response -> assertThat(response).hasStatus(Response.NotFound))
 

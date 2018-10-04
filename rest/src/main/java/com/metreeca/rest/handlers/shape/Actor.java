@@ -168,6 +168,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 	@Override public Responder handle(final Request request) {
 		return request.body(ShapeFormat.shape()).map(
+
 				shape -> {  // !!! look for ldp:contains sub-shapes?
 
 					final Shape redacted=shape
@@ -182,6 +183,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 							: shaped(request, authorized);
 
 				},
+
 				error -> {
 
 					final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
@@ -216,7 +218,6 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected Collection<Statement> trace(final Collection<Statement> model) {
-
 		try (final StringWriter writer=new StringWriter()) {
 
 			Rio.write(model, new TurtleWriter(writer));
