@@ -41,7 +41,7 @@ public final class DataFormat implements Format<byte[]> {
 	 *
 	 * @return the singleton binary body format instance
 	 */
-	private static DataFormat data() {
+	public static DataFormat data() {
 		return Instance;
 	}
 

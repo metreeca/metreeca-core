@@ -18,15 +18,19 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.things.ModelAssert;
-import com.metreeca.form.things.Transputs;
+import com.metreeca.rest.formats.DataFormat;
 import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.formats.TextFormat;
 
 import org.assertj.core.api.*;
 
 import java.io.*;
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 
+import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -34,6 +38,8 @@ import static com.metreeca.rest.formats.WriterFormat.writer;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static org.assertj.core.api.Assertions.fail;
+
+import static java.lang.String.format;
 
 
 public final class ResponseAssert extends AbstractAssert<ResponseAssert, Response> {
@@ -188,31 +194,51 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 	private ResponseAssert cache() {
 
 		if ( actual != null ) {
+
 			actual
 
 					.body(input())
-					.set(() -> { // cache binary body
+					.set(new Supplier<InputStream>() { // cache binary body
 
-						final byte[] data=data();
-						final String text=text();
+						private byte[] data;
 
-						return data.length > 0 ? new ByteArrayInputStream(data)
-								: !text.isEmpty() ? Transputs.input(new StringReader(text))
-								: Transputs.input();
+						@Override public InputStream get() {
+							return new ByteArrayInputStream(data != null ? data : (data=data()));
+						}
 
 					})
 
 					.body(reader())
-					.set(() -> { // cache textual body
+					.set(new Supplier<Reader>() { // cache textual body
 
-						final byte[] data=data();
-						final String text=text();
+						private String text;
 
-						return !text.isEmpty() ? new StringReader(text)
-								: data.length > 0 ? Transputs.reader(new ByteArrayInputStream(data))
-								: Transputs.reader();
+						@Override public Reader get() {
+							return new StringReader(text != null ? text : (text=text()));
+						}
 
 					});
+
+			final StringBuilder builder=new StringBuilder(1000);
+
+			builder.append("response status").append(actual.status()).append('\n');
+
+			actual.headers().forEach((name, values) -> values.forEach(value ->
+					builder.append(name).append(": ").append(value).append('\n')
+			));
+
+			builder.append('\n');
+
+			actual.body(DataFormat.data()).use(data -> {
+				if ( data().length > 0 ) { builder.append(format("<binary body of length %d>", data.length)); }
+			});
+
+			actual.body(TextFormat.text()).use(text -> {
+				if ( !text.isEmpty() ) { builder.append(text); }
+			});
+
+			Logger.getGlobal().info(indent(builder.toString()));
+
 		}
 
 		return this;
