@@ -19,8 +19,9 @@ package com.metreeca.rest.handlers.shape;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Values;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Responder;
 import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.sys.Trace;
 
@@ -35,7 +36,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
 import javax.json.*;
 
@@ -50,7 +51,7 @@ import static com.metreeca.tray.Tray.tool;
 import static java.util.Arrays.asList;
 import static java.util.Collections.disjoint;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.groupingBy;
 
 
 /**
@@ -234,45 +235,37 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected JsonObject report(final Report trace) {
+	protected JsonObject report(final Report report) {
 
-		final Map<Issue.Level, List<Issue>> levels=new EnumMap<>(Issue.Level.class);
+		final Map<Issue.Level, List<Issue>> issues=report.getIssues().stream().collect(groupingBy(Issue::getLevel));
 
-		trace.getIssues().forEach(issue -> levels.compute(issue.getLevel(), (level, current) -> {
+		final JsonObjectBuilder json=Json.createObjectBuilder();
 
-			final List<Issue> updated=(current != null) ? current : new ArrayList<>();
+		Optional.ofNullable(issues.get(Issue.Level.Error)).ifPresent(errors ->
+				json.add("errors", report(errors, item -> report(item)))
+		);
 
-			updated.add(issue);
+		Optional.ofNullable(issues.get(Issue.Level.Warning)).ifPresent(warnings ->
+				json.add("warnings", report(warnings, item -> report(item)))
+		);
 
-			return updated;
-
-		}));
-
-		final JsonObjectBuilder report=Json.createObjectBuilder();
-
-		Optional.ofNullable(levels.get(Issue.Level.Error)).ifPresent(errors ->
-				report.add("errors", report(errors.stream().map(this::report))));
-
-		Optional.ofNullable(levels.get(Issue.Level.Warning)).ifPresent(warnings ->
-				report.add("warnings", report(warnings.stream().map(this::report))));
-
-		trace.getFrames().forEach(frame -> {
+		report.getFrames().forEach(frame -> {
 
 			final String property=format(frame.getValue());
 			final JsonObject value=report(frame);
 
 			if ( !value.isEmpty() ) {
-				report.add(property, value);
+				json.add(property, value);
 			}
 		});
 
-		return report.build();
+		return json.build();
 	}
 
 
 	private JsonObject report(final Frame<Report> frame) {
 
-		final JsonObjectBuilder report=Json.createObjectBuilder();
+		final JsonObjectBuilder json=Json.createObjectBuilder();
 
 		for (final Map.Entry<Step, Report> slot : frame.getSlots().entrySet()) {
 
@@ -280,31 +273,36 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 			final JsonObject value=report(slot.getValue());
 
 			if ( !value.isEmpty() ) {
-				report.add(property, value);
+				json.add(property, value);
 			}
 		}
 
-		return report.build();
+		return json.build();
 	}
 
 	private JsonObject report(final Issue issue) {
 
-		final JsonObjectBuilder report=Json.createObjectBuilder();
+		final JsonObjectBuilder json=Json.createObjectBuilder();
 
-		report.add("cause", issue.getMessage());
-		report.add("shape", issue.getShape().toString());
+		json.add("cause", issue.getMessage());
+		json.add("shape", issue.getShape().toString());
 
 		final Set<Value> values=issue.getValues();
 
 		if ( !values.isEmpty() ) {
-			report.add("values", report(values.stream().map(Values::format)));
+			json.add("values", report(values, v -> Json.createValue(format(v))));
 		}
 
-		return report.build();
+		return json.build();
 	}
 
-	private JsonArray report(final Stream<?> stream) {
-		return Json.createArrayBuilder(stream.collect(toList())).build();
+	private <V> JsonArray report(final Iterable<V> errors, final Function<V, JsonValue> reporter) {
+
+		final JsonArrayBuilder json=Json.createArrayBuilder();
+
+		errors.forEach(item -> json.add(reporter.apply(item)));
+
+		return json.build();
 	}
 
 }

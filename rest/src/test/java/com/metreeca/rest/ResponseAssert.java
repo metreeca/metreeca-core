@@ -56,7 +56,7 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 				response.body(reader()).set(cache::reader); // cache textual body
 			}
 
-			final StringBuilder builder=new StringBuilder(1000);
+			final StringBuilder builder=new StringBuilder(2500);
 
 			builder.append(response.status()).append('\n');
 
@@ -67,7 +67,9 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 			builder.append('\n');
 
 			response.body(TextFormat.text()).use(text -> {
-				if ( !text.isEmpty() ) { builder.append(text.length() > 1000 ? text.substring(1000)+"…" : text); }
+				if ( !text.isEmpty() ) {
+					builder.append(text.length() > builder.capacity() ? text.substring(0, builder.capacity())+"\n⋮" : text);
+				}
 			});
 
 			Logger.getLogger(response.getClass().getName()).log(
