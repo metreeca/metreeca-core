@@ -131,17 +131,15 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 			final List<String> errors=errorCollector.getErrors();
 			final List<String> warnings=errorCollector.getWarnings();
 
-			// !!! log warnings/error/fatals
-
-			if ( fatals.isEmpty() ) {
+			if ( fatals.isEmpty() ) { // add shape-implied statements and return model
 
 				focus.ifPresent(f -> shape.ifPresent(s ->
-						model.addAll(s.accept(mode(Form.verify)).accept(new Outliner(f))) // shape-implied statements
+						model.addAll(s.accept(mode(Form.verify)).accept(new Outliner(f)))
 				));
 
 				return value(model);
 
-			} else {
+			} else { // report errors // !!! log warnings/error/fatals?
 
 				final JsonObjectBuilder trace=Json.createObjectBuilder()
 

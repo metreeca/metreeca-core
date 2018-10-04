@@ -35,10 +35,14 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.util.*;
+import java.util.stream.Stream;
+
+import javax.json.*;
 
 import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.things.Sets.intersection;
 import static com.metreeca.form.things.Strings.indent;
+import static com.metreeca.form.things.Values.format;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.tray.Tray.tool;
@@ -211,38 +215,6 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//protected void model(
-	//		final Request request, final Response response,
-	//		final Shape shape, final Consumer<Collection<Statement>> delegate
-	//) { // !!! refactor
-	//
-	//	final IRI focus=request.focus();
-	//
-	//	Collection<Statement> model=null; // user-submitted statements
-	//
-	//	try {
-	//
-	//		model=request.rdf(shape, focus);
-	//
-	//	} catch ( final RDFParseException e ) {
-	//
-	//		response.status(Response.BadRequest).json(error("data-malformed", e));
-	//
-	//	}
-	//
-	//	// @@@ already handled by RDFFormat.get()
-	//	//if ( model != null ) {
-	//	//
-	//	//	model.addAll(shape.accept(mode(Form.verify)).accept(new Outliner(focus))); // shape-implied statements
-	//	//
-	//	//	delegate.accept(model);
-	//	//}
-	//
-	//}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	protected Collection<Statement> trace(final Collection<Statement> model) {
 
 		try (final StringWriter writer=new StringWriter()) {
@@ -261,7 +233,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected Map<String, Object> report(final Report trace) {
+	protected JsonObject report(final Report trace) {
 
 		final Map<Issue.Level, List<Issue>> levels=new EnumMap<>(Issue.Level.class);
 
@@ -275,59 +247,63 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 		}));
 
-		final Map<String, Object> map=new LinkedHashMap<>();
+		final JsonObjectBuilder report=Json.createObjectBuilder();
 
 		Optional.ofNullable(levels.get(Issue.Level.Error)).ifPresent(errors ->
-				map.put("errors", errors.stream().map(this::report).collect(toList())));
+				report.add("errors", report(errors.stream().map(this::report))));
 
 		Optional.ofNullable(levels.get(Issue.Level.Warning)).ifPresent(warnings ->
-				map.put("warnings", warnings.stream().map(this::report).collect(toList())));
+				report.add("warnings", report(warnings.stream().map(this::report))));
 
 		trace.getFrames().forEach(frame -> {
 
-			final String property=Values.format(frame.getValue());
-			final Map<Object, Object> report=report(frame);
+			final String property=format(frame.getValue());
+			final JsonObject value=report(frame);
 
-			if ( !report.isEmpty() ) {
-				map.put(property, report);
+			if ( !value.isEmpty() ) {
+				report.add(property, value);
 			}
 		});
 
-		return map;
+		return report.build();
 	}
 
 
-	private Map<Object, Object> report(final Frame<Report> frame) {
+	private JsonObject report(final Frame<Report> frame) {
 
-		final Map<Object, Object> map=new LinkedHashMap<>();
+		final JsonObjectBuilder report=Json.createObjectBuilder();
 
 		for (final Map.Entry<Step, Report> slot : frame.getSlots().entrySet()) {
 
 			final String property=slot.getKey().format();
-			final Map<String, Object> report=report(slot.getValue());
+			final JsonObject value=report(slot.getValue());
 
-			if ( !report.isEmpty() ) {
-				map.put(property, report);
+			if ( !value.isEmpty() ) {
+				report.add(property, value);
 			}
 		}
 
-		return map;
+		return report.build();
 	}
 
-	private Map<String, Object> report(final Issue issue) {
+	private JsonObject report(final Issue issue) {
 
-		final Map<String, Object> map=new LinkedHashMap<>();
+		final JsonObjectBuilder report=Json.createObjectBuilder();
 
-		map.put("cause", issue.getMessage());
-		map.put("shape", issue.getShape());
+		report.add("cause", issue.getMessage());
+		report.add("shape", issue.getShape().toString());
 
 		final Set<Value> values=issue.getValues();
 
 		if ( !values.isEmpty() ) {
-			map.put("values", values.stream().map(Values::format).collect(toList()));
+			report.add("values", report(values.stream().map(Values::format)));
 		}
 
-		return map;
+		return report.build();
+	}
+
+	private JsonArray report(final Stream<?> stream) {
+		return Json.createArrayBuilder(stream.collect(toList())).build();
 	}
 
 }
