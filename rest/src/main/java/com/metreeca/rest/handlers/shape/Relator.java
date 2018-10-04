@@ -40,6 +40,7 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import java.util.*;
 
+import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
@@ -100,14 +101,34 @@ public final class Relator extends Actor<Relator> {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	public Relator() {
-		super(Form.relate, Form.detail);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Responder handle(final Request request) {
+		return handler(Form.relate, Form.detail, shape ->
+				empty(shape)? direct(request) : driven(request, shape)
+		).handle(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override protected Responder shaped(final Request request, final Shape shape) {
+	private Responder direct(final Request request) {
+		return consumer -> graph.query(connection -> {
+
+			final IRI focus=request.item();
+			final Collection<Statement> model=cell(connection, focus);
+
+			request.reply(response -> model.isEmpty()
+
+					? response.status(Response.NotFound)
+					: response.status(Response.OK).body(rdf()).set(model)
+
+			).accept(consumer);
+
+		});
+	}
+
+	private Responder driven(final Request request, final Shape shape) {
 		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();
@@ -160,22 +181,6 @@ public final class Relator extends Actor<Relator> {
 				});
 
 			}, request::reply).accept(consumer);
-
-		});
-	}
-
-	@Override protected Responder direct(final Request request) {
-		return consumer -> graph.query(connection -> {
-
-			final IRI focus=request.item();
-			final Collection<Statement> model=cell(connection, focus);
-
-			request.reply(response -> model.isEmpty()
-
-					? response.status(Response.NotFound)
-					: response.status(Response.OK).body(rdf()).set(model)
-
-			).accept(consumer);
 
 		});
 	}

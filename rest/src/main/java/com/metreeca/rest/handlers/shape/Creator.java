@@ -22,93 +22,26 @@ import com.metreeca.form.*;
 import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.form.Shape.*;
-import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.things.Sets.intersection;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.rewrite;
-import static com.metreeca.rest.Handler.forbidden;
-import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
-import static java.util.Collections.disjoint;
 import static java.util.UUID.randomUUID;
 
 
-public final class _Creator extends Actor<_Creator> {
-
-	public _Creator() {
-		super(Form.create, Form.detail);
-	}
-
-	@Override protected Responder shaped(final Request request, final Shape shape) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! remove
-	}
-
-	@Override protected Responder direct(final Request request) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! remove
-	}
-
-
-	private final Set<Value> roles=new HashSet<>(); // !!!
-
-	private Handler handler(final IRI task, final IRI view, final Function<Shape, Responder> action) {
-		return request -> request.body(ShapeFormat.shape()).map(
-
-				shape -> {  // !!! look for ldp:contains sub-shapes?
-
-					final Shape redacted=shape
-							.accept(task(task))
-							.accept(view(view));
-
-					final Shape authorized=redacted
-							.accept(role(roles.isEmpty() ? request.roles() : intersection(roles, request.roles())));
-
-					return empty(redacted) ? forbidden(request)
-							: empty(authorized) ? refused(request)
-							: action.apply(authorized);
-
-				},
-
-				error -> {
-
-					final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
-
-					return refused ? refused(request)
-							: action.apply(and());
-
-				}
-
-		).map(response -> {
-
-			if ( response.request().safe() && response.success() ) {
-				response.headers("+Vary", "Accept", "Prefer"); // !!! @@@ move to implementations
-			}
-
-			return response.headers("Link",
-					link(LDP.RDF_SOURCE, "type"),
-					link(LDP.RESOURCE, "type")
-			);
-
-		});
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+public final class Creator extends Actor<Creator> {
 
 	/*
 	 * Shared lock for serializing slug operations (concurrent graph txns may produce conflicting results).
@@ -127,7 +60,7 @@ public final class _Creator extends Actor<_Creator> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public _Creator slug(final BiFunction<Request, Collection<Statement>, String> slug) {
+	public Creator slug(final BiFunction<Request, Collection<Statement>, String> slug) {
 
 		if ( slug == null ) {
 			throw new NullPointerException("null slug");

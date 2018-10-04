@@ -29,6 +29,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.rest.HandlerAssert.dataset;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -69,13 +70,17 @@ final class ActorTest {
 
 	private static final class TestActor extends Actor<TestActor> {
 
-		private TestActor() { super(Form.relate, Form.detail); }
+		@Override public Responder handle(final Request request) {
+			return handler(Form.relate, Form.detail, shape ->
+					empty(shape)? direct(request) : driven(request, shape)
+			).handle(request);
+		}
 
-		@Override protected Responder shaped(final Request request, final Shape shape) {
+		private Responder driven(final Request request, final Shape shape) {
 			return request.reply(response -> response.status(Response.OK));
 		}
 
-		@Override protected Responder direct(final Request request) {
+		private Responder direct(final Request request) {
 			return request.reply(response -> response.status(Response.OK));
 		}
 

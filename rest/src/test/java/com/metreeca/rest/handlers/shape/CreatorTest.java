@@ -46,7 +46,7 @@ import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 
-final class _CreatorTest {
+final class CreatorTest {
 
 	private void exec(final Runnable task) {
 		new Tray().exec(task).clear();
@@ -86,7 +86,7 @@ final class _CreatorTest {
 	//// Driven ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenCreate() {
-		exec(() -> new _Creator()
+		exec(() -> new Creator()
 
 				.handle(driven())
 
@@ -115,7 +115,7 @@ final class _CreatorTest {
 	}
 
 	@Test void testDrivenCreateSlug() {
-		exec(() -> new _Creator()
+		exec(() -> new Creator()
 
 				.slug((request, model) -> "slug")
 
@@ -146,7 +146,7 @@ final class _CreatorTest {
 
 
 	@Test void testDrivenUnauthorized() {
-		exec(() -> new _Creator()
+		exec(() -> new Creator()
 
 				.handle(driven().roles(Form.none))
 
@@ -165,7 +165,7 @@ final class _CreatorTest {
 	}
 
 	@Test void testDrivenForbidden() {
-		exec(() -> new _Creator()
+		exec(() -> new Creator()
 
 				.handle(driven().body(shape()).set(or()))
 
@@ -184,7 +184,7 @@ final class _CreatorTest {
 	}
 
 	@Test void testDrivenMalformedData() {
-		exec(() -> new _Creator()
+		exec(() -> new Creator()
 
 				.handle(driven().map(body("!!!")))
 
@@ -203,7 +203,7 @@ final class _CreatorTest {
 	}
 
 	@Test void testDrivenInvalidData() {
-		exec(() -> new _Creator()
+		exec(() -> new Creator()
 
 				.handle(driven().map(body("@prefix : <http://example.com/terms#>. <>"
 						+" :forename 'Tino' ;"
@@ -225,7 +225,7 @@ final class _CreatorTest {
 	}
 
 	@Test void testDrivenRestrictedData() {
-		exec(() -> new _Creator()
+		exec(() -> new Creator()
 
 				.handle(driven()
 						.roles(Salesman))

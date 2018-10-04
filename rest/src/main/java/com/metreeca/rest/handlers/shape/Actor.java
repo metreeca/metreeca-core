@@ -41,6 +41,7 @@ import java.util.function.Function;
 import javax.json.*;
 
 import static com.metreeca.form.Shape.*;
+import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Sets.intersection;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
@@ -101,24 +102,6 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 	private Set<Value> roles=emptySet();
 
-	private final IRI task;
-	private final IRI view;
-
-
-	protected Actor(final IRI task, final IRI view) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		if ( view == null ) {
-			throw new NullPointerException("null view");
-		}
-
-		this.task=task;
-		this.view=view;
-	}
-
 
 	@SuppressWarnings("unchecked") private T self() { return (T)this; }
 
@@ -167,8 +150,8 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Responder handle(final Request request) {
-		return request.body(ShapeFormat.shape()).map(
+	protected Handler handler(final IRI task, final IRI view, final Function<Shape, Responder> action) {
+		return request -> request.body(ShapeFormat.shape()).map(
 
 				shape -> {  // !!! look for ldp:contains sub-shapes?
 
@@ -181,7 +164,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 					return empty(redacted) ? forbidden(request)
 							: empty(authorized) ? refused(request)
-							: shaped(request, authorized);
+							: action.apply(authorized);
 
 				},
 
@@ -190,14 +173,14 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 					final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
 
 					return refused ? refused(request)
-							: direct(request);
+							: action.apply(and());
 
 				}
 
 		).map(response -> {
 
 			if ( response.request().safe() && response.success() ) {
-				response.headers("+Vary", "Accept", "Prefer");
+				response.headers("+Vary", "Accept", "Prefer"); // !!! @@@ move to implementations
 			}
 
 			return response.headers("Link",
@@ -207,13 +190,6 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 		});
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	protected abstract Responder shaped(final Request request, final Shape shape);
-
-	protected abstract Responder direct(final Request request);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
