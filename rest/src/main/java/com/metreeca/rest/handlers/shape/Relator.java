@@ -105,8 +105,14 @@ public final class Relator extends Actor<Relator> {
 
 	@Override public Responder handle(final Request request) {
 		return handler(Form.relate, Form.detail, shape ->
+
 				empty(shape)? direct(request) : driven(request, shape)
-		).handle(request);
+
+		).handle(request).map(response ->
+
+				response.success() ? response.headers("Vary", "Accept") : response
+
+		);
 	}
 
 

@@ -77,50 +77,68 @@ public final class Creator extends Actor<Creator> {
 	@Override public Responder handle(final Request request) {
 		return request.query().isEmpty() ? request.body(rdf()).map(
 
-				model -> handler(Form.create, Form.detail, shape -> request.reply(response -> graph.update(connection -> {
+				model -> handler(Form.create, Form.detail, shape ->
 
-					synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
+						empty(shape) ? direct(request, model) : driven(request, model, shape)
 
-						final IRI source=request.item();
-						final IRI target=iri(request.stem(), slug.apply(request, model));
-
-						model.addAll(shape // add implied statements
-								.accept(mode(Form.verify))
-								.accept(new Outliner(source))
-						);
-
-						final Report report=new SPARQLEngine(connection).create(target, shape, trace(rewrite(
-								model, source, target
-						)));
-
-						if ( report.assess(Issue.Level.Error) ) { // shape violations
-
-							connection.rollback();
-
-							// !!! rewrite report value references to original target iri
-							// !!! rewrite references to external base IRI
-
-							return response.map(new Failure<>()
-									.status(Response.UnprocessableEntity)
-									.error("data-invalid")
-									.trace(report(report)));
-
-						} else { // valid data
-
-							connection.commit();
-
-							return response
-									.status(Response.Created)
-									.header("Location", target.stringValue());
-
-						}
-					}
-
-				}))).handle(request),
+				).handle(request),
 
 				request::reply
 
 		) : request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Responder direct(final Request request, final Collection<Statement> model) {
+		return request.reply(response -> response.map(new Failure<>()
+				.status(Response.NotImplemented)
+				.cause("shapeless resource creation not supported"))
+		);
+	}
+
+	private Responder driven(final Request request, final Collection<Statement> model, final Shape shape) {
+		return request.reply(response -> graph.update(connection -> {
+
+			synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
+
+				final IRI source=request.item();
+				final IRI target=iri(request.stem(), slug.apply(request, model));
+
+				model.addAll(shape // add implied statements
+						.accept(mode(Form.verify))
+						.accept(new Outliner(source))
+				);
+
+				final Report report=new SPARQLEngine(connection).create(target, shape, trace(rewrite(
+						model, source, target
+				)));
+
+				if ( report.assess(Issue.Level.Error) ) { // shape violations
+
+					connection.rollback();
+
+					// !!! rewrite report value references to original target iri
+					// !!! rewrite references to external base IRI
+
+					return response.map(new Failure<>()
+							.status(Response.UnprocessableEntity)
+							.error("data-invalid")
+							.trace(report(report)));
+
+				} else { // valid data
+
+					connection.commit();
+
+					return response
+							.status(Response.Created)
+							.header("Location", target.stringValue());
+
+				}
+			}
+
+		}));
 	}
 
 

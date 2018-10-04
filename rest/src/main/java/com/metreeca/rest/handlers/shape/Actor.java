@@ -179,10 +179,6 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 		).map(response -> {
 
-			if ( response.request().safe() && response.success() ) {
-				response.headers("+Vary", "Accept", "Prefer"); // !!! @@@ move to implementations
-			}
-
 			return response.headers("Link",
 					link(LDP.RDF_SOURCE, "type"),
 					link(LDP.RESOURCE, "type")
