@@ -17,10 +17,8 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.JSONAdapter;
-import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
 
@@ -38,7 +36,6 @@ import java.util.*;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -131,11 +128,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 			final List<String> errors=errorCollector.getErrors();
 			final List<String> warnings=errorCollector.getWarnings();
 
-			if ( fatals.isEmpty() ) { // add shape-implied statements and return model
-
-				focus.ifPresent(f -> shape.ifPresent(s ->
-						model.addAll(s.accept(mode(Form.verify)).accept(new Outliner(f)))
-				));
+			if ( fatals.isEmpty() ) { // return model
 
 				return value(model);
 

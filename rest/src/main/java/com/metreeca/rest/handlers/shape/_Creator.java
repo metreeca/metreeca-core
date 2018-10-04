@@ -19,6 +19,7 @@ package com.metreeca.rest.handlers.shape;
 
 
 import com.metreeca.form.*;
+import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.ShapeFormat;
@@ -42,14 +43,72 @@ import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.handlers.shape.Actor.link;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.disjoint;
 import static java.util.UUID.randomUUID;
 
 
-public final class _Creator implements Handler {
+public final class _Creator extends Actor<_Creator> {
+
+	public _Creator() {
+		super(Form.create, Form.detail);
+	}
+
+	@Override protected Responder shaped(final Request request, final Shape shape) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! remove
+	}
+
+	@Override protected Responder direct(final Request request) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! remove
+	}
+
+
+	private final Set<Value> roles=new HashSet<>(); // !!!
+
+	private Handler handler(final IRI task, final IRI view, final Function<Shape, Responder> action) {
+		return request -> request.body(ShapeFormat.shape()).map(
+
+				shape -> {  // !!! look for ldp:contains sub-shapes?
+
+					final Shape redacted=shape
+							.accept(task(task))
+							.accept(view(view));
+
+					final Shape authorized=redacted
+							.accept(role(roles.isEmpty() ? request.roles() : intersection(roles, request.roles())));
+
+					return empty(redacted) ? forbidden(request)
+							: empty(authorized) ? refused(request)
+							: action.apply(authorized);
+
+				},
+
+				error -> {
+
+					final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
+
+					return refused ? refused(request)
+							: action.apply(and());
+
+				}
+
+		).map(response -> {
+
+			if ( response.request().safe() && response.success() ) {
+				response.headers("+Vary", "Accept", "Prefer"); // !!! @@@ move to implementations
+			}
+
+			return response.headers("Link",
+					link(LDP.RDF_SOURCE, "type"),
+					link(LDP.RESOURCE, "type")
+			);
+
+		});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/*
 	 * Shared lock for serializing slug operations (concurrent graph txns may produce conflicting results).
@@ -82,50 +141,6 @@ public final class _Creator implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Set<Value> roles=new HashSet<>(); // !!!
-
-	private Handler handler(final IRI task, final IRI view, final Function<Shape, Responder> action) {
-
-		return request -> request.body(ShapeFormat.shape()).map(
-
-				shape -> {  // !!! look for ldp:contains sub-shapes?
-
-					final Shape redacted=shape
-							.accept(task(task))
-							.accept(view(view));
-
-					final Shape authorized=redacted
-							.accept(role(roles.isEmpty() ? request.roles() : intersection(roles, request.roles())));
-
-					return empty(redacted) ? forbidden(request)
-							: empty(authorized) ? refused(request)
-							: action.apply(authorized);
-
-				},
-
-				error -> {
-
-					final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
-
-					return refused ? refused(request)
-							: action.apply(and());
-
-				}
-
-		).map(response -> {
-
-			if ( response.request().safe() && response.success() ) {
-				response.headers("+Vary", "Accept", "Prefer"); // !!! move to implementations
-			}
-
-			return response.headers("Link",
-					link(LDP.RDF_SOURCE, "type"),
-					link(LDP.RESOURCE, "type")
-			);
-
-		});
-	}
-
 	@Override public Responder handle(final Request request) {
 		return request.query().isEmpty() ? request.body(rdf()).map(
 
@@ -133,26 +148,41 @@ public final class _Creator implements Handler {
 
 					synchronized ( lock ) { // attempt to serialize slug generation from multiple txns
 
-						final String name=slug.apply(request, model);
+						final IRI source=request.item();
+						final IRI target=iri(request.stem(), slug.apply(request, model));
 
-						final IRI iri=iri(request.stem(), name); // assign an IRI to the resource to be created
-						final Collection<Statement> rewritten=rewrite(model, request.item(), iri); // rewrite to IRI
+						model.addAll(shape // add implied statements
+								.accept(mode(Form.verify))
+								.accept(new Outliner(source))
+						);
 
-						final Report report=new SPARQLEngine(connection).create(iri, shape, /* !!! trace */(rewritten));
+						final Report report=new SPARQLEngine(connection).create(target, shape, trace(rewrite(
+								model, source, target
+						)));
 
-						// shape violations
-						// !!! rewrite report value references to original target iri
-						// !!! rewrite references to external base IRI
-						// valid data
-						return request.reply(response -> report.assess(Issue.Level.Error)
-										? response.map(new Failure<>()
+						return request.reply(response -> {
+							if ( report.assess(Issue.Level.Error) ) { // shape violations
+
+								connection.rollback();
+
+								// !!! rewrite report value references to original target iri
+								// !!! rewrite references to external base IRI
+
+								return response.map(new Failure<>()
 										.status(Response.UnprocessableEntity)
 										.error("data-invalid")
-								// !!! .cause(report(report))
-								) : response
+										.trace(report(report)));
+
+							} else { // valid data
+
+								connection.commit();
+
+								return response
 										.status(Response.Created)
-										.header("Location", iri.stringValue())
-						);
+										.header("Location", target.stringValue());
+
+							}
+						});
 					}
 
 				})).handle(request),
@@ -185,7 +215,6 @@ public final class _Creator implements Handler {
 			// !!! custom iri stem/pattern
 			// !!! client naming hints (http://www.w3.org/TR/ldp/ §5.2.3.10 -> https://tools.ietf.org/html/rfc5023#section-9.7)
 			// !!! normalize slug (https://tools.ietf.org/html/rfc5023#section-9.7)
-			// !!! support UUID hint
 			// !!! 409 Conflict https://tools.ietf.org/html/rfc7231#section-6.5.8 for clashing slug?
 
 			final String stem=request.stem();

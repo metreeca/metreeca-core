@@ -18,6 +18,7 @@
 package com.metreeca.rest.handlers.shape;
 
 import com.metreeca.form.Form;
+import com.metreeca.form.things.Transputs;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -29,6 +30,9 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import java.io.StringReader;
+import java.util.function.Function;
+
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.ValueAssert.assertThat;
@@ -36,7 +40,8 @@ import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
@@ -47,13 +52,14 @@ final class _CreatorTest {
 		new Tray().exec(task).clear();
 	}
 
+
 	private Request direct() {
 		return new Request()
 				.roles(Manager)
 				.method(Request.POST)
 				.base(Base)
 				.path("/employees/")
-				.body(rdf()).set(decode("<>"
+				.map(body("@prefix : <http://example.com/terms#>. <>"
 						+" :forename 'Tino' ;"
 						+" :surname 'Faussone' ;"
 						+" :email 'tfaussone@classicmodelcars.com' ;"
@@ -67,6 +73,10 @@ final class _CreatorTest {
 				.body(shape()).set(Employee);
 	}
 
+
+	private Function<Request, Request> body(final String rdf) {
+		return request -> request.body(input()).set(() -> Transputs.input(new StringReader(rdf)));
+	}
 
 	private Model graph() {
 		return tool(Graph.Factory).query(connection -> { return export(connection); });
@@ -82,7 +92,8 @@ final class _CreatorTest {
 
 				.accept(response -> {
 
-					final IRI location=response.header("Location")
+					final IRI location=response
+							.header("Location")
 							.map(Values::iri)
 							.orElse(null);
 
@@ -161,7 +172,7 @@ final class _CreatorTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(Response.Forbidden)
 							.doesNotHaveHeader("Location")
 							.doesNotHaveBody();
 
@@ -175,17 +186,14 @@ final class _CreatorTest {
 	@Test void testDrivenMalformedData() {
 		exec(() -> new _Creator()
 
-				.handle(driven().body(shape()).set(or()))
+				.handle(driven().map(body("!!!")))
 
 				.accept(response -> {
 
 					assertThat(response)
 							.hasStatus(Response.BadRequest)
 							.doesNotHaveHeader("Location")
-							.doesNotHaveBody();
-
-					// !!! assertTrue("error detailed", response.json() instanceof Map);
-
+							.hasBodyThat(json()).satisfies(object -> object.getString("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
@@ -197,7 +205,7 @@ final class _CreatorTest {
 	@Test void testDrivenInvalidData() {
 		exec(() -> new _Creator()
 
-				.handle(driven().body(rdf()).set(decode("<>"
+				.handle(driven().map(body("@prefix : <http://example.com/terms#>. <>"
 						+" :forename 'Tino' ;"
 						+" :surname 'Faussone'. "
 				)))
@@ -207,9 +215,7 @@ final class _CreatorTest {
 					assertThat(response)
 							.hasStatus(Response.UnprocessableEntity)
 							.doesNotHaveHeader("Location")
-							.doesNotHaveBody();
-
-					// !!! assertTrue("error detailed", response.json() instanceof Map);
+							.hasBodyThat(json()).satisfies(object -> object.getString("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
@@ -227,11 +233,9 @@ final class _CreatorTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.BadRequest)  // !!! vs Forbidden / UnprocessableEntity
+							.hasStatus(Response.UnprocessableEntity)
 							.doesNotHaveHeader("Location")
-							.doesNotHaveBody();
-
-					// !!! assertTrue("error detailed", response.json() instanceof Map);
+							.hasBodyThat(json()).satisfies(object -> object.getString("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
