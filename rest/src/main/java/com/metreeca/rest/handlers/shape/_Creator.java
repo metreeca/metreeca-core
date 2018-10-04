@@ -144,9 +144,9 @@ public final class _Creator extends Actor<_Creator> {
 	@Override public Responder handle(final Request request) {
 		return request.query().isEmpty() ? request.body(rdf()).map(
 
-				model -> handler(Form.create, Form.detail, shape -> graph.update(connection -> {
+				model -> handler(Form.create, Form.detail, shape -> request.reply(response -> graph.update(connection -> {
 
-					synchronized ( lock ) { // attempt to serialize slug generation from multiple txns
+					synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
 
 						final IRI source=request.item();
 						final IRI target=iri(request.stem(), slug.apply(request, model));
@@ -160,32 +160,30 @@ public final class _Creator extends Actor<_Creator> {
 								model, source, target
 						)));
 
-						return request.reply(response -> {
-							if ( report.assess(Issue.Level.Error) ) { // shape violations
+						if ( report.assess(Issue.Level.Error) ) { // shape violations
 
-								connection.rollback();
+							connection.rollback();
 
-								// !!! rewrite report value references to original target iri
-								// !!! rewrite references to external base IRI
+							// !!! rewrite report value references to original target iri
+							// !!! rewrite references to external base IRI
 
-								return response.map(new Failure<>()
-										.status(Response.UnprocessableEntity)
-										.error("data-invalid")
-										.trace(report(report)));
+							return response.map(new Failure<>()
+									.status(Response.UnprocessableEntity)
+									.error("data-invalid")
+									.trace(report(report)));
 
-							} else { // valid data
+						} else { // valid data
 
-								connection.commit();
+							connection.commit();
 
-								return response
-										.status(Response.Created)
-										.header("Location", target.stringValue());
+							return response
+									.status(Response.Created)
+									.header("Location", target.stringValue());
 
-							}
-						});
+						}
 					}
 
-				})).handle(request),
+				}))).handle(request),
 
 				request::reply
 
