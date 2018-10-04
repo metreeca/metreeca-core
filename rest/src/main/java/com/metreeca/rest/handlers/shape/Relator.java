@@ -106,7 +106,7 @@ public final class Relator extends Actor<Relator> {
 	@Override public Responder handle(final Request request) {
 		return handler(Form.relate, Form.detail, shape ->
 
-				empty(shape)? direct(request) : driven(request, shape)
+				empty(shape) ? direct(request) : driven(request, shape)
 
 		).handle(request).map(response ->
 
@@ -135,60 +135,55 @@ public final class Relator extends Actor<Relator> {
 	}
 
 	private Responder driven(final Request request, final Shape shape) {
-		return consumer -> graph.query(connection -> {
 
-			final IRI focus=request.item();
+		final IRI focus=request.item();
 
-			request.query(and(shape, all(focus))).map(query -> { // focused shape
+		return request.query(and(shape, all(focus))).map(query -> request.reply(response -> graph.query(connection -> {
 
-				final Collection<Statement> model=new SPARQLEngine(connection)
-						.browse(query)
-						.values()
-						.stream()
-						.findFirst()
-						.orElseGet(Collections::emptySet);
+			final Collection<Statement> model=new SPARQLEngine(connection)
+					.browse(query)
+					.values()
+					.stream()
+					.findFirst()
+					.orElseGet(Collections::emptySet);
 
-				return request.reply(response -> {
-					if ( model.isEmpty() ) {
+			if ( model.isEmpty() ) {
 
-						// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
-						// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
-						// !!! optimize using a single query if working on a remote repository
+				// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
+				// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
+				// !!! optimize using a single query if working on a remote repository
 
-						final boolean contains=connection.hasStatement(focus, null, null, true)
-								|| connection.hasStatement(null, null, focus, true);
+				final boolean contains=connection.hasStatement(focus, null, null, true)
+						|| connection.hasStatement(null, null, focus, true);
 
-						return contains
-								? response.status(Response.Forbidden) // resource known but empty envelope for user
-								: response.status(Response.NotFound); // !!! 404 under strict security
+				return contains
+						? response.status(Response.Forbidden) // resource known but empty envelope for user
+						: response.status(Response.NotFound); // !!! 404 under strict security
 
-					} else {
+			} else {
 
-						return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
+				return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
 
-							@Override public Response visit(final Edges edges) {
-								return r.body(shape()).set(edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
-										.body(rdf()).set(model);
-							}
-
-							@Override public Response visit(final Stats stats) {
-								return r.body(shape()).set(StatsShape)
-										.body(rdf()).set(rewrite(model, Form.meta, focus));
-							}
-
-							@Override public Response visit(final Items items) {
-								return r.body(shape()).set(ItemsShape)
-										.body(rdf()).set(rewrite(model, Form.meta, focus));
-							}
-
-						}));
-
+					@Override public Response visit(final Edges edges) {
+						return r.body(shape()).set(edges.getShape().accept(mode(Form.verify))) // hide filtering constraints
+								.body(rdf()).set(model);
 					}
-				});
 
-			}, request::reply).accept(consumer);
+					@Override public Response visit(final Stats stats) {
+						return r.body(shape()).set(StatsShape)
+								.body(rdf()).set(rewrite(model, Form.meta, focus));
+					}
 
-		});
+					@Override public Response visit(final Items items) {
+						return r.body(shape()).set(ItemsShape)
+								.body(rdf()).set(rewrite(model, Form.meta, focus));
+					}
+
+				}));
+
+			}
+
+		})), request::reply);
 	}
 
 

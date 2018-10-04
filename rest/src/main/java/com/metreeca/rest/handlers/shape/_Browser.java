@@ -20,6 +20,8 @@ package com.metreeca.rest.handlers.shape;
 
 public final class _Browser {
 
+	// !!! Link headers
+
 	//public static _Browser browser(final Shape shape) {
 	//
 	//	if ( shape == null ) {
