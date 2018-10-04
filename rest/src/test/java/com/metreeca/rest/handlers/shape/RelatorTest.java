@@ -47,6 +47,7 @@ final class RelatorTest {
 				.clear();
 	}
 
+	
 	private Request direct() {
 		return new Request()
 				.method(Request.GET)

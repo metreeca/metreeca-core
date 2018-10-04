@@ -62,6 +62,7 @@ import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.term;
 
@@ -612,7 +613,7 @@ final class SPARQLReaderTest {
 
 	private Collection<Statement> model(final String query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
-			return ValuesTest.construct(connection, query);
+			return construct(connection, query);
 		}
 	}
 

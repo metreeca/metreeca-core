@@ -191,7 +191,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 		return request -> request.body(ShapeFormat.shape()).map(
 
-				shape -> {  // !!! look for ldp:contains sub-shapes?
+				shape -> {
 
 					final Shape redacted=shape
 							.accept(task(task))
@@ -215,9 +215,9 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 				}
 
-		).map(response -> response.headers("Link",
-				link(LDP.RDF_SOURCE, "type"),
-				link(LDP.RESOURCE, "type")
+		).map(response -> response.headers("+Link",
+				link(LDP.RESOURCE, "type"),
+				link(LDP.RDF_SOURCE, "type")
 		));
 	}
 

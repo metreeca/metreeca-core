@@ -55,8 +55,8 @@ import static java.util.Objects.requireNonNull;
 			throw new NullPointerException("null mapper");
 		}
 
-		return consumer -> accept(value -> consumer.accept(
-				requireNonNull(mapper.apply(value), "null mapper return value"))
+		return consumer -> accept(response -> consumer.accept(
+				requireNonNull(mapper.apply(response), "null mapper return value"))
 		);
 	}
 
