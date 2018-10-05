@@ -233,7 +233,8 @@ public abstract class Gateway implements ServletContextListener {
 
 				try { // ;( request.getParts() is not available to filters…
 
-					final List<FileItem> items=isMultipartContent(request) ? tool(Upload).parseRequest(request) : emptyList();
+					final List<FileItem> items=isMultipartContent(request) ?
+							tool(Upload).parseRequest(request) : emptyList();
 
 					handler.handle(request(request, items)).accept(r -> response(response, r));
 
