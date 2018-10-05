@@ -77,7 +77,7 @@ public final class Server implements Wrapper {
 
 	//// Pre-Processing ////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Request query(final Request request) { // parse parameters from query string
+	private Request query(final Request request) { // parse parameters from query string, if not already set
 		return request.parameters().isEmpty() && request.method().equals(GET)
 				? request.parameters(parse(request.query()))
 				: request;
