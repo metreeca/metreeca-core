@@ -133,6 +133,30 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 		return this;
 	}
 
+	public ResponseAssert hasHeader(final String name, final String value) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		isNotNull();
+
+		final String found=actual.header(name).orElse(null);
+
+		if ( !value.equals(found)) {
+			failWithMessage(
+					"expected response to have <%s> header with value <%s> but found <%s>",
+					name, value, found
+			);
+		}
+
+		return this;
+	}
+
 	public ResponseAssert doesNotHaveHeader(final String name) {
 
 		if ( name == null ) {
