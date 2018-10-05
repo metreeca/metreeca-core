@@ -44,8 +44,8 @@ import static java.util.Collections.emptyList;
 
 final class ProcessorTest {
 
-	private void exec(final Runnable task) {
-		new Tray().exec(task).clear();
+	private void exec(final Runnable... tasks) {
+		new Tray().exec(tasks).clear();
 	}
 
 
@@ -154,58 +154,42 @@ final class ProcessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testExecuteUpdateScriptOnRequestFocus() {
-		exec(() -> {
+		exec(graph(decode("<test> rdf:value rdf:first.")), () -> new Processor()
 
-			tool(Graph.Factory).update(connection -> {
-				connection.add(decode("<test> rdf:value rdf:first."));
-			});
+				.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
+				.wrap((Handler)request -> request.reply(response -> response.status(Response.OK)))
 
-			new Processor()
+				.handle(new Request()
+						.method(Request.POST)
+						.base(Base)
+						.path("/test"))
 
-					.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-					.wrap((Handler)request -> request.reply(response -> response.status(Response.OK)))
-
-					.handle(new Request()
-							.method(Request.POST)
-							.base(Base)
-							.path("/test"))
-
-					.accept(response -> assertThat(graph())
-							.as("repository updated")
-							.isIsomorphicTo(decode("<test> rdf:value rdf:first, rdf:rest."))
-					);
-
-		});
+				.accept(response -> assertThat(graph())
+						.as("repository updated")
+						.isIsomorphicTo(decode("<test> rdf:value rdf:first, rdf:rest."))
+				));
 	}
 
 	@Test void testExecuteUpdateScriptOnResponseLocation() {
-		exec(() -> {
+		exec(graph(decode("<test> rdf:value rdf:first.")), () -> new Processor()
 
-			tool(Graph.Factory).update(connection -> {
-				connection.add(decode("<test> rdf:value rdf:first."));
-			});
+				.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
+				.wrap((Handler)request -> request.reply(response -> response
+						.status(Response.OK)
+						.header("Location", Base+"test")))
 
-			new Processor()
+				.handle(new Request()
+						.method(Request.POST)
+						.base(Base)
+						.path("/"))
 
-					.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-					.wrap((Handler)request -> request.reply(response -> response
-							.status(Response.OK)
-							.header("Location", Base+"test")))
+				.accept(response -> tool(Graph.Factory).query(connection -> {
 
-					.handle(new Request()
-							.method(Request.POST)
-							.base(Base)
-							.path("/"))
+					assertThat(decode("<test> rdf:value rdf:first, rdf:rest."))
+							.as("repository updated")
+							.isIsomorphicTo(export(connection));
 
-					.accept(response -> tool(Graph.Factory).query(connection -> {
-
-						assertThat(decode("<test> rdf:value rdf:first, rdf:rest."))
-								.as("repository updated")
-								.isIsomorphicTo(export(connection));
-
-					}));
-
-		});
+				})));
 	}
 
 }
