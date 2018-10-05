@@ -44,6 +44,10 @@ import static java.util.Objects.requireNonNull;
  *
  * <p>Process {@linkplain RDFFormat RDF} payloads for incoming request and outgoing responses and executes SPARQL
  * Update post-processing scripts.</p>
+ *
+ * <p>If the incoming request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single
+ * transaction on the system {@linkplain Graph#Factory graph database}, which is automatically committed on {@linkplain
+ * Response#success() successful} response or rolled back otherwise.</p>
  */
 public final class Processor implements Wrapper {
 
@@ -182,7 +186,11 @@ public final class Processor implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return pre().wrap(post()).wrap(update()).wrap(handler);
+		return new Connector()
+				.wrap(pre())
+				.wrap(post())
+				.wrap(update())
+				.wrap(handler);
 	}
 
 

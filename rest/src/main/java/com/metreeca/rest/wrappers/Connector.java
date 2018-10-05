@@ -67,7 +67,6 @@ public final class Connector implements Wrapper {
 						return response;
 
 					}).accept(consumer);
-
 				});
 
 			}
