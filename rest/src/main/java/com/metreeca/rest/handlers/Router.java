@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 
 /**
@@ -53,6 +54,11 @@ import java.util.function.Function;
  */
 public final class Router implements Handler {
 
+	private static final Pattern PathPattern=Pattern.compile("^(/[-+_\\w]+)*(/\\*?)?$");
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Map<String, Handler> handlers=new TreeMap<>(Comparator
 			.comparingInt(String::length).reversed() // longest paths first
 			.thenComparing(String::compareTo) // then alphabetically
@@ -70,7 +76,8 @@ public final class Router implements Handler {
 	 * @return this router
 	 *
 	 * @throws NullPointerException     if either {@code path} or {@code handler} is {@code null}
-	 * @throws IllegalArgumentException if {@code path} doesn't include a leading slash
+	 * @throws IllegalArgumentException if {@code path} doesn't match the {@code ^(/[-+_\w]+)*(/\*?)?$} regular
+	 *                                  expression
 	 * @throws IllegalStateException    if {@code path} is already bound to a path
 	 */
 	public Router path(final String path, final Handler handler) {
@@ -79,8 +86,8 @@ public final class Router implements Handler {
 			throw new NullPointerException("null path");
 		}
 
-		if ( !path.startsWith("/") ) {
-			throw new IllegalArgumentException("missing leading / in path {"+path+"}");
+		if ( !PathPattern.matcher(path).matches() ) {
+			throw new IllegalArgumentException("malformed path <"+path+">");
 		}
 
 		if ( handler == null ) {
@@ -88,7 +95,7 @@ public final class Router implements Handler {
 		}
 
 		if ( handlers.putIfAbsent(normalize(path), handler) != null ) {
-			throw new IllegalStateException("path is already mapped {"+path+"}");
+			throw new IllegalStateException("path already mapped <"+path+">");
 		}
 
 		return this;

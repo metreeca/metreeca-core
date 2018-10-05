@@ -21,6 +21,7 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -30,6 +31,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
 final class RouterTest {
+
+	private Request request(final String path) {
+		return new Request().path(path);
+	}
 
 	private Handler handler(final int id) {
 		return request -> request.reply(response -> response.status(id));
@@ -56,8 +61,7 @@ final class RouterTest {
 
 				.path("/one", handler(100))
 
-				.handle(new Request()
-						.path("/two"))
+				.handle(request("/two"))
 
 				.accept(response -> assertThat(response)
 						.as("request ignored").hasStatus(0));
@@ -105,6 +109,23 @@ final class RouterTest {
 	}
 
 
+	@Disabled @Test void test() {
+
+		final int exact=100; // exact match with optional trailing slash
+		final int prefix=200; // prefix match with optional suffix
+		final int subtree=300; // prefix match with non empty suffix
+
+		final Router router=new Router()
+
+				.path("/p", handler(exact))
+				.path("/p/", handler(prefix))
+				.path("/p/*", handler(subtree));
+
+		router.handle(request("/p")).accept(response -> assertThat(response).hasStatus(exact));
+
+
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testMatchExactPathIgnoringTrailingSlashes() {
@@ -114,19 +135,19 @@ final class RouterTest {
 				.path("/one", handler(100))
 				.path("/two/", handler(200));// trailing slash
 
-		router.handle(new Request().path("/one")).accept(response ->
+		router.handle(request("/one")).accept(response ->
 				assertThat(response).as("exact match without trailing slash").hasStatus(100));
 
-		router.handle(new Request().path("/one/")).accept(response ->
+		router.handle(request("/one/")).accept(response ->
 				assertThat(response).as("exact match with trailing slash").hasStatus(100));
 
-		router.handle(new Request().path("/two")).accept(response ->
+		router.handle(request("/two")).accept(response ->
 				assertThat(response).as("exact match without trailing slash").hasStatus(200));
 
-		router.handle(new Request().path("/two/")).accept(response ->
+		router.handle(request("/two/")).accept(response ->
 				assertThat(response).as("exact match with trailing slash").hasStatus(200));
 
-		router.handle(new Request().path("/three/")).accept(response ->
+		router.handle(request("/three/")).accept(response ->
 				assertThat(response).as("no match").hasStatus(0));
 	}
 
@@ -137,10 +158,10 @@ final class RouterTest {
 				.path("/one/*", handler(100))
 				.path("/one/two/*", handler(200));// trailing slash
 
-		router.handle(new Request().path("/one/zero")).accept(response ->
+		router.handle(request("/one/zero")).accept(response ->
 				assertThat(response).as("prefix match").hasStatus(100));
 
-		router.handle(new Request().path("/one/two/zero")).accept(response ->
+		router.handle(request("/one/two/zero")).accept(response ->
 						assertThat(response).as("longest prefix match").hasStatus(200));
 
 	}
@@ -152,10 +173,10 @@ final class RouterTest {
 				.path("/one/*", handler(100))
 				.path("/two/*", handler(200));// trailing slash
 
-		router.handle(new Request().path("/one/zero"))
+		router.handle(request("/one/zero"))
 				.accept(response -> assertThat(response.status()).isEqualTo(100));
 
-		router.handle(new Request().path("/two/zero"))
+		router.handle(request("/two/zero"))
 				.accept(response -> assertThat(response.status()).isEqualTo(200));
 
 	}
@@ -167,13 +188,13 @@ final class RouterTest {
 				.path("/one/", handler(100))
 				.path("/one/*", handler(500));// trailing slash
 
-		router.handle(new Request().path("/one")).accept(response ->
+		router.handle(request("/one")).accept(response ->
 						assertThat(response).as("collection match").hasStatus(100));
 
-		router.handle(new Request().path("/one/")).accept(response ->
+		router.handle(request("/one/")).accept(response ->
 						assertThat(response).as("collection match trailing slash").hasStatus(100));
 
-		router.handle(new Request().path("/one/two")).accept(response ->
+		router.handle(request("/one/two")).accept(response ->
 						assertThat(response).as("resource match").hasStatus(500));
 
 	}
