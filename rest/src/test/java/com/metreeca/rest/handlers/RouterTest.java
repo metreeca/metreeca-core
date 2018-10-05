@@ -17,11 +17,8 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -36,6 +33,14 @@ final class RouterTest {
 		return new Request().path(path);
 	}
 
+	private Handler handler() {
+		return request -> request.reply(response -> response
+				.status(Response.OK)
+				.header("base", request.base())
+				.header("path", request.path())
+		);
+	}
+
 	private Handler handler(final int id) {
 		return request -> request.reply(response -> response.status(id));
 	}
@@ -45,11 +50,11 @@ final class RouterTest {
 
 	@Test void testCheckPaths() {
 
-		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy( () -> new Router()
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new Router()
 				.path("one", handler(100))
 		);
 
-		assertThatExceptionOfType(IllegalStateException.class).isThrownBy( () -> new Router()
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new Router()
 				.path("/one", handler(100))
 				.path("/one", handler(100))
 		);
@@ -67,64 +72,79 @@ final class RouterTest {
 						.as("request ignored").hasStatus(0));
 	}
 
-	@Test void testRewriteBaseAndPath() {
 
-		new Router()
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				.path("/one", request -> { // exact match
+	@Test void testMatchesExactPath() {
 
+		final Router router=new Router().path("/one", handler());
 
-					assertThat(request.base()).as("base not rewritten").isEqualTo("http://example.org/");
-					assertThat(request.path()).as("path not rewritten").isEqualTo("/one/");
+		router.handle(request("/one")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/"));
 
-					return request.reply(response -> response.status(Response.OK));
+		router.handle(request("/one/")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/"));
 
-				})
+		router.handle(request("/one/two")).accept(response -> assertThat(response)
+				.hasStatus(0));
 
-				.handle(new Request()
-						.base("http://example.org/")
-						.path("/one/"))
+	}
 
-				.accept(response -> assertThat(response)
-								.as("request processed").hasStatus(Response.OK));
+	@Test void testMatchesPrefixPath() {
 
-		new Router()
+		final Router router=new Router().path("/one/", handler());
 
-				.path("/one/*", request -> { // prefix match
+		router.handle(request("/one")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/"));
 
+		router.handle(request("/one/")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/"));
 
-					assertThat(request.base()).as("base rewritten").isEqualTo("http://example.org/one/");
-					assertThat(request.path()).as("path rewritten").isEqualTo("/two/three");
+		router.handle(request("/one/two")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/two"));
 
-					return request.reply(response -> response.status(Response.OK));
+	}
 
-				})
+	@Test void testMatchesSubtreePath() {
 
-				.handle(new Request()
-						.base("http://example.org/")
-						.path("/one/two/three"))
+		final Router router=new Router().path("/one/*", handler());
 
-				.accept(response -> assertThat(response.status())
-						.as("request processed").isEqualTo(Response.OK));
+		router.handle(request("/one")).accept(response -> assertThat(response)
+				.hasStatus(0));
+
+		router.handle(request("/one/")).accept(response -> assertThat(response)
+				.hasStatus(0));
+
+		router.handle(request("/one/two")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/two"));
+
 	}
 
 
-	@Disabled @Test void test() {
+	@Test void testMatchesRootExactPath() {
 
-		final int exact=100; // exact match with optional trailing slash
-		final int prefix=200; // prefix match with optional suffix
-		final int subtree=300; // prefix match with non empty suffix
+		final Router router=new Router().path("/", handler());
 
-		final Router router=new Router()
+		router.handle(request("/")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK).hasHeader("base", "app:/").hasHeader("path", "/"));
 
-				.path("/p", handler(exact))
-				.path("/p/", handler(prefix))
-				.path("/p/*", handler(subtree));
-
-		router.handle(request("/p")).accept(response -> assertThat(response).hasStatus(exact));
-
+		router.handle(request("/one")).accept(response -> assertThat(response)
+				.hasStatus(0));
 
 	}
+
+	@Test void testMatchesRootSubtreePath() {
+
+		final Router router=new Router().path("/*", handler());
+
+		router.handle(request("/")).accept(response -> assertThat(response)
+				.hasStatus(0));
+
+		router.handle(request("/one")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK).hasHeader("base", "app:/").hasHeader("path", "/one"));
+
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -151,22 +171,38 @@ final class RouterTest {
 				assertThat(response).as("no match").hasStatus(0));
 	}
 
-	@Test void testMatchLongestPrefix() {
+	@Test void testPreferExactMatch() {
+
+		final int exact=100;
+		final int prefix=200;
+
+		final Router router=new Router()
+
+				.path("/one", handler(exact))
+				.path("/one/", handler(prefix));
+
+		router.handle(request("/one")).accept(response -> assertThat(response).hasStatus(exact));
+		router.handle(request("/one/")).accept(response -> assertThat(response).hasStatus(exact));
+		router.handle(request("/one/two")).accept(response -> assertThat(response).hasStatus(prefix));
+
+	}
+
+	@Test void testPreferLongestPrefix() {
 
 		final Router router=new Router()
 
 				.path("/one/*", handler(100))
-				.path("/one/two/*", handler(200));// trailing slash
+				.path("/one/two/*", handler(200));
 
 		router.handle(request("/one/zero")).accept(response ->
 				assertThat(response).as("prefix match").hasStatus(100));
 
 		router.handle(request("/one/two/zero")).accept(response ->
-						assertThat(response).as("longest prefix match").hasStatus(200));
+				assertThat(response).as("longest prefix match").hasStatus(200));
 
 	}
 
-	@Test void testManagesPrefixesOfEqualLength() {
+	@Test void testPreferLexicographicallyLesserPrefix() {
 
 		final Router router=new Router()
 
@@ -178,24 +214,6 @@ final class RouterTest {
 
 		router.handle(request("/two/zero"))
 				.accept(response -> assertThat(response.status()).isEqualTo(200));
-
-	}
-
-	@Test void testNormalizePaths() {
-
-		final Router router=new Router()
-
-				.path("/one/", handler(100))
-				.path("/one/*", handler(500));// trailing slash
-
-		router.handle(request("/one")).accept(response ->
-						assertThat(response).as("collection match").hasStatus(100));
-
-		router.handle(request("/one/")).accept(response ->
-						assertThat(response).as("collection match trailing slash").hasStatus(100));
-
-		router.handle(request("/one/two")).accept(response ->
-						assertThat(response).as("resource match").hasStatus(500));
 
 	}
 

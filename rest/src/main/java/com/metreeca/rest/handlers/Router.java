@@ -22,9 +22,7 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Responder;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -33,24 +31,25 @@ import java.util.regex.Pattern;
  * Path-based request router.
  *
  * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#path()
- * path} according to the following rules:</p>
- *
- * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
- * opportunity to handle the request.</p>
+ * path} according to the following rules, in order of precedence and ignoring trailing question marks:</p>
  *
  * <ul>
  *
- * <li>paths with a trailing wildcard (e.g. {@code /container/*}) match any resource path sharing the same prefix
- * (e.g {@code /container}, {@code /container/resource});</li>
+ * <li>paths with no trailing slash or wildcard ({@code /<resource>}) match resource path exactly, ignoring trailing
+ * slashes ({@code /<resource>}, {@code /<resource>/});</li>
  *
- * <li>paths with no trailing wildcard (e.g. {@code /resource}) match resource path exactly (e.g {@code
- * /resource});</li>
+ * <li>paths with a trailing slash ({@code /<resource>/}) match any resource path sharing the same prefix, ignoring
+ * trailing slashes ({@code /<resource>}, {@code /<resource>/}, {@code /<resource>/<item>});</li>
  *
- * <li>lexicographically longer and preceding paths take precedence over shorter and following ones.</li>
+ * <li>paths with a trailing wildcard ({@code /<resource>/*}) match any resource path sharing the same prefix
+ * ({@code /<resource>/<item>});</li>
  *
  * </ul>
  *
- * <p>Trailing slashes and question marks in resource paths are ignored.</p>
+ * <p>Lexicographically longer and preceding paths take precedence over shorter and following ones.</p>
+ *
+ * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
+ * opportunity to handle the request.</p>
  */
 public final class Router implements Handler {
 
@@ -59,7 +58,7 @@ public final class Router implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Map<String, Handler> handlers=new TreeMap<>(Comparator
+	private final Map<String, Function<Request, Optional<Responder>>> routes=new TreeMap<>(Comparator
 			.comparingInt(String::length).reversed() // longest paths first
 			.thenComparing(String::compareTo) // then alphabetically
 	);
@@ -70,15 +69,15 @@ public final class Router implements Handler {
 	/**
 	 * Adds a handler to this router.
 	 *
-	 * @param path    the path pattern the handler to be added will be bound to; the value is normalized before use
+	 * @param path    the path pattern the handler to be added will be bound to
 	 * @param handler the handler to be added to this router at {@code path}
 	 *
 	 * @return this router
 	 *
-	 * @throws NullPointerException     if either {@code path} or {@code handler} is {@code null}
+	 * @throws NullPointerException     if either {@code path} or {@code handler} is null
 	 * @throws IllegalArgumentException if {@code path} doesn't match the {@code ^(/[-+_\w]+)*(/\*?)?$} regular
 	 *                                  expression
-	 * @throws IllegalStateException    if {@code path} is already bound to a path
+	 * @throws IllegalStateException    if {@code path} is already bound to a handler
 	 */
 	public Router path(final String path, final Handler handler) {
 
@@ -94,7 +93,11 @@ public final class Router implements Handler {
 			throw new NullPointerException("null handler");
 		}
 
-		if ( handlers.putIfAbsent(normalize(path), handler) != null ) {
+		final String sorter=path.endsWith("/") ? path+'1'
+				: path.endsWith("/*") ? path.replace('*', '2')
+				: path+"/0";
+
+		if ( routes.putIfAbsent(sorter, route(path, handler)) != null ) {
 			throw new IllegalStateException("path already mapped <"+path+">");
 		}
 
@@ -110,33 +113,72 @@ public final class Router implements Handler {
 			throw new NullPointerException("null request");
 		}
 
-		final String path=request.path();
-		final String key=normalize(path);
-
-		return handlers
-				.entrySet()
-				.stream()
-				.filter(entry -> matches(key, entry.getKey()))
+		return routes.values().stream()
+				.map(route -> route.apply(request))
+				.filter(Optional::isPresent)
 				.findFirst()
-				.map(entry -> entry.getValue().handle(request.map(rewrite(entry.getKey()))))
+				.map(Optional::get)
 				.orElseGet(() -> request.reply(response -> response)); // null response >> managed by the container
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private boolean matches(final String path, final String pattern) {
-		return path.equals(pattern) || pattern.endsWith("/") && path.startsWith(pattern);
+	private Function<Request, Optional<Responder>> route(final String path, final Handler handler) {
+		return path.equals("/") ? root(path, handler)
+				: path.endsWith("/") ? prefix(path, handler)
+				: path.endsWith("/*") ? subtree(path, handler)
+				: exact(path, handler);
 	}
 
-	private String normalize(final String path) {
-		return path.endsWith("?") || path.endsWith("/") || path.endsWith("/*") ? path.substring(0, path.length()-1) : path;
+
+	private Function<Request, Optional<Responder>> root(final String path, final Handler handler) {
+		return request -> request.path().equals(path) ? Optional.of(consumer -> handler.handle(
+
+				request
+
+		).accept(consumer)) : Optional.empty();
 	}
 
-	private Function<Request, Request> rewrite(final String path) {
-		return request -> path.endsWith("/")
-				? request.base(request.base()+path.substring(1)).path(request.path().substring(path.length()-1))
-				: request;
+	private Function<Request, Optional<Responder>> prefix(final String path, final Handler handler) {
+
+		final Pattern pattern=Pattern.compile(Pattern.quote(path.substring(0, path.length()-1))+"(/.*)?");
+
+		final String base=path.substring(1);
+		final int head=path.length()-1;
+
+		return request -> pattern.matcher(request.path()).matches() ? Optional.of(consumer -> handler.handle(
+
+				request.base(request.base()+base).path(request.path().length() == head ? "/" : request.path().substring(head))
+
+		).accept(consumer)) : Optional.empty();
+	}
+
+	private Function<Request, Optional<Responder>> subtree(final String path, final Handler handler) {
+
+		final Pattern pattern=Pattern.compile(Pattern.quote(path.substring(0, path.length()-1))+".+");
+
+		final String base=path.substring(1, path.length()-1);
+		final int head=path.length()-2;
+
+		return request -> pattern.matcher(request.path()).matches() ? Optional.of(consumer -> handler.handle(
+
+				request.base(request.base()+base).path(request.path().substring(head))
+
+		).accept(consumer)) : Optional.empty();
+	}
+
+	private Function<Request, Optional<Responder>> exact(final String path, final Handler handler) {
+
+		final Pattern pattern=Pattern.compile(Pattern.quote(path)+"/?");
+
+		final String base=path.substring(1)+"/";
+
+		return request -> pattern.matcher(request.path()).matches() ? Optional.of(consumer -> handler.handle(
+
+				request.base(request.base()+base).path("/")
+
+		).accept(consumer)) : Optional.empty();
 	}
 
 }
