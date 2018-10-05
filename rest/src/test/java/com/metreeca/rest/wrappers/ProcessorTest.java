@@ -33,10 +33,10 @@ import java.util.function.BiFunction;
 import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
-
-import static org.assertj.core.api.Assertions.fail;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -92,16 +92,13 @@ final class ProcessorTest {
 
 						.body(rdf()).set(emptyList()))
 
-				.accept(response -> {
-					response.body(rdf()).use(
-							model -> assertThat(model).as("items retrieved").hasSubset(asList(
-									statement(response.item(), RDF.VALUE, RDF.FIRST),
-									statement(response.item(), RDF.VALUE, RDF.REST)
-							)),
-							error -> fail("missing RDF payload")
-					);
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.as("items retrieved")
+						.hasSubset(asList(
+								statement(response.item(), RDF.VALUE, RDF.FIRST),
+								statement(response.item(), RDF.VALUE, RDF.REST)
+						))));
 	}
 
 	@Test void testIgnoreMissingRequestRDFPayload() {
@@ -113,12 +110,7 @@ final class ProcessorTest {
 
 				.handle(new Request()) // no RDF payload
 
-				.accept(response -> {
-					response.body(rdf()).use(
-							model -> fail("unexpected RDF payload"),
-							error -> {}
-					);
-				}));
+				.accept(response -> assertThat(response).hasBody(rdf())));
 	}
 
 
@@ -136,16 +128,13 @@ final class ProcessorTest {
 
 						.body(rdf()).set(emptyList()))
 
-				.accept(response -> {
-					response.body(rdf()).use(
-							model -> assertThat(model).as("items retrieved").hasSubset(asList(
-									statement(response.item(), RDF.VALUE, RDF.FIRST),
-									statement(response.item(), RDF.VALUE, RDF.REST)
-							)),
-							error -> fail("missing RDF payload")
-					);
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.as("items retrieved")
+						.hasSubset(asList(
+								statement(response.item(), RDF.VALUE, RDF.FIRST),
+								statement(response.item(), RDF.VALUE, RDF.REST)
+						))));
 	}
 
 	@Test void testIgnoreMissingResponseRDFPayload() {
@@ -157,12 +146,8 @@ final class ProcessorTest {
 
 				.handle(new Request()) // no RDF payload
 
-				.accept(response -> {
-					response.body(rdf()).use(
-							model -> fail("unexpected RDF payload"),
-							error -> {}
-					);
-				}));
+				.accept(response -> assertThat(response).hasBody(rdf())));
+
 	}
 
 
@@ -176,6 +161,7 @@ final class ProcessorTest {
 			});
 
 			new Processor()
+
 					.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
 					.wrap((Handler)request -> request.reply(response -> response.status(Response.OK)))
 
@@ -184,13 +170,10 @@ final class ProcessorTest {
 							.base(Base)
 							.path("/test"))
 
-					.accept(response -> tool(Graph.Factory).query(connection -> {
-
-						assertThat(decode("<test> rdf:value rdf:first, rdf:rest."))
-								.as("repository updated")
-								.isIsomorphicTo(export(connection));
-
-					}));
+					.accept(response -> assertThat(graph())
+							.as("repository updated")
+							.isIsomorphicTo(decode("<test> rdf:value rdf:first, rdf:rest."))
+					);
 
 		});
 	}
@@ -203,6 +186,7 @@ final class ProcessorTest {
 			});
 
 			new Processor()
+
 					.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
 					.wrap((Handler)request -> request.reply(response -> response
 							.status(Response.OK)

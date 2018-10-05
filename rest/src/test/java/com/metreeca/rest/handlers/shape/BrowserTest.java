@@ -22,20 +22,17 @@ import com.metreeca.form.Form;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
-import static com.metreeca.rest.HandlerAssert.dataset;
+import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
-import static com.metreeca.tray.Tray.tool;
 
 import static javax.json.Json.createObjectBuilder;
 
@@ -44,7 +41,7 @@ final class BrowserTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
-				.exec(dataset(small()))
+				.exec(graph(small()))
 				.exec(task)
 				.clear();
 	}
@@ -61,11 +58,6 @@ final class BrowserTest {
 	private Request driven() {
 		return direct()
 				.body(shape()).set(Employee);
-	}
-
-
-	private Model graph(final String sparql) {
-		return tool(Graph.Factory).query(connection -> { return construct(connection, sparql); });
 	}
 
 

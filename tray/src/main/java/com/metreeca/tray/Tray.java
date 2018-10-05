@@ -221,10 +221,10 @@ public final class Tray {
 	/**
 	 * Executes a task using shared tools managed by this tray.
 	 *
-	 * <p>During task execution, shared tools may be retrieved from this tool tray through
-	 * the static {@linkplain  #tool(Supplier) service locator} method of the Tray class. The context tray used by the
-	 * service locator method is managed through a {@link ThreadLocal} variable, so it won't be available to methods
-	 * executed on a different thread.</p>
+	 * <p>During task execution, shared tools may be retrieved from this tool tray through the static {@linkplain
+	 * #tool(Supplier) service locator} method of the Tray class. The context tray used by the service locator method is
+	 * managed through a {@link ThreadLocal} variable, so it won't be available to methods executed on a different
+	 * thread.</p>
 	 *
 	 * @param task the task to be executed
 	 *

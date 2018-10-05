@@ -19,10 +19,10 @@ package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Values;
+import com.metreeca.rest.HandlerAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -38,12 +38,9 @@ import javax.json.JsonObject;
 
 import static com.metreeca.form.things.ModelAssert.assertThat;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.form.things.ValuesTest.export;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.HandlerAssert.dataset;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,7 +60,7 @@ final class SPARQLTest {
 		final Tray tray=new Tray();
 
 		for (final Collection<Statement> dataset : datasets) {
-			tray.exec(dataset(dataset, RDF.NIL));
+			tray.exec(HandlerAssert.graph(dataset, RDF.NIL));
 		}
 
 		return tray;
@@ -72,14 +69,6 @@ final class SPARQLTest {
 
 	private SPARQL endpoint() {
 		return new SPARQL();
-	}
-
-	private Model graphs(final IRI... contexts) {
-		return tool(Graph.Factory).query(connection -> {
-
-			return export(connection, contexts);
-
-		});
 	}
 
 
@@ -474,7 +463,7 @@ final class SPARQLTest {
 							.hasStatus(Response.OK)
 							.hasBodyThat(json()).satisfies(hasBooleanValue(true));
 
-					assertThat(graphs()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
+					assertThat(HandlerAssert.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
 
 				}));
 	}
@@ -490,7 +479,7 @@ final class SPARQLTest {
 							.hasStatus(Response.OK)
 							.hasBodyThat(json()).satisfies(hasBooleanValue(true));
 
-					assertThat(graphs()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
+					assertThat(HandlerAssert.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
 
 				}));
 	}
@@ -529,7 +518,7 @@ final class SPARQLTest {
 							.hasStatus(Response.OK)
 							.hasBodyThat(json()).satisfies(hasBooleanValue(true));
 
-					assertThat(graphs()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
+					assertThat(HandlerAssert.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
 
 				}));
 	}
@@ -545,7 +534,7 @@ final class SPARQLTest {
 							.hasStatus(Response.OK)
 							.hasBodyThat(json()).satisfies(hasBooleanValue(true));
 
-					assertThat(graphs()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
+					assertThat(HandlerAssert.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
 
 				}));
 	}

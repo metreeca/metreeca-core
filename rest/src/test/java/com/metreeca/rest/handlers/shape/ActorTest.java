@@ -19,9 +19,7 @@ package com.metreeca.rest.handlers.shape;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Responder;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -31,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.things.ValuesTest.small;
-import static com.metreeca.rest.HandlerAssert.dataset;
+import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 
 
@@ -39,7 +37,7 @@ final class ActorTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
-				.exec(dataset(small()))
+				.exec(graph(small()))
 				.exec(task)
 				.clear();
 	}

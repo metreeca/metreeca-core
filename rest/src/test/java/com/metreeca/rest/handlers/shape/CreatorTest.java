@@ -23,10 +23,8 @@ import com.metreeca.form.things.Values;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
@@ -39,11 +37,11 @@ import static com.metreeca.form.things.ValueAssert.assertThat;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
-import static com.metreeca.tray.Tray.tool;
 
 
 final class CreatorTest {
@@ -76,10 +74,6 @@ final class CreatorTest {
 
 	private Function<Request, Request> body(final String rdf) {
 		return request -> request.body(input()).set(() -> Transputs.input(new StringReader(rdf)));
-	}
-
-	private Model graph() {
-		return tool(Graph.Factory).query(connection -> { return export(connection); });
 	}
 
 

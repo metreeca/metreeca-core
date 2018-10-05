@@ -31,7 +31,7 @@ import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.form.things.ValuesTest.term;
-import static com.metreeca.rest.HandlerAssert.dataset;
+import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
@@ -42,12 +42,12 @@ final class RelatorTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
-				.exec(dataset(small()))
+				.exec(graph(small()))
 				.exec(task)
 				.clear();
 	}
 
-	
+
 	private Request direct() {
 		return new Request()
 				.method(Request.GET)
