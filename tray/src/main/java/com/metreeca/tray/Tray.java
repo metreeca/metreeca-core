@@ -219,28 +219,35 @@ public final class Tray {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Executes a task using shared tools managed by this tray.
+	 * Executes a set of task using shared tools managed by this tray.
 	 *
 	 * <p>During task execution, shared tools may be retrieved from this tool tray through the static {@linkplain
 	 * #tool(Supplier) service locator} method of the Tray class. The context tray used by the service locator method is
 	 * managed through a {@link ThreadLocal} variable, so it won't be available to methods executed on a different
 	 * thread.</p>
 	 *
-	 * @param task the task to be executed
+	 * @param tasks the tasks to be executed
 	 *
 	 * @return this tool tray
 	 *
-	 * @throws NullPointerException if {@code task} is null
+	 * @throws NullPointerException if {@code task} is null or contains null items
 	 */
-	public Tray exec(final Runnable task) {
+	public Tray exec(final Runnable... tasks) {
 
-		if ( task == null ) {
-			throw new NullPointerException("null task");
+		if ( tasks == null ) {
+			throw new NullPointerException("null tasks");
 		}
 
 		return context(() -> {
 
-			task.run();
+			for (final Runnable task : tasks) {
+
+				if ( task == null ) {
+					throw new NullPointerException("null task");
+				}
+
+				task.run();
+			}
 
 			return this;
 
