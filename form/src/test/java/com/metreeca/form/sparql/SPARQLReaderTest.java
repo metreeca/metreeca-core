@@ -30,6 +30,7 @@ import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
 import org.assertj.core.api.Assertions;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -78,7 +79,7 @@ final class SPARQLReaderTest {
 
 	@Test void testEdgesEmptyShape() {
 
-		final Map<Value, Collection<Statement>> matches=edges(and());
+		final Map<Resource, Collection<Statement>> matches=edges(and());
 
 		Assertions.assertThat(matches.isEmpty()).as("empty focus").isTrue();
 
@@ -86,7 +87,7 @@ final class SPARQLReaderTest {
 
 	@Test void testEdgesEmptyResultSet() {
 
-		final Map<Value, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Resource, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(RDF.NIL)));
 
 		Assertions.assertThat(matches.isEmpty()).as("empty focus").isTrue();
 
@@ -94,7 +95,7 @@ final class SPARQLReaderTest {
 
 	@Test void testEdgesEmptyProjection() {
 
-		final Map<Value, Collection<Statement>> matches=edges(clazz(term("Product")));
+		final Map<Resource, Collection<Statement>> matches=edges(clazz(term("Product")));
 
 		Assertions.assertThat((Object)focus(
 
@@ -108,7 +109,7 @@ final class SPARQLReaderTest {
 
 	@Test void testEdgesMatching() {
 
-		final Map<Value, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(term("Product"))));
+		final Map<Resource, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(term("Product"))));
 
 		Assertions.assertThat((Object)focus(
 
@@ -150,7 +151,7 @@ final class SPARQLReaderTest {
 
 	@Test void testStatsEmptyResultSet() {
 
-		final Map<Value, Collection<Statement>> matches=stats(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Resource, Collection<Statement>> matches=stats(trait(RDF.TYPE, all(RDF.NIL)));
 
 		Assertions.assertThat(set(Form.meta)).as("meta focus").isEqualTo(matches.keySet());
 
@@ -159,7 +160,7 @@ final class SPARQLReaderTest {
 
 	@Test void testStatsEmptyProjection() {
 
-		final Map<Value, Collection<Statement>> matches=stats(clazz(term("Product")));
+		final Map<Resource, Collection<Statement>> matches=stats(clazz(term("Product")));
 
 		assertThat(model("prefix spec: <"+Form.Namespace+">\n"
 				+"\n"
@@ -186,7 +187,7 @@ final class SPARQLReaderTest {
 
 	@Test void testStatsRootConstraints() {
 
-		final Map<Value, Collection<Statement>> matches=stats(all(item("employees/1370")), Step.step(term("account")));
+		final Map<Resource, Collection<Statement>> matches=stats(all(item("employees/1370")), Step.step(term("account")));
 
 		assertThat(model("prefix spec: <"+Form.Namespace+">\n"
 				+"\n"
@@ -216,7 +217,7 @@ final class SPARQLReaderTest {
 
 	@Test void testItemsEmptyResultSet() {
 
-		final Map<Value, Collection<Statement>> matches=items(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Resource, Collection<Statement>> matches=items(trait(RDF.TYPE, all(RDF.NIL)));
 
 		Assertions.assertThat(set(Form.meta)).isEqualTo(matches.keySet());
 
@@ -225,7 +226,7 @@ final class SPARQLReaderTest {
 
 	@Test void testItemsEmptyProjection() {
 
-		final Map<Value, Collection<Statement>> matches=items(clazz(term("Product")));
+		final Map<Resource, Collection<Statement>> matches=items(clazz(term("Product")));
 
 		assertThat(model("prefix spec: <"+Form.Namespace+">\n"
 				+"\n"
@@ -248,7 +249,7 @@ final class SPARQLReaderTest {
 
 	@Test void testItemsRootConstraints() {
 
-		final Map<Value, Collection<Statement>> matches=items(all(item("employees/1370")), Step.step(term("account")));
+		final Map<Resource, Collection<Statement>> matches=items(all(item("employees/1370")), Step.step(term("account")));
 
 		assertThat(model("prefix spec: <"+Form.Namespace+">\n"
 				+"\n"
@@ -577,26 +578,26 @@ final class SPARQLReaderTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map<Value, Collection<Statement>> edges(final Shape shape, final Query.Order... orders) {
+	private Map<Resource, Collection<Statement>> edges(final Shape shape, final Query.Order... orders) {
 		return process(new Edges(shape, list(orders), 0, 0));
 	}
 
-	private Map<Value, Collection<Statement>> stats(final Shape shape, final Step... path) {
+	private Map<Resource, Collection<Statement>> stats(final Shape shape, final Step... path) {
 		return process(new Stats(shape, list(path)));
 	}
 
-	private Map<Value, Collection<Statement>> items(final Shape shape, final Step... path) {
+	private Map<Resource, Collection<Statement>> items(final Shape shape, final Step... path) {
 		return process(new Items(shape, list(path)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> model(final Map<Value, Collection<Statement>> matches) {
+	private Collection<Statement> model(final Map<Resource, Collection<Statement>> matches) {
 		return matches.values().stream().reduce(list(), (x, y) -> concat(x, y));
 	}
 
-	private Map<Value, Collection<Statement>> process(final Query query) {
+	private Map<Resource, Collection<Statement>> process(final Query query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
 			return new SPARQLReader(connection).process(query);
 		}

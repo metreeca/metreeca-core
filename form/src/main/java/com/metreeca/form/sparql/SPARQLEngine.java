@@ -21,7 +21,9 @@ import com.metreeca.form.*;
 import com.metreeca.form.queries.Edges;
 
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
@@ -33,6 +35,7 @@ import static com.metreeca.form.Report.report;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
+import static com.metreeca.form.things.Values.rewrite;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -65,7 +68,7 @@ public final class SPARQLEngine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Map<Value, Collection<Statement>> browse(final Shape shape) {
+	public Map<Resource, Collection<Statement>> browse(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -74,7 +77,7 @@ public final class SPARQLEngine {
 		return browse(new Edges(shape));
 	}
 
-	public Map<Value, Collection<Statement>> browse(final Query query) {
+	public Map<Resource, Collection<Statement>> browse(final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
@@ -83,6 +86,23 @@ public final class SPARQLEngine {
 		return new SPARQLReader(connection).process(query);
 	}
 
+	public Collection<Statement> browse(final Query query, final IRI focus) {
+
+		if ( query == null ) {
+			throw new NullPointerException("null query");
+		}
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		return browse(query).values().stream()
+				.flatMap(statements -> statements.stream().map(statement -> rewrite(statement, Form.meta, focus)))
+				.collect(toList());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Collection<Statement> relate(final IRI focus, final Shape shape) {
 

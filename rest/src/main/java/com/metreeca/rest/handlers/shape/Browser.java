@@ -36,21 +36,18 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.queries.Items.ItemsShape;
-import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
-
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -141,56 +138,15 @@ public final class Browser extends Actor<Browser> {
 	private Responder driven(final Request request, final Shape shape) {
 		return request.reply(response -> request.query(shape).map(
 
-				query -> graph.query(connection -> {
+				query -> query.accept(new Query.Probe<Response>() {
 
-					return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() {
+					@Override public Response visit(final Edges edges) {
+						return edges(edges, response);
+					}
 
-						@Override public Response visit(final Edges edges) {
+					@Override public Response visit(final Stats stats) { return stats(stats, response); }
 
-							final Collection<Statement> model=new ArrayList<>();
-
-							// container metadata
-
-							model.add(statement(request.item(), RDF.TYPE, LDP.BASIC_CONTAINER));
-
-							if ( !include(request, LDP.PREFER_EMPTY_CONTAINER) ) {
-
-								// retrieve filtered content from repository
-
-								final Map<Value, Collection<Statement>> matches=new SPARQLEngine(connection).browse(query);
-
-								matches.forEach((item, statements) -> {
-									model.add(statement(request.item(), LDP.CONTAINS, item));
-									model.addAll(statements);
-								});
-
-							} else {
-								response.header("Preference-Applied", String.format(
-										"return=representation; include=\"%s\"", LDP.PREFER_EMPTY_CONTAINER
-								));
-							}
-
-							return r.body(shape()).set(trait(LDP.CONTAINS, shape.accept(mode(Form.verify)))) // hide filtering constraints
-									.body(rdf()).set(model);
-						}
-
-						@Override public Response visit(final Stats stats) { // !!! re/factor
-
-							return r.body(shape()).set(StatsShape)
-									.body(rdf()).set(new SPARQLEngine(connection).browse(query).values().stream()
-											.flatMap(statements -> statements.stream().map(statement -> rewrite(statement, Form.meta, request.item())))
-											.collect(toList()));
-						}
-
-						@Override public Response visit(final Items items) {
-
-							return r.body(shape()).set(ItemsShape)
-									.body(rdf()).set(new SPARQLEngine(connection).browse(query).values().stream()
-											.flatMap(statements -> statements.stream().map(statement -> rewrite(statement, Form.meta, request.item())))
-											.collect(toList()));
-						}
-
-					}));
+					@Override public Response visit(final Items items) { return items(items, response); }
 
 				}),
 
@@ -199,10 +155,61 @@ public final class Browser extends Actor<Browser> {
 		));
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Response edges(final Edges edges, final Response response) {
+		return graph.query(connection -> {
+
+			final Request request=response.request();
+			final IRI item=response.item();
+
+			final Collection<Statement> model=new ArrayList<>();
+
+			model.add(statement(item, RDF.TYPE, LDP.BASIC_CONTAINER));
+
+			if ( include(request, LDP.PREFER_EMPTY_CONTAINER) ) {
+
+				response.header("Preference-Applied", String.format(
+						"return=representation; include=\"%s\"", LDP.PREFER_EMPTY_CONTAINER
+				));
+
+			} else {
+
+				new SPARQLEngine(connection).browse(edges).forEach((focus, statements) -> {
+					model.add(statement(focus, LDP.CONTAINS, focus));
+					model.addAll(statements);
+				});
+
+			}
+
+			return response.status(Response.OK)
+					.body(shape()).set(trait(LDP.CONTAINS, edges.getShape().accept(mode(Form.verify)))) // hide filtering constraints
+					.body(rdf()).set(model);
+		});
+	}
+
+	private Response stats(final Query stats, final Response response) {
+		return graph.query(connection -> {
+			return response.status(Response.OK)
+					.body(shape()).set(ItemsShape)
+					.body(rdf()).set(new SPARQLEngine(connection).browse(stats, response.item()));
+
+		});
+	}
+
+	private Response items(final Query items, final Response response) {
+		return graph.query(connection -> {
+			return response.status(Response.OK)
+					.body(shape()).set(ItemsShape)
+					.body(rdf()).set(new SPARQLEngine(connection).browse(items, response.item()));
+
+		});
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private boolean include(final Request request, final IRI include) {
+	private boolean include(final Request request, final Value include) {
 
 		// !!! handle multiple uris in include parameter
 		// !!! handle omit parameter (with multiple uris)
