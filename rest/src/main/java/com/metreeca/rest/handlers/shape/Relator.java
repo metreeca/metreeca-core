@@ -62,27 +62,31 @@ import static java.util.Collections.singleton;
  * <dl>
  *
  * <dt>Request {@link ShapeFormat} body {optional}</dt>
+ *
  * <dd>An optional linked data shape driving the retrieval process.</dd>
  *
  * <dt>Response {@link ShapeFormat} body {optional}</dt>
+ *
  * <dd>If the request includes a shape payload, the response includes the derived shape actually used in the resource
- * retrieval process, redacted according to request user roles, {@code relate} task, {@code filter} mode and {@code
- * detail} view.</dd>
+ * retrieval process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task,
+ * {@link Form#verify} mode and {@link Form#detail} view.</dd>
  *
- * <dt>Response {@link RDFFormat} body</dt>
+ * <dt>Response shape-driven {@link RDFFormat} body</dt>
  *
- * <dd>If the request includes a {@link ShapeFormat} body representation, the response includes the {@linkplain
- * RDFFormat RDF description} of the request {@linkplain Request#item() focus item}, as defined by the associated linked
- * data {@linkplain Shape shape} redacted taking into account the user {@linkplain Request#roles() roles} of the
- * request.</dd>
+ * <dd>If the request includes a {@link ShapeFormat} body, the response includes the {@linkplain
+ * RDFFormat RDF description} of the request {@linkplain Request#item() focus item}, as defined by the redacted linked
+ * data {@linkplain Shape shape}.</dd>
  *
- * <dd>Otherwise, the  response includes the symmetric concise bounded description of the request focus item, extended
- * with {@code rdfs:label/comment} annotations for all referenced IRIs.</dd>
+ * <dt>Response shapeless {@link RDFFormat} body</dt>
  *
- * <dd>In both cases, resource description content is retrieved  from the system {@linkplain Graph#Factory graph}
- * database.</dd>
+ * <dd>If the request does not include a {@link ShapeFormat} body, the response includes the symmetric concise bounded
+ * description of the request focus item, extended with {@code rdfs:label/comment} annotations for all referenced
+ * IRIs.</dd>
  *
  * </dl>
+ *
+ * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
+ * database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */

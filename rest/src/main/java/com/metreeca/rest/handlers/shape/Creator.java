@@ -56,13 +56,15 @@ import static java.util.UUID.randomUUID;
  * <dl>
  *
  * <dt>Request {@link ShapeFormat} body {optional}</dt>
+ *
  * <dd>An optional linked data shape driving the creation process.</dd>
  *
- * <dt>Request {@link RDFFormat} body</dt>
+ * <dt>Request shape-driven {@link RDFFormat} body</dt>
+ *
  * <dd>The RDF content to be assigned to the newly created resource; must describe the new resource using
  * the request {@linkplain Request#item() focus item} as subject.</dd>
  *
- * <dd>If the request includes a {@link ShapeFormat} body representation, it is redacted taking into account the user
+ * <dd>If the request includes a {@link ShapeFormat} body, it is redacted taking into account the user
  * {@linkplain Request#roles() roles} of the request and used to validate the request RDF body; validation errors are
  * reported with a {@linkplain Response#UnprocessableEntity} status code and a structured {@linkplain
  * Failure#trace(JsonValue) trace} element.</dd>
@@ -71,13 +73,15 @@ import static java.util.UUID.randomUUID;
  * request {@linkplain Request#item() focus item} and a name provided by either the default {@linkplain #uuid()
  * UUID-based} or a {@linkplain #slug(BiFunction) custom-provided} slug generator.</dd>
  *
- * <dd>In both cases, resource description content is stored into the system {@linkplain Graph#Factory graph}
- * database.</dd>
+ * <dt>Request shapeless {@link RDFFormat} body</dt>
  *
- * <dd>Shapeless resource creation is not yet supported and is reported with a {@linkplain Response#NotImplemented}
- * HTTP status code.</dd>
+ * <dd><strong>Warning</strong> / Shapeless resource creation is not yet supported and is reported with a {@linkplain
+ * Response#NotImplemented} HTTP status code.</dd>
  *
  * </dl>
+ *
+ * <p>Rgardless of the operating mode, resource description content is stored into the system {@linkplain Graph#Factory
+ * graph} database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */

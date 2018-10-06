@@ -23,6 +23,7 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
@@ -139,6 +140,27 @@ final class BrowserTest {
 
 						.as("only resources matching filter included")
 						.doesNotHaveStatement(null, term("title"), literal("President"))
+				)
+		);
+	}
+
+
+	@Test void testDrivePreferEmptyContainer() {
+		exec(() -> new Browser()
+
+				.handle(driven().header("Prefer", String.format(
+						"return=representation; include=\"%s\"", LDP.PREFER_EMPTY_CONTAINER
+				)))
+
+				.accept(response -> assertThat(response)
+
+						.hasStatus(Response.OK)
+						.hasHeader("Preference-Applied", response.request().header("Prefer").orElse(""))
+
+						.hasBody(shape())
+
+						.hasBodyThat(rdf())
+						.doesNotHaveStatement(null, LDP.CONTAINS, null)
 				)
 		);
 	}
