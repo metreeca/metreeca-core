@@ -86,20 +86,23 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 	}
 
 	/**
-	 * Asserts that actual and expected statement collections are isomorphic.
+	 * Asserts that actual and model statement collections are isomorphic.
 	 *
-	 * @param expected the expected statement collection
+	 * @param model the model statement collection
 	 */
-	public ModelAssert isIsomorphicTo(final Model expected) {
+	public ModelAssert isIsomorphicTo(final Model model) {
 
-		if ( expected == null ) {
-			throw new NullPointerException("null expected");
+		if ( model == null ) {
+			throw new NullPointerException("null model");
 		}
 
 		isNotNull();
 
-		if ( !Models.isomorphic(actual, expected) ) {
-			failWithMessage("expected <%s> to be isomorphic to <%s>", format(actual), format(new TreeModel(expected)));
+		if ( !Models.isomorphic(actual, model) ) {
+			failWithMessage(
+					"model <\n%s\n> to be isomorphic to <\n%s\n>",
+					indent(format(new TreeModel(actual))), indent(format(new TreeModel(model)))
+			);
 		}
 
 		return this;

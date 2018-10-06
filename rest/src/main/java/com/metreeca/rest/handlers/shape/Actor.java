@@ -19,18 +19,17 @@ package com.metreeca.rest.handlers.shape;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Responder;
+import com.metreeca.rest.*;
+import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.ShapeFormat;
+import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.sys.Trace;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import javax.json.*;
@@ -62,8 +61,7 @@ import static java.util.stream.Collectors.groupingBy;
  * parameters {@linkplain #handler(IRI, IRI, Function) provided} by the concrete implementation;</li>
  *
  * <li>enforces role-based access control; Access to the managed resource action is public, unless explicitly
- * {@linkplain #roles(Value...) limited} to
- * * specific user roles;</li>
+ * {@linkplain #roles(Value...) limited} to * specific user roles;</li>
  *
  * <li>adds default LDP {@code Link} response headers for RDF sources.</li>
  *
@@ -113,6 +111,8 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 	private Set<Value> roles=emptySet();
 
+	private final Processor processor=new Processor();
+
 
 	@SuppressWarnings("unchecked") private T self() { return (T)this; }
 
@@ -159,6 +159,73 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 	}
 
 
+	/**
+	 * Inserts a pre-processing RDF filter.
+	 *
+	 * @param filter the RDF pre-processing filter to be inserted; takes as argument an incoming request and its
+	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 *
+	 * @return this actor
+	 *
+	 * @throws NullPointerException if {@code filter} is null
+	 * @see Processor#pre(BiFunction)
+	 */
+	public T pre(final BiFunction<Request, Model, Model> filter) {
+
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
+
+		processor.pre(filter);
+
+		return self();
+	}
+
+	/**
+	 * Inserts a post-processing RDF filter.
+	 *
+	 * @param filter the RDF post-processing filter to be inserted; takes as argument a successful outgoing response and
+	 *               its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 *
+	 * @return this actor
+	 *
+	 * @throws NullPointerException if {@code filter} is null
+	 * @see Processor#post(BiFunction)
+	 */
+	public T post(final BiFunction<Response, Model, Model> filter) {
+
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
+
+		processor.post(filter);
+
+		return self();
+	}
+
+	/**
+	 * Configures the SPARQL Update post-processing script.
+	 *
+	 * @param update the SPARQL Update update to be executed on successful request processing; empty scripts are
+	 *               ignored
+	 *
+	 * @return this actor
+	 *
+	 * @throws NullPointerException if {@code update} is null
+	 * @see Processor#update(String)
+	 */
+	public T update(final String update) {
+
+		if ( update == null ) {
+			throw new NullPointerException("null update");
+		}
+
+		processor.update(update);
+
+		return self();
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -189,7 +256,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 			throw new NullPointerException("null action");
 		}
 
-		return request -> request.body(ShapeFormat.shape()).map(
+		return processor.wrap((Handler)request -> request.body(ShapeFormat.shape()).map(
 
 				shape -> {
 
@@ -218,7 +285,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 		).map(response -> response.headers("+Link",
 				link(LDP.RESOURCE, "type"),
 				link(LDP.RDF_SOURCE, "type")
-		));
+		)));
 	}
 
 
