@@ -43,6 +43,9 @@ import static com.metreeca.form.things.Sets.set;
 import static java.util.Arrays.asList;
 
 
+/**
+ * Linked data shape constraint.
+ */
 public interface Shape {
 
 	public static boolean empty(final Shape shape) { // !!! review

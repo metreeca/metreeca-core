@@ -77,6 +77,19 @@ import static java.util.stream.Collectors.toList;
 	}
 
 
+	/**
+	 *
+	 * Parses a JSON object encoding a query.
+	 *
+	 * @param json the JSON object encodinf a shape-driven linked data query
+	 *
+	 * @return the parsed query
+	 *
+	 * @throws NullPointerException   if {@code json} is null
+	 * @throws JsonException          if {@code json} is malformed
+	 * @throws NoSuchElementException if the query encoded by {@code json} referes to data outside the {@linkplain
+	 *                                #QueryParser(Shape) parser shape}
+	 */
 	public Query parse(final String json) throws JsonException {
 
 		if ( json == null ) {
@@ -386,7 +399,7 @@ import static java.util.stream.Collectors.toList;
 			final Step edge=index.get(step);
 
 			if ( edge == null ) {
-				throw new IllegalArgumentException("unknown path step ["+step+"]");
+				throw new NoSuchElementException("unknown path step ["+step+"]");
 			}
 
 			edges.add(edge);

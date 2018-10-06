@@ -29,6 +29,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 
+/**
+ * Shape-driven linked data query.
+ */
 public interface Query {
 
 	public static Order increasing(final Step... steps) {

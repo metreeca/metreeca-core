@@ -15,36 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form;
-
-import com.metreeca.form.shifts.Count;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.shifts.Table;
-
-
 /**
- * Focus-shifting operator.
+ * Shape-related codecs.
  */
-public interface Shift {
 
-	public <V> V accept(final Probe<V> probe);
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public abstract static class Probe<V> {
-
-		public V visit(final Step step) { return fallback(step); }
-
-		public V visit(final Count count) { return fallback(count); }
-
-		public V visit(final Table table) { return fallback(table); }
-
-
-		protected V fallback(final Shift shift) {
-			return null;
-		}
-
-	}
-
-}
+package com.metreeca.form.codecs;
