@@ -26,6 +26,7 @@ import org.eclipse.rdf4j.model.util.Models;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
 
 
@@ -58,7 +59,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		isNotNull();
 
 		if ( !actual.isEmpty() ) {
-			failWithMessage("expected model to be empty but was <%s>", actual);
+			failWithMessage("expected model to be empty but was <\n%s\n>", indent(format(actual)));
 		}
 
 		return this;
@@ -116,18 +117,27 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 	/**
 	 * Asserts that the expected statement collection is a subset of the actual one.
 	 *
-	 * @param expected the expected model
+	 * @param model the expected model
 	 */
-	public ModelAssert hasSubset(final Model expected) {
+	public ModelAssert hasSubset(final Model model) {
 
-		if ( expected == null ) {
-			throw new NullPointerException("null expected");
+		if ( model == null ) {
+			throw new NullPointerException("null model");
 		}
 
 		isNotNull();
 
-		if ( !Models.isSubset(expected, actual) ) {
-			failWithMessage("expected <%s> to have subset <%s>", format(actual), format(new TreeModel(expected)));
+		if ( !Models.isSubset(model, actual) ) {
+
+			final Collection<Statement> expected=new TreeModel(model);
+			final Collection<Statement> missing=new TreeModel(expected);
+
+			missing.removeAll(actual);
+
+			failWithMessage(
+					"expected model to have subset <\n%s\n> but <\n%s\n> was missing",
+					indent(format(expected)), indent(format(missing))
+			);
 		}
 
 		return this;
@@ -144,7 +154,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		final Model matching=actual.filter(subject, predicate, object);
 
 		if ( matching.isEmpty() ) {
-			failWithMessage("expected <%s> to contain no statements matching <%s %s %s> but has none",
+			failWithMessage("expected <%s> to contain no statements matching <{%s %s %s}> but has none",
 					format(subject), format(predicate), format(object), format(actual));
 		}
 
@@ -162,7 +172,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 
 		if ( !matching.isEmpty() ) {
 			failWithMessage(
-					"expected model to contain no statements matching {%s %s %s} but has <%s>",
+					"expected model to contain no statements matching <{%s %s %s}> but has <%s>",
 					 format(subject), format(predicate), format(object), format(matching)
 			);
 		}

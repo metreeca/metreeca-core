@@ -48,7 +48,7 @@ import static java.util.UUID.randomUUID;
 /**
  * Resource creator.
  *
- * <p>Handles creation requests on linked data resource collections.</p>
+ * <p>Handles creation requests on linked data resource containers.</p>
  *
  * <p>On successful resource creation, the IRI of the newly created resource is advertised through the {@code Location}
  * HTTP response header.</p>
@@ -64,10 +64,10 @@ import static java.util.UUID.randomUUID;
  * <dd>The RDF content to be assigned to the newly created resource; must describe the new resource using
  * the request {@linkplain Request#item() focus item} as subject.</dd>
  *
- * <dd>If the request includes a {@link ShapeFormat} body, it is redacted taking into account the user
- * {@linkplain Request#roles() roles} of the request and used to validate the request RDF body; validation errors are
- * reported with a {@linkplain Response#UnprocessableEntity} status code and a structured {@linkplain
- * Failure#trace(JsonValue) trace} element.</dd>
+ * <dd>If the request includes a {@link ShapeFormat} body, it is redacted taking into account the request user
+ * {@linkplain Request#roles() roles},  {@link Form#create} task,  {@link Form#verify} mode and {@link Form#detail} view
+ * and used to validate the request RDF body; validation errors are reported with a {@linkplain
+ * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
  *
  * <dd>On successful body validation, the newly created resource is assigned a unique IRI based on the stem of the
  * request {@linkplain Request#item() focus item} and a name provided by either the default {@linkplain #uuid()
@@ -80,10 +80,8 @@ import static java.util.UUID.randomUUID;
  *
  * </dl>
  *
- * <p>Rgardless of the operating mode, resource description content is stored into the system {@linkplain Graph#Factory
- * graph} database.</p>
- *
- * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
+ * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
+ * Graph#Factory graph} database.</p>
  */
 public final class Creator extends Actor<Creator> {
 
@@ -189,6 +187,7 @@ public final class Creator extends Actor<Creator> {
 
 					// !!! rewrite report value references to original target iri
 					// !!! rewrite references to external base IRI
+					// !!! factor with Updater
 
 					return response.map(new Failure<>()
 							.status(Response.UnprocessableEntity)
