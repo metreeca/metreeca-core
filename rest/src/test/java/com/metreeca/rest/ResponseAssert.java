@@ -67,7 +67,10 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 
 			response.body(TextFormat.text()).use(text -> {
 				if ( !text.isEmpty() ) {
-					builder.append(text.length() > builder.capacity() ? text.substring(0, builder.capacity())+"\n⋮" : text);
+
+					final int limit=builder.capacity();
+
+					builder.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮").append("\n\n");
 				}
 			});
 

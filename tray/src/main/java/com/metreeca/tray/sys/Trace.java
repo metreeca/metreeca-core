@@ -276,6 +276,8 @@ public abstract class Trace {
 						final PrintWriter printer=new PrintWriter(writer.append(' '))
 				) {
 
+					printer.append("caused by ");
+
 					cause.printStackTrace(printer);
 
 					return writer.toString();

@@ -188,6 +188,13 @@ public final class Request extends Message<Request> {
 					.error("query-malformed")
 					.cause(e);
 
+		} catch ( final NoSuchElementException e ) {
+
+			return new Failure<Query>()
+					.status(Response.UnprocessableEntity)
+					.error("query-illegal")
+					.cause(e);
+
 		}
 	}
 
