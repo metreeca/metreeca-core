@@ -19,6 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.*;
+import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -38,7 +39,7 @@ import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.things.ModelAssert.assertThat;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Transputs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;

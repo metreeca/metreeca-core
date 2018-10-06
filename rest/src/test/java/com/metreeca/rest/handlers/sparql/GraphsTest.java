@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.util.Set;
 
-import static com.metreeca.form.things.ModelAssert.assertThat;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.union;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;

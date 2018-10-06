@@ -31,7 +31,7 @@ import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Report.report;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.ModelAssert.assertThat;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.ValuesTest.decode;
 

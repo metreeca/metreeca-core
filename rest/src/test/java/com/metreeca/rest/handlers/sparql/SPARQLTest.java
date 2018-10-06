@@ -18,6 +18,7 @@
 package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.form.Form;
+import com.metreeca.form.truths.JSONAssert;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.HandlerAssert;
 import com.metreeca.rest.Request;
@@ -34,9 +35,9 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.json.JsonObject;
+import javax.json.JsonValue;
 
-import static com.metreeca.form.things.ModelAssert.assertThat;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
@@ -130,12 +131,13 @@ final class SPARQLTest {
 	}
 
 
-	private Consumer<JsonObject> hasBooleanValue(final boolean value) {
-		return json -> assertThat(json.getBoolean("boolean")).isEqualTo(value);
+	private Consumer<JsonValue> hasBooleanValue(final boolean value) {
+		return json -> JSONAssert.assertThat(json.asJsonObject()).hasField("boolean", value);
 	}
 
-	private Consumer<JsonObject> hasBindings(final IRI... iris) {
+	private Consumer<JsonValue> hasBindings(final IRI... iris) {
 		return json -> assertThat(json
+				.asJsonObject()
 				.getJsonObject("results")
 				.getJsonArray("bindings")
 				.stream()

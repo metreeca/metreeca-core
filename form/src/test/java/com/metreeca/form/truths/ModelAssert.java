@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.things;
+package com.metreeca.form.truths;
 
 import org.assertj.core.api.AbstractAssert;
 import org.eclipse.rdf4j.model.*;

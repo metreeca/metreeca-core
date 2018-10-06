@@ -17,11 +17,10 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.things.ModelAssert;
+import com.metreeca.form.truths.JSONAssert;
+import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.form.things.Transputs;
-import com.metreeca.rest.formats.DataFormat;
-import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.TextFormat;
+import com.metreeca.rest.formats.*;
 
 import org.assertj.core.api.*;
 
@@ -231,11 +230,15 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 		return hasBodyThat(format, Assertions::assertThat);
 	}
 
+	public JSONAssert hasBodyThat(final JSONFormat format) {
+		return hasBodyThat(format, JSONAssert::assertThat);
+	}
+
 	public ModelAssert hasBodyThat(final RDFFormat format) {
 		return hasBodyThat(format, ModelAssert::assertThat);
 	}
 
-	private <V, A extends Assert<A, ? extends V>> A hasBodyThat(final Format<V> format, final Function<V, A> mapper) {
+	private <V, T, A extends Assert<A, T>> A hasBodyThat(final Format<V> format, final Function<V, A> mapper) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");

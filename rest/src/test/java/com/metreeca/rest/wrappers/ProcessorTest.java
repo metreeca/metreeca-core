@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.things.ModelAssert.assertThat;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.rest.HandlerAssert.graph;

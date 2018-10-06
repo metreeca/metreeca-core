@@ -26,6 +26,8 @@ import com.metreeca.tray.Tray;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.rest.HandlerAssert.graph;
@@ -180,8 +182,9 @@ final class BrowserTest {
 				)
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.Forbidden)
-						.hasBody(json())
+						.hasStatus(Response.UnprocessableEntity)
+						.hasBodyThat(json())
+						.hasField("error", Json.createValue("query-illegal"))
 				)
 		);
 	}
