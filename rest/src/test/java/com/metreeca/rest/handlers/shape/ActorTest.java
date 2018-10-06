@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.term;
@@ -37,6 +38,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 
 
 final class ActorTest {
@@ -49,18 +51,18 @@ final class ActorTest {
 	//// Direct ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDirectEnforceRoleBasedAccessControl() {
-		exec(() -> access(false, RDF.NIL).accept(response -> assertThat(response).hasStatus(Response.OK)));
-		exec(() -> access(false, RDF.FIRST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.OK)));
-		exec(() -> access(false, RDF.REST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.Unauthorized)));
+		exec(() -> access(true, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.OK)));
+		exec(() -> access(true, RDF.FIRST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.OK)));
+		exec(() -> access(true, RDF.REST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.Unauthorized)));
 	}
 
 
 	//// Driven ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenEnforceRoleBasedAccessControl() {
-		exec(() -> access(true, RDF.NIL).accept(response -> assertThat(response).hasStatus(Response.OK)));
-		exec(() -> access(true, RDF.FIRST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.OK)));
-		exec(() -> access(true, RDF.REST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.Unauthorized)));
+		exec(() -> access(false, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.OK)));
+		exec(() -> access(false, RDF.FIRST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.OK)));
+		exec(() -> access(false, RDF.REST, RDF.FIRST).accept(response -> assertThat(response).hasStatus(Response.Unauthorized)));
 	}
 
 
@@ -107,9 +109,11 @@ final class ActorTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Responder access(final boolean driven, final IRI effective, final IRI... permitted) {
+	private Responder access(final boolean direct, final IRI effective, final IRI... permitted) {
 		return new TestActor().roles(permitted).handle(new Request().roles(effective).map(request ->
-				driven ? request : request.body(shape()).set(clazz(term("Employee")))
+				direct ? request : request.body(shape()).set(
+						role(singleton(RDF.FIRST), clazz(term("Employee")))
+				)
 		));
 	}
 
