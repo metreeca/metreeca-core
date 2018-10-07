@@ -3,19 +3,19 @@
  *
  * This file is part of Metreeca.
  *
- *  Metreeca is free software: you can redistribute it and/or modify it under the terms
- *  of the GNU Affero General Public License as published by the Free Software Foundation,
- *  either version 3 of the License, or(at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- *  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *  See the GNU Affero General Public License for more details.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License along with Metreeca.
- *  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.shape;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shifts.Step;
@@ -51,7 +51,7 @@ import static java.util.stream.Collectors.groupingBy;
 /**
  * Resource actor.
  *
- * <p>Handles a specific action on a linked data resource.</p>
+ * <p>Handles actions linked data resources.</p>
  *
  * <p>The abstract base:</p>
  *

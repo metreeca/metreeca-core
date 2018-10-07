@@ -15,7 +15,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.shape;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.*;
@@ -23,6 +23,7 @@ import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.formats.ShapeFormat;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;

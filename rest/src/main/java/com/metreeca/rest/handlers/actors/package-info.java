@@ -19,4 +19,4 @@
  * Model-driven resource handlers.
  */
 
-package com.metreeca.rest.handlers.shape;
+package com.metreeca.rest.handlers.actors;

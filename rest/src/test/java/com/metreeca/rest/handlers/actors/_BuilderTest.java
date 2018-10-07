@@ -15,7 +15,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.shape;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
@@ -23,6 +23,7 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.Or.or;
@@ -33,7 +34,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 
-final class _BuilderTest {
+@Disabled final class _BuilderTest {
 
 	private void exec(final Runnable task) {
 		new Tray()

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.shape;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.truths.ModelAssert;
@@ -26,6 +26,7 @@ import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.Shape.role;
@@ -68,7 +69,7 @@ final class ActorTest {
 
 	//// Shared ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testDelegateProcessor() {
+	@Disabled  @Test void testDelegateProcessor() {
 		exec(() -> new TestActor()
 
 				.pre((request, statements) -> {
