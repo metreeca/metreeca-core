@@ -26,7 +26,6 @@ import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.Shape.role;
@@ -69,7 +68,7 @@ final class ActorTest {
 
 	//// Shared ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Disabled  @Test void testDelegateProcessor() {
+	@Test void testDelegateProcessor() {
 		exec(() -> new TestActor()
 
 				.pre((request, statements) -> {

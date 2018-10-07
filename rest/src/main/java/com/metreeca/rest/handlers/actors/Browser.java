@@ -31,14 +31,13 @@ import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,6 +123,13 @@ public final class Browser extends Actor<Browser> {
 
 		));
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Browser post(final BiFunction<Response, Model, Model> filter) { return super.post(filter); }
+
+	@Override public Browser update(final String update) { return super.update(update); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

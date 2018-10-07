@@ -27,9 +27,11 @@ import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
+import java.util.function.BiFunction;
 
 import javax.json.JsonValue;
 
@@ -81,6 +83,13 @@ public final class Updater extends Actor<Updater> {
 				request::reply
 		)));
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Updater pre(final BiFunction<Request, Model, Model> filter) { return super.pre(filter); }
+
+	@Override public Updater update(final String update) { return super.update(update); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

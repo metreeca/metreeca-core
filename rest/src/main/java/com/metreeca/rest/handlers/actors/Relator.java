@@ -40,6 +40,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import java.util.*;
+import java.util.function.BiFunction;
 
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.mode;
@@ -109,6 +110,11 @@ public final class Relator extends Actor<Relator> {
 
 		));
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Relator post(final BiFunction<Response, Model, Model> filter) { return super.post(filter); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

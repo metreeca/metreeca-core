@@ -28,6 +28,7 @@ import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
@@ -107,6 +108,13 @@ public final class Creator extends Actor<Creator> {
 				request::reply
 		)));
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Creator pre(final BiFunction<Request, Model, Model> filter) { return super.pre(filter); }
+
+	@Override public Creator update(final String update) { return super.update(update); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

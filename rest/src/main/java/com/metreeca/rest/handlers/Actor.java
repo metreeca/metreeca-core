@@ -40,6 +40,7 @@ import static com.metreeca.form.things.Sets.intersection;
 import static com.metreeca.form.things.Values.format;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
@@ -159,6 +160,8 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Inserts a pre-processing RDF filter.
 	 *
@@ -170,7 +173,7 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * @throws NullPointerException if {@code filter} is null
 	 * @see Processor#pre(BiFunction)
 	 */
-	public T pre(final BiFunction<Request, Model, Model> filter) {
+	protected T pre(final BiFunction<Request, Model, Model> filter) {
 
 		if ( filter == null ) {
 			throw new NullPointerException("null filter");
@@ -192,7 +195,7 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * @throws NullPointerException if {@code filter} is null
 	 * @see Processor#post(BiFunction)
 	 */
-	public T post(final BiFunction<Response, Model, Model> filter) {
+	protected T post(final BiFunction<Response, Model, Model> filter) {
 
 		if ( filter == null ) {
 			throw new NullPointerException("null filter");
@@ -214,7 +217,7 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * @throws NullPointerException if {@code update} is null
 	 * @see Processor#update(String)
 	 */
-	public T update(final String update) {
+	protected T update(final String update) {
 
 		if ( update == null ) {
 			throw new NullPointerException("null update");
@@ -256,38 +259,49 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 			throw new NullPointerException("null action");
 		}
 
-		// !!! return request.query().isEmpty() ?  : request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
 
-		return /* !!! processor.wrap*/((Handler)request -> request.body(ShapeFormat.shape()).map(
+		return processor
 
-				shape -> {
+				.wrap((Wrapper)handler -> request -> handler.handle(request).map(response -> response.headers("+Link",
+						link(LDP.RESOURCE, "type"),
+						link(LDP.RDF_SOURCE, "type")
+				)))
 
-					final Shape redacted=shape
-							.accept(task(task))
-							.accept(view(view));
+				.wrap((Wrapper)handler -> request -> request.safe() || request.query().isEmpty()
 
-					final Shape authorized=redacted
-							.accept(role(roles.isEmpty() ? request.roles() : intersection(roles, request.roles())));
+						? handler.handle(request)
 
-					return empty(redacted) ? forbidden(request)
-							: empty(authorized) ? refused(request)
-							: action.apply(request, authorized);
+						: request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"))
+				)
 
-				},
+				.wrap((Handler)request -> request.body(shape()).map(
 
-				error -> {
+						shape -> {
 
-					final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
+							final Shape redacted=shape
+									.accept(task(task))
+									.accept(view(view));
 
-					return refused ? refused(request)
-							: action.apply(request, and());
+							final Shape authorized=redacted.accept(
+									role(roles.isEmpty() ? request.roles() : intersection(roles, request.roles()))
+							);
 
-				}
+							return empty(redacted) ? forbidden(request)
+									: empty(authorized) ? refused(request)
+									: action.apply(request, authorized);
 
-		).map(response -> response.headers("+Link",
-				link(LDP.RESOURCE, "type"),
-				link(LDP.RDF_SOURCE, "type")
-		)));
+						},
+
+						error -> {
+
+							final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
+
+							return refused ? refused(request)
+									: action.apply(request, and());
+
+						}
+
+				));
 
 	}
 
