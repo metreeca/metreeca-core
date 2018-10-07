@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.shapes.Trait.trait;
@@ -103,14 +104,10 @@ public final class Browser extends Actor<Browser> {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public Browser() {
+		delegate(handler(Form.relate, Form.digest, (request, shape) -> (
 
-	@Override public Responder handle(final Request request) {
-		return handler(Form.relate, Form.digest, shape ->
-
-				Shape.empty(shape) ? direct(request) : driven(request, shape)
-
-		).handle(request)
+				empty(shape) ? direct(request) : driven(request, shape))
 
 				.map(response -> response.headers("+Link",
 
@@ -123,7 +120,9 @@ public final class Browser extends Actor<Browser> {
 
 						response.headers("Vary", "Accept", "Prefer") : response
 
-				);
+				)
+
+		));
 	}
 
 
@@ -155,6 +154,7 @@ public final class Browser extends Actor<Browser> {
 
 		));
 	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

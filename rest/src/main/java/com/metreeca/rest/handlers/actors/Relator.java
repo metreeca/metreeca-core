@@ -96,18 +96,18 @@ public final class Relator extends Actor<Relator> {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public Relator() {
+		delegate(handler(Form.relate, Form.detail, (request, shape) -> (
 
-	@Override public Responder handle(final Request request) {
-		return handler(Form.relate, Form.detail, shape ->
+				empty(shape) ? direct(request) : driven(request, shape))
 
-				empty(shape) ? direct(request) : driven(request, shape)
+				.map(response -> response.success() ?
 
-		).handle(request).map(response ->
+						response.headers("Vary", "Accept") : response
 
-				response.success() ? response.headers("Vary", "Accept") : response
+				)
 
-		);
+		));
 	}
 
 

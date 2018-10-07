@@ -58,7 +58,7 @@ import static java.util.stream.Collectors.groupingBy;
  * <ul>
  *
  * <li>looks for a {@linkplain ShapeFormat shape} body in incoming requests and redact it according to task/view
- * parameters {@linkplain #handler(IRI, IRI, Function) provided} by the concrete implementation;</li>
+ * parameters {@linkplain #handler(IRI, IRI, BiFunction) provided} by the concrete implementation;</li>
  *
  * <li>enforces role-based access control; Access to the managed resource action is public, unless explicitly
  * {@linkplain #roles(Value...) limited} to * specific user roles;</li>
@@ -78,7 +78,7 @@ import static java.util.stream.Collectors.groupingBy;
  *
  * @see <a href="https://www.w3.org/TR/ldp/#ldprs">Linked Data Platform 1.0 - §4.3 RDF Source</a>
  */
-public abstract class Actor<T extends Actor<T>> implements Handler {
+public abstract class Actor<T extends Actor<T>> extends Delegator {
 
 	private final Trace trace=tool(Trace.Factory);
 
@@ -233,16 +233,16 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 	 *
 	 * @param task   a IRI identifying the {@linkplain Form#task task} to be performed by the generated handler
 	 * @param view   a IRI identifying the {@linkplain Form#view view} level for the generated handler
-	 * @param action a function mapping a resource shape to a resource responder; the possibly empty input shape is
-	 *               retrieved from the request {@linkplain ShapeFormat shape} body, if one is available, and redacted
-	 *               according to {@code task} and {@code view} parameters and the roles of the user performing the
-	 *               request; {@code mode} redaction is left to final shape consumers
+	 * @param action a function mapping a request and resource shape to a resource responder; the possibly empty input
+	 *               shape is retrieved from the request {@linkplain ShapeFormat shape} body, if one is available, and
+	 *               redacted according to {@code task} and {@code view} parameters and the roles of the user performing
+	 *               the request; {@code mode} redaction is left to final shape consumers
 	 *
 	 * @return an handler for the specified shape driven action
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	protected Handler handler(final IRI task, final IRI view, final Function<Shape, Responder> action) {
+	protected Handler handler(final IRI task, final IRI view, final BiFunction<Request, Shape, Responder> action) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -256,7 +256,9 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 			throw new NullPointerException("null action");
 		}
 
-		return /*processor.wrap*/((Handler)request -> request.body(ShapeFormat.shape()).map(
+		// !!! return request.query().isEmpty() ?  : request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
+
+		return /* !!! processor.wrap*/((Handler)request -> request.body(ShapeFormat.shape()).map(
 
 				shape -> {
 
@@ -269,7 +271,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 
 					return empty(redacted) ? forbidden(request)
 							: empty(authorized) ? refused(request)
-							: action.apply(authorized);
+							: action.apply(request, authorized);
 
 				},
 
@@ -278,7 +280,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 					final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
 
 					return refused ? refused(request)
-							: action.apply(and());
+							: action.apply(request, and());
 
 				}
 
@@ -286,6 +288,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 				link(LDP.RESOURCE, "type"),
 				link(LDP.RDF_SOURCE, "type")
 		)));
+
 	}
 
 

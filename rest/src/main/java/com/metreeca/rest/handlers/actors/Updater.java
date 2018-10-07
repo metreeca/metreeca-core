@@ -75,20 +75,11 @@ public final class Updater extends Actor<Updater> {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Responder handle(final Request request) {
-		return request.query().isEmpty() ? request.body(rdf()).map(
-
-				model -> handler(Form.update, Form.detail, shape ->
-
-						empty(shape) ? direct(request, model) : driven(request, model, shape)
-
-				).handle(request),
-
+	public Updater() {
+		delegate(handler(Form.update, Form.detail, (request, shape) -> request.body(rdf()).map(
+				model -> empty(shape) ? direct(request, model) : driven(request, model, shape),
 				request::reply
-
-		) : request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
+		)));
 	}
 
 

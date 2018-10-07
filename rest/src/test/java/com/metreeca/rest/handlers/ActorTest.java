@@ -123,8 +123,8 @@ final class ActorTest {
 
 	private static final class TestActor extends Actor<TestActor> {
 
-		@Override public Responder handle(final Request request) {
-			return handler(Form.relate, Form.detail, shape -> request.reply(response ->
+		private TestActor() {
+			delegate(handler(Form.relate, Form.detail, (request, shape) -> request.reply(response ->
 
 					response.status(Response.OK)
 
@@ -138,7 +138,7 @@ final class ActorTest {
 									error -> r
 							))
 
-			)).handle(request);
+			)));
 		}
 
 	}

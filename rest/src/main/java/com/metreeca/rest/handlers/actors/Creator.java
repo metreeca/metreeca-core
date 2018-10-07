@@ -101,6 +101,14 @@ public final class Creator extends Actor<Creator> {
 	private BiFunction<Request, Collection<Statement>, String> slug=uuid();
 
 
+	public Creator() {
+		delegate(handler(Form.create, Form.detail, (request, shape) -> request.body(rdf()).map(
+				model -> empty(shape) ? direct(request, model) : driven(request, model, shape),
+				request::reply
+		)));
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -126,23 +134,6 @@ public final class Creator extends Actor<Creator> {
 		}
 
 		return this;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Responder handle(final Request request) {
-		return request.query().isEmpty() ? request.body(rdf()).map(
-
-				model -> handler(Form.create, Form.detail, shape ->
-
-						empty(shape) ? direct(request, model) : driven(request, model, shape)
-
-				).handle(request),
-
-				request::reply
-
-		) : request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
 	}
 
 

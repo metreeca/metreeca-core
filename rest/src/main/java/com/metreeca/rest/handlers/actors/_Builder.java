@@ -18,11 +18,10 @@
 package com.metreeca.rest.handlers.actors;
 
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Request;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
@@ -32,25 +31,40 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Values.time;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
 public final class _Builder extends Actor<_Builder> {
+
+	public _Builder() {
+		//_handler(Form.relate, Form.detail, shape -> request.reply(response -> {
+		//
+		//	final Collection<Statement> model=request.body(rdf()).get().orElseGet(Collections::emptySet);
+		//
+		//	return model.isEmpty()
+		//
+		//			? response.status(Response.NotFound)
+		//
+		//			: response.status(Response.OK)
+		//
+		//			.body(shape()).set(shape.accept(mode(Form.verify)))// hide filtering constraints
+		//			.body(rdf()).set(shape.accept(new Restrictor(model, singleton(response.item()))).collect(toList()));
+		//
+		//}))
+	}
+
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public _Builder query(final String query) {
 
@@ -59,30 +73,6 @@ public final class _Builder extends Actor<_Builder> {
 		}
 
 		return pre(new SPARQLBuilder(query));
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Responder handle(final Request request) {
-		return request.query().isEmpty() ? handler(Form.relate, Form.detail, shape -> request.reply(response -> {
-
-			final Collection<Statement> model=request.body(rdf()).get().orElseGet(Collections::emptySet);
-
-			return model.isEmpty()
-
-					? response.status(Response.NotFound)
-
-					: response.status(Response.OK)
-
-					.body(shape()).set(shape.accept(mode(Form.verify)))// hide filtering constraints
-					.body(rdf()).set(shape.accept(new Restrictor(model, singleton(response.item()))).collect(toList()));
-
-		})).handle(
-
-				request.body(rdf()).set(emptySet()) // initial empty model to activate pre-processing
-
-		) : request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
 	}
 
 
