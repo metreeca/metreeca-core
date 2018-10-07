@@ -19,6 +19,7 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.*;
+import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
@@ -36,6 +37,7 @@ import java.util.function.BiFunction;
 import javax.json.JsonValue;
 
 import static com.metreeca.form.Shape.empty;
+import static com.metreeca.form.Shape.mode;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
@@ -78,10 +80,25 @@ public final class Updater extends Actor<Updater> {
 
 
 	public Updater() {
-		delegate(handler(Form.update, Form.detail, (request, shape) -> request.body(rdf()).map(
-				model -> empty(shape) ? direct(request, model) : driven(request, model, shape),
-				request::reply
-		)));
+		delegate(handler(Form.update, Form.detail, (request, shape) -> request.body(rdf())
+
+				.map(model -> { // add implied statements
+
+					model.addAll(shape
+							.accept(mode(Form.verify))
+							.accept(new Outliner(request.item()))
+					);
+
+					return model;
+
+				})
+
+				.map(
+						model -> empty(shape) ? direct(request, model) : driven(request, model, shape),
+						request::reply
+				)
+
+		));
 	}
 
 
