@@ -23,7 +23,6 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.Or.or;
@@ -34,7 +33,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 
-@Disabled final class _BuilderTest {
+final class BuilderTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
@@ -80,7 +79,7 @@ import static com.metreeca.rest.formats.ShapeFormat.shape;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testBuild() {
-		exec(() -> new _Builder().query(virtual())
+		exec(() -> new Builder().model(virtual())
 
 				.handle(driven())
 
@@ -102,7 +101,7 @@ import static com.metreeca.rest.formats.ShapeFormat.shape;
 	}
 
 	@Test void testBuildLimited() {
-		exec(() -> new _Builder().query(virtual())
+		exec(() -> new Builder().model(virtual())
 
 				.handle(driven().roles(Salesman))
 
@@ -125,7 +124,7 @@ import static com.metreeca.rest.formats.ShapeFormat.shape;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenUnautorized() {
-		exec(() -> new _Builder()
+		exec(() -> new Builder()
 
 				.handle(driven().roles(Form.none))
 
@@ -135,7 +134,7 @@ import static com.metreeca.rest.formats.ShapeFormat.shape;
 	}
 
 	@Test void testDrivenForbidden() {
-		exec(() -> new _Builder()
+		exec(() -> new Builder()
 
 				.handle(driven().body(shape()).set(or()))
 
@@ -145,7 +144,7 @@ import static com.metreeca.rest.formats.ShapeFormat.shape;
 	}
 
 	@Test void testDrivenUnknownOnEmptyModel() {
-		exec(() -> new _Builder()
+		exec(() -> new Builder()
 
 				.handle(driven())
 

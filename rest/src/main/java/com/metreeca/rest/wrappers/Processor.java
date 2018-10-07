@@ -159,7 +159,7 @@ public final class Processor implements Wrapper {
 	 *
 	 * </table>
 	 *
-	 * @param update the SPARQL Update update to be executed by this processor on successful request processing; empty
+	 * @param update the SPARQL update to be executed by this processor on successful request processing; empty
 	 *               scripts are ignored
 	 *
 	 * @return this processor

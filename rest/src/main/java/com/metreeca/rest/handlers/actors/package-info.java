@@ -16,7 +16,7 @@
  */
 
 /**
- * Model-driven resource handlers.
+ * Basic resource actors.
  */
 
 package com.metreeca.rest.handlers.actors;
