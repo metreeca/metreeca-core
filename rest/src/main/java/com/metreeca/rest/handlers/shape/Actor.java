@@ -256,7 +256,7 @@ public abstract class Actor<T extends Actor<T>> implements Handler {
 			throw new NullPointerException("null action");
 		}
 
-		return processor.wrap((Handler)request -> request.body(ShapeFormat.shape()).map(
+		return /*processor.wrap*/((Handler)request -> request.body(ShapeFormat.shape()).map(
 
 				shape -> {
 

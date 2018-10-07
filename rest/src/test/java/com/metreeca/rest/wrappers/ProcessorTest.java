@@ -90,7 +90,7 @@ final class ProcessorTest {
 
 				.handle(new Request()
 
-						.body(rdf()).set(emptyList()))
+						.body(rdf()).set(emptyList())) // empty body to activate pre-processing
 
 				.accept(response -> assertThat(response)
 						.hasBodyThat(rdf())

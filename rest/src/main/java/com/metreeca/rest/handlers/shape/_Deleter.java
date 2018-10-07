@@ -20,60 +20,6 @@ package com.metreeca.rest.handlers.shape;
 
 public final class _Deleter {
 
-	//public static _Deleter deleter(final Shape shape) {
-	//
-	//	if ( shape == null ) {
-	//		throw new NullPointerException("null shape");
-	//	}
-	//
-	//	return new _Deleter(shape);
-	//}
-	//
-	//
-	//private final Shape shape;
-	//
-	//private Wrapper wrapper=wrapper();
-	//
-	//private final Graph graph=tool(Graph.Factory);
-	//
-	//
-	//private _Deleter(final Shape shape) {
-	//	this.shape=shape
-	//			.accept(task(Form.delete))
-	//			.accept(view(Form.detail));
-	//}
-	//
-	//
-	//public boolean active() {
-	//	return !empty(shape);
-	//}
-	//
-	//
-	//@Override public _Deleter wrap(final Wrapper wrapper) {
-	//
-	//	if ( wrapper == null ) {
-	//		throw new NullPointerException("null wrapper");
-	//	}
-	//
-	//	this.wrapper=wrapper.wrap(this.wrapper);
-	//
-	//	return this;
-	//}
-	//
-	//@Override public void handle(final Request request, final Response response) {
-	//	authorize(request, response, shape, shape -> {
-	//		try (final RepositoryConnection connection=graph.connect()) {
-	//
-	//			transactor(connection)
-	//					.wrap(wrapper)
-	//					.wrap(process(connection, shape))
-	//					.handle(request, response);
-	//
-	//		}
-	//	});
-	//}
-	//
-	//
 	//private Handler process(final RepositoryConnection connection, final Shape shape) {
 	//	return (request, response) -> {
 	//
