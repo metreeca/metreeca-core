@@ -97,6 +97,8 @@
 
 		<javadocs>${project.basedir}/docs/latest/javadocs</javadocs>
 
+		<timestamp>${maven.build.timestamp}</timestamp> <!-- ;( not directly available to filtered resources -->
+
 	</properties>
 
 	<dependencies> <!-- shared testing dependencies -->
