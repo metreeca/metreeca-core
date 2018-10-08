@@ -123,7 +123,7 @@ final class BuilderTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testDrivenUnautorized() {
+	@Test void testDrivenUnauthorized() {
 		exec(() -> new Builder()
 
 				.handle(driven().roles(Form.none))

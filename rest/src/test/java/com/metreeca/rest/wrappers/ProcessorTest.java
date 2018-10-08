@@ -30,12 +30,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
@@ -50,10 +52,19 @@ final class ProcessorTest {
 
 
 	private Handler echo() {
-		return request -> request.reply(response -> request.body(rdf()).map(
-				v -> response.body(rdf()).set(v),
-				e -> response
-		).status(Response.OK));
+		return request -> request.reply(response -> response.status(Response.OK)
+
+				.map(r -> request.body(shape()).map(
+						v -> r.body(shape()).set(v),
+						e -> r
+				))
+
+				.map(r -> request.body(rdf()).map(
+						v -> r.body(rdf()).set(v),
+						e -> r
+				))
+
+		);
 	}
 
 
@@ -81,7 +92,9 @@ final class ProcessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessRequestRDFPayload() {
-		exec(() -> new Processor() // multiple filters to test piping
+		exec(() -> new Processor()
+
+				// multiple filters to test piping
 
 				.pre(pre(RDF.FIRST))
 				.pre(pre(RDF.REST))
@@ -113,11 +126,40 @@ final class ProcessorTest {
 				.accept(response -> assertThat(response).hasBody(rdf())));
 	}
 
+	@Test void testTrimRequestRDFPayloadToRequestShape() {
+		exec(() -> new Processor()
+
+				.pre((response, model) -> {
+
+					model.add(response.item(), RDF.FIRST, RDF.NIL);
+					model.add(response.item(), RDF.REST, RDF.NIL);
+
+					return model;
+
+				})
+
+				.wrap(echo())
+
+				.handle(new Request()
+
+						.body(shape()).set(trait(RDF.FIRST))
+						.body(rdf()).set(emptyList())) // empty body to activate pre-processing
+
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.as("statements outside shape envelope trimmed")
+						.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
+				)
+		);
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessResponseRDFPayload() {
-		exec(() -> new Processor() // multiple filters to test piping
+		exec(() -> new Processor()
+
+				// multiple filters to test piping
 
 				.post(post(RDF.FIRST))
 				.post(post(RDF.REST))
@@ -126,7 +168,7 @@ final class ProcessorTest {
 
 				.handle(new Request()
 
-						.body(rdf()).set(emptyList()))
+						.body(rdf()).set(emptyList())) // empty body to activate post-processing
 
 				.accept(response -> assertThat(response)
 						.hasBodyThat(rdf())
@@ -146,8 +188,35 @@ final class ProcessorTest {
 
 				.handle(new Request()) // no RDF payload
 
-				.accept(response -> assertThat(response).hasBody(rdf())));
+				.accept(response -> assertThat(response).hasBody(rdf()))
+		);
+	}
 
+	@Test void testTrimResponseRDFPayloadToResponseShape() {
+		exec(() -> new Processor()
+
+				.post((response, model) -> {
+
+					model.add(response.item(), RDF.FIRST, RDF.NIL);
+					model.add(response.item(), RDF.REST, RDF.NIL);
+
+					return model;
+
+				})
+
+				.wrap(echo())
+
+				.handle(new Request()
+
+						.body(shape()).set(trait(RDF.FIRST))
+						.body(rdf()).set(emptyList())) // empty body to activate post-processing
+
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.as("statements outside shape envelope trimmed")
+						.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
+				)
+		);
 	}
 
 

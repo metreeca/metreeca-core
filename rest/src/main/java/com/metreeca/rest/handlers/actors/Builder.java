@@ -19,9 +19,6 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.RDFFormat;
@@ -29,28 +26,24 @@ import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.things.Values.time;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -87,7 +80,10 @@ public final class Builder extends Actor<Builder> {
 
 
 	public Builder() {
-		delegate(handler(Form.relate, Form.detail, (request, shape) -> {
+		post(
+				(response, model) -> model // non-empty filter forces RDF body trimming in Processor
+
+		).delegate(handler(Form.relate, Form.detail, (request, shape) -> {
 
 			final Collection<Statement> model=this.model.apply(request);
 
@@ -97,8 +93,9 @@ public final class Builder extends Actor<Builder> {
 
 					: response.status(Response.OK)
 
-					.body(shape()).set(shape.accept(mode(Form.verify)))// hide filtering constraints // !!! add only if non empty
-					.body(rdf()).set(shape.accept(new Restrictor(model, singleton(response.item()))).collect(toList()))
+					.map(r -> empty(shape) ? r : r.body(shape()).set(shape))
+
+					.body(rdf()).set(model)
 			);
 
 		}));
@@ -204,74 +201,5 @@ public final class Builder extends Actor<Builder> {
 		return super.post(filter);
 	}
 
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Model restrictor.
-	 *
-	 * <p>Recursively extracts from a model and an initial collection of source values all the statements compatible
-	 * with a shape.</p>
-	 */
-	private static final class Restrictor extends Shape.Probe<Stream<Statement>> {
-
-		private final Collection<Statement> model;
-		private final Collection<Value> sources;
-
-
-		private Restrictor(final Collection<Statement> model, final Collection<Value> sources) {
-			this.model=model;
-			this.sources=sources;
-		}
-
-
-		@Override protected Stream<Statement> fallback(final Shape shape) {
-			return Stream.empty();
-		}
-
-
-		@Override public Stream<Statement> visit(final Trait trait) {
-
-			final Step step=trait.getStep();
-
-			final IRI iri=step.getIRI();
-			final boolean inverse=step.isInverse();
-
-			final Function<Statement, Value> source=inverse
-					? Statement::getObject
-					: Statement::getSubject;
-
-			final Function<Statement, Value> target=inverse
-					? Statement::getSubject
-					: Statement::getObject;
-
-			final Collection<Statement> restricted=model.stream()
-					.filter(s -> sources.contains(source.apply(s)) && iri.equals(s.getPredicate()))
-					.collect(toList());
-
-			final Set<Value> focus=restricted.stream()
-					.map(target)
-					.collect(toSet());
-
-			return Stream.concat(restricted.stream(), trait.getShape().accept(new Restrictor(model, focus)));
-		}
-
-		@Override public Stream<Statement> visit(final And and) {
-			return and.getShapes().stream().flatMap(shape -> shape.accept(this));
-		}
-
-		@Override public Stream<Statement> visit(final Or or) {
-			return or.getShapes().stream().flatMap(shape -> shape.accept(this));
-		}
-
-		@Override public Stream<Statement> visit(final Test test) {
-			return Stream.concat(test.getPass().accept(this), test.getFail().accept(this));
-		}
-
-		@Override public Stream<Statement> visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
-	}
 
 }

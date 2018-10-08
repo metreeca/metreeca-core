@@ -18,27 +18,40 @@
 package com.metreeca.rest.wrappers;
 
 
+import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.*;
+import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static com.metreeca.form.Shape.empty;
+import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.time;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
+import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -69,6 +82,9 @@ public final class Processor implements Wrapper {
 	 * <p>The filter is chained after previously inserted pre-processing filters and executed on incoming requests and
 	 * their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
+	 * <p>If the request contains a {@link ShapeFormat} body, the filtered model is trimmed to remove statements
+	 * outside the allowed shape envelope.</p>
+	 *
 	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
 	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
 	 *
@@ -93,6 +109,9 @@ public final class Processor implements Wrapper {
 	 * <p>The filter is chained after previously inserted post-processing filters and executed on {@linkplain
 	 * Response#success() successful} outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is
 	 * present, or ignored, otherwise.</p>
+	 *
+	 * <p>If the response contains a {@link ShapeFormat} body, the filtered model is trimmed to remove statements
+	 * outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
 	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -212,8 +231,22 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-		return message.body(rdf()).pipe(statements ->
-				(filter == null) ? statements : filter.apply(message, new LinkedHashModel(statements)));
+		return message.body(rdf()).pipe(statements -> (filter == null) ? statements
+				: trim(message, filter.apply(message, new LinkedHashModel(statements)))
+		);
+	}
+
+	private <T extends Message<T>> Collection<Statement> trim(final T message, final Model model) {
+		return message.body(shape()).map(
+
+				shape -> empty(shape) ? model : shape
+						.accept(mode(Form.verify)) // hide filtering details
+						.accept(new Trimmer(model, singleton(message.item())))
+						.collect(toList()),
+
+				error -> model
+
+		);
 	}
 
 
@@ -257,6 +290,76 @@ public final class Processor implements Wrapper {
 			return response;
 
 		});
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Model trimmer.
+	 *
+	 * <p>Recursively extractsall the statements compatible with a shape from a model and an initial collection of
+	 * source values .</p>
+	 */
+	private static final class Trimmer extends Shape.Probe<Stream<Statement>> {
+
+		private final Collection<Statement> model;
+		private final Collection<Value> sources;
+
+
+		private Trimmer(final Collection<Statement> model, final Collection<Value> sources) {
+			this.model=model;
+			this.sources=sources;
+		}
+
+
+		@Override protected Stream<Statement> fallback(final Shape shape) {
+			return Stream.empty();
+		}
+
+
+		@Override public Stream<Statement> visit(final Trait trait) {
+
+			final Step step=trait.getStep();
+
+			final IRI iri=step.getIRI();
+			final boolean inverse=step.isInverse();
+
+			final Function<Statement, Value> source=inverse
+					? Statement::getObject
+					: Statement::getSubject;
+
+			final Function<Statement, Value> target=inverse
+					? Statement::getSubject
+					: Statement::getObject;
+
+			final Collection<Statement> restricted=model.stream()
+					.filter(s -> sources.contains(source.apply(s)) && iri.equals(s.getPredicate()))
+					.collect(toList());
+
+			final Set<Value> focus=restricted.stream()
+					.map(target)
+					.collect(toSet());
+
+			return Stream.concat(restricted.stream(), trait.getShape().accept(new Trimmer(model, focus)));
+		}
+
+		@Override public Stream<Statement> visit(final And and) {
+			return and.getShapes().stream().flatMap(shape -> shape.accept(this));
+		}
+
+		@Override public Stream<Statement> visit(final Or or) {
+			return or.getShapes().stream().flatMap(shape -> shape.accept(this));
+		}
+
+		@Override public Stream<Statement> visit(final Test test) {
+			return Stream.concat(test.getPass().accept(this), test.getFail().accept(this));
+		}
+
+		@Override public Stream<Statement> visit(final Group group) {
+			return group.getShape().accept(this);
+		}
+
 	}
 
 }
