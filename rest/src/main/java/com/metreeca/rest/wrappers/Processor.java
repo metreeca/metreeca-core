@@ -213,40 +213,8 @@ public final class Processor implements Wrapper {
 				.wrap(pre())
 				.wrap(post())
 				.wrap(sync())
+				.wrap(hide())
 				.wrap(handler);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private <T extends Message<T>> BiFunction<T, Model, Model> chain(
-			final BiFunction<T, Model, Model> pipeline, final BiFunction<T, Model, Model> filter
-	) {
-
-		final BiFunction<T, Model, Model> checked=(request, model) ->
-				requireNonNull(filter.apply(request, model), "null filter return value");
-
-		return (pipeline == null) ? checked
-				: (request, model) -> checked.apply(request, pipeline.apply(request, model));
-	}
-
-	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-		return message.body(rdf()).pipe(statements -> (filter == null) ? statements
-				: trim(message, filter.apply(message, new LinkedHashModel(statements)))
-		);
-	}
-
-	private <T extends Message<T>> Collection<Statement> trim(final T message, final Model model) {
-		return message.body(shape()).map(
-
-				shape -> empty(shape) ? model : shape
-						.accept(mode(Form.verify)) // hide filtering details
-						.accept(new Trimmer(model, singleton(message.item())))
-						.collect(toList()),
-
-				error -> model
-
-		);
 	}
 
 
@@ -290,6 +258,44 @@ public final class Processor implements Wrapper {
 			return response;
 
 		});
+	}
+
+	private Wrapper hide() {
+		return handler -> request -> handler.handle(request).map(response -> response.body(shape()).pipe(
+				shape -> shape.accept(mode(Form.verify)) // hide filtering details
+		));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private <T extends Message<T>> BiFunction<T, Model, Model> chain(
+			final BiFunction<T, Model, Model> pipeline, final BiFunction<T, Model, Model> filter
+	) {
+
+		final BiFunction<T, Model, Model> checked=(request, model) ->
+				requireNonNull(filter.apply(request, model), "null filter return value");
+
+		return (pipeline == null) ? checked
+				: (request, model) -> checked.apply(request, pipeline.apply(request, model));
+	}
+
+	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
+		return message.body(rdf()).pipe(statements -> (filter == null) ? statements
+				: trim(message, filter.apply(message, new LinkedHashModel(statements)))
+		);
+	}
+
+	private <T extends Message<T>> Collection<Statement> trim(final T message, final Model model) {
+		return message.body(shape()).map(
+
+				shape -> empty(shape) ? model : shape
+						.accept(new Trimmer(model, singleton(message.item())))
+						.collect(toList()),
+
+				error -> model
+
+		);
 	}
 
 
