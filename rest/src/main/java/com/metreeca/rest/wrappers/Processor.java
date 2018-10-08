@@ -28,6 +28,8 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Values.iri;
@@ -54,7 +56,7 @@ public final class Processor implements Wrapper {
 	private BiFunction<Request, Model, Model> pre;
 	private BiFunction<Response, Model, Model> post;
 
-	private String update="";
+	private final Collection<String> updates=new ArrayList<>();
 
 	private final Graph graph=tool(Graph.Factory);
 
@@ -111,7 +113,7 @@ public final class Processor implements Wrapper {
 	}
 
 	/**
-	 * Configures the SPARQL Update post-processing script.
+	 * Inserts a SPARQL Update post-processing script.
 	 *
 	 * <p>The script is executed on the shared {@linkplain Graph#Factory graph} tool on {@linkplain Response#success()
 	 * successful} request processing by wrapped handlers and {@linkplain #post(BiFunction) post-processing filters},
@@ -159,8 +161,8 @@ public final class Processor implements Wrapper {
 	 *
 	 * </table>
 	 *
-	 * @param update the SPARQL update to be executed by this processor on successful request processing; empty
-	 *               scripts are ignored
+	 * @param update a SPARQL update to be executed by this processor on successful request processing; empty scripts
+	 *               are ignored
 	 *
 	 * @return this processor
 	 *
@@ -172,7 +174,9 @@ public final class Processor implements Wrapper {
 			throw new NullPointerException("null update script");
 		}
 
-		this.update=update;
+		if ( !update.isEmpty() ) {
+			updates.add(update);
+		}
 
 		return this;
 	}
@@ -227,21 +231,26 @@ public final class Processor implements Wrapper {
 	private Wrapper update() {
 		return handler -> request -> handler.handle(request).map(response -> {
 
-			if ( response.success() && !update.isEmpty() ) {
+			if ( response.success() && !updates.isEmpty() ) {
 				graph.update(connection -> {
 
 					final IRI user=response.request().user();
 					final IRI item=response.item();
 
-					final Update update=connection.prepareUpdate(QueryLanguage.SPARQL, this.update, request.base());
+					for (final String update : updates) {
 
-					update.setBinding("this", item);
-					update.setBinding("stem", iri(item.getNamespace()));
-					update.setBinding("name", literal(item.getLocalName()));
-					update.setBinding("user", user);
-					update.setBinding("time", time(true));
+						final Update operation=connection.prepareUpdate(QueryLanguage.SPARQL, update, request.base());
 
-					update.execute();
+						operation.setBinding("this", item);
+						operation.setBinding("stem", iri(item.getNamespace()));
+						operation.setBinding("name", literal(item.getLocalName()));
+						operation.setBinding("user", user);
+						operation.setBinding("time", time(true));
+
+						operation.execute();
+
+					}
+
 				});
 			}
 

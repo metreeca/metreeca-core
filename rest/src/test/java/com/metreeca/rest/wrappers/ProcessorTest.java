@@ -154,9 +154,11 @@ final class ProcessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testExecuteUpdateScriptOnRequestFocus() {
-		exec(graph(decode("<test> rdf:value rdf:first.")), () -> new Processor()
+		exec(() -> new Processor()
 
-				.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
+				.update(sparql("insert { ?this rdf:value rdf:first } where {}"))
+				.update(sparql("insert { ?this rdf:value rdf:rest } where {}"))
+
 				.wrap((Handler)request -> request.reply(response -> response.status(Response.OK)))
 
 				.handle(new Request()
@@ -171,9 +173,11 @@ final class ProcessorTest {
 	}
 
 	@Test void testExecuteUpdateScriptOnResponseLocation() {
-		exec(graph(decode("<test> rdf:value rdf:first.")), () -> new Processor()
+		exec(() -> new Processor()
 
-				.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
+				.update(sparql("insert { ?this rdf:value rdf:first } where {}"))
+				.update(sparql("insert { ?this rdf:value rdf:rest } where {}"))
+
 				.wrap((Handler)request -> request.reply(response -> response
 						.status(Response.OK)
 						.header("Location", Base+"test")))
