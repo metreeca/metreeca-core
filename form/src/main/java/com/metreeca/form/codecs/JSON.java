@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.things;
+package com.metreeca.form.codecs;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -38,7 +38,7 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
  * @see "https://javaee.github.io/jsonp/"
  * @deprecated To be removed
  */
-@Deprecated public final class JSON {
+@Deprecated final class JSON {
 
 	private static final JsonParserFactory parsers=Json
 			.createParserFactory(null);

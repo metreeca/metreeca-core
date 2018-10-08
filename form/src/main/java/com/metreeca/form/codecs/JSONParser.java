@@ -24,7 +24,6 @@ import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.shapes.Alias;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.JSON;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;

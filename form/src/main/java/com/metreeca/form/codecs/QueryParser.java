@@ -25,7 +25,6 @@ import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.JSON;
 
 import org.eclipse.rdf4j.model.Value;
 
