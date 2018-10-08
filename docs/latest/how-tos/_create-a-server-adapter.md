@@ -1,9 +1,6 @@
 ---
 title: 		How To Create a Server Adapter
 excerpt:	Usability guidelines and other configuration tips
-caption:    "${module.caption}"
-project:    "${module.project}"
-version:    "${module.version}"
 ---
 
 - the framework
