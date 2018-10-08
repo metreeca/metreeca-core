@@ -69,6 +69,10 @@
 	</issueManagement>
 
 	<distributionManagement>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
 		<snapshotRepository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -344,7 +348,7 @@
 	<profiles>
 		<profile>
 
-			<id>release</id>
+			<id>ossrh</id>
 
 			<build>
 				<plugins>
