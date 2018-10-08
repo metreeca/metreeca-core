@@ -56,7 +56,7 @@ public final class Processor implements Wrapper {
 	private BiFunction<Request, Model, Model> pre;
 	private BiFunction<Response, Model, Model> post;
 
-	private final Collection<String> updates=new ArrayList<>();
+	private final Collection<String> scripts=new ArrayList<>();
 
 	private final Graph graph=tool(Graph.Factory);
 
@@ -64,12 +64,12 @@ public final class Processor implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Inserts a pre-processing RDF filter.
+	 * Inserts a request RDF pre-processing filter.
 	 *
 	 * <p>The filter is chained after previously inserted pre-processing filters and executed on incoming requests and
 	 * their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
-	 * @param filter the RDF pre-processing filter to be inserted; takes as argument an incoming request and its
+	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
 	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
 	 *
 	 * @return this processor
@@ -88,14 +88,14 @@ public final class Processor implements Wrapper {
 	}
 
 	/**
-	 * Inserts a post-processing RDF filter.
+	 * Inserts a response RDF post-processing filter.
 	 *
 	 * <p>The filter is chained after previously inserted post-processing filters and executed on {@linkplain
 	 * Response#success() successful} outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is
 	 * present, or ignored, otherwise.</p>
 	 *
-	 * @param filter the RDF post-processing filter to be inserted; takes as argument a successful outgoing response and
-	 *               its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
+	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
 	 *
 	 * @return this processor
 	 *
@@ -113,11 +113,11 @@ public final class Processor implements Wrapper {
 	}
 
 	/**
-	 * Inserts a SPARQL Update post-processing script.
+	 * Inserts a SPARQL Update housekeeping script.
 	 *
 	 * <p>The script is executed on the shared {@linkplain Graph#Factory graph} tool on {@linkplain Response#success()
-	 * successful} request processing by wrapped handlers and {@linkplain #post(BiFunction) post-processing filters},
-	 * with the following pre-defined bindings:</p>
+	 * successful} request processing by wrapped handlers and before applying {@linkplain #post(BiFunction)
+	 * post-processing filters}, with the following pre-defined bindings:</p>
 	 *
 	 * <table summary="pre-defined bindings">
 	 *
@@ -161,21 +161,21 @@ public final class Processor implements Wrapper {
 	 *
 	 * </table>
 	 *
-	 * @param update a SPARQL update to be executed by this processor on successful request processing; empty scripts
-	 *               are ignored
+	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
+	 *               processing; empty scripts are ignored
 	 *
 	 * @return this processor
 	 *
-	 * @throws NullPointerException if {@code update} is null
+	 * @throws NullPointerException if {@code script} is null
 	 */
-	public Processor update(final String update) {
+	public Processor sync(final String script) {
 
-		if ( update == null ) {
-			throw new NullPointerException("null update script");
+		if ( script == null ) {
+			throw new NullPointerException("null script script");
 		}
 
-		if ( !update.isEmpty() ) {
-			updates.add(update);
+		if ( !script.isEmpty() ) {
+			scripts.add(script);
 		}
 
 		return this;
@@ -193,7 +193,7 @@ public final class Processor implements Wrapper {
 		return new Connector()
 				.wrap(pre())
 				.wrap(post())
-				.wrap(update())
+				.wrap(sync())
 				.wrap(handler);
 	}
 
@@ -228,16 +228,16 @@ public final class Processor implements Wrapper {
 				.map(response -> response.success() ? process(response, post) : response);
 	}
 
-	private Wrapper update() {
+	private Wrapper sync() {
 		return handler -> request -> handler.handle(request).map(response -> {
 
-			if ( response.success() && !updates.isEmpty() ) {
+			if ( response.success() && !scripts.isEmpty() ) {
 				graph.update(connection -> {
 
 					final IRI user=response.request().user();
 					final IRI item=response.item();
 
-					for (final String update : updates) {
+					for (final String update : scripts) {
 
 						final Update operation=connection.prepareUpdate(QueryLanguage.SPARQL, update, request.base());
 

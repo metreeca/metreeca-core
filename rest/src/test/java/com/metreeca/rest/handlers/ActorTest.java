@@ -85,7 +85,7 @@ final class ActorTest {
 					return statements;
 				})
 
-				.update("insert { ?this rdf:value rdf:nil } where {}")
+				.sync("insert { ?this rdf:value rdf:nil } where {}")
 
 				.handle(new Request().body(rdf()).set(emptyList())) // enable rdf pre-processing
 

@@ -153,11 +153,11 @@ final class ProcessorTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testExecuteUpdateScriptOnRequestFocus() {
+	@Test void testExecuteScriptOnRequestFocus() {
 		exec(() -> new Processor()
 
-				.update(sparql("insert { ?this rdf:value rdf:first } where {}"))
-				.update(sparql("insert { ?this rdf:value rdf:rest } where {}"))
+				.sync(sparql("insert { ?this rdf:value rdf:first } where {}"))
+				.sync(sparql("insert { ?this rdf:value rdf:rest } where {}"))
 
 				.wrap((Handler)request -> request.reply(response -> response.status(Response.OK)))
 
@@ -172,11 +172,11 @@ final class ProcessorTest {
 				));
 	}
 
-	@Test void testExecuteUpdateScriptOnResponseLocation() {
+	@Test void testExecuteScriptOnResponseLocation() {
 		exec(() -> new Processor()
 
-				.update(sparql("insert { ?this rdf:value rdf:first } where {}"))
-				.update(sparql("insert { ?this rdf:value rdf:rest } where {}"))
+				.sync(sparql("insert { ?this rdf:value rdf:first } where {}"))
+				.sync(sparql("insert { ?this rdf:value rdf:rest } where {}"))
 
 				.wrap((Handler)request -> request.reply(response -> response
 						.status(Response.OK)

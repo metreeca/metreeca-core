@@ -163,10 +163,10 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Inserts a pre-processing RDF filter.
+	 * Inserts a request RDF pre-processing filter.
 	 *
-	 * @param filter the RDF pre-processing filter to be inserted; takes as argument an incoming request and its
-	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 * @param filter the request RDF request pre-processing filter to be inserted; takes as argument an incoming request
+	 *               and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
 	 *
 	 * @return this actor
 	 *
@@ -185,10 +185,10 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	}
 
 	/**
-	 * Inserts a post-processing RDF filter.
+	 * Inserts a response post-processing RDF filter.
 	 *
-	 * @param filter the RDF post-processing filter to be inserted; takes as argument a successful outgoing response and
-	 *               its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
+	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
 	 *
 	 * @return this actor
 	 *
@@ -207,23 +207,23 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	}
 
 	/**
-	 * Configures the SPARQL Update post-processing script.
+	 * Inserts a SPARQL Update housekeeping script.
 	 *
-	 * @param update the SPARQL Update update to be executed on successful request processing; empty scripts are
-	 *               ignored
+	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
+	 *               processing; empty scripts are ignored
 	 *
 	 * @return this actor
 	 *
-	 * @throws NullPointerException if {@code update} is null
-	 * @see Processor#update(String)
+	 * @throws NullPointerException if {@code script} is null
+	 * @see Processor#sync(String)
 	 */
-	protected T update(final String update) {
+	protected T sync(final String script) {
 
-		if ( update == null ) {
-			throw new NullPointerException("null update");
+		if ( script == null ) {
+			throw new NullPointerException("null script");
 		}
 
-		processor.update(update);
+		processor.sync(script);
 
 		return self();
 	}

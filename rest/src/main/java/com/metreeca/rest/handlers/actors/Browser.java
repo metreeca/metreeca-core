@@ -129,7 +129,7 @@ public final class Browser extends Actor<Browser> {
 
 	@Override public Browser post(final BiFunction<Response, Model, Model> filter) { return super.post(filter); }
 
-	@Override public Browser update(final String update) { return super.update(update); }
+	@Override public Browser sync(final String script) { return super.sync(script); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

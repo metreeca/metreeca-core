@@ -129,7 +129,7 @@ public final class Creator extends Actor<Creator> {
 
 	@Override public Creator pre(final BiFunction<Request, Model, Model> filter) { return super.pre(filter); }
 
-	@Override public Creator update(final String update) { return super.update(update); }
+	@Override public Creator sync(final String script) { return super.sync(script); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

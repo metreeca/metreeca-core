@@ -106,7 +106,7 @@ public final class Updater extends Actor<Updater> {
 
 	@Override public Updater pre(final BiFunction<Request, Model, Model> filter) { return super.pre(filter); }
 
-	@Override public Updater update(final String update) { return super.update(update); }
+	@Override public Updater sync(final String script) { return super.sync(script); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
