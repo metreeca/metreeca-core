@@ -365,8 +365,8 @@ final class JSONParserTest extends JSONAdapterTest {
 
 			final RDFParser parser=new JSONParser();
 
-			parser.set(JSONAdapter.Focus, focus);
-			parser.set(JSONAdapter.Shape, shape);
+			parser.set(JSONCodec.Focus, focus);
+			parser.set(JSONCodec.Shape, shape);
 
 			parser.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
 

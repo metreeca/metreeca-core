@@ -26,7 +26,6 @@ import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.stream.*;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
@@ -48,10 +47,6 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 
 	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static List<Object> array(final Object... items) {
-		return asList(items);
-	}
 
 	@SafeVarargs public static Map<String, Object> object(final Map.Entry<String, Object>... fields) {
 

@@ -367,8 +367,8 @@ final class JSONWriterTest extends JSONAdapterTest {
 
 			final RDFWriter writer=new JSONWriter(buffer);
 
-			writer.set(JSONAdapter.Focus, focus);
-			writer.set(JSONAdapter.Shape, shape);
+			writer.set(JSONCodec.Focus, focus);
+			writer.set(JSONCodec.Shape, shape);
 
 			Rio.write(model, writer);
 

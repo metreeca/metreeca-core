@@ -47,6 +47,7 @@ import java.util.stream.Stream;
 import javax.json.JsonException;
 import javax.json.stream.JsonParsingException;
 
+import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.traits;
@@ -65,16 +66,18 @@ public final class JSONParser extends AbstractRDFParser {
 	private final DecimalFormat DoubleFormat=new DecimalFormat("0.0##E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public RDFFormat getRDFFormat() {
-		return JSONAdapter.JSONFormat;
+		return JSONCodec.JSONFormat;
 	}
 
 	@Override public Collection<RioSetting<?>> getSupportedSettings() {
 
 		final Collection<RioSetting<?>> settings=super.getSupportedSettings();
 
-		settings.add(JSONAdapter.Focus);
-		settings.add(JSONAdapter.Shape);
+		settings.add(JSONCodec.Focus);
+		settings.add(JSONCodec.Shape);
 
 		return settings;
 	}
@@ -105,12 +108,12 @@ public final class JSONParser extends AbstractRDFParser {
 			throw new NullPointerException("null base URI");
 		}
 
-		final Resource focus=getParserConfig().get(JSONAdapter.Focus);
-		final Shape shape=getParserConfig().get(JSONAdapter.Shape);
+		final Resource focus=getParserConfig().get(JSONCodec.Focus);
+		final Shape shape=getParserConfig().get(JSONCodec.Shape);
 
 		final Shape driver=(shape == null) ? null : shape // infer implicit constraints to drive json shorthands
 
-				.accept(Shape.mode(Form.verify))
+				.accept(mode(Form.verify))
 				.accept(new Inferencer())
 				.accept(new Optimizer());
 
@@ -360,7 +363,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 			} else if ( shape != null ) {
 
-				final Map<String, Step> aliases=Alias.aliases(shape, JSONAdapter.Reserved)
+				final Map<String, Step> aliases=Alias.aliases(shape, JSONCodec.Reserved)
 						.entrySet().stream()
 						.collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 

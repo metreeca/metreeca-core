@@ -32,8 +32,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 
-
-public final class JSONAdapter {
+public interface JSONCodec {
 
 	/**
 	 * The plain <a href="http://www.json.org/">JSON</a> file format.
@@ -55,7 +54,7 @@ public final class JSONAdapter {
 	 * <p>Defaults to {@code null}.</p>
 	 */
 	public static final RioSetting<Resource> Focus=new RioSettingImpl<>(
-			JSONAdapter.class.getName()+"#Focus", "Resource focus", null);
+			JSONCodec.class.getName()+"#Focus", "Resource focus", null);
 
 	/**
 	 * Sets the expected shape for the resources handled by codecs.
@@ -63,16 +62,11 @@ public final class JSONAdapter {
 	 * <p>Defaults to {@code null}.</p>
 	 */
 	public static final RioSetting<com.metreeca.form.Shape> Shape=new RioSettingImpl<>(
-			JSONAdapter.class.getName()+"#Shape", "Resource shape", null);
+			JSONCodec.class.getName()+"#Shape", "Resource shape", null);
 
 
 	public static final Collection<String> Reserved=new HashSet<>(singleton(
 			"this"
 	));
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private JSONAdapter() {}
 
 }

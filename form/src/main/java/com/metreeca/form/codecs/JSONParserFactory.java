@@ -25,7 +25,7 @@ import org.eclipse.rdf4j.rio.RDFParserFactory;
 public final class JSONParserFactory implements RDFParserFactory {
 
 	@Override public RDFFormat getRDFFormat() {
-		return JSONAdapter.JSONFormat;
+		return JSONCodec.JSONFormat;
 	}
 
 	@Override public RDFParser getParser() {

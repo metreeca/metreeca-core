@@ -18,7 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.codecs.JSONAdapter;
+import com.metreeca.form.codecs.JSONCodec;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
 
@@ -89,8 +89,8 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 					.service(RDFParserRegistry.getInstance(), TURTLE, type)
 					.getParser();
 
-			parser.set(JSONAdapter.Shape, shape.orElse(null));
-			parser.set(JSONAdapter.Focus, focus.orElse(null));
+			parser.set(JSONCodec.Shape, shape.orElse(null));
+			parser.set(JSONCodec.Focus, focus.orElse(null));
 
 			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
 			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
@@ -180,8 +180,8 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 						final RDFWriter writer=factory.getWriter(output);
 
-						writer.set(JSONAdapter.Shape, message.body(shape()).get().orElse(null));
-						writer.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
+						writer.set(JSONCodec.Shape, message.body(shape()).get().orElse(null));
+						writer.set(JSONCodec.Focus, response.map(Response::item).orElse(null));
 
 						Rio.write(rdf, writer);
 

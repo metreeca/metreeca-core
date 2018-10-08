@@ -58,6 +58,8 @@ public final class JSONWriter extends AbstractRDFWriter {
 	private final Model model=new LinkedHashModel();
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public JSONWriter(final OutputStream stream) {
 
 		if ( stream == null ) {
@@ -78,15 +80,15 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 
 	@Override public RDFFormat getRDFFormat() {
-		return JSONAdapter.JSONFormat;
+		return JSONCodec.JSONFormat;
 	}
 
 	@Override public Collection<RioSetting<?>> getSupportedSettings() {
 
 		final Collection<RioSetting<?>> settings=super.getSupportedSettings();
 
-		settings.add(JSONAdapter.Focus);
-		settings.add(JSONAdapter.Shape);
+		settings.add(JSONCodec.Focus);
+		settings.add(JSONCodec.Shape);
 
 		return settings;
 	}
@@ -97,8 +99,8 @@ public final class JSONWriter extends AbstractRDFWriter {
 	@Override public void endRDF() throws RDFHandlerException {
 		try {
 
-			final Resource focus=getWriterConfig().get(JSONAdapter.Focus);
-			final Shape shape=getWriterConfig().get(JSONAdapter.Shape);
+			final Resource focus=getWriterConfig().get(JSONCodec.Focus);
+			final Shape shape=getWriterConfig().get(JSONCodec.Shape);
 
 			final Shape driver=(shape == null) ? null : shape // infer implicit constraints to drive json shorthands
 
@@ -184,7 +186,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 				} else { // write direct/inverse traits as specified by the shape
 
-					final Map<Step, String> aliases=aliases(shape, JSONAdapter.Reserved);
+					final Map<Step, String> aliases=aliases(shape, JSONCodec.Reserved);
 
 					for (final Map.Entry<Step, Shape> entry : traits.entrySet()) {
 
