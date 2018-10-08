@@ -75,6 +75,17 @@ public final class Request extends Message<Request> {
 	private final Map<String, List<String>> parameters=new LinkedHashMap<>();
 
 
+	/**
+	 * Retrieves the focus item IRI of this request.
+	 *
+	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
+	 * this request
+	 */
+	@Override public IRI item() {
+		return iri(base+path.substring(1));
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -138,16 +149,6 @@ public final class Request extends Message<Request> {
 		return !disjoint(this.roles, roles);
 	}
 
-
-	/**
-	 * Retrieves the focus item IRI of this request.
-	 *
-	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
-	 * this request
-	 */
-	public IRI item() {
-		return iri(base+path.substring(1));
-	}
 
 	/**
 	 * Retrieves the stem IRI of this request.

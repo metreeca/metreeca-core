@@ -17,6 +17,8 @@
 
 package com.metreeca.rest;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -56,6 +58,14 @@ public abstract class Message<T extends Message<T>> {
 
 
 	private T self() { return (T)this; }
+
+
+	/**
+	 * Retrieves the focus item IRI of this message.
+	 *
+	 * @return an absolute IRI identifying the focus item of this message
+	 */
+	public abstract IRI item();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -80,6 +80,19 @@ public final class Response extends Message<Response> {
 	}
 
 
+	/**
+	 * Retrieves the focus item IRI of this response.
+	 *
+	 * @return the absolute IRI included in the {@code Location} header of this response, if defined; the {@linkplain
+	 * Request#item() focus item} IRI of the originating request otherwise
+	 */
+	@Override public IRI item() {
+		return header("location")
+				.map(Values::iri)
+				.orElseGet(() -> request().item());
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -112,19 +125,6 @@ public final class Response extends Message<Response> {
 	 */
 	public boolean error() {
 		return status/100 > 3;
-	}
-
-
-	/**
-	 * Retrieves the focus item IRI of this response.
-	 *
-	 * @return the absolute IRI included in the {@code Location} header of this response, if defined; the {@linkplain
-	 * Request#item() focus item} IRI of the originating request otherwise
-	 */
-	public IRI item() {
-		return header("location")
-				.map(Values::iri)
-				.orElseGet(() -> request().item());
 	}
 
 

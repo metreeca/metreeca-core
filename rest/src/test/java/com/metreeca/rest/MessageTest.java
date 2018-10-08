@@ -19,6 +19,8 @@ package com.metreeca.rest;
 
 import com.metreeca.rest.formats.TextFormat;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -130,7 +132,13 @@ final class MessageTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TestMessage extends Message<TestMessage> {}
+	private static final class TestMessage extends Message<TestMessage> {
+
+		@Override public IRI item() {
+				return RDF.NIL;
+		}
+
+	}
 
 	private static final class TestFormat implements Format<String> {
 
