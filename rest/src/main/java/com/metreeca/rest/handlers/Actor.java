@@ -335,11 +335,11 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 		final JsonObjectBuilder json=Json.createObjectBuilder();
 
 		Optional.ofNullable(issues.get(Issue.Level.Error)).ifPresent(errors ->
-				json.add("errors", report(errors, item -> report(item)))
+				json.add("errors", report(errors, this::report))
 		);
 
 		Optional.ofNullable(issues.get(Issue.Level.Warning)).ifPresent(warnings ->
-				json.add("warnings", report(warnings, item -> report(item)))
+				json.add("warnings", report(warnings, this::report))
 		);
 
 		report.getFrames().forEach(frame -> {

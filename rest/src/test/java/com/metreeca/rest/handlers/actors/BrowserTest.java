@@ -92,6 +92,7 @@ final class BrowserTest {
 						.hasBody(shape())
 
 						.hasBodyThat(rdf())
+						.hasStatement(response.item(), LDP.CONTAINS, null)
 						.hasSubset(graph("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
 				)
 		);

@@ -183,7 +183,7 @@ public final class Browser extends Actor<Browser> {
 			} else {
 
 				new SPARQLEngine(connection).browse(edges).forEach((focus, statements) -> {
-					model.add(statement(focus, LDP.CONTAINS, focus));
+					model.add(statement(item, LDP.CONTAINS, focus));
 					model.addAll(statements);
 				});
 
