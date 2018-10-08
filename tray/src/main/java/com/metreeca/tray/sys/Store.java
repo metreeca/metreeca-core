@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 
 import java.io.*;
 import java.util.Optional;
@@ -141,7 +141,7 @@ public final class Store {
 
 		synchronized ( lock ) {
 
-			final File file=new File(storage, nameUUIDFromBytes(id.getBytes(Transputs.UTF8)).toString());
+			final File file=new File(storage, nameUUIDFromBytes(id.getBytes(Codecs.UTF8)).toString());
 
 			// acquire inter-process lock
 
@@ -264,7 +264,7 @@ public final class Store {
 		 */
 		public byte[] data() throws UncheckedIOException {
 			try (final InputStream input=input();) {
-				return Transputs.data(input);
+				return Codecs.data(input);
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
@@ -283,7 +283,7 @@ public final class Store {
 		public Blob data(final byte... data) throws UncheckedIOException {
 			try (final OutputStream output=output()) {
 
-				Transputs.data(output, data);
+				Codecs.data(output, data);
 
 				return this;
 
@@ -305,7 +305,7 @@ public final class Store {
 		public Blob data(final InputStream data) throws UncheckedIOException {
 			try (final OutputStream output=output()) {
 
-				Transputs.data(output, data);
+				Codecs.data(output, data);
 
 				return this;
 
@@ -318,13 +318,13 @@ public final class Store {
 		/**
 		 * Retrieves the textual content of this blob.
 		 *
-		 * @return the textual content of this blob, as read using the {@linkplain Transputs#UTF8 default encoding}
+		 * @return the textual content of this blob, as read using the {@linkplain Codecs#UTF8 default encoding}
 		 *
 		 * @throws UncheckedIOException if an I/O error occurs while reading from this blob
 		 */
 		public String text() throws UncheckedIOException {
 			try (final Reader reader=reader();) {
-				return Transputs.text(reader);
+				return Codecs.text(reader);
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
@@ -333,7 +333,7 @@ public final class Store {
 		/**
 		 * Configures the textual content of this blob.
 		 *
-		 * @param text the textual content to be written to this blob using the {@linkplain Transputs#UTF8 default
+		 * @param text the textual content to be written to this blob using the {@linkplain Codecs#UTF8 default
 		 *             encoding}
 		 *
 		 * @return this blob
@@ -344,7 +344,7 @@ public final class Store {
 		public Blob text(final String text) throws UncheckedIOException {
 			try (final Writer writer=writer()) {
 
-				Transputs.text(writer, text);
+				Codecs.text(writer, text);
 
 				return this;
 
@@ -357,7 +357,7 @@ public final class Store {
 		 * Configures the textual content of this blob.
 		 *
 		 * @param text reader providing access to the textual content to be written to this blob using the {@linkplain
-		 *             Transputs#UTF8 default encoding}
+		 *             Codecs#UTF8 default encoding}
 		 *
 		 * @return this blob
 		 *
@@ -367,7 +367,7 @@ public final class Store {
 		public Blob text(final Reader text) throws UncheckedIOException {
 			try (final Writer writer=writer()) {
 
-				Transputs.text(writer, text);
+				Codecs.text(writer, text);
 
 				return this;
 
@@ -387,7 +387,7 @@ public final class Store {
 		public InputStream input() throws UncheckedIOException {
 			try {
 
-				return file.exists() ? new FileInputStream(file) : Transputs.input();
+				return file.exists() ? new FileInputStream(file) : Codecs.input();
 
 			} catch ( final FileNotFoundException e ) {
 
@@ -424,7 +424,7 @@ public final class Store {
 		 * @throws UncheckedIOException if an I/O error occurs while accessing this blob
 		 */
 		public Reader reader() throws UncheckedIOException {
-			return Transputs.reader(input());
+			return Codecs.reader(input());
 		}
 
 		/**
@@ -435,7 +435,7 @@ public final class Store {
 		 * @throws UncheckedIOException if an I/O error occurs while accessing this blob
 		 */
 		public Writer writer() throws UncheckedIOException {
-			return Transputs.writer(output());
+			return Codecs.writer(output());
 		}
 
 	}

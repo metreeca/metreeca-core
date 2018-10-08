@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.xml;
 
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.Values;
 
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
@@ -59,7 +59,7 @@ public final class Saxon {
 	public static final Supplier<Saxon> Factory=Saxon::new;
 
 
-	private static final String identity=Transputs.text(Saxon.class, ".xsl");
+	private static final String identity=Codecs.text(Saxon.class, ".xsl");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

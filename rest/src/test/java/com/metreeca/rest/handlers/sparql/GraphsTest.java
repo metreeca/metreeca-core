@@ -18,7 +18,7 @@
 package com.metreeca.rest.handlers.sparql;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -143,7 +143,7 @@ final class GraphsTest {
 
 	private Request put(final Request request) {
 		return request.method(Request.PUT).body(input()).set(() ->
-				new ByteArrayInputStream(encode(Rest).getBytes(Transputs.UTF8))
+				new ByteArrayInputStream(encode(Rest).getBytes(Codecs.UTF8))
 		);
 	}
 
@@ -153,7 +153,7 @@ final class GraphsTest {
 
 	private Request post(final Request request) {
 		return request.method(Request.POST).body(input()).set(() ->
-				new ByteArrayInputStream(encode(Rest).getBytes(Transputs.UTF8))
+				new ByteArrayInputStream(encode(Rest).getBytes(Codecs.UTF8))
 		);
 	}
 

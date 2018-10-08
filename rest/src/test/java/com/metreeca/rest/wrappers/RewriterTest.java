@@ -40,7 +40,7 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.form.things.Transputs.encode;
+import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -223,7 +223,7 @@ final class RewriterTest {
 										.add("p", "o")
 										.build()
 										.toString()
-										.getBytes(Transputs.UTF8))))
+										.getBytes(Codecs.UTF8))))
 
 
 				.accept(response -> {

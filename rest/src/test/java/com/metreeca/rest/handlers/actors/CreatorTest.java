@@ -18,7 +18,7 @@
 package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -73,7 +73,7 @@ final class CreatorTest {
 
 
 	private Function<Request, Request> body(final String rdf) {
-		return request -> request.body(input()).set(() -> Transputs.input(new StringReader(rdf)));
+		return request -> request.body(input()).set(() -> Codecs.input(new StringReader(rdf)));
 	}
 
 

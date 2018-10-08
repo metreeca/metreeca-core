@@ -393,7 +393,7 @@ public final class Values {
 			throw new NullPointerException("null text");
 		}
 
-		return literal(nameUUIDFromBytes(text.getBytes(Transputs.UTF8)).toString());
+		return literal(nameUUIDFromBytes(text.getBytes(Codecs.UTF8)).toString());
 	}
 
 

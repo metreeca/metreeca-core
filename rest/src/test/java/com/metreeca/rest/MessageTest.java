@@ -25,7 +25,7 @@ import java.io.*;
 import java.util.function.Function;
 
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Transputs.text;
+import static com.metreeca.form.things.Codecs.text;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;

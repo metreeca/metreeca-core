@@ -17,9 +17,9 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.things.Codecs;
 import com.metreeca.form.truths.JSONAssert;
 import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.form.things.Transputs;
 import com.metreeca.rest.formats.*;
 
 import org.assertj.core.api.*;
@@ -276,7 +276,7 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 			final byte[] data=data();
 			final String text=text();
 
-			return new ByteArrayInputStream(data.length == 0 ? text.getBytes(Transputs.UTF8) : data);
+			return new ByteArrayInputStream(data.length == 0 ? text.getBytes(Codecs.UTF8) : data);
 		}
 
 		private StringReader reader() {
@@ -284,7 +284,7 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 			final String text=text();
 			final byte[] data=data();
 
-			return new StringReader(text.isEmpty() ? new String(data, Transputs.UTF8) : text);
+			return new StringReader(text.isEmpty() ? new String(data, Codecs.UTF8) : text);
 		}
 
 
