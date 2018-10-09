@@ -36,7 +36,7 @@ Primitive shapes specifying constraints to be individually met by each RDF term 
 
 | shape                                                        | constraint                                                   |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [datatype](../javadocs/com/metreeca/form/shapes/Datatype.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | each term in the focus set has a given extended RDF datatype IRI; IRI references and blank nodes are considered to be respectively of `http://www.openrdf.org/schema/sesame#iri` ([Values.IRI](../javadocs/com/metreeca/form/things/Values.html#IRI)) and `http://www.openrdf.org/schema/sesame#bnode` ([Values.BNode](../javadocs/com/metreeca/form/things/Values.html#BNode)) datatype |
+| [datatype](../javadocs/com/metreeca/form/shapes/Datatype.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | each term in the focus set has a given extended RDF datatype IRI; IRI references and blank nodes are considered to be respectively of `http://www.openrdf.org/schema/sesame#iri` ([Values.IRI](../javadocs/com/metreeca/form/things/Values.html#IRIType)) and `http://www.openrdf.org/schema/sesame#bnode` ([Values.BNode](../javadocs/com/metreeca/form/things/Values.html#BNodeType)) datatype |
 | [class](../javadocs/com/metreeca/form/shapes/Clazz.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | each term in the focus set is an instance of a given RDF class or one of its superclasses |
 | [minExclusive](../javadocs/com/metreeca/form/shapes/MinExclusive.html)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | each term in the focus set is strictly greater than a given minum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
 | [maxExclusive](../javadocs/com/metreeca/form/shapes/MaxExclusive.html)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | each term in the focus set is strictly less than a given maximum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
@@ -66,9 +66,9 @@ Common combinations of set constraints are directly available as shorthand shape
 | shorthand shape                          | equivalent shape                   | constraint                  |
 | :--------------------------------------- | :--------------------------------- | --------------------------- |
 | [required](../javadocs/com/metreeca/form/Shape.html#required--) | `and(minCount(1), maxCount(1))`    | exactly one                 |
-| [optional](../javadocs/com/metreeca/form/Shape.html#optional—) | `maxCount(1)`                      | at most one                 |
-| [repeatable](../javadocs/com/metreeca/form/Shape.html#repeatable—) | `minCount(1)`                      | at least one                |
-| [multiple](../javadocs/com/metreeca/form/Shape.html#multiple—) | `and()`                            | any number                  |
+| [optional](../javadocs/com/metreeca/form/Shape.html#optional--) | `maxCount(1)`                      | at most one                 |
+| [repeatable](../javadocs/com/metreeca/form/Shape.html#repeatable--) | `minCount(1)`                      | at least one                |
+| [multiple](../javadocs/com/metreeca/form/Shape.html#multiple--) | `and()`                            | any number                  |
 | [only](../javadocs/com/metreeca/form/Shape.html#only-org.eclipse.rdf4j.model.Value...-)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …) | `and(all(value, …), in(value, …))` | constant pre-defined values |
 
 ## Structural Constraints
@@ -222,7 +222,7 @@ For instance, applying these rules the following shape:
 and(required(), datatype(xsd:string))
 ```
 
-will be ancoded in RDF as:
+will be encoded in RDF as:
 
 ```turtle
 @prefix form: <app://form.metreeca.com/terms#>.
