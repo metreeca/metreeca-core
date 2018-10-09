@@ -32,16 +32,15 @@ import java.io.StringReader;
 import java.util.function.Function;
 
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.form.truths.ValueAssert.assertThat;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.form.truths.ValueAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 
 final class CreatorTest {
@@ -68,7 +67,7 @@ final class CreatorTest {
 
 	private Request driven() {
 		return direct()
-				.body(shape()).set(Employee);
+				.shape(Employee);
 	}
 
 
@@ -161,7 +160,7 @@ final class CreatorTest {
 	@Test void testDrivenForbidden() {
 		exec(() -> new Creator()
 
-				.handle(driven().body(shape()).set(or()))
+				.handle(driven().shape(or()))
 
 				.accept(response -> {
 

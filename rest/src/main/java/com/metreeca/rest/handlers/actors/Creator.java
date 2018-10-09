@@ -23,7 +23,6 @@ import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
@@ -57,16 +56,12 @@ import static java.util.UUID.randomUUID;
  *
  * <dl>
  *
- * <dt>Request {@link ShapeFormat} body {optional}</dt>
- *
- * <dd>An optional linked data shape driving the creation process.</dd>
- *
  * <dt>Request shape-driven {@link RDFFormat} body</dt>
  *
  * <dd>The RDF content to be assigned to the newly created resource; must describe the new resource using
  * the request {@linkplain Request#item() focus item} as subject.</dd>
  *
- * <dd>If the request includes a {@link ShapeFormat} body, it is redacted taking into account the request user
+ * <dd>If the request includes  a {@linkplain Message#shape() shape}, it is redacted taking into account the request user
  * {@linkplain Request#roles() roles},  {@link Form#create} task,  {@link Form#verify} mode and {@link Form#detail} view
  * and used to validate the request RDF body; validation errors are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
@@ -117,7 +112,7 @@ public final class Creator extends Actor<Creator> {
 				})
 
 				.map(
-						model -> empty(shape) ? direct(request, model) : driven(request, model, shape),
+						model -> wild(shape) ? direct(request, model) : driven(request, model, shape),
 						request::reply
 				)
 

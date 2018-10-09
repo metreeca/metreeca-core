@@ -17,6 +17,8 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.Shape;
+
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.*;
@@ -24,6 +26,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.value;
@@ -50,6 +53,8 @@ public abstract class Message<T extends Message<T>> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Shape shape=wild();
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
@@ -318,7 +323,36 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves a structured of this message body.
+	 * Retrieves the linked data shape.
+	 *
+	 * @return the linked data shape associated to this message
+	 */
+	public Shape shape() {
+		return shape;
+	}
+
+	/**
+	 * Configures the linked data shape.
+	 *
+	 * @param shape the linked data shape to be associated to this message
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public T shape(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		this.shape=shape;
+
+		return self();
+	}
+
+
+	/**
+	 * Retrieves a structured body.
 	 *
 	 * @param format the body format managing the required body representation
 	 * @param <V>    the type of the structured message body managed by the format

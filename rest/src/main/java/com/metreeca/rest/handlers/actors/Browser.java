@@ -27,7 +27,6 @@ import com.metreeca.form.queries.Stats;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
@@ -41,13 +40,10 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.form.Shape.empty;
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -58,19 +54,9 @@ import static com.metreeca.tray.Tray.tool;
  *
  * <dl>
  *
- * <dt>Request {@link ShapeFormat} body {optional}</dt>
- *
- * <dd>An optional linked data shape driving the retrieval process.</dd>
- *
- * <dt>Response {@link ShapeFormat} body {optional}</dt>
- *
- * <dd>If the request includes a shape payload, the response includes the derived shape actually used in the container
- * retrieval process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task,
- * {@link Form#verify} mode and {@link Form#digest} view.</dd>
- *
  * <dt>Response shape-driven {@link RDFFormat} body</dt>
  *
- * <dd>If the request includes a {@link ShapeFormat} body, the response includes the {@linkplain RDFFormat RDF
+ * <dd>If the request includes {@linkplain Message#shape() shape}, the response includes the {@linkplain RDFFormat RDF
  * description} of the request {@linkplain Request#item() focus item}, {@linkplain LDP#CONTAINS containing} the RDF
  * descriptions of the virtual container items matched by the redacted linked data {@linkplain Shape shape}.</dd>
  *
@@ -86,6 +72,10 @@ import static com.metreeca.tray.Tray.tool;
  * Response#NotImplemented} HTTP status code.</dd>
  *
  * </dl>
+ *
+ * <p>If the request includes a shape, the response includes the derived shape actually used in the container retrieval
+ * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
+ * Form#verify} mode and {@link Form#digest} view.</p>
  *
  * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
  * database.</p>
@@ -106,7 +96,7 @@ public final class Browser extends Actor<Browser> {
 	public Browser() {
 		delegate(handler(Form.relate, Form.digest, (request, shape) -> (
 
-				empty(shape) ? direct(request) : driven(request, shape))
+				Shape.wild(shape) ? direct(request) : driven(request, shape))
 
 				.map(response -> response.headers("+Link",
 
@@ -190,7 +180,7 @@ public final class Browser extends Actor<Browser> {
 			}
 
 			return response.status(Response.OK)
-					.body(shape()).set(trait(LDP.CONTAINS, edges.getShape().accept(mode(Form.verify)))) // hide filtering constraints
+					.shape(trait(LDP.CONTAINS, edges.getShape()))
 					.body(rdf()).set(model);
 		});
 	}
@@ -198,7 +188,7 @@ public final class Browser extends Actor<Browser> {
 	private Response stats(final Query stats, final Response response) {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
-					.body(shape()).set(ItemsShape)
+					.shape(ItemsShape)
 					.body(rdf()).set(new SPARQLEngine(connection).browse(stats, response.item()));
 
 		});
@@ -207,7 +197,7 @@ public final class Browser extends Actor<Browser> {
 	private Response items(final Query items, final Response response) {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
-					.body(shape()).set(ItemsShape)
+					.shape(ItemsShape)
 					.body(rdf()).set(new SPARQLEngine(connection).browse(items, response.item()));
 
 		});

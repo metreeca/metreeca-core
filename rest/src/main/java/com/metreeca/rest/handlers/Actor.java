@@ -21,7 +21,6 @@ import com.metreeca.form.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.sys.Trace;
 
@@ -40,7 +39,6 @@ import static com.metreeca.form.things.Sets.intersection;
 import static com.metreeca.form.things.Values.format;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
@@ -58,22 +56,15 @@ import static java.util.stream.Collectors.groupingBy;
  *
  * <ul>
  *
- * <li>looks for a {@linkplain ShapeFormat shape} body in incoming requests and redact it according to task/view
- * parameters {@linkplain #handler(IRI, IRI, BiFunction) provided} by the concrete implementation;</li>
+ * <li>redact {@linkplain Message#shape() request shape }according to task/view parameters {@linkplain #handler(IRI,
+ * IRI, BiFunction) provided} by the concrete implementation;</li>
  *
- * <li>enforces role-based access control; Access to the managed resource action is public, unless explicitly
- * {@linkplain #roles(Value...) limited} to * specific user roles;</li>
+ * <li>enforces role-based access control; access to the managed resource action is public, unless explicitly
+ * {@linkplain #roles(Value...) limited} to specific user roles;</li>
  *
  * <li>adds default LDP {@code Link} response headers for RDF sources.</li>
  *
  * </ul>
- *
- * <dl>
- *
- * <dt>Request {@link ShapeFormat} body {optional}</dt>
- * <dd>An optional linked data shape driving action processing.</dd>
- *
- * </dl>
  *
  * @param <T> the self-bounded message type supporting fluent setters
  *
@@ -236,8 +227,7 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 *
 	 * @param task   a IRI identifying the {@linkplain Form#task task} to be performed by the generated handler
 	 * @param view   a IRI identifying the {@linkplain Form#view view} level for the generated handler
-	 * @param action a function mapping a request and resource shape to a resource responder; the possibly empty input
-	 *               shape is retrieved from the request {@linkplain ShapeFormat shape} body, if one is available, and
+	 * @param action a function mapping a request and its shape to a resource responder; the request shape
 	 *               redacted according to {@code task} and {@code view} parameters and the roles of the user performing
 	 *               the request; {@code mode} redaction is left to final shape consumers
 	 *
@@ -275,34 +265,34 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 						link(LDP.RDF_SOURCE, "type")
 				)))
 
-				.wrap((Handler)request -> request.body(shape()).map(
+				.wrap((Handler)request -> {
 
-						shape -> {
+					final Shape shape=request.shape();
 
-							final Shape redacted=shape
-									.accept(task(task))
-									.accept(view(view));
+					if ( wild(shape)) {
 
-							final Shape authorized=redacted.accept(
-									role(roles.isEmpty() ? request.roles() : intersection(roles, request.roles()))
-							);
+						final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
 
-							return empty(redacted) ? forbidden(request)
-									: empty(authorized) ? refused(request)
-									: action.apply(request, authorized);
+						return refused ? refused(request)
+								: action.apply(request, and());
 
-						},
+					} else {
 
-						error -> {
+						final Shape redacted=shape
+								.accept(task(task))
+								.accept(view(view));
 
-							final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
+						final Shape authorized=redacted.accept(
+								role(roles.isEmpty() ? request.roles() : intersection(roles, request.roles()))
+						);
 
-							return refused ? refused(request)
-									: action.apply(request, and());
+						return wild(redacted) || empty(redacted) ? forbidden(request)
+								: wild(authorized) || empty(authorized) ? refused(request)
+								: action.apply(request, authorized);
 
-						}
+					}
 
-				));
+				});
 
 	}
 

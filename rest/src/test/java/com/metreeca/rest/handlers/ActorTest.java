@@ -35,7 +35,6 @@ import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
@@ -111,7 +110,7 @@ final class ActorTest {
 
 	private Responder access(final boolean direct, final IRI effective, final IRI... permitted) {
 		return new TestActor().roles(permitted).handle(new Request().roles(effective).map(request ->
-				direct ? request : request.body(shape()).set(
+				direct ? request : request.shape(
 						role(singleton(RDF.FIRST), clazz(term("Employee")))
 				)
 		));
@@ -127,10 +126,7 @@ final class ActorTest {
 
 					response.status(Response.OK)
 
-							.map(r -> request.body(shape()).map( // echo shape body
-									value -> r.body(shape()).set(value),
-									error -> r
-							))
+							.shape(request.shape()) // echo shape
 
 							.map(r -> request.body(rdf()).map( // echo rdf body
 									value -> r.body(rdf()).set(value),

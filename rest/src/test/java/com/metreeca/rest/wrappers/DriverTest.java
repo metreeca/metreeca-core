@@ -22,7 +22,6 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.ShapeCodec;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.formats.ShapeFormat;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -36,12 +35,15 @@ import static com.metreeca.form.Shape.optional;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 final class DriverTest {
@@ -72,7 +74,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertFalse(request.body(ShapeFormat.shape()).get().isPresent());
+					assertThat(request).doesNotHaveShape();
 
 					return request.reply(response -> response);
 
@@ -80,12 +82,10 @@ final class DriverTest {
 
 				.handle(request())
 
-				.accept(response -> {
-
-					assertFalse(response.header("link").isPresent());
-					assertFalse(response.body(ShapeFormat.shape()).get().isPresent());
-
-				});
+				.accept(response -> assertThat(response)
+						.doesNotHaveHeader("Link")
+						.doesNotHaveShape()
+				);
 	}
 
 	@Test void testConfigureExchangeShape() {
@@ -93,7 +93,7 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertEquals(TestShape, request.body(ShapeFormat.shape()).get().orElseGet(() -> fail("missing shape")));
+					assertThat(request).hasShape(TestShape);
 
 					return request.reply(response -> response.header("link", "existing"));
 
@@ -101,14 +101,9 @@ final class DriverTest {
 
 				.handle(request())
 
-				.accept(response -> {
-
-					assertIterableEquals(
-							list("existing", "<http://example.org/resource?specs>; rel="+LDP.CONSTRAINED_BY),
-							response.headers("link")
-					);
-
-				});
+				.accept(response -> assertThat(response).hasHeaders("Link",
+						"existing", "<http://example.org/resource?specs>; rel="+LDP.CONSTRAINED_BY
+				));
 	}
 
 	@Test void testHandleSpecsQuery() {

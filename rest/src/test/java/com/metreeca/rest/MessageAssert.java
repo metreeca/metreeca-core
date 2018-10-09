@@ -27,7 +27,6 @@ import org.assertj.core.api.*;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static com.metreeca.form.Shape.empty;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -132,7 +131,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( empty(shape) ) {
+		if ( Shape.wild(shape) ) {
 			failWithMessage("expected message to have a shape but has none", shape);
 		}
 
@@ -160,7 +159,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( !empty(shape) ) {
+		if ( !Shape.wild(shape) ) {
 			failWithMessage("expected message to have no shape but has <%s>", shape);
 		}
 

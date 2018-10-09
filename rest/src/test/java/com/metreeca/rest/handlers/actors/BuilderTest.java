@@ -30,7 +30,6 @@ import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 
 final class BuilderTest {
@@ -72,7 +71,7 @@ final class BuilderTest {
 	private Request driven() {
 		return direct()
 				.roles(Manager)
-				.body(shape()).set(Employee);
+				.shape(Employee);
 	}
 
 
@@ -136,7 +135,7 @@ final class BuilderTest {
 	@Test void testDrivenForbidden() {
 		exec(() -> new Builder()
 
-				.handle(driven().body(shape()).set(or()))
+				.handle(driven().shape(or()))
 
 				.accept(response -> assertThat(response).hasStatus(Response.Forbidden))
 
