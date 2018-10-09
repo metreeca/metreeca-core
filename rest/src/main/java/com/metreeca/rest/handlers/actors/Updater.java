@@ -76,11 +76,11 @@ public final class Updater extends Actor<Updater> {
 
 
 	public Updater() {
-		delegate(handler(Form.update, Form.detail, (request, shape) -> request.body(rdf())
+		delegate(action(Form.update, Form.detail).wrap((Request request) -> request.body(rdf())
 
 				.map(model -> { // add implied statements
 
-					model.addAll(shape
+					model.addAll(request.shape()
 							.accept(mode(Form.verify))
 							.accept(new Outliner(request.item()))
 					);
@@ -90,11 +90,9 @@ public final class Updater extends Actor<Updater> {
 				})
 
 				.map(
-						model -> wild(shape) ? direct(request, model) : driven(request, model, shape),
+						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
 						request::reply
-				)
-
-		));
+				)));
 	}
 
 
@@ -114,7 +112,7 @@ public final class Updater extends Actor<Updater> {
 		);
 	}
 
-	private Responder driven(final Request request, final Collection<Statement> model, final Shape shape) {
+	private Responder driven(final Request request, final Collection<Statement> model) {
 		return request.reply(response -> graph.update(connection -> {
 
 			final IRI focus=request.item();
@@ -128,7 +126,7 @@ public final class Updater extends Actor<Updater> {
 
 			} else {
 
-				final Report report=new SPARQLEngine(connection).update(focus, shape, trace(model));
+				final Report report=new SPARQLEngine(connection).update(focus, request.shape(), trace(model));
 
 				if ( report.assess(Issue.Level.Error) ) { // shape violations
 

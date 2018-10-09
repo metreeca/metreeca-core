@@ -40,6 +40,7 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.statement;
@@ -94,9 +95,9 @@ public final class Browser extends Actor<Browser> {
 
 
 	public Browser() {
-		delegate(handler(Form.relate, Form.digest, (request, shape) -> (
+		delegate(action(Form.relate, Form.digest).wrap((Request request) -> (
 
-				Shape.wild(shape) ? direct(request) : driven(request, shape))
+				wild(request.shape()) ? direct(request) : driven(request))
 
 				.map(response -> response.headers("+Link",
 
@@ -109,9 +110,7 @@ public final class Browser extends Actor<Browser> {
 
 						response.headers("Vary", "Accept", "Prefer") : response
 
-				)
-
-		));
+				)));
 	}
 
 
@@ -131,8 +130,8 @@ public final class Browser extends Actor<Browser> {
 		);
 	}
 
-	private Responder driven(final Request request, final Shape shape) {
-		return request.reply(response -> request.query(shape).map(
+	private Responder driven(final Request request) {
+		return request.reply(response -> request.query(request.shape()).map(
 
 				query -> query.accept(new Query.Probe<Response>() {
 

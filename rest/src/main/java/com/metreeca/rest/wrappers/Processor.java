@@ -78,8 +78,8 @@ public final class Processor implements Wrapper {
 	 * <p>The filter is chained after previously inserted pre-processing filters and executed on incoming requests and
 	 * their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
-	 * <p>If the request includes  a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove statements
-	 * outside the allowed shape envelope.</p>
+	 * <p>If the request includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
+	 * statements outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
 	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -106,8 +106,8 @@ public final class Processor implements Wrapper {
 	 * Response#success() successful} outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is
 	 * present, or ignored, otherwise.</p>
 	 *
-	 * <p>If the response includes  a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove statements
-	 * outside the allowed shape envelope.</p>
+	 * <p>If the response includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
+	 * statements outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
 	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -280,7 +280,7 @@ public final class Processor implements Wrapper {
 		final Shape shape=message.shape();
 		final Set<Value> focus=singleton(message.item());
 
-		return wild(shape) ? model : shape
+		return wild(shape) ? model : shape // !!! migrate wildcard handling to Trimmer
 				.accept(new Trimmer(model, focus))
 				.collect(toList());
 	}

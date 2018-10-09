@@ -75,7 +75,7 @@ public final class Builder extends Actor<Builder> {
 		post(
 				(response, model) -> model // non-empty filter forces RDF body trimming in Processor
 
-		).delegate(handler(Form.relate, Form.detail, (request, shape) -> {
+		).delegate(action(Form.relate, Form.detail).wrap((Request request) -> {
 
 			final Collection<Statement> model=this.model.apply(request);
 
@@ -85,11 +85,10 @@ public final class Builder extends Actor<Builder> {
 
 					: response.status(Response.OK)
 
-					.map(r -> wild(shape) ? r : r.shape(shape))
+					.map(r -> wild(request.shape()) ? r : r.shape(request.shape()))
 
 					.body(rdf()).set(model)
 			);
-
 		}));
 	}
 

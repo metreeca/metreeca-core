@@ -98,11 +98,11 @@ public final class Creator extends Actor<Creator> {
 
 
 	public Creator() {
-		delegate(handler(Form.create, Form.detail, (request, shape) -> request.body(rdf())
+		delegate(action(Form.create, Form.detail).wrap((Request request) -> request.body(rdf())
 
 				.map(model -> { // add implied statements
 
-					model.addAll(shape
+					model.addAll(request.shape()
 							.accept(mode(Form.verify))
 							.accept(new Outliner(request.item()))
 					);
@@ -112,11 +112,9 @@ public final class Creator extends Actor<Creator> {
 				})
 
 				.map(
-						model -> wild(shape) ? direct(request, model) : driven(request, model, shape),
+						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
 						request::reply
-				)
-
-		));
+				)));
 	}
 
 
@@ -164,7 +162,7 @@ public final class Creator extends Actor<Creator> {
 		);
 	}
 
-	private Responder driven(final Request request, final Collection<Statement> model, final Shape shape) {
+	private Responder driven(final Request request, final Collection<Statement> model) {
 		return request.reply(response -> graph.update(connection -> {
 
 			synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
@@ -182,7 +180,7 @@ public final class Creator extends Actor<Creator> {
 				final IRI source=request.item();
 				final IRI target=iri(request.stem(), slug);
 
-				final Report report=new SPARQLEngine(connection).create(target, shape, trace(rewrite(
+				final Report report=new SPARQLEngine(connection).create(target, request.shape(), trace(rewrite(
 						model, source, target
 				)));
 

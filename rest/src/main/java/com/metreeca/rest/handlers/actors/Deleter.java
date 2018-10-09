@@ -19,7 +19,6 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Actor;
@@ -52,8 +51,8 @@ public final class Deleter extends Actor<Deleter> {
 
 
 	public Deleter() {
-		delegate(handler(Form.delete, Form.detail, (request, shape) ->
-				wild(shape) ? direct(request) : driven(request, shape)
+		delegate(action(Form.delete, Form.detail).wrap((Request request) ->
+				wild(request.shape()) ? direct(request) : driven(request)
 		));
 	}
 
@@ -66,7 +65,7 @@ public final class Deleter extends Actor<Deleter> {
 		);
 	}
 
-	private Responder driven(final Request request, final Shape shape) {
+	private Responder driven(final Request request) {
 		return request.reply(response -> graph.update(connection -> {
 
 			final IRI focus=request.item();
@@ -80,7 +79,7 @@ public final class Deleter extends Actor<Deleter> {
 
 			} else {
 
-				new SPARQLEngine(connection).delete(focus, shape);
+				new SPARQLEngine(connection).delete(focus, request.shape());
 
 				return response.status(Response.NoContent);
 
