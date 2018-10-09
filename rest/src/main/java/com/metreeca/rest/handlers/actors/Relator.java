@@ -25,11 +25,8 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.sparql.SPARQLEngine;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Responder;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
@@ -42,15 +39,14 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import java.util.*;
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -63,29 +59,23 @@ import static java.util.Collections.singleton;
  *
  * <dl>
  *
- * <dt>Request {@link ShapeFormat} body {optional}</dt>
- *
- * <dd>An optional linked data shape driving the retrieval process.</dd>
- *
- * <dt>Response {@link ShapeFormat} body {optional}</dt>
- *
- * <dd>If the request includes a shape payload, the response includes the derived shape actually used in the resource
- * retrieval process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task,
- * {@link Form#verify} mode and {@link Form#detail} view.</dd>
- *
  * <dt>Response shape-driven {@link RDFFormat} body</dt>
  *
- * <dd>If the request includes a {@link ShapeFormat} body, the response includes the {@linkplain
+ * <dd>If the request includes  a {@linkplain Message#shape() shape}, the response includes the {@linkplain
  * RDFFormat RDF description} of the request {@linkplain Request#item() focus item}, as defined by the redacted linked
  * data {@linkplain Shape shape}.</dd>
  *
  * <dt>Response shapeless {@link RDFFormat} body</dt>
  *
- * <dd>If the request does not include a {@link ShapeFormat} body, the response includes the symmetric concise bounded
- * description of the request focus item, extended with {@code rdfs:label/comment} annotations for all referenced
- * IRIs.</dd>
+ * <dd>If the request does not include a {@linkplain Message#shape() shape}, the response includes the symmetric concise
+ * bounded description of the request focus item, extended with {@code rdfs:label/comment} annotations for all
+ * referenced IRIs.</dd>
  *
  * </dl>
+ *
+ * <p>If the request includes a shape, the response includes the derived shape actually used in the resource retrieval
+ * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
+ * Form#verify} mode and {@link Form#detail} view.</p>
  *
  * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
  * database.</p>
@@ -100,7 +90,7 @@ public final class Relator extends Actor<Relator> {
 	public Relator() {
 		delegate(handler(Form.relate, Form.detail, (request, shape) -> (
 
-				empty(shape) ? direct(request) : driven(request, shape))
+				wild(shape) ? direct(request) : driven(request, shape))
 
 				.map(response -> response.success() ?
 
@@ -166,17 +156,17 @@ public final class Relator extends Actor<Relator> {
 				return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
 
 					@Override public Response visit(final Edges edges) {
-						return r.body(shape()).set(shape.accept(mode(Form.verify))) // hide filtering constraints
+						return r.shape(shape.accept(mode(Form.verify))) // hide filtering constraints
 								.body(rdf()).set(model);
 					}
 
 					@Override public Response visit(final Stats stats) {
-						return r.body(shape()).set(StatsShape)
+						return r.shape(StatsShape)
 								.body(rdf()).set(rewrite(model, Form.meta, focus));
 					}
 
 					@Override public Response visit(final Items items) {
-						return r.body(shape()).set(ItemsShape)
+						return r.shape(ItemsShape)
 								.body(rdf()).set(rewrite(model, Form.meta, focus));
 					}
 

@@ -37,7 +37,6 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
@@ -52,12 +51,10 @@ final class ProcessorTest {
 
 
 	private Handler echo() {
-		return request -> request.reply(response -> response.status(Response.OK)
+		return request -> request.reply(response -> response
 
-				.map(r -> request.body(shape()).map(
-						v -> r.body(shape()).set(v),
-						e -> r
-				))
+				.status(Response.OK)
+				.shape(request.shape())
 
 				.map(r -> request.body(rdf()).map(
 						v -> r.body(rdf()).set(v),
@@ -142,7 +139,7 @@ final class ProcessorTest {
 
 				.handle(new Request()
 
-						.body(shape()).set(trait(RDF.FIRST))
+						.shape(trait(RDF.FIRST))
 						.body(rdf()).set(emptyList())) // empty body to activate pre-processing
 
 				.accept(response -> assertThat(response)
@@ -208,7 +205,7 @@ final class ProcessorTest {
 
 				.handle(new Request()
 
-						.body(shape()).set(trait(RDF.FIRST))
+						.shape(trait(RDF.FIRST))
 						.body(rdf()).set(emptyList())) // empty body to activate post-processing
 
 				.accept(response -> assertThat(response)

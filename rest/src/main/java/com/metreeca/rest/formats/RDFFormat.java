@@ -24,7 +24,6 @@ import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
@@ -40,7 +39,6 @@ import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
@@ -78,19 +76,17 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	@Override public Result<Collection<Statement>> get(final Message<?> message) {
 		return message.body(input()).flatMap(supplier -> {
 
-			final Optional<Request> request=message.as(Request.class);
+			final IRI focus=message.item();
+			final Shape shape=message.shape();
 
-			final Optional<IRI> focus=request.map(Request::item);
-			final Optional<Shape> shape=message.body(shape()).get();
-
-			final String type=request.flatMap(r -> r.header("Content-Type")).orElse("");
+			final String type=message.header("Content-Type").orElse("");
 
 			final RDFParser parser=Formats
 					.service(RDFParserRegistry.getInstance(), TURTLE, type)
 					.getParser();
 
-			parser.set(JSONCodec.Shape, shape.orElse(null));
-			parser.set(JSONCodec.Focus, focus.orElse(null));
+			parser.set(JSONCodec.Shape, Shape.wild(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+			parser.set(JSONCodec.Focus, focus);
 
 			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
 			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
@@ -110,7 +106,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 			try (final InputStream input=supplier.get()) {
 
-				parser.parse(input, focus.map(Value::stringValue).orElse("")); // resolve relative IRIs wrt the focus
+				parser.parse(input, focus.stringValue()); // resolve relative IRIs wrt the focus
 
 			} catch ( final RDFParseException e ) {
 
@@ -174,14 +170,18 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 				.header("Content-Type", types.stream()
 						.filter(type -> registry.getFileFormatForMIMEType(type).isPresent())
 						.findFirst()
-						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()))
+						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
+				)
+
 				.body(output()).flatPipe(consumer -> message.body(rdf()).map(rdf -> target -> {
 					try (final OutputStream output=target.get()) {
 
+						final Shape shape=message.shape();
+
 						final RDFWriter writer=factory.getWriter(output);
 
-						writer.set(JSONCodec.Shape, message.body(shape()).get().orElse(null));
-						writer.set(JSONCodec.Focus, response.map(Response::item).orElse(null));
+						writer.set(JSONCodec.Shape, Shape.wild(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+						writer.set(JSONCodec.Focus, message.item());
 
 						Rio.write(rdf, writer);
 

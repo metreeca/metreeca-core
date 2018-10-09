@@ -18,12 +18,13 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.things.*;
+import com.metreeca.form.things.Codecs;
+import com.metreeca.form.things.Values;
+import com.metreeca.form.things.ValuesTest;
 import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -39,10 +40,10 @@ import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -204,7 +205,7 @@ final class RewriterTest {
 					);
 
 					return request.reply(response -> response.status(Response.OK)
-							.body(ShapeFormat.shape()).set(TestShape)
+							.shape(TestShape)
 							.body(rdf()).set(singleton(internal("s", "p", "o"))));
 				}))
 
@@ -216,7 +217,7 @@ final class RewriterTest {
 						.header("content-type", "application/json")
 						.header("accept", "application/json")
 
-						.body(ShapeFormat.shape()).set(TestShape)
+						.shape(TestShape)
 
 						.body(input()).set(() -> new ByteArrayInputStream(
 								Json.createObjectBuilder()

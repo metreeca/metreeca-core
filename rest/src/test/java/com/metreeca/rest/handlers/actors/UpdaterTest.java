@@ -39,7 +39,6 @@ import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 
 final class UpdaterTest {
@@ -69,7 +68,7 @@ final class UpdaterTest {
 
 	private Request driven() {
 		return direct()
-				.body(shape()).set(Employee);
+				.shape(Employee);
 	}
 
 
@@ -131,7 +130,7 @@ final class UpdaterTest {
 	@Test void testDrivenForbidden() {
 		exec(() -> new Updater().roles(RDF.FIRST, RDF.REST)
 
-				.handle(driven().body(shape()).set(or()))
+				.handle(driven().shape(or()))
 
 				.accept(response -> {
 

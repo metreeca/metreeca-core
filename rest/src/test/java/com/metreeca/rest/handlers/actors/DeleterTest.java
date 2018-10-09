@@ -30,7 +30,6 @@ import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 
 final class DeleterTest {
@@ -53,7 +52,7 @@ final class DeleterTest {
 
 	private Request driven() {
 		return direct()
-				.body(shape()).set(Employee);
+				.shape(Employee);
 	}
 
 
@@ -101,7 +100,7 @@ final class DeleterTest {
 	@Test void testDrivenForbidden() {
 		exec(() -> new Deleter()
 
-				.handle(driven().body(shape()).set(or()))
+				.handle(driven().shape(or()))
 
 				.accept(response -> {
 

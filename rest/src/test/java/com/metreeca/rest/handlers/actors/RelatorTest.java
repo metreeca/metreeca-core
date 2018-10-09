@@ -34,7 +34,6 @@ import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -58,7 +57,7 @@ final class RelatorTest {
 	private Request driven() {
 		return direct()
 				.roles(ValuesTest.Manager)
-				.body(shape()).set(ValuesTest.Employee);
+				.shape(ValuesTest.Employee);
 	}
 
 
@@ -72,7 +71,7 @@ final class RelatorTest {
 				.accept(response -> assertThat(response)
 
 						.hasStatus(Response.OK)
-						.doesNotHaveBody(shape())
+						.doesNotHaveShape()
 
 						.hasBodyThat(rdf())
 						.as("response RDF body contains a resource description")
@@ -102,7 +101,7 @@ final class RelatorTest {
 
 							.hasStatus(Response.OK)
 
-							.hasBody(shape())
+							.hasShape()
 
 							.hasBodyThat(rdf())
 							.as("items retrieved")
@@ -143,7 +142,7 @@ final class RelatorTest {
 	@Test void testDrivenForbidden() {
 		exec(() -> new Relator()
 
-				.handle(driven().body(shape()).set(or()))
+				.handle(driven().shape(or()))
 
 				.accept(response -> assertThat(response).hasStatus(Response.Forbidden))
 

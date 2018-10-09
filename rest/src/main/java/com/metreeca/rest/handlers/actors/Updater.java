@@ -23,7 +23,6 @@ import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
@@ -36,8 +35,8 @@ import java.util.function.BiFunction;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.Shape.wild;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
@@ -49,18 +48,15 @@ import static com.metreeca.tray.Tray.tool;
  *
  * <dl>
  *
- * <dt>Request {@link ShapeFormat} body {optional}</dt>
- *
- * <dd>An optional linked data shape driving the updating process.</dd>
- *
  * <dt>Request shape-driven {@link RDFFormat} body</dt>
  *
  * <dd>The RDF content to be assigned to the updated resource.</dd>
  *
- * <dd>If the request includes a {@link ShapeFormat} body, it is redacted taking into account the request user
+ * <dd>If the request includes  a {@linkplain Message#shape() shape}, it is redacted taking into account the request user
  * {@linkplain Request#roles() roles}, {@link Form#update} task, {@link Form#verify} mode and {@link Form#digest} view
  * and used to validate the request RDF body; validation errors are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
+ *
  * <dd>On successful body validation, the RDF description of the resource as matched by the redacted shape is replaced
  * with the updated one.</dd>
  *
@@ -94,7 +90,7 @@ public final class Updater extends Actor<Updater> {
 				})
 
 				.map(
-						model -> empty(shape) ? direct(request, model) : driven(request, model, shape),
+						model -> wild(shape) ? direct(request, model) : driven(request, model, shape),
 						request::reply
 				)
 

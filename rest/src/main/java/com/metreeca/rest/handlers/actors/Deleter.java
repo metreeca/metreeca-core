@@ -27,7 +27,7 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.form.Shape.empty;
+import static com.metreeca.form.Shape.wild;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -53,7 +53,7 @@ public final class Deleter extends Actor<Deleter> {
 
 	public Deleter() {
 		delegate(handler(Form.delete, Form.detail, (request, shape) ->
-				empty(shape) ? direct(request) : driven(request, shape)
+				wild(shape) ? direct(request) : driven(request, shape)
 		));
 	}
 

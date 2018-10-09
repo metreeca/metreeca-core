@@ -26,7 +26,6 @@ import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -62,7 +61,6 @@ import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -79,10 +77,10 @@ import static java.util.stream.Collectors.toMap;
  *
  * <li>request {@linkplain Request#user() user}, {@linkplain Request#roles() roles}, {@linkplain Request#base() base},
  * {@linkplain Request#query() query}, {@linkplain Request#parameters() parameters}, {@linkplain Request#headers()
- * headers}, {@link ShapeFormat} and {@link RDFFormat} {@linkplain Request#body(Format) body} payloads;</li>
+ * headers}, {@linkplain Message#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
  *
- * <li>response {@linkplain Request#item() focus item}, {@linkplain Request#headers() headers}, {@link ShapeFormat} and
- * {@link RDFFormat} {@linkplain Request#body(Format) body} payloads;</li>
+ * <li>response {@linkplain Request#item() focus item}, {@linkplain Request#headers() headers}, {@linkplain
+ * Message#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
  *
  * </ul>
  *
@@ -161,19 +159,20 @@ public final class Rewriter implements Wrapper {
 
 				.base(engine.rewrite(request.base()))
 
-				.map(r -> {	// re-encode rewritten query only if it was actually encoded
+				.map(r -> {    // re-encode rewritten query only if it was actually encoded
 
 					final String encoded=r.query();
 					final String decoded=decode(encoded);
 
-					return r.query(encoded.equals(decoded)? engine.rewrite(encoded) : encode(engine.rewrite(decoded)));
+					return r.query(encoded.equals(decoded) ? engine.rewrite(encoded) : encode(engine.rewrite(decoded)));
 
 				})
 
 				.parameters(engine.rewrite(request.parameters()))
 				.headers(engine.rewrite(request.headers()))
 
-				.body(shape()).pipe(engine::rewrite)
+				.shape(engine.rewrite(request.shape()))
+
 				.body(rdf()).pipe(model -> engine.rewrite(model, engine::rewrite));
 	}
 
@@ -186,7 +185,8 @@ public final class Rewriter implements Wrapper {
 
 				.headers(engine.rewrite(response.headers()))
 
-				.body(shape()).pipe(engine::rewrite)
+				.shape(engine.rewrite(response.shape()))
+
 				.body(rdf()).pipe(model -> engine.rewrite(model, engine::rewrite));
 	}
 

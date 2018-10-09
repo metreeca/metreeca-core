@@ -23,7 +23,6 @@ import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
@@ -38,12 +37,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.empty;
+import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.time;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -80,7 +78,7 @@ public final class Processor implements Wrapper {
 	 * <p>The filter is chained after previously inserted pre-processing filters and executed on incoming requests and
 	 * their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
-	 * <p>If the request contains a {@link ShapeFormat} body, the filtered model is trimmed to remove statements
+	 * <p>If the request includes  a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove statements
 	 * outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
@@ -108,7 +106,7 @@ public final class Processor implements Wrapper {
 	 * Response#success() successful} outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is
 	 * present, or ignored, otherwise.</p>
 	 *
-	 * <p>If the response contains a {@link ShapeFormat} body, the filtered model is trimmed to remove statements
+	 * <p>If the response includes  a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove statements
 	 * outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
@@ -278,15 +276,13 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> Collection<Statement> trim(final T message, final Model model) {
-		return message.body(shape()).map(
 
-				shape -> empty(shape) ? model : shape
-						.accept(new Trimmer(model, singleton(message.item())))
-						.collect(toList()),
+		final Shape shape=message.shape();
+		final Set<Value> focus=singleton(message.item());
 
-				error -> model
-
-		);
+		return wild(shape) ? model : shape
+				.accept(new Trimmer(model, focus))
+				.collect(toList());
 	}
 
 
@@ -301,12 +297,12 @@ public final class Processor implements Wrapper {
 	private static final class Trimmer extends Shape.Probe<Stream<Statement>> {
 
 		private final Collection<Statement> model;
-		private final Collection<Value> sources;
+		private final Collection<Value> focus;
 
 
-		private Trimmer(final Collection<Statement> model, final Collection<Value> sources) {
+		private Trimmer(final Collection<Statement> model, final Collection<Value> focus) {
 			this.model=model;
-			this.sources=sources;
+			this.focus=focus;
 		}
 
 
@@ -331,7 +327,7 @@ public final class Processor implements Wrapper {
 					: Statement::getObject;
 
 			final Collection<Statement> restricted=model.stream()
-					.filter(s -> sources.contains(source.apply(s)) && iri.equals(s.getPredicate()))
+					.filter(s -> focus.contains(source.apply(s)) && iri.equals(s.getPredicate()))
 					.collect(toList());
 
 			final Set<Value> focus=restricted.stream()
