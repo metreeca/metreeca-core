@@ -18,15 +18,9 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.things.Codecs;
-import com.metreeca.form.truths.JSONAssert;
-import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.rest.formats.*;
-
-import org.assertj.core.api.*;
+import com.metreeca.rest.formats.TextFormat;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,12 +28,9 @@ import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-import static com.metreeca.tray.sys.Trace.clip;
-
-import static org.assertj.core.api.Assertions.fail;
 
 
-public final class ResponseAssert extends AbstractAssert<ResponseAssert, Response> {
+public final class ResponseAssert extends MessageAssert<ResponseAssert, Response> {
 
 	public static ResponseAssert assertThat(final Response response) {
 
@@ -115,144 +106,6 @@ public final class ResponseAssert extends AbstractAssert<ResponseAssert, Respons
 		}
 
 		return this;
-	}
-
-
-	public ResponseAssert hasHeader(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		isNotNull();
-
-		final Collection<String> values=actual.headers(name);
-
-		if ( values.isEmpty() ) {
-			failWithMessage("expected response to have <%s> headers but has none", name);
-		}
-
-		return this;
-	}
-
-	public ResponseAssert hasHeader(final String name, final String value) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		isNotNull();
-
-		final String found=actual.header(name).orElse(null);
-
-		if ( !value.equals(found)) {
-			failWithMessage(
-					"expected response to have <%s> header with value <%s> but found <%s>",
-					name, value, found
-			);
-		}
-
-		return this;
-	}
-
-	public ResponseAssert doesNotHaveHeader(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		isNotNull();
-
-		final Collection<String> values=actual.headers(name);
-
-		if ( !values.isEmpty() ) {
-			failWithMessage("expected response to have no <%s> headers but has <%s>", name, values);
-		}
-
-		return this;
-	}
-
-
-	public ResponseAssert doesNotHaveBody() {
-
-		isNotNull();
-
-		actual.body(DataFormat.data()).get().ifPresent(data -> {
-			if ( data.length > 0 ) {
-				failWithMessage("expected empty body but had binary body of length <%d>", data.length);
-			}
-		});
-
-		actual.body(TextFormat.text()).get().ifPresent(text -> {
-			if ( !text.isEmpty() ) {
-				failWithMessage(
-						"expected empty body but had textual body of length <%d> (%s)",
-						text.length(), clip(text)
-				);
-			}
-		});
-
-		return this;
-	}
-
-	public ResponseAssert doesNotHaveBody(final Format<?> format) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		isNotNull();
-
-		return actual.body(format).map(
-				value -> fail("expected response to have no <%s> body but has one"),
-				error -> this
-		);
-	}
-
-
-	public ResponseAssert hasBody(final Format<?> format) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		isNotNull();
-
-		return actual.body(format).map(value -> this, error -> fail(
-				"expected response to have a <%s> body but was unable to retrieve one (%s)",
-				format.getClass().getSimpleName(), error
-		));
-	}
-
-
-	public <V> ObjectAssert<V> hasBodyThat(final Format<V> format) {
-		return hasBodyThat(format, Assertions::assertThat);
-	}
-
-	public JSONAssert hasBodyThat(final JSONFormat format) {
-		return hasBodyThat(format, JSONAssert::assertThat);
-	}
-
-	public ModelAssert hasBodyThat(final RDFFormat format) {
-		return hasBodyThat(format, ModelAssert::assertThat);
-	}
-
-	private <V, T, A extends Assert<A, T>> A hasBodyThat(final Format<V> format, final Function<V, A> mapper) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		isNotNull();
-
-		return actual.body(format).map(mapper, error -> fail(
-				"expected response to have a <%s> body but was unable to retrieve one (%s)",
-				format.getClass().getSimpleName(), error
-		));
 	}
 
 
