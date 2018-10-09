@@ -1,9 +1,9 @@
 ---
 title:     Idiomatic RDF/JSON Serialization Reference
-excerpt:    "Idiomatic RDF/JSON serialization format codecs and grammar"
+excerpt:    Idiomatic RDF/JSON serialization format codecs and grammar
 ---
 
-Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the platform supports a simpler idiomatic JSON‑based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language.md#shapes).
+Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the framework supports a simpler idiomatic JSON‑based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language.md#shapes).
 
 Codecs for this serialization make heavy use of reasoning over linked data shapes to **prove** useful features of the RDF payload, like the expected value for a property being a IRI reference or a required non-repeatable string.
 
@@ -19,7 +19,7 @@ Codec behaviour is controlled through the following  RDF4J [RioSetting](http://d
 
 | setting                                  | type                                     | value                                    | default                             |
 | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------- |
-| [Shape](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Shape) | [Shape](../javadocs/com/metreeca/form/shape) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
+| [Shape](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Shape) | [Shape](../javadocs/com/metreeca/form/Shape.html) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
 | [Focus](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Focus) | [Resource](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Resource.html) | the entry point for the de/serializaton process | `null` (will be inferred from data) |
 
 # JSON Serialization
