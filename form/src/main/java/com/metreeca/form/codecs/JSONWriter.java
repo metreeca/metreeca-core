@@ -40,6 +40,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.shapes.Alias.aliases;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
@@ -102,10 +103,10 @@ public final class JSONWriter extends AbstractRDFWriter {
 			final Resource focus=getWriterConfig().get(JSONCodec.Focus);
 			final Shape shape=getWriterConfig().get(JSONCodec.Shape);
 
-			final Shape driver=(shape == null) ? null : shape // infer implicit constraints to drive json shorthands
+			final Shape driver=(shape == null) ? null : shape
 
-					.accept(Shape.mode(Form.verify))
-					.accept(new Inferencer())
+					.accept(mode(Form.verify)) // remove internal filtering shapes
+					.accept(new Inferencer()) // infer implicit constraints to drive json shorthands
 					.accept(new Optimizer());
 
 			final Predicate<Resource> trail=resource -> false;

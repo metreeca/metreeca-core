@@ -262,17 +262,18 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 
 		return processor
 
-				.wrap((Wrapper)handler -> request -> handler.handle(request).map(response -> response.headers("+Link",
-						link(LDP.RESOURCE, "type"),
-						link(LDP.RDF_SOURCE, "type")
-				)))
-
 				.wrap((Wrapper)handler -> request -> request.safe() || request.query().isEmpty()
 
 						? handler.handle(request)
 
 						: request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"))
+
 				)
+
+				.wrap((Wrapper)handler -> request -> handler.handle(request).map(response -> response.headers("+Link",
+						link(LDP.RESOURCE, "type"),
+						link(LDP.RDF_SOURCE, "type")
+				)))
 
 				.wrap((Handler)request -> request.body(shape()).map(
 

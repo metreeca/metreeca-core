@@ -18,7 +18,6 @@
 package com.metreeca.rest.wrappers;
 
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
@@ -40,7 +39,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Shape.empty;
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.time;
@@ -213,7 +211,6 @@ public final class Processor implements Wrapper {
 				.wrap(pre())
 				.wrap(post())
 				.wrap(sync())
-				.wrap(hide())
 				.wrap(handler);
 	}
 
@@ -258,12 +255,6 @@ public final class Processor implements Wrapper {
 			return response;
 
 		});
-	}
-
-	private Wrapper hide() {
-		return handler -> request -> handler.handle(request).map(response -> response.body(shape()).pipe(
-				shape -> shape.accept(mode(Form.verify)) // hide filtering details
-		));
 	}
 
 
