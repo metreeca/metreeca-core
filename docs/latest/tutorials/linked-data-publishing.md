@@ -25,11 +25,11 @@ Before learning how to expose selected resources and collections from your works
 
 Once your demo workspace is ready, open the linked data port catalog.
 
-![Open port catalog](images/open-port-catalog.png)
+![Open port catalog](linked-data-publishing.mdimages/open-port-catalog.png)
 
 The system will open a navigable catalog listing the active linked data ports.
 
-![Inspect port catalog](images/inspect-port-catalog.png)
+![Inspect port catalog](linked-data-publishing.mdimages/inspect-port-catalog.png)
 
 Each *linked data port* specifies how linked data resources whose URLs match a server-relative path pattern will be handled by the linked data server. For instance, the linked data port mapped to `/product-lines/*` specifies  how to handle all of the following linked data resources:
 
@@ -40,7 +40,7 @@ https://demo.metreeca.com/product-lines/planes
 …
 ```
 
-The demo workspace is pre-configured with a number of ports, some exposing default system-managed services (root handler, SPARQL endpoints, …), some defined as Java custom services (`/products-lines/`, /`product-lines/*`, …) supporting the [linked data development tutorial](../linked-data-interaction/).
+The demo workspace is pre-configured with a number of ports, some exposing default system-managed services (root handler, SPARQL endpoints, …), some defined as Java custom services (`/products-lines/`, /`product-lines/*`, …) supporting the [linked data development tutorial](linked-data-interaction.md).
 
 Ports handling navigation entry points are flagged as *root*; user-defined ports will be flagged as *soft*. Configuration details for each port may be inspected by clicking on the port path.
 
@@ -48,11 +48,11 @@ In the following sections you will learn how to create and manage additional cus
 
 # Creating New Ports
 
-![open-port-editor](images/open-port-editor.png)
+![open-port-editor](linked-data-publishing.mdimages/open-port-editor.png)
 
 ## Editing Port Metadata
 
-![Edit metadata](images/edit-metadata.png)
+![Edit metadata](linked-data-publishing.mdimages/edit-metadata.png)
 
 <!-- keep aligned with system APIs specs -->
 
@@ -78,25 +78,25 @@ The optional trailing character in the path pattern controls how resources are h
 | *`<path>/`*  | the resource at `<path>/` will be handled as an LDP Basic Container including all of the RDF resources matched by the port shape; an ancillary port mapped to the `<path>/*` pattern is automatically generated to handle container items as LDP RDF Resources, exposing RDF properties as specified by the port shape |
 | `<path>/*`   | every resource with an IRI starting with `<path>/` will be handled as an LDP RDF Resource, exposing RDF properties as specified by the port shape |
 
-All resources handled as LDP Basic Container support [faceted search](../../references/faceted-search.md), sorting and pagination out of the box.
+All resources handled as LDP Basic Container support [faceted search](../references/faceted-search.md), sorting and pagination out of the box.
 
 ## Editing Port Models
 
-![Open the linked data model editor](images/open-shape-editor.png)
+![Open the linked data model editor](linked-data-publishing.mdimages/open-shape-editor.png)
 
 The *shape* tab of the port editor supports editing the linked data model associated with the port.
 
-Linked data models are defined with a [SHACL](https://www.w3.org/TR/shacl/)-based [specification language](../../references/spec-language.md), assembling building blocks on an interactive drag-and-drop canvas.
+Linked data models are defined with a [SHACL](https://www.w3.org/TR/shacl/)-based [specification language](../references/spec-language.md), assembling building blocks on an interactive drag-and-drop canvas.
 
 <p class="note">Direct import of of SHACL specs is planned.</p>
 
 Let's start defining a barebone port model stating that all resources of class `:Employee` are to be included as container items, exposing only the `rdfs:label` property for each item.
 
-![Edit shapes](images/edit-shapes.png)
+![Edit shapes](linked-data-publishing.mdimages/edit-shapes.png)
 
-![Create port](images/create-port.png)
+![Create port](linked-data-publishing.mdimages/create-port.png)
 
-The relevant [building blocks](../../references/spec-language.md#shapes) are selected from the side palette and dragged to the model canvas. Blocks may be rearranged by dragging them around on the canvas or removed by dragging them out of the canvas.
+The relevant [building blocks](../references/spec-language.md#shapes) are selected from the side palette and dragged to the model canvas. Blocks may be rearranged by dragging them around on the canvas or removed by dragging them out of the canvas.
 
 Resource IRIs may be entered as:
 
@@ -108,23 +108,23 @@ RDF values required by other constraint blocks are entered using Turtle syntax f
 
 Available prefixes for qualified names may be inspected and edited from the *Namespaces* catalog under the system configuration toolbox; well-known prefixes like `rdf`, `rdfs`, `xds`, … are made available by default even if not listed in the namespace catalog.
 
-![Open namespace catalog](images/open-namespaces.png)
+![Open namespace catalog](linked-data-publishing.mdimages/open-namespaces.png)
 
 To navigate back to the model editor, hit the browser *back* button or select it from the history sidebar.
 
-![Navigate back to the model editor](images/navigate-back.png)
+![Navigate back to the model editor](linked-data-publishing.mdimages/navigate-back.png)
 
 To restore the modelling palette, click on the *shape* tab of the port editor.
 
-![Restore the modelling palette](images/restore-palette.png)
+![Restore the modelling palette](linked-data-publishing.mdimages/restore-palette.png)
 
 ## Inspecting Handled Resources 
 
 As soon as the new port is created, the system activates the required resource handlers and starts exposing read/write linked data REST APIs at the matching HTTP/S URLs, as specified by the port model.
 
-Exposed containers and resources are immediately available for rapid [linked data development](../linked-data-interaction/) and may be interactively inspected in the linked data navigaton interface.
+Exposed containers and resources are immediately available for rapid [linked data development](linked-data-interaction.md) and may be interactively inspected in the linked data navigaton interface.
 
-![Inspect linked data resoures](images/inspect-resources.png)
+![Inspect linked data resoures](linked-data-publishing.mdimages/inspect-resources.png)
 
 The linked data navigation interface is dynamically built on the basis of the resource model and supports interactive inspection, editing and cross-linking of linked data resources, validating updates against constraints specified in the resource model.
 
@@ -134,9 +134,9 @@ The linked data navigation interface is dynamically built on the basis of the re
 
 We'll now refine the initial barebone model, exposing more employee properties, like the internal code, forename and surname, and detailing properties roles and constraints.
 
-![Edit port shape](images/edit-port-shape.png)
+![Edit port shape](linked-data-publishing.mdimages/edit-port-shape.png)
 
-![Update port specs](images/update-port.png)
+![Update port specs](linked-data-publishing.mdimages/update-port.png)
 
 The extended model makes use of *occurence* and *value* constraints to state that `rdfs:label`, `:code`, `:forename` and `:surname` values are expected:
 
@@ -146,13 +146,13 @@ The extended model makes use of *occurence* and *value* constraints to state tha
 
 ## Parameterizing Models
 
-The `verify` and `server` blocks in the extended model also introduce the central concept of *[parametric](../../references/spec-language.md#parameters)* model.
+The `verify` and `server` blocks in the extended model also introduce the central concept of *[parametric](../references/spec-language.md#parameters)* model.
 
 The `verify` block states that nested constraints are to be used only for validating incoming data and not for selecting existing resources to be exposed as container items. Constraints like the `class`, defined outside the `verify` block, will be used both for selecting relevant resources and validating incoming data.
 
 The `server` block states that nested properties are server-managed and will be considered only when retrieving or deleting resources, but won't be accepted as valid content on resource creation and updating.
 
-In the most general form, models may be parameterized on for different [axes](../../references/spec-language.md#parameters), using the wrapping building blocks available under the *Conditions* tabs of the modelling palette. Building blocks specified outside parametric sectios are unconditionally enabled.
+In the most general form, models may be parameterized on for different [axes](../references/spec-language.md#parameters), using the wrapping building blocks available under the *Conditions* tabs of the modelling palette. Building blocks specified outside parametric sectios are unconditionally enabled.
 
 ## Controlling Resource Access
 
@@ -164,25 +164,25 @@ Parametric models support the definition of fine-grained access control rules an
 
 We'll now extend the employee directory model, adding cross-links to employee supervisors and subordinates.
 
-![Edit port shape](images/edit-port.png)
+![Edit port shape](linked-data-publishing.mdimages/edit-port.png)
 
-![Connect port](images/connect-port.png)
+![Connect port](linked-data-publishing.mdimages/connect-port.png)
 
 The `relate` blocks state that `rdfs:label`s for linked employees are to be retrieved along with employee properties, e.g. to drive visualisation, but they are to be disallowed or ignored on resource creation, updating and deletion.
 
 The `shapes` block organizes nested blocks into a visualization box, as demonstrated in the final navigable employee directory.
 
-![Inspect directory](images/inspect-directory.png)
+![Inspect directory](linked-data-publishing.mdimages/inspect-directory.png)
 
-![Navigate employee directory](images/navigate-directory.png)
+![Navigate employee directory](linked-data-publishing.mdimages/navigate-directory.png)
 
 ## Post-Processing Updates
 
 We'll now complete the employee directory model, adding post-processing scripts for updating server-managed properties after entries are created or modified.
 
-![Edit port shape](images/edit-port.png)
+![Edit port shape](linked-data-publishing.mdimages/edit-port.png)
 
-![Connect port](images/script-port.png)
+![Connect port](linked-data-publishing.mdimages/script-port.png)
 
 The *mutate* SPARQL Update post-processing script will update the server-managed `rdfs:label` property according to user-supplied `:forename`/`:surname` properties after an entry resource managed by the employee directory is created or modified.
 
@@ -215,6 +215,6 @@ SPARQL Update post-processing scripts are executed after the corresponding state
 
 # Deleting Ports
 
-![Edit port](images/edit-port.png)
+![Edit port](linked-data-publishing.mdimages/edit-port.png)
 
-![Delete port](images/delete-port.png)
+![Delete port](linked-data-publishing.mdimages/delete-port.png)

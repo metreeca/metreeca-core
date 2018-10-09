@@ -5,33 +5,21 @@ excerpt:    Hands-on guided tour of read/write model-driven linked data REST API
 
 # Getting Started
 
-This example-driven tutorial demonstrates how to interact with read/write REST APIs published with the Metreeca/Link model-driven linked data framework to support rapid data-driven app development. Basic familiarity with  [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
-
-To get started open [https://demo.metreeca.com/workspace/](https://demo.metreeca.com/workspace/) with a [supported](../../handbooks/installation#system-requirements) web browser and activate your demo workspace by agreeing to the terms of service and the privacy policy.
-
-<p class="warning">Demo workspaces are not secured: don't upload personal or otherwise sensitive data.</p>
-
-<p class="warning">Demo workspaces are transient: don't expect edits to outlast browser sessions.</p>
-
-Once your demo workspace is ready, take note of your unique user identifier appearing in the URL displayed in the toolbar of your browser: this will be used later on to build writable resource URLs in your demo workspace.
-
-![Copy server base URL](images/copy-base-url.png)
+This example-driven tutorial demonstrates how to interact with read/write REST APIs published with the Metreeca/Link model-driven linked data engine. Basic familiarity with  [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
 
 You may try out the examples in the following sections using your favorite REST testing tool or working from the command line with toos like `curl` or `wget`. If this is the case, save your user identifier to an environment variable.
 
-```sh
-% user='***-***-***-***'
-```
+To get started, complete the model-driven linked data REST API [publishing tutorial](linked-data-publishing.md) and make sure your local linked data server instance is up and running. Read operations can also be tested on the shared read-only demo instance available at [https://demo.metreeca.com/](https://demo.metreeca.com/).
+
+<p class="warning">The demo server is hosted on a cloud service: it is not expected to provide production-level performance and may experience some delays during on-demand  workspace initialization.</p>
 
 The demo workspace will be pre-populated with a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models.
 
-Before learning how to interact with read/write linked data REST APIs exposing resources and collections from your workspace, you may want to familiarize yourself with the dataset contents following through the [search and analysis tutorial](../search-and-analysis/).
-
-<p class="warning">The demo server is hosted on a cloud service: it is not expected to provide production-level performance and may experience some delays during on-demand workspace initialization.</p>
+Before learning how to interact with read/write linked data REST APIs exposing resources and collections from your workspace, you may want to familiarize yourself with the dataset contents following through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/).
 
 # Model-Driven APIs
 
-The demo workspace is pre-configured with a small collection of read/write REST APIs  that drive a demo [product catalog](https://demo.metreeca.com/apps/shop/) web interface.
+The demo workspace is pre-configured with a small collection of read/write REST APIs  that drive a [product catalog](https://demo.metreeca.com/apps/shop/) web interface.
 
 | REST API                                 | Contents                     |
 | :--------------------------------------- | :--------------------------- |
@@ -42,15 +30,15 @@ The demo workspace is pre-configured with a small collection of read/write REST 
 
 Usually, even a simple application like this would require extensive back-end development activities in order to connect to the database and perform coordinated custom queries supporting data retrieval, faceted search, facet population, sorting, pagination and so on. User authorization, validation of updates and enforcing of consistency rules would as well require lenghty and error-prone custom back-end development.
 
-Metreeca automates the whole process with a model-driven API engine that compiles high‑level declarative linked data models into read/write REST APIs immediately available for front-end app development, supporting all of the above-mentioned features without back-end coding.
+Metreeca/Link automates the whole process with a model-driven API engine that compiles high‑level declarative linked data models into read/write REST APIs immediately available for front-end app development, supporting all of the above-mentioned features without custom back-end coding.
 
-You may learn how to publish your own model-driven linked data APIs following through the [linked data modelling tutorial](../linked-data-publishing/).
+You may learn how to publish your own model-driven linked data APIs following through the [linked data modelling tutorial](../linked-data-publishing.md).
 
 # Read Operations
 
-Linked data REST APIs published by Metreeca API engine support controlled read access to  RDF contents managed by the underlying graph storage layer.
+Linked data REST APIs published by Metreeca/Link API engine support controlled read access to  RDF contents managed by the underlying graph storage layer.
 
-User authorization and user-specific content generation are performed according to [role-based](../../references/spec-language.md#parameters) rules integrated in the linked data model driving the API publishing process.
+User authorization and user-specific content generation are performed according to [role-based](../references/spec-language.md#parameters) rules integrated in the linked data model driving the API publishing process.
 
 ## RDF Resources
 
@@ -108,7 +96,7 @@ Standard content negotiation is supported, so you may ask for resource descripti
 </rdf:RDF>
 ```
 
-JSON-based formats are especially convenient for front-end development: beside the standardised  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialisation, Metreeca supports a simpler [idiomatic JSON](../../references/idiomatic-json.md)-based format, which streamlines resource descriptions taking into account the constraints described in the associated linked data models.
+JSON-based formats are especially convenient for front-end development: beside the standardised  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialisation, Metreeca supports a simpler [idiomatic](../references/idiomatic-json.md) JSON-based format, which streamlines resource descriptions taking into account the constraints described in the associated linked data models.
 
 To ask for resource descriptions in the idiomatic JSON format, specify the `application/json` MIME type in the `Accept` HTTP request header.
 
@@ -142,13 +130,11 @@ To ask for resource descriptions in the idiomatic JSON format, specify the `appl
 }
 ```
 
-If available, the linked data model associated with a resource can be retrieved and inspected from the URL provided in the `Link rel="ldp:constrainedBy"`HTTP response header. The information provided by the associated model could be used, for instance, to optimize or dynamically build user interfaces or to automaticaly provide client-side validation on data forms, like done in the default [linked data navigator](https://demo.metreeca.com/products/) of the platform.
-
-<p class="note">The linked data navigator is still a work in progress: more to come as dynamic editing forms are improved and advanced <a href="../search-and-analysis/">search and analysis</a> features like faceted filtering and infographics are integrated in the tool.</p>
+If available, the linked data model associated with a resource can be retrieved and inspected from the URL provided in the `Link rel="ldp:constrainedBy"`HTTP response header. The information provided by the associated model could be used, for instance, to optimize or dynamically build user interfaces or to automaticaly provide client-side validation on data forms.
 
 ## RDF Collections
 
-RDF resource collections managed by the underlying graph storage are exposed by the Metreeca REST API engine as [Linked Data Platform (LDP) Containers](https://www.w3.org/TR/ldp/#ldpc).
+RDF resource collections managed by the underlying graph storage are exposed by the Metreeca/Link REST API engine as [Linked Data Platform (LDP) Basic Containers](https://www.w3.org/TR/ldp/#ldpc).
 
 To retrieve the RDF description of a published collections, as specified by the associated data model, perform a `GET` operation on the URL identifying the collection.
 
@@ -194,7 +180,7 @@ By default, collection descriptions include a digest description of each collect
 
 ```sh
 % curl --header 'Accept: application/json' \
-    --header 'Prefer: return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"' \
+    --header 'Prefer: return=representation; include="http://www.w3.org/ns/ldp#PreferEmptyContainer"' \
     "https://demo.metreeca.com/products/"
     
 < HTTP/2 200 OK
@@ -213,9 +199,9 @@ Again, if available, the linked data model associated with a collection can be r
 
 # Write Operations
 
-Linked data REST APIs published by Metreeca API engine support controlled write access to  RDF contents managed by the underlying graph storage layer.
+Linked data REST APIs published by Metreeca/Link API engine support controlled write access to  RDF contents managed by the underlying graph storage layer.
 
-User authorization and user-specific content validation are performed according to [role-based](../../references/spec-language.md#parameters) rules integrated in the linked data model driving the API publishing process.
+User authorization and user-specific content validation are performed according to [role‑based](../references/spec-language.md#parameters) rules integrated in the linked data model driving the API publishing process.
 
 ## Creating Resources
 
@@ -359,7 +345,7 @@ The deleted resource is immediately no longer available for retrieval at the pre
 
 Metreeca/Link REST APIs engine extends [Linked Data Platform (LDP) Containers](https://www.w3.org/TR/ldp/#ldpc) with support for faceted search.
 
-To retrieve a digest description of collection items matching a set of facet filters, perform a `GET` operation on the URL identifying the collection, appending a URL-encoded JSON query object [describing the filters](../../references/faceted-search.md) to be applied.
+To retrieve a digest description of collection items matching a set of facet filters, perform a `GET` operation on the URL identifying the collection, appending a URL-encoded JSON query object [describing the filters](../references/faceted-search.md) to be applied.
 
 ```json
 {	
@@ -411,7 +397,7 @@ Note that RDF container descriptions are omitted from faceted search results.
 
 ## Sorting and Pagination
 
-Faceted search results may be sorted and paginated including [sorting criteria](../../references/faceted-search.md#sorting-criteria) and [pagination limits](../../references/faceted-search.md#graph-query) in the JSON query object.
+Faceted search results may be sorted and paginated including [sorting criteria](../references/faceted-search.md#sorting-criteria) and [pagination limits](../references/faceted-search.md#graph-query) in the JSON query object.
 
 ```json
 {
@@ -427,7 +413,7 @@ Faceted search results may be sorted and paginated including [sorting criteria](
 
 ## Facet Stats and Options
 
-The faceted search engine supports also introspection queries for retrieving [facet stats](../../references/faceted-search.md#stats-query)  and available [facet options](../../references/faceted-search.md#items-query).
+The faceted search engine supports also introspection queries for retrieving [facet stats](../references/faceted-search.md#stats-query)  and available [facet options](../references/faceted-search.md#items-query).
 
 To retrieve datatype, count and range stats for a facet, taking into account applied filters, specify the target property path in the faceted search query object.
 
