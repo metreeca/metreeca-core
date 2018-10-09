@@ -240,8 +240,8 @@ implements <a href="../../../../com/metreeca/rest/Wrapper.html" title="interface
  <p>The filter is chained after previously inserted pre-processing filters and executed on incoming requests and
  their <a href="../../../../com/metreeca/rest/formats/RDFFormat.html" title="class in com.metreeca.rest.formats">RDF</a> payload, if one is present, or ignored, otherwise.</p>
 
- <p>If the request contains a <a href="../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body, the filtered model is trimmed to remove statements
- outside the allowed shape envelope.</p></div>
+ <p>If the request includes a <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a>, the filtered model is trimmed to remove
+ statements outside the allowed shape envelope.</p></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>filter</code> - the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
@@ -265,8 +265,8 @@ implements <a href="../../../../com/metreeca/rest/Wrapper.html" title="interface
  <p>The filter is chained after previously inserted post-processing filters and executed on <a href="../../../../com/metreeca/rest/Response.html#success--">successful</a> outgoing responses and their <a href="../../../../com/metreeca/rest/formats/RDFFormat.html" title="class in com.metreeca.rest.formats">RDF</a> payload, if one is
  present, or ignored, otherwise.</p>
 
- <p>If the response contains a <a href="../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body, the filtered model is trimmed to remove statements
- outside the allowed shape envelope.</p></div>
+ <p>If the response includes a <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a>, the filtered model is trimmed to remove
+ statements outside the allowed shape envelope.</p></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>filter</code> - the response RDF post-processing filter to be inserted; takes as argument a successful outgoing

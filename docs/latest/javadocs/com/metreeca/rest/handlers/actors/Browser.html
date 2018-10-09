@@ -131,19 +131,9 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 
  <dl>
 
- <dt>Request <a href="../../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body {optional}</dt>
-
- <dd>An optional linked data shape driving the retrieval process.</dd>
-
- <dt>Response <a href="../../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body {optional}</dt>
-
- <dd>If the request includes a shape payload, the response includes the derived shape actually used in the container
- retrieval process, redacted according to request user <a href="../../../../../com/metreeca/rest/Request.html#roles--">roles</a>, <a href="../../../../../com/metreeca/form/Form.html#relate"><code>Form.relate</code></a> task,
- <a href="../../../../../com/metreeca/form/Form.html#verify"><code>Form.verify</code></a> mode and <a href="../../../../../com/metreeca/form/Form.html#digest"><code>Form.digest</code></a> view.</dd>
-
  <dt>Response shape-driven <a href="../../../../../com/metreeca/rest/formats/RDFFormat.html" title="class in com.metreeca.rest.formats"><code>RDFFormat</code></a> body</dt>
 
- <dd>If the request includes a <a href="../../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body, the response includes the <a href="../../../../../com/metreeca/rest/formats/RDFFormat.html" title="class in com.metreeca.rest.formats">RDF
+ <dd>If the request includes <a href="../../../../../com/metreeca/rest/Message.html#shape--">shape</a>, the response includes the <a href="../../../../../com/metreeca/rest/formats/RDFFormat.html" title="class in com.metreeca.rest.formats">RDF
  description</a> of the request <a href="../../../../../com/metreeca/rest/Request.html#item--">focus item</a>, <a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/vocabulary/LDP.html?is-external=true#CONTAINS" title="class or interface in org.eclipse.rdf4j.model.vocabulary">containing</a> the RDF
  descriptions of the virtual container items matched by the redacted linked data <a href="../../../../../com/metreeca/form/Shape.html" title="interface in com.metreeca.form">shape</a>.</dd>
 
@@ -158,6 +148,9 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
  <dd><strong>Warning</strong> / Shapeless container retrieval is not yet supported and is reported with a <a href="../../../../../com/metreeca/rest/Response.html#NotImplemented">Response.NotImplemented</a> HTTP status code.</dd>
 
  </dl>
+
+ <p>If the request includes a shape, the response includes the derived shape actually used in the container retrieval
+ process, redacted according to request user <a href="../../../../../com/metreeca/rest/Request.html#roles--">roles</a>, <a href="../../../../../com/metreeca/form/Form.html#relate"><code>Form.relate</code></a> task, <a href="../../../../../com/metreeca/form/Form.html#verify"><code>Form.verify</code></a> mode and <a href="../../../../../com/metreeca/form/Form.html#digest"><code>Form.digest</code></a> view.</p>
 
  <p>Regardless of the operating mode, RDF data is retrieved from the system <a href="../../../../../com/metreeca/tray/rdf/Graph.html#Factory">graph</a>
  database.</p></div>
@@ -218,7 +211,7 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.metreeca.rest.handlers.<a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></h3>
-<code><a href="../../../../../com/metreeca/rest/handlers/Actor.html#handler-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-java.util.function.BiFunction-">handler</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#link-org.eclipse.rdf4j.model.IRI-java.lang.String-">link</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#pre-java.util.function.BiFunction-">pre</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#report-com.metreeca.form.Report-">report</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-java.util.Collection-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-org.eclipse.rdf4j.model.Value...-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#trace-java.util.Collection-">trace</a></code></li>
+<code><a href="../../../../../com/metreeca/rest/handlers/Actor.html#action-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-">action</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#link-org.eclipse.rdf4j.model.IRI-java.lang.String-">link</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#pre-java.util.function.BiFunction-">pre</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#report-com.metreeca.form.Report-">report</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-java.util.Collection-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-org.eclipse.rdf4j.model.Value...-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#trace-java.util.Collection-">trace</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.metreeca.rest.handlers.Delegator">
