@@ -31,9 +31,25 @@ import static com.metreeca.form.Shape.empty;
 import static com.metreeca.tray.Tray.tool;
 
 
+/**
+ * Resource deleter.
+ *
+ * <p>Handles deletion requests on linked data resources.</p>
+ *
+ * <p>If the request includes  a {@linkplain Message#shape() shape}, it is redacted taking into account the request
+ * user {@linkplain Request#roles() roles}, {@link Form#delete} task, {@link Form#verify} mode and {@link Form#detail}
+ * view and used to identify the neighborhood of the request {@linkplain Request#item() focus item} to be deleted.</p>
+ *
+ * <p><strong>Warning</strong> / Shapeless resource updating is not yet supported and is reported with a {@linkplain
+ * Response#NotImplemented} HTTP status code.</p>
+ *
+ * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
+ * Graph#Factory graph} database.</p>
+ */
 public final class Deleter extends Actor<Deleter> {
 
 	private final Graph graph=tool(Graph.Factory);
+
 
 	public Deleter() {
 		delegate(handler(Form.delete, Form.detail, (request, shape) ->
@@ -52,7 +68,6 @@ public final class Deleter extends Actor<Deleter> {
 
 	private Responder driven(final Request request, final Shape shape) {
 		return request.reply(response -> graph.update(connection -> {
-
 
 			final IRI focus=request.item();
 
