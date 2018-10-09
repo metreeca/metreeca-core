@@ -60,9 +60,9 @@ import static java.util.Collections.emptySet;
  *
  * </dl>
  *
- * <dd>If the request includes a shape, the response includes the derived shape actually used in the resource retrieval
+ * <p>If the request includes a shape, the response includes the derived shape actually used in the resource retrieval
  * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#verify} mode and {@link Form#detail} view.</dd>
+ * Form#verify} mode and {@link Form#detail} view.</p>
  */
 public final class Builder extends Actor<Builder> {
 
