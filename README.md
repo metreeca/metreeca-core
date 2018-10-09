@@ -2,6 +2,8 @@
 
 ---
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/link.svg)](com.metreeca:link)
+
 # Metreeca/Link
 
 Metreeca/Link is a Java framework enabling rapid development of linked data applications.

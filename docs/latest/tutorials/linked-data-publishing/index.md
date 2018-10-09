@@ -1,14 +1,11 @@
 ---
-title:	    Linked Data Modelling Tutorial
-excerpt:    Hands-on guided tour of linked data modelling and API publishing tools
-tags:	    Tutorial
-module:     "${docs.module}"
-version:    "${docs.version}"
+title:	    Publishing Model‑Driven Linked Data REST APIs
+excerpt:    Hands-on guided tour of linked data modelling and model-driven REST API publishing tools
 ---
 
 # Getting Started
 
-This example-driven tutorial introduces the linked data modelling and API publishing tools of the [Metreeca](https://www.metreeca.com/platform/) model-driven linked data platform. Basic familiarity with  [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
+This example-driven tutorial introduces the building blocks of the Metreeca/Link model-driven linked data framework. Basic familiarity with  [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
 
 To get started open [https://demo.metreeca.com/workspace/](https://demo.metreeca.com/workspace/) with a [supported](../../handbooks/installation#system-requirements) web browser and activate your demo workspace by agreeing to the terms of service and the privacy policy.
 
@@ -43,7 +40,7 @@ https://demo.metreeca.com/product-lines/planes
 …
 ```
 
-The demo workspace is pre-configured with a number of ports, some exposing default system-managed services (root handler, SPARQL endpoints, …), some defined as Java custom services (`/products-lines/`, /`product-lines/*`, …) supporting the [linked data development tutorial](../linked-data-development/).
+The demo workspace is pre-configured with a number of ports, some exposing default system-managed services (root handler, SPARQL endpoints, …), some defined as Java custom services (`/products-lines/`, /`product-lines/*`, …) supporting the [linked data development tutorial](../linked-data-interaction/).
 
 Ports handling navigation entry points are flagged as *root*; user-defined ports will be flagged as *soft*. Configuration details for each port may be inspected by clicking on the port path.
 
@@ -81,7 +78,7 @@ The optional trailing character in the path pattern controls how resources are h
 | *`<path>/`*  | the resource at `<path>/` will be handled as an LDP Basic Container including all of the RDF resources matched by the port shape; an ancillary port mapped to the `<path>/*` pattern is automatically generated to handle container items as LDP RDF Resources, exposing RDF properties as specified by the port shape |
 | `<path>/*`   | every resource with an IRI starting with `<path>/` will be handled as an LDP RDF Resource, exposing RDF properties as specified by the port shape |
 
-All resources handled as LDP Basic Container support [faceted search](../../com.metreeca.spec/references/faceted-search), sorting and pagination out of the box.
+All resources handled as LDP Basic Container support [faceted search](../../references/faceted-search.md), sorting and pagination out of the box.
 
 ## Editing Port Models
 
@@ -89,7 +86,7 @@ All resources handled as LDP Basic Container support [faceted search](../../com.
 
 The *shape* tab of the port editor supports editing the linked data model associated with the port.
 
-Linked data models are defined with a [SHACL](https://www.w3.org/TR/shacl/)-based [specification language](../../../com.metreeca.spec/references/spec-language), assembling building blocks on an interactive drag-and-drop canvas.
+Linked data models are defined with a [SHACL](https://www.w3.org/TR/shacl/)-based [specification language](../../references/spec-language.md), assembling building blocks on an interactive drag-and-drop canvas.
 
 <p class="note">Direct import of of SHACL specs is planned.</p>
 
@@ -99,7 +96,7 @@ Let's start defining a barebone port model stating that all resources of class `
 
 ![Create port](images/create-port.png)
 
-The relevant [building blocks](../../../com.metreeca.spec/references/spec-language/#shapes) are selected from the side palette and dragged to the model canvas. Blocks may be rearranged by dragging them around on the canvas or removed by dragging them out of the canvas.
+The relevant [building blocks](../../references/spec-language.md#shapes) are selected from the side palette and dragged to the model canvas. Blocks may be rearranged by dragging them around on the canvas or removed by dragging them out of the canvas.
 
 Resource IRIs may be entered as:
 
@@ -125,7 +122,7 @@ To restore the modelling palette, click on the *shape* tab of the port editor.
 
 As soon as the new port is created, the system activates the required resource handlers and starts exposing read/write linked data REST APIs at the matching HTTP/S URLs, as specified by the port model.
 
-Exposed containers and resources are immediately available for rapid [linked data development](../linked-data-development/) and may be interactively inspected in the linked data navigaton interface.
+Exposed containers and resources are immediately available for rapid [linked data development](../linked-data-interaction/) and may be interactively inspected in the linked data navigaton interface.
 
 ![Inspect linked data resoures](images/inspect-resources.png)
 
@@ -149,13 +146,13 @@ The extended model makes use of *occurence* and *value* constraints to state tha
 
 ## Parameterizing Models
 
-The `verify` and `server` blocks in the extended model also introduce the central concept of *[parametric](../../../com.metreeca.spec/references/spec-language#parameters)* model.
+The `verify` and `server` blocks in the extended model also introduce the central concept of *[parametric](../../references/spec-language.md#parameters)* model.
 
 The `verify` block states that nested constraints are to be used only for validating incoming data and not for selecting existing resources to be exposed as container items. Constraints like the `class`, defined outside the `verify` block, will be used both for selecting relevant resources and validating incoming data.
 
 The `server` block states that nested properties are server-managed and will be considered only when retrieving or deleting resources, but won't be accepted as valid content on resource creation and updating.
 
-In the most general form, models may be parameterized on for different [axes](../../../com.metreeca.spec/references/spec-language#parameters), using the wrapping building blocks available under the *Conditions* tabs of the modelling palette. Building blocks specified outside parametric sectios are unconditionally enabled.
+In the most general form, models may be parameterized on for different [axes](../../references/spec-language.md#parameters), using the wrapping building blocks available under the *Conditions* tabs of the modelling palette. Building blocks specified outside parametric sectios are unconditionally enabled.
 
 ## Controlling Resource Access
 

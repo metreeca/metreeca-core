@@ -1,6 +1,6 @@
 ---
-title:      Faceted Search Reference
-excerpt:    "Faceted search support and query serializations"
+title:      REST Faceted API Search Reference
+excerpt:    REST faceted API search support and query serializations
 ---
 
 REST APIs publishing LDP Containers support system-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.
@@ -9,13 +9,13 @@ Faceted searches are performed with a `GET` operation on the URL identifying the
 
 <!-- document support for other query serializations -->
 
-Faceted searches return an RDF description of the query-specific result set. Standard content negotiation is supported for the RDF payload through the `Accept` HTTP request header. In the following sections, RDF structures for query responses are outlined using the idiomatic [JSON](idiomatic-json) format (`application/json`  MIME type).
+Faceted searches return an RDF description of the query-specific result set. Standard content negotiation is supported for the RDF payload through the `Accept` HTTP request header. In the following sections, RDF structures for query responses are outlined using the idiomatic [JSON](idiomatic-json.md) format (`application/json`  MIME type).
 
 # Queries
 
-Linked data [queries](../javadocs/com/metreeca/form/Query.html) define what kind of results is expected from faceted searches on [readable](../tutorials/linked-data-development/#read-operations) linked data REST APIs.
+Linked data [queries](../javadocs/com/metreeca/form/Query.html) define what kind of results is expected from faceted searches on [readable](../tutorials/linked-data-interaction/#read-operations) linked data REST APIs.
 
-JSON query serialization extends the idiomatic [JSON](idiomatic-json) format with  query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all RDF terms appearing in filters, including [shorthands](idiomatic-json#literals) for numeric values and literals with provable datatypes.
+JSON query serialization extends the idiomatic [JSON](idiomatic-json) format with  query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all RDF terms appearing in filters, including [shorthands](idiomatic-json.md#literals) for numeric values and literals with provable datatypes.
 
 <p class="warning">Work in progress… specs to be improved and detailed.</p>
 
