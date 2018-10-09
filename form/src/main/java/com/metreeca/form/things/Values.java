@@ -41,7 +41,9 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 
 
 public final class Values {
@@ -391,7 +393,7 @@ public final class Values {
 			throw new NullPointerException("null text");
 		}
 
-		return literal(nameUUIDFromBytes(text.getBytes(Transputs.UTF8)).toString());
+		return literal(nameUUIDFromBytes(text.getBytes(Codecs.UTF8)).toString());
 	}
 
 
@@ -448,6 +450,12 @@ public final class Values {
 
 
 	//// Formatters ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static String format(final Iterable<Statement> statements) {
+		return statements == null ? null : stream(statements.spliterator(), false)
+				.map(Values::format)
+				.collect(joining("\n"));
+	}
 
 	public static String format(final Statement statement) {
 		return statement == null ? null

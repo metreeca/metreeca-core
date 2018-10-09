@@ -21,6 +21,9 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.Shift;
 
 
+/**
+ * {Work in progress}
+ */
 public final class Virtual implements Shape {
 
 	public static Virtual virtual(final Trait trait, final Shift shift) {

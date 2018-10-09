@@ -26,7 +26,6 @@ import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.formats.ShapeFormat;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -57,11 +56,11 @@ import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shifts.Count.count;
 import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.shifts.Table.table;
-import static com.metreeca.form.things.Transputs.encode;
+import static com.metreeca.form.things.Codecs.decode;
+import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -78,10 +77,10 @@ import static java.util.stream.Collectors.toMap;
  *
  * <li>request {@linkplain Request#user() user}, {@linkplain Request#roles() roles}, {@linkplain Request#base() base},
  * {@linkplain Request#query() query}, {@linkplain Request#parameters() parameters}, {@linkplain Request#headers()
- * headers}, {@link ShapeFormat} and {@link RDFFormat} {@linkplain Request#body(Format) body} payloads;</li>
+ * headers}, {@linkplain Message#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
  *
- * <li>response {@linkplain Request#item() focus item}, {@linkplain Request#headers() headers}, {@link ShapeFormat} and
- * {@link RDFFormat} {@linkplain Request#body(Format) body} payloads;</li>
+ * <li>response {@linkplain Request#item() focus item}, {@linkplain Request#headers() headers}, {@linkplain
+ * Message#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
  *
  * </ul>
  *
@@ -143,51 +142,52 @@ public final class Rewriter implements Wrapper {
 			final boolean identity=external.isEmpty() || internal.isEmpty() || external.equals(internal);
 
 			return identity ? handler.handle(request) : request
-					.map(r -> rewrite(external, internal, r))
+					.map(r -> rewrite(r, new Engine(external, internal)))
 					.map(handler::handle)
-					.map(r -> rewrite(internal, external, r));
+					.map(r -> rewrite(r, new Engine(internal, external)));
 		};
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Request rewrite(final String source, final String target, final Request request) {
-
-		final Engine decoded=new Engine(source, target);
-		final Engine encoded=new Engine(encode(source), encode(target));
-
+	private Request rewrite(final Request request, final Engine engine) {
 		return request
 
-				.user(decoded.rewrite(request.user()))
-				.roles(decoded.rewrite(request.roles(), decoded::rewrite))
+				.user(engine.rewrite(request.user()))
+				.roles(engine.rewrite(request.roles(), engine::rewrite))
 
-				.base(decoded.rewrite(request.base()))
+				.base(engine.rewrite(request.base()))
 
-				.query(decoded.rewrite(request.query())) // decoded variant
-				.query(encoded.rewrite(request.query())) // encoded variant
+				.map(r -> {    // re-encode rewritten query only if it was actually encoded
 
-				.parameters(decoded.rewrite(request.parameters()))
-				.headers(decoded.rewrite(request.headers()))
+					final String encoded=r.query();
+					final String decoded=decode(encoded);
 
-				.body(shape()).pipe(decoded::rewrite)
-				.body(rdf()).pipe(model -> decoded.rewrite(model, decoded::rewrite));
+					return r.query(encoded.equals(decoded) ? engine.rewrite(encoded) : encode(engine.rewrite(decoded)));
+
+				})
+
+				.parameters(engine.rewrite(request.parameters()))
+				.headers(engine.rewrite(request.headers()))
+
+				.shape(engine.rewrite(request.shape()))
+
+				.body(rdf()).pipe(model -> engine.rewrite(model, engine::rewrite));
 	}
 
-	private Response rewrite(final String source, final String target, final Response response) {
-
-		final Engine decoded=new Engine(source, target);
-
+	private Response rewrite(final Response response, final Engine engine) {
 		return response
 
 				// ;( force response focus rewriting even if location is not already set
 
 				.header("Location", response.item().stringValue())
 
-				.headers(decoded.rewrite(response.headers()))
+				.headers(engine.rewrite(response.headers()))
 
-				.body(shape()).pipe(decoded::rewrite)
-				.body(rdf()).pipe(model -> decoded.rewrite(model, decoded::rewrite));
+				.shape(engine.rewrite(response.shape()))
+
+				.body(rdf()).pipe(model -> engine.rewrite(model, engine::rewrite));
 	}
 
 

@@ -43,15 +43,36 @@ import static com.metreeca.form.things.Sets.set;
 import static java.util.Arrays.asList;
 
 
+/**
+ * Linked data shape constraint.
+ */
 public interface Shape {
 
-	public static boolean empty(final Shape shape) { // !!! review
+	public static Shape wild() {
+		return and(); // !!! replace with wildcard?
+	}
+
+	public static boolean wild(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		return shape.equals(and()) || shape.equals(or());
+		return wild().equals(shape);
+	}
+
+
+	public static Shape empty() {
+		return or();
+	}
+
+	public static boolean empty(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return empty().equals(shape);
 	}
 
 

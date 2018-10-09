@@ -17,7 +17,7 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
@@ -41,7 +41,7 @@ public final class DataFormat implements Format<byte[]> {
 	 *
 	 * @return the singleton binary body format instance
 	 */
-	private static DataFormat data() {
+	public static DataFormat data() {
 		return Instance;
 	}
 
@@ -62,7 +62,7 @@ public final class DataFormat implements Format<byte[]> {
 		return message.body(input()).map(source -> {
 			try (final InputStream input=source.get()) {
 
-				return Transputs.data(input);
+				return Codecs.data(input);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

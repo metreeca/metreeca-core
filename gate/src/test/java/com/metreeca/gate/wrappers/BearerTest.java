@@ -17,7 +17,7 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.gate.Roster;
 import com.metreeca.gate.RosterTest;
 import com.metreeca.rest.*;
@@ -59,7 +59,7 @@ final class BearerTest {
 
 				.handle(new Request()
 						.method(Request.GET)
-						.body(reader()).set(Transputs::reader))
+						.body(reader()).set(Codecs::reader))
 
 				.accept(response -> {
 
@@ -129,7 +129,7 @@ final class BearerTest {
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
 						.describedAs("challenge not included").doesNotHaveHeader("WWW-Authenticate")
-						.hasEmptyBody());
+						.doesNotHaveBody());
 	}
 
 	@Test void testAuthorizationBadCredentials() {

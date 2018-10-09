@@ -17,11 +17,16 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.Shape;
+
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.value;
@@ -38,6 +43,8 @@ import static java.util.stream.Collectors.toList;
  * HTTP message.
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
+ *
+ * @param <T> the self-bounded message type supporting fluent setters
  */
 @SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {
@@ -47,20 +54,23 @@ public abstract class Message<T extends Message<T>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private Shape shape=wild();
+
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
 	private final Map<Format<?>, Object> cache=new HashMap<>();
 	private final Map<Format<?>, Function<Message<?>, Result<?>>> pipes=new HashMap<>();
 
 
+	private T self() { return (T)this; }
+
+
 	/**
-	 * Retrieves this message.
+	 * Retrieves the focus item IRI of this message.
 	 *
-	 * <p>This method is required to support the abstract fluent API through the self-bound abstract class pattern.</p>
-	 *
-	 * @return this message
+	 * @return an absolute IRI identifying the focus item of this message
 	 */
-	protected abstract T self();
+	public abstract IRI item();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -313,7 +323,36 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves a structured of this message body.
+	 * Retrieves the linked data shape.
+	 *
+	 * @return the linked data shape associated to this message
+	 */
+	public Shape shape() {
+		return shape;
+	}
+
+	/**
+	 * Configures the linked data shape.
+	 *
+	 * @param shape the linked data shape to be associated to this message
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public T shape(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		this.shape=shape;
+
+		return self();
+	}
+
+
+	/**
+	 * Retrieves a structured body.
 	 *
 	 * @param format the body format managing the required body representation
 	 * @param <V>    the type of the structured message body managed by the format
@@ -458,8 +497,7 @@ public abstract class Message<T extends Message<T>> {
 			}
 
 			pipes.compute(format, (_format, getter) -> message ->
-					(getter != null ? getter : (Function<Message<?>, Result<?>>)format::get)
-							.apply(message)
+					(getter != null ? getter : (Function<Message<?>, Result<?>>)format::get).apply(message)
 							.flatMap(value -> mapper.apply((V)value)));
 
 			return self();
@@ -484,18 +522,19 @@ public abstract class Message<T extends Message<T>> {
 
 			final V cached=(V)cache.get(format);
 
-			return cached != null ? success.apply(cached) : pipes.getOrDefault(format, format::get)
-					.apply(self())
-					.map(
-							v -> {
+			return cached != null ? success.apply(cached) : pipes.getOrDefault(format, format::get).apply(self()).map(
 
-								cache.put(format, v);
+					v -> {
 
-								return success.apply((V)v);
+						cache.put(format, v);
 
-							},
-							f -> failure.apply((Failure<V>)f)
-					);
+						return success.apply((V)v);
+
+					},
+
+					f -> failure.apply((Failure<V>)f)
+
+			);
 		}
 
 	}

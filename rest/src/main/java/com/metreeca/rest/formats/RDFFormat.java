@@ -17,16 +17,13 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.codecs.JSONAdapter;
-import com.metreeca.form.probes.Outliner;
+import com.metreeca.form.codecs.JSONCodec;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
@@ -38,12 +35,10 @@ import java.util.*;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.ShapeFormat.shape;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
@@ -81,19 +76,17 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	@Override public Result<Collection<Statement>> get(final Message<?> message) {
 		return message.body(input()).flatMap(supplier -> {
 
-			final Optional<Request> request=message.as(Request.class);
+			final IRI focus=message.item();
+			final Shape shape=message.shape();
 
-			final Optional<IRI> focus=request.map(Request::item);
-			final Optional<Shape> shape=message.body(shape()).get();
-
-			final String type=request.flatMap(r -> r.header("Content-Type")).orElse("");
+			final String type=message.header("Content-Type").orElse("");
 
 			final RDFParser parser=Formats
 					.service(RDFParserRegistry.getInstance(), TURTLE, type)
 					.getParser();
 
-			parser.set(JSONAdapter.Shape, shape.orElse(null));
-			parser.set(JSONAdapter.Focus, focus.orElse(null));
+			parser.set(JSONCodec.Shape, Shape.wild(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+			parser.set(JSONCodec.Focus, focus);
 
 			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
 			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
@@ -113,7 +106,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 			try (final InputStream input=supplier.get()) {
 
-				parser.parse(input, focus.map(Value::stringValue).orElse("")); // resolve relative IRIs wrt the focus
+				parser.parse(input, focus.stringValue()); // resolve relative IRIs wrt the focus
 
 			} catch ( final RDFParseException e ) {
 
@@ -131,17 +124,11 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 			final List<String> errors=errorCollector.getErrors();
 			final List<String> warnings=errorCollector.getWarnings();
 
-			// !!! log warnings/error/fatals
-
-			if ( fatals.isEmpty() ) {
-
-				focus.ifPresent(f -> shape.ifPresent(s ->
-						model.addAll(s.accept(mode(Form.verify)).accept(new Outliner(f))) // shape-implied statements
-				));
+			if ( fatals.isEmpty() ) { // return model
 
 				return value(model);
 
-			} else {
+			} else { // report errors // !!! log warnings/error/fatals?
 
 				final JsonObjectBuilder trace=Json.createObjectBuilder()
 
@@ -183,14 +170,18 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 				.header("Content-Type", types.stream()
 						.filter(type -> registry.getFileFormatForMIMEType(type).isPresent())
 						.findFirst()
-						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType()))
+						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
+				)
+
 				.body(output()).flatPipe(consumer -> message.body(rdf()).map(rdf -> target -> {
 					try (final OutputStream output=target.get()) {
 
+						final Shape shape=message.shape();
+
 						final RDFWriter writer=factory.getWriter(output);
 
-						writer.set(JSONAdapter.Shape, message.body(shape()).get().orElse(null));
-						writer.set(JSONAdapter.Focus, response.map(Response::item).orElse(null));
+						writer.set(JSONCodec.Shape, Shape.wild(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+						writer.set(JSONCodec.Focus, message.item());
 
 						Rio.write(rdf, writer);
 

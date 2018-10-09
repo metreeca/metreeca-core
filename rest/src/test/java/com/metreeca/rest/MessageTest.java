@@ -19,13 +19,15 @@ package com.metreeca.rest;
 
 import com.metreeca.rest.formats.TextFormat;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.function.Function;
 
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Transputs.text;
+import static com.metreeca.form.things.Codecs.text;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -132,7 +134,9 @@ final class MessageTest {
 
 	private static final class TestMessage extends Message<TestMessage> {
 
-		@Override protected TestMessage self() { return this; }
+		@Override public IRI item() {
+				return RDF.NIL;
+		}
 
 	}
 

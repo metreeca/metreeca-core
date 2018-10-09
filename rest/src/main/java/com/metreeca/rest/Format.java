@@ -64,6 +64,7 @@ public interface Format<V> {
 	 * <p>The default implementation has no effects.</p>
 	 *
 	 * @param message the message to be configured to hold a structured body managed by this format
+	 * @param <T> the type of {@code message}
 	 *
 	 * @return the configured {@code message}
 	 *

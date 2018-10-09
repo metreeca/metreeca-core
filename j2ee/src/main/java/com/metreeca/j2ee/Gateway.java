@@ -233,7 +233,8 @@ public abstract class Gateway implements ServletContextListener {
 
 				try { // ;( request.getParts() is not available to filters…
 
-					final List<FileItem> items=isMultipartContent(request) ? tool(Upload).parseRequest(request) : emptyList();
+					final List<FileItem> items=isMultipartContent(request) ?
+							tool(Upload).parseRequest(request) : emptyList();
 
 					handler.handle(request(request, items)).accept(r -> response(response, r));
 
@@ -324,7 +325,7 @@ public abstract class Gateway implements ServletContextListener {
 				//			}
 				//
 				//			try {
-				//				updated.add(item.getString(Transputs.UTF8.name()));
+				//				updated.add(item.getString(Codecs.UTF8.name()));
 				//			} catch ( final UnsupportedEncodingException unexpected ) {
 				//				throw new UncheckedIOException(unexpected);
 				//			}

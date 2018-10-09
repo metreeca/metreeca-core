@@ -24,11 +24,15 @@ import java.util.regex.Pattern;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonWriterFactory;
+import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.rest.Result.value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
+
+import static java.util.Collections.singletonMap;
 
 
 /**
@@ -50,6 +54,10 @@ public final class JSONFormat implements Format<JsonObject> {
 	 * A pattern matching JSON-based MIME types, for instance {@code application/ld+json}.
 	 */
 	public static final Pattern MIMEPattern=Pattern.compile("^application/(.*\\+)?json$");
+
+
+	private static final JsonWriterFactory JsonWriters=Json
+			.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true));
 
 
 	/**
@@ -106,7 +114,7 @@ public final class JSONFormat implements Format<JsonObject> {
 				.body(writer()).flatPipe(consumer -> message.body(json()).map(json -> target -> {
 					try (final Writer writer=target.get()) {
 
-						Json.createWriter(writer).write(json);
+						JsonWriters.createWriter(writer).write(json);
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);

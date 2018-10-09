@@ -17,7 +17,7 @@
 
 package com.metreeca.tray.sys;
 
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.tray.sys.Store.Blob;
 
 import java.io.*;
@@ -237,7 +237,7 @@ public final class Cache {
 							final OutputStream output=blob.output();
 							final InputStream input=new FileInputStream(file)
 					) {
-						Transputs.data(output, input);
+						Codecs.data(output, input);
 					}
 
 				}
@@ -313,7 +313,7 @@ public final class Cache {
 					connection.connect();
 
 					final int code=connection.getResponseCode();
-					final String encoding=Optional.ofNullable(connection.getContentEncoding()).orElse(Transputs.UTF8.name());
+					final String encoding=Optional.ofNullable(connection.getContentEncoding()).orElse(Codecs.UTF8.name());
 
 					if ( code/100 == 2 ) {
 
@@ -324,13 +324,13 @@ public final class Cache {
 								final OutputStream output=blob.output();
 								final InputStream input=connection.getInputStream()
 						) {
-							Transputs.data(output, input);
+							Codecs.data(output, input);
 						}
 
 					} else {
 
 						final String message=format("unable to retrieve data from <%s> : status %d (%s)",
-								clip(url), code, Transputs.text(Transputs.reader(connection.getErrorStream(), encoding)));
+								clip(url), code, Codecs.text(Codecs.reader(connection.getErrorStream(), encoding)));
 
 						trace.warning(this, message);
 

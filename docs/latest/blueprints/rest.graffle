@@ -117,7 +117,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2018-09-28 09:52:37 +0000</string>
+	<string>2018-10-08 15:32:03 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro Bollini</string>
 	<key>MovementHandleVisible</key>
@@ -153,7 +153,7 @@
 		<key>NSPaperSize</key>
 		<array>
 			<string>size</string>
-			<string>{841.8897705078125, 595.27557373046875}</string>
+			<string>{841.8897705078125, 595.27555656433105}</string>
 		</array>
 		<key>NSPrintReverseOrientation</key>
 		<array>
@@ -754,7 +754,7 @@
 						<key>Info</key>
 						<integer>-1</integer>
 						<key>Position</key>
-						<real>0.55962242788133443</real>
+						<real>0.55962240695953369</real>
 					</dict>
 					<key>ID</key>
 					<integer>62</integer>
@@ -778,13 +778,13 @@
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{440.90207776859438, 134.53345268080216}</string>
+								<string>{440.90207447461341, 134.53345268080264}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{440.90207776859438, 140.78345268080216}</string>
+								<string>{440.90207447461341, 140.78345268080264}</string>
 							</dict>
 						</array>
 					</dict>
@@ -797,7 +797,7 @@
 					<key>Points</key>
 					<array>
 						<string>{440.75984597891301, 102.43307118763133}</string>
-						<string>{440.90207776859438, 140.78345268080216}</string>
+						<string>{440.90207447461341, 140.78345268080264}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1089,7 +1089,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{197.22140809508804, 448.36063404918656}, {32, 21}}</string>
+					<string>{{197.32283607308318, 445.07010597830237}, {32, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1154,19 +1154,7 @@
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{212.82283607308301, 490.96063404918658}</string>
-							</dict>
-							<dict>
-								<key>element</key>
-								<string>LINETO</string>
-								<key>point</key>
-								<string>{212.82283607308301, 458.86063404918656}</string>
-							</dict>
-							<dict>
-								<key>element</key>
-								<string>LINETO</string>
-								<key>point</key>
-								<string>{213.32283607308318, 458.86063404918656}</string>
+								<string>{213.32283607308318, 484.72441384679684}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -1184,7 +1172,7 @@
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{212.82283607308301, 490.96063404918658}</string>
+						<string>{213.32283607308318, 484.72441384679684}</string>
 						<string>{213.32283607308318, 426.00000326633455}</string>
 					</array>
 					<key>Style</key>
@@ -1542,7 +1530,7 @@
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{213.32283607308301, 323.75984434574627}</string>
+								<string>{213.32283607308318, 323.75984434574627}</string>
 							</dict>
 						</array>
 					</dict>
@@ -1555,7 +1543,7 @@
 					<key>Points</key>
 					<array>
 						<string>{213.32283607308318, 396.00000326633449}</string>
-						<string>{213.32283607308301, 323.75984434574627}</string>
+						<string>{213.32283607308318, 323.75984434574627}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1881,7 +1869,7 @@ map(mapper):Responder}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{191.32283607308301, 490.96063404918658}, {43, 15}}</string>
+							<string>{{164.32283607308318, 484.72441384679684}, {98, 15}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -1933,15 +1921,27 @@ map(mapper):Responder}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{191.32283607308301, 505.96063404918664}, {43, 16}}</string>
+							<string>{{164.32283607308318, 499.72441384679678}, {98, 25}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
-							<string>Vertical</string>
+							<string>YES</string>
 							<key>Flow</key>
 							<string>Resize</string>
+							<key>FontInfo</key>
+							<dict>
+								<key>Color</key>
+								<dict>
+									<key>space</key>
+									<string>gg22</string>
+									<key>w</key>
+									<string>0</string>
+								</dict>
+								<key>Font</key>
+								<string>HelveticaNeue-Bold</string>
+							</dict>
 							<key>ID</key>
-							<integer>41</integer>
+							<integer>73</integer>
 							<key>Style</key>
 							<dict>
 								<key>shadow</key>
@@ -1959,15 +1959,26 @@ map(mapper):Responder}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>Text</key>
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
+{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs16 \cf0 wrap(:Wrapper):Wrapper\
+wrap(:Handler):Handler}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
+							<key>Wrap</key>
+							<string>NO</string>
 						</dict>
 					</array>
 					<key>GridH</key>
 					<array>
 						<integer>40</integer>
-						<integer>41</integer>
+						<integer>73</integer>
 						<array/>
 					</array>
 					<key>GroupConnect</key>
@@ -2172,19 +2183,19 @@ map(mapper):Responder}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{440.75984597891301, 247.25984434574627}</string>
+								<string>{440.75984597891301, 247.2598443457463}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{440.75984597891301, 205.25984434574627}</string>
+								<string>{440.75984597891301, 205.2598443457463}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{323.29371422069954, 205.25984434574627}</string>
+								<string>{323.29371422069954, 205.2598443457463}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -2202,7 +2213,7 @@ map(mapper):Responder}</string>
 					<real>30.88841438293457</real>
 					<key>Points</key>
 					<array>
-						<string>{440.75984597891301, 247.25984434574627}</string>
+						<string>{440.75984597891301, 247.2598443457463}</string>
 						<string>{323.29371422069954, 173.28346522276797}</string>
 					</array>
 					<key>Style</key>
@@ -2261,19 +2272,19 @@ map(mapper):Responder}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{213.32283607308301, 236.75984434574627}</string>
+								<string>{213.32283607308318, 236.75984434574633}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{213.32283607308301, 204.75984434574627}</string>
+								<string>{213.32283607308318, 204.75984434574633}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{323.29371422069954, 204.75984434574627}</string>
+								<string>{323.29371422069954, 204.75984434574633}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -2291,7 +2302,7 @@ map(mapper):Responder}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{213.32283607308301, 236.75984434574627}</string>
+						<string>{213.32283607308318, 236.75984434574633}</string>
 						<string>{323.29371422069954, 173.28346522276797}</string>
 					</array>
 					<key>Style</key>
@@ -2399,13 +2410,13 @@ map(mapper):Responder}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{223.82283607308301, 323.75984434574627}</string>
+								<string>{223.82283607308318, 323.75984434574627}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{223.82283607308301, 329.00984434574627}</string>
+								<string>{223.82283607308318, 329.00984434574627}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -2429,7 +2440,7 @@ map(mapper):Responder}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{223.82283607308301, 323.75984434574627}</string>
+						<string>{223.82283607308318, 323.75984434574627}</string>
 						<string>{428.50984597891301, 313.25984434574627}</string>
 					</array>
 					<key>Style</key>
@@ -2472,7 +2483,7 @@ map(mapper):Responder}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{305.00868141421978, 221.00984434574622}, {37, 21}}</string>
+					<string>{{305.00868141421995, 221.0098443457463}, {37, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2537,25 +2548,25 @@ map(mapper):Responder}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{428.50984597891301, 247.25984434574627}</string>
+								<string>{428.50984597891301, 247.2598443457463}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{428.50984597891301, 231.50984434574622}</string>
+								<string>{428.50984597891301, 231.5098443457463}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{223.82283607308301, 231.50984434574622}</string>
+								<string>{223.82283607308318, 231.5098443457463}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{223.82283607308301, 236.75984434574625}</string>
+								<string>{223.82283607308318, 236.7598443457463}</string>
 							</dict>
 						</array>
 					</dict>
@@ -2567,8 +2578,8 @@ map(mapper):Responder}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{428.50984597891301, 247.25984434574627}</string>
-						<string>{223.82283607308301, 236.75984434574625}</string>
+						<string>{428.50984597891301, 247.2598443457463}</string>
+						<string>{223.82283607308318, 236.7598443457463}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2613,7 +2624,7 @@ map(mapper):Responder}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{192.32283607308301, 236.75984434574627}, {42, 15}}</string>
+							<string>{{192.32283607308318, 236.7598443457463}, {42, 15}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -2653,7 +2664,7 @@ map(mapper):Responder}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{192.32283607308301, 251.75984434574627}, {42, 56}}</string>
+							<string>{{192.32283607308318, 251.75984434574627}, {42, 56}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -2699,7 +2710,7 @@ query}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{192.32283607308301, 307.75984434574627}, {42, 16}}</string>
+							<string>{{192.32283607308318, 307.75984434574627}, {42, 16}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -2784,7 +2795,7 @@ query}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{416.25984597891301, 247.25984434574627}, {49, 15}}</string>
+							<string>{{416.25984597891301, 247.2598443457463}, {49, 15}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -2993,7 +3004,7 @@ cause}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{293.79371422069954, 123.28346522276797}, {59, 25}}</string>
+							<string>{{293.79371422069954, 123.28346522276797}, {59, 35}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -3026,7 +3037,8 @@ cause}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f0\fs16 \cf0 headers\
+\f0\fs16 \cf0 item\
+headers\
 bodies}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
@@ -3036,7 +3048,7 @@ bodies}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{293.79371422069954, 148.28346522276797}, {59, 25}}</string>
+							<string>{{293.79371422069954, 158.28346522276797}, {59, 15}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -3069,8 +3081,7 @@ bodies}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f0\fs16 \cf0 map()\
-with()}</string>
+\f0\fs16 \cf0 map()}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -3203,7 +3214,9 @@ with()}</string>
 		<key>VisibleRegion</key>
 		<string>{{-21, 0}, {848.82936507936506, 537}}</string>
 		<key>WindowInfo_InspectorTab</key>
-		<array/>
+		<array>
+			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
+		</array>
 		<key>ZoomValues</key>
 		<array>
 			<array>

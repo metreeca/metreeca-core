@@ -17,7 +17,7 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Wrapper;
@@ -87,8 +87,8 @@ import static com.metreeca.tray.Tray.tool;
 
 		this.text=loader
 				.load(path)
-				.map(Transputs::reader)
-				.map(Transputs::text)
+				.map(Codecs::reader)
+				.map(Codecs::text)
 				.orElseThrow(() -> new NoSuchElementException("missing app page ["+path+"]"));
 
 

@@ -50,7 +50,7 @@ public final class BasicRoster {
 	////		if ( matcher.matches() ) {
 	////
 	////			final String token=new String(Base64.getDecoder()
-	////					.decode(matcher.group("token")), Transputs.UTF8);
+	////					.decode(matcher.group("token")), Codecs.UTF8);
 	////
 	////			final int colon=max(token.indexOf(':'), 0);
 	////

@@ -28,20 +28,20 @@ final class JSONParserFactoryTest {
 	@Test void testFormatRegisteredWithRegistry() {
 
 		assertThat(RDFParserRegistry.getInstance()
-				.getFileFormatForMIMEType(JSONAdapter.JSONFormat.getDefaultMIMEType())
-				.filter(format1 -> format1.equals(JSONAdapter.JSONFormat))
+				.getFileFormatForMIMEType(JSONCodec.JSONFormat.getDefaultMIMEType())
+				.filter(format1 -> format1.equals(JSONCodec.JSONFormat))
 				.isPresent()).as("by mime type").isTrue();
 
 		assertThat(RDFParserRegistry.getInstance()
-				.getFileFormatForFileName("test."+JSONAdapter.JSONFormat.getDefaultFileExtension())
-				.filter(format -> format.equals(JSONAdapter.JSONFormat))
+				.getFileFormatForFileName("test."+JSONCodec.JSONFormat.getDefaultFileExtension())
+				.filter(format -> format.equals(JSONCodec.JSONFormat))
 				.isPresent()).as("by extension").isTrue();
 
 	}
 
 	@Test void testFactoryRegisteredWithRegistry() {
 		assertThat(RDFParserRegistry.getInstance()
-				.get(JSONAdapter.JSONFormat)
+				.get(JSONCodec.JSONFormat)
 				.filter(factory -> factory instanceof JSONParserFactory)
 				.isPresent()).as("factory registered").isTrue();
 

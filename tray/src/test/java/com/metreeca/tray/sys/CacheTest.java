@@ -30,8 +30,8 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import static com.metreeca.form.things.Transputs.text;
-import static com.metreeca.form.things.Transputs.url;
+import static com.metreeca.form.things.Codecs.text;
+import static com.metreeca.form.things.Codecs.url;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

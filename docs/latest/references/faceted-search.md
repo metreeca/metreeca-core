@@ -1,9 +1,6 @@
 ---
 title:      Faceted Search Reference
 excerpt:    "Faceted search support and query serializations"
-caption:    "${module.caption}"
-project:    "${module.project}"
-version:    "${module.version}"
 ---
 
 REST APIs publishing LDP Containers support system-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.
@@ -16,15 +13,15 @@ Faceted searches return an RDF description of the query-specific result set. Sta
 
 # Queries
 
-Linked data [queries](../apidocs/com/metreeca/spec/Query.html) define what kind of results is expected from faceted searches on [readable](../../com.metreeca.data/tutorials/linked-data-development/#read-operations) linked data REST APIs.
+Linked data [queries](../javadocs/com/metreeca/form/Query.html) define what kind of results is expected from faceted searches on [readable](../tutorials/linked-data-development/#read-operations) linked data REST APIs.
 
 JSON query serialization extends the idiomatic [JSON](idiomatic-json) format with  query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all RDF terms appearing in filters, including [shorthands](idiomatic-json#literals) for numeric values and literals with provable datatypes.
 
-<p class="warning">Work in progress… specs to be improved and detailed.</p> 
+<p class="warning">Work in progress… specs to be improved and detailed.</p>
 
 ## Graph Query
 
-[Edges](../apidocs/com/metreeca/spec/queries/Edges.html) queries return the RDF description of container items matching a set of facet filters.
+[Edges](../javadocs/com/metreeca/form/queries/Edges.html) queries return the RDF description of container items matching a set of facet filters.
 
     <edges query> ::= { // all fields are optional
         "filter": <filter>,        
@@ -42,7 +39,7 @@ JSON query serialization extends the idiomatic [JSON](idiomatic-json) format wit
 
 ## Stats Query
 
-[Stats](../apidocs/com/metreeca/spec/queries/Stats.html) queries return an RDF report detailing datatype, count and range stats for a facet specified by a target property path, taking into account applied filters.
+[Stats](../javadocs/com/metreeca/form/queries/Stats.html) queries return an RDF report detailing datatype, count and range stats for a facet specified by a target property path, taking into account applied filters.
 
 ```
 <stats query> ::= {
@@ -77,7 +74,7 @@ JSON query serialization extends the idiomatic [JSON](idiomatic-json) format wit
 
 ## Items Query
 
-[Items](../apidocs/com/metreeca/spec/queries/Items.html) queries return an RDF report detailing option values and counts for a facet specified by a target property path, taking into account applied filters.
+[Items](../javadocs/com/metreeca/form/queries/Items.html) queries return an RDF report detailing option values and counts for a facet specified by a target property path, taking into account applied filters.
 
     <items query> ::= {
         "filter": <filter>,
@@ -104,7 +101,7 @@ JSON query serialization extends the idiomatic [JSON](idiomatic-json) format wit
 
 
     <filter> ::= {
-
+    
         "^": <datatype>, // datatype
         "@": <class>, // class
         

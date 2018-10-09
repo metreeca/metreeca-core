@@ -17,7 +17,7 @@
 
 package com.metreeca.gate.digests;
 
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.gate.Digest;
 
 import java.security.NoSuchAlgorithmException;
@@ -40,7 +40,7 @@ public final class PBKDF2Digest extends Digest {
 	/**
 	 * Opaque digest algorithm identifying tag.
 	 */
-	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(Transputs.UTF8));
+	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(Codecs.UTF8));
 
 	private static final int Length=24; // salt length
 	private static final int Rounds=1000; // encryption rounds

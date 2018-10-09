@@ -25,6 +25,8 @@ import java.util.Locale;
  */
 public final class Strings {
 
+	//// Case Conversions //////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static String lower(final String string) {
 		return string == null ? null : string.toLowerCase(Locale.ROOT);
 	}
@@ -54,10 +56,7 @@ public final class Strings {
 	}
 
 
-	public static String capitalize(final String string) {
-		return string == null || string.isEmpty() ? string
-				: Character.toUpperCase(string.charAt(0))+string.substring(1);
-	}
+	//// Content Operator //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String normalize(final String string) {
 		if ( string == null || string.isEmpty() ) { return string; } else {
@@ -104,6 +103,6 @@ public final class Strings {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Strings() {}
+	private Strings() {} // utility
 
 }

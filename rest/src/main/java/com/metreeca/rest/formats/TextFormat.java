@@ -17,7 +17,7 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.form.things.Transputs;
+import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
@@ -62,7 +62,7 @@ public final class TextFormat implements Format<String> {
 		return message.body(reader()).map(source -> {
 			try (final Reader reader=source.get()) {
 
-				return Transputs.text(reader);
+				return Codecs.text(reader);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

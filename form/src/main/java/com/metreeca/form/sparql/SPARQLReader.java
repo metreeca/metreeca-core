@@ -77,19 +77,19 @@ final class SPARQLReader {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Map<Value, Collection<Statement>> process(final Query query) {
+	public Map<Resource, Collection<Statement>> process(final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
 		}
 
-		return query.accept(new Query.Probe<Map<Value, Collection<Statement>>>() {
+		return query.accept(new Query.Probe<Map<Resource, Collection<Statement>>>() {
 
-			@Override public Map<Value, Collection<Statement>> visit(final Edges edges) { return edges(edges); }
+			@Override public Map<Resource, Collection<Statement>> visit(final Edges edges) { return edges(edges); }
 
-			@Override public Map<Value, Collection<Statement>> visit(final Stats stats) { return stats(stats); }
+			@Override public Map<Resource, Collection<Statement>> visit(final Stats stats) { return stats(stats); }
 
-			@Override public Map<Value, Collection<Statement>> visit(final Items items) { return items(items); }
+			@Override public Map<Resource, Collection<Statement>> visit(final Items items) { return items(items); }
 
 		});
 	}
@@ -97,7 +97,7 @@ final class SPARQLReader {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map<Value, Collection<Statement>> edges(final Edges edges) {
+	private Map<Resource, Collection<Statement>> edges(final Edges edges) {
 
 		final Shape shape=edges.getShape();
 		final List<Query.Order> orders=edges.getOrders();
@@ -107,7 +107,7 @@ final class SPARQLReader {
 		final Object root=0; // root identifier // !!! review
 
 		final Collection<Statement> template=new ArrayList<>();
-		final Map<Value, Collection<Statement>> matches=new LinkedHashMap<>();
+		final Map<Resource, Collection<Statement>> matches=new LinkedHashMap<>();
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
@@ -145,7 +145,7 @@ final class SPARQLReader {
 
 			@Override public void handleSolution(final BindingSet bindings) {
 
-				final Value match=bindings.getValue(root.toString());
+				final Resource match=(Resource)bindings.getValue(root.toString());
 
 				if ( match != null ) {
 					matches.compute(match, (value, statements) -> {
@@ -178,7 +178,7 @@ final class SPARQLReader {
 		return matches;
 	}
 
-	private Map<Value, Collection<Statement>> stats(final Stats stats) {
+	private Map<Resource, Collection<Statement>> stats(final Stats stats) {
 
 		final Shape shape=stats.getShape();
 		final List<Step> path=stats.getPath();
@@ -267,7 +267,7 @@ final class SPARQLReader {
 		return singletonMap(Form.meta, model);
 	}
 
-	private Map<Value, Collection<Statement>> items(final Items items) {
+	private Map<Resource, Collection<Statement>> items(final Items items) {
 
 		final Shape shape=items.getShape();
 		final List<Step> path=items.getPath();

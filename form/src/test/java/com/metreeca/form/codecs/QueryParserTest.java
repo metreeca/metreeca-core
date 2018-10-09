@@ -31,6 +31,7 @@ import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 import javax.json.JsonException;
@@ -69,16 +70,18 @@ final class QueryParserTest {
 	);
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Test void testParseEmptyString() {
 
 		final Shape shape=and();
 
-		graph("", shape, edges -> {
+		edges("", shape, edges -> {
 
-			assertThat((Object)shape).as("base shape").isEqualTo(edges.getShape());
+			assertThat(shape).as("base shape").isEqualTo(edges.getShape());
 
-			assertThat((Object)0).as("no offset").isEqualTo(edges.getOffset());
-			assertThat((Object)0).as("no limit").isEqualTo(edges.getLimit());
+			assertThat(0).as("no offset").isEqualTo(edges.getOffset());
+			assertThat(0).as("no limit").isEqualTo(edges.getLimit());
 
 		});
 	}
@@ -110,94 +113,94 @@ final class QueryParserTest {
 
 	@Test void testParseSortingCriteria() {
 
-		graph("{ \"order\": \"\" }", shape, edges -> assertThat(Lists.list(Query.increasing())).as("empty path").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"\" }", shape, edges -> assertThat(Lists.list(Query.increasing())).as("empty path").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"+\" }", shape, edges -> assertThat(Lists.list(Query.increasing())).as("empty path increasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"+\" }", shape, edges -> assertThat(Lists.list(Query.increasing())).as("empty path increasing").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"-\" }", shape, edges -> assertThat(Lists.list(Query.decreasing())).as("empty path decreasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"-\" }", shape, edges -> assertThat(Lists.list(Query.decreasing())).as("empty path decreasing").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"first.rest\" }", shape, edges -> assertThat(Lists.list(Query.increasing(first, rest))).as("path").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"first.rest\" }", shape, edges -> assertThat(Lists.list(Query.increasing(first, rest))).as("path").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"+first.rest\" }", shape, edges -> assertThat(Lists.list(Query.increasing(first, rest))).as("path increasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"+first.rest\" }", shape, edges -> assertThat(Lists.list(Query.increasing(first, rest))).as("path increasing").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": \"-first.rest\" }", shape, edges -> assertThat(Lists.list(Query.decreasing(first, rest))).as("path decreasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"-first.rest\" }", shape, edges -> assertThat(Lists.list(Query.decreasing(first, rest))).as("path decreasing").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": [] }", shape, edges -> assertThat(Lists.list()).as("empty list").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": [] }", shape, edges -> assertThat(Lists.list()).as("empty list").isEqualTo(edges.getOrders()));
 
-		graph("{ \"order\": [\"+first\", \"-first.rest\"] }", shape, edges -> assertThat(Lists.list(Query.increasing(first), Query.decreasing(first, rest))).as("list").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": [\"+first\", \"-first.rest\"] }", shape, edges -> assertThat(Lists.list(Query.increasing(first), Query.decreasing(first, rest))).as("list").isEqualTo(edges.getOrders()));
 
 	}
 
 	@Test void testParseSimpleFilters() {
 
-		graph("{ \"filter\": { \">>\": 1 } }", shape, edges -> assertThat((Object)filter(shape, minCount(1))).as("min count").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \">>\": 1 } }", shape, edges -> assertThat(filter(shape, minCount(1))).as("min count").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"<<\": 1 } }", shape, edges -> assertThat((Object)filter(shape, maxCount(1))).as("max count").isEqualTo(edges.getShape()));
-
-
-		graph("{ \"filter\": { \">=\": 1 } }", shape, edges -> assertThat((Object)filter(shape, MinInclusive.minInclusive(One))).as("min inclusive").isEqualTo(edges.getShape()));
-
-		graph("{ \"filter\": { \"<=\": 1 } }", shape, edges -> assertThat((Object)filter(shape, maxInclusive(One))).as("max inclusive").isEqualTo(edges.getShape()));
-
-		graph("{ \"filter\": { \">\": 1 } }", shape, edges -> assertThat((Object)filter(shape, MinExclusive.minExclusive(One))).as("min exclusive").isEqualTo(edges.getShape()));
-
-		graph("{ \"filter\": { \"<\": 1 } }", shape, edges -> assertThat((Object)filter(shape, maxExclusive(One))).as("max exclusive").isEqualTo(edges.getShape()));
-
-		graph("{ \"filter\": { \"~\": \"words\" } }", shape, edges -> assertThat((Object)filter(shape, like("words"))).as("like").isEqualTo(edges.getShape()));
-
-		graph("{ \"filter\": { \"*\": \"pattern\" } }", shape, edges -> assertThat((Object)filter(shape, pattern("pattern"))).as("pattern").isEqualTo(edges.getShape()));
-
-		graph("{ \"filter\": { \">#\": 123 } }", shape, edges -> assertThat((Object)filter(shape, MinLength.minLength(123))).as("min length").isEqualTo(edges.getShape()));
-
-		graph("{ \"filter\": { \"#<\": 123 } }", shape, edges -> assertThat((Object)filter(shape, maxLength(123))).as("max length").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"<<\": 1 } }", shape, edges -> assertThat(filter(shape, maxCount(1))).as("max count").isEqualTo(edges.getShape()));
 
 
-		graph("{ \"filter\": { \"@\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil\" } }", shape, edges -> assertThat((Object)filter(shape, clazz(RDF.NIL))).as("class").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \">=\": 1 } }", shape, edges -> assertThat(filter(shape, MinInclusive.minInclusive(One))).as("min inclusive").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"^\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil\" } }", shape, edges -> assertThat((Object)filter(shape, datatype(RDF.NIL))).as("type").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"<=\": 1 } }", shape, edges -> assertThat(filter(shape, maxInclusive(One))).as("max inclusive").isEqualTo(edges.getShape()));
+
+		edges("{ \"filter\": { \">\": 1 } }", shape, edges -> assertThat(filter(shape, MinExclusive.minExclusive(One))).as("min exclusive").isEqualTo(edges.getShape()));
+
+		edges("{ \"filter\": { \"<\": 1 } }", shape, edges -> assertThat(filter(shape, maxExclusive(One))).as("max exclusive").isEqualTo(edges.getShape()));
+
+		edges("{ \"filter\": { \"~\": \"words\" } }", shape, edges -> assertThat(filter(shape, like("words"))).as("like").isEqualTo(edges.getShape()));
+
+		edges("{ \"filter\": { \"*\": \"pattern\" } }", shape, edges -> assertThat(filter(shape, pattern("pattern"))).as("pattern").isEqualTo(edges.getShape()));
+
+		edges("{ \"filter\": { \">#\": 123 } }", shape, edges -> assertThat(filter(shape, MinLength.minLength(123))).as("min length").isEqualTo(edges.getShape()));
+
+		edges("{ \"filter\": { \"#<\": 123 } }", shape, edges -> assertThat(filter(shape, maxLength(123))).as("max length").isEqualTo(edges.getShape()));
 
 
-		graph("{ \"filter\": { \"?\": [] } }", shape, edges -> assertThat((Object)filter(shape, and())).as("existential (empty)").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"@\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil\" } }", shape, edges -> assertThat(filter(shape, clazz(RDF.NIL))).as("class").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"?\": { \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" } } }", shape, edges -> assertThat((Object)filter(shape, any(RDF.FIRST))).as("existential (singleton)").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"^\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil\" } }", shape, edges -> assertThat(filter(shape, datatype(RDF.NIL))).as("type").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"?\": [\n"
+
+		edges("{ \"filter\": { \"?\": [] } }", shape, edges -> assertThat(filter(shape, and())).as("existential (empty)").isEqualTo(edges.getShape()));
+
+		edges("{ \"filter\": { \"?\": { \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" } } }", shape, edges -> assertThat(filter(shape, any(RDF.FIRST))).as("existential (singleton)").isEqualTo(edges.getShape()));
+
+		edges("{ \"filter\": { \"?\": [\n"
 				+"\t{ \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" },\n"
 				+"\t{ \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest\" }\n"
-				+"] } }", shape, edges -> assertThat((Object)filter(shape, any(RDF.FIRST, RDF.REST))).as("existential (multiple)").isEqualTo(edges.getShape()));
+				+"] } }", shape, edges -> assertThat(filter(shape, any(RDF.FIRST, RDF.REST))).as("existential (multiple)").isEqualTo(edges.getShape()));
 
 
-		graph("{ \"filter\": { \"!\": [] } }", shape, edges -> assertThat((Object)filter(shape, and())).as("universal (empty)").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"!\": [] } }", shape, edges -> assertThat(filter(shape, and())).as("universal (empty)").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"!\": { \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" } } }", shape, edges -> assertThat((Object)filter(shape, All.all(RDF.FIRST))).as("universal (singleton)").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"!\": { \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" } } }", shape, edges -> assertThat(filter(shape, All.all(RDF.FIRST))).as("universal (singleton)").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"!\": [\n"
+		edges("{ \"filter\": { \"!\": [\n"
 				+"\t{ \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#first\" },\n"
 				+"\t{ \"this\": \"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest\" }\n"
-				+"] } }", shape, edges -> assertThat((Object)filter(shape, All.all(RDF.FIRST, RDF.REST))).as("universal (multiple)").isEqualTo(edges.getShape()));
+				+"] } }", shape, edges -> assertThat(filter(shape, All.all(RDF.FIRST, RDF.REST))).as("universal (multiple)").isEqualTo(edges.getShape()));
 
 	}
 
 	@Test void testParseStructuredFilters() {
 
-		graph("{\n\t\"filter\": {}\n}", shape, edges -> assertThat((Object)filter(shape, and())).as("empty filter").isEqualTo(edges.getShape()));
+		edges("{\n\t\"filter\": {}\n}", shape, edges -> assertThat(filter(shape, and())).as("empty filter").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"first.rest\": { \">=\": 1 } } }", shape, edges -> assertThat((Object)filter(shape, trait(first, trait(rest, MinInclusive.minInclusive(One))))).as("nested filter").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": { \">=\": 1 } } }", shape, edges -> assertThat(filter(shape, trait(first, trait(rest, MinInclusive.minInclusive(One))))).as("nested filter").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"first.rest\": 1 } }", shape, edges -> assertThat((Object)filter(shape, trait(first, trait(rest, any(One))))).as("nested filter singleton shorthand").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": 1 } }", shape, edges -> assertThat(filter(shape, trait(first, trait(rest, any(One))))).as("nested filter singleton shorthand").isEqualTo(edges.getShape()));
 
-		graph("{ \"filter\": { \"first.rest\": [1, 10] } }", shape, edges -> assertThat((Object)filter(shape, trait(first, trait(rest, any(One, Ten))))).as("nested filter multiple shorthand").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": [1, 10] } }", shape, edges -> assertThat(filter(shape, trait(first, trait(rest, any(One, Ten))))).as("nested filter multiple shorthand").isEqualTo(edges.getShape()));
 
 	}
 
 
 	@Test void testParseEdgesQuery() {
 
-		graph("{ \"filter\": {}, \"offset\": 1, \"limit\": 2 }", shape, edges -> {
+		edges("{ \"filter\": {}, \"offset\": 1, \"limit\": 2 }", shape, edges -> {
 
-			assertThat((Object)filter(shape, and())).as("shape").isEqualTo(edges.getShape());
-			assertThat((Object)1).as("offset").isEqualTo(edges.getOffset());
-			assertThat((Object)2).as("limit").isEqualTo(edges.getLimit());
+			assertThat(filter(shape, and())).as("shape").isEqualTo(edges.getShape());
+			assertThat(1).as("offset").isEqualTo(edges.getOffset());
+			assertThat(2).as("limit").isEqualTo(edges.getLimit());
 
 		});
 
@@ -207,7 +210,7 @@ final class QueryParserTest {
 
 		stats("{ \"filter\": {}, \"stats\": \"\" }", shape, stats -> {
 
-			assertThat((Object)filter(shape, and())).as("shape").isEqualTo(stats.getShape());
+			assertThat(filter(shape, and())).as("shape").isEqualTo(stats.getShape());
 			assertThat(Lists.list()).as("path").isEqualTo(stats.getPath());
 
 		});
@@ -218,7 +221,7 @@ final class QueryParserTest {
 
 		items("{ \"filter\": {}, \"items\": \"\" }", shape, items -> {
 
-			assertThat((Object)filter(shape, and())).as("shape").isEqualTo(items.getShape());
+			assertThat(filter(shape, and())).as("shape").isEqualTo(items.getShape());
 			assertThat(Lists.list()).as("path").isEqualTo(items.getPath());
 
 		});
@@ -228,18 +231,25 @@ final class QueryParserTest {
 
 	@Test void testRejectNullFilters() {
 		assertThatExceptionOfType(JsonException.class)
-				.isThrownBy(() -> graph("{ \"filter\": null }", shape, edges -> {}));
+				.isThrownBy(() -> edges("{ \"filter\": null }", shape, edges -> {}));
 	}
 
 	@Test void testRejectNullValues() {
 		assertThatExceptionOfType(JsonException.class)
-				.isThrownBy(() -> graph("{ \"filter\": { \"first\": null } }", shape, edges -> {}));
+				.isThrownBy(() -> edges("{ \"filter\": { \"first\": null } }", shape, edges -> {}));
+	}
+
+	@Test void testRejectReferencesOutsideShapeEnvelope() {
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+				edges("{ \"filter\": { \"nil\": { \">=\": 1 } } }", shape, edges -> {})
+		);
+
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void graph(final String json, final Shape shape, final Consumer<Edges> tester) {
+	private void edges(final String json, final Shape shape, final Consumer<Edges> tester) {
 		test(json, shape, new Query.Probe<Boolean>() {
 			@Override public Boolean visit(final Edges edges) {
 

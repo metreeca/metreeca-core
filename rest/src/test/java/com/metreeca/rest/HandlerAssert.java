@@ -19,22 +19,31 @@ package com.metreeca.rest;
 
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 
+import static com.metreeca.form.things.ValuesTest.construct;
+import static com.metreeca.form.things.ValuesTest.export;
 import static com.metreeca.tray.Tray.tool;
 
 
 public final class HandlerAssert {
 
-	public static Runnable dataset(final Iterable<Statement> model) {
-		return dataset(model, (Resource)null);
+	public static Model graph(final Resource... contexts) {
+		return tool(Graph.Factory).query(connection -> { return export(connection, contexts); });
 	}
 
-	public static Runnable dataset(final Iterable<Statement> model, final Resource... contexts) {
+	public static Model graph(final String sparql) {
+		return tool(Graph.Factory).query(connection -> { return construct(connection, sparql); });
+	}
+
+	public static Runnable graph(final Iterable<Statement> model, final Resource... contexts) {
 		return () -> tool(Graph.Factory).update(connection -> { connection.add(model, contexts); });
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private HandlerAssert() {} // utility
 

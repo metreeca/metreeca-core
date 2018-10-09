@@ -65,10 +65,11 @@ public abstract class Trace {
 	 */
 	public static final Supplier<Trace> Factory=() -> {
 
-		// logging not configured: reset and load compact console configuration
+		// logging not configured: reset and load compact console configuration ;(unless on GAE)
 
 		if ( System.getProperty("java.util.logging.config.file") == null
-				&& System.getProperty("java.util.logging.config.class") == null ) {
+				&& System.getProperty("java.util.logging.config.class") == null
+				&& !"Production".equals(System.getProperty("com.google.appengine.runtime.environment")) ) {
 
 			final java.util.logging.Level level=java.util.logging.Level.INFO;
 
@@ -266,7 +267,7 @@ public abstract class Trace {
 		}
 
 		private String message(final String message) {
-			return message != null ? message.replaceAll("\n", "\n    ") : "";
+			return message == null ? "" : message.replaceAll("\n", "\n    ");
 		}
 
 		private String trace(final Throwable cause) {
@@ -275,6 +276,8 @@ public abstract class Trace {
 						final StringWriter writer=new StringWriter();
 						final PrintWriter printer=new PrintWriter(writer.append(' '))
 				) {
+
+					printer.append("caused by ");
 
 					cause.printStackTrace(printer);
 

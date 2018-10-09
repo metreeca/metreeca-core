@@ -40,13 +40,14 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.shapes.Alias.aliases;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.traits;
-import static com.metreeca.form.things.JSON.encode;
-import static com.metreeca.form.things.JSON.field;
-import static com.metreeca.form.things.JSON.object;
+import static com.metreeca.form.codecs.JSON.encode;
+import static com.metreeca.form.codecs.JSON.field;
+import static com.metreeca.form.codecs.JSON.object;
 
 import static java.util.stream.Collectors.toList;
 
@@ -57,6 +58,8 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 	private final Model model=new LinkedHashModel();
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public JSONWriter(final OutputStream stream) {
 
@@ -78,15 +81,15 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 
 	@Override public RDFFormat getRDFFormat() {
-		return JSONAdapter.JSONFormat;
+		return JSONCodec.JSONFormat;
 	}
 
 	@Override public Collection<RioSetting<?>> getSupportedSettings() {
 
 		final Collection<RioSetting<?>> settings=super.getSupportedSettings();
 
-		settings.add(JSONAdapter.Focus);
-		settings.add(JSONAdapter.Shape);
+		settings.add(JSONCodec.Focus);
+		settings.add(JSONCodec.Shape);
 
 		return settings;
 	}
@@ -97,13 +100,13 @@ public final class JSONWriter extends AbstractRDFWriter {
 	@Override public void endRDF() throws RDFHandlerException {
 		try {
 
-			final Resource focus=getWriterConfig().get(JSONAdapter.Focus);
-			final Shape shape=getWriterConfig().get(JSONAdapter.Shape);
+			final Resource focus=getWriterConfig().get(JSONCodec.Focus);
+			final Shape shape=getWriterConfig().get(JSONCodec.Shape);
 
-			final Shape driver=(shape == null) ? null : shape // infer implicit constraints to drive json shorthands
+			final Shape driver=(shape == null) ? null : shape
 
-					.accept(Shape.mode(Form.verify))
-					.accept(new Inferencer())
+					.accept(mode(Form.verify)) // remove internal filtering shapes
+					.accept(new Inferencer()) // infer implicit constraints to drive json shorthands
 					.accept(new Optimizer());
 
 			final Predicate<Resource> trail=resource -> false;
@@ -184,7 +187,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 				} else { // write direct/inverse traits as specified by the shape
 
-					final Map<Step, String> aliases=aliases(shape, JSONAdapter.Reserved);
+					final Map<Step, String> aliases=aliases(shape, JSONCodec.Reserved);
 
 					for (final Map.Entry<Step, Shape> entry : traits.entrySet()) {
 

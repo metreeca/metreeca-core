@@ -22,6 +22,9 @@ import com.metreeca.form.shifts.Step;
 import com.metreeca.form.shifts.Table;
 
 
+/**
+ * Focus-shifting operator.
+ */
 public interface Shift {
 
 	public <V> V accept(final Probe<V> probe);

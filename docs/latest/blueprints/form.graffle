@@ -5,7 +5,7 @@
 	<key>ApplicationVersion</key>
 	<array>
 		<string>com.omnigroup.OmniGraffle7</string>
-		<string>191.28.0.317117</string>
+		<string>192.8.0.318534</string>
 	</array>
 	<key>ColorProfiles</key>
 	<array>
@@ -117,7 +117,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2018-09-11 06:32:54 +0000</string>
+	<string>2018-10-08 15:30:24 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro Bollini</string>
 	<key>MovementHandleVisible</key>
@@ -138,7 +138,7 @@
 		<key>NSHorizonalPagination</key>
 		<array>
 			<string>coded</string>
-			<string>BAtzdHJlYW10eXBlZIHoA4QBQISEhAhOU051bWJlcgCEhAdOU1ZhbHVlAISECE5TT2JqZWN0AIWEASqEhAFxlwCG</string>
+			<string>YnBsaXN0MDDUAQIDBAUGCQpYJHZlcnNpb25YJG9iamVjdHNZJGFyY2hpdmVyVCR0b3ASAAGGoKIHCFUkbnVsbBAAXxAPTlNLZXllZEFyY2hpdmVy0QsMVHJvb3SAAQgRGiMtMjc6QEJUV1wAAAAAAAABAQAAAAAAAAANAAAAAAAAAAAAAAAAAAAAXg==</string>
 		</array>
 		<key>NSLeftMargin</key>
 		<array>
@@ -148,17 +148,17 @@
 		<key>NSOrientation</key>
 		<array>
 			<string>coded</string>
-			<string>BAtzdHJlYW10eXBlZIHoA4QBQISEhAhOU051bWJlcgCEhAdOU1ZhbHVlAISECE5TT2JqZWN0AIWEASqEhAFxlwGG</string>
+			<string>YnBsaXN0MDDUAQIDBAUGCQpYJHZlcnNpb25YJG9iamVjdHNZJGFyY2hpdmVyVCR0b3ASAAGGoKIHCFUkbnVsbBABXxAPTlNLZXllZEFyY2hpdmVy0QsMVHJvb3SAAQgRGiMtMjc6QEJUV1wAAAAAAAABAQAAAAAAAAANAAAAAAAAAAAAAAAAAAAAXg==</string>
 		</array>
 		<key>NSPaperSize</key>
 		<array>
 			<string>size</string>
-			<string>{841.8897705078125, 595.27555656433105}</string>
+			<string>{841.8897705078125, 595.27557373046875}</string>
 		</array>
 		<key>NSPrintReverseOrientation</key>
 		<array>
 			<string>coded</string>
-			<string>BAtzdHJlYW10eXBlZIHoA4QBQISEhAhOU051bWJlcgCEhAdOU1ZhbHVlAISECE5TT2JqZWN0AIWEASqEhAFxlwCG</string>
+			<string>YnBsaXN0MDDUAQIDBAUGCQpYJHZlcnNpb25YJG9iamVjdHNZJGFyY2hpdmVyVCR0b3ASAAGGoKIHCFUkbnVsbBAAXxAPTlNLZXllZEFyY2hpdmVy0QsMVHJvb3SAAQgRGiMtMjc6QEJUV1wAAAAAAAABAQAAAAAAAAANAAAAAAAAAAAAAAAAAAAAXg==</string>
 		</array>
 		<key>NSRightMargin</key>
 		<array>
@@ -17674,7 +17674,7 @@ traits:Map&lt;Shift, T&gt;}</string>
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>0</integer>
+		<integer>4</integer>
 		<key>Frame</key>
 		<string>{{0, 0}, {1440, 829}}</string>
 		<key>ShowInfo</key>
@@ -17682,11 +17682,15 @@ traits:Map&lt;Shift, T&gt;}</string>
 		<key>Sidebar</key>
 		<true/>
 		<key>SidebarWidth</key>
-		<integer>216</integer>
+		<integer>244</integer>
 		<key>Sidebar_Tab</key>
 		<integer>0</integer>
 		<key>VisibleRegion</key>
-		<string>{{-8.9999999999999982, 0}, {823.35508155583443, 537}}</string>
+		<string>{{-34.999999999999979, 0}, {876.65983606557393, 537.00000000000011}}</string>
+		<key>WindowInfo_InspectorTab</key>
+		<array>
+			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
+		</array>
 		<key>ZoomValues</key>
 		<array>
 			<array>

@@ -17,26 +17,27 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.things.ModelAssert.assertThat;
+import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
-
-import static org.assertj.core.api.Java6Assertions.fail;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -44,10 +45,22 @@ import static java.util.Collections.emptyList;
 
 final class ProcessorTest {
 
+	private void exec(final Runnable... tasks) {
+		new Tray().exec(tasks).clear();
+	}
+
+
 	private Handler echo() {
-		return request -> request.reply(response -> {
-					return ((Result<Collection<Statement>>)request.body(rdf())).map(v -> response.body(rdf()).set(v), e -> response).status(Response.OK);
-				}
+		return request -> request.reply(response -> response
+
+				.status(Response.OK)
+				.shape(request.shape())
+
+				.map(r -> request.body(rdf()).map(
+						v -> r.body(rdf()).set(v),
+						e -> r
+				))
+
 		);
 	}
 
@@ -76,155 +89,177 @@ final class ProcessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessRequestRDFPayload() {
-		new Tray()
+		exec(() -> new Processor()
 
-				.get(() -> new Processor() // multiple filters to test piping
+				// multiple filters to test piping
 
-						.pre(pre(RDF.FIRST))
-						.pre(pre(RDF.REST)))
+				.pre(pre(RDF.FIRST))
+				.pre(pre(RDF.REST))
 
 				.wrap(echo())
 
 				.handle(new Request()
 
-						.body(rdf()).set(emptyList()))
+						.body(rdf()).set(emptyList())) // empty body to activate pre-processing
 
-				.accept(response -> {
-					response.body(rdf()).use(
-							model -> assertThat(model).as("items retrieved").hasSubset(asList(
-									statement(response.item(), RDF.VALUE, RDF.FIRST),
-									statement(response.item(), RDF.VALUE, RDF.REST)
-							)),
-							error -> fail("missing RDF payload")
-					);
-
-				});
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.as("items retrieved")
+						.hasSubset(asList(
+								statement(response.item(), RDF.VALUE, RDF.FIRST),
+								statement(response.item(), RDF.VALUE, RDF.REST)
+						))));
 	}
 
 	@Test void testIgnoreMissingRequestRDFPayload() {
-		new Tray()
+		exec(() -> new Processor()
 
-				.get(() -> new Processor()
-
-						.pre(pre(RDF.FIRST)))
+				.pre(pre(RDF.FIRST))
 
 				.wrap(echo())
 
 				.handle(new Request()) // no RDF payload
 
-				.accept(response -> {
-					response.body(rdf()).use(
-							model -> fail("unexpected RDF payload"),
-							error -> {}
-					);
-				});
+				.accept(response -> assertThat(response).hasBody(rdf())));
+	}
+
+	@Test void testTrimRequestRDFPayloadToRequestShape() {
+		exec(() -> new Processor()
+
+				.pre((response, model) -> {
+
+					model.add(response.item(), RDF.FIRST, RDF.NIL);
+					model.add(response.item(), RDF.REST, RDF.NIL);
+
+					return model;
+
+				})
+
+				.wrap(echo())
+
+				.handle(new Request()
+
+						.shape(trait(RDF.FIRST))
+						.body(rdf()).set(emptyList())) // empty body to activate pre-processing
+
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.as("statements outside shape envelope trimmed")
+						.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
+				)
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessResponseRDFPayload() {
-		new Tray()
+		exec(() -> new Processor()
 
-				.get(() -> new Processor() // multiple filters to test piping
+				// multiple filters to test piping
 
-						.post(post(RDF.FIRST))
-						.post(post(RDF.REST)))
+				.post(post(RDF.FIRST))
+				.post(post(RDF.REST))
 
 				.wrap(echo())
 
 				.handle(new Request()
 
-						.body(rdf()).set(emptyList()))
+						.body(rdf()).set(emptyList())) // empty body to activate post-processing
 
-				.accept(response -> {
-					response.body(rdf()).use(
-							model -> assertThat(model).as("items retrieved").hasSubset(asList(
-									statement(response.item(), RDF.VALUE, RDF.FIRST),
-									statement(response.item(), RDF.VALUE, RDF.REST)
-							)),
-							error -> fail("missing RDF payload")
-					);
-
-				});
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.as("items retrieved")
+						.hasSubset(asList(
+								statement(response.item(), RDF.VALUE, RDF.FIRST),
+								statement(response.item(), RDF.VALUE, RDF.REST)
+						))));
 	}
 
 	@Test void testIgnoreMissingResponseRDFPayload() {
-		new Tray()
+		exec(() -> new Processor()
 
-				.get(() -> new Processor()
-
-						.post(post(RDF.FIRST)))
+				.post(post(RDF.FIRST))
 
 				.wrap(echo())
 
 				.handle(new Request()) // no RDF payload
 
-				.accept(response -> {
-					response.body(rdf()).use(
-							model -> fail("unexpected RDF payload"),
-							error -> {}
-					);
-				});
+				.accept(response -> assertThat(response).hasBody(rdf()))
+		);
+	}
+
+	@Test void testTrimResponseRDFPayloadToResponseShape() {
+		exec(() -> new Processor()
+
+				.post((response, model) -> {
+
+					model.add(response.item(), RDF.FIRST, RDF.NIL);
+					model.add(response.item(), RDF.REST, RDF.NIL);
+
+					return model;
+
+				})
+
+				.wrap(echo())
+
+				.handle(new Request()
+
+						.shape(trait(RDF.FIRST))
+						.body(rdf()).set(emptyList())) // empty body to activate post-processing
+
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.as("statements outside shape envelope trimmed")
+						.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
+				)
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testExecuteUpdateScriptOnRequestFocus() {
+	@Test void testExecuteScriptOnRequestFocus() {
+		exec(() -> new Processor()
 
-		final Tray tray=new Tray();
-		final Graph graph=tray.get(Graph.Factory);
+				.sync(sparql("insert { ?this rdf:value rdf:first } where {}"))
+				.sync(sparql("insert { ?this rdf:value rdf:rest } where {}"))
 
-		tray
-
-				.exec(() -> tool(Graph.Factory).update(connection -> {
-					connection.add(decode("<test> rdf:value rdf:first."));
-				}))
-
-				.get(() -> new Processor()
-						.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-						.wrap((Handler)request -> request.reply(response -> response.status(Response.OK))))
+				.wrap((Handler)request -> request.reply(response -> response.status(Response.OK)))
 
 				.handle(new Request()
 						.method(Request.POST)
 						.base(Base)
 						.path("/test"))
 
-				.accept(response -> graph.query(connection -> {
-
-					assertThat((Collection<Statement>)decode("<test> rdf:value rdf:first, rdf:rest.")).as("repository updated").isIsomorphicTo((Collection<Statement>)export(connection));
-
-				}));
+				.accept(response -> assertThat(graph())
+						.as("repository updated")
+						.isIsomorphicTo(decode("<test> rdf:value rdf:first, rdf:rest."))
+				));
 	}
 
-	@Test void testExecuteUpdateScriptOnResponseLocation() {
+	@Test void testExecuteScriptOnResponseLocation() {
+		exec(() -> new Processor()
 
-		final Tray tray=new Tray();
-		final Graph graph=tray.get(Graph.Factory);
+				.sync(sparql("insert { ?this rdf:value rdf:first } where {}"))
+				.sync(sparql("insert { ?this rdf:value rdf:rest } where {}"))
 
-		tray
-
-				.exec(() -> tool(Graph.Factory).update(connection -> {
-					connection.add(decode("<test> rdf:value rdf:first."));
-				}))
-
-				.get(() -> new Processor()
-						.update(sparql("insert { ?this rdf:value rdf:rest } where { ?this rdf:value rdf:first }"))
-						.wrap((Handler)request -> request.reply(response -> response
-								.status(Response.OK)
-								.header("Location", Base+"test"))))
+				.wrap((Handler)request -> request.reply(response -> response
+						.status(Response.OK)
+						.header("Location", Base+"test")))
 
 				.handle(new Request()
 						.method(Request.POST)
 						.base(Base)
 						.path("/"))
 
-				.accept(response -> graph.query(connection -> {
+				.accept(response -> tool(Graph.Factory).query(connection -> {
 
-					assertThat((Collection<Statement>)decode("<test> rdf:value rdf:first, rdf:rest.")).as("repository updated").isIsomorphicTo((Collection<Statement>)export(connection));
+					assertThat(decode("<test> rdf:value rdf:first, rdf:rest."))
+							.as("repository updated")
+							.isIsomorphicTo(export(connection));
 
-				}));
+				})));
 	}
 
 }

@@ -24,7 +24,7 @@
 
 	<groupId>com.metreeca</groupId>
 	<artifactId>link</artifactId>
-	<version>0.0-SNAPSHOT</version>
+	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Metreeca Linked Data Framework</name>
@@ -69,6 +69,10 @@
 	</issueManagement>
 
 	<distributionManagement>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
 		<snapshotRepository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -89,7 +93,7 @@
 	<properties>
 
 		<java.version>1.8</java.version>
-		<rdf4j.version>2.3.2</rdf4j.version>
+		<rdf4j.version>2.4.0</rdf4j.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -97,6 +101,8 @@
 		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 
 		<javadocs>${project.basedir}/docs/latest/javadocs</javadocs>
+
+		<timestamp>${maven.build.timestamp}</timestamp> <!-- ;( not directly available to filtered resources -->
 
 	</properties>
 
@@ -343,7 +349,7 @@
 	<profiles>
 		<profile>
 
-			<id>release</id>
+			<id>ossrh</id>
 
 			<build>
 				<plugins>

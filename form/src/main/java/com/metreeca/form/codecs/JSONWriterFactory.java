@@ -29,7 +29,7 @@ import java.net.URISyntaxException;
 public final class JSONWriterFactory implements RDFWriterFactory {
 
 	@Override public RDFFormat getRDFFormat() {
-		return JSONAdapter.JSONFormat;
+		return JSONCodec.JSONFormat;
 	}
 
 
