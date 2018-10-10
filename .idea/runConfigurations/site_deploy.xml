@@ -11,7 +11,6 @@
           <option name="goals">
             <list>
               <option value="-DskipTests=true" />
-              <option value="install" />
               <option value="site-deploy" />
             </list>
           </option>
@@ -24,6 +23,6 @@
         </MavenRunnerParameters>
       </option>
     </MavenSettings>
-    <method />
+    <method v="2" />
   </configuration>
 </component>
