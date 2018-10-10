@@ -29,7 +29,14 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
@@ -38,10 +45,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Shape.wild;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.Values.time;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.form.things.Values.*;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -61,6 +65,49 @@ import static java.util.stream.Collectors.toSet;
  * Response#success() successful} response or rolled back otherwise.</p>
  */
 public final class Processor implements Wrapper {
+
+	/**
+	 * Creates a message processing filter for inserting static RDF content.
+	 *
+	 * @param rdf the RDF content to be inserted in the processed message; parsed using as base the {@linkplain
+	 *            Message#item() focus item} of the processed message
+	 * @param <T> the type of the processed message
+	 *
+	 * @return the new message processing filter
+	 *
+	 * @throws NullPointerException if {@code rdf} is null
+	 * @throws RDFParseException    if {@code rdf} is malformed
+	 */
+	public static <T extends Message<T>> BiFunction<T, Model, Model> rdf(final String rdf) throws RDFParseException {
+
+		if ( rdf == null ) {
+			throw new NullPointerException("null rdf");
+		}
+
+		final IRI placeholder=iri("placeholder:/");
+		final StatementCollector collector=new StatementCollector();
+
+		final RDFParser parser=new TurtleParser();
+
+		parser.setRDFHandler(collector);
+
+		try (final StringReader reader=new StringReader(rdf)) {
+			parser.parse(reader, placeholder.stringValue());
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+
+		return (response, statements) -> {
+
+			statements.addAll(rewrite(collector.getStatements(), placeholder, response.item()));
+
+			return statements;
+
+		};
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private BiFunction<Request, Model, Model> pre;
 	private BiFunction<Response, Model, Model> post;
@@ -270,7 +317,7 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-		return message.body(rdf()).pipe(statements -> (filter == null) ? statements
+		return message.body(RDFFormat.rdf()).pipe(statements -> (filter == null) ? statements
 				: trim(message, filter.apply(message, new LinkedHashModel(statements)))
 		);
 	}

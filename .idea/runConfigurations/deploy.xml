@@ -10,7 +10,6 @@
           </option>
           <option name="goals">
             <list>
-              <option value="-DskipTests=false" />
               <option value="clean" />
               <option value="deploy" />
             </list>
@@ -18,7 +17,7 @@
           <option name="pomFileName" />
           <option name="profilesMap">
             <map>
-              <entry key="ossrh" value="true" />
+              <entry key="release" value="true" />
             </map>
           </option>
           <option name="resolveToWorkspace" value="false" />
