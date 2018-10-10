@@ -317,18 +317,20 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-		return message.body(RDFFormat.rdf()).pipe(statements -> (filter == null) ? statements
-				: trim(message, filter.apply(message, new LinkedHashModel(statements)))
+
+		// ;( memoize current message state, before it's possibly altered by downstream wrappers
+
+		final IRI focus=message.item();
+		final Shape shape=message.shape();
+
+		return message.body(RDFFormat.rdf()).pipe(statements -> (filter == null) ?
+				statements : trim(focus, shape, filter.apply(message, new LinkedHashModel(statements)))
 		);
 	}
 
-	private <T extends Message<T>> Collection<Statement> trim(final T message, final Model model) {
-
-		final Shape shape=message.shape();
-		final Set<Value> focus=singleton(message.item());
-
+	private <T extends Message<T>> Collection<Statement> trim(final Value focus, final Shape shape, final Model model) {
 		return wild(shape) ? model : shape // !!! migrate wildcard handling to Trimmer
-				.accept(new Trimmer(model, focus))
+				.accept(new Trimmer(model, singleton(focus)))
 				.collect(toList());
 	}
 
