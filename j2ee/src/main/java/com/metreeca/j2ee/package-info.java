@@ -18,7 +18,7 @@
 /**
  * J2EE adapter.
  *
- * <p>The J2EE module provides an adapter for deploying apps based on Metreeca/Link as web applications managed by a
+ * <p>The J2EE package provides an adapter for deploying apps based on Metreeca/Link as web applications managed by a
  * Servlet 3.1 container.</p>
  *
  * <p>To deploy a linked data app as a web application, package it as a {@code war} archive adding:</p>
@@ -62,7 +62,7 @@
  *
  * import static com.metreeca.tray.Tray.tool;
  *
- * @WebListener public final class Demo extends Gateway {
+ * {@literal @}WebListener public final class Demo extends Gateway {
  *
  *     public Demo() {
  *         super("/*", tray -> tray // define the path pattern matcjing the resources managed by the app
