@@ -3,33 +3,199 @@ title:	    Publishing Model‑Driven Linked Data REST APIs
 excerpt:    Hands-on guided tour of linked data modelling and model-driven REST API publishing tools
 ---
 
-# Getting Started
-
 This example-driven tutorial introduces the building blocks of the Metreeca/Link model-driven linked data framework. Basic familiarity with  [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
 
-To get started open [https://demo.metreeca.com/workspace/](https://demo.metreeca.com/workspace/) with a [supported](../../handbooks/installation#system-requirements) web browser and activate your demo workspace by agreeing to the terms of service and the privacy policy.
+In the following sections you will learn how to use the framework to develop a linked data server and to publish model-driven linked data resources through REST APIs, automatically supporting fine grained role‑based read/write access control,  faceted search and incoming data validation.
 
-<p class="warning">Demo workspaces are not secured: don't upload personal or otherwise sensitive data.</p>
+In the tutorial we will work with a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](Metreeca/Self) self-service linked data search and analysis tool, which works on the same data.
 
-<p class="warning">Demo workspaces are transient: don't expect edits to outlast browser sessions.</p>
+We will walk through the REST API development process focusing on the task of exposing the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog as a [Linked Data Platform](https://www.w3.org/TR/ldp-primer/) (LDP) Basic Container and a collection of associated RDF resources.
 
-The demo workspace will be pre-populated with a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models.
+An IDEA project including the code for the complete demo app and supporting run configurations is available on [GitHub](https://github.com/metreeca/demo/tree/tutorial): clone or [download](https://github.com/metreeca/demo/archive/tutorial.zip) it to your workspace and open in your favorite IDE.
 
-Before learning how to expose selected resources and collections from your workspace as  read/write linked data REST APIs, you may want to familiarize yourself with the dataset contents following through the [search and analysis tutorial](../search-and-analysis/).
+# Getting Started
 
-<p class="warning">The demo server is hosted on a cloud service: it is not expected to provide production-level performance and may experience some delays during on-demand workspace initialization.</p>
+To get started, set up a Java 1.8 project, adding required dependencies for the Metreeca/Link [adapter](../javadocs/) for the target deployment server.
 
-<p class="warning">The modelling user interface is still under active development and it is routinely tested only with Chrome: other browsers may exhibit inconstistent layouts and visual glitches.</p>
+In this tutorial we will deploy to a Servlet 3.1 container like Tomcat 8,  so using Maven:
 
-# Managing Ports
+```xml
+<dependencies>
 
-Once your demo workspace is ready, open the linked data port catalog.
+    <dependency>
+    <groupId>com.metreeca</groupId>
+    <artifactId>j2ee</artifactId>
+    <version>${module.version}</version>
+    </dependency>
 
-![Open port catalog](linked-data-publishing.mdimages/open-port-catalog.png)
+    <dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.1.0</version>
+    <scope>provided</scope>
+    </dependency>
 
-The system will open a navigable catalog listing the active linked data ports.
+</dependencies>
+```
 
-![Inspect port catalog](linked-data-publishing.mdimages/inspect-port-catalog.png)
+## Deploying a Server
+
+<u>Then</u> define a server stub like:
+
+```java
+import com.metreeca.j2ee.Gateway;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.wrappers.Server;
+
+import javax.servlet.annotation.WebListener;
+
+
+@WebListener public final class Demo extends Gateway {
+
+	public Demo() {
+		super("/*", tray -> tray.get(() -> new Server()
+
+				.wrap((Request request) -> request.reply(response ->
+						response.status(Response.OK))
+				)
+
+		));
+	}
+
+}
+```
+
+The stub configures the application to handle any resource using a minimal [handler](../javadocs/?com/metreeca/rest/Handler.html) always replying to incoming [requests](../javadocs/?com/metreeca/rest/Request.html) with a [response](../javadocs/?com/metreeca/rest/Responsehtml) including a `200` HTTP status code. The standard [Server](../javadocs/?com/metreeca/rest/wrappers/Server.html) wrapper provides default pre/post-processing services and shared error handling.
+
+Compile and deploy to your favorite servlet container and try your first request:
+
+```sh
+% curl --include http://localhost:8080/
+
+HTTP/1.1 200
+```
+
+The [tray](../javadocs/?com/metreeca/tray/Tray.html) argument handled to the app loader lambda manages the shared system-provided tools and can be used to customize them and to run app initialization tasks.
+
+```java
+public Demo() {
+	super("/*", tray -> tray
+
+			.set(Graph.Factory, RDF4JMemory::new)
+
+			.exec(() -> tool(Graph.Factory).update(connection -> {
+                try {
+                    connection.add(
+                        BIRT.class.getResourceAsStream("BIRT.ttl"),
+                        BIRT.Base, RDFFormat.TURTLE
+                    );
+                } catch ( final IOException e ) {
+                    throw new UncheckedIOException(e);
+                }
+			}))
+
+			.get(() -> new Server()
+
+					.wrap((Request request) -> request.reply(response ->
+							response.status(Response.OK))
+					)
+
+			)
+	);
+}
+```
+
+Here we are customizing the system-wide [graph](../javadocs/?com/metreeca/tray/rdf/Graph.html) database as an ephemeral heap-based RDF4J store, initializing it with the BIRT dataset.
+
+The static [Tray.tool()](../javadocs/com/metreeca/tray/Tray.html#tool-java.util.function.Supplier-) service locator method provides access to shared tools inside tray initialisation tasks and wrapper/handlers constructors.
+
+Complex initialization tasks can be easily factored to a dedicated class:
+
+```java
+… tray.exec(new BIRT()) …
+    
+
+public final class BIRT implements Runnable {
+
+	public static final String Base="https://demo.metreeca.com/";
+	public static final String Namespace=Base+"terms#";
+
+	@Override public void run() {
+		tool(Graph.Factory).update(connection -> {
+            try {
+                connection.add(
+                    getClass().getResourceAsStream("BIRT.ttl"), 
+                    BIRT.Base, RDFFormat.TURTLE
+                );
+            } catch ( final IOException e ) {
+                throw new UncheckedIOException(e);
+            }
+		});
+	}
+
+}
+```
+
+## Dispatching Requests
+
+```java
+() -> new Server()
+
+		.wrap(new Router()
+
+				.path("/products/", new Router()
+						.path("/", new Worker()
+								.get(new Browser())
+								.post(new Creator())
+						)
+						.path("/*", new Worker()
+								.get(new Relator())
+								.put(new Updater())
+								.delete(new Deleter())
+						)
+				)
+
+				.path("/product-lines/", new Router()
+						.path("/", new Worker()
+								.get(new Browser())
+								.post(new Creator())
+						)
+						.path("/*", new Worker()
+								.get(new Relator())
+								.put(new Updater())
+								.delete(new Deleter())
+						)
+				)
+
+		)
+```
+
+[Browser](../javadocs/?com/metreeca/rest/handlers/actors/Browser.html), [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html), [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html), [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html), [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleterhtml) standard handlers provides…
+
+
+
+<p class="warning">Model-less operations aren't yet fully supported by all action handlers</p>
+
+```sh
+% curl --include  http://localhost:8080/products/S18_4409
+
+HTTP/1.1 200 
+Vary: Accept
+Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
+Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
+Content-Type: text/turtle;charset=UTF-8
+
+<http://localhost:8080/products/S18_4409> a <http://localhost:8080/terms#Product>;
+  <http://www.w3.org/2000/01/rdf-schema#label> "1932 Alfa Romeo 8C2300 Spider Sport";
+  <http://localhost:8080/terms#code> "S18_4409";
+  <http://localhost:8080/terms#scale> "1:18";
+  <http://localhost:8080/terms#vendor> "Exoto Designs";
+  <http://localhost:8080/terms#buy> 43.26;
+  <http://localhost:8080/terms#sell> 92.03;
+  <http://localhost:8080/terms#stock> 6553;
+  ⋮
+```
 
 Each *linked data port* specifies how linked data resources whose URLs match a server-relative path pattern will be handled by the linked data server. For instance, the linked data port mapped to `/product-lines/*` specifies  how to handle all of the following linked data resources:
 
@@ -40,51 +206,65 @@ https://demo.metreeca.com/product-lines/planes
 …
 ```
 
-The demo workspace is pre-configured with a number of ports, some exposing default system-managed services (root handler, SPARQL endpoints, …), some defined as Java custom services (`/products-lines/`, /`product-lines/*`, …) supporting the [linked data development tutorial](linked-data-interaction.md).
-
-Ports handling navigation entry points are flagged as *root*; user-defined ports will be flagged as *soft*. Configuration details for each port may be inspected by clicking on the port path.
-
-In the following sections you will learn how to create and manage additional custom  model-driven ports using the interactive linked data modelling tools. We will walk through the process focusing on the task of exposing the [Employee](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Employee) directory as a [Linked Data Platform](https://www.w3.org/TR/ldp-primer/) (LDP) Basic Container and a collection of associated RDF resources.
-
-# Creating New Ports
-
-![open-port-editor](linked-data-publishing.mdimages/open-port-editor.png)
-
-## Editing Port Metadata
-
-![Edit metadata](linked-data-publishing.mdimages/edit-metadata.png)
-
-<!-- keep aligned with system APIs specs -->
-
-The *port* tab of the port editor supports editing port path patterns and other system metadata.
-
-- **root** / root resource flag
-
-  If selected, flags the resource handled by the port as a navigation entry-point, to be included, for instance, as a root resource in the system [VoID](https://www.w3.org/TR/void/) report
-
-- **path** / the server-relative path pattern
-
-  Must be a syntactically correct [URI absolute path](https://tools.ietf.org/html/rfc3986#section-3.3), optionally followed by a question mark (`?`), a slash (`/`) or a wildcard (`/*`)
-
-- **label** / a human-readable label
-- **notes** / an optional human-readable description
-
 The optional trailing character in the path pattern controls how resources are handled by the matching port according to the following schema.
 
-| path pattern | handling mode                            |
-| ------------ | ---------------------------------------- |
+| path pattern | handling mode                                                |
+| ------------ | ------------------------------------------------------------ |
 | `<path>`     | the resource at `<path>` will be handled as an LDP RDF Resource, exposing RDF properties as specified by the port shape (more on that in the next steps…) |
-| *`<path>?`*  | the resource at `<path>` will be handled as an LDP Basic Container including all of the RDF resources matched by the port shape |
 | *`<path>/`*  | the resource at `<path>/` will be handled as an LDP Basic Container including all of the RDF resources matched by the port shape; an ancillary port mapped to the `<path>/*` pattern is automatically generated to handle container items as LDP RDF Resources, exposing RDF properties as specified by the port shape |
 | `<path>/*`   | every resource with an IRI starting with `<path>/` will be handled as an LDP RDF Resource, exposing RDF properties as specified by the port shape |
 
-All resources handled as LDP Basic Container support [faceted search](../references/faceted-search.md), sorting and pagination out of the box.
+Again, complex handlers can be easily factored to dedicated classes:
 
-## Editing Port Models
+```java
+() -> new Server()
 
-![Open the linked data model editor](linked-data-publishing.mdimages/open-shape-editor.png)
+		.wrap(new Router()
 
-The *shape* tab of the port editor supports editing the linked data model associated with the port.
+				.path("/products/", new Products())
+				.path("/product-lines/", new ProdutLines())
+
+		)
+```
+
+```java
+public final class Products extends Delegator {
+
+	public Products() {
+		delegate(new Router()
+
+				.path("/", new Worker()
+						.get(new Browser())
+						.post(new Creator())
+				)
+
+				.path("/*", new Worker()
+						.get(new Relator())
+						.put(new Updater())
+						.delete(new Deleter())
+				)
+
+		);
+	}
+
+}
+```
+
+@@@ [Delegator](../javadocs/?com/metreeca/rest/handlers/actors/Delegator.html)
+
+# Model-Driven REST APIs
+
+Engine-managed, demonstrated in the Interaction tutorial
+
+- faceted search
+- REST/JSON
+- data validation
+
+*All resources handled as LDP Basic Container support [faceted search](../references/faceted-search.md), sorting and pagination out of the box.*
+
+
+
+## Modelling RDF Resources
 
 Linked data models are defined with a [SHACL](https://www.w3.org/TR/shacl/)-based [specification language](../references/spec-language.md), assembling building blocks on an interactive drag-and-drop canvas.
 
@@ -106,31 +286,15 @@ Resource IRIs may be entered as:
 
 RDF values required by other constraint blocks are entered using Turtle syntax for [IRIs](https://www.w3.org/TR/turtle/#sec-iri) and [literals](https://www.w3.org/TR/turtle/#literals). In this context, absolute and server-relative IRIs must by wrapped inside angle brackets (e.g. `</product-lines/>`). Multiple values are entered as comma-separated Turtle [object lists](https://www.w3.org/TR/turtle/#object-lists).
 
-Available prefixes for qualified names may be inspected and edited from the *Namespaces* catalog under the system configuration toolbox; well-known prefixes like `rdf`, `rdfs`, `xds`, … are made available by default even if not listed in the namespace catalog.
 
-![Open namespace catalog](linked-data-publishing.mdimages/open-namespaces.png)
-
-To navigate back to the model editor, hit the browser *back* button or select it from the history sidebar.
-
-![Navigate back to the model editor](linked-data-publishing.mdimages/navigate-back.png)
-
-To restore the modelling palette, click on the *shape* tab of the port editor.
-
-![Restore the modelling palette](linked-data-publishing.mdimages/restore-palette.png)
-
-## Inspecting Handled Resources 
 
 As soon as the new port is created, the system activates the required resource handlers and starts exposing read/write linked data REST APIs at the matching HTTP/S URLs, as specified by the port model.
 
-Exposed containers and resources are immediately available for rapid [linked data development](linked-data-interaction.md) and may be interactively inspected in the linked data navigaton interface.
+Exposed containers and resources are immediately available for rapid [linked data development](linked-data-interaction.md) <u>and may be interactively inspected in the linked data navigaton interface.</u>
 
-![Inspect linked data resoures](linked-data-publishing.mdimages/inspect-resources.png)
 
-The linked data navigation interface is dynamically built on the basis of the resource model and supports interactive inspection, editing and cross-linking of linked data resources, validating updates against constraints specified in the resource model.
 
-<p class="note">The linked data navigator is still a work in progress: more to come as dynamic editing forms are improved and advanced <a href="../search-and-analysis/">search and analysis</a> features like faceted filtering and infographics are integrated in the tool.</p>
-
-# Updating Ports
+## Updating Ports
 
 We'll now refine the initial barebone model, exposing more employee properties, like the internal code, forename and surname, and detailing properties roles and constraints.
 
@@ -158,7 +322,11 @@ In the most general form, models may be parameterized on for different [axes](..
 
 Parametric models support the definition of fine-grained access control rules and role-dependent read/write resource views.
 
-<p class="warning">Work in progress…</p>
+
+
+- access control
+- modify model
+- add wrapper
 
 ## Cross-Linking Resources
 
@@ -213,8 +381,8 @@ SPARQL Update post-processing scripts are executed after the corresponding state
 | delete | DELETE                                   |
 | mutate | POST/PUT/DELETE (all state-mutating methods) |
 
-# Deleting Ports
+# Next Steps
 
-![Edit port](linked-data-publishing.mdimages/edit-port.png)
-
-![Delete port](linked-data-publishing.mdimages/delete-port.png)
+- Interaction tutorial
+- expore standard wrappers/handlers
+  - eg SPARQL endpoint

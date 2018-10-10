@@ -100,7 +100,73 @@
 <!--   -->
 </a>
 <h2 title="Package com.metreeca.j2ee Description">Package com.metreeca.j2ee Description</h2>
-<div class="block">J2EE adapter.</div>
+<div class="block">J2EE adapter.
+
+ <p>The J2EE package provides an adapter for deploying apps based on Metreeca/Link as web applications managed by a
+ Servlet 3.1 container.</p>
+
+ <p>To deploy a linked data app as a web application, package it as a <code>war</code> archive adding:</p>
+
+ <ul>
+
+ <li>a runtime dependency from the J2EE module and other required framework components;</li>
+
+ <li>a provided dependency from the Servlet 3.1 API, unless you want to manually define the app as a web context
+ listener in <code>WEB-INF/web.xml</code>.</li>
+
+ </ul>
+
+ <p>Using maven:</p>
+
+ <pre><code> &lt;dependencies&gt;
+
+     &lt;dependency&gt;
+         &lt;groupId&gt;com.metreeca&lt;/groupId&gt;
+         &lt;artifactId&gt;j2ee&lt;/artifactId&gt;
+         &lt;version&gt;${module.version}&lt;/version&gt;
+     &lt;/dependency&gt;
+
+     &lt;dependency&gt;
+         &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
+         &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
+         &lt;version&gt;3.1.0&lt;/version&gt;
+         &lt;scope&gt;provided&lt;/scope&gt;
+     &lt;/dependency&gt;
+
+ &lt;/dependencies&gt; </code></pre>
+
+ <p>Then define the app entry point as:</p>
+
+ <pre><code> package com.metreeca.demo;
+
+ import com.metreeca.j2ee.Gateway;
+ import com.metreeca.rest.wrappers.Server;
+
+ import javax.servlet.annotation.WebListener;
+
+ import static com.metreeca.tray.Tray.tool;
+
+  {@literal @}WebListener public final class Demo extends Gateway {
+
+     public Demo() {
+         super("/*", tray -&gt; tray // define the path pattern matcjing the resources managed by the app
+
+                 .set(Tool.Factory, () -&gt; { return new ToolReplacement(); } // customize shared tools
+
+                 .exec(() -&gt; { tool(Tool.Factory).exec(…); }) // initialize the app using the shared tools
+
+                 .get(() -&gt; new Server()
+
+                         .wrap(new Wrapper() { … }) // configure system-wide wrappers
+
+                         .wrap(new Handler() { … }) // configure the app main handler
+                 )
+         );
+     }
+
+ } </code></pre>
+
+ <p>Standard wrappers and handler building blocks are provided by the <a href="../../../com/metreeca/rest/wrappers/package-summary.html"><code>com.metreeca.rest.wrappers</code></a> and  <a href="../../../com/metreeca/rest/handlers/package-summary.html"><code>com.metreeca.rest.handlers</code></a> packages.</p></div>
 </div>
 <!-- ======= START OF BOTTOM NAVBAR ====== -->
 <div class="bottomNav"><a name="navbar.bottom">

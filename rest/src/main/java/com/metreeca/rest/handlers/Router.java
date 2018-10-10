@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * Path-based request router.
  *
  * <p>Delegates request processing to a handler selected on the basis of the request HTTP {@linkplain Request#path()
- * path} according to the following rules, in order of precedence and ignoring trailing question marks:</p>
+ * path} according to the following rules, in order of precedence:</p>
  *
  * <ul>
  *
