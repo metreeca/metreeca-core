@@ -44,6 +44,7 @@ import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.RequestAssert.assertThat;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -52,6 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
 
@@ -253,6 +255,35 @@ final class RewriterTest {
 					);
 
 				});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testBodyFiltersShouldSeeInternalData() {
+		exec(() -> new Rewriter().base(Internal)
+
+				.wrap((Handler handler) -> (Request request) -> handler.handle(request)
+						.map(response -> response.body(rdf()).pipe(statements -> {
+
+							// ;( assertThat(response).hasHeader("Location", Internal) causes SOE
+
+							assertThat(response.header("Location")).contains(Internal);
+
+							return statements;
+
+						}))
+				)
+
+				.wrap((Request request) -> request.reply(response -> response
+						.status(Response.OK)
+						.header("Location", Internal)
+						.body(rdf())
+						.set(emptySet())))
+
+				.handle(new Request().base(External))
+
+				.accept(response -> assertThat(response).hasBodyThat(rdf())));
 	}
 
 }
