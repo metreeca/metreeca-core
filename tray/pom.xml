@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>virtuoso.openlinksw.com</groupId>
 			<artifactId>rdf4j-provider</artifactId>
-			<version>2.2-20171221</version>
+			<version>2.2-20180514</version>
 		</dependency>
 
 		<dependency>
