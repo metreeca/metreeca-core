@@ -1,17 +1,19 @@
 ---
 title:	    Publishing Model‑Driven Linked Data REST APIs
-excerpt:    Hands-on guided tour of linked data modelling and model-driven REST API publishing tools
+excerpt:    Hands-on guided tour of model-driven linked data REST APIs publishing
 ---
 
-This example-driven tutorial introduces the building blocks of the Metreeca/Link model-driven linked data framework. Basic familiarity with  [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
+This example-driven tutorial introduces the main building blocks of the Metreeca/Link model-driven linked data framework. Basic familiarity with  [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
 
 In the following sections you will learn how to use the framework to develop a linked data server and to publish model-driven linked data resources through REST APIs, automatically supporting fine grained role‑based read/write access control,  faceted search and incoming data validation.
 
-In the tutorial we will work with a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](Metreeca/Self) self-service linked data search and analysis tool, which works on the same data.
+In the tutorial we will work with a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
 
 We will walk through the REST API development process focusing on the task of exposing the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog as a [Linked Data Platform](https://www.w3.org/TR/ldp-primer/) (LDP) Basic Container and a collection of associated RDF resources.
 
-An IDEA project including the code for the complete demo app and supporting run configurations is available on [GitHub](https://github.com/metreeca/demo/tree/tutorial): clone or [download](https://github.com/metreeca/demo/archive/tutorial.zip) it to your workspace and open in your favorite IDE.
+You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl` or `wget`.
+
+A Maven project with the code for the complete demo app is available on [GitHub](https://github.com/metreeca/demo/tree/tutorial): clone or [download](https://github.com/metreeca/demo/archive/tutorial.zip) it to your workspace and open in your favorite IDE. If you are working with IntelliJ IDEA you may just use the `Demo` pre-configured run configuration to deploy and update the local server instance.
 
 # Getting Started
 
@@ -172,8 +174,6 @@ public final class BIRT implements Runnable {
 ```
 
 [Browser](../javadocs/?com/metreeca/rest/handlers/actors/Browser.html), [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html), [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html), [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html), [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleterhtml) standard handlers provides…
-
-
 
 <p class="warning">Model-less operations aren't yet fully supported by all action handlers</p>
 
