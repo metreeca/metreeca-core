@@ -43,6 +43,7 @@ import static com.metreeca.form.Shape.optional;
 import static com.metreeca.form.Shape.verify;
 import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.queries.Items.ItemsShape;
+import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
@@ -194,7 +195,7 @@ public final class Browser extends Actor<Browser> {
 	private Response stats(final Query stats, final Response response) {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
-					.shape(ItemsShape)
+					.shape(StatsShape)
 					.body(rdf()).set(new SPARQLEngine(connection).browse(stats, response.item()));
 
 		});
