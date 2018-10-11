@@ -97,7 +97,12 @@ public final class Router implements Handler {
 				: path.endsWith("/*") ? path.replace('*', '2')
 				: path+"/0";
 
-		if ( routes.putIfAbsent(sorter, route(path, handler)) != null ) {
+		final Function<Request, Optional<Responder>> route=path.equals("/") ? route("", "/", handler) // root
+				: path.endsWith("/") ? route(path.substring(0, path.length()-1), "(/.*)?", handler) // prefix
+				: path.endsWith("/*") ? route(path.substring(0, path.length()-2), "/.+", handler) // subtree
+				: route(path, "/?", handler); // exact
+
+		if ( routes.putIfAbsent(sorter, route) != null ) {
 			throw new IllegalStateException("path already mapped <"+path+">");
 		}
 
@@ -124,61 +129,23 @@ public final class Router implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Function<Request, Optional<Responder>> route(final String path, final Handler handler) {
-		return path.equals("/") ? root(path, handler)
-				: path.endsWith("/") ? prefix(path, handler)
-				: path.endsWith("/*") ? subtree(path, handler)
-				: exact(path, handler);
-	}
+	private Function<Request, Optional<Responder>> route(
+			final String prefix, final String suffix, final Handler handler
+	) {
 
+		final Pattern pattern=Pattern.compile(Pattern.quote(prefix)+suffix);
 
-	private Function<Request, Optional<Responder>> root(final String path, final Handler handler) {
-		return request -> request.path().equals(path) ? Optional.of(consumer -> handler.handle(
+		return request -> {
 
-				request
+			final String head=request.header("Location").orElse("");
+			final String tail=request.path().substring(head.length());
 
-		).accept(consumer)) : Optional.empty();
-	}
+			return pattern.matcher(tail).matches() ? Optional.of(consumer -> handler.handle(
 
-	private Function<Request, Optional<Responder>> prefix(final String path, final Handler handler) {
+					request.header("Location", head+prefix)
 
-		final Pattern pattern=Pattern.compile(Pattern.quote(path.substring(0, path.length()-1))+"(/.*)?");
-
-		final String base=path.substring(1);
-		final int head=path.length()-1;
-
-		return request -> pattern.matcher(request.path()).matches() ? Optional.of(consumer -> handler.handle(
-
-				request.base(request.base()+base).path(request.path().length() == head ? "/" : request.path().substring(head))
-
-		).accept(consumer)) : Optional.empty();
-	}
-
-	private Function<Request, Optional<Responder>> subtree(final String path, final Handler handler) {
-
-		final Pattern pattern=Pattern.compile(Pattern.quote(path.substring(0, path.length()-1))+".+");
-
-		final String base=path.substring(1, path.length()-1);
-		final int head=path.length()-2;
-
-		return request -> pattern.matcher(request.path()).matches() ? Optional.of(consumer -> handler.handle(
-
-				request.base(request.base()+base).path(request.path().substring(head))
-
-		).accept(consumer)) : Optional.empty();
-	}
-
-	private Function<Request, Optional<Responder>> exact(final String path, final Handler handler) {
-
-		final Pattern pattern=Pattern.compile(Pattern.quote(path)+"/?");
-
-		final String base=path.substring(1)+"/";
-
-		return request -> pattern.matcher(request.path()).matches() ? Optional.of(consumer -> handler.handle(
-
-				request.base(request.base()+base).path("/")
-
-		).accept(consumer)) : Optional.empty();
+			).accept(consumer)) : Optional.empty();
+		};
 	}
 
 }

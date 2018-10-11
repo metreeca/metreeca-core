@@ -277,18 +277,23 @@ public final class Processor implements Wrapper {
 			if ( response.success() && !scripts.isEmpty() ) {
 				graph.update(connection -> {
 
-					final IRI user=response.request().user();
 					final IRI item=response.item();
+					final IRI stem=iri(item.getNamespace());
+					final Literal name=literal(item.getLocalName());
+
+					final IRI user=response.request().user();
+					final Literal time=time(true);
 
 					for (final String update : scripts) {
 
 						final Update operation=connection.prepareUpdate(QueryLanguage.SPARQL, update, request.base());
 
 						operation.setBinding("this", item);
-						operation.setBinding("stem", iri(item.getNamespace()));
-						operation.setBinding("name", literal(item.getLocalName()));
+						operation.setBinding("stem", stem);
+						operation.setBinding("name", name);
+
 						operation.setBinding("user", user);
-						operation.setBinding("time", time(true));
+						operation.setBinding("time", time);
 
 						operation.execute();
 

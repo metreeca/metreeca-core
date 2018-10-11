@@ -36,7 +36,6 @@ final class RouterTest {
 	private Handler handler() {
 		return request -> request.reply(response -> response
 				.status(Response.OK)
-				.header("base", request.base())
 				.header("path", request.path())
 		);
 	}
@@ -80,10 +79,10 @@ final class RouterTest {
 		final Router router=new Router().path("/one", handler());
 
 		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/"));
+				.hasStatus(Response.OK).hasHeader("path", "/one"));
 
 		router.handle(request("/one/")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/"));
+				.hasStatus(Response.OK).hasHeader("path", "/one/"));
 
 		router.handle(request("/one/two")).accept(response -> assertThat(response)
 				.hasStatus(0));
@@ -95,13 +94,13 @@ final class RouterTest {
 		final Router router=new Router().path("/one/", handler());
 
 		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/"));
+				.hasStatus(Response.OK).hasHeader("path", "/one"));
 
 		router.handle(request("/one/")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/"));
+				.hasStatus(Response.OK).hasHeader("path", "/one/"));
 
 		router.handle(request("/one/two")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/two"));
+				.hasStatus(Response.OK).hasHeader("path", "/one/two"));
 
 	}
 
@@ -116,7 +115,7 @@ final class RouterTest {
 				.hasStatus(0));
 
 		router.handle(request("/one/two")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("base", "app:/one/").hasHeader("path", "/two"));
+				.hasStatus(Response.OK).hasHeader("path", "/one/two"));
 
 	}
 
@@ -126,7 +125,7 @@ final class RouterTest {
 		final Router router=new Router().path("/", handler());
 
 		router.handle(request("/")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("base", "app:/").hasHeader("path", "/"));
+				.hasStatus(Response.OK).hasHeader("path", "/"));
 
 		router.handle(request("/one")).accept(response -> assertThat(response)
 				.hasStatus(0));
@@ -141,7 +140,7 @@ final class RouterTest {
 				.hasStatus(0));
 
 		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("base", "app:/").hasHeader("path", "/one"));
+				.hasStatus(Response.OK).hasHeader("path", "/one"));
 
 	}
 
