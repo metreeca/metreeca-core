@@ -254,7 +254,7 @@ Note that property values that may be inferred from the associated linked data m
 EOF
 
 HTTP/2 201 Created
-Location: http://localhost:8080/products/20
+Location: http://localhost:8080/products/S10_7
 ```
 
 The newly created resource is immediately available for retrieval at the URL returned in the `Location` HTTP response header.
@@ -281,7 +281,7 @@ Note that the `line` property is included in a shorthand form, as it is inferred
 EOF
 
 HTTP/2 201 Created
-Location: https://demo.metreeca.com/products/21
+Location: https://demo.metreeca.com/products/S10_8
 ```
 
 Submitted data is automatically validated agaist the constraints specified in the linked data model driving the target REST API. Submiting, for instance, out of range price data would return an error and a structured error report.
@@ -427,7 +427,7 @@ To retrieve a digest description of collection items matching a set of facet fil
 
 ```sh
 % curl --include --header 'Accept: application/json' \
-    'http://localhost:8080/products?%7B%22filter%22%3A%7B%22price%22%3A%7B%22%3E%3D%22%3A100%7D%2C%22vendor%22%3A%22Classic%20Metal%20Creations%22%7D%7D'
+    'http://localhost:8080/products/?%7B%22filter%22%3A%7B%22price%22%3A%7B%22%3E%3D%22%3A100%7D%2C%22vendor%22%3A%22Classic%20Metal%20Creations%22%7D%7D'
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -494,11 +494,9 @@ To retrieve datatype, count and range stats for a facet, taking into account app
 % curl --include --header 'Accept: application/json' \
     'http://localhost:8080/products?%7B%0A%09%22stats%22%3A%20%22price%22%2C%09%0A%20%20%20%20%22filter%22%3A%20%7B%20%0A%20%20%20%20%20%20%20%20%22vendor%22%3A%20%22Classic%20Metal%20Creations%22%0A%20%20%20%20%7D%0A%7D'
 
-< HTTP/2 200 OK
-< Content-Type: application/json
-```
+HTTP/2 200 OK
+Content-Type: application/json
 
-```json
 {
     "this": "http://localhost:8080/products",
     "count": 10,
@@ -528,7 +526,7 @@ To list available item options and counts for a facet, taking into account appli
 
 ```sh
 % curl --include --header 'Accept: application/json' \
-    'http://localhost:8080/products?%7B%0A%09%22items%22%3A%20%22line%22%2C%09%0A%20%20%20%20%22filter%22%3A%20%7B%20%0A%20%20%20%20%20%20%20%20%22vendor%22%3A%20%22Classic%20Metal%20Creations%22%0A%20%20%20%20%7D%0A%7D'
+    'http://localhost:8080/products/?%7B%0A%09%22items%22%3A%20%22line%22%2C%09%0A%20%20%20%20%22filter%22%3A%20%7B%20%0A%20%20%20%20%20%20%20%20%22vendor%22%3A%20%22Classic%20Metal%20Creations%22%0A%20%20%20%20%7D%0A%7D'
 
 HTTP/2 200 OK
 Content-Type: application/json
