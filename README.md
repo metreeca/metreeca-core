@@ -9,7 +9,7 @@ Its engine leverages high‑level declarative domain models defined with [SHACL]
 
 Published linked data resources are also made available through idiomatic REST/JSON APIs, completely shielding front‑end developers from linked data technicalities.
 
-To get started, walk through the model‑driven linked data [publishing](https://metreeca.github.io/link/latest/tutorials/linked-data-publishing/) and [interaction](https://metreeca.github.io/link/latest/tutorials/linked-data-interaction/) tutorials.
+To get started, walk through the model‑driven linked data [publishing](https://metreeca.github.io/link/latest/tutorials/linked-data-publishing) and [interaction](https://metreeca.github.io/link/latest/tutorials/linked-data-interaction) tutorials.
 
 ---
 
