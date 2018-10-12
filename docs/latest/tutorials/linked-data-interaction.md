@@ -5,7 +5,7 @@ excerpt:    Hands-on guided tour of model-driven linked data REST APIs features
 
 This example-driven tutorial introduces the main client-facing features of the Metreeca/Link model-driven linked data framework. Basic familiarity with [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
 
-In the following sections you will learn how to interact with REST APIs published with the framework, leveraging automatic model-driven fine grained role‑based read/write access control,  faceted search and incoming data validation.
+In the following sections you will learn how to interact with REST APIs published with the framework, leveraging automatic model-driven fine-grained role‑based read/write access control,  faceted search and incoming data validation.
 
 In the tutorial we will work with the linked data server developed in the  [publishing tutorial](linked-data-publishing.md), using a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
 
@@ -143,7 +143,28 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-If available, the [linked data model](../references/spec-language.html#rdf-encoding) associated with a resource can be retrieved and inspected from the URL provided in the `Link rel="ldp:constrainedBy"`HTTP response header. The information provided by the associated model could be used, for instance, to optimize or dynamically build user interfaces or to automaticaly provide client-side validation on data forms.
+If available, the linked data model associated with a resource can be [retrieved and inspected](../references/spec-language.html#rdf-encoding) from the URL provided in the `Link rel="ldp:constrainedBy"`HTTP response header. The information provided by the associated model could be used, for instance, to optimize or dynamically build user interfaces or to automaticaly provide client-side validation on data forms.
+
+Retrieved data is automatically trimmed to the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Reserved properties are included only if the request is properly authenticated.
+
+```sh
+% curl --include --header 'Accept: application/json' \
+	--header 'Authorization: Bearer secret' \
+    "http://localhost:8080/products/S18_3140"
+    
+HTTP/1.1 200  
+Content-Type: application/json;charset=UTF-8
+
+{
+    "this": "http://localhost:8080/products/S18_3140",
+    
+    ⋮
+    
+	"stock": 3913,
+    "price": 136.59,
+    "buy": 68.3 # << buy price included only if authorized
+}
+```
 
 ## RDF Collections
 
@@ -227,7 +248,7 @@ User authorization and user-specific content validation are performed according 
 
 ## Creating Resources
 
-New RDF resources are create by submitting an RDF description to the REST API of a writable RDF collection using the `POST` HTTP method.
+New RDF resources are created by submitting an RDF description to the REST API of a writable RDF collection using the `POST` HTTP method.
 
 Standard content negotiation is supported, so you may submit resource descriptions in a suitable RDF concrete syntax ([Turtle](https://www.w3.org/TR/turtle/), [N-Triples](https://www.w3.org/TR/n-triples/), [RDF/XML](https://www.w3.org/TR/rdf-syntax-grammar/), …) specifying the associated MIME type in the `Content-Type` HTTP request header.
 
@@ -254,7 +275,7 @@ Note that property values that may be inferred from the associated linked data m
 EOF
 
 HTTP/2 201 Created
-Location: http://localhost:8080/products/S10_7
+Location: http://localhost:8080/products/S10_6
 ```
 
 The newly created resource is immediately available for retrieval at the URL returned in the `Location` HTTP response header.
@@ -281,10 +302,10 @@ Note that the `line` property is included in a shorthand form, as it is inferred
 EOF
 
 HTTP/2 201 Created
-Location: https://demo.metreeca.com/products/S10_8
+Location: https://demo.metreeca.com/products/S10_7
 ```
 
-Submitted data is automatically validated agaist the constraints specified in the linked data model driving the target REST API. Submiting, for instance, out of range price data would return an error and a structured error report.
+Submitted data is automatically validated against the constraints specified in the linked data model driving the target REST API. Submiting, for instance, out of range price data would return an error and a structured error report.
 
 ```sh
 % curl --include --request POST \
@@ -343,7 +364,7 @@ Content-Type: application/json;charset=UTF-8
 
 ```
 
-Submitted data is automatically matched agaist the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Submiting, for instance, buy price data without valid authorization headers would return an error.
+Submitted data is automatically matched against the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Submiting, for instance, buy price data without valid authorization headers would return an error.
 
 ```sh
 % curl --include --request POST \
@@ -364,7 +385,7 @@ EOF
 HTTP/1.1 401 Unauthorized
 ```
 
-## Updating Resource
+## Updating Resources
 
 Existing writable RDF resources are updated by submitting an RDF description to their REST API using the `PUT` HTTP method.
 
@@ -461,7 +482,7 @@ Note that RDF container descriptions are omitted from faceted search results.
 
 ## Sorting and Pagination
 
-Faceted search results may be sorted and paginated including [sorting criteria](../references/faceted-search.md#sorting-criteria) and [pagination limits](../references/faceted-search.md#graph-query) in the JSON query object.
+Faceted search results may be sorted and paginated including [sorting criteria](../references/faceted-search.md#edges-query) and [pagination limits](../references/faceted-search.md#edges-query) in the JSON query object.
 
 ```json
 {
@@ -492,7 +513,7 @@ To retrieve datatype, count and range stats for a facet, taking into account app
 
 ```sh
 % curl --include --header 'Accept: application/json' \
-    'http://localhost:8080/products?%7B%0A%09%22stats%22%3A%20%22price%22%2C%09%0A%20%20%20%20%22filter%22%3A%20%7B%20%0A%20%20%20%20%20%20%20%20%22vendor%22%3A%20%22Classic%20Metal%20Creations%22%0A%20%20%20%20%7D%0A%7D'
+    'http://localhost:8080/products/?%7B%0A%09%22stats%22%3A%20%22price%22%2C%09%0A%20%20%20%20%22filter%22%3A%20%7B%20%0A%20%20%20%20%20%20%20%20%22vendor%22%3A%20%22Classic%20Metal%20Creations%22%0A%20%20%20%20%7D%0A%7D'
 
 HTTP/2 200 OK
 Content-Type: application/json
