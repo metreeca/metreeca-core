@@ -559,7 +559,7 @@ private static final class ScaleSlug implements BiFunction<Request, Model, Strin
 
 The slug generator assigns newly created resources a unique identifier based on their scale.
 
-```
+```spa
 prefix birt: <terms#>
 
 prefix owl: <http://www.w3.org/2002/07/owl#>
@@ -578,7 +578,7 @@ insert { $this birt:stock 0 } where {};
 
 The *ProductsCreate* SPARQL Update post-processing script will update server-managed `birt:code` and `birt:stock` properties after a new product is added to the catalog.
 
-SPARQL Update post-processing scripts are executed after the state-mutating HTTP request is successfully completed, with some [pre-defined bindings](.../javadocs/com/metreeca/rest/wrappers/Processor.html#sync-java.lang.String-) like the `$this` variable holding the IRI of the targe resource either as derived from the HTTP request or as defined by the `Location` HTTP header after a POST request.
+SPARQL Update post-processing scripts are executed after the state-mutating HTTP request is successfully completed, with some [pre-defined bindings](../javadocs/com/metreeca/rest/wrappers/Processor.html#sync-java.lang.String-) like the `$this` variable holding the IRI of the targe resource either as derived from the HTTP request or as defined by the `Location` HTTP header after a POST request.
 
 Request and response RDF payloads may also be [pre](../javadocs/com/metreeca/rest/wrappers/Processor.html#pre-java.util.function.BiFunction-) and [post](../javadocs/com/metreeca/rest/wrappers/Processor.html#post-java.util.function.BiFunction-)-processed using custom filtering functions.
 

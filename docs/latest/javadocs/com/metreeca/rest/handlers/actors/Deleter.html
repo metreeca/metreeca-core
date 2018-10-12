@@ -18,6 +18,12 @@
     catch(err) {
     }
 //-->
+var methods = {"i0":10};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var altColor = "altColor";
+var rowColor = "rowColor";
+var tableTab = "tableTab";
+var activeTableTab = "activeTableTab";
 </script>
 <noscript>
 <div>JavaScript is disabled on your browser.</div>
@@ -71,13 +77,13 @@
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#methods.inherited.from.class.com.metreeca.rest.handlers.Actor">Method</a></li>
+<li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
-<li>Method</li>
+<li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
 <a name="skip.navbar.top">
@@ -159,12 +165,25 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <!--   -->
 </a>
 <h3>Method Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/metreeca/rest/handlers/actors/Deleter.html" title="class in com.metreeca.rest.handlers.actors">Deleter</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/rest/handlers/actors/Deleter.html#sync-java.lang.String-">sync</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;script)</code>
+<div class="block">Inserts a SPARQL Update housekeeping script.</div>
+</td>
+</tr>
+</table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.metreeca.rest.handlers.Actor">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.metreeca.rest.handlers.<a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></h3>
-<code><a href="../../../../../com/metreeca/rest/handlers/Actor.html#action-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-">action</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#link-org.eclipse.rdf4j.model.IRI-java.lang.String-">link</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#post-java.util.function.BiFunction-">post</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#pre-java.util.function.BiFunction-">pre</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#report-com.metreeca.form.Report-">report</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-java.util.Collection-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-org.eclipse.rdf4j.model.Value...-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#sync-java.lang.String-">sync</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#trace-java.util.Collection-">trace</a></code></li>
+<code><a href="../../../../../com/metreeca/rest/handlers/Actor.html#action-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-">action</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#link-org.eclipse.rdf4j.model.IRI-java.lang.String-">link</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#post-java.util.function.BiFunction-">post</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#pre-java.util.function.BiFunction-">pre</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#report-com.metreeca.form.Report-">report</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-java.util.Collection-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-org.eclipse.rdf4j.model.Value...-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#trace-java.util.Collection-">trace</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.metreeca.rest.handlers.Delegator">
@@ -208,6 +227,36 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <li class="blockList">
 <h4>Deleter</h4>
 <pre>public&nbsp;Deleter()</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="sync-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>sync</h4>
+<pre>public&nbsp;<a href="../../../../../com/metreeca/rest/handlers/actors/Deleter.html" title="class in com.metreeca.rest.handlers.actors">Deleter</a>&nbsp;sync(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;script)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../com/metreeca/rest/handlers/Actor.html#sync-java.lang.String-">Actor</a></code></span></div>
+<div class="block">Inserts a SPARQL Update housekeeping script.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../../../com/metreeca/rest/handlers/Actor.html#sync-java.lang.String-">sync</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a>&lt;<a href="../../../../../com/metreeca/rest/handlers/actors/Deleter.html" title="class in com.metreeca.rest.handlers.actors">Deleter</a>&gt;</code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>script</code> - the SPARQL Update housekeeping script to be executed by this processor on successful request
+               processing; empty scripts are ignored</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>this actor</dd>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../../com/metreeca/rest/wrappers/Processor.html#sync-java.lang.String-"><code>Processor.sync(String)</code></a></dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -266,13 +315,13 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#methods.inherited.from.class.com.metreeca.rest.handlers.Actor">Method</a></li>
+<li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
-<li>Method</li>
+<li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
 <a name="skip.navbar.bottom">
