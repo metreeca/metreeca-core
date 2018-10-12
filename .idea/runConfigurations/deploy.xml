@@ -12,6 +12,7 @@
             <list>
               <option value="-DskipTests=false" />
               <option value="clean" />
+              <option value="validate" />
               <option value="deploy" />
             </list>
           </option>

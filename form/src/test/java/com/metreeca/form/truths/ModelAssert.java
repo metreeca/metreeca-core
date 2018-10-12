@@ -157,8 +157,10 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		final Model matching=actual.filter(subject, predicate, object);
 
 		if ( matching.isEmpty() ) {
-			failWithMessage("expected <%s> to contain no statements matching <{%s %s %s}> but has none",
-					format(subject), format(predicate), format(object), format(actual));
+			failWithMessage(
+					"expected <%s> to contain statements matching <{%s %s %s}> but has none",
+					format(actual), format(subject), format(predicate), format(object)
+			);
 		}
 
 		return this;

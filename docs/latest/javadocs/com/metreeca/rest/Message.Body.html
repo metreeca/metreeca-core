@@ -242,7 +242,11 @@ implements <a href="../../../com/metreeca/rest/Result.html" title="interface in 
 
  <p>Future calls to getter <a href="../../../com/metreeca/rest/Result.html" title="interface in com.metreeca.rest">result</a> methods on this body will pipe the structured value
  either explicitly <a href="../../../com/metreeca/rest/Message.Body.html#set-V-">set</a> or <a href="../../../com/metreeca/rest/Format.html#get-com.metreeca.rest.Message-">retrieved</a> on demand by
- the format associated to this body through a filtering function.</p></div>
+ the format associated to this body through a filtering function.</p>
+
+ <p><strong>Warning</strong> / Filtering is performed on demand, as final consumer eventually retrieves the
+ filtered message body: if <code>mapper</code> relies on information retrieved from the message, its current state
+ must be memoized, before it's possibly altered by downstream wrappers.</p></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>mapper</code> - the value filtering function</dd>
@@ -266,7 +270,11 @@ implements <a href="../../../com/metreeca/rest/Result.html" title="interface in 
 
  <p>Future calls to getter <a href="../../../com/metreeca/rest/Result.html" title="interface in com.metreeca.rest">result</a> methods on this body will pipe the structured value
  either explicitly <a href="../../../com/metreeca/rest/Message.Body.html#set-V-">set</a> or <a href="../../../com/metreeca/rest/Format.html#get-com.metreeca.rest.Message-">retrieved</a> on demand by
- the format associated to this body through a result-returning filtering function.</p></div>
+ the format associated to this body through a result-returning filtering function.</p>
+
+ <p><strong>Warning</strong> / Filtering is performed on demand, as final consumer eventually retrieves the
+ filtered message body: if <code>mapper</code> relies on information retrieved from the message, its current state
+ must be memoized, before it's possibly altered by downstream wrappers.</p></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>mapper</code> - the value filtering function</dd>

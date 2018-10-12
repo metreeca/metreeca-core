@@ -122,7 +122,7 @@ implements <a href="../../../../com/metreeca/rest/Wrapper.html" title="interface
 
  <ul>
 
- <li>associates the shape model to incoming requests as a <a href="../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body;</li>
+ <li>associates the shape model to incoming requests as  a <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a>;</li>
 
  <li>advertises the association between the response focus <a href="../../../../com/metreeca/rest/Response.html#item--">item</a> and the shape model
  through a "<code>Link: &lt;resource?specs&gt;; rel=http://www.w3.org/ns/ldp#constrainedBy</code>" header;</li>
@@ -152,10 +152,10 @@ implements <a href="../../../../com/metreeca/rest/Wrapper.html" title="interface
 
  <ul>
 
- <li>redacting the shape read associated with incoming request as a <a href="../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body according to the task to
+ <li>redacting the shape read associated with incoming request as  a <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a> according to the task to
  be performed;</li>
 
- <li>associating a shape to outgoing responses as a <a href="../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body in order to drive further processing
+ <li>associating a shape to outgoing responses as  a <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a> in order to drive further processing
  (e.g. RDF to JSON body mapping).</li>
 
  </ul>

@@ -20,7 +20,6 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.Values;
-import com.metreeca.form.things.ValuesTest;
 import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
@@ -44,6 +43,7 @@ import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -57,10 +57,15 @@ import static java.util.Collections.singleton;
 
 final class RewriterTest {
 
-	private static final String External=ValuesTest.Base;
-	private static final String Internal="app://test/";
+	private static final String External="app://external/";
+	private static final String Internal="app://internal/";
 
 	private static final Shape TestShape=trait(internal("p"), and(required(), datatype(Values.IRIType)));
+
+
+	private static void exec(final Runnable... tasks) {
+		new Tray().exec(tasks).clear();
+	}
 
 
 	private static IRI external(final String name) {
@@ -199,12 +204,12 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
-					request.body(rdf()).use(
-							model -> assertThat(singleton(internal("s", "p", "o"))).as("request json rewritten").isIsomorphicTo(model),
-							error -> fail("missing RDF payload")
-					);
+					assertThat(request).hasBodyThat(rdf())
+							.as("request json rewritten")
+							.isIsomorphicTo(singleton(internal("s", "p", "o")));
 
-					return request.reply(response -> response.status(Response.OK)
+					return request.reply(response -> response.
+							status(Response.OK)
 							.shape(TestShape)
 							.body(rdf()).set(singleton(internal("s", "p", "o"))));
 				}))

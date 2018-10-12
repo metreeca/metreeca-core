@@ -136,22 +136,14 @@ extends <a href="../../../../com/metreeca/rest/handlers/Delegator.html" title="c
 
  <ul>
 
- <li>looks for a <a href="../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats">shape</a> body in incoming requests and redact it according to task/view
- parameters <a href="../../../../com/metreeca/rest/handlers/Actor.html#handler-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-java.util.function.BiFunction-">provided</a> by the concrete implementation;</li>
+ <li>redact request and response <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a> according to task/view parameters <a href="../../../../com/metreeca/rest/handlers/Actor.html#action-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-">provided</a> by the concrete implementation;</li>
 
- <li>enforces role-based access control; Access to the managed resource action is public, unless explicitly
- <a href="../../../../com/metreeca/rest/handlers/Actor.html#roles-org.eclipse.rdf4j.model.Value...-">limited</a> to * specific user roles;</li>
+ <li>enforces role-based access control; access to the managed resource action is public, unless explicitly
+ <a href="../../../../com/metreeca/rest/handlers/Actor.html#roles-org.eclipse.rdf4j.model.Value...-">limited</a> to specific user roles;</li>
 
  <li>adds default LDP <code>Link</code> response headers for RDF sources.</li>
 
- </ul>
-
- <dl>
-
- <dt>Request <a href="../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body {optional}</dt>
- <dd>An optional linked data shape driving action processing.</dd>
-
- </dl></div>
+ </ul></div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="https://www.w3.org/TR/ldp/#ldprs">Linked Data Platform 1.0 - §4.3 RDF Source</a></dd>
@@ -192,11 +184,10 @@ extends <a href="../../../../com/metreeca/rest/handlers/Delegator.html" title="c
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>protected <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Actor.html#handler-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-java.util.function.BiFunction-">handler</a></span>(<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&nbsp;task,
-       <a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&nbsp;view,
-       <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="../../../../com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a>,<a href="../../../../com/metreeca/rest/Responder.html" title="interface in com.metreeca.rest">Responder</a>&gt;&nbsp;action)</code>
-<div class="block">Creates a shape-driven action handler.</div>
+<td class="colFirst"><code>protected <a href="../../../../com/metreeca/rest/Wrapper.html" title="interface in com.metreeca.rest">Wrapper</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Actor.html#action-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-">action</a></span>(<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&nbsp;task,
+      <a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&nbsp;view)</code>
+<div class="block">Creates a shape-driven action wrapper.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -418,28 +409,28 @@ extends <a href="../../../../com/metreeca/rest/handlers/Delegator.html" title="c
 </dl>
 </li>
 </ul>
-<a name="handler-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-java.util.function.BiFunction-">
+<a name="action-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>handler</h4>
-<pre>protected&nbsp;<a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a>&nbsp;handler(<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&nbsp;task,
-                          <a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&nbsp;view,
-                          <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="../../../../com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a>,<a href="../../../../com/metreeca/rest/Responder.html" title="interface in com.metreeca.rest">Responder</a>&gt;&nbsp;action)</pre>
-<div class="block">Creates a shape-driven action handler.</div>
+<h4>action</h4>
+<pre>protected&nbsp;<a href="../../../../com/metreeca/rest/Wrapper.html" title="interface in com.metreeca.rest">Wrapper</a>&nbsp;action(<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&nbsp;task,
+                         <a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&nbsp;view)</pre>
+<div class="block">Creates a shape-driven action wrapper.
+
+ <p>Redacts request and response <a href="../../../../com/metreeca/rest/Message.html#shape--">shapes</a> according to <code>task</code> and <code>view</code>
+ parameters and the <a href="../../../../com/metreeca/rest/Request.html#roles--">roles</a> of the user performing the request; response shape is also
+ redacted according to the <a href="../../../../com/metreeca/form/Shape.html#verify-com.metreeca.form.Shape...-"><code>Shape.verify(Shape...)</code></a> mode; request <code>mode</code> redaction is left to final
+ shape consumers.</p></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>task</code> - a IRI identifying the <a href="../../../../com/metreeca/form/Form.html#task">task</a> to be performed by the generated handler</dd>
-<dd><code>view</code> - a IRI identifying the <a href="../../../../com/metreeca/form/Form.html#view">view</a> level for the generated handler</dd>
-<dd><code>action</code> - a function mapping a request and resource shape to a resource responder; the possibly empty input
-               shape is retrieved from the request <a href="../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats">shape</a> body, if one is available, and
-               redacted according to <code>task</code> and <code>view</code> parameters and the roles of the user performing
-               the request; <code>mode</code> redaction is left to final shape consumers</dd>
+<dd><code>task</code> - a IRI identifying the <a href="../../../../com/metreeca/form/Form.html#task">task</a> to be performed by the wrapped handler</dd>
+<dd><code>view</code> - a IRI identifying the <a href="../../../../com/metreeca/form/Form.html#view">view</a> level for the wrapped handler</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>an handler for the specified shape driven action</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if any argument is null</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if either <code>task</code> or <code>view</code> is null</dd>
 </dl>
 </li>
 </ul>

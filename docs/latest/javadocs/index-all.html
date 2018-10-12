@@ -164,6 +164,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Response.html#Accepted">Accepted</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#action-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-">action(IRI, IRI)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
+<dd>
+<div class="block">Creates a shape-driven action wrapper.</div>
+</dd>
 <dt><a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Actor</span></a>&lt;<a href="com/metreeca/rest/handlers/Actor.html" title="type parameter in Actor">T</a> extends <a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a>&lt;<a href="com/metreeca/rest/handlers/Actor.html" title="type parameter in Actor">T</a>&gt;&gt; - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
 <dd>
 <div class="block">Resource actor.</div>
@@ -280,7 +284,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-">body(Format&lt;V&gt;)</a></span> - Method in class com.metreeca.rest.<a href="com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a></dt>
 <dd>
-<div class="block">Retrieves a structured of this message body.</div>
+<div class="block">Retrieves a structured body.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Failure.html#BodyMalformed">BodyMalformed</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></dt>
 <dd>
@@ -617,7 +621,9 @@
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Request.html#DELETE">DELETE</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/metreeca/rest/handlers/actors/Deleter.html" title="class in com.metreeca.rest.handlers.actors"><span class="typeNameLink">Deleter</span></a> - Class in <a href="com/metreeca/rest/handlers/actors/package-summary.html">com.metreeca.rest.handlers.actors</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Resource deleter.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/actors/Deleter.html#Deleter--">Deleter()</a></span> - Constructor for class com.metreeca.rest.handlers.actors.<a href="com/metreeca/rest/handlers/actors/Deleter.html" title="class in com.metreeca.rest.handlers.actors">Deleter</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/Form.html#detail">detail</a></span> - Static variable in class com.metreeca.form.<a href="com/metreeca/form/Form.html" title="class in com.metreeca.form">Form</a></dt>
@@ -651,6 +657,8 @@
 <dt><span class="memberNameLink"><a href="com/metreeca/form/queries/Edges.html#Edges-com.metreeca.form.Shape-">Edges(Shape)</a></span> - Constructor for class com.metreeca.form.queries.<a href="com/metreeca/form/queries/Edges.html" title="class in com.metreeca.form.queries">Edges</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/queries/Edges.html#Edges-com.metreeca.form.Shape-java.util.List-int-int-">Edges(Shape, List&lt;Query.Order&gt;, int, int)</a></span> - Constructor for class com.metreeca.form.queries.<a href="com/metreeca/form/queries/Edges.html" title="class in com.metreeca.form.queries">Edges</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/form/Shape.html#empty--">empty()</a></span> - Static method in interface com.metreeca.form.<a href="com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/Shape.html#empty-com.metreeca.form.Shape-">empty(Shape)</a></span> - Static method in interface com.metreeca.form.<a href="com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a></dt>
 <dd>&nbsp;</dd>
@@ -1143,10 +1151,6 @@
 <dt><a href="com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest"><span class="typeNameLink">Handler</span></a> - Interface in <a href="com/metreeca/rest/package-summary.html">com.metreeca.rest</a></dt>
 <dd>
 <div class="block">Resource handler {thread-safe}.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#handler-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-java.util.function.BiFunction-">handler(IRI, IRI, BiFunction&lt;Request, Shape, Responder&gt;)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
-<dd>
-<div class="block">Creates a shape-driven action handler.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/codecs/JSONWriter.html#handleStatement-org.eclipse.rdf4j.model.Statement-">handleStatement(Statement)</a></span> - Method in class com.metreeca.form.codecs.<a href="com/metreeca/form/codecs/JSONWriter.html" title="class in com.metreeca.form.codecs">JSONWriter</a></dt>
 <dd>&nbsp;</dd>
@@ -2042,6 +2046,10 @@
 <dd>
 <div class="block">Retrieves the RDF body format.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/wrappers/Processor.html#rdf-java.lang.String-">rdf(String)</a></span> - Static method in class com.metreeca.rest.wrappers.<a href="com/metreeca/rest/wrappers/Processor.html" title="class in com.metreeca.rest.wrappers">Processor</a></dt>
+<dd>
+<div class="block">Creates a message processing filter for inserting static RDF content.</div>
+</dd>
 <dt><a href="com/metreeca/tray/rdf/graphs/RDF4JMemory.html" title="class in com.metreeca.tray.rdf.graphs"><span class="typeNameLink">RDF4JMemory</span></a> - Class in <a href="com/metreeca/tray/rdf/graphs/package-summary.html">com.metreeca.tray.rdf.graphs</a></dt>
 <dd>
 <div class="block">RDF4J memory graph store.</div>
@@ -2372,9 +2380,13 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/Shape.html#shape-org.eclipse.rdf4j.model.IRI-java.util.Collection-java.util.Collection-">shape(IRI, Collection&lt;? extends Value&gt;, Collection&lt;Shape&gt;)</a></span> - Static method in interface com.metreeca.form.<a href="com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/rest/formats/ShapeFormat.html#shape--">shape()</a></span> - Static method in class com.metreeca.rest.formats.<a href="com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats">ShapeFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/Message.html#shape--">shape()</a></span> - Method in class com.metreeca.rest.<a href="com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a></dt>
 <dd>
-<div class="block">Retrieves the shape body format.</div>
+<div class="block">Retrieves the linked data shape.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/Message.html#shape-com.metreeca.form.Shape-">shape(Shape)</a></span> - Method in class com.metreeca.rest.<a href="com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a></dt>
+<dd>
+<div class="block">Configures the linked data shape.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/wrappers/Driver.html#shape-com.metreeca.form.Shape-">shape(Shape)</a></span> - Method in class com.metreeca.rest.wrappers.<a href="com/metreeca/rest/wrappers/Driver.html" title="class in com.metreeca.rest.wrappers">Driver</a></dt>
 <dd>
@@ -2386,10 +2398,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/codecs/ShapeCodec.html#ShapeCodec--">ShapeCodec()</a></span> - Constructor for class com.metreeca.form.codecs.<a href="com/metreeca/form/codecs/ShapeCodec.html" title="class in com.metreeca.form.codecs">ShapeCodec</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><span class="typeNameLink">ShapeFormat</span></a> - Class in <a href="com/metreeca/rest/formats/package-summary.html">com.metreeca.rest.formats</a></dt>
-<dd>
-<div class="block">Shape body format.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/Form.html#shapes">shapes</a></span> - Static variable in class com.metreeca.form.<a href="com/metreeca/form/Form.html" title="class in com.metreeca.form">Form</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/Form.html#shift">shift</a></span> - Static variable in class com.metreeca.form.<a href="com/metreeca/form/Form.html" title="class in com.metreeca.form">Form</a></dt>
@@ -2406,7 +2414,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/Frame.html#slot-com.metreeca.form.shifts.Step-T-">slot(Step, T)</a></span> - Static method in class com.metreeca.form.<a href="com/metreeca/form/Frame.html" title="class in com.metreeca.form">Frame</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/actors/Creator.html#slug-java.util.function.BiFunction-">slug(BiFunction&lt;Request, Collection&lt;Statement&gt;, String&gt;)</a></span> - Method in class com.metreeca.rest.handlers.actors.<a href="com/metreeca/rest/handlers/actors/Creator.html" title="class in com.metreeca.rest.handlers.actors">Creator</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/actors/Creator.html#slug-java.util.function.BiFunction-">slug(BiFunction&lt;Request, Model, String&gt;)</a></span> - Method in class com.metreeca.rest.handlers.actors.<a href="com/metreeca/rest/handlers/actors/Creator.html" title="class in com.metreeca.rest.handlers.actors">Creator</a></dt>
 <dd>
 <div class="block">Configures the slug generation function.</div>
 </dd>
@@ -2501,6 +2509,8 @@
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/actors/Browser.html#sync-java.lang.String-">sync(String)</a></span> - Method in class com.metreeca.rest.handlers.actors.<a href="com/metreeca/rest/handlers/actors/Browser.html" title="class in com.metreeca.rest.handlers.actors">Browser</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/actors/Creator.html#sync-java.lang.String-">sync(String)</a></span> - Method in class com.metreeca.rest.handlers.actors.<a href="com/metreeca/rest/handlers/actors/Creator.html" title="class in com.metreeca.rest.handlers.actors">Creator</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/actors/Deleter.html#sync-java.lang.String-">sync(String)</a></span> - Method in class com.metreeca.rest.handlers.actors.<a href="com/metreeca/rest/handlers/actors/Deleter.html" title="class in com.metreeca.rest.handlers.actors">Deleter</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/actors/Updater.html#sync-java.lang.String-">sync(String)</a></span> - Method in class com.metreeca.rest.handlers.actors.<a href="com/metreeca/rest/handlers/actors/Updater.html" title="class in com.metreeca.rest.handlers.actors">Updater</a></dt>
 <dd>&nbsp;</dd>
@@ -2863,7 +2873,9 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/Form.html#Virtual">Virtual</a></span> - Static variable in class com.metreeca.form.<a href="com/metreeca/form/Form.html" title="class in com.metreeca.form">Form</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/metreeca/form/shapes/Virtual.html" title="class in com.metreeca.form.shapes"><span class="typeNameLink">Virtual</span></a> - Class in <a href="com/metreeca/form/shapes/package-summary.html">com.metreeca.form.shapes</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">{Work in progress}</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/shapes/Virtual.html#Virtual-com.metreeca.form.shapes.Trait-com.metreeca.form.Shift-">Virtual(Trait, Shift)</a></span> - Constructor for class com.metreeca.form.shapes.<a href="com/metreeca/form/shapes/Virtual.html" title="class in com.metreeca.form.shapes">Virtual</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/shapes/Virtual.html#virtual-com.metreeca.form.shapes.Trait-com.metreeca.form.Shift-">virtual(Trait, Shift)</a></span> - Static method in class com.metreeca.form.shapes.<a href="com/metreeca/form/shapes/Virtual.html" title="class in com.metreeca.form.shapes">Virtual</a></dt>
@@ -3069,6 +3081,10 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/shapes/When.html#when-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.Value...-">when(IRI, Value...)</a></span> - Static method in class com.metreeca.form.shapes.<a href="com/metreeca/form/shapes/When.html" title="class in com.metreeca.form.shapes">When</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/form/shapes/When.html#when-org.eclipse.rdf4j.model.IRI-java.util.Collection-">when(IRI, Collection&lt;? extends Value&gt;)</a></span> - Static method in class com.metreeca.form.shapes.<a href="com/metreeca/form/shapes/When.html" title="class in com.metreeca.form.shapes">When</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/form/Shape.html#wild--">wild()</a></span> - Static method in interface com.metreeca.form.<a href="com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/form/Shape.html#wild-com.metreeca.form.Shape-">wild(Shape)</a></span> - Static method in interface com.metreeca.form.<a href="com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/metreeca/rest/handlers/Worker.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Worker</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
 <dd>

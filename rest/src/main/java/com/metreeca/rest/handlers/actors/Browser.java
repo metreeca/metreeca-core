@@ -31,8 +31,7 @@ import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,8 +39,13 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.form.Shape.optional;
+import static com.metreeca.form.Shape.verify;
 import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.queries.Items.ItemsShape;
+import static com.metreeca.form.queries.Stats.StatsShape;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -179,7 +183,11 @@ public final class Browser extends Actor<Browser> {
 			}
 
 			return response.status(Response.OK)
-					.shape(trait(LDP.CONTAINS, edges.getShape()))
+					.shape(and( // !!! provisional support for container metadata (replace with wildcard trait)
+							trait(RDFS.LABEL, verify(optional(), datatype(XMLSchema.STRING))),
+							trait(RDFS.COMMENT, verify(optional(), datatype(XMLSchema.STRING))),
+							trait(LDP.CONTAINS, edges.getShape())
+					))
 					.body(rdf()).set(model);
 		});
 	}
@@ -187,7 +195,7 @@ public final class Browser extends Actor<Browser> {
 	private Response stats(final Query stats, final Response response) {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
-					.shape(ItemsShape)
+					.shape(StatsShape)
 					.body(rdf()).set(new SPARQLEngine(connection).browse(stats, response.item()));
 
 		});

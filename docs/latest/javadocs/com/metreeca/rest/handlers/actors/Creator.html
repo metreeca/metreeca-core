@@ -134,16 +134,12 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 
  <dl>
 
- <dt>Request <a href="../../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body {optional}</dt>
-
- <dd>An optional linked data shape driving the creation process.</dd>
-
  <dt>Request shape-driven <a href="../../../../../com/metreeca/rest/formats/RDFFormat.html" title="class in com.metreeca.rest.formats"><code>RDFFormat</code></a> body</dt>
 
  <dd>The RDF content to be assigned to the newly created resource; must describe the new resource using
  the request <a href="../../../../../com/metreeca/rest/Request.html#item--">focus item</a> as subject.</dd>
 
- <dd>If the request includes a <a href="../../../../../com/metreeca/rest/formats/ShapeFormat.html" title="class in com.metreeca.rest.formats"><code>ShapeFormat</code></a> body, it is redacted taking into account the request user
+ <dd>If the request includes  a <a href="../../../../../com/metreeca/rest/Message.html#shape--">shape</a>, it is redacted taking into account the request user
  <a href="../../../../../com/metreeca/rest/Request.html#roles--">roles</a>,  <a href="../../../../../com/metreeca/form/Form.html#create"><code>Form.create</code></a> task,  <a href="../../../../../com/metreeca/form/Form.html#verify"><code>Form.verify</code></a> mode and <a href="../../../../../com/metreeca/form/Form.html#detail"><code>Form.detail</code></a> view
  and used to validate the request RDF body; validation errors are reported with a <a href="../../../../../com/metreeca/rest/Response.html#UnprocessableEntity">Response.UnprocessableEntity</a> status code and a structured <a href="../../../../../com/metreeca/rest/Failure.html#trace-javax.json.JsonValue-">trace</a> element.</dd>
 
@@ -193,7 +189,7 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Statement.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Statement</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Model.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Model</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/rest/handlers/actors/Creator.html#auto-com.metreeca.form.Shape-">auto</a></span>(<a href="../../../../../com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a>&nbsp;shape)</code>
 <div class="block">Generates a sequential auto-incrementing slug.</div>
 </td>
@@ -206,7 +202,7 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/metreeca/rest/handlers/actors/Creator.html" title="class in com.metreeca.rest.handlers.actors">Creator</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/rest/handlers/actors/Creator.html#slug-java.util.function.BiFunction-">slug</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Statement.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Statement</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;slug)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/rest/handlers/actors/Creator.html#slug-java.util.function.BiFunction-">slug</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Model.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Model</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;slug)</code>
 <div class="block">Configures the slug generation function.</div>
 </td>
 </tr>
@@ -217,7 +213,7 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 </td>
 </tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Statement.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Statement</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Model.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Model</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/metreeca/rest/handlers/actors/Creator.html#uuid--">uuid</a></span>()</code>
 <div class="block">Generates a random UUID-based slug.</div>
 </td>
@@ -228,7 +224,7 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.metreeca.rest.handlers.<a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></h3>
-<code><a href="../../../../../com/metreeca/rest/handlers/Actor.html#handler-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-java.util.function.BiFunction-">handler</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#link-org.eclipse.rdf4j.model.IRI-java.lang.String-">link</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#post-java.util.function.BiFunction-">post</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#report-com.metreeca.form.Report-">report</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-java.util.Collection-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-org.eclipse.rdf4j.model.Value...-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#trace-java.util.Collection-">trace</a></code></li>
+<code><a href="../../../../../com/metreeca/rest/handlers/Actor.html#action-org.eclipse.rdf4j.model.IRI-org.eclipse.rdf4j.model.IRI-">action</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#link-org.eclipse.rdf4j.model.IRI-java.lang.String-">link</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#post-java.util.function.BiFunction-">post</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#report-com.metreeca.form.Report-">report</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-java.util.Collection-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#roles-org.eclipse.rdf4j.model.Value...-">roles</a>, <a href="../../../../../com/metreeca/rest/handlers/Actor.html#trace-java.util.Collection-">trace</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.metreeca.rest.handlers.Delegator">
@@ -332,7 +328,7 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <ul class="blockList">
 <li class="blockList">
 <h4>slug</h4>
-<pre>public&nbsp;<a href="../../../../../com/metreeca/rest/handlers/actors/Creator.html" title="class in com.metreeca.rest.handlers.actors">Creator</a>&nbsp;slug(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Statement.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Statement</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;slug)</pre>
+<pre>public&nbsp;<a href="../../../../../com/metreeca/rest/handlers/actors/Creator.html" title="class in com.metreeca.rest.handlers.actors">Creator</a>&nbsp;slug(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Model.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Model</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;slug)</pre>
 <div class="block">Configures the slug generation function.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -351,7 +347,7 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <ul class="blockList">
 <li class="blockList">
 <h4>uuid</h4>
-<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Statement.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Statement</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;uuid()</pre>
+<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Model.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Model</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;uuid()</pre>
 <div class="block">Generates a random UUID-based slug.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
@@ -365,7 +361,7 @@ extends <a href="../../../../../com/metreeca/rest/handlers/Actor.html" title="cl
 <ul class="blockListLast">
 <li class="blockList">
 <h4>auto</h4>
-<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Statement.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Statement</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;auto(<a href="../../../../../com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a>&nbsp;shape)</pre>
+<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="../../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Model.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">Model</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;auto(<a href="../../../../../com/metreeca/form/Shape.html" title="interface in com.metreeca.form">Shape</a>&nbsp;shape)</pre>
 <div class="block">Generates a sequential auto-incrementing slug.
 
  <p><strong>Warning</strong> / Missing native SPARQL support for auto-incrementing ids, auto-incrementing slug

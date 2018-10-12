@@ -1,9 +1,9 @@
 ---
-title:     Idiomatic JSON Reference
-excerpt:    "Idiomatic RDF JSON serialization format codecs and grammar"
+title:     Idiomatic RDF/JSON Serialization Reference
+excerpt:    Idiomatic RDF/JSON serialization format codecs and grammar
 ---
 
-Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the platform supports a simpler idiomatic JSON‑based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language#shapes).
+Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the framework supports a simpler idiomatic JSON‑based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language.md#shapes).
 
 Codecs for this serialization make heavy use of reasoning over linked data shapes to **prove** useful features of the RDF payload, like the expected value for a property being a IRI reference or a required non-repeatable string.
 
@@ -19,7 +19,7 @@ Codec behaviour is controlled through the following  RDF4J [RioSetting](http://d
 
 | setting                                  | type                                     | value                                    | default                             |
 | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------- |
-| [Shape](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Shape) | [Shape](../javadocs/com/metreeca/form/shape) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
+| [Shape](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Shape) | [Shape](../javadocs/com/metreeca/form/Shape.html) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
 | [Focus](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Focus) | [Resource](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Resource.html) | the entry point for the de/serializaton process | `null` (will be inferred from data) |
 
 # JSON Serialization
@@ -120,7 +120,7 @@ If  the property value may be proved to be non-repeatable, it may be included as
 
 Predicate IRIs are represented as strings, in either plain or angle bracket notation. Predicate IRIs for inverse RDF properties are prefixed with a caret charatecter (`^`).
 
-If a shape is provided to the codec, predicate IRIs are reported in a shortened form using user-defined or system-inferred  [aliases](spec-language#annotations). Predicate IRIs with clashing aliases are written in full using the angle bracket notation.
+If a shape is provided to the codec, predicate IRIs are reported in a shortened form using user-defined or system-inferred  [aliases](spec-language.md#annotations). Predicate IRIs with clashing aliases are written in full using the angle bracket notation.
 
 The `this` label is reserved for system use.
 
