@@ -93,8 +93,8 @@ public final class Router implements Handler {
 			throw new NullPointerException("null handler");
 		}
 
-		final String sorter=path.endsWith("/") ? path+'1'
-				: path.endsWith("/*") ? path.replace('*', '2')
+		final String sorter=path.endsWith("/*") ? path.replace('*', '2')
+				: path.endsWith("/") ? path+'1'
 				: path+"/0";
 
 		final Function<Request, Optional<Responder>> route=path.equals("/") ? route("", "/", handler) // root
