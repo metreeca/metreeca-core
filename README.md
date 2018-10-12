@@ -1,5 +1,5 @@
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/link.svg)](com.metreeca:link)
+![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/link.svg)
 
 # Metreeca/Link
 
