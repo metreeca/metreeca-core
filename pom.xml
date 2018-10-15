@@ -445,7 +445,7 @@
 
 					</plugin>
 
-					<plugin> <!-- http://maven.apache.org/plugins/maven-scm-publish-plugin/index.html -->
+					<plugin> <!-- http://maven.apache.org/plugins/maven-scm-publish-plugin/ -->
 
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-scm-publish-plugin</artifactId>
@@ -456,6 +456,7 @@
 							<scmBranch>gh-pages</scmBranch>
 							<serverId>github</serverId>
 							<content>${project.build.directory}/docs</content>
+							<siteOutputEncoding>${project.build.sourceEncoding}</siteOutputEncoding>
 							<checkinComment>Deploy v${project.version} docs</checkinComment>
 						</configuration>
 
@@ -463,8 +464,8 @@
 							<execution>
 
 								<id>deploy-docs</id>
-								<phase>site-deploy</phase>
 								<inherited>false</inherited>
+								<phase>site-deploy</phase>
 
 								<goals>
 									<goal>publish-scm</goal>
