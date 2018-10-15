@@ -94,9 +94,12 @@
 		<java.version>1.8</java.version>
 		<rdf4j.version>2.4.0</rdf4j.version>
 
+		<docs.major>${project.artifact.selectedVersion.majorVersion}.x</docs.major>
+		<docs.minor>${project.artifact.selectedVersion.majorVersion}.${project.artifact.selectedVersion.minorVersion}</docs.minor>
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<maven.deploy.skip>true</maven.deploy.skip> <!-- !!! no public artifact deployment -->
+		<maven.deploy.skip>true</maven.deploy.skip> <!-- ossrh public artifact deployment -->
 		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 
 		<timestamp>${maven.build.timestamp}</timestamp> <!-- ;( not directly available to filtered resources -->
@@ -241,7 +244,7 @@
 
 						<configuration>
 
-							<reportOutputDirectory>${project.build.directory}/docs/${project.version}</reportOutputDirectory>
+							<reportOutputDirectory>${project.build.directory}/generated-docs</reportOutputDirectory>
 							<destDir>javadocs</destDir>
 
 							<groups>
@@ -283,7 +286,7 @@
 					<execution>
 
 						<id>copy-version-docs</id>
-						<phase>site</phase>
+						<phase>post-site</phase>
 						<inherited>false</inherited>
 
 						<goals>
@@ -292,7 +295,8 @@
 
 						<configuration>
 
-							<outputDirectory>${project.build.directory}/docs/${project.version}</outputDirectory>
+							<outputDirectory>${project.build.directory}/docs/versions/${docs.minor}
+							</outputDirectory>
 							<overwrite>true</overwrite>
 
 							<resources>
@@ -302,11 +306,45 @@
 									<filtering>true</filtering>
 								</resource>
 
+								<resource> <!-- generated docs -->
+									<directory>${project.build.directory}/generated-docs</directory>
+									<filtering>true</filtering>
+								</resource>
+
 							</resources>
 
 						</configuration>
 
 					</execution>
+
+					<execution>
+
+						<id>copy-release-docs</id>
+						<phase>post-site</phase>
+						<inherited>false</inherited>
+
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+
+						<configuration>
+
+							<outputDirectory>${project.build.directory}/docs/versions/${docs.major}</outputDirectory>
+							<overwrite>true</overwrite>
+
+							<resources>
+
+								<resource>
+									<directory>${project.build.directory}/docs/versions/${docs.minor}</directory>
+									<filtering>false</filtering>
+								</resource>
+
+							</resources>
+
+						</configuration>
+
+					</execution>
+
 				</executions>
 
 			</plugin>
