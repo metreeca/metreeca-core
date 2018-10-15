@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="preview" type="MavenRunConfiguration" factoryName="Maven" singleton="true">
+  <configuration default="false" name="site-deploy" type="MavenRunConfiguration" factoryName="Maven" singleton="true">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
@@ -10,13 +10,16 @@
           </option>
           <option name="goals">
             <list>
-              <option value="-DskipTests=true" />
-              <option value="post-site" />
+              <option value="clean" />
+              <option value="validate" />
+              <option value="site-deploy" />
             </list>
           </option>
           <option name="pomFileName" />
           <option name="profilesMap">
-            <map />
+            <map>
+              <entry key="release" value="true" />
+            </map>
           </option>
           <option name="resolveToWorkspace" value="false" />
           <option name="workingDirPath" value="$PROJECT_DIR$" />
