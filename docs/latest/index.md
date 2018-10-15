@@ -4,7 +4,7 @@ Its engine automatically converts declarative high-level domain models defined w
 
 Published linked data resources are made available both through [LDP](https://www.w3.org/TR/ldp-primer/) and idiomatic REST/JSON APIs, supporting standardized access from third-party clients and completely shielding front‑end developers from linked data technicalities.
 
-To get started, walk through the model‑driven linked data [publishing](tutorials/linked-data-publishing.md) and [interaction](tutorials/linked-data-interaction.md) tutorials.
+To get started with Metreeca/Link, walk through the model‑driven linked data [publishing](tutorials/linked-data-publishing.md) and [interaction](tutorials/linked-data-interaction.md) tutorials.
 
 ---
 
