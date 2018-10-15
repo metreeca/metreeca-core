@@ -157,7 +157,7 @@ The [rewriter](../javadocs/?com/metreeca/rest/wrappers/Rewriter.html) wrapper re
 
 # Handling Requests
 
-Requests are dispatched to their final handlers through a hierarchy of dispatching wrappers.
+Requests are dispatched to their final handlers through a hierarchy of wrappers and delegating handlers.
 
 ```java
 () -> new Server()

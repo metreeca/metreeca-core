@@ -1,9 +1,8 @@
+Metreeca/Link is an open source [RDF4J](http://rdf4j.org)-based Java framework enabling rapid development of RESTful linked data services.
 
-Metreeca/Link is an [RDF4J](http://rdf4j.org)‑based Java framework enabling rapid development of linked data APIs and services.
+Its engine automatically converts declarative high-level domain models defined with [SHACL](https://www.w3.org/TR/shacl/) and [SPARQL](https://www.w3.org/TR/sparql11-overview/) into extended linked data APIs supporting faceted search, data validation and fine‑grained role‑based read/write access control rules.
 
-Its engine leverages high‑level declarative domain models defined with [SHACL](https://www.w3.org/TR/shacl/) and [SPARQL](https://www.w3.org/TR/sparql11-overview/) to automatically generate extended model‑driven [LDP](https://www.w3.org/TR/ldp-primer/) REST APIs supporting fine‑grained role‑based read/write access control, faceted search and incoming data validation.
-
-Published linked data resources are also made available through idiomatic REST/JSON APIs, completely shielding front‑end developers from linked data technicalities.
+Published linked data resources are made available both through [LDP](https://www.w3.org/TR/ldp-primer/) and idiomatic REST/JSON APIs, supporting standardized access from third-party clients and completely shielding front‑end developers from linked data technicalities.
 
 To get started, walk through the model‑driven linked data [publishing](tutorials/linked-data-publishing.md) and [interaction](tutorials/linked-data-interaction.md) tutorials.
 
