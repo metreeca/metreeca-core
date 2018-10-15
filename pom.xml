@@ -494,6 +494,7 @@
 							<scmBranch>gh-pages</scmBranch>
 							<serverId>github</serverId>
 							<content>${project.build.directory}/docs</content>
+							<skipDeletedFiles>true</skipDeletedFiles>
 							<siteOutputEncoding>${project.build.sourceEncoding}</siteOutputEncoding>
 							<checkinComment>Deploy v${project.version} docs</checkinComment>
 						</configuration>
