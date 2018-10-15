@@ -99,8 +99,6 @@
 		<maven.deploy.skip>true</maven.deploy.skip> <!-- !!! no public artifact deployment -->
 		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 
-		<javadocs>${project.basedir}/docs/latest/javadocs</javadocs>
-
 		<timestamp>${maven.build.timestamp}</timestamp> <!-- ;( not directly available to filtered resources -->
 
 	</properties>
@@ -151,35 +149,6 @@
 		</resources>
 
 		<plugins>
-
-			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
-
-				<executions>
-					<execution>
-
-						<id>clean-javadocs-folder</id>
-						<phase>pre-site</phase>
-
-						<goals>
-							<goal>clean</goal>
-						</goals>
-
-						<configuration>
-							<filesets>
-								<fileset>
-									<directory>${javadocs}</directory>
-								</fileset>
-							</filesets>
-						</configuration>
-
-					</execution>
-				</executions>
-
-			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-compiler-plugin -->
 
@@ -272,7 +241,7 @@
 
 						<configuration>
 
-							<reportOutputDirectory>${javadocs}</reportOutputDirectory>
+							<reportOutputDirectory>${project.build.directory}/docs/${project.version}</reportOutputDirectory>
 							<destDir>javadocs</destDir>
 
 							<groups>
@@ -300,6 +269,44 @@
 
 					</execution>
 
+				</executions>
+
+			</plugin>
+
+			<plugin> <!-- report https://maven.apache.org/plugins/maven-resources-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+
+				<executions>
+					<execution>
+
+						<id>copy-version-docs</id>
+						<phase>site</phase>
+						<inherited>false</inherited>
+
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+
+						<configuration>
+
+							<outputDirectory>${project.build.directory}/docs/${project.version}</outputDirectory>
+							<overwrite>true</overwrite>
+
+							<resources>
+
+								<resource> <!-- static docs -->
+									<directory>${project.basedir}/docs/</directory>
+									<filtering>true</filtering>
+								</resource>
+
+							</resources>
+
+						</configuration>
+
+					</execution>
 				</executions>
 
 			</plugin>
@@ -435,6 +442,36 @@
 							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
+
+					</plugin>
+
+					<plugin> <!-- http://maven.apache.org/plugins/maven-scm-publish-plugin/index.html -->
+
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-scm-publish-plugin</artifactId>
+						<version>3.0.0</version>
+
+						<configuration>
+							<pubScmUrl>scm:git:https://github.com/metreeca/link.git</pubScmUrl>
+							<scmBranch>gh-pages</scmBranch>
+							<serverId>github</serverId>
+							<content>${project.build.directory}/docs</content>
+							<checkinComment>Deploy v${project.version} docs</checkinComment>
+						</configuration>
+
+						<executions>
+							<execution>
+
+								<id>deploy-docs</id>
+								<phase>site-deploy</phase>
+								<inherited>false</inherited>
+
+								<goals>
+									<goal>publish-scm</goal>
+								</goals>
+
+							</execution>
+						</executions>
 
 					</plugin>
 
