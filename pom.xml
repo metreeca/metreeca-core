@@ -29,7 +29,7 @@
 
 	<name>Metreeca Linked Data Framework</name>
 	<description>A declarative model-driven framework for rapid linked data service development.</description>
-	<url>https://github.com/metreeca/metreeca-core</url>
+	<url>https://github.com/metreeca/link</url>
 	<inceptionYear>2013</inceptionYear>
 
 	<organization>
@@ -58,14 +58,14 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git@github.com:metreeca/metreeca-core.git</connection>
-		<developerConnection>scm:git:git@github.com:metreeca/metreeca-core.git</developerConnection>
-		<url>https://github.com/metreeca/metreeca-core</url>
+		<connection>scm:git:git@github.com:metreeca/link.git</connection>
+		<developerConnection>scm:git:git@github.com:metreeca/link.git</developerConnection>
+		<url>https://github.com/metreeca/link</url>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/metreeca/metreeca-core/issues</url>
+		<url>https://github.com/metreeca/link/issues</url>
 	</issueManagement>
 
 	<distributionManagement>
