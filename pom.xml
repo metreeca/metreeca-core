@@ -300,6 +300,11 @@
 								<resource> <!-- static docs -->
 									<directory>${project.basedir}/docs/</directory>
 									<filtering>true</filtering>
+									<excludes> <!-- ignore local jekyll testing leftovers -->
+										<exclude>_site/**/*</exclude>
+										<exclude>.jekyll-metadata</exclude>
+										<exclude>Gemfile.lock</exclude>
+									</excludes>
 								</resource>
 
 								<resource> <!-- generated docs -->
