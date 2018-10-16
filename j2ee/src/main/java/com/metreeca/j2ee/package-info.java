@@ -39,7 +39,7 @@
  *     <dependency>
  *         <groupId>com.metreeca</groupId>
  *         <artifactId>j2ee</artifactId>
- *         <version>${module.version}</version>
+ *         <version>${project.version}</version>
  *     </dependency>
  *
  *     <dependency>

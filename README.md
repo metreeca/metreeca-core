@@ -1,18 +1,18 @@
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/link.svg)](com.metreeca:link)
+[![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/link.svg)](https://search.maven.org/search?q=com.metreeca)
 
 # Metreeca/Link
 
-Metreeca/Link is an [RDF4J](http://rdf4j.org)‑based Java framework enabling rapid development of linked data APIs and services.
+Metreeca/Link is an open source [RDF4J](http://rdf4j.org)-based Java framework enabling rapid development of RESTful linked data services.
 
-Its engine leverages high‑level declarative domain models defined with [SHACL](https://www.w3.org/TR/shacl/) and [SPARQL](https://www.w3.org/TR/sparql11-overview/) to automatically generate extended model‑driven [LDP](https://www.w3.org/TR/ldp-primer/) REST APIs supporting fine‑grained role‑based read/write access control, faceted search and incoming data validation.
+Its engine automatically converts declarative high-level domain models defined with [SHACL](https://www.w3.org/TR/shacl/) and [SPARQL](https://www.w3.org/TR/sparql11-overview/) into extended linked data APIs supporting faceted search, data validation and fine‑grained role‑based read/write access control rules.
 
-Published linked data resources are also made available through idiomatic REST/JSON APIs, completely shielding front‑end developers from linked data technicalities.
+Published linked data resources are made available both through [LDP](https://www.w3.org/TR/ldp-primer/) and idiomatic REST/JSON APIs, supporting standardized access from third-party clients and completely shielding front‑end developers from linked data technicalities.
 
-To get started, walk through the model‑driven linked data [publishing](https://metreeca.github.io/link/latest/tutorials/linked-data-publishing/) and [interaction](https://metreeca.github.io/link/latest/tutorials/linked-data-interaction/) tutorials.
+To get started with Metreeca/Link, open the [docs](https://metreeca.github.io/link/) and walk through the model‑driven linked data [publishing](https://metreeca.github.io/link/tutorials/linked-data-publishing) and [interaction](https://metreeca.github.io/link/tutorials/linked-data-interaction) tutorials.
 
 ---
 
-home / [www.metreeca.com](https://www.metreeca.com/)  
-docs / [metreeca.github.io/link](https://metreeca.github.io/link)  
+home / [www.metreeca.com](https://www.metreeca.com/)  
+docs / [metreeca.github.io/link](https://metreeca.github.io/link/)  
 forum / [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca)

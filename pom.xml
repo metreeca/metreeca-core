@@ -29,7 +29,7 @@
 
 	<name>Metreeca Linked Data Framework</name>
 	<description>A declarative model-driven framework for rapid linked data service development.</description>
-	<url>https://github.com/metreeca/metreeca-core</url>
+	<url>https://github.com/metreeca/link</url>
 	<inceptionYear>2013</inceptionYear>
 
 	<organization>
@@ -58,14 +58,14 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git@github.com:metreeca/metreeca-core.git</connection>
-		<developerConnection>scm:git:git@github.com:metreeca/metreeca-core.git</developerConnection>
-		<url>https://github.com/metreeca/metreeca-core</url>
+		<connection>scm:git:git@github.com:metreeca/link.git</connection>
+		<developerConnection>scm:git:git@github.com:metreeca/link.git</developerConnection>
+		<url>https://github.com/metreeca/link</url>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/metreeca/metreeca-core/issues</url>
+		<url>https://github.com/metreeca/link/issues</url>
 	</issueManagement>
 
 	<distributionManagement>
@@ -96,10 +96,8 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<maven.deploy.skip>true</maven.deploy.skip> <!-- !!! no public artifact deployment -->
+		<maven.deploy.skip>true</maven.deploy.skip> <!-- ossrh public artifact deployment -->
 		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
-
-		<javadocs>${project.basedir}/docs/latest/javadocs</javadocs>
 
 		<timestamp>${maven.build.timestamp}</timestamp> <!-- ;( not directly available to filtered resources -->
 
@@ -151,35 +149,6 @@
 		</resources>
 
 		<plugins>
-
-			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
-
-				<executions>
-					<execution>
-
-						<id>clean-javadocs-folder</id>
-						<phase>pre-site</phase>
-
-						<goals>
-							<goal>clean</goal>
-						</goals>
-
-						<configuration>
-							<filesets>
-								<fileset>
-									<directory>${javadocs}</directory>
-								</fileset>
-							</filesets>
-						</configuration>
-
-					</execution>
-				</executions>
-
-			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-compiler-plugin -->
 
@@ -272,7 +241,7 @@
 
 						<configuration>
 
-							<reportOutputDirectory>${javadocs}</reportOutputDirectory>
+							<reportOutputDirectory>${project.build.directory}/generated-docs</reportOutputDirectory>
 							<destDir>javadocs</destDir>
 
 							<groups>
@@ -300,6 +269,49 @@
 
 					</execution>
 
+				</executions>
+
+			</plugin>
+
+			<plugin> <!-- report https://maven.apache.org/plugins/maven-resources-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+
+				<executions>
+					<execution>
+
+						<id>copy-version-docs</id>
+						<phase>post-site</phase>
+						<inherited>false</inherited>
+
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+
+						<configuration>
+
+							<outputDirectory>${project.build.directory}/docs/</outputDirectory>
+							<overwrite>true</overwrite>
+
+							<resources>
+
+								<resource> <!-- static docs -->
+									<directory>${project.basedir}/docs/</directory>
+									<filtering>true</filtering>
+								</resource>
+
+								<resource> <!-- generated docs -->
+									<directory>${project.build.directory}/generated-docs</directory>
+									<filtering>true</filtering>
+								</resource>
+
+							</resources>
+
+						</configuration>
+
+					</execution>
 				</executions>
 
 			</plugin>
@@ -435,6 +447,37 @@
 							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
+
+					</plugin>
+
+					<plugin> <!-- http://maven.apache.org/plugins/maven-scm-publish-plugin/ -->
+
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-scm-publish-plugin</artifactId>
+						<version>3.0.0</version>
+
+						<configuration>
+							<pubScmUrl>scm:git:https://github.com/metreeca/link.git</pubScmUrl>
+							<scmBranch>gh-pages</scmBranch>
+							<serverId>github</serverId>
+							<content>${project.build.directory}/docs</content>
+							<siteOutputEncoding>${project.build.sourceEncoding}</siteOutputEncoding>
+							<checkinComment>Deploy v${project.version} docs</checkinComment>
+						</configuration>
+
+						<executions>
+							<execution>
+
+								<id>deploy-docs</id>
+								<inherited>false</inherited>
+								<phase>site-deploy</phase>
+
+								<goals>
+									<goal>publish-scm</goal>
+								</goals>
+
+							</execution>
+						</executions>
 
 					</plugin>
 
