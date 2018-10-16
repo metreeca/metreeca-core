@@ -6,7 +6,11 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
+        <option value="$PROJECT_DIR$/rest/pom.xml" />
+        <option value="$PROJECT_DIR$/j2ee/pom.xml" />
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/form/pom.xml" />
+        <option value="$PROJECT_DIR$/tray/pom.xml" />
       </list>
     </option>
   </component>

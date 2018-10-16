@@ -5,12 +5,17 @@ target/
 *~
 ~*
 
+#### Jekyll ############################################################################################################
+
+.jekyll-metadata
+Gemfile.lock
+_site/
+
 # IntelliJ IDEA (see https://intellij-support.jetbrains.com/hc/en-us/articles/206544839)
 
 /.idea/workspace.xml
 /.idea/modules.xml
 /.idea/tasks.xml
-/.idea/misc.xml
 
 /.idea/libraries/
 /.idea/dictionaries/

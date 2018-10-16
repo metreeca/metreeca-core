@@ -94,9 +94,6 @@
 		<java.version>1.8</java.version>
 		<rdf4j.version>2.4.0</rdf4j.version>
 
-		<docs.major>${project.artifact.selectedVersion.majorVersion}.x</docs.major>
-		<docs.minor>${project.artifact.selectedVersion.majorVersion}.${project.artifact.selectedVersion.minorVersion}</docs.minor>
-
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<maven.deploy.skip>true</maven.deploy.skip> <!-- ossrh public artifact deployment -->
@@ -295,8 +292,7 @@
 
 						<configuration>
 
-							<outputDirectory>${project.build.directory}/docs/versions/${docs.minor}
-							</outputDirectory>
+							<outputDirectory>${project.build.directory}/docs/</outputDirectory>
 							<overwrite>true</overwrite>
 
 							<resources>
@@ -316,35 +312,6 @@
 						</configuration>
 
 					</execution>
-
-					<execution>
-
-						<id>copy-release-docs</id>
-						<phase>post-site</phase>
-						<inherited>false</inherited>
-
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-
-						<configuration>
-
-							<outputDirectory>${project.build.directory}/docs/versions/${docs.major}</outputDirectory>
-							<overwrite>true</overwrite>
-
-							<resources>
-
-								<resource>
-									<directory>${project.build.directory}/docs/versions/${docs.minor}</directory>
-									<filtering>false</filtering>
-								</resource>
-
-							</resources>
-
-						</configuration>
-
-					</execution>
-
 				</executions>
 
 			</plugin>
@@ -494,7 +461,6 @@
 							<scmBranch>gh-pages</scmBranch>
 							<serverId>github</serverId>
 							<content>${project.build.directory}/docs</content>
-							<skipDeletedFiles>true</skipDeletedFiles>
 							<siteOutputEncoding>${project.build.sourceEncoding}</siteOutputEncoding>
 							<checkinComment>Deploy v${project.version} docs</checkinComment>
 						</configuration>
