@@ -32,7 +32,7 @@ import static java.util.Objects.requireNonNull;
  * @param <V> the type of the value possibly returned by the operation
  * @param <E> the type of the error possibly reported by the operation
  */
-public interface Result<V, E> {
+public abstract class Result<V, E> {
 
 	/**
 	 * Creates an operation result with a returned value.
@@ -99,12 +99,16 @@ public interface Result<V, E> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	private Result() {} // ADT
+
+
 	/**
 	 * Retrieves the operation returned value.
 	 *
 	 * @return an optional operation returned value, if one is present; an empty optional, otherwise
 	 */
-	public default Optional<V> value() {
+	public Optional<V> value() {
 		return fold(Optional::of, f -> Optional.empty());
 	}
 
@@ -113,7 +117,7 @@ public interface Result<V, E> {
 	 *
 	 * @return an optional operation reported error, if one is present; an empty optional, otherwise
 	 */
-	public default Optional<E> error() {
+	public Optional<E> error() {
 		return fold(f -> Optional.empty(), Optional::of);
 	}
 
@@ -129,7 +133,7 @@ public interface Result<V, E> {
 	 *
 	 * @throws NullPointerException if {@code mapper} is null or returns a null value
 	 */
-	public default <R> Result<R, E> value(final Function<V, R> mapper) {
+	public <R> Result<R, E> value(final Function<V, R> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -149,7 +153,7 @@ public interface Result<V, E> {
 	 *
 	 * @throws NullPointerException if {@code mapper} is null or returns a null value
 	 */
-	public default <R> Result<V, R> error(final Function<E, R> mapper) {
+	public <R> Result<V, R> error(final Function<E, R> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -171,7 +175,7 @@ public interface Result<V, E> {
 	 *
 	 * @throws NullPointerException if either {@code success} or {@code failure} is null
 	 */
-	public default Result<V, E> use(final Consumer<V> success, final Consumer<E> failure) {
+	public Result<V, E> use(final Consumer<V> success, final Consumer<E> failure) {
 
 		if ( success == null ) {
 			throw new NullPointerException("null success consumer");
