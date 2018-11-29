@@ -188,7 +188,7 @@ public final class Browser extends Actor<Browser> {
 							trait(RDFS.COMMENT, verify(optional(), datatype(XMLSchema.STRING))),
 							trait(LDP.CONTAINS, edges.getShape())
 					))
-					.body(rdf()).set(model);
+					.body(rdf(),model);
 		});
 	}
 
@@ -196,7 +196,7 @@ public final class Browser extends Actor<Browser> {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
 					.shape(StatsShape)
-					.body(rdf()).set(new SPARQLEngine(connection).browse(stats, response.item()));
+					.body(rdf(),new SPARQLEngine(connection).browse(stats, response.item()));
 
 		});
 	}
@@ -205,7 +205,7 @@ public final class Browser extends Actor<Browser> {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
 					.shape(ItemsShape)
-					.body(rdf()).set(new SPARQLEngine(connection).browse(items, response.item()));
+					.body(rdf(),new SPARQLEngine(connection).browse(items, response.item()));
 
 		});
 	}

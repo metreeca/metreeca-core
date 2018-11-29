@@ -179,7 +179,7 @@ final class RewriterTest {
 					);
 
 					return request.reply(response -> response.status(Response.OK)
-							.body(rdf()).set(singleton(internal("s", "p", "o"))));
+							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
 
 				.handle(new Request()
@@ -187,7 +187,7 @@ final class RewriterTest {
 						.base(External)
 						.path("/s")
 
-						.body(rdf()).set(singleton(external("s", "p", "o"))))
+						.body(rdf(), singleton(external("s", "p", "o"))))
 
 				.accept(response -> {
 
@@ -211,7 +211,7 @@ final class RewriterTest {
 					return request.reply(response -> response.
 							status(Response.OK)
 							.shape(TestShape)
-							.body(rdf()).set(singleton(internal("s", "p", "o"))));
+							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
 
 				.handle(new Request()
@@ -224,7 +224,7 @@ final class RewriterTest {
 
 						.shape(TestShape)
 
-						.body(input()).set(() -> new ByteArrayInputStream(
+						.body(input(), () -> new ByteArrayInputStream(
 								Json.createObjectBuilder()
 										.add("p", "o")
 										.build()

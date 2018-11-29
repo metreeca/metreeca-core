@@ -84,7 +84,7 @@ final class ActorTest {
 
 				.sync("insert { ?this rdf:value rdf:nil } where {}")
 
-				.handle(new Request().body(rdf()).set(emptyList())) // enable rdf pre-processing
+				.handle(new Request().body(rdf(), emptyList())) // enable rdf pre-processing
 
 				.accept(response -> {
 
@@ -127,7 +127,7 @@ final class ActorTest {
 					.shape(request.shape()) // echo shape
 
 					.map(r -> request.body(rdf()).fold( // echo rdf body
-							value -> r.body(rdf()).set(value),
+							value -> r.body(rdf(), value),
 							error -> r
 					))
 

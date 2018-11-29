@@ -142,7 +142,7 @@ final class GraphsTest {
 	}
 
 	private Request put(final Request request) {
-		return request.method(Request.PUT).body(input()).set(() ->
+		return request.method(Request.PUT).body(input(), () ->
 				new ByteArrayInputStream(encode(Rest).getBytes(Codecs.UTF8))
 		);
 	}
@@ -152,7 +152,7 @@ final class GraphsTest {
 	}
 
 	private Request post(final Request request) {
-		return request.method(Request.POST).body(input()).set(() ->
+		return request.method(Request.POST).body(input(), () ->
 				new ByteArrayInputStream(encode(Rest).getBytes(Codecs.UTF8))
 		);
 	}

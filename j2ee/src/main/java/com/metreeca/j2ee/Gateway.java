@@ -291,7 +291,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				return request
 
-						.body(input()).set(() -> {
+						.body(input(), () -> {
 							try {
 								return http.getInputStream();
 							} catch ( final IOException e ) {
@@ -299,7 +299,7 @@ public abstract class Gateway implements ServletContextListener {
 							}
 						})
 
-						.body(reader()).set(() -> {
+						.body(reader(), () -> {
 							try {
 								return http.getReader();
 							} catch ( final IOException e ) {

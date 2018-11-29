@@ -154,7 +154,7 @@ public final class Graphs extends Delegator {
 
 				request.reply(response -> response.status(Response.OK)
 						.shape(GraphsShape)
-						.body(rdf()).set(model)
+						.body(rdf(), model)
 				).accept(consumer);
 
 			} else {
@@ -174,7 +174,7 @@ public final class Graphs extends Delegator {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(output()).set(_target -> {
+							.body(output(), _target -> {
 								try (final OutputStream output=_target.get()) {
 									connection.export(factory.getWriter(output), context);
 								} catch ( final IOException e ) {

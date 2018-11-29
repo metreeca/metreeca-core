@@ -60,6 +60,7 @@ import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 import static java.util.stream.Collectors.toList;
@@ -173,7 +174,7 @@ public final class Rewriter implements Wrapper {
 
 				.shape(engine.rewrite(request.shape()))
 
-				.body(rdf()).pipe(model -> engine.rewrite(model, engine::rewrite));
+				.pipe(rdf(), model -> Value(engine.rewrite(model, engine::rewrite)));
 	}
 
 	private Response rewrite(final Response response, final Engine engine) {
@@ -187,7 +188,7 @@ public final class Rewriter implements Wrapper {
 
 				.shape(engine.rewrite(response.shape()))
 
-				.body(rdf()).pipe(model -> engine.rewrite(model, engine::rewrite));
+				.pipe(rdf(), model -> Value(engine.rewrite(model, engine::rewrite)));
 	}
 
 

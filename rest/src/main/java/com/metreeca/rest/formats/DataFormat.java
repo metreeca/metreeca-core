@@ -73,7 +73,7 @@ public final class DataFormat implements Format<byte[]> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(output()).flatPipe(consumer -> message.body(data()).value(bytes -> target -> {
+		return message.pipe(output(), consumer -> message.body(data()).value(bytes -> target -> {
 			try (final OutputStream output=target.get()) {
 
 				output.write(bytes);

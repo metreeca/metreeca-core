@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Codecs.text;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,7 +109,7 @@ final class MessageTest {
 
 	@Test void testBodyCaching() {
 
-		final TestMessage message=new TestMessage().body(reader()).set(() -> new StringReader("test"));
+		final TestMessage message=new TestMessage().body(reader(), () -> new StringReader("test"));
 
 		final Function<Message<?>, String> accessor=m -> {
 			return ((Result<String, Failure>)m
@@ -121,8 +122,8 @@ final class MessageTest {
 	@Test void testBodyOnDemandFiltering() {
 
 		final Message<?> message=new TestMessage()
-				.body(TestFormat.test()).pipe(string -> string+"!")
-				.body(reader()).set(() -> new StringReader("test"));
+				.pipe(TestFormat.test(), string -> Value(string+"!"))
+				.body(reader(), () -> new StringReader("test"));
 
 		assertEquals("test!",
 				message.body(TestFormat.test()).fold(value -> value, error -> fail("missing test body")));

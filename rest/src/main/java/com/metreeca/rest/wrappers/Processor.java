@@ -46,6 +46,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.things.Values.*;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -328,9 +329,9 @@ public final class Processor implements Wrapper {
 		final IRI focus=message.item();
 		final Shape shape=message.shape();
 
-		return message.body(RDFFormat.rdf()).pipe(statements -> (filter == null) ?
+		return message.pipe(RDFFormat.rdf(), statements -> Value((filter == null) ?
 				statements : trim(focus, shape, filter.apply(message, new LinkedHashModel(statements)))
-		);
+		));
 	}
 
 	private <T extends Message<T>> Collection<Statement> trim(final Value focus, final Shape shape, final Model model) {

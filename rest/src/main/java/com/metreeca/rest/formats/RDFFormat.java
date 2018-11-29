@@ -174,7 +174,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
 				)
 
-				.body(output()).flatPipe(consumer -> message.body(rdf()).value(rdf -> target -> {
+				.pipe(output(), consumer -> message.body(rdf()).value(rdf -> target -> {
 					try (final OutputStream output=target.get()) {
 
 						final Shape shape=message.shape();

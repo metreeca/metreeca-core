@@ -41,7 +41,7 @@ public interface Format<V> {
 	 * </ul>
 	 *
 	 * <p>The default implementation returns a failure reporting the {@link Response#UnsupportedMediaType} status,
-	 * unless explicitly {@linkplain Message.Body#set(Object) overridden}</p>
+	 * unless explicitly {@linkplain Message#body(Format, Object) overridden}.</p>
 	 *
 	 * @param message the message the structured body managed by this format is to be retrieved from
 	 *

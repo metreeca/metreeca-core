@@ -113,10 +113,13 @@ public final class JSONFormat implements Format<JsonObject> {
 	@Override public <T extends Message<T>> T set(final T message) {
 		return message
 				.header("content-type", MIME)
-				.body(writer()).flatPipe(consumer -> message.body(json()).value(json -> target -> {
-					try (final Writer writer=target.get()) {
+				.pipe(writer(), consumer -> message.body(json()).value(json -> target -> {
+					try (
+							final Writer writer=target.get();
+							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)
+					) {
 
-						JsonWriters.createWriter(writer).write(json);
+						jsonWriter.write(json);
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);

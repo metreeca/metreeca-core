@@ -39,7 +39,7 @@ final class WorkerTest {
 
 				.status(Response.OK)
 
-				.body(writer()).set(target -> {
+				.body(writer(), target -> {
 					try (final Writer writer=target.get()) {
 						writer.write("body");
 					} catch ( final IOException e ) {
@@ -47,7 +47,7 @@ final class WorkerTest {
 					}
 				})
 
-				.body(output()).set(target -> {
+				.body(output(), target -> {
 					try (final OutputStream output=target.get()) {
 						output.write("body".getBytes());
 					} catch ( final IOException e ) {

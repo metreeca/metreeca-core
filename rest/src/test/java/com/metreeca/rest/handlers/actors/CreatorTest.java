@@ -72,7 +72,7 @@ final class CreatorTest {
 
 
 	private Function<Request, Request> body(final String rdf) {
-		return request -> request.body(input()).set(() -> Codecs.input(new StringReader(rdf)));
+		return request -> request.body(input(), () -> Codecs.input(new StringReader(rdf)));
 	}
 
 

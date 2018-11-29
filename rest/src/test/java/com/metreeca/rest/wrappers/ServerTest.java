@@ -75,7 +75,7 @@ final class ServerTest {
 				.handle(new Request()
 						.method(Request.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded")
-						.body(text()).set("one=1&two=2&two=2"))
+						.body(text(), "one=1&two=2&two=2"))
 
 				.accept(response -> assertThat(response.status()).isEqualTo(OK));
 	}
@@ -133,7 +133,7 @@ final class ServerTest {
 				.handle(new Request()
 						.method(Request.PUT)
 						.header("Content-Type", "application/x-www-form-urlencoded")
-						.body(text()).set("one=1&two=2&two=2"))
+						.body(text(), "one=1&two=2&two=2"))
 
 				.accept(response -> assertThat(response.status()).isEqualTo(OK));
 	}

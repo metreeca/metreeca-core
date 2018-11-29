@@ -39,11 +39,11 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 			final Cache cache=new Cache(response);
 
 			if ( !response.body(input()).value().isPresent() ) {
-				response.body(input()).set(cache::input); // cache binary body
+				response.body(input(), cache::input); // cache binary body
 			}
 
 			if ( !response.body(reader()).value().isPresent() ) {
-				response.body(reader()).set(cache::reader); // cache textual body
+				response.body(reader(), cache::reader); // cache textual body
 			}
 
 			final StringBuilder builder=new StringBuilder(2500);

@@ -261,7 +261,7 @@ public final class SPARQL extends Delegator {
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(output()).set(target -> {
+				.body(output(), target -> {
 					try (final OutputStream output=target.get()) {
 
 						factory.getWriter(output).handleBoolean(result);
@@ -285,7 +285,7 @@ public final class SPARQL extends Delegator {
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-				.body(output()).set(target -> {
+				.body(output(), target -> {
 					try (final OutputStream output=target.get()) {
 
 						final TupleQueryResultWriter writer=factory.getWriter(output);
@@ -316,7 +316,7 @@ public final class SPARQL extends Delegator {
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-				.body(output()).set(target -> {
+				.body(output(), target -> {
 					try (final OutputStream output=target.get()) {
 
 						final RDFWriter writer=factory.getWriter(output);
@@ -366,7 +366,7 @@ public final class SPARQL extends Delegator {
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(output()).set(target -> {
+				.body(output(), target -> {
 					try (final OutputStream output=target.get()) {
 						factory.getWriter(output).handleBoolean(true);
 					} catch ( final IOException e ) {

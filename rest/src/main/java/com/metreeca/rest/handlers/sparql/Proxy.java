@@ -160,7 +160,7 @@ public final class Proxy implements Handler {
 
 		}
 
-		return response.body(output()).set(target -> {
+		return response.body(output(), target -> {
 			try (
 					final OutputStream output=target.get();
 					final InputStream input=connect(connection)

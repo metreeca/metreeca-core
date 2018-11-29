@@ -146,8 +146,8 @@ public final class Worker implements Handler {
 
 	private Responder head(final Request request) {
 		return handle(request.method(Request.GET)).map(response -> response
-				.body(output()).set(target -> {})
-				.body(writer()).set(target -> {})
+				.body(output(), target -> {})
+				.body(writer(), target -> {})
 		);
 	}
 

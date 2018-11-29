@@ -185,8 +185,7 @@ public final class Failure implements Function<Response, Response> {
 		return response
 				.status(status)
 				.cause(cause)
-				.body(json())
-				.set(ticket());
+				.body(json(), ticket());
 	}
 
 
