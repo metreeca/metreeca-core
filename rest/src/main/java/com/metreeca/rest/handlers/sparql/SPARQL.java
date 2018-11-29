@@ -118,7 +118,7 @@ public final class SPARQL extends Delegator {
 
 				if ( operation == null ) { // !!! return void description for GET
 
-					request.reply(new Failure<>()
+					request.reply(new Failure()
 							.status(Response.BadRequest)
 							.error("parameter-missing")
 							.cause("missing query/update parameter")
@@ -146,7 +146,7 @@ public final class SPARQL extends Delegator {
 
 				} else {
 
-					request.reply(new Failure<>()
+					request.reply(new Failure()
 							.status(Response.NotImplemented)
 							.error("operation-unsupported")
 							.cause(operation.getClass().getName())
@@ -156,7 +156,7 @@ public final class SPARQL extends Delegator {
 
 			} catch ( final MalformedQueryException e ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("query-malformed")
 						.cause(e)
@@ -164,7 +164,7 @@ public final class SPARQL extends Delegator {
 
 			} catch ( final IllegalArgumentException e ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("request-malformed")
 						.cause(e)
@@ -172,7 +172,7 @@ public final class SPARQL extends Delegator {
 
 			} catch ( final UnsupportedOperationException e ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.NotImplemented)
 						.error("operation-unsupported")
 						.cause(e)
@@ -182,7 +182,7 @@ public final class SPARQL extends Delegator {
 
 				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("query-evaluation")
 						.cause(e)
@@ -190,7 +190,7 @@ public final class SPARQL extends Delegator {
 
 			} catch ( final UpdateExecutionException e ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("update-evaluation")
 						.cause(e)
@@ -198,7 +198,7 @@ public final class SPARQL extends Delegator {
 
 			} catch ( final TupleQueryResultHandlerException e ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("response-error")
 						.cause(e)
@@ -206,7 +206,7 @@ public final class SPARQL extends Delegator {
 
 			} catch ( final RuntimeException e ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("repository-error")
 						.cause(e)

@@ -58,7 +58,7 @@ final class ProcessorTest {
 				.status(Response.OK)
 				.shape(request.shape())
 
-				.map(r -> request.body(rdf()).map(
+				.map(r -> request.body(rdf()).fold(
 						v -> r.body(rdf()).set(v),
 						e -> r
 				))

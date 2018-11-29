@@ -74,7 +74,7 @@ public final class Proxy implements Handler {
 						: e instanceof IOException ? Response.BadGateway
 						: Response.InternalServerError;
 
-				return response.map(new Failure<>()
+				return response.map(new Failure()
 						.status(i)
 						.error("request-failed")
 						.cause(e));

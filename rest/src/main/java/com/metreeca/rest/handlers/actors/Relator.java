@@ -129,7 +129,7 @@ public final class Relator extends Actor<Relator> {
 
 		final IRI focus=request.item();
 
-		return request.query(and(shape, all(focus))).map(query -> request.reply(response -> graph.query(connection -> {
+		return request.query(and(shape, all(focus))).fold(query -> request.reply(response -> graph.query(connection -> {
 
 			final Collection<Statement> model=new SPARQLEngine(connection)
 					.browse(query)

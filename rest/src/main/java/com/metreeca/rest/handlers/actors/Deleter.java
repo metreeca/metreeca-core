@@ -65,7 +65,7 @@ public final class Deleter extends Actor<Deleter> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder direct(final Request request) {
-		return request.reply(response -> response.map(new Failure<>()
+		return request.reply(response -> response.map(new Failure()
 				.status(Response.NotImplemented)
 				.cause("shapeless resource creation not supported"))
 		);

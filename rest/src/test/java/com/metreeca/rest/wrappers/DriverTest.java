@@ -119,7 +119,7 @@ final class DriverTest {
 
 					final Model model=new LinkedHashModel(response
 							.body(rdf())
-							.get()
+							.value()
 							.orElseGet(() -> fail("missing RDF body"))
 					);
 

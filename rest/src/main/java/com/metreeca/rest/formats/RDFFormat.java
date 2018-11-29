@@ -36,7 +36,8 @@ import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -73,8 +74,8 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
 	 * status, otherwise
 	 */
-	@Override public Result<Collection<Statement>> get(final Message<?> message) {
-		return message.body(input()).flatMap(supplier -> {
+	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
+		return message.body(input()).fold(supplier -> {
 
 			final IRI focus=message.item();
 			final Shape shape=message.shape();
@@ -126,7 +127,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 			if ( fatals.isEmpty() ) { // return model
 
-				return value(model);
+				return Value(model);
 
 			} else { // report errors // !!! log warnings/error/fatals?
 
@@ -138,14 +139,14 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 				if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
 				if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
 
-				return new Failure<Collection<Statement>>()
+				return Error(new Failure()
 						.status(Response.BadRequest)
 						.error(Failure.BodyMalformed)
-						.trace(trace.build());
+						.trace(trace.build()));
 
 			}
 
-		});
+		}, Result::Error);
 	}
 
 	/**
@@ -173,7 +174,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
 				)
 
-				.body(output()).flatPipe(consumer -> message.body(rdf()).map(rdf -> target -> {
+				.body(output()).flatPipe(consumer -> message.body(rdf()).value(rdf -> target -> {
 					try (final OutputStream output=target.get()) {
 
 						final Shape shape=message.shape();

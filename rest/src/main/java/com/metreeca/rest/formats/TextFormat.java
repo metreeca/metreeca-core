@@ -18,9 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.things.Codecs;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 
 import java.io.*;
 
@@ -58,8 +56,8 @@ public final class TextFormat implements Format<String> {
 	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
 	 * otherwise
 	 */
-	@Override public Result<String> get(final Message<?> message) {
-		return message.body(reader()).map(source -> {
+	@Override public Result<String, Failure> get(final Message<?> message) {
+		return message.body(reader()).value(source -> {
 			try (final Reader reader=source.get()) {
 
 				return Codecs.text(reader);
@@ -75,7 +73,7 @@ public final class TextFormat implements Format<String> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(writer()).flatPipe(consumer -> message.body(text()).map(bytes -> target -> {
+		return message.body(writer()).flatPipe(consumer -> message.body(text()).value(bytes -> target -> {
 			try (final Writer output=target.get()) {
 
 				output.write(bytes);

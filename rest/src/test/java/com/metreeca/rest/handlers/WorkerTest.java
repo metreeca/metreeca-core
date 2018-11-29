@@ -102,7 +102,7 @@ final class WorkerTest {
 
 					assertThat(response.status()).isEqualTo(Response.OK);
 
-					assertThat(((Result<Consumer<Supplier<OutputStream>>>)response.body(output())).<byte[]>map(
+					assertThat(((Result<Consumer<Supplier<OutputStream>>, Failure>)response.body(output())).<byte[]>fold(
 							v -> {
 
 								final ByteArrayOutputStream output=new ByteArrayOutputStream();
@@ -115,7 +115,7 @@ final class WorkerTest {
 							e -> new byte[0]
 					)).isEmpty();
 
-					assertThat(((Result<Consumer<Supplier<Writer>>>)response.body(writer())).<String>map(
+					assertThat(((Result<Consumer<Supplier<Writer>>, Failure>)response.body(writer())).<String>fold(
 							v -> {
 
 								final StringWriter output=new StringWriter();

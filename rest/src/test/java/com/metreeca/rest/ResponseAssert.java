@@ -38,11 +38,11 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 			final Cache cache=new Cache(response);
 
-			if ( !response.body(input()).get().isPresent() ) {
+			if ( !response.body(input()).value().isPresent() ) {
 				response.body(input()).set(cache::input); // cache binary body
 			}
 
-			if ( !response.body(reader()).get().isPresent() ) {
+			if ( !response.body(reader()).value().isPresent() ) {
 				response.body(reader()).set(cache::reader); // cache textual body
 			}
 
@@ -63,7 +63,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 					builder.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮").append("\n\n");
 				}
-			});
+			}, failure -> {});
 
 			Logger.getLogger(response.getClass().getName()).log(
 					response.success() ? Level.INFO : Level.WARNING,
@@ -146,7 +146,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 			if ( text == null ) {
 				try (final StringWriter buffer=new StringWriter()) {
 
-					response.body(writer()).use(consumer -> consumer.accept(() -> buffer));
+					response.body(writer()).use(consumer -> consumer.accept(() -> buffer), failure -> {});
 
 					text=buffer.toString();
 
@@ -163,7 +163,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 			if ( data == null ) {
 				try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
 
-					response.body(output()).use(consumer -> consumer.accept(() -> buffer));
+					response.body(output()).use(consumer -> consumer.accept(() -> buffer), failure -> {});
 
 					data=buffer.toByteArray();
 

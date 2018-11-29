@@ -18,6 +18,9 @@
 package com.metreeca.rest;
 
 
+import static com.metreeca.rest.Result.Error;
+
+
 /**
  * Message body format.
  *
@@ -42,18 +45,18 @@ public interface Format<V> {
 	 *
 	 * @param message the message the structured body managed by this format is to be retrieved from
 	 *
-	 * @return a result providing access to the structured body managed by this format, if it was possible to derive one
-	 * from {@code message}; a result providing access to the processing failure, otherwise
+	 * @return a value result providing access to the structured body managed by this format, if it was possible to
+	 * derive one from {@code message}; an error result providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public default Result<V> get(final Message<?> message) {
+	public default Result<V, Failure> get(final Message<?> message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
 		}
 
-		return new Failure<V>().status(Response.UnsupportedMediaType);
+		return Error(new Failure().status(Response.UnsupportedMediaType));
 	}
 
 	/**
@@ -64,7 +67,7 @@ public interface Format<V> {
 	 * <p>The default implementation has no effects.</p>
 	 *
 	 * @param message the message to be configured to hold a structured body managed by this format
-	 * @param <T> the type of {@code message}
+	 * @param <T>     the type of {@code message}
 	 *
 	 * @return the configured {@code message}
 	 *

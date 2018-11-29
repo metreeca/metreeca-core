@@ -126,7 +126,7 @@ final class ActorTest {
 
 					.shape(request.shape()) // echo shape
 
-					.map(r -> request.body(rdf()).map( // echo rdf body
+					.map(r -> request.body(rdf()).fold( // echo rdf body
 							value -> r.body(rdf()).set(value),
 							error -> r
 					))

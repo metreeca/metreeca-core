@@ -111,8 +111,8 @@ final class MessageTest {
 		final TestMessage message=new TestMessage().body(reader()).set(() -> new StringReader("test"));
 
 		final Function<Message<?>, String> accessor=m -> {
-			return ((Result<String>)m
-					.body(TextFormat.text())).map(value -> value, error -> fail("missing test body"));
+			return ((Result<String, Failure>)m
+					.body(TextFormat.text())).fold(value -> value, error -> fail("missing test body"));
 		};
 
 		assertSame(accessor.apply(message), accessor.apply(message));
@@ -125,7 +125,7 @@ final class MessageTest {
 				.body(reader()).set(() -> new StringReader("test"));
 
 		assertEquals("test!",
-				((Result<String>)message.body(TestFormat.test())).map(value -> value, error -> fail("missing test body")));
+				message.body(TestFormat.test()).fold(value -> value, error -> fail("missing test body")));
 
 	}
 
@@ -148,8 +148,8 @@ final class MessageTest {
 		private static TestFormat test() { return Instance; }
 
 
-		@Override public Result<String> get(final Message<?> message) {
-			return message.body(reader()).map(supplier -> {
+		@Override public Result<String, Failure> get(final Message<?> message) {
+			return message.body(reader()).value(supplier -> {
 				try (final Reader reader=supplier.get()) {
 					return text(reader);
 				} catch ( final IOException e ) {

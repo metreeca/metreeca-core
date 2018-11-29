@@ -259,7 +259,7 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	private Wrapper query() {
 		return handler -> request -> request.safe() || request.query().isEmpty()
 				? handler.handle(request)
-				: request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
+				: request.reply(new Failure().status(Response.BadRequest).cause("unexpected query parameters"));
 	}
 
 	private Wrapper headers() {

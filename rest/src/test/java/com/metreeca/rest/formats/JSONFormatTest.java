@@ -51,7 +51,7 @@ final class JSONFormatTest {
 				.header("content-type", JSONFormat.MIME)
 				.body(reader()).set(() -> new StringReader(TestJSON.toString()));
 
-		assertEquals(TestJSON, request.body(json()).get().orElseGet(() -> fail("no json representation")));
+		assertEquals(TestJSON, request.body(json()).value().orElseGet(() -> fail("no json representation")));
 	}
 
 	@Test void testRetrieveJSONChecksContentType() {
@@ -59,7 +59,7 @@ final class JSONFormatTest {
 		final Request request=new Request()
 				.body(reader()).set(() -> new StringReader(TestJSON.toString()));
 
-		assertThat(request.body(json()).get().isPresent()).isFalse();
+		assertThat(request.body(json()).value().isPresent()).isFalse();
 	}
 
 	@Test void testConfigureJSON() {
@@ -68,7 +68,7 @@ final class JSONFormatTest {
 
 		assertEquals(TestJSON, request.body(writer())
 
-				.map(client -> {
+				.value(client -> {
 					try (final StringWriter writer=new StringWriter()) {
 
 						client.accept(() -> writer);
@@ -80,9 +80,9 @@ final class JSONFormatTest {
 					}
 				})
 
-				.map(test -> Json.createReader(new StringReader(test)).readObject())
+				.value(test -> Json.createReader(new StringReader(test)).readObject())
 
-				.get()
+				.value()
 
 				.orElseGet(() -> fail("missing outbound representation"))
 

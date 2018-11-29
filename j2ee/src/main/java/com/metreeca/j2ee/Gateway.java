@@ -404,7 +404,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				response.headers().forEach((name, values) -> values.forEach(value -> http.addHeader(name, value)));
 
-				response.body(output()).get().ifPresent(consumer -> consumer.accept(() -> {
+				response.body(output()).value().ifPresent(consumer -> consumer.accept(() -> {
 					try {
 						return http.getOutputStream();
 					} catch ( final IOException e ) {
@@ -412,7 +412,7 @@ public abstract class Gateway implements ServletContextListener {
 					}
 				}));
 
-				response.body(writer()).get().ifPresent(consumer -> consumer.accept(() -> {
+				response.body(writer()).value().ifPresent(consumer -> consumer.accept(() -> {
 					try {
 						return http.getWriter();
 					} catch ( final IOException e ) {

@@ -22,13 +22,12 @@ import com.metreeca.rest.*;
 import java.io.*;
 import java.util.regex.Pattern;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonWriterFactory;
+import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
@@ -82,26 +81,29 @@ public final class JSONFormat implements Format<JsonObject> {
 	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal
 	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
-	@Override public Result<JsonObject> get(final Message<?> message) {
+	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
 		return message.headers("Content-Type").stream().anyMatch(type -> MIMEPattern.matcher(type).matches())
 				? message.body(reader())
-				.flatMap(source -> {
-					try (final Reader reader=source.get()) {
+				.fold(source -> {
+					try (
+							final Reader reader=source.get();
+							final JsonReader jsonReader=Json.createReader(reader)
+					) {
 
-						return value(Json.createReader(reader).readObject());
+						return Value(jsonReader.readObject());
 
 					} catch ( final JsonParsingException e ) {
 
-						return new Failure<JsonObject>()
+						return Error(new Failure()
 								.status(Response.BadRequest)
 								.error(Failure.BodyMalformed)
-								.cause(e);
+								.cause(e));
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-				})
-				: new Failure<JsonObject>().status(Response.UnsupportedMediaType);
+				}, Result::Error)
+				: Error(new Failure().status(Response.UnsupportedMediaType));
 	}
 
 	/**
@@ -111,7 +113,7 @@ public final class JSONFormat implements Format<JsonObject> {
 	@Override public <T extends Message<T>> T set(final T message) {
 		return message
 				.header("content-type", MIME)
-				.body(writer()).flatPipe(consumer -> message.body(json()).map(json -> target -> {
+				.body(writer()).flatPipe(consumer -> message.body(json()).value(json -> target -> {
 					try (final Writer writer=target.get()) {
 
 						JsonWriters.createWriter(writer).write(json);

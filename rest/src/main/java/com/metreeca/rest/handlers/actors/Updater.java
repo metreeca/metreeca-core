@@ -78,7 +78,7 @@ public final class Updater extends Actor<Updater> {
 	public Updater() {
 		delegate(action(Form.update, Form.detail).wrap((Request request) -> request.body(rdf())
 
-				.map(model -> { // add implied statements
+				.value(model -> { // add implied statements
 
 					model.addAll(request.shape()
 							.accept(mode(Form.verify))
@@ -89,7 +89,7 @@ public final class Updater extends Actor<Updater> {
 
 				})
 
-				.map(
+				.fold(
 						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
 						request::reply
 				)));
@@ -106,7 +106,7 @@ public final class Updater extends Actor<Updater> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder direct(final Request request, final Collection<Statement> model) {
-		return request.reply(response -> response.map(new Failure<>()
+		return request.reply(response -> response.map(new Failure()
 				.status(Response.NotImplemented)
 				.cause("shapeless resource creation not supported"))
 		);
@@ -136,7 +136,7 @@ public final class Updater extends Actor<Updater> {
 					// !!! rewrite references to external base IRI
 					// !!! factor with Creator
 
-					return response.map(new Failure<>()
+					return response.map(new Failure()
 							.status(Response.UnprocessableEntity)
 							.error("data-invalid")
 							.trace(report(report)));
