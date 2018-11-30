@@ -45,6 +45,7 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -264,13 +265,13 @@ final class RewriterTest {
 		exec(() -> new Rewriter().base(Internal)
 
 				.wrap((Handler handler) -> (Request request) -> handler.handle(request)
-						.map(response -> response.body(rdf()).pipe(statements -> {
+						.map(response -> response.pipe(rdf(), statements -> {
 
 							// ;( assertThat(response).hasHeader("Location", Internal) causes SOE
 
 							assertThat(response.header("Location")).contains(Internal);
 
-							return statements;
+							return Value(statements);
 
 						}))
 				)
@@ -278,8 +279,7 @@ final class RewriterTest {
 				.wrap((Request request) -> request.reply(response -> response
 						.status(Response.OK)
 						.header("Location", Internal)
-						.body(rdf())
-						.set(emptySet())))
+						.body(rdf(), emptySet())))
 
 				.handle(new Request().base(External))
 
