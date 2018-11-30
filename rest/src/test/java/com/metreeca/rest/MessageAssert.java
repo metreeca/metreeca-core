@@ -175,13 +175,13 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		actual.body(DataFormat.data()).get().ifPresent(data -> {
+		actual.body(DataFormat.data()).value().ifPresent(data -> {
 			if ( data.length > 0 ) {
 				failWithMessage("expected empty body but had binary body of length <%d>", data.length);
 			}
 		});
 
-		actual.body(TextFormat.text()).get().ifPresent(text -> {
+		actual.body(TextFormat.text()).value().ifPresent(text -> {
 			if ( !text.isEmpty() ) {
 				failWithMessage(
 						"expected empty body but had textual body of length <%d> (%s)",
@@ -201,7 +201,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		return actual.body(format).map(
+		return actual.body(format).fold(
 				value -> fail("expected response to have no <%s> body but has one"),
 				error -> myself
 		);
@@ -216,7 +216,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		return actual.body(format).map(
+		return actual.body(format).fold(
 				value -> myself,
 				error -> fail(
 						"expected response to have a <%s> body but was unable to retrieve one (%s)",
@@ -247,7 +247,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		return actual.body(format).map(mapper, error -> fail(
+		return actual.body(format).fold(mapper, error -> fail(
 				"expected response to have a <%s> body but was unable to retrieve one (%s)",
 				format.getClass().getSimpleName(), error
 		));

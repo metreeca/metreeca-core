@@ -87,7 +87,7 @@ public final class Builder extends Actor<Builder> {
 
 					.map(r -> wild(request.shape()) ? r : r.shape(request.shape()))
 
-					.body(rdf()).set(model)
+					.body(rdf(), model)
 			);
 		}));
 	}

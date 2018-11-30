@@ -64,7 +64,7 @@ public final class Server implements Wrapper {
 
 				trace.error(this, format("%s %s > internal error", request.method(), request.item()), e);
 
-				return request.reply(new Failure<>()
+				return request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("exception-untrapped")
 						.cause("unable to process request: see server logs for details")
@@ -87,7 +87,7 @@ public final class Server implements Wrapper {
 		return request.parameters().isEmpty()
 				&& request.method().equals(POST)
 				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
-				? request.parameters(parse(request.body(text()).get().orElse("")))
+				? request.parameters(parse(request.body(text()).value().orElse("")))
 				: request;
 	}
 

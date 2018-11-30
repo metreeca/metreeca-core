@@ -43,6 +43,7 @@ import static com.metreeca.form.Shape.optional;
 import static com.metreeca.form.Shape.verify;
 import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.queries.Items.ItemsShape;
+import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
@@ -127,14 +128,14 @@ public final class Browser extends Actor<Browser> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder direct(final Request request) {
-		return request.reply(response -> response.map(new Failure<>()
+		return request.reply(response -> response.map(new Failure()
 				.status(Response.NotImplemented)
 				.cause("shapeless container browsing not supported"))
 		);
 	}
 
 	private Responder driven(final Request request) {
-		return request.reply(response -> request.query(request.shape()).map(
+		return request.reply(response -> request.query(request.shape()).fold(
 
 				query -> query.accept(new Query.Probe<Response>() {
 
@@ -187,15 +188,15 @@ public final class Browser extends Actor<Browser> {
 							trait(RDFS.COMMENT, verify(optional(), datatype(XMLSchema.STRING))),
 							trait(LDP.CONTAINS, edges.getShape())
 					))
-					.body(rdf()).set(model);
+					.body(rdf(),model);
 		});
 	}
 
 	private Response stats(final Query stats, final Response response) {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
-					.shape(ItemsShape)
-					.body(rdf()).set(new SPARQLEngine(connection).browse(stats, response.item()));
+					.shape(StatsShape)
+					.body(rdf(),new SPARQLEngine(connection).browse(stats, response.item()));
 
 		});
 	}
@@ -204,7 +205,7 @@ public final class Browser extends Actor<Browser> {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
 					.shape(ItemsShape)
-					.body(rdf()).set(new SPARQLEngine(connection).browse(items, response.item()));
+					.body(rdf(),new SPARQLEngine(connection).browse(items, response.item()));
 
 		});
 	}

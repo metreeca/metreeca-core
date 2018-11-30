@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Codecs.text;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,11 +109,11 @@ final class MessageTest {
 
 	@Test void testBodyCaching() {
 
-		final TestMessage message=new TestMessage().body(reader()).set(() -> new StringReader("test"));
+		final TestMessage message=new TestMessage().body(reader(), () -> new StringReader("test"));
 
 		final Function<Message<?>, String> accessor=m -> {
-			return ((Result<String>)m
-					.body(TextFormat.text())).map(value -> value, error -> fail("missing test body"));
+			return ((Result<String, Failure>)m
+					.body(TextFormat.text())).fold(value -> value, error -> fail("missing test body"));
 		};
 
 		assertSame(accessor.apply(message), accessor.apply(message));
@@ -121,11 +122,11 @@ final class MessageTest {
 	@Test void testBodyOnDemandFiltering() {
 
 		final Message<?> message=new TestMessage()
-				.body(TestFormat.test()).pipe(string -> string+"!")
-				.body(reader()).set(() -> new StringReader("test"));
+				.pipe(TestFormat.test(), string -> Value(string+"!"))
+				.body(reader(), () -> new StringReader("test"));
 
 		assertEquals("test!",
-				((Result<String>)message.body(TestFormat.test())).map(value -> value, error -> fail("missing test body")));
+				message.body(TestFormat.test()).fold(value -> value, error -> fail("missing test body")));
 
 	}
 
@@ -148,8 +149,8 @@ final class MessageTest {
 		private static TestFormat test() { return Instance; }
 
 
-		@Override public Result<String> get(final Message<?> message) {
-			return message.body(reader()).map(supplier -> {
+		@Override public Result<String, Failure> get(final Message<?> message) {
+			return message.body(reader()).value(supplier -> {
 				try (final Reader reader=supplier.get()) {
 					return text(reader);
 				} catch ( final IOException e ) {

@@ -46,6 +46,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.things.Values.*;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -277,18 +278,23 @@ public final class Processor implements Wrapper {
 			if ( response.success() && !scripts.isEmpty() ) {
 				graph.update(connection -> {
 
-					final IRI user=response.request().user();
 					final IRI item=response.item();
+					final IRI stem=iri(item.getNamespace());
+					final Literal name=literal(item.getLocalName());
+
+					final IRI user=response.request().user();
+					final Literal time=time(true);
 
 					for (final String update : scripts) {
 
 						final Update operation=connection.prepareUpdate(QueryLanguage.SPARQL, update, request.base());
 
 						operation.setBinding("this", item);
-						operation.setBinding("stem", iri(item.getNamespace()));
-						operation.setBinding("name", literal(item.getLocalName()));
+						operation.setBinding("stem", stem);
+						operation.setBinding("name", name);
+
 						operation.setBinding("user", user);
-						operation.setBinding("time", time(true));
+						operation.setBinding("time", time);
 
 						operation.execute();
 
@@ -317,18 +323,20 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-		return message.body(RDFFormat.rdf()).pipe(statements -> (filter == null) ? statements
-				: trim(message, filter.apply(message, new LinkedHashModel(statements)))
-		);
+
+		// ;( memoize current message state, before it's possibly altered by downstream wrappers
+
+		final IRI focus=message.item();
+		final Shape shape=message.shape();
+
+		return message.pipe(RDFFormat.rdf(), statements -> Value((filter == null) ?
+				statements : trim(focus, shape, filter.apply(message, new LinkedHashModel(statements)))
+		));
 	}
 
-	private <T extends Message<T>> Collection<Statement> trim(final T message, final Model model) {
-
-		final Shape shape=message.shape();
-		final Set<Value> focus=singleton(message.item());
-
+	private <T extends Message<T>> Collection<Statement> trim(final Value focus, final Shape shape, final Model model) {
 		return wild(shape) ? model : shape // !!! migrate wildcard handling to Trimmer
-				.accept(new Trimmer(model, focus))
+				.accept(new Trimmer(model, singleton(focus)))
 				.collect(toList());
 	}
 

@@ -37,14 +37,14 @@ final class HandlerTest {
 
 			transaction.add("begin");
 
-			request.reply(response -> response.body(text()).set("inside")).accept(consumer);
+			request.reply(response -> response.body(text(), "inside")).accept(consumer);
 
 			transaction.add("commit");
 
 		};
 
 		handler.handle(new Request()).accept(response -> {
-			transaction.add(response.body(text()).get().orElse(""));
+			transaction.add(response.body(text()).value().orElse(""));
 		});
 
 		assertThat(transaction).containsExactly("begin", "inside", "commit");

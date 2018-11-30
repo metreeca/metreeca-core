@@ -29,6 +29,7 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -94,13 +95,13 @@ public final class Creator extends Actor<Creator> {
 	private final Object lock=tool(LockFactory);
 
 
-	private BiFunction<Request, Collection<Statement>, String> slug=uuid();
+	private BiFunction<Request, Model, String> slug=uuid();
 
 
 	public Creator() {
 		delegate(action(Form.create, Form.detail).wrap((Request request) -> request.body(rdf())
 
-				.map(model -> { // add implied statements
+				.value(model -> { // add implied statements
 
 					model.addAll(request.shape()
 							.accept(mode(Form.verify))
@@ -111,7 +112,7 @@ public final class Creator extends Actor<Creator> {
 
 				})
 
-				.map(
+				.fold(
 						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
 						request::reply
 				)));
@@ -137,7 +138,7 @@ public final class Creator extends Actor<Creator> {
 	 *
 	 * @throws NullPointerException if {@code slug} is null
 	 */
-	public Creator slug(final BiFunction<Request, Collection<Statement>, String> slug) {
+	public Creator slug(final BiFunction<Request, Model, String> slug) {
 
 		if ( slug == null ) {
 			throw new NullPointerException("null slug");
@@ -156,7 +157,7 @@ public final class Creator extends Actor<Creator> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder direct(final Request request, final Collection<Statement> model) {
-		return request.reply(response -> response.map(new Failure<>()
+		return request.reply(response -> response.map(new Failure()
 				.status(Response.NotImplemented)
 				.cause("shapeless resource creation not supported"))
 		);
@@ -167,7 +168,7 @@ public final class Creator extends Actor<Creator> {
 
 			synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
 
-				final String slug=this.slug.apply(request, model);
+				final String slug=this.slug.apply(request, new LinkedHashModel(model));
 
 				if ( slug == null ) {
 					throw new NullPointerException("null slug");
@@ -192,7 +193,7 @@ public final class Creator extends Actor<Creator> {
 					// !!! rewrite references to external base IRI
 					// !!! factor with Updater
 
-					return response.map(new Failure<>()
+					return response.map(new Failure()
 							.status(Response.UnprocessableEntity)
 							.error("data-invalid")
 							.trace(report(report)));
@@ -219,7 +220,7 @@ public final class Creator extends Actor<Creator> {
 	 *
 	 * @return a random UUID-based slug
 	 */
-	public static BiFunction<Request, Collection<Statement>, String> uuid() {
+	public static BiFunction<Request, Model, String> uuid() {
 		return (request, model) -> randomUUID().toString();
 	}
 
@@ -238,7 +239,7 @@ public final class Creator extends Actor<Creator> {
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public static BiFunction<Request, Collection<Statement>, String> auto(final Shape shape) {
+	public static BiFunction<Request, Model, String> auto(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

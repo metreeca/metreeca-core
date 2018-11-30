@@ -58,8 +58,8 @@ final class ProcessorTest {
 				.status(Response.OK)
 				.shape(request.shape())
 
-				.map(r -> request.body(rdf()).map(
-						v -> r.body(rdf()).set(v),
+				.map(r -> request.body(rdf()).fold(
+						v -> r.body(rdf(), v),
 						e -> r
 				))
 
@@ -102,7 +102,7 @@ final class ProcessorTest {
 
 				.handle(new Request()
 
-						.body(rdf()).set(emptyList())) // empty body to activate pre-processing
+						.body(rdf(), emptyList())) // empty body to activate pre-processing
 
 				.accept(response -> assertThat(response)
 						.hasBodyThat(rdf())
@@ -142,7 +142,7 @@ final class ProcessorTest {
 				.handle(new Request()
 
 						.shape(trait(RDF.FIRST))
-						.body(rdf()).set(emptyList())) // empty body to activate pre-processing
+						.body(rdf(), emptyList())) // empty body to activate pre-processing
 
 				.accept(response -> assertThat(response)
 						.hasBodyThat(rdf())
@@ -167,7 +167,7 @@ final class ProcessorTest {
 
 				.handle(new Request()
 
-						.body(rdf()).set(emptyList())) // empty body to activate post-processing
+						.body(rdf(), emptyList())) // empty body to activate post-processing
 
 				.accept(response -> assertThat(response)
 						.hasBodyThat(rdf())
@@ -208,7 +208,7 @@ final class ProcessorTest {
 				.handle(new Request()
 
 						.shape(trait(RDF.FIRST))
-						.body(rdf()).set(emptyList())) // empty body to activate post-processing
+						.body(rdf(), emptyList())) // empty body to activate post-processing
 
 				.accept(response -> assertThat(response)
 						.hasBodyThat(rdf())
@@ -272,7 +272,7 @@ final class ProcessorTest {
 
 				.wrap(echo())
 
-				.handle(new Request().body(rdf()).set(emptySet()))
+				.handle(new Request().body(rdf(), emptySet()))
 
 				.accept(response -> assertThat(response)
 						.hasBodyThat(rdf())
@@ -286,7 +286,7 @@ final class ProcessorTest {
 
 				.wrap(echo())
 
-				.handle(new Request().body(rdf()).set(emptySet()))
+				.handle(new Request().body(rdf(), emptySet()))
 
 				.accept(response -> assertThat(response)
 						.hasBodyThat(rdf())

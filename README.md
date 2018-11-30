@@ -1,17 +1,18 @@
-**Coming soon** / Follow us on [Twitter](https://twitter.com/metreeca)  to learn about the first public relesase.
 
----
+[![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/link.svg)](https://search.maven.org/search?q=com.metreeca)
 
 # Metreeca/Link
 
-Metreeca/Link is a Java framework enabling rapid development of linked data applications.
+Metreeca/Link is an open source [RDF4J](http://rdf4j.org)-based Java framework enabling rapid development of RESTful linked data services.
 
-Its engine leverages high-level declarative domain models defined with SHACL and SPARQL to automatically generate read/write LDP APIs supporting model-driven faceted search, data validation and fine grained role-based read/write access control.
+Its engine automatically converts declarative high-level domain models defined with [SHACL](https://www.w3.org/TR/shacl/) and [SPARQL](https://www.w3.org/TR/sparql11-overview/) into extended linked data APIs supporting faceted search, data validation and fine‑grained role‑based read/write access control rules.
 
-Exposed linked data resources can also be accessed as plain REST/JSON APIs, completely shielding front-end developers from linked data technicalities.
+Published linked data resources are made available both through [LDP](https://www.w3.org/TR/ldp-primer/) and idiomatic REST/JSON APIs, supporting standardized access from third-party clients and completely shielding front‑end developers from linked data technicalities.
+
+To get started with Metreeca/Link, open the [docs](https://metreeca.github.io/link/) and walk through the model‑driven linked data [publishing](https://metreeca.github.io/link/tutorials/linked-data-publishing) and [interaction](https://metreeca.github.io/link/tutorials/linked-data-interaction) tutorials.
 
 ---
 
-home / [www.metreeca.com](https://www.metreeca.com/)  
-docs / [metreeca.github.io/link](https://metreeca.github.io/link)  
+home / [www.metreeca.com](https://www.metreeca.com/)  
+docs / [metreeca.github.io/link](https://metreeca.github.io/link/)  
 forum / [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca)

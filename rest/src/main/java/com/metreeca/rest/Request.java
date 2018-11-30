@@ -35,7 +35,8 @@ import javax.json.JsonException;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
@@ -166,13 +167,13 @@ public final class Request extends Message<Request> {
 	 *
 	 * @param shape the base shape for the query
 	 *
-	 * @return a result providing access to the combined query merging constraints from {@code shape} and the request
-	 * {@linkplain #query() query} string, as returned by the {@linkplain QueryParser query parser}; a result providing
-	 * access to the processing failure, otherwise
+	 * @return a value result providing access to the combined query merging constraints from {@code shape} and the
+	 * request {@linkplain #query() query} string, as returned by the {@linkplain QueryParser query parser}; an error
+	 * result providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public Result<Query> query(final Shape shape) {
+	public Result<Query, Failure> query(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -180,21 +181,21 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return value(new QueryParser(shape).parse(Codecs.decode(query())));
+			return Value(new QueryParser(shape).parse(Codecs.decode(query())));
 
 		} catch ( final JsonException e ) {
 
-			return new Failure<Query>()
+			return Error(new Failure()
 					.status(Response.BadRequest)
 					.error("query-malformed")
-					.cause(e);
+					.cause(e));
 
 		} catch ( final NoSuchElementException e ) {
 
-			return new Failure<Query>()
+			return Error(new Failure()
 					.status(Response.UnprocessableEntity)
 					.error("query-illegal")
-					.cause(e);
+					.cause(e));
 
 		}
 	}

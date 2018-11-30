@@ -18,9 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.things.Codecs;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 
 import java.io.*;
 
@@ -58,8 +56,8 @@ public final class DataFormat implements Format<byte[]> {
 	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing error,
 	 * otherwise
 	 */
-	@Override public Result<byte[]> get(final Message<?> message) {
-		return message.body(input()).map(source -> {
+	@Override public Result<byte[], Failure> get(final Message<?> message) {
+		return message.body(input()).value(source -> {
 			try (final InputStream input=source.get()) {
 
 				return Codecs.data(input);
@@ -75,7 +73,7 @@ public final class DataFormat implements Format<byte[]> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(output()).flatPipe(consumer -> message.body(data()).map(bytes -> target -> {
+		return message.pipe(output(), consumer -> message.body(data()).value(bytes -> target -> {
 			try (final OutputStream output=target.get()) {
 
 				output.write(bytes);

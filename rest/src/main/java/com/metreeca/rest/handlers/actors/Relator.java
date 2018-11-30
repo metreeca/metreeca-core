@@ -116,7 +116,7 @@ public final class Relator extends Actor<Relator> {
 			request.reply(response -> model.isEmpty()
 
 					? response.status(Response.NotFound)
-					: response.status(Response.OK).body(rdf()).set(model)
+					: response.status(Response.OK).body(rdf(), model)
 
 			).accept(consumer);
 
@@ -129,7 +129,7 @@ public final class Relator extends Actor<Relator> {
 
 		final IRI focus=request.item();
 
-		return request.query(and(shape, all(focus))).map(query -> request.reply(response -> graph.query(connection -> {
+		return request.query(and(shape, all(focus))).fold(query -> request.reply(response -> graph.query(connection -> {
 
 			final Collection<Statement> model=new SPARQLEngine(connection)
 					.browse(query)
@@ -157,17 +157,17 @@ public final class Relator extends Actor<Relator> {
 
 					@Override public Response visit(final Edges edges) {
 						return r.shape(shape.accept(mode(Form.verify))) // hide filtering constraints
-								.body(rdf()).set(model);
+								.body(rdf(), model);
 					}
 
 					@Override public Response visit(final Stats stats) {
 						return r.shape(StatsShape)
-								.body(rdf()).set(rewrite(model, Form.meta, focus));
+								.body(rdf(), rewrite(model, Form.meta, focus));
 					}
 
 					@Override public Response visit(final Items items) {
 						return r.shape(ItemsShape)
-								.body(rdf()).set(rewrite(model, Form.meta, focus));
+								.body(rdf(), rewrite(model, Form.meta, focus));
 					}
 
 				}));

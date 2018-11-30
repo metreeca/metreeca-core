@@ -30,7 +30,7 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 /**
  * HTTP processing failure.
  *
- * <p>Reports an error condition in an HTTP request processing operation that can be {@linkplain #apply(Response)
+ * <p>Reports an error condition in an HTTP request processing operation; can be {@linkplain #apply(Response)
  * transferred} to the {@linkplain JSONFormat JSON} body of an HTTP response like:</p>
  *
  * <pre>{@code
@@ -43,11 +43,8 @@ import static com.metreeca.rest.formats.JSONFormat.json;
  *     "trace": <trace>     # a optional structured JSON error report
  * }
  * }</pre>
- *
- * @param <V> the type of the result value expected from the failed operation
  */
-@SuppressWarnings("unchecked")
-public final class Failure<V> implements Result<V>, Function<Response, Response> {
+public final class Failure implements Function<Response, Response> {
 
 	/**
 	 * The machine readable error tag for failures due to malformed data in message body.
@@ -65,18 +62,6 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	private JsonValue trace;
 
 
-	/**
-	 * Casts this failure to a different expected result value.
-	 *
-	 * @param <R> the type of the expected target result value
-	 *
-	 * @return this failure cast to the expected result type
-	 */
-	public <R> Failure<R> as() {
-		return (Failure<R>)this;
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -88,7 +73,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	 *
 	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
 	 */
-	public Failure<V> status(final int status) {
+	public Failure status(final int status) {
 
 		if ( status < 100 || status > 599 ) {
 			throw new IllegalArgumentException("illegal status code ["+status+"]");
@@ -108,7 +93,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	 *
 	 * @throws NullPointerException if {@code error} is null
 	 */
-	public Failure<V> error(final String error) {
+	public Failure error(final String error) {
 
 		if ( error == null ) {
 			throw new NullPointerException("null error");
@@ -128,7 +113,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
-	public Failure<V> cause(final String cause) {
+	public Failure cause(final String cause) {
 
 		if ( cause == null ) {
 			throw new NullPointerException("null cause");
@@ -148,7 +133,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
-	public Failure<V> cause(final Throwable cause) {
+	public Failure cause(final Throwable cause) {
 
 		if ( cause == null ) {
 			throw new NullPointerException("null cause");
@@ -168,7 +153,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	 *
 	 * @throws NullPointerException if {@code trace} is null
 	 */
-	public Failure<V> trace(final JsonValue trace) {
+	public Failure trace(final JsonValue trace) {
 
 		if ( trace == null ) {
 			throw new NullPointerException("null trace");
@@ -181,20 +166,6 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	@Override public <R> R map(final Function<V, R> success, final Function<Failure<V>, R> failure) {
-
-		if ( success == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		if ( failure == null ) {
-			throw new NullPointerException("null error");
-		}
-
-		return failure.apply(this);
-	}
 
 	/**
 	 * Transfers the description of the error condition to an HTTP response.
@@ -214,10 +185,9 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 		return response
 				.status(status)
 				.cause(cause)
-				.body(json())
-				.set(ticket());
-
+				.body(json(), ticket());
 	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

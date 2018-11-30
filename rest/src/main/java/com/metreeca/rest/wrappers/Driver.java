@@ -176,7 +176,7 @@ public final class Driver implements Wrapper {
 
 					return response.status(Response.OK)
 							// !!! .body(asShape, ___) provide (recursive) shape for task shapes ;)
-							.body(rdf()).set(model);
+							.body(rdf(), model);
 
 				})) :
 

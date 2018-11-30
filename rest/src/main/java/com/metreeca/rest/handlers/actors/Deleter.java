@@ -56,10 +56,16 @@ public final class Deleter extends Actor<Deleter> {
 		));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Deleter sync(final String script) { return super.sync(script); }
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder direct(final Request request) {
-		return request.reply(response -> response.map(new Failure<>()
+		return request.reply(response -> response.map(new Failure()
 				.status(Response.NotImplemented)
 				.cause("shapeless resource creation not supported"))
 		);

@@ -1,10 +1,10 @@
 # Getting Involved
 
-Code patches are absolutely welcome. However, they're not the only way to get involved: you can help the project by [reporting bugs](#reporting-bugs); improving docs; helping others on [GitHub Issues](https://github.com/metreeca/metreeca-core/issues); tweeting to [@metreeca](https://twitter.com/metreeca); telling the world about Metreeca ;-)
+Code patches are absolutely welcome. However, they're not the only way to get involved: you can help the project by [reporting bugs](#reporting-bugs); improving docs; helping others on [GitHub Issues](https://github.com/metreeca/link/issues); tweeting to [@metreeca](https://twitter.com/metreeca); telling the world about Metreeca ;-)
 
 # Reporting Bugs
 
-Before reporting a bug on the project's [issues](https://github.com/metreeca/metreeca-core/issues) page, search already reported issues for similar cases and, if something is found, just add any additional details in the comments.
+Before reporting a bug on the project's [issues](https://github.com/metreeca/link/issues) page, search already reported issues for similar cases and, if something is found, just add any additional details in the comments.
 
 If you've really found a new bug, creating a helpful report that will make fixing it much easier and quicker:
 
@@ -19,6 +19,6 @@ If you just want some help with the platform or your project, try asking a speci
 
 # Suggesting Features
 
-If you think you have a good idea about improving or extending Metreeca/Core, feel free to open a ticket on the project's [issues](https://github.com/metreeca/metreeca-core/issues) page, ignoring the issue reporting template.
+If you think you have a good idea about improving or extending Metreeca/Core, feel free to open a ticket on the project's [issues](https://github.com/metreeca/link/issues) page, ignoring the issue reporting template.
 
 Again search already reported suggestions and, if something is found, just add any additional details in the comments.
