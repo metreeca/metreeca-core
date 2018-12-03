@@ -104,7 +104,7 @@ public final class Server implements Wrapper {
 		final Throwable cause=response.cause().orElse(null);
 
 		trace.entry(status < 400 ? Trace.Level.Info : status < 500 ? Trace.Level.Warning : Trace.Level.Error,
-				this, format("%s %s > %d", method, item, status), cause);
+				this, () -> format("%s %s > %d", method, item, status), cause);
 
 		return response;
 	}

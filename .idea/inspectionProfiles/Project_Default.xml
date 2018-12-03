@@ -741,6 +741,7 @@
       <option name="myAllowedSuppressions">
         <list>
           <option value="deprecation" />
+          <option value="unchecked" />
         </list>
       </option>
     </inspection_tool>
@@ -908,6 +909,7 @@
     <inspection_tool class="UseOfAnotherObjectsPrivateField" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreSameClass" value="true" />
       <option name="ignoreEquals" value="true" />
+      <option name="ignoreInnerClasses" value="true" />
     </inspection_tool>
     <inspection_tool class="UseOfJDBCDriverClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UseOfObsoleteAssert" enabled="true" level="WARNING" enabled_by_default="true" />

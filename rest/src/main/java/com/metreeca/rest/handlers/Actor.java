@@ -26,7 +26,12 @@ import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -35,6 +40,7 @@ import javax.json.*;
 
 import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.things.Sets.intersection;
+import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
@@ -49,7 +55,7 @@ import static java.util.stream.Collectors.groupingBy;
 /**
  * Resource actor.
  *
- * <p>Handles actions linked data resources.</p>
+ * <p>Handles actions on linked data resources.</p>
  *
  * <p>The abstract base:</p>
  *
@@ -320,19 +326,21 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 
 	protected Collection<Statement> trace(final Collection<Statement> model) {
 
-		return model; // !!! enable once tracing with message suppliers is implemented
+		trace.entry(Trace.Level.Debug, this, () -> {
 
-		//try (final StringWriter writer=new StringWriter()) {
-		//
-		//	Rio.write(model, new TurtleWriter(writer));
-		//
-		//	trace.debug(this, "processing model\n"+indent(writer, true));
-		//
-		//	return model;
-		//
-		//} catch ( final IOException e ) {
-		//	throw new UncheckedIOException(e);
-		//}
+			try (final StringWriter writer=new StringWriter()) {
+
+				Rio.write(model, new TurtleWriter(writer));
+
+				return "processing model\n"+indent(writer, true);
+
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+
+		}, null);
+
+		return model;
 	}
 
 
