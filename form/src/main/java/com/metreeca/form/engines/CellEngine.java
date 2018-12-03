@@ -20,9 +20,10 @@ package com.metreeca.form.engines;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Report;
-import com.metreeca.form.things.Structures;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
@@ -30,6 +31,7 @@ import java.util.Collection;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Report.report;
 import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.things.Structures.cell;
 
 import static java.util.stream.Collectors.toList;
 
@@ -59,6 +61,23 @@ public final class CellEngine {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Retrieves a resource cell.
+	 *
+	 * @param focus the focus resource for the cell to be retrieved
+	 * @return the labelled symmetric bounded description of {@code focus}
+	 *
+	 * @throws NullPointerException if {@code focus} is null
+	 */
+	public Collection<Statement> relate(final Resource focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		return cell(focus, true, connection);
+	}
+
+	/**
 	 * Creates a resource cell.
 	 *
 	 * @param focus the focus resource for the cell to be created
@@ -79,8 +98,7 @@ public final class CellEngine {
 			throw new NullPointerException("null model");
 		}
 
-		final Model envelope=Structures
-				.cell(focus, false, model);
+		final Model envelope=cell(focus, false, model);
 
 		final Collection<Statement> outliers=model.stream()
 				.filter(statement -> !envelope.contains(statement))
@@ -115,7 +133,7 @@ public final class CellEngine {
 			throw new NullPointerException("null focus");
 		}
 
-		connection.remove(Structures.cell(focus, false, connection));
+		connection.remove(cell(focus, false, connection));
 	}
 
 }

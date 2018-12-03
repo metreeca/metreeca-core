@@ -21,10 +21,11 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
+import com.metreeca.form.engines.CellEngine;
+import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
-import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
@@ -44,7 +45,6 @@ import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.things.Structures.cell;
 import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
@@ -109,7 +109,7 @@ public final class Relator extends Actor<Relator> {
 		return consumer -> graph.query(connection -> {
 
 			final IRI focus=request.item();
-			final Collection<Statement> model=cell(focus, true, connection);
+			final Collection<Statement> model=new CellEngine(connection).relate(focus);
 
 			request.reply(response -> model.isEmpty()
 
