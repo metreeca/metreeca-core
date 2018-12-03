@@ -69,7 +69,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 
 		isNotNull();
 
-		if ( !actual.isEmpty() ) {
+		if ( actual.isEmpty() ) {
 			failWithMessage("expected model to be not empty");
 		}
 
