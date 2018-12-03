@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.sparql;
+package com.metreeca.form.engines;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;

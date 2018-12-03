@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.sparql;
+package com.metreeca.form.engines;
 
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;

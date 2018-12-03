@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.sparql;
+package com.metreeca.form.engines;
 
 import org.junit.jupiter.api.Test;
 

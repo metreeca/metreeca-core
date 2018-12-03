@@ -20,7 +20,7 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Outliner;
-import com.metreeca.form.sparql.SPARQLEngine;
+import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.sparql;
+package com.metreeca.form.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.queries.Edges;
@@ -86,7 +86,7 @@ public final class SPARQLEngine {
 		return new SPARQLReader(connection).process(query);
 	}
 
-	public Collection<Statement> browse(final Query query, final IRI focus) {
+	public Collection<Statement> browse(final Query query, final IRI focus) { // !!! review/remove
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
@@ -155,7 +155,7 @@ public final class SPARQLEngine {
 		// extend validation report with statements outside shape envelope
 
 		return outliers.isEmpty() ? report : report(concat(report.getIssues(), outliers.stream()
-				.map(outlier -> issue(Issue.Level.Error, "unexpected statement "+outlier, shape))
+				.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier, shape))
 				.collect(toList())
 		), report.getFrames());
 	}

@@ -24,7 +24,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
-import com.metreeca.form.sparql.SPARQLEngine;
+import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;

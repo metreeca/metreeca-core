@@ -18,9 +18,13 @@
 package com.metreeca.rest.handlers.actors;
 
 
-import com.metreeca.form.*;
+import com.metreeca.form.Form;
+import com.metreeca.form.Issue.Level;
+import com.metreeca.form.Report;
+import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Outliner;
-import com.metreeca.form.sparql.SPARQLEngine;
+import com.metreeca.form.engines.CellEngine;
+import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
@@ -57,29 +61,32 @@ import static java.util.UUID.randomUUID;
  *
  * <dl>
  *
- * <dt>Request shape-driven {@link RDFFormat} body</dt>
+ * <dt>Request {@link RDFFormat} body</dt>
  *
  * <dd>The RDF content to be assigned to the newly created resource; must describe the new resource using
  * the request {@linkplain Request#item() focus item} as subject.</dd>
  *
- * <dd>If the request includes  a {@linkplain Message#shape() shape}, it is redacted taking into account the request user
- * {@linkplain Request#roles() roles},  {@link Form#create} task,  {@link Form#verify} mode and {@link Form#detail} view
- * and used to validate the request RDF body; validation errors are reported with a {@linkplain
+ * <dd>On successful body validation, the resource to be created is assigned a unique IRI based on the stem of the
+ * request {@linkplain Request#item() focus item} and a name provided by either the default {@linkplain #uuid()
+ * UUID-based} or a {@linkplain #slug(BiFunction) custom-provided} slug generator and the RDF body is rewritten to the
+ * assigned IRI.</dd>
+ *
+ * <dd>If the request includes a {@linkplain Message#shape() shape}, it is redacted taking into account the request
+ * user {@linkplain Request#roles() roles},  {@link Form#create} task,  {@link Form#verify} mode and {@link Form#detail}
+ * view and used to validate the rewritten RDF body; validation errors are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
  *
- * <dd>On successful body validation, the newly created resource is assigned a unique IRI based on the stem of the
- * request {@linkplain Request#item() focus item} and a name provided by either the default {@linkplain #uuid()
- * UUID-based} or a {@linkplain #slug(BiFunction) custom-provided} slug generator.</dd>
- *
- * <dt>Request shapeless {@link RDFFormat} body</dt>
- *
- * <dd><strong>Warning</strong> / Shapeless resource creation is not yet supported and is reported with a {@linkplain
- * Response#NotImplemented} HTTP status code.</dd>
+ * <dd>If the request does not include a {@linkplain Message#shape() shape}, the request body is expected to contain a
+ * symmetric concise bounded description of the resource to be created; statements outside this envelope are reported
+ * with a {@linkplain Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue)
+ * trace} element.</dd>
  *
  * </dl>
  *
  * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
  * Graph#Factory graph} database.</p>
+ *
+ * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
 public final class Creator extends Actor<Creator> {
 
@@ -113,7 +120,7 @@ public final class Creator extends Actor<Creator> {
 				})
 
 				.fold(
-						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
+						model -> process(request, model),
 						request::reply
 				)));
 	}
@@ -156,14 +163,7 @@ public final class Creator extends Actor<Creator> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Responder direct(final Request request, final Collection<Statement> model) {
-		return request.reply(response -> response.map(new Failure()
-				.status(Response.NotImplemented)
-				.cause("shapeless resource creation not supported"))
-		);
-	}
-
-	private Responder driven(final Request request, final Collection<Statement> model) {
+	private Responder process(final Request request, final Collection<Statement> model) {
 		return request.reply(response -> graph.update(connection -> {
 
 			synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
@@ -181,11 +181,14 @@ public final class Creator extends Actor<Creator> {
 				final IRI source=request.item();
 				final IRI target=iri(request.stem(), slug);
 
-				final Report report=new SPARQLEngine(connection).create(target, request.shape(), trace(rewrite(
-						model, source, target
-				)));
+				final Shape shape=request.shape();
+				final Collection<Statement> rewritten=trace(rewrite(model, source, target));
 
-				if ( report.assess(Issue.Level.Error) ) { // shape violations
+				final Report report=wild(shape)
+						? new CellEngine(connection).create(target, rewritten)
+						: new SPARQLEngine(connection).create(target, shape, rewritten);
+
+				if ( report.assess(Level.Error) ) { // cell/shape violations
 
 					connection.rollback();
 

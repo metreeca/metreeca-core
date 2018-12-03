@@ -24,7 +24,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
-import com.metreeca.form.sparql.SPARQLEngine;
+import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
@@ -57,23 +57,23 @@ import static com.metreeca.tray.Tray.tool;
  *
  * <dl>
  *
- * <dt>Response shape-driven {@link RDFFormat} body</dt>
+ * <dt>Response {@link RDFFormat} body</dt>
  *
- * <dd>If the request includes  a {@linkplain Message#shape() shape}, the response includes the {@linkplain
- * RDFFormat RDF description} of the request {@linkplain Request#item() focus item}, as defined by the redacted linked
- * data {@linkplain Shape shape}.</dd>
+ * <dd>If the request includes  a {@linkplain Message#shape() shape}, the response includes the {@linkplain RDFFormat
+ * RDF description} of the request {@linkplain Request#item() focus item}, as defined by the redacted linked data
+ * {@linkplain Shape shape}.</dd>
  *
- * <dt>Response shapeless {@link RDFFormat} body</dt>
- *
- * <dd>If the request does not include a {@linkplain Message#shape() shape}, the response includes the symmetric concise
- * bounded description of the request focus item, extended with {@code rdfs:label/comment} annotations for all
+ * <dd>If the request does not include a {@linkplain Message#shape() shape}, the response includes the symmetric
+ * concise bounded description of the request focus item, extended with {@code rdfs:label/comment} annotations for all
  * referenced IRIs.</dd>
  *
- * </dl>
+ * <dt>Response shape</dt>
  *
- * <p>If the request includes a shape, the response includes the derived shape actually used in the resource retrieval
+ * <dd>If the request includes a shape, the response includes the derived shape actually used in the resource retrieval
  * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#verify} mode and {@link Form#detail} view.</p>
+ * Form#verify} mode and {@link Form#detail} view.</d>
+ *
+ * </dl>
  *
  * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
  * database.</p>

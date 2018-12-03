@@ -16,8 +16,8 @@
  */
 
 /**
- * Shape-driven SPARQL tools.
+ * Query/update engines.
  */
 
-package com.metreeca.form.sparql;
+package com.metreeca.form.engines;
 

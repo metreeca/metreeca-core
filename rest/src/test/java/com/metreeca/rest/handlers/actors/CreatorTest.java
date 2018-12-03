@@ -76,6 +76,150 @@ final class CreatorTest {
 	}
 
 
+	//// Direct ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testDirectCreate() {
+		exec(() -> new Creator()
+
+				.handle(direct())
+
+				.accept(response -> {
+
+					final IRI location=response
+							.header("Location")
+							.map(Values::iri)
+							.orElse(null);
+
+					assertThat(response)
+							.hasStatus(Response.Created)
+							.doesNotHaveBody();
+
+					assertThat(location)
+							.as("resource created with IRI stemmed on request focus")
+							.hasNamespace(response.request().item().stringValue());
+
+					assertThat(graph()).hasSubset(
+							statement(location, term("forename"), literal("Tino")),
+							statement(location, term("surname"), literal("Faussone"))
+					);
+
+				}));
+	}
+
+	@Test void testDirectCreateSlug() {
+		exec(() -> new Creator()
+
+				.slug((request, model) -> "slug")
+
+				.handle(direct())
+
+				.accept(response -> {
+
+					final IRI location=response.header("Location")
+							.map(Values::iri)
+							.orElse(null);
+
+					assertThat(response)
+							.hasStatus(Response.Created)
+							.doesNotHaveBody();
+
+					assertThat(location)
+							.as("resource created with computed IRI")
+							.isEqualTo(item("employees/slug"));
+
+					assertThat(graph()).hasSubset(
+							statement(location, term("forename"), literal("Tino")),
+							statement(location, term("surname"), literal("Faussone"))
+					);
+
+				}));
+	}
+
+
+
+	@Test void testDirectUnauthorized() {
+		exec(() -> new Creator().roles(Manager)
+
+				.handle(direct().user(Form.none).roles(Salesman))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.Unauthorized)
+							.doesNotHaveHeader("Location")
+							.doesNotHaveBody();
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isEmpty();
+
+				}));
+	}
+
+	@Test void testDirectForbidden() {
+		exec(() -> new Creator().roles(Manager)
+
+				.handle(direct().user(RDF.NIL).roles(Salesman))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.Forbidden)
+							.doesNotHaveHeader("Location")
+							.doesNotHaveBody();
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isEmpty();
+
+				}));
+	}
+
+	@Test void testDirectMalformedData() {
+		exec(() -> new Creator()
+
+				.handle(direct().map(body("!!!")))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.BadRequest)
+							.doesNotHaveHeader("Location")
+							.hasBodyThat(json())
+							.hasField("error");
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isEmpty();
+
+				}));
+	}
+
+	@Test void testDirectExceedingdData() {
+		exec(() -> new Creator()
+
+				.handle(direct().map(body("@prefix : <http://example.com/terms#>. <>"
+						+" :forename 'Tino' ;"
+						+" :surname 'Faussone' ;"
+						+" :office <offices/1> . <offices/1> :value 'exceeding' ."
+				)))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.UnprocessableEntity)
+							.doesNotHaveHeader("Location")
+							.hasBodyThat(json())
+							.hasField("error");
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isEmpty();
+
+				}));
+	}
+
+
 	//// Driven ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenCreate() {

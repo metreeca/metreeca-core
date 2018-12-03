@@ -19,7 +19,7 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.form.sparql.SPARQLEngine;
+import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
