@@ -84,6 +84,38 @@ final class StructuresTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromModel() {
+
+			final Model cell=Structures.cell(focus, false, model);
+
+			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
+			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
+
+	}
+
+	@Test void testRetrieveLabelledSymmetricConciseBoundedDescriptionFromModel() {
+
+		final Model cell=Structures.cell(focus, true, model);
+
+		assertThat(cell.subjects())
+				.containsOnly(focus, _dblank, _iblank, direct, inverse);
+
+		assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
+				.containsOnly(focus, _dblank, _iblank, direct);
+
+		assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
+
+				statement(direct, RDFS.LABEL, dlabel),
+				statement(direct, RDFS.COMMENT, dcomment),
+
+				statement(inverse, RDFS.LABEL, ilabel),
+				statement(inverse, RDFS.COMMENT, icomment)
+
+		);
+
+	}
+
+
 	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromRepository() {
 
 		try (final RepositoryConnection connection=sandbox(model).get()) {
@@ -110,11 +142,13 @@ final class StructuresTest {
 					.containsOnly(focus, _dblank, _iblank, direct);
 
 			assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
+
 					statement(direct, RDFS.LABEL, dlabel),
 					statement(direct, RDFS.COMMENT, dcomment),
 
 					statement(inverse, RDFS.LABEL, ilabel),
 					statement(inverse, RDFS.COMMENT, icomment)
+
 			);
 		}
 

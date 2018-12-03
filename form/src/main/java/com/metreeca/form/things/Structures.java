@@ -17,13 +17,15 @@
 
 package com.metreeca.form.things;
 
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.Collections.singleton;
 
@@ -38,6 +40,37 @@ import static java.util.Collections.singleton;
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
 public final class Structures {
+
+	/**
+	 * Retrieves a symmetric concise bounded description from a statement source.
+	 *
+	 * @param focus    the resource whose symmetric concise bounded description is to be retrieved
+	 * @param labelled if {@code true}, the retrieved description will be extended with {@code rdfs:label/comment}
+	 *                 annotations for all referenced IRIs
+	 * @param model    the statement source the description is to be retrieved from
+	 *
+	 * @return the symmetric concise bounded description of {@code focus} retrieved from {@code model}
+	 *
+	 * @throws NullPointerException if either {@code focus} or {@code model} is null
+	 */
+	public static Model cell(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return cell(focus, labelled, (s, p, o) ->
+				StreamSupport.stream(model.spliterator(), true).filter(statement
+						-> (s == null || s.equals(statement.getSubject()))
+						&& (p == null || p.equals(statement.getPredicate()))
+						&& (o == null || o.equals(statement.getObject()))
+				)
+		);
+	}
 
 	/**
 	 * Retrieves the symmetric concise bounded description of a resource from a repository.
@@ -63,7 +96,15 @@ public final class Structures {
 			throw new NullPointerException("null connection");
 		}
 
-		final Model model=new LinkedHashModel();
+		return cell(focus, labelled, (s, p, o) ->
+				Iterations.stream(connection.getStatements(s, p, o, true))
+		);
+	}
+
+
+	private static Model cell(final Resource focus, final boolean labelled, final Source source) {
+
+		final Model cell=new LinkedHashModel();
 
 		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
 		final Collection<Value> visited=new HashSet<>();
@@ -75,55 +116,39 @@ public final class Structures {
 			if ( visited.add(value) ) {
 				if ( value.equals(focus) || value instanceof BNode ) {
 
-					try (final RepositoryResult<Statement> statements=connection.getStatements(
-							(Resource)value, null, null, true
-					)) {
-						while ( statements.hasNext() ) {
+					source.match((Resource)value, null, null)
+							.peek(statement -> pending.add(statement.getObject()))
+							.forEach(cell::add);
 
-							final Statement statement=statements.next();
-
-							model.add(statement);
-							pending.add(statement.getObject());
-						}
-					}
-
-					try (final RepositoryResult<Statement> statements=connection.getStatements(
-							null, null, value, true
-					)) {
-						while ( statements.hasNext() ) {
-
-							final Statement statement=statements.next();
-
-							model.add(statement);
-							pending.add(statement.getSubject());
-						}
-					}
+					source.match(null, null, value)
+							.peek(statement -> pending.add(statement.getSubject()))
+							.forEach(cell::add);
 
 				} else if ( labelled && value instanceof IRI ) {
 
-					try (final RepositoryResult<Statement> statements=connection.getStatements(
-							(Resource)value, RDFS.LABEL, null, true
-					)) {
-						while ( statements.hasNext() ) { model.add(statements.next()); }
-					}
-
-					try (final RepositoryResult<Statement> statements=connection.getStatements(
-							(Resource)value, RDFS.COMMENT, null, true
-					)) {
-						while ( statements.hasNext() ) { model.add(statements.next()); }
-					}
+					source.match((Resource)value, RDFS.LABEL, null).forEach(cell::add);
+					source.match((Resource)value, RDFS.COMMENT, null).forEach(cell::add);
 
 				}
 			}
 
 		}
 
-		return model;
+		return cell;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Structures() {} // utility
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@FunctionalInterface private static interface Source {
+
+		public Stream<Statement> match(final Resource subject, final IRI predicate, final Value object);
+
+	}
 
 }
