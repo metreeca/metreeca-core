@@ -22,9 +22,7 @@ import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Report;
 import com.metreeca.form.things.Structures;
 
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
@@ -39,7 +37,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Cell-based query/update engine.
  *
- * <p>Handles CRUD operations on resource cells defined by labelled symmetric concise bounded descriptions.</p>
+ * <p>Handles CRUD operations on resource cells defined by (labelled) symmetric concise bounded descriptions.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
@@ -63,7 +61,7 @@ public final class CellEngine {
 	/**
 	 * Creates a resource cell.
 	 *
-	 * @param focus the focus resource for the cell
+	 * @param focus the focus resource for the cell to be created
 	 * @param model the statements to be included in the newly created cell centered on {@code focus}
 	 *
 	 * @return a validation report for the operation; includes {@linkplain Issue.Level#Error errors} if {@code model}
@@ -102,6 +100,22 @@ public final class CellEngine {
 
 		}
 
+	}
+
+	/**
+	 * Deletes a resource cell.
+	 *
+	 * @param focus the focus resource for the cell to be deleted
+	 *
+	 * @throws NullPointerException if {@code focus} is null
+	 */
+	public void delete(final Resource focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		connection.remove(Structures.cell(focus, false, connection));
 	}
 
 }

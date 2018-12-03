@@ -120,7 +120,8 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * Configures the permitted roles.
 	 *
 	 * @param roles the user {@linkplain Request#roles(Value...) roles} enabled to perform the resource action managed
-	 *              by this actor; empty for public access
+	 *              by this actor; empty for public access; may be further restricted by role-based annotations in the
+	 *              {@linkplain Request#shape request shape}, if one is present
 	 *
 	 * @return this actor
 	 *
@@ -134,7 +135,8 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * Configures the permitted roles.
 	 *
 	 * @param roles the user {@linkplain Request#roles(Value...) roles} enabled to perform the resource action managed
-	 *              by this actor; empty for public access
+	 *              by this actor; empty for public access; may be further restricted by role-based annotations in the
+	 *              {@linkplain Request#shape request shape}, if one is present
 	 *
 	 * @return this actor
 	 *

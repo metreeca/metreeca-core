@@ -19,6 +19,8 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
+import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Actor;
@@ -39,11 +41,13 @@ import static com.metreeca.tray.Tray.tool;
  * user {@linkplain Request#roles() roles}, {@link Form#delete} task, {@link Form#verify} mode and {@link Form#detail}
  * view and used to identify the neighborhood of the request {@linkplain Request#item() focus item} to be deleted.</p>
  *
- * <p><strong>Warning</strong> / Shapeless resource updating is not yet supported and is reported with a {@linkplain
- * Response#NotImplemented} HTTP status code.</p>
+ * <dd>If the request does not include a {@linkplain Message#shape() shape}, the symmetric concise bounded description
+ * of the request {@linkplain Request#item() focus item} will be deleted.</dd>
  *
  * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
  * Graph#Factory graph} database.</p>
+ *
+ * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
 public final class Deleter extends Actor<Deleter> {
 
@@ -51,9 +55,7 @@ public final class Deleter extends Actor<Deleter> {
 
 
 	public Deleter() {
-		delegate(action(Form.delete, Form.detail).wrap((Request request) ->
-				wild(request.shape()) ? direct(request) : driven(request)
-		));
+		delegate(action(Form.delete, Form.detail).wrap(this::process));
 	}
 
 
@@ -64,17 +66,11 @@ public final class Deleter extends Actor<Deleter> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Responder direct(final Request request) {
-		return request.reply(response -> response.map(new Failure()
-				.status(Response.NotImplemented)
-				.cause("shapeless resource creation not supported"))
-		);
-	}
-
-	private Responder driven(final Request request) {
+	private Responder process(final Request request) {
 		return request.reply(response -> graph.update(connection -> {
 
 			final IRI focus=request.item();
+			final Shape shape=request.shape();
 
 			if ( !connection.hasStatement(focus, null, null, true)
 					&& !connection.hasStatement(null, null, focus, true) ) {
@@ -85,7 +81,11 @@ public final class Deleter extends Actor<Deleter> {
 
 			} else {
 
-				new SPARQLEngine(connection).delete(focus, request.shape());
+				if ( wild(shape) ){
+					new CellEngine(connection).delete(focus);
+				} else {
+					new SPARQLEngine(connection).delete(focus, shape);
+				}
 
 				return response.status(Response.NoContent);
 

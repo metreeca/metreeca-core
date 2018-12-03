@@ -18,11 +18,13 @@
 package com.metreeca.rest.handlers.actors;
 
 
+import com.metreeca.form.Form;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.Or.or;
@@ -61,6 +63,67 @@ final class DeleterTest {
 	@Test void testDirectDelete() {
 		exec(() -> new Deleter()
 
+				.handle(direct())
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.NoContent)
+							.doesNotHaveBody();
+
+					assertThat(graph("construct where { <employees/1370> ?p ?o }"))
+							.as("cell deleted")
+							.isEmpty();
+
+					assertThat(graph("construct where { <employees/1102> rdfs:label ?o }"))
+							.as("connected resources preserved")
+							.isNotEmpty();
+
+				}));
+	}
+
+
+	@Test void testDirectUnauthorized() {
+		exec(() -> new Deleter().roles(Manager)
+
+				.handle(direct().user(Form.none).roles(Salesman))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.Unauthorized)
+							.doesNotHaveBody();
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isIsomorphicTo(Dataset);
+
+				}));
+	}
+
+	@Test void testDirectForbidden() {
+		exec(() -> new Deleter().roles(Manager)
+
+				.handle(direct().user(RDF.NIL).roles(Salesman))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.Forbidden)
+							.doesNotHaveBody();
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isIsomorphicTo(Dataset);
+
+				}));
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testDrivenDelete() {
+		exec(() -> new Deleter()
+
 				.handle(driven())
 
 				.accept(response -> {
@@ -70,14 +133,11 @@ final class DeleterTest {
 							.doesNotHaveBody();
 
 					assertThat(graph("construct where { <employees/1370> ?p ?o }"))
-							.as("graph unchanged")
 							.isEmpty();
 
 				}));
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenUnauthorized() {
 		exec(() -> new Deleter()
