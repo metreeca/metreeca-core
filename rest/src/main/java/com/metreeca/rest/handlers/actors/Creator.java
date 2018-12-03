@@ -22,9 +22,9 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Report;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
+import com.metreeca.form.probes.Outliner;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
@@ -66,11 +66,6 @@ import static java.util.UUID.randomUUID;
  * <dd>The RDF content to be assigned to the newly created resource; must describe the new resource using
  * the request {@linkplain Request#item() focus item} as subject.</dd>
  *
- * <dd>On successful body validation, the resource to be created is assigned a unique IRI based on the stem of the
- * request {@linkplain Request#item() focus item} and a name provided by either the default {@linkplain #uuid()
- * UUID-based} or a {@linkplain #slug(BiFunction) custom-provided} slug generator and the RDF body is rewritten to the
- * assigned IRI.</dd>
- *
  * <dd>If the request includes a {@linkplain Message#shape() shape}, it is redacted taking into account the request
  * user {@linkplain Request#roles() roles},  {@link Form#create} task,  {@link Form#verify} mode and {@link Form#detail}
  * view and used to validate the rewritten RDF body; validation errors are reported with a {@linkplain
@@ -80,6 +75,11 @@ import static java.util.UUID.randomUUID;
  * symmetric concise bounded description of the resource to be created; statements outside this envelope are reported
  * with a {@linkplain Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue)
  * trace} element.</dd>
+ *
+ * <dd>On successful body validation, the resource to be created is assigned a unique IRI based on the stem of the
+ * request {@linkplain Request#item() focus item} and a name provided by either the default {@linkplain #uuid()
+ * UUID-based} or a {@linkplain #slug(BiFunction) custom-provided} slug generator and the RDF body is rewritten to the
+ * assigned IRI.</dd>
  *
  * </dl>
  *

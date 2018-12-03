@@ -79,6 +79,118 @@ final class UpdaterTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Test void testDirectUpdate() {
+		exec(() -> new Updater()
+
+				.handle(direct())
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.NoContent)
+							.doesNotHaveBody();
+
+					assertThat(graph())
+
+							.as("graph updated")
+
+							.hasSubset(decode("@prefix : <http://example.com/terms#> . </employees/1370>"
+									+":forename 'Tino';"
+									+":surname 'Faussone';"
+									+":email 'tfaussone@example.com';"
+									+":title 'Sales Rep' ;"
+									+":seniority 5 ."
+							))
+
+							.doesNotHaveStatement(item("employees/1370"), term("forename"), literal("Gerard"))
+							.doesNotHaveStatement(item("employees/1370"), term("surname"), literal("Hernandez"));
+
+				}));
+	}
+
+
+	@Test void testDirectUnauthorized() {
+		exec(() -> new Updater().roles(Manager)
+
+				.handle(direct().user(Form.none).roles(Salesman))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.Unauthorized)
+							.doesNotHaveBody();
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isIsomorphicTo(Dataset);
+
+				}));
+	}
+
+	@Test void testDirectForbidden() {
+		exec(() -> new Updater().roles(Manager)
+
+				.handle(direct().user(RDF.NIL).roles(Salesman))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.Forbidden)
+							.doesNotHaveBody();
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isIsomorphicTo(Dataset);
+
+				}));
+	}
+
+	@Test void testDirectMalformedData() {
+		exec(() -> new Updater()
+
+				.handle(direct().map(body("!!!")))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.BadRequest)
+							.hasBodyThat(json())
+							.hasField("error");
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isIsomorphicTo(Dataset);
+
+				}));
+	}
+
+	@Test void testDirectExceedingData() {
+		exec(() -> new Creator()
+
+				.handle(direct().map(body("@prefix : <http://example.com/terms#>. <>"
+						+" :forename 'Tino' ;"
+						+" :surname 'Faussone' ;"
+						+" :office <offices/1> . <offices/1> :value 'exceeding' ."
+				)))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.UnprocessableEntity)
+							.doesNotHaveHeader("Location")
+							.hasBodyThat(json())
+							.hasField("error");
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isIsomorphicTo(Dataset);
+
+				}));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Test void testDrivenUpdate() {
 		exec(() -> new Updater()
 

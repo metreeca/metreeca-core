@@ -98,26 +98,48 @@ public final class CellEngine {
 			throw new NullPointerException("null model");
 		}
 
-		final Model envelope=cell(focus, false, model);
+		final Report report=validate(focus, model);
 
-		final Collection<Statement> outliers=model.stream()
-				.filter(statement -> !envelope.contains(statement))
-				.collect(toList());
-
-		if ( outliers.isEmpty() ) {
+		if ( !report.assess(Level.Error) ) {
 
 			connection.add(model);
 
-			return report();
+		}
 
-		} else {
+		return report;
+	}
 
-			return report(outliers.stream()
-					.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier, wild()))
-					.collect(toList()));
+	/**
+	 * Updates a resource cell.
+	 *
+	 * @param focus the focus resource for the cell to be updated
+	 * @param model the statements to be included in the updated cell centered on {@code focus}
+	 *
+	 * @return a validation report for the operation; includes {@linkplain Issue.Level#Error errors} if {@code model}
+	 * contains statements outside the symmetric concise bounded description of {@code focus}
+	 *
+	 * @throws NullPointerException if either {@code focus} or {@code model} is null
+	 */
+	public Report update(final Resource focus, final Collection<Statement> model) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		final Report report=validate(focus, model);
+
+		if ( !report.assess(Level.Error) ) {
+
+			connection.remove(cell(focus, false, connection));
+			connection.add(model);
 
 		}
 
+		return report;
 	}
 
 	/**
@@ -134,6 +156,23 @@ public final class CellEngine {
 		}
 
 		connection.remove(cell(focus, false, connection));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Report validate(final Resource focus, final Collection<Statement> model) {
+
+		final Model envelope=cell(focus, false, model);
+
+		final Collection<Statement> outliers=model.stream()
+				.filter(statement -> !envelope.contains(statement))
+				.collect(toList());
+
+		return outliers.isEmpty() ? report() : report(outliers.stream()
+				.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier, wild()))
+				.collect(toList()));
+
 	}
 
 }

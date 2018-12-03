@@ -195,7 +195,7 @@ final class CreatorTest {
 				}));
 	}
 
-	@Test void testDirectExceedingdData() {
+	@Test void testDirectExceedingData() {
 		exec(() -> new Creator()
 
 				.handle(direct().map(body("@prefix : <http://example.com/terms#>. <>"

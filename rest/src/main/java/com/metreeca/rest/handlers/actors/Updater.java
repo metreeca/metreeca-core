@@ -19,8 +19,9 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.*;
-import com.metreeca.form.probes.Outliner;
+import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
+import com.metreeca.form.probes.Outliner;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
@@ -48,27 +49,29 @@ import static com.metreeca.tray.Tray.tool;
  *
  * <dl>
  *
- * <dt>Request shape-driven {@link RDFFormat} body</dt>
+ * <dt>Request{@link RDFFormat} body</dt>
  *
  * <dd>The RDF content to be assigned to the updated resource.</dd>
  *
- * <dd>If the request includes  a {@linkplain Message#shape() shape}, it is redacted taking into account the request user
- * {@linkplain Request#roles() roles}, {@link Form#update} task, {@link Form#verify} mode and {@link Form#digest} view
- * and used to validate the request RDF body; validation errors are reported with a {@linkplain
+ * <dd>If the request includes a {@linkplain Message#shape() shape}, it is redacted taking into account the request
+ * user {@linkplain Request#roles() roles}, {@link Form#update} task, {@link Form#verify} mode and {@link Form#digest}
+ * view and used to validate the request RDF body; validation errors are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
  *
- * <dd>On successful body validation, the RDF description of the resource as matched by the redacted shape is replaced
- * with the updated one.</dd>
+ * <dd>If the request does not include a {@linkplain Message#shape() shape}, the request body is expected to contain a
+ * symmetric concise bounded description of the resource to be updated; statements outside this envelope are reported
+ * with a {@linkplain Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue)
+ * trace} element.</dd>
  *
- * <dt>Request shapeless {@link RDFFormat} body</dt>
- *
- * <dd><strong>Warning</strong> / Shapeless resource updating is not yet supported and is reported with a {@linkplain
- * Response#NotImplemented} HTTP status code.</dd>
+ * <dd>On successful body validation, the RDF description of the resource as matched either by the redacted shape or by
+ * the existing symmetric concise bounded description is replaced with the updated one.</dd>
  *
  * </dl>
  *
  * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
  * Graph#Factory graph} database.</p>
+ *
+ * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
 public final class Updater extends Actor<Updater> {
 
@@ -90,7 +93,7 @@ public final class Updater extends Actor<Updater> {
 				})
 
 				.fold(
-						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
+						model -> process(request, model),
 						request::reply
 				)));
 	}
@@ -105,14 +108,7 @@ public final class Updater extends Actor<Updater> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Responder direct(final Request request, final Collection<Statement> model) {
-		return request.reply(response -> response.map(new Failure()
-				.status(Response.NotImplemented)
-				.cause("shapeless resource creation not supported"))
-		);
-	}
-
-	private Responder driven(final Request request, final Collection<Statement> model) {
+	private Responder process(final Request request, final Collection<Statement> model) {
 		return request.reply(response -> graph.update(connection -> {
 
 			final IRI focus=request.item();
@@ -126,7 +122,13 @@ public final class Updater extends Actor<Updater> {
 
 			} else {
 
-				final Report report=new SPARQLEngine(connection).update(focus, request.shape(), trace(model));
+
+				final Shape shape=request.shape();
+				final Collection<Statement> update=trace(model);
+
+				final Report report=wild(shape)
+						? new CellEngine(connection).update(focus, update)
+						: new SPARQLEngine(connection).update(focus, shape, update);
 
 				if ( report.assess(Issue.Level.Error) ) { // shape violations
 
