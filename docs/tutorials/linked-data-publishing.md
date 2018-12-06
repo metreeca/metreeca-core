@@ -234,9 +234,9 @@ If the index doesn't contain a matching handler, no action is performed giving t
 | [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleter.html)⃰ | resource deletion / deletes the detailed RDF description of the target item |
 | [Builder](../javadocs/?com/metreeca/rest/handlers/actors/Builder.html) | virtual resource retrieval / retrieves the detailed RDF description of the virtual target item |
 
-Unless a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the [symmetric concise bounded description](https://www.w3.org/Submission/CBD/) of the target item(s).
+If a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the graph neighbourhood of the target target item(s)  identified by the model after redaction according to the request user roles and to actor-specific task,  mode and view parameters.
 
-<p class="warning">⃰ Model-less operations aren't yet fully supported by all action handlers.</p>
+If no shape model is associated to the request, CRUD operations are performed on the (labelled) [symmetric concise bounded description](https://www.w3.org/Submission/CBD/) of the target item(s).
 
 ## Delegators
 
