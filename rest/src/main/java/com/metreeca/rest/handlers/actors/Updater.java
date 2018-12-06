@@ -106,9 +106,9 @@ public final class Updater extends Actor<Updater> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder direct(final Request request, final Collection<Statement> model) {
-		return request.reply(response -> response.map(new Failure()
+		return request.reply(new Failure()
 				.status(Response.NotImplemented)
-				.cause("shapeless resource creation not supported"))
+				.cause("shapeless resource updating not supported")
 		);
 	}
 

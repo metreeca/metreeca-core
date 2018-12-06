@@ -128,9 +128,9 @@ public final class Browser extends Actor<Browser> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder direct(final Request request) {
-		return request.reply(response -> response.map(new Failure()
+		return request.reply(new Failure()
 				.status(Response.NotImplemented)
-				.cause("shapeless container browsing not supported"))
+				.cause("shapeless container browsing not supported")
 		);
 	}
 
