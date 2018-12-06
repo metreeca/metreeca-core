@@ -35,6 +35,7 @@ import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.truths.JSONAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.truths.ValueAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
@@ -186,8 +187,7 @@ final class CreatorTest {
 					assertThat(response)
 							.hasStatus(Response.BadRequest)
 							.doesNotHaveHeader("Location")
-							.hasBodyThat(json())
-							.hasField("error");
+							.hasBody(json(), json -> assertThat(json).hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
@@ -209,8 +209,7 @@ final class CreatorTest {
 					assertThat(response)
 							.hasStatus(Response.UnprocessableEntity)
 							.doesNotHaveHeader("Location")
-							.hasBodyThat(json())
-							.hasField("error");
+							.hasBody(json(), json -> assertThat(json).hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
@@ -230,8 +229,7 @@ final class CreatorTest {
 					assertThat(response)
 							.hasStatus(Response.UnprocessableEntity)
 							.doesNotHaveHeader("Location")
-							.hasBodyThat(json())
-							.hasField("error");
+							.hasBody(json(), json -> assertThat(json).hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")

@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -84,17 +85,17 @@ final class BuilderTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBodyThat(rdf())
-						.isIsomorphicTo(decode("<virtual> a :Employee ;\n"
-								+"\trdfs:label 'Tino Faussone' ;\n"
-								+"\t:code '1234' ;\n"
-								+"\t:surname 'Faussone' ;\n"
-								+"\t:forename 'Tino' ;\n"
-								+"\t:email 'tfaussone@classicmodelcars.com' ;\n"
-								+"\t:title 'Sales Rep' ;\n"
-								+"\t:supervisor <employees/1102> ;\n"
-								+"\t:seniority '1'^^xsd:integer .\n"))
-				)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(decode("<virtual> a :Employee ;\n"
+										+"\trdfs:label 'Tino Faussone' ;\n"
+										+"\t:code '1234' ;\n"
+										+"\t:surname 'Faussone' ;\n"
+										+"\t:forename 'Tino' ;\n"
+										+"\t:email 'tfaussone@classicmodelcars.com' ;\n"
+										+"\t:title 'Sales Rep' ;\n"
+										+"\t:supervisor <employees/1102> ;\n"
+										+"\t:seniority '1'^^xsd:integer .\n"))
+						))
 
 		);
 	}
@@ -106,15 +107,15 @@ final class BuilderTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBodyThat(rdf())
-						.isIsomorphicTo(decode("<virtual> a :Employee ;\n"
-								+"\trdfs:label 'Tino Faussone' ;\n"
-								+"\t:code '1234' ;\n"
-								+"\t:surname 'Faussone' ;\n"
-								+"\t:forename 'Tino' ;\n"
-								+"\t:email 'tfaussone@classicmodelcars.com' ;\n"
-								+"\t:title 'Sales Rep' .\n"))
-				)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(decode("<virtual> a :Employee ;\n"
+										+"\trdfs:label 'Tino Faussone' ;\n"
+										+"\t:code '1234' ;\n"
+										+"\t:surname 'Faussone' ;\n"
+										+"\t:forename 'Tino' ;\n"
+										+"\t:email 'tfaussone@classicmodelcars.com' ;\n"
+										+"\t:title 'Sales Rep' .\n"))
+						))
 
 		);
 	}

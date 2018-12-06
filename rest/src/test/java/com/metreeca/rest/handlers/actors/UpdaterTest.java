@@ -20,6 +20,7 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Codecs;
+import com.metreeca.form.truths.JSONAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -154,8 +155,8 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.BadRequest)
-							.hasBodyThat(json())
-							.hasField("error");
+							.hasBody(json(), json -> JSONAssert.assertThat(json)
+									.hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
@@ -178,8 +179,8 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.UnprocessableEntity)
-							.hasBodyThat(json())
-							.hasField("error");
+							.hasBody(json(), json -> JSONAssert.assertThat(json)
+							.hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
@@ -198,8 +199,8 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.UnprocessableEntity)
-							.hasBodyThat(json())
-							.hasField("error");
+							.hasBody(json(), json -> JSONAssert.assertThat(json)
+							.hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")

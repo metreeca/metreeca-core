@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
@@ -30,6 +29,7 @@ import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -90,13 +90,13 @@ final class ActorTest {
 
 					assertThat(response)
 							.as("pre/post-processing filters executed")
-							.hasBodyThat(rdf())
+							.hasBody(rdf(), rdf -> assertThat(rdf)
 							.isIsomorphicTo(
 									statement(response.item(), RDF.VALUE, RDF.FIRST), // pre-processor
 									statement(response.item(), RDF.VALUE, RDF.REST) // post-processor
-							);
+							));
 
-					ModelAssert.assertThat(graph())
+					assertThat(graph())
 							.as("update script executed")
 							.hasSubset(statement(response.item(), RDF.VALUE, RDF.NIL));
 

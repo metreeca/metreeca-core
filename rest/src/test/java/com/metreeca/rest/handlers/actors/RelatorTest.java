@@ -20,6 +20,7 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
+import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -73,9 +74,9 @@ final class RelatorTest {
 						.hasStatus(Response.OK)
 						.doesNotHaveShape()
 
-						.hasBodyThat(rdf())
-						.as("response RDF body contains a resource description")
-						.hasStatement(response.item(), null, null)));
+						.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
+								.as("response RDF body contains a resource description")
+								.hasStatement(response.item(), null, null))));
 	}
 
 	@Test void testDirectUnknown() {
@@ -103,11 +104,11 @@ final class RelatorTest {
 
 							.hasShape()
 
-							.hasBodyThat(rdf())
-							.as("items retrieved")
-							.hasSubset(construct(connection,
-									"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }"
-							));
+							.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
+									.as("items retrieved")
+									.hasSubset(construct(connection,
+											"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }"
+									)));
 
 				}))
 		);
@@ -124,15 +125,15 @@ final class RelatorTest {
 
 							.hasStatus(Response.OK)
 
-							.hasBodyThat(rdf())
+							.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
-							.as("items retrieved")
-							.hasSubset(construct(connection,
-									"construct where { <employees/1370> a :Employee; :code ?c }"
-							))
+									.as("items retrieved")
+									.hasSubset(construct(connection,
+											"construct where { <employees/1370> a :Employee; :code ?c }"
+									))
 
-							.as("properties restricted to manager role not included")
-							.doesNotHaveStatement(null, term("seniority"), null);
+									.as("properties restricted to manager role not included")
+									.doesNotHaveStatement(null, term("seniority"), null));
 
 				}))
 		);

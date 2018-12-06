@@ -18,14 +18,13 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.truths.JSONAssert;
-import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.rest.formats.*;
+import com.metreeca.rest.formats.DataFormat;
+import com.metreeca.rest.formats.TextFormat;
 
-import org.assertj.core.api.*;
+import org.assertj.core.api.AbstractAssert;
 
 import java.util.Collection;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.wild;
@@ -43,7 +42,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 	public A hasHeader(final String name) {
 
@@ -118,7 +116,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		isNotNull();
 
 		assertThat(actual.headers(name))
-				.as("<%sh> message headers",name)
+				.as("<%sh> message headers", name)
 				.containsExactly(values);
 
 		return myself;
@@ -133,7 +131,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( wild(shape) || empty(shape)) {
+		if ( wild(shape) || empty(shape) ) {
 			failWithMessage("expected message to have a shape but has none", shape);
 		}
 
@@ -171,6 +169,46 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	public A hasBody(final Format<?> format) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		return hasBody(format, body -> {});
+	}
+
+	public <V> A hasBody(final Format<V> format, final Consumer<V> assertions) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		if ( assertions == null ) {
+			throw new NullPointerException("null assertions");
+		}
+
+		isNotNull();
+
+		return actual.body(format).fold(
+
+				value -> {
+
+					assertions.accept(value);
+
+					return myself;
+
+				},
+
+				error -> fail(
+						"expected response to have a <%s> body but was unable to retrieve one (%s)",
+						format.getClass().getSimpleName(), error
+				)
+		);
+	}
+
+
 	public A doesNotHaveBody() {
 
 		isNotNull();
@@ -205,52 +243,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 				value -> fail("expected response to have no <%s> body but has one"),
 				error -> myself
 		);
-	}
-
-
-	public A hasBody(final Format<?> format) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		isNotNull();
-
-		return actual.body(format).fold(
-				value -> myself,
-				error -> fail(
-						"expected response to have a <%s> body but was unable to retrieve one (%s)",
-						format.getClass().getSimpleName(), error
-				)
-		);
-	}
-
-
-	public <V> ObjectAssert<V> hasBodyThat(final Format<V> format) {
-		return hasBodyThat(format, Assertions::assertThat);
-	}
-
-	public JSONAssert hasBodyThat(final JSONFormat format) {
-		return hasBodyThat(format, JSONAssert::assertThat);
-	}
-
-	public ModelAssert hasBodyThat(final RDFFormat format) {
-		return hasBodyThat(format, ModelAssert::assertThat);
-	}
-
-
-	private <V, VT, VA extends Assert<VA, VT>> VA hasBodyThat(final Format<V> format, final Function<V, VA> mapper) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		isNotNull();
-
-		return actual.body(format).fold(mapper, error -> fail(
-				"expected response to have a <%s> body but was unable to retrieve one (%s)",
-				format.getClass().getSimpleName(), error
-		));
 	}
 
 }

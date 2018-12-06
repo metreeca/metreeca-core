@@ -19,6 +19,8 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
+import com.metreeca.form.truths.JSONAssert;
+import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -90,11 +92,11 @@ final class BrowserTest {
 
 						.hasShape()
 
-						.hasBodyThat(rdf())
+						.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 						.hasStatement(response.item(), LDP.CONTAINS, null)
 						.hasSubset(graph("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
 				)
-		);
+		));
 	}
 
 	@Test void testDrivenBrowseLimited() {
@@ -108,13 +110,13 @@ final class BrowserTest {
 
 						.hasShape()
 
-						.hasBodyThat(rdf())
+						.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 						.hasSubset(graph("construct where { ?e a :Employee; rdfs:label ?label }"))
 
 						.as("properties restricted to manager role not included")
 						.doesNotHaveStatement(null, term("seniority"), null)
 				)
-		);
+		));
 	}
 
 	@Test void testDrivenBrowseFiltered() {
@@ -132,7 +134,7 @@ final class BrowserTest {
 
 						.hasShape()
 
-						.hasBodyThat(rdf())
+						.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 						.hasSubset(graph(""
 								+"construct { ?e a :Employee; :title ?t }\n"
 								+"where { ?e a :Employee; :title ?t, 'Sales Rep' }"
@@ -141,7 +143,7 @@ final class BrowserTest {
 						.as("only resources matching filter included")
 						.doesNotHaveStatement(null, term("title"), literal("President"))
 				)
-		);
+		));
 	}
 
 
@@ -159,10 +161,10 @@ final class BrowserTest {
 
 						.hasShape()
 
-						.hasBodyThat(rdf())
+						.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 						.doesNotHaveStatement(null, LDP.CONTAINS, null)
 				)
-		);
+		));
 	}
 
 
@@ -203,10 +205,10 @@ final class BrowserTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.UnprocessableEntity)
-						.hasBodyThat(json())
+						.hasBody(json(), json    -> JSONAssert.assertThat(json)
 						.hasField("error")
 				)
-		);
+		));
 	}
 
 }

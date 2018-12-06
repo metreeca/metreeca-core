@@ -17,6 +17,7 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -105,12 +106,15 @@ final class ProcessorTest {
 						.body(rdf(), emptyList())) // empty body to activate pre-processing
 
 				.accept(response -> assertThat(response)
-						.hasBodyThat(rdf())
-						.as("items retrieved")
-						.hasSubset(asList(
-								statement(response.item(), RDF.VALUE, RDF.FIRST),
-								statement(response.item(), RDF.VALUE, RDF.REST)
-						))));
+						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
+								.as("items retrieved")
+								.hasSubset(asList(
+										statement(response.item(), RDF.VALUE, RDF.FIRST),
+										statement(response.item(), RDF.VALUE, RDF.REST)
+								))
+						)
+				)
+		);
 	}
 
 	@Test void testIgnoreMissingRequestRDFPayload() {
@@ -145,9 +149,10 @@ final class ProcessorTest {
 						.body(rdf(), emptyList())) // empty body to activate pre-processing
 
 				.accept(response -> assertThat(response)
-						.hasBodyThat(rdf())
-						.as("statements outside shape envelope trimmed")
-						.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.as("statements outside shape envelope trimmed")
+								.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
+						)
 				)
 		);
 	}
@@ -170,12 +175,15 @@ final class ProcessorTest {
 						.body(rdf(), emptyList())) // empty body to activate post-processing
 
 				.accept(response -> assertThat(response)
-						.hasBodyThat(rdf())
-						.as("items retrieved")
-						.hasSubset(asList(
-								statement(response.item(), RDF.VALUE, RDF.FIRST),
-								statement(response.item(), RDF.VALUE, RDF.REST)
-						))));
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.as("items retrieved")
+								.hasSubset(asList(
+										statement(response.item(), RDF.VALUE, RDF.FIRST),
+										statement(response.item(), RDF.VALUE, RDF.REST)
+								))
+						)
+				)
+		);
 	}
 
 	@Test void testIgnoreMissingResponseRDFPayload() {
@@ -211,9 +219,10 @@ final class ProcessorTest {
 						.body(rdf(), emptyList())) // empty body to activate post-processing
 
 				.accept(response -> assertThat(response)
-						.hasBodyThat(rdf())
-						.as("statements outside shape envelope trimmed")
-						.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.as("statements outside shape envelope trimmed")
+								.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
+						)
 				)
 		);
 	}
@@ -275,8 +284,9 @@ final class ProcessorTest {
 				.handle(new Request().body(rdf(), emptySet()))
 
 				.accept(response -> assertThat(response)
-						.hasBodyThat(rdf())
-						.hasStatement(response.item(), RDF.VALUE, RDF.NIL)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.hasStatement(response.item(), RDF.VALUE, RDF.NIL)
+						)
 				)
 		);
 	}
@@ -289,8 +299,9 @@ final class ProcessorTest {
 				.handle(new Request().body(rdf(), emptySet()))
 
 				.accept(response -> assertThat(response)
-						.hasBodyThat(rdf())
-						.hasStatement(response.item(), RDF.VALUE, RDF.NIL)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.hasStatement(response.item(), RDF.VALUE, RDF.NIL)
+						)
 				)
 		);
 	}
