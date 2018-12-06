@@ -204,9 +204,9 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
-					assertThat(request).hasBodyThat(rdf())
+					assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 							.as("request json rewritten")
-							.isIsomorphicTo(singleton(internal("s", "p", "o")));
+							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
 					return request.reply(response -> response.
 							status(Response.OK)
