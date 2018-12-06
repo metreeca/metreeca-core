@@ -164,7 +164,9 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * Inserts a request RDF pre-processing filter.
 	 *
 	 * @param filter the request RDF request pre-processing filter to be inserted; takes as argument an incoming request
-	 *               and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 *               and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model; if the
+	 *               request includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
+	 *               statements outside the allowed envelope after shape redaction
 	 *
 	 * @return this actor
 	 *
@@ -186,7 +188,9 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * Inserts a response post-processing RDF filter.
 	 *
 	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
-	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model;
+	 *               if the response includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to
+	 *               remove statements outside the allowed envelope after shape redaction
 	 *
 	 * @return this actor
 	 *
