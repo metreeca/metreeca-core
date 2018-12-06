@@ -256,9 +256,9 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 
 		return query().wrap(headers())
 
-				.wrap(pre(task, view)) // redact request shape before processor trimming
+				.wrap(pre(task, view)) // redact request shape before pre-processor shape-driven RDF payload trimming
 				.wrap(processor)
-				.wrap(post(task, view)); // redact response shape before processor trimming
+				.wrap(post(task, view)); // redact response shape before post-processor shape-driven RDF payload trimming
 	}
 
 

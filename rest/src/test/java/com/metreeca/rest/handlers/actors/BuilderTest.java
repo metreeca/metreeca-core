@@ -107,6 +107,7 @@ final class BuilderTest {
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
 						.hasBodyThat(rdf())
+						.as("only salesman-visible statements included")
 						.isIsomorphicTo(decode("<virtual> a :Employee ;\n"
 								+"\trdfs:label 'Tino Faussone' ;\n"
 								+"\t:code '1234' ;\n"

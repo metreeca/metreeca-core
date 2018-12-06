@@ -75,7 +75,7 @@ public final class Builder extends Actor<Builder> {
 
 	public Builder() {
 		post(
-				(response, model) -> model // non-empty filter forces RDF body trimming in Processor
+				(response, model) -> model // non-empty filter forces shape-driven RDF body trimming in Processor
 
 		).delegate(action(Form.relate, Form.detail).wrap((Request request) -> {
 

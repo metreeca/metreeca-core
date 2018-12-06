@@ -346,7 +346,7 @@ public final class Processor implements Wrapper {
 	/**
 	 * Model trimmer.
 	 *
-	 * <p>Recursively extractsall the statements compatible with a shape from a model and an initial collection of
+	 * <p>Recursively extracts all the statements compatible with a shape from a model and an initial collection of
 	 * source values .</p>
 	 */
 	private static final class Trimmer extends Shape.Probe<Stream<Statement>> {
