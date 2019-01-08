@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -19,9 +19,7 @@ package com.metreeca.rest.handlers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Responder;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -122,16 +120,16 @@ final class ActorTest {
 	private static final class TestActor extends Actor<TestActor> {
 
 		private TestActor() {
-			delegate(handler(Form.relate, Form.detail, (request, shape) -> request.reply(response ->
+			delegate(action(Form.relate, Form.detail).wrap((Handler)request -> request.reply(response -> response
 
-					response.status(Response.OK)
+					.status(Response.OK)
 
-							.shape(request.shape()) // echo shape
+					.shape(request.shape()) // echo shape
 
-							.map(r -> request.body(rdf()).map( // echo rdf body
-									value -> r.body(rdf()).set(value),
-									error -> r
-							))
+					.map(r -> request.body(rdf()).map( // echo rdf body
+							value -> r.body(rdf()).set(value),
+							error -> r
+					))
 
 			)));
 		}

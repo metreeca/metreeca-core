@@ -1,25 +1,24 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
- *  Metreeca is free software: you can redistribute it and/or modify it under the terms
- *  of the GNU Affero General Public License as published by the Free Software Foundation,
- *  either version 3 of the License, or(at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- *  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *  See the GNU Affero General Public License for more details.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License along with Metreeca.
- *  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
 import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Actor;
@@ -52,10 +51,16 @@ public final class Deleter extends Actor<Deleter> {
 
 
 	public Deleter() {
-		delegate(handler(Form.delete, Form.detail, (request, shape) ->
-				wild(shape) ? direct(request) : driven(request, shape)
+		delegate(action(Form.delete, Form.detail).wrap((Request request) ->
+				wild(request.shape()) ? direct(request) : driven(request)
 		));
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Deleter sync(final String script) { return super.sync(script); }
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,7 +71,7 @@ public final class Deleter extends Actor<Deleter> {
 		);
 	}
 
-	private Responder driven(final Request request, final Shape shape) {
+	private Responder driven(final Request request) {
 		return request.reply(response -> graph.update(connection -> {
 
 			final IRI focus=request.item();
@@ -80,7 +85,7 @@ public final class Deleter extends Actor<Deleter> {
 
 			} else {
 
-				new SPARQLEngine(connection).delete(focus, shape);
+				new SPARQLEngine(connection).delete(focus, request.shape());
 
 				return response.status(Response.NoContent);
 

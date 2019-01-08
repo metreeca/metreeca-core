@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -29,7 +29,14 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
@@ -38,10 +45,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Shape.wild;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.Values.time;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.form.things.Values.*;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.singleton;
@@ -62,6 +66,49 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Processor implements Wrapper {
 
+	/**
+	 * Creates a message processing filter for inserting static RDF content.
+	 *
+	 * @param rdf the RDF content to be inserted in the processed message; parsed using as base the {@linkplain
+	 *            Message#item() focus item} of the processed message
+	 * @param <T> the type of the processed message
+	 *
+	 * @return the new message processing filter
+	 *
+	 * @throws NullPointerException if {@code rdf} is null
+	 * @throws RDFParseException    if {@code rdf} is malformed
+	 */
+	public static <T extends Message<T>> BiFunction<T, Model, Model> rdf(final String rdf) throws RDFParseException {
+
+		if ( rdf == null ) {
+			throw new NullPointerException("null rdf");
+		}
+
+		final IRI placeholder=iri("placeholder:/");
+		final StatementCollector collector=new StatementCollector();
+
+		final RDFParser parser=new TurtleParser();
+
+		parser.setRDFHandler(collector);
+
+		try (final StringReader reader=new StringReader(rdf)) {
+			parser.parse(reader, placeholder.stringValue());
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+
+		return (response, statements) -> {
+
+			statements.addAll(rewrite(collector.getStatements(), placeholder, response.item()));
+
+			return statements;
+
+		};
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private BiFunction<Request, Model, Model> pre;
 	private BiFunction<Response, Model, Model> post;
 
@@ -78,8 +125,8 @@ public final class Processor implements Wrapper {
 	 * <p>The filter is chained after previously inserted pre-processing filters and executed on incoming requests and
 	 * their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
-	 * <p>If the request includes  a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove statements
-	 * outside the allowed shape envelope.</p>
+	 * <p>If the request includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
+	 * statements outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
 	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -106,8 +153,8 @@ public final class Processor implements Wrapper {
 	 * Response#success() successful} outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is
 	 * present, or ignored, otherwise.</p>
 	 *
-	 * <p>If the response includes  a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove statements
-	 * outside the allowed shape envelope.</p>
+	 * <p>If the response includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
+	 * statements outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
 	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -230,18 +277,23 @@ public final class Processor implements Wrapper {
 			if ( response.success() && !scripts.isEmpty() ) {
 				graph.update(connection -> {
 
-					final IRI user=response.request().user();
 					final IRI item=response.item();
+					final IRI stem=iri(item.getNamespace());
+					final Literal name=literal(item.getLocalName());
+
+					final IRI user=response.request().user();
+					final Literal time=time(true);
 
 					for (final String update : scripts) {
 
 						final Update operation=connection.prepareUpdate(QueryLanguage.SPARQL, update, request.base());
 
 						operation.setBinding("this", item);
-						operation.setBinding("stem", iri(item.getNamespace()));
-						operation.setBinding("name", literal(item.getLocalName()));
+						operation.setBinding("stem", stem);
+						operation.setBinding("name", name);
+
 						operation.setBinding("user", user);
-						operation.setBinding("time", time(true));
+						operation.setBinding("time", time);
 
 						operation.execute();
 
@@ -270,18 +322,20 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-		return message.body(rdf()).pipe(statements -> (filter == null) ? statements
-				: trim(message, filter.apply(message, new LinkedHashModel(statements)))
+
+		// ;( memoize current message state, before it's possibly altered by downstream wrappers
+
+		final IRI focus=message.item();
+		final Shape shape=message.shape();
+
+		return message.body(RDFFormat.rdf()).pipe(statements -> (filter == null) ?
+				statements : trim(focus, shape, filter.apply(message, new LinkedHashModel(statements)))
 		);
 	}
 
-	private <T extends Message<T>> Collection<Statement> trim(final T message, final Model model) {
-
-		final Shape shape=message.shape();
-		final Set<Value> focus=singleton(message.item());
-
-		return wild(shape) ? model : shape
-				.accept(new Trimmer(model, focus))
+	private <T extends Message<T>> Collection<Statement> trim(final Value focus, final Shape shape, final Model model) {
+		return wild(shape) ? model : shape // !!! migrate wildcard handling to Trimmer
+				.accept(new Trimmer(model, singleton(focus)))
 				.collect(toList());
 	}
 

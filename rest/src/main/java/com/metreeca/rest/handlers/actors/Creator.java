@@ -1,18 +1,18 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
- *  Metreeca is free software: you can redistribute it and/or modify it under the terms
- *  of the GNU Affero General Public License as published by the Free Software Foundation,
- *  either version 3 of the License, or(at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- *  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *  See the GNU Affero General Public License for more details.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License along with Metreeca.
- *  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest.handlers.actors;
@@ -29,6 +29,7 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -94,15 +95,15 @@ public final class Creator extends Actor<Creator> {
 	private final Object lock=tool(LockFactory);
 
 
-	private BiFunction<Request, Collection<Statement>, String> slug=uuid();
+	private BiFunction<Request, Model, String> slug=uuid();
 
 
 	public Creator() {
-		delegate(handler(Form.create, Form.detail, (request, shape) -> request.body(rdf())
+		delegate(action(Form.create, Form.detail).wrap((Request request) -> request.body(rdf())
 
 				.map(model -> { // add implied statements
 
-					model.addAll(shape
+					model.addAll(request.shape()
 							.accept(mode(Form.verify))
 							.accept(new Outliner(request.item()))
 					);
@@ -112,11 +113,9 @@ public final class Creator extends Actor<Creator> {
 				})
 
 				.map(
-						model -> wild(shape) ? direct(request, model) : driven(request, model, shape),
+						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
 						request::reply
-				)
-
-		));
+				)));
 	}
 
 
@@ -139,7 +138,7 @@ public final class Creator extends Actor<Creator> {
 	 *
 	 * @throws NullPointerException if {@code slug} is null
 	 */
-	public Creator slug(final BiFunction<Request, Collection<Statement>, String> slug) {
+	public Creator slug(final BiFunction<Request, Model, String> slug) {
 
 		if ( slug == null ) {
 			throw new NullPointerException("null slug");
@@ -164,12 +163,12 @@ public final class Creator extends Actor<Creator> {
 		);
 	}
 
-	private Responder driven(final Request request, final Collection<Statement> model, final Shape shape) {
+	private Responder driven(final Request request, final Collection<Statement> model) {
 		return request.reply(response -> graph.update(connection -> {
 
 			synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
 
-				final String slug=this.slug.apply(request, model);
+				final String slug=this.slug.apply(request, new LinkedHashModel(model));
 
 				if ( slug == null ) {
 					throw new NullPointerException("null slug");
@@ -182,7 +181,7 @@ public final class Creator extends Actor<Creator> {
 				final IRI source=request.item();
 				final IRI target=iri(request.stem(), slug);
 
-				final Report report=new SPARQLEngine(connection).create(target, shape, trace(rewrite(
+				final Report report=new SPARQLEngine(connection).create(target, request.shape(), trace(rewrite(
 						model, source, target
 				)));
 
@@ -221,7 +220,7 @@ public final class Creator extends Actor<Creator> {
 	 *
 	 * @return a random UUID-based slug
 	 */
-	public static BiFunction<Request, Collection<Statement>, String> uuid() {
+	public static BiFunction<Request, Model, String> uuid() {
 		return (request, model) -> randomUUID().toString();
 	}
 
@@ -240,7 +239,7 @@ public final class Creator extends Actor<Creator> {
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public static BiFunction<Request, Collection<Statement>, String> auto(final Shape shape) {
+	public static BiFunction<Request, Model, String> auto(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -37,10 +37,12 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.wrappers.Processor.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 
 final class ProcessorTest {
@@ -260,6 +262,37 @@ final class ProcessorTest {
 							.isIsomorphicTo(export(connection));
 
 				})));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testPreInsertStaticRDF() {
+		exec(() -> new Processor().pre(rdf(String.format("@prefix rdf: <%s> . <> rdf:value rdf:nil .", RDF.NAMESPACE)))
+
+				.wrap(echo())
+
+				.handle(new Request().body(rdf()).set(emptySet()))
+
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.hasStatement(response.item(), RDF.VALUE, RDF.NIL)
+				)
+		);
+	}
+
+	@Test void testPostInsertStaticRDF() {
+		exec(() -> new Processor().post(rdf(String.format("@prefix rdf: <%s> . <> rdf:value rdf:nil .", RDF.NAMESPACE)))
+
+				.wrap(echo())
+
+				.handle(new Request().body(rdf()).set(emptySet()))
+
+				.accept(response -> assertThat(response)
+						.hasBodyThat(rdf())
+						.hasStatement(response.item(), RDF.VALUE, RDF.NIL)
+				)
+		);
 	}
 
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2018 Metreeca srl. All rights reserved.
+  Copyright © 2013-2019 Metreeca srl. All rights reserved.
 
   This file is part of Metreeca.
 
@@ -29,7 +29,7 @@
 
 	<name>Metreeca Linked Data Framework</name>
 	<description>A declarative model-driven framework for rapid linked data service development.</description>
-	<url>https://github.com/metreeca/metreeca-core</url>
+	<url>https://github.com/metreeca/link</url>
 	<inceptionYear>2013</inceptionYear>
 
 	<organization>
@@ -58,14 +58,14 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git@github.com:metreeca/metreeca-core.git</connection>
-		<developerConnection>scm:git:git@github.com:metreeca/metreeca-core.git</developerConnection>
-		<url>https://github.com/metreeca/metreeca-core</url>
+		<connection>scm:git:git@github.com:metreeca/link.git</connection>
+		<developerConnection>scm:git:git@github.com:metreeca/link.git</developerConnection>
+		<url>https://github.com/metreeca/link</url>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/metreeca/metreeca-core/issues</url>
+		<url>https://github.com/metreeca/link/issues</url>
 	</issueManagement>
 
 	<distributionManagement>
@@ -93,14 +93,13 @@
 	<properties>
 
 		<java.version>1.8</java.version>
-		<rdf4j.version>2.4.0</rdf4j.version>
+		<rdf4j.version>2.4.2</rdf4j.version>
+		<junit.version>5.3.1</junit.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<maven.deploy.skip>true</maven.deploy.skip> <!-- !!! no public artifact deployment -->
+		<maven.deploy.skip>true</maven.deploy.skip> <!-- ossrh public artifact deployment -->
 		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
-
-		<javadocs>${project.basedir}/docs/latest/javadocs</javadocs>
 
 		<timestamp>${maven.build.timestamp}</timestamp> <!-- ;( not directly available to filtered resources -->
 
@@ -111,14 +110,21 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.2.0</version>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency> <!-- !!! to be removed once tempdir is migrated to core -->
 			<groupId>org.junit-pioneer</groupId>
 			<artifactId>junit-pioneer</artifactId>
-			<version>0.1.2</version>
+			<version>0.3.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -152,35 +158,6 @@
 		</resources>
 
 		<plugins>
-
-			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
-
-				<executions>
-					<execution>
-
-						<id>clean-javadocs-folder</id>
-						<phase>pre-site</phase>
-
-						<goals>
-							<goal>clean</goal>
-						</goals>
-
-						<configuration>
-							<filesets>
-								<fileset>
-									<directory>${javadocs}</directory>
-								</fileset>
-							</filesets>
-						</configuration>
-
-					</execution>
-				</executions>
-
-			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-compiler-plugin -->
 
@@ -238,6 +215,15 @@
 
 			</plugin>
 
+
+			<plugin> <!-- https://maven.apache.org/surefire/maven-surefire-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.0</version>
+
+			</plugin>
+
 			<plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
 
 				<groupId>org.apache.maven.plugins</groupId>
@@ -273,7 +259,7 @@
 
 						<configuration>
 
-							<reportOutputDirectory>${javadocs}</reportOutputDirectory>
+							<reportOutputDirectory>${project.build.directory}/generated-docs</reportOutputDirectory>
 							<destDir>javadocs</destDir>
 
 							<groups>
@@ -301,6 +287,54 @@
 
 					</execution>
 
+				</executions>
+
+			</plugin>
+
+			<plugin> <!-- report https://maven.apache.org/plugins/maven-resources-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+
+				<executions>
+					<execution>
+
+						<id>copy-version-docs</id>
+						<phase>post-site</phase>
+						<inherited>false</inherited>
+
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+
+						<configuration>
+
+							<outputDirectory>${project.build.directory}/docs/</outputDirectory>
+							<overwrite>true</overwrite>
+
+							<resources>
+
+								<resource> <!-- static docs -->
+									<directory>${project.basedir}/docs/</directory>
+									<filtering>true</filtering>
+									<excludes> <!-- ignore local jekyll testing leftovers -->
+										<exclude>_site/**/*</exclude>
+										<exclude>.jekyll-metadata</exclude>
+										<exclude>Gemfile.lock</exclude>
+									</excludes>
+								</resource>
+
+								<resource> <!-- generated docs -->
+									<directory>${project.build.directory}/generated-docs</directory>
+									<filtering>true</filtering>
+								</resource>
+
+							</resources>
+
+						</configuration>
+
+					</execution>
 				</executions>
 
 			</plugin>
@@ -349,7 +383,7 @@
 	<profiles>
 		<profile>
 
-			<id>ossrh</id>
+			<id>release</id>
 
 			<build>
 				<plugins>
@@ -403,6 +437,11 @@
 						<artifactId>maven-gpg-plugin</artifactId>
 						<version>1.6</version>
 
+						<configuration>
+							<executable>gpg2</executable>
+							<passphraseServerId>gpg.metreeca</passphraseServerId>
+						</configuration>
+
 						<executions>
 							<execution>
 
@@ -431,6 +470,37 @@
 							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
+
+					</plugin>
+
+					<plugin> <!-- http://maven.apache.org/plugins/maven-scm-publish-plugin/ -->
+
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-scm-publish-plugin</artifactId>
+						<version>3.0.0</version>
+
+						<configuration>
+							<pubScmUrl>scm:git:https://github.com/metreeca/link.git</pubScmUrl>
+							<scmBranch>gh-pages</scmBranch>
+							<serverId>github</serverId>
+							<content>${project.build.directory}/docs</content>
+							<siteOutputEncoding>${project.build.sourceEncoding}</siteOutputEncoding>
+							<checkinComment>Deploy v${project.version} docs</checkinComment>
+						</configuration>
+
+						<executions>
+							<execution>
+
+								<id>deploy-docs</id>
+								<inherited>false</inherited>
+								<phase>site-deploy</phase>
+
+								<goals>
+									<goal>publish-scm</goal>
+								</goals>
+
+							</execution>
+						</executions>
 
 					</plugin>
 

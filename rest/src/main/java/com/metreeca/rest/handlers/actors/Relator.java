@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -88,17 +88,15 @@ public final class Relator extends Actor<Relator> {
 
 
 	public Relator() {
-		delegate(handler(Form.relate, Form.detail, (request, shape) -> (
+		delegate(action(Form.relate, Form.detail).wrap((Request request) -> (
 
-				wild(shape) ? direct(request) : driven(request, shape))
+				wild(request.shape()) ? direct(request) : driven(request))
 
 				.map(response -> response.success() ?
 
 						response.headers("Vary", "Accept") : response
 
-				)
-
-		));
+				)));
 	}
 
 
@@ -125,7 +123,9 @@ public final class Relator extends Actor<Relator> {
 		});
 	}
 
-	private Responder driven(final Request request, final Shape shape) {
+	private Responder driven(final Request request) {
+
+		final Shape shape=request.shape();
 
 		final IRI focus=request.item();
 

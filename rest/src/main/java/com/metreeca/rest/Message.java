@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -335,6 +335,7 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures the linked data shape.
 	 *
 	 * @param shape the linked data shape to be associated to this message
+	 *
 	 * @return this message
 	 *
 	 * @throws NullPointerException if {@code shape} is null
@@ -450,6 +451,10 @@ public abstract class Message<T extends Message<T>> {
 		 * either explicitly {@linkplain #set(Object) set} or {@linkplain Format#get(Message) retrieved} on demand by
 		 * the format associated to this body through a filtering function.</p>
 		 *
+		 * <p><strong>Warning</strong> / Filtering is performed on demand, as final consumer eventually retrieves the
+		 * filtered message body: if {@code mapper} relies on information retrieved from the message, its current state
+		 * must be memoized, before it's possibly altered by downstream wrappers.</p>
+		 *
 		 * @param mapper the value filtering function
 		 *
 		 * @return the message this body belongs to
@@ -477,6 +482,10 @@ public abstract class Message<T extends Message<T>> {
 		 * <p>Future calls to getter {@linkplain Result result} methods on this body will pipe the structured value
 		 * either explicitly {@linkplain #set(Object) set} or {@linkplain Format#get(Message) retrieved} on demand by
 		 * the format associated to this body through a result-returning filtering function.</p>
+		 *
+		 * <p><strong>Warning</strong> / Filtering is performed on demand, as final consumer eventually retrieves the
+		 * filtered message body: if {@code mapper} relies on information retrieved from the message, its current state
+		 * must be memoized, before it's possibly altered by downstream wrappers.</p>
 		 *
 		 * @param mapper the value filtering function
 		 *

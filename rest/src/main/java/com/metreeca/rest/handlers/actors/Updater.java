@@ -1,18 +1,18 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
- *  Metreeca is free software: you can redistribute it and/or modify it under the terms
- *  of the GNU Affero General Public License as published by the Free Software Foundation,
- *  either version 3 of the License, or(at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- *  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *  See the GNU Affero General Public License for more details.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License along with Metreeca.
- *  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest.handlers.actors;
@@ -76,11 +76,11 @@ public final class Updater extends Actor<Updater> {
 
 
 	public Updater() {
-		delegate(handler(Form.update, Form.detail, (request, shape) -> request.body(rdf())
+		delegate(action(Form.update, Form.detail).wrap((Request request) -> request.body(rdf())
 
 				.map(model -> { // add implied statements
 
-					model.addAll(shape
+					model.addAll(request.shape()
 							.accept(mode(Form.verify))
 							.accept(new Outliner(request.item()))
 					);
@@ -90,11 +90,9 @@ public final class Updater extends Actor<Updater> {
 				})
 
 				.map(
-						model -> wild(shape) ? direct(request, model) : driven(request, model, shape),
+						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
 						request::reply
-				)
-
-		));
+				)));
 	}
 
 
@@ -114,7 +112,7 @@ public final class Updater extends Actor<Updater> {
 		);
 	}
 
-	private Responder driven(final Request request, final Collection<Statement> model, final Shape shape) {
+	private Responder driven(final Request request, final Collection<Statement> model) {
 		return request.reply(response -> graph.update(connection -> {
 
 			final IRI focus=request.item();
@@ -128,7 +126,7 @@ public final class Updater extends Actor<Updater> {
 
 			} else {
 
-				final Report report=new SPARQLEngine(connection).update(focus, shape, trace(model));
+				final Report report=new SPARQLEngine(connection).update(focus, request.shape(), trace(model));
 
 				if ( report.assess(Issue.Level.Error) ) { // shape violations
 

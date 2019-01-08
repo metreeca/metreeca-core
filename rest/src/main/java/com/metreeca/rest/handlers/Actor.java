@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -34,7 +34,6 @@ import java.util.function.Function;
 import javax.json.*;
 
 import static com.metreeca.form.Shape.*;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Sets.intersection;
 import static com.metreeca.form.things.Values.format;
 import static com.metreeca.rest.Handler.forbidden;
@@ -56,8 +55,8 @@ import static java.util.stream.Collectors.groupingBy;
  *
  * <ul>
  *
- * <li>redact {@linkplain Message#shape() request shape }according to task/view parameters {@linkplain #handler(IRI,
- * IRI, BiFunction) provided} by the concrete implementation;</li>
+ * <li>redact request and response {@linkplain Message#shape() shape} according to task/view parameters {@linkplain
+ * #action(IRI, IRI) provided} by the concrete implementation;</li>
  *
  * <li>enforces role-based access control; access to the managed resource action is public, unless explicitly
  * {@linkplain #roles(Value...) limited} to specific user roles;</li>
@@ -223,19 +222,21 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Creates a shape-driven action handler.
+	 * Creates a shape-driven action wrapper.
 	 *
-	 * @param task   a IRI identifying the {@linkplain Form#task task} to be performed by the generated handler
-	 * @param view   a IRI identifying the {@linkplain Form#view view} level for the generated handler
-	 * @param action a function mapping a request and its shape to a resource responder; the request shape
-	 *               redacted according to {@code task} and {@code view} parameters and the roles of the user performing
-	 *               the request; {@code mode} redaction is left to final shape consumers
+	 * <p>Redacts request and response {@linkplain Message#shape() shapes} according to {@code task} and {@code view}
+	 * parameters and the {@linkplain Request#roles() roles} of the user performing the request; response shape is also
+	 * redacted according to the {@link Shape#verify(Shape...)} mode; request {@code mode} redaction is left to final
+	 * shape consumers.</p>
+	 *
+	 * @param task a IRI identifying the {@linkplain Form#task task} to be performed by the wrapped handler
+	 * @param view a IRI identifying the {@linkplain Form#view view} level for the wrapped handler
 	 *
 	 * @return an handler for the specified shape driven action
 	 *
-	 * @throws NullPointerException if any argument is null
+	 * @throws NullPointerException if either {@code task} or {@code view} is null
 	 */
-	protected Handler handler(final IRI task, final IRI view, final BiFunction<Request, Shape, Responder> action) {
+	protected Wrapper action(final IRI task, final IRI view) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -245,55 +246,73 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 			throw new NullPointerException("null view");
 		}
 
-		if ( action == null ) {
-			throw new NullPointerException("null action");
-		}
+		return query().wrap(headers())
+
+				.wrap(pre(task, view)) // redact request shape before processor trimming
+				.wrap(processor)
+				.wrap(post(task, view)); // redact response shape before processor trimming
+	}
 
 
-		return processor
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				.wrap((Wrapper)handler -> request -> request.safe() || request.query().isEmpty()
+	private Wrapper query() {
+		return handler -> request -> request.safe() || request.query().isEmpty()
+				? handler.handle(request)
+				: request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
+	}
 
-						? handler.handle(request)
+	private Wrapper headers() {
+		return handler -> request -> handler.handle(request).map(response -> response.headers("+Link",
+				link(LDP.RESOURCE, "type"),
+				link(LDP.RDF_SOURCE, "type")
+		));
+	}
 
-						: request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"))
 
-				)
+	private Wrapper pre(final IRI task, final IRI view) {
+		return handler -> request -> {
 
-				.wrap((Wrapper)handler -> request -> handler.handle(request).map(response -> response.headers("+Link",
-						link(LDP.RESOURCE, "type"),
-						link(LDP.RDF_SOURCE, "type")
-				)))
+			final Shape shape=request.shape();
 
-				.wrap((Handler)request -> {
+			if ( wild(shape) ) {
 
-					final Shape shape=request.shape();
+				final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
 
-					if ( wild(shape)) {
+				return refused ? refused(request)
+						: handler.handle(request);
 
-						final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
+			} else {
 
-						return refused ? refused(request)
-								: action.apply(request, and());
+				final Shape redacted=shape
+						.accept(task(task))
+						.accept(view(view));
 
-					} else {
+				final Shape authorized=redacted.accept(
+						role(roles(request))
+				);
 
-						final Shape redacted=shape
-								.accept(task(task))
-								.accept(view(view));
+				return wild(redacted) || empty(redacted) ? forbidden(request)
+						: wild(authorized) || empty(authorized) ? refused(request)
+						: handler.handle(request.shape(authorized));
 
-						final Shape authorized=redacted.accept(
-								role(roles.isEmpty() ? request.roles() : intersection(roles, request.roles()))
-						);
+			}
 
-						return wild(redacted) || empty(redacted) ? forbidden(request)
-								: wild(authorized) || empty(authorized) ? refused(request)
-								: action.apply(request, authorized);
+		};
+	}
 
-					}
+	private Wrapper post(final IRI task, final IRI view) {
+		return handler -> request -> handler.handle(request).map(response -> response.shape(response.shape()
+				.accept(task(task))
+				.accept(view(view))
+				.accept(mode(Form.verify))
+				.accept(role(roles(request)))
+		));
+	}
 
-				});
 
+	private Set<Value> roles(final Request request) {
+		return roles.isEmpty() ? request.roles() : intersection(roles, request.roles());
 	}
 
 
