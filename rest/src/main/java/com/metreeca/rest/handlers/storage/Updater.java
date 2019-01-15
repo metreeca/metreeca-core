@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.storage;
 
 
 import com.metreeca.form.*;
@@ -43,32 +43,37 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * Resource updater.
+ * Stored resource updater.
  *
- * <p>Handles updating requests on linked data resources.</p>
+ * <p>Handles updating requests on the stored linked data resource identified by the request {@linkplain Request#item()
+ * focus item}, taking into account the expected resource {@linkplain Message#shape() shape}, if one is provided.</p>
  *
  * <dl>
  *
- * <dt>Request{@link RDFFormat} body</dt>
+ * <dt>Shape-less mode</dt>
  *
- * <dd>The RDF content to be assigned to the updated resource.</dd>
- *
- * <dd>If the request includes a {@linkplain Message#shape() shape}, it is redacted taking into account the request
- * user {@linkplain Request#roles() roles}, {@link Form#update} task, {@link Form#verify} mode and {@link Form#digest}
- * view and used to validate the request RDF body; validation errors are reported with a {@linkplain
+ * <dd>If no shape is provided, the request {@link RDFFormat} body is expected to contain a symmetric concise bounded
+ * description of the resource to be updated; statements outside this envelope are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
  *
- * <dd>If the request does not include a {@linkplain Message#shape() shape}, the request body is expected to contain a
- * symmetric concise bounded description of the resource to be updated; statements outside this envelope are reported
- * with a {@linkplain Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue)
- * trace} element.</dd>
+ * <dd>On successful body validation, the existing symmetric concise bounded description of the target resource is
+ * replaced with the updated one.</dd>
  *
- * <dd>On successful body validation, the RDF description of the resource as matched either by the redacted shape or by
- * the existing symmetric concise bounded description is replaced with the updated one.</dd>
+ * <dt>Shape-driven mode</dt>
+ *
+ * <dd>If a shape is provided, it is redacted taking into account the request user {@linkplain Request#roles() roles},
+ * {@link Form#update} task, {@link Form#verify} mode and {@link Form#detail} view.</dd>
+ *
+ * <dd>The request {@link RDFFormat} body is expected to contain an RDF description of the resource to be updated
+ * matching the redacted shape; statements outside this envelope are reported with a {@linkplain
+ * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
+ *
+ * <dd>On successful body validation, the existing RDF description of the target resource matched by the redacted shape
+ * is replaced with the updated one.</dd>
  *
  * </dl>
  *
- * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
+ * <p>Regardless of the operating mode, the updated RDF resource description is stored into the system {@linkplain
  * Graph#Factory graph} database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>

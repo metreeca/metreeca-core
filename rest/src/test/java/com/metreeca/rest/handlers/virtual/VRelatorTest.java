@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.virtual;
 
 
 import com.metreeca.form.Form;
@@ -33,7 +33,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 
-final class BuilderTest {
+final class VRelatorTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
@@ -79,7 +79,7 @@ final class BuilderTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testBuild() {
-		exec(() -> new Builder().model(virtual())
+		exec(() -> new VRelator().model(virtual())
 
 				.handle(driven())
 
@@ -101,7 +101,7 @@ final class BuilderTest {
 	}
 
 	@Test void testBuildLimited() {
-		exec(() -> new Builder().model(virtual())
+		exec(() -> new VRelator().model(virtual())
 
 				.handle(driven().roles(Salesman))
 
@@ -125,7 +125,7 @@ final class BuilderTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenUnauthorized() {
-		exec(() -> new Builder()
+		exec(() -> new VRelator()
 
 				.handle(driven().roles(Form.none))
 
@@ -135,7 +135,7 @@ final class BuilderTest {
 	}
 
 	@Test void testDrivenForbidden() {
-		exec(() -> new Builder()
+		exec(() -> new VRelator()
 
 				.handle(driven().shape(or()))
 
@@ -145,7 +145,7 @@ final class BuilderTest {
 	}
 
 	@Test void testDrivenUnknownOnEmptyModel() {
-		exec(() -> new Builder()
+		exec(() -> new VRelator()
 
 				.handle(driven())
 

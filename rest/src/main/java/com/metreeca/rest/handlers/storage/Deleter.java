@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.storage;
 
 
 import com.metreeca.form.Form;
@@ -33,18 +33,28 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * Resource deleter.
+ * Stored resource deleter.
  *
- * <p>Handles deletion requests on linked data resources.</p>
+ * <p>Handles deletion requests on the stored linked data resource identified by the request {@linkplain Request#item()
+ * focus item}, taking into account the expected resource {@linkplain Message#shape() shape}, if one is provided.</p>
  *
- * <p>If the request includes  a {@linkplain Message#shape() shape}, it is redacted taking into account the request
- * user {@linkplain Request#roles() roles}, {@link Form#delete} task, {@link Form#verify} mode and {@link Form#detail}
- * view and used to identify the neighborhood of the request {@linkplain Request#item() focus item} to be deleted.</p>
+ * <dl>
  *
- * <dd>If the request does not include a {@linkplain Message#shape() shape}, the symmetric concise bounded description
- * of the request {@linkplain Request#item() focus item} will be deleted.</dd>
+ * <dt>Shape-less mode</dt>
  *
- * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
+ * <dd>If no shape is provided, the existing symmetric concise bounded description of the target resource is
+ * deleted.</dd>
+ *
+ * <dt>Shape-driven mode</dt>
+ *
+ * <dd>If a shape is provided, it is redacted taking into account the request user {@linkplain Request#roles() roles},
+ * {@link Form#delete} task, {@link Form#verify} mode and {@link Form#detail} view.</dd>
+ *
+ * <dd>The existing RDF description of the target resource matched by the redacted shape is deleted.</dd>
+ *
+ * </dl>
+ *
+ * <p>Regardless of the operating mode, the deleted RDF resource description is removed from the system {@linkplain
  * Graph#Factory graph} database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
@@ -81,7 +91,7 @@ public final class Deleter extends Actor<Deleter> {
 
 			} else {
 
-				if ( wild(shape) ){
+				if ( wild(shape) ) {
 					new CellEngine(connection).delete(focus);
 				} else {
 					new SPARQLEngine(connection).delete(focus, shape);

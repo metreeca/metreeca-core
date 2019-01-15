@@ -15,17 +15,16 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
-
+package com.metreeca.rest.handlers.storage;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Codecs;
-import com.metreeca.form.truths.JSONAssert;
+import com.metreeca.form.things.Values;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
-import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
@@ -34,21 +33,21 @@ import java.util.function.Function;
 
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.truths.JSONAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.form.truths.ValueAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
-final class UpdaterTest {
-
-	private static final Model Dataset=small();
-
+final class CreatorTest {
 
 	private void exec(final Runnable task) {
-		new Tray().exec(graph(Dataset), task).clear();
+		new Tray().exec(task).clear();
 	}
 
 
@@ -57,13 +56,13 @@ final class UpdaterTest {
 				.roles(Manager)
 				.method(Request.POST)
 				.base(Base)
-				.path("/employees/1370") // Gerard Hernandez
-				.map(body("@prefix : <http://example.com/terms#> . <>"
-						+":forename 'Tino';"
-						+":surname 'Faussone';"
-						+":email 'tfaussone@example.com';"
-						+":title 'Sales Rep' ;"
-						+":seniority 5 ." // outside salesman envelope
+				.path("/employees/")
+				.map(body("@prefix : <http://example.com/terms#>. <>"
+						+" :forename 'Tino' ;"
+						+" :surname 'Faussone' ;"
+						+" :email 'tfaussone@classicmodelcars.com' ;"
+						+" :title 'Sales Rep' ;"
+						+" :seniority 1 ."
 				));
 	}
 
@@ -78,40 +77,68 @@ final class UpdaterTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Direct ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testDirectUpdate() {
-		exec(() -> new Updater()
+	@Test void testDirectCreate() {
+		exec(() -> new Creator()
 
 				.handle(direct())
 
 				.accept(response -> {
 
+					final IRI location=response
+							.header("Location")
+							.map(Values::iri)
+							.orElse(null);
+
 					assertThat(response)
-							.hasStatus(Response.NoContent)
+							.hasStatus(Response.Created)
 							.doesNotHaveBody();
 
-					assertThat(graph())
+					assertThat(location)
+							.as("resource created with IRI stemmed on request focus")
+							.hasNamespace(response.request().item().stringValue());
 
-							.as("graph updated")
+					assertThat(graph()).hasSubset(
+							statement(location, term("forename"), literal("Tino")),
+							statement(location, term("surname"), literal("Faussone"))
+					);
 
-							.hasSubset(decode("@prefix : <http://example.com/terms#> . </employees/1370>"
-									+":forename 'Tino';"
-									+":surname 'Faussone';"
-									+":email 'tfaussone@example.com';"
-									+":title 'Sales Rep' ;"
-									+":seniority 5 ."
-							))
+				}));
+	}
 
-							.doesNotHaveStatement(item("employees/1370"), term("forename"), literal("Gerard"))
-							.doesNotHaveStatement(item("employees/1370"), term("surname"), literal("Hernandez"));
+	@Test void testDirectCreateSlug() {
+		exec(() -> new Creator()
+
+				.slug((request, model) -> "slug")
+
+				.handle(direct())
+
+				.accept(response -> {
+
+					final IRI location=response.header("Location")
+							.map(Values::iri)
+							.orElse(null);
+
+					assertThat(response)
+							.hasStatus(Response.Created)
+							.doesNotHaveBody();
+
+					assertThat(location)
+							.as("resource created with computed IRI")
+							.isEqualTo(item("employees/slug"));
+
+					assertThat(graph()).hasSubset(
+							statement(location, term("forename"), literal("Tino")),
+							statement(location, term("surname"), literal("Faussone"))
+					);
 
 				}));
 	}
 
 
 	@Test void testDirectUnauthorized() {
-		exec(() -> new Updater().roles(Manager)
+		exec(() -> new Creator().roles(Manager)
 
 				.handle(direct().user(Form.none).roles(Salesman))
 
@@ -119,17 +146,18 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.Unauthorized)
+							.doesNotHaveHeader("Location")
 							.doesNotHaveBody();
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}
 
 	@Test void testDirectForbidden() {
-		exec(() -> new Updater().roles(Manager)
+		exec(() -> new Creator().roles(Manager)
 
 				.handle(direct().user(RDF.NIL).roles(Salesman))
 
@@ -137,17 +165,18 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.Forbidden)
+							.doesNotHaveHeader("Location")
 							.doesNotHaveBody();
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}
 
 	@Test void testDirectMalformedData() {
-		exec(() -> new Updater()
+		exec(() -> new Creator()
 
 				.handle(direct().map(body("!!!")))
 
@@ -155,12 +184,14 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.BadRequest)
-							.hasBodyThat(json())
-							.hasField("error");
+							.doesNotHaveHeader("Location")
+							.hasBody(json(), json -> assertThat(json)
+									.hasField("error")
+							);
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}
@@ -179,51 +210,82 @@ final class UpdaterTest {
 					assertThat(response)
 							.hasStatus(Response.UnprocessableEntity)
 							.doesNotHaveHeader("Location")
-							.hasBodyThat(json())
-							.hasField("error");
+							.hasBody(json(), json -> assertThat(json)
+									.hasField("error")
+							);
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Driven ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testDrivenUpdate() {
-		exec(() -> new Updater()
+	@Test void testDrivenCreate() {
+		exec(() -> new Creator()
 
 				.handle(driven())
 
 				.accept(response -> {
 
+					final IRI location=response
+							.header("Location")
+							.map(Values::iri)
+							.orElse(null);
+
 					assertThat(response)
-							.hasStatus(Response.NoContent)
+							.hasStatus(Response.Created)
 							.doesNotHaveBody();
 
-					assertThat(graph())
+					assertThat(location)
+							.as("resource created with IRI stemmed on request focus")
+							.hasNamespace(response.request().item().stringValue());
 
-							.as("graph updated")
+					assertThat(graph()).hasSubset(
+							statement(location, RDF.TYPE, term("Employee")),
+							statement(location, term("forename"), literal("Tino")),
+							statement(location, term("surname"), literal("Faussone"))
+					);
 
-							.hasSubset(decode("@prefix : <http://example.com/terms#> . </employees/1370>"
-									+":forename 'Tino';"
-									+":surname 'Faussone';"
-									+":email 'tfaussone@example.com';"
-									+":title 'Sales Rep' ;"
-									+":seniority 5 ."
-							))
+				}));
+	}
 
-							.doesNotHaveStatement(item("employees/1370"), term("forename"), literal("Gerard"))
-							.doesNotHaveStatement(item("employees/1370"), term("surname"), literal("Hernandez"));
+	@Test void testDrivenCreateSlug() {
+		exec(() -> new Creator()
+
+				.slug((request, model) -> "slug")
+
+				.handle(driven())
+
+				.accept(response -> {
+
+					final IRI location=response.header("Location")
+							.map(Values::iri)
+							.orElse(null);
+
+					assertThat(response)
+							.hasStatus(Response.Created)
+							.doesNotHaveBody();
+
+					assertThat(location)
+							.as("resource created with computed IRI")
+							.isEqualTo(item("employees/slug"));
+
+					assertThat(graph()).hasSubset(
+							statement(location, RDF.TYPE, term("Employee")),
+							statement(location, term("forename"), literal("Tino")),
+							statement(location, term("surname"), literal("Faussone"))
+					);
 
 				}));
 	}
 
 
 	@Test void testDrivenUnauthorized() {
-		exec(() -> new Updater()
+		exec(() -> new Creator()
 
 				.handle(driven().roles(Form.none))
 
@@ -231,17 +293,18 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.Unauthorized)
+							.doesNotHaveHeader("Location")
 							.doesNotHaveBody();
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}
 
 	@Test void testDrivenForbidden() {
-		exec(() -> new Updater().roles(RDF.FIRST, RDF.REST)
+		exec(() -> new Creator()
 
 				.handle(driven().shape(or()))
 
@@ -249,17 +312,18 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.Forbidden)
+							.doesNotHaveHeader("Location")
 							.doesNotHaveBody();
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}
 
 	@Test void testDrivenMalformedData() {
-		exec(() -> new Updater()
+		exec(() -> new Creator()
 
 				.handle(driven().map(body("!!!")))
 
@@ -267,42 +331,40 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.BadRequest)
-							.hasBody(json(), json -> JSONAssert.assertThat(json)
-									.hasField("error"));
+							.doesNotHaveHeader("Location")
+							.hasBody(json(), json -> assertThat(json).hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}
 
 	@Test void testDrivenInvalidData() {
-		exec(() -> new Updater()
+		exec(() -> new Creator()
 
-				.handle(driven().map(body("@prefix : <http://example.com/terms#>. <employees/1370>"
-						+":forename 'Tino';"
-						+":surname 'Faussone';"
-						+":email 'tfaussone@example.com' ;"
-						+":title 'Sales Rep'." // missing seniority/supervisor/subordinate
+				.handle(driven().map(body("@prefix : <http://example.com/terms#>. <>"
+						+" :forename 'Tino' ;"
+						+" :surname 'Faussone'. "
 				)))
 
 				.accept(response -> {
 
 					assertThat(response)
 							.hasStatus(Response.UnprocessableEntity)
-							.hasBody(json(), json -> JSONAssert.assertThat(json)
-							.hasField("error"));
+							.doesNotHaveHeader("Location")
+							.hasBody(json(), json -> assertThat(json).hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}
 
 	@Test void testDrivenRestrictedData() {
-		exec(() -> new Updater()
+		exec(() -> new Creator()
 
 				.handle(driven()
 						.roles(Salesman))
@@ -311,12 +373,12 @@ final class UpdaterTest {
 
 					assertThat(response)
 							.hasStatus(Response.UnprocessableEntity)
-							.hasBody(json(), json -> JSONAssert.assertThat(json)
-							.hasField("error"));
+							.doesNotHaveHeader("Location")
+							.hasBody(json(), json -> assertThat(json).hasField("error"));
 
 					assertThat(graph())
 							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
+							.isEmpty();
 
 				}));
 	}

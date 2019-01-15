@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.storage;
 
 
 import com.metreeca.form.Form;
@@ -51,32 +51,32 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * Resource relator.
+ * Stored resource relator.
  *
- * <p>Handles retrieval requests on linked data resources.</p>
+ * <p>Handles retrieval requests on the stored linked data resource identified by the request {@linkplain
+ * Request#item() focus item}, taking into account the expected resource {@linkplain Message#shape() shape}, if one is
+ * provided.</p>
  *
  * <dl>
  *
- * <dt>Response {@link RDFFormat} body</dt>
+ * <dt>Shape-less mode</dt>
  *
- * <dd>If the request includes  a {@linkplain Message#shape() shape}, the response includes the {@linkplain RDFFormat
- * RDF description} of the request {@linkplain Request#item() focus item}, as defined by the redacted linked data
- * {@linkplain Shape shape}.</dd>
+ * <dd>If no shape is provided, the response {@link RDFFormat} body contains the symmetric concise bounded description
+ * of the request focus item, extended with {@code rdfs:label/comment} annotations for all referenced IRIs.</dd>
  *
- * <dd>If the request does not include a {@linkplain Message#shape() shape}, the response includes the symmetric
- * concise bounded description of the request focus item, extended with {@code rdfs:label/comment} annotations for all
- * referenced IRIs.</dd>
+ * <dt>Shape-driven mode</dt>
  *
- * <dt>Response shape</dt>
+ * <dd>If a shape is provided, the response provides the derived shape actually used in the retrieval process, redacted
+ * according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#verify} mode and
+ * {@link Form#detail} view.</dd>
  *
- * <dd>If the request includes a shape, the response includes the derived shape actually used in the resource retrieval
- * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#verify} mode and {@link Form#detail} view.</d>
+ * <dd>The response {@link RDFFormat} body contains the RDF description of the request focus, as matched by the
+ * redacted request shape.</dd>
  *
  * </dl>
  *
- * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
- * database.</p>
+ * <p>Regardless of the operating mode, the retrieved RDF description is read from the system {@linkplain Graph#Factory
+ * graph} database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */

@@ -15,18 +15,16 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.virtual;
 
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
+import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
-import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.rdf.Graph;
 
@@ -53,41 +51,16 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * Basic container browser.
+ * Virtual basic container browser.
  *
- * <p>Handles retrieval requests on linked data basic container.</p>
- *
- * <dl>
- *
- * <dt>Response shape-driven {@link RDFFormat} body</dt>
- *
- * <dd>If the request includes {@linkplain Message#shape() shape}, the response includes the {@linkplain RDFFormat RDF
- * description} of the request {@linkplain Request#item() focus item}, {@linkplain LDP#CONTAINS containing} the RDF
- * descriptions of the virtual container items matched by the redacted linked data {@linkplain Shape shape}.</dd>
- *
- * <dd>If the request contains a {@code Prefer} header requesting the {@link LDP#PREFER_EMPTY_CONTAINER}
- * representation, virtual item descriptions are omitted.</dd>
- *
- * <dd>If the request contains a filtering {@linkplain Request#query(Shape) query}, only matching virtual container
- * item descriptionss are included.</dd>
- *
- * <dt>Response shapeless {@link RDFFormat} body</dt>
- *
- * <dd><strong>Warning</strong> / Shapeless container retrieval is not yet supported and is reported with a {@linkplain
- * Response#NotImplemented} HTTP status code.</dd>
- *
- * </dl>
- *
- * <p>If the request includes a shape, the response includes the derived shape actually used in the container retrieval
- * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#verify} mode and {@link Form#digest} view.</p>
- *
- * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
- * database.</p>
+ * <p>Handles retrieval requests on the virtual linked data basic resource container identified by the request
+ * {@linkplain Request#item() focus item}, taking into account the expected resource {@linkplain Message#shape() shape},
+ * if one is provided.</p>
  *
  * @see <a href="https://www.w3.org/TR/ldp/#ldpbc">Linked Data Platform 1.0 - §5.3 Basic</a>
+ * @deprecated work in progress
  */
-public final class Browser extends Actor<Browser> {
+@Deprecated public final class VBrowser extends Actor<VBrowser> {
 
 	private static final Pattern RepresentationPattern=Pattern
 			.compile("\\s*return\\s*=\\s*representation\\s*;\\s*include\\s*=\\s*\"(?<representation>[^\"]*)\"\\s*");
@@ -98,7 +71,7 @@ public final class Browser extends Actor<Browser> {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	public Browser() {
+	public VBrowser() {
 		delegate(action(Form.relate, Form.digest).wrap((Request request) -> (
 
 				wild(request.shape()) ? direct(request) : driven(request))
@@ -120,9 +93,9 @@ public final class Browser extends Actor<Browser> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Browser post(final BiFunction<Response, Model, Model> filter) { return super.post(filter); }
+	@Override public VBrowser post(final BiFunction<Response, Model, Model> filter) { return super.post(filter); }
 
-	@Override public Browser sync(final String script) { return super.sync(script); }
+	@Override public VBrowser sync(final String script) { return super.sync(script); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +161,7 @@ public final class Browser extends Actor<Browser> {
 							trait(RDFS.COMMENT, verify(optional(), datatype(XMLSchema.STRING))),
 							trait(LDP.CONTAINS, edges.getShape())
 					))
-					.body(rdf(),model);
+					.body(rdf(), model);
 		});
 	}
 
@@ -196,7 +169,7 @@ public final class Browser extends Actor<Browser> {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
 					.shape(StatsShape)
-					.body(rdf(),new SPARQLEngine(connection).browse(stats, response.item()));
+					.body(rdf(), new SPARQLEngine(connection).browse(stats, response.item()));
 
 		});
 	}
@@ -205,7 +178,7 @@ public final class Browser extends Actor<Browser> {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
 					.shape(ItemsShape)
-					.body(rdf(),new SPARQLEngine(connection).browse(items, response.item()));
+					.body(rdf(), new SPARQLEngine(connection).browse(items, response.item()));
 
 		});
 	}

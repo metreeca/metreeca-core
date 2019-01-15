@@ -328,7 +328,7 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the linked data shape.
 	 *
-	 * @return the linked data shape associated to this message
+	 * @return the linked data shape associated to this message; defaults to the {@linkplain Shape#wild() wildcard} shape
 	 */
 	public Shape shape() {
 		return shape;

@@ -223,20 +223,26 @@ If the index doesn't contain a matching handler, no action is performed giving t
 
 ## Actors
 
-[Actors](../javadocs/?com/metreeca/rest/handlers/actors/package-summary.html) provide a default implementaton for CRUD actions on LDP resources and Basic containers identified by the request [focus item](../javadocs/com/metreeca/rest/Request.html#item--).
+[Storage actors](../javadocs/?com/metreeca/rest/handlers/storage/package-summary.html) provide default implementations for CRUD actions on LDP resources and basic containers identified by the request [focus item](../javadocs/com/metreeca/rest/Request.html#item--).
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Browser](../javadocs/?com/metreeca/rest/handlers/actors/Browser.html)⃰ | container browsing / retrieves the detailed RDF description of the target item and (optionally) the compact RDF description of the contained resources; supports extended [faceted search](linked-data-interaction#faceted-search), sorting and pagination |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | resource retrieval / retrieves the detailed RDF description of the target item |
-| [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html)⃰ | resource creation / uploads the detailed RDF description of the target item |
-| [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html)⃰ | resource updating / updates the detailed RDF description of the target item |
-| [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleter.html)⃰ | resource deletion / deletes the detailed RDF description of the target item |
-| [Builder](../javadocs/?com/metreeca/rest/handlers/actors/Builder.html) | virtual resource retrieval / retrieves the detailed RDF description of the virtual target item |
+| [Browser](../javadocs/?com/metreeca/rest/handlers/storage/Browser.html) | basic container browsing / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; supports extended [faceted search](linked-data-interaction#faceted-search), sorting and pagination |
+| [Creator](../javadocs/?com/metreeca/rest/handlers/storage/Creator.html) | basic container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
+| [Relator](../javadocs/?com/metreeca/rest/handlers/storage/Relator.html) | resource retrieval / retrieves the detailed RDF description of the target item |
+| [Updater](../javadocs/?com/metreeca/rest/handlers/storage/Updater.html) | resource updating / updates the detailed RDF description of the target item |
+| [Deleter](../javadocs/?com/metreeca/rest/handlers/storage/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
 
 If a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the graph neighbourhood of the target target item(s)  identified by the model after redaction according to the request user roles and to actor-specific task,  mode and view parameters.
 
 If no shape model is associated to the request, CRUD operations are performed on the (labelled) [symmetric concise bounded description](https://www.w3.org/Submission/CBD/) of the target item(s).
+
+[Virtual actors](../javadocs/?com/metreeca/rest/handlers/virtual/package-summary.html) provide default implementations for read-only actions on LDP resources and basic containers whose descriptions are generated on demand.
+
+| actor                                                        | action                                                       |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [VBrowser](../javadocs/?com/metreeca/rest/handlers/virtual/VBrowser.html) | virtual basic container browsing / retrieves the detailed RDF description of the virtual target item and (optionally) the digest RDF description of the contained resources |
+| [VRelator](../javadocs/?com/metreeca/rest/handlers/virtual/VRelator.html) | virtual resource retrieval / retrieves the detailed RDF description of the virtual target item |
 
 ## Delegators
 

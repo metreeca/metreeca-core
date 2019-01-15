@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.storage;
 
 
 import com.metreeca.form.Form;
@@ -34,6 +34,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -52,38 +53,53 @@ import static java.util.UUID.randomUUID;
 
 
 /**
- * Resource creator.
+ * Stored basic container resource creator.
  *
- * <p>Handles creation requests on linked data resource containers.</p>
+ * <p>Handles creation requests on the stored linked data basic resource container identified by the request
+ * {@linkplain Request#item() focus item}, taking into account the expected resource {@linkplain Message#shape() shape},
+ * if one is provided.</p>
+ *
+ * <dl>
+ *
+ * <dt>Shape-less mode</dt>
+ *
+ * <dd>If no shape is provided, the request {@link RDFFormat} body is expected to contain a symmetric concise bounded
+ * description of the resource to be created; statements outside this envelope are reported with a {@linkplain
+ * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
+ *
+ * <dt>Shape-driven mode</dt>
+ *
+ * <dd>If a shape is provided, it is redacted taking into account the request user {@linkplain Request#roles() roles},
+ * {@link Form#create} task, {@link Form#verify} mode and {@link Form#detail} view.</dd>
+ *
+ * <dd>The request {@link RDFFormat} body is expected to contain an RDF description of the resource to be created
+ * matching the redacted shape; statements outside this envelope are reported with a {@linkplain
+ * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
+ *
+ * </dl>
+ *
+ * <p>The RDF content to be assigned to the newly created resource must describe the new resource using the request
+ * {@linkplain Request#item() focus item} as subject.</p>
+ *
+ * <p>On successful body validation:</p>
+ *
+ * <ul>
+ *
+ * <li>the resource to be created is assigned a unique IRI based on the stem of the request {@linkplain Request#item()
+ * focus item} and a name provided by either the default {@linkplain #uuid() UUID-based} or a {@linkplain
+ * #slug(BiFunction) custom-provided} slug generator;</li>
+ *
+ * <li>the RDF body is rewritten to the assigned IRI and stored into the graph database;</li>
+ *
+ * <li>the target basic container identified by the request focus item is connected to the newly created resource using
+ * the {@link LDP#CONTAINS ldp:contains} property.</li>
+ *
+ * </ul>
  *
  * <p>On successful resource creation, the IRI of the newly created resource is advertised through the {@code Location}
  * HTTP response header.</p>
  *
- * <dl>
- *
- * <dt>Request {@link RDFFormat} body</dt>
- *
- * <dd>The RDF content to be assigned to the newly created resource; must describe the new resource using
- * the request {@linkplain Request#item() focus item} as subject.</dd>
- *
- * <dd>If the request includes a {@linkplain Message#shape() shape}, it is redacted taking into account the request
- * user {@linkplain Request#roles() roles},  {@link Form#create} task,  {@link Form#verify} mode and {@link Form#detail}
- * view and used to validate the rewritten RDF body; validation errors are reported with a {@linkplain
- * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
- *
- * <dd>If the request does not include a {@linkplain Message#shape() shape}, the request body is expected to contain a
- * symmetric concise bounded description of the resource to be created; statements outside this envelope are reported
- * with a {@linkplain Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue)
- * trace} element.</dd>
- *
- * <dd>On successful body validation, the resource to be created is assigned a unique IRI based on the stem of the
- * request {@linkplain Request#item() focus item} and a name provided by either the default {@linkplain #uuid()
- * UUID-based} or a {@linkplain #slug(BiFunction) custom-provided} slug generator and the RDF body is rewritten to the
- * assigned IRI.</dd>
- *
- * </dl>
- *
- * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
+ * <p>Regardless of the operating mode, the updated RDF resource description is stored into the system {@linkplain
  * Graph#Factory graph} database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>

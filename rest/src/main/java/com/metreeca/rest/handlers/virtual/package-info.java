@@ -16,7 +16,10 @@
  */
 
 /**
- * Basic resource actors.
+ * Virtual resource actors.
+ *
+ * <p>Provides default implementations for read-only actions on LDP resources and basic containers whose descriptions
+ * are generated on demand.</p>
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.virtual;
