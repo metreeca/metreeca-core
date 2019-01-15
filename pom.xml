@@ -69,14 +69,22 @@
 	</issueManagement>
 
 	<distributionManagement>
+
 		<repository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/releases</url>
 		</repository>
+
 		<snapshotRepository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
+
+		<site>
+			<id>github-pages</id>
+			<url>https://metreeca.github.io/link/reports</url>
+		</site>
+
 	</distributionManagement>
 
 	<modules>
@@ -338,28 +346,20 @@
 
 				<configuration>
 
-					<skip>true</skip> <!-- custom docs/reports only -->
 					<skipDeploy>true</skipDeploy> <!-- ;( manual deployment -->
 
+					<stagingDirectory>${maven.multiModuleProjectDirectory}/target/docs/reports</stagingDirectory>
+
 				</configuration>
-
-			</plugin>
-
-			<plugin> <!-- report generator / https://maven.apache.org/plugins/maven-project-info-reports-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.0.0</version>
 
 				<executions>
 					<execution>
 
-						<id>generate-dependency-report</id>
-						<phase>site</phase>
-						<inherited>false</inherited>
+						<id>collect-module-reports</id>
+						<phase>post-site</phase>
 
 						<goals>
-							<goal>dependencies</goal>
+							<goal>stage</goal>
 						</goals>
 
 					</execution>
@@ -370,6 +370,37 @@
 		</plugins>
 
 	</build>
+
+	<reporting>
+		<plugins>
+
+			<plugin> <!-- https://maven.apache.org/plugins/maven-project-info-reports-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>3.0.0</version>
+
+				<reportSets>
+
+					<reportSet>
+
+						<reports>
+							<report>index</report>
+							<report>dependencies</report>
+						</reports>
+
+						<configuration>
+							<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+						</configuration>
+
+					</reportSet>
+
+				</reportSets>
+
+			</plugin>
+
+		</plugins>
+	</reporting>
 
 	<profiles>
 		<profile>
