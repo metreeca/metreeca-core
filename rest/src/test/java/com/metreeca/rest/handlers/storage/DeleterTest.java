@@ -75,6 +75,10 @@ final class DeleterTest {
 							.as("cell deleted")
 							.isEmpty();
 
+					assertThat(graph("construct where { ?s ?p <employees/1370> }"))
+							.as("inbound links removed")
+							.isEmpty();
+
 					assertThat(graph("construct where { <employees/1102> rdfs:label ?o }"))
 							.as("connected resources preserved")
 							.isNotEmpty();
