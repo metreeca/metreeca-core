@@ -54,29 +54,31 @@ import static com.metreeca.tray.Tray.tool;
  * Stored resource relator.
  *
  * <p>Handles retrieval requests on the stored linked data resource identified by the request {@linkplain
- * Request#item() focus item}, taking into account the expected resource {@linkplain Message#shape() shape}, if one is
- * provided.</p>
+ * Request#item() focus item}.</p>
  *
- * <dl>
+ * <p>If the request includes an expected {@linkplain Message#shape() resource shape}:</p>
  *
- * <dt>Shape-less mode</dt>
+ * <ul>
  *
- * <dd>If no shape is provided, the response {@link RDFFormat} body contains the symmetric concise bounded description
- * of the request focus item, extended with {@code rdfs:label/comment} annotations for all referenced IRIs.</dd>
+ * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
+ * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#verify} mode and {@link Form#detail}
+ * view.</li>
  *
- * <dt>Shape-driven mode</dt>
+ * <li>the response {@link RDFFormat RDF body} contains the RDF description of the request focus, as matched by the
+ * redacted request shape.</li>
  *
- * <dd>If a shape is provided, the response provides the derived shape actually used in the retrieval process, redacted
- * according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#verify} mode and
- * {@link Form#detail} view.</dd>
+ * </ul>
  *
- * <dd>The response {@link RDFFormat} body contains the RDF description of the request focus, as matched by the
- * redacted request shape.</dd>
+ * <p>Otherwise:</p>
  *
- * </dl>
+ * <ul>
  *
- * <p>Regardless of the operating mode, the retrieved RDF description is read from the system {@linkplain Graph#Factory
- * graph} database.</p>
+ * <li>the response {@link RDFFormat RDF body} contains the symmetric concise bounded description of the request focus
+ * item, extended with {@code rdfs:label/comment} annotations for all referenced IRIs.</li>
+ *
+ * </ul>
+ *
+ * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph} database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */

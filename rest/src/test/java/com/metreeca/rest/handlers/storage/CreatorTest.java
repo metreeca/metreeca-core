@@ -25,6 +25,7 @@ import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
@@ -99,10 +100,18 @@ final class CreatorTest {
 							.as("resource created with IRI stemmed on request focus")
 							.hasNamespace(response.request().item().stringValue());
 
-					assertThat(graph()).hasSubset(
-							statement(location, term("forename"), literal("Tino")),
-							statement(location, term("surname"), literal("Faussone"))
-					);
+					assertThat(graph())
+							.as("resource description stored into the graph")
+							.hasSubset(
+									statement(location, term("forename"), literal("Tino")),
+									statement(location, term("surname"), literal("Faussone"))
+							);
+
+					assertThat(graph())
+							.as("basic container connected to resource description")
+							.hasSubset(
+									statement(response.request().item(), LDP.CONTAINS, location)
+							);
 
 				}));
 	}
@@ -244,11 +253,19 @@ final class CreatorTest {
 							.as("resource created with IRI stemmed on request focus")
 							.hasNamespace(response.request().item().stringValue());
 
-					assertThat(graph()).hasSubset(
-							statement(location, RDF.TYPE, term("Employee")),
-							statement(location, term("forename"), literal("Tino")),
-							statement(location, term("surname"), literal("Faussone"))
-					);
+					assertThat(graph())
+							.as("resource description stored into the graph")
+							.hasSubset(
+									statement(location, RDF.TYPE, term("Employee")),
+									statement(location, term("forename"), literal("Tino")),
+									statement(location, term("surname"), literal("Faussone"))
+							);
+
+					assertThat(graph())
+							.as("basic container connected to resource description")
+							.hasSubset(
+									statement(response.request().item(), LDP.CONTAINS, location)
+							);
 
 				}));
 	}

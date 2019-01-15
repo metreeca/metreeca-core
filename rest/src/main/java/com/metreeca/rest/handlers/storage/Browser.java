@@ -56,33 +56,36 @@ import static com.metreeca.tray.Tray.tool;
  * Stored basic container browser.
  *
  * <p>Handles retrieval requests on the stored linked data basic resource container identified by the request
- * {@linkplain Request#item() focus item}, taking into account the expected resource {@linkplain Message#shape() shape},
- * if one is provided.</p>
+ * {@linkplain Request#item() focus item}.</p>
  *
- * <dl>
+ * <p>If the request includes an expected {@linkplain Message#shape() resource shape}:</p>
  *
- * <dt>Response shape-driven {@link RDFFormat} body</dt>
+ * <ul>
  *
- * <dd>If the request includes {@linkplain Message#shape() shape}, the response includes the {@linkplain RDFFormat RDF
- * description} of the request {@linkplain Request#item() focus item}, {@linkplain LDP#CONTAINS containing} the RDF
- * descriptions of the virtual container items matched by the redacted linked data {@linkplain Shape shape}.</dd>
+ * <li>the response includes the derived shape actually used in the container retrieval process, redacted according to
+ * request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#verify} mode and {@link
+ * Form#digest} view;</li>
  *
- * <dd>If the request contains a {@code Prefer} header requesting the {@link LDP#PREFER_EMPTY_CONTAINER}
- * representation, virtual item descriptions are omitted.</dd>
+ * <li>the response {@linkplain RDFFormat RDF body} contains the RDF description of the request {@linkplain
+ * Request#item() focus item}, {@linkplain LDP#CONTAINS containing} the RDF descriptions of the container items matched
+ * by the redacted linked data {@linkplain Shape shape}.</li>
  *
- * <dd>If the request contains a filtering {@linkplain Request#query(Shape) query}, only matching virtual container
- * item descriptionss are included.</dd>
+ * </ul>
  *
- * <dt>Response shapeless {@link RDFFormat} body</dt>
+ * <p>Otherwise:</p>
  *
- * <dd><strong>Warning</strong> / Shapeless container retrieval is not yet supported and is reported with a {@linkplain
- * Response#NotImplemented} HTTP status code.</dd>
+ * <ul>
  *
- * </dl>
+ * <li><strong>Warning</strong> / Shapeless container retrieval is not yet supported and is reported with a {@linkplain
+ * Response#NotImplemented} HTTP status code.</li>
  *
- * <p>If the request includes a shape, the response includes the derived shape actually used in the container retrieval
- * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#verify} mode and {@link Form#digest} view.</p>
+ * </ul>
+ *
+ * <p>If the request contains a {@code Prefer} header requesting the {@link LDP#PREFER_EMPTY_CONTAINER} representation,
+ * item descriptions are omitted.</p>
+ *
+ * <p>If the request contains a filtering {@linkplain Request#query(Shape) query}, only matching virtual container
+ * item descriptions are included.</p>
  *
  * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
  * database.</p>

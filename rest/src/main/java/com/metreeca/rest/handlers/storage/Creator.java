@@ -56,30 +56,33 @@ import static java.util.UUID.randomUUID;
  * Stored basic container resource creator.
  *
  * <p>Handles creation requests on the stored linked data basic resource container identified by the request
- * {@linkplain Request#item() focus item}, taking into account the expected resource {@linkplain Message#shape() shape},
- * if one is provided.</p>
+ * {@linkplain Request#item() focus item}.</p>
  *
- * <dl>
+ * <p>If the request includes an expected {@linkplain Message#shape() resource shape}:</p>
  *
- * <dt>Shape-less mode</dt>
+ * <ul>
  *
- * <dd>If no shape is provided, the request {@link RDFFormat} body is expected to contain a symmetric concise bounded
- * description of the resource to be created; statements outside this envelope are reported with a {@linkplain
- * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
+ * <li>the shape is redacted taking into account request user {@linkplain Request#roles() roles}, {@link Form#create}
+ * task, {@link Form#verify} mode and {@link Form#detail} view;</li>
  *
- * <dt>Shape-driven mode</dt>
+ * <li>the request {@link RDFFormat RDF body} is expected to contain an RDF description of the resource to be created
+ * matched by the redacted shape; statements outside this envelope are reported with a {@linkplain
+ * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</li>
  *
- * <dd>If a shape is provided, it is redacted taking into account the request user {@linkplain Request#roles() roles},
- * {@link Form#create} task, {@link Form#verify} mode and {@link Form#detail} view.</dd>
+ * </ul>
  *
- * <dd>The request {@link RDFFormat} body is expected to contain an RDF description of the resource to be created
- * matching the redacted shape; statements outside this envelope are reported with a {@linkplain
- * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
+ * <p>Otherwise:</p>
  *
- * </dl>
+ * <ul>
  *
- * <p>The RDF content to be assigned to the newly created resource must describe the new resource using the request
- * {@linkplain Request#item() focus item} as subject.</p>
+ * <li>the request {@link RDFFormat RDF body} is expected to contain a symmetric concise bounded description of the
+ * resource to be created; statements outside this envelope are reported with a {@linkplain
+ * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element;</li>
+ *
+ * </ul>
+ *
+ * <p>The request RDF body must describe the resource to be created using the request {@linkplain Request#item() focus
+ * item} as subject.</p>
  *
  * <p>On successful body validation:</p>
  *
@@ -89,7 +92,7 @@ import static java.util.UUID.randomUUID;
  * focus item} and a name provided by either the default {@linkplain #uuid() UUID-based} or a {@linkplain
  * #slug(BiFunction) custom-provided} slug generator;</li>
  *
- * <li>the RDF body is rewritten to the assigned IRI and stored into the graph database;</li>
+ * <li>the request RDF body is rewritten to the assigned IRI and stored into the graph database;</li>
  *
  * <li>the target basic container identified by the request focus item is connected to the newly created resource using
  * the {@link LDP#CONTAINS ldp:contains} property.</li>
@@ -99,8 +102,8 @@ import static java.util.UUID.randomUUID;
  * <p>On successful resource creation, the IRI of the newly created resource is advertised through the {@code Location}
  * HTTP response header.</p>
  *
- * <p>Regardless of the operating mode, the updated RDF resource description is stored into the system {@linkplain
- * Graph#Factory graph} database.</p>
+ * <p>Regardless of the operating mode, RDF data is inserted into the system {@linkplain Graph#Factory graph}
+ * database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
@@ -218,6 +221,8 @@ public final class Creator extends Actor<Creator> {
 							.trace(report(report)));
 
 				} else { // valid data
+
+					connection.add(source, LDP.CONTAINS, target); // insert resource into container
 
 					connection.commit();
 

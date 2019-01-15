@@ -54,8 +54,7 @@ import static com.metreeca.tray.Tray.tool;
  * Virtual basic container browser.
  *
  * <p>Handles retrieval requests on the virtual linked data basic resource container identified by the request
- * {@linkplain Request#item() focus item}, taking into account the expected resource {@linkplain Message#shape() shape},
- * if one is provided.</p>
+ * {@linkplain Request#item() focus item}.</p>
  *
  * @see <a href="https://www.w3.org/TR/ldp/#ldpbc">Linked Data Platform 1.0 - §5.3 Basic</a>
  * @deprecated work in progress
