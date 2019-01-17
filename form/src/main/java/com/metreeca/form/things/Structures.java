@@ -34,7 +34,7 @@ import static java.util.Collections.singleton;
  * RDF structure utilities.
  *
  * <p>Provides utility methods for retrieving RDF structures like lists and descriptions from RDF models, repositories
- * and other statement sources.</p>*
+ * and other statement sources.</p>
  *
  * @see <a href="https://www.w3.org/TR/rdf-schema/#ch_collectionvocab/">RDF Schema 1.1 - § 5.2 RDF Collections</a>
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>

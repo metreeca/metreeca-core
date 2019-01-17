@@ -275,7 +275,7 @@
 									<packages>com.metreeca.tray*</packages>
 								</group>
 								<group>
-									<title>Shapes Engine</title>
+									<title>Shapes Framework</title>
 									<packages>com.metreeca.form*</packages>
 								</group>
 							</groups>
