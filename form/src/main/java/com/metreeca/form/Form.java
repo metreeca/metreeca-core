@@ -35,7 +35,7 @@ public final class Form {
 	/**
 	 * Alias annotation.
 	 *
-	 * <p>The associated {@code xsd:string} value provides an alternate short property name for reporting values for
+	 * <p>The associated {@code xsd:string} value provides an alternate property name for reporting values for
 	 * the enclosing shape (e.g. in the context of JSON-based RDF serialization results).</p>
 	 */
 	public static final IRI Alias=iri(Namespace, "alias");

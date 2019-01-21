@@ -16661,7 +16661,7 @@ traits:Map&lt;Shift, T&gt;}</string>
 		<key>Sidebar_Tab</key>
 		<integer>0</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, -8.0000000000000373}, {806, 553.74560669456059}}</string>
+		<string>{{-21, 0}, {848.82936507936506, 537}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
 			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
