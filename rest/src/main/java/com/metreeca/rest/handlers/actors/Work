@@ -1,0 +1,62 @@
+
+
+
+	private final Shape shape=and(
+
+			relate(
+					trait(RDF.TYPE, only(LDP.DIRECT_CONTAINER)),
+					trait(LDP.MEMBERSHIP_RESOURCE, only(term("Product"))),
+					trait(LDP.IS_MEMBER_OF_RELATION, only(RDF.TYPE))
+			),
+			trait(LDP.CONTAINS, and(
+
+			))
+	);
+
+	private static final Shape.Probe<Shape> trimmer=new Shape.Probe<Shape>() { // prune ldp:contains trait // !!! review
+
+		@Override protected Shape fallback(final Shape shape) { return shape; }
+
+		@Override public Shape visit(final Trait trait) { return trait.getStep().equals(Contains) ? and() : trait; }
+
+		@Override public Shape visit(final Virtual virtual) {
+			return virtual.getTrait().getStep().equals(Contains) ? and() : virtual;
+		}
+
+		@Override public Shape visit(final And and) {
+			return and(and.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+		}
+
+		@Override public Shape visit(final Or or) {
+			return or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+		}
+
+		@Override public Shape visit(final Test test) {
+			return test(test.getTest().accept(this),
+					test.getPass().accept(this), test.getFail().accept(this));
+		}
+
+	};
+
+
+exec(() -> {
+					tool(Graph.Factory).update(connection -> {
+						connection.prepareUpdate(QueryLanguage.SPARQL, "prefix : <terms#>\n"
+								+"\n"
+								+"prefix ldp: <http://www.w3.org/ns/ldp#>\n"
+								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+								+"\n"
+								+"insert {\n"
+								+"\n"
+								+"\t</employees/> a ldp:BasicContainer;\n"
+								+"\t\trdfs:label \"Employees\";\n"
+								+"\t\trdfs:comment \"Employee Directory\";\n"
+								+"\t\tldp:contains ?employee.\n"
+								+"\t\t\n"
+								+"} where {\n"
+								+"\n"
+								+"\t?employee a :Employee.\n"
+								+"\t\n"
+								+"}", Base);
+					});
+				})

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.virtual;
+package com.metreeca.rest.handlers._virtual;
 
 
 import com.metreeca.form.Form;

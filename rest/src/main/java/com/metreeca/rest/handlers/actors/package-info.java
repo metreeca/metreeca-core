@@ -16,10 +16,9 @@
  */
 
 /**
- * Stored resource actors.
+ * LDP action handlers.
  *
- * <p>Provides default implementations for CRUD actions on LDP resources and basic containers whose descriptions are
- * physically stored in a graph database.</p>
+ * <p>Provides default implementations for CRUD actions on LDP resources and containers.</p>
  */
 
-package com.metreeca.rest.handlers.storage;
+package com.metreeca.rest.handlers.actors;

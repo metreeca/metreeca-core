@@ -289,20 +289,17 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 
 			if ( wild(shape) ) {
 
-				final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
+				return !roles.isEmpty() && disjoint(roles, request.roles()) ?
+						refused(request) : handler.handle(request);
 
-				return refused ? refused(request)
-						: handler.handle(request);
-
-			} else {
+			} else { // !!! cache redacted shapes?
 
 				final Shape redacted=shape
 						.accept(task(task))
 						.accept(view(view));
 
-				final Shape authorized=redacted.accept(
-						role(roles(request))
-				);
+				final Shape authorized=redacted
+						.accept(role(roles(request)));
 
 				return wild(redacted) || empty(redacted) ? forbidden(request)
 						: wild(authorized) || empty(authorized) ? refused(request)
@@ -313,7 +310,7 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 		};
 	}
 
-	private Wrapper post(final IRI task, final IRI view) {
+	private Wrapper post(final IRI task, final IRI view) { // !!! cache redacted shapes?
 		return handler -> request -> handler.handle(request).map(response -> response.shape(response.shape()
 				.accept(task(task))
 				.accept(view(view))

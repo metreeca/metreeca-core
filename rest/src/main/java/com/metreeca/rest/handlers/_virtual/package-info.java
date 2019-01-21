@@ -22,4 +22,4 @@
  * are generated on demand.</p>
  */
 
-package com.metreeca.rest.handlers.virtual;
+package com.metreeca.rest.handlers._virtual;

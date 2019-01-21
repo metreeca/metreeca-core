@@ -35,8 +35,7 @@ import static java.util.stream.Collectors.toSet;
  * <p>States that each term in the focus set has a given extended RDF datatype.</p>
  *
  * <p>For validation purposes IRI references and blank nodes are considered to be respectively of {@link
- * Values#IRIType}
- * {@link Values#BNodeType} datatype</p>
+ * Values#IRIType} and {@link Values#BNodeType} datatype.</p>
  */
 public final class Datatype implements Shape {
 

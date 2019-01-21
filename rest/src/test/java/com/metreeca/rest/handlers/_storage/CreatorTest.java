@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.storage;
+package com.metreeca.rest.handlers._storage;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Codecs;

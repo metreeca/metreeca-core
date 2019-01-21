@@ -223,15 +223,15 @@ If the index doesn't contain a matching handler, no action is performed giving t
 
 ## Actors
 
-[Storage actors](../javadocs/?com/metreeca/rest/handlers/storage/package-summary.html) provide default implementations for CRUD actions on LDP resources and basic containers identified by the request [focus item](../javadocs/com/metreeca/rest/Request.html#item--).
+[Storage actors](../javadocs/?com/metreeca/rest/handlers/actors/package-summary.html) provide default implementations for CRUD actions on LDP resources and basic containers identified by the request [focus item](../javadocs/com/metreeca/rest/Request.html#item--).
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Browser](../javadocs/?com/metreeca/rest/handlers/storage/Browser.html) | basic container browsing / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; supports extended [faceted search](linked-data-interaction#faceted-search), sorting and pagination |
-| [Creator](../javadocs/?com/metreeca/rest/handlers/storage/Creator.html) | basic container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/storage/Relator.html) | resource retrieval / retrieves the detailed RDF description of the target item |
-| [Updater](../javadocs/?com/metreeca/rest/handlers/storage/Updater.html) | resource updating / updates the detailed RDF description of the target item |
-| [Deleter](../javadocs/?com/metreeca/rest/handlers/storage/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
+| [Browser](../javadocs/?com/metreeca/rest/handlers/actors/Browser.html) | basic container browsing / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; supports extended [faceted search](linked-data-interaction#faceted-search), sorting and pagination |
+| [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html) | basic container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
+| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | resource retrieval / retrieves the detailed RDF description of the target item |
+| [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html) | resource updating / updates the detailed RDF description of the target item |
+| [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
 
 If a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the graph neighbourhood of the target target item(s)  identified by the model after redaction according to the request user roles and to actor-specific task,  mode and view parameters.
 

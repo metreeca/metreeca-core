@@ -48,8 +48,12 @@ import static java.util.Arrays.asList;
  */
 public interface Shape {
 
+	public static final Shape Wild=and(); // !!! replace with wildcard?
+	public static final Shape Empty=or();
+
+
 	public static Shape wild() {
-		return and(); // !!! replace with wildcard?
+		return Wild;
 	}
 
 	public static boolean wild(final Shape shape) {
@@ -63,7 +67,7 @@ public interface Shape {
 
 
 	public static Shape empty() {
-		return or();
+		return Empty;
 	}
 
 	public static boolean empty(final Shape shape) {

@@ -58,8 +58,8 @@ import static java.util.stream.Collectors.toSet;
 /**
  * RDF processor.
  *
- * <p>Process {@linkplain RDFFormat RDF} payloads for incoming request and outgoing responses and executes SPARQL
- * Update post-processing scripts.</p>
+ * <p>Trims to shape and process {@linkplain RDFFormat RDF} payloads for incoming request and outgoing responses and
+ * executes SPARQL Update post-processing scripts.</p>
  *
  * <p>If the incoming request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single
  * transaction on the system {@linkplain Graph#Factory graph database}, which is automatically committed on {@linkplain

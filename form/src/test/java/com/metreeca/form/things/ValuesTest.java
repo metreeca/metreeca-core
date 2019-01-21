@@ -128,6 +128,16 @@ public final class ValuesTest {
 			)
 	);
 
+	public static final Shape Employees=and(
+			server(
+					trait(RDF.TYPE, LDP.BASIC_CONTAINER)
+			),
+			trait(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
+			trait(RDFS.COMMENT, and(required(), datatype(XMLSchema.STRING))),
+			trait(LDP.CONTAINS, and(multiple(), Employee))
+	);
+
+
 	private static final Map<String, String> Prefixes=new LinkedHashMap<String, String>() {{
 		put("", Namespace);
 		put("birt", Namespace);

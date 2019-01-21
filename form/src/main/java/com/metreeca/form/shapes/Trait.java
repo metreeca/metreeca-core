@@ -21,9 +21,13 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
+import static com.metreeca.form.Shape.only;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.map;
 
@@ -41,16 +45,20 @@ import static java.util.stream.Collectors.*;
 public final class Trait implements Shape {
 
 	public static Trait trait(final IRI iri) {
-		return trait(Step.step(iri));
+		return trait(step(iri));
+	}
+
+	public static Trait trait(final IRI iri, final Value... values) {
+		return trait(step(iri), only(values));
 	}
 
 	public static Trait trait(final IRI iri, final Shape shape) {
-		return trait(Step.step(iri), shape);
+		return trait(step(iri), shape);
 	}
 
 
 	public static Trait trait(final Step step) {
-		return trait(step, And.and());
+		return trait(step, and());
 	}
 
 	public static Trait trait(final Step step, final Shape shape) {
@@ -112,7 +120,7 @@ public final class Trait implements Shape {
 	}
 
 	@Override public String toString() {
-		return "trait("+step+(shape.equals(And.and()) ? "" : ", "+shape)+")";
+		return "trait("+step+(shape.equals(and()) ? "" : ", "+shape)+")";
 	}
 
 
@@ -161,7 +169,7 @@ public final class Trait implements Shape {
 
 					.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new, mapping(Map.Entry::getValue,
 							collectingAndThen(toCollection(LinkedHashSet::new), set ->
-									set.size() == 1 ? set.iterator().next() : And.and(set)))));
+									set.size() == 1 ? set.iterator().next() : and(set)))));
 		}
 
 	}
