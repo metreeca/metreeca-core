@@ -288,7 +288,7 @@ final class QueryParserTest {
 	}
 
 	private Shape filter(final Shape shape, final Shape filter) {
-		return and(shape, com.metreeca.form.shapes.Test.test(Shape.filter(), filter));
+		return and(shape, Option.condition(Shape.filter(), filter));
 	}
 
 }

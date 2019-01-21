@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
+import static com.metreeca.form.shapes.Option.condition;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
 
@@ -83,7 +83,7 @@ final class RedactorTest {
 
 		assertThat((Object)and(and())).as("conjunction").isEqualTo(and(nested).accept(first));
 		assertThat((Object)or(and())).as("disjunction").isEqualTo(or(nested).accept(first));
-		assertThat((Object)test(and(), and(), and())).as("option").isEqualTo(test(and(), and(), nested).accept(first));
+		assertThat((Object)condition(and(), and(), and())).as("option").isEqualTo(condition(and(), and(), nested).accept(first));
 
 	}
 

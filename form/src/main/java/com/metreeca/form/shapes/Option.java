@@ -18,25 +18,25 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.things.Strings;
 
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.things.Strings.indent;
 
 
 /**
  * Conditional logical constraint.
  *
- * <p>States that the focus set is consistent either with a 'positive' shape, if consistent also with a 'condition'
- * shape, or with a 'negative' shape, otherwise.</p>
+ * <p>States that the focus set is consistent either with a {@linkplain #getPass() positive} shape, if consistent also
+ * with a {@linkplain #getTest() test} shape, or with a {@linkplain #getFail() negative} shape, otherwise.</p>
  */
-public final class Test implements Shape {
+public final class Option implements Shape {
 
-	public static Test test(final Shape condition, final Shape positive) {
-		return new Test(condition, positive, and());
+	public static Option condition(final Shape test, final Shape pass) {
+		return new Option(test, pass, and());
 	}
 
-	public static Test test(final Shape condition, final Shape positive, final Shape negative) {
-		return new Test(condition, positive, negative);
+	public static Option condition(final Shape test, final Shape pass, final Shape fail) {
+		return new Option(test, pass, fail);
 	}
 
 
@@ -45,7 +45,7 @@ public final class Test implements Shape {
 	private final Shape fail;
 
 
-	public Test(final Shape test, final Shape pass, final Shape fail) {
+	public Option(final Shape test, final Shape pass, final Shape fail) {
 
 		if ( test == null ) {
 			throw new NullPointerException("null test shape");
@@ -89,10 +89,10 @@ public final class Test implements Shape {
 
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Test
-				&& test.equals(((Test)object).test)
-				&& pass.equals(((Test)object).pass)
-				&& fail.equals(((Test)object).fail);
+		return this == object || object instanceof Option
+				&& test.equals(((Option)object).test)
+				&& pass.equals(((Option)object).pass)
+				&& fail.equals(((Option)object).fail);
 	}
 
 	@Override public int hashCode() {
@@ -100,10 +100,10 @@ public final class Test implements Shape {
 	}
 
 	@Override public String toString() {
-		return "test(\n"
-				+Strings.indent(test.toString())+",\n"
-				+Strings.indent(pass.toString())
-				+(fail.equals(and()) ? "" : ",\n"+Strings.indent(fail.toString()))
+		return "condition(\n"
+				+indent(test.toString())+",\n"
+				+indent(pass.toString())
+				+(fail.equals(and()) ? "" : ",\n"+indent(fail.toString()))
 				+"\n)";
 	}
 

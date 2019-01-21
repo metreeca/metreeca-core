@@ -20,6 +20,7 @@ package com.metreeca.form.probes;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Datatype;
 import com.metreeca.form.shapes.MinCount;
+import com.metreeca.form.shapes.Option;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
@@ -119,16 +120,16 @@ final class OptimizerTest {
 
 	@Test void testOptimizeOption() {
 
-		assertThat((Object)x).as("always pass").isEqualTo(optimize(com.metreeca.form.shapes.Test.test(and(), x, y)));
-		assertThat((Object)y).as("always fail").isEqualTo(optimize(com.metreeca.form.shapes.Test.test(or(), x, y)));
+		assertThat((Object)x).as("always pass").isEqualTo(optimize(Option.condition(and(), x, y)));
+		assertThat((Object)y).as("always fail").isEqualTo(optimize(Option.condition(or(), x, y)));
 
-		assertThat((Object)y).as("identical options").isEqualTo(optimize(com.metreeca.form.shapes.Test.test(x, y, y)));
+		assertThat((Object)y).as("identical options").isEqualTo(optimize(Option.condition(x, y, y)));
 
-		assertThat((Object)com.metreeca.form.shapes.Test.test(x, y, z)).as("optimized test shape").isEqualTo(optimize(com.metreeca.form.shapes.Test.test(and(x), y, z)));
-		assertThat((Object)com.metreeca.form.shapes.Test.test(x, y, z)).as("optimized pass shape").isEqualTo(optimize(com.metreeca.form.shapes.Test.test(x, and(y), z)));
-		assertThat((Object)com.metreeca.form.shapes.Test.test(x, y, z)).as("optimized fail shape").isEqualTo(optimize(com.metreeca.form.shapes.Test.test(x, y, and(z))));
+		assertThat((Object)Option.condition(x, y, z)).as("optimized test shape").isEqualTo(optimize(Option.condition(and(x), y, z)));
+		assertThat((Object)Option.condition(x, y, z)).as("optimized pass shape").isEqualTo(optimize(Option.condition(x, and(y), z)));
+		assertThat((Object)Option.condition(x, y, z)).as("optimized fail shape").isEqualTo(optimize(Option.condition(x, y, and(z))));
 
-		assertThat((Object)com.metreeca.form.shapes.Test.test(x, y, z)).as("material").isEqualTo(optimize(com.metreeca.form.shapes.Test.test(x, y, z)));
+		assertThat((Object)Option.condition(x, y, z)).as("material").isEqualTo(optimize(Option.condition(x, y, z)));
 
 	}
 

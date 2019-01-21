@@ -400,8 +400,8 @@ public final class Processor implements Wrapper {
 			return or.getShapes().stream().flatMap(shape -> shape.accept(this));
 		}
 
-		@Override public Stream<Statement> visit(final Test test) {
-			return Stream.concat(test.getPass().accept(this), test.getFail().accept(this));
+		@Override public Stream<Statement> visit(final Option option) {
+			return Stream.concat(option.getPass().accept(this), option.getFail().accept(this));
 		}
 
 	}

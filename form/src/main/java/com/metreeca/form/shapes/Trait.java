@@ -148,8 +148,8 @@ public final class Trait implements Shape {
 			return traits(or.getShapes());
 		}
 
-		@Override public Map<Step, Shape> visit(final Test test) {
-			return traits(list(test.getPass(), test.getFail()));
+		@Override public Map<Step, Shape> visit(final Option option) {
+			return traits(list(option.getPass(), option.getFail()));
 		}
 
 

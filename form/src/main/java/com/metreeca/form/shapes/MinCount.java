@@ -107,10 +107,10 @@ public final class MinCount implements Shape {
 					.reduce(null, min);
 		}
 
-		@Override public Integer visit(final Test test) {
+		@Override public Integer visit(final Option option) {
 			return min.apply(
-					test.getPass().accept(this),
-					test.getFail().accept(this));
+					option.getPass().accept(this),
+					option.getFail().accept(this));
 		}
 
 	}

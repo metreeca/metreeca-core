@@ -184,8 +184,8 @@ public final class Meta implements Shape {
 			return aliases(or.getShapes());
 		}
 
-		@Override public Map<Step, String> visit(final Test test) {
-			return aliases(list(test.getPass(), test.getFail()));
+		@Override public Map<Step, String> visit(final Option option) {
+			return aliases(list(option.getPass(), option.getFail()));
 		}
 
 
@@ -289,8 +289,8 @@ public final class Meta implements Shape {
 			return alias(or.getShapes());
 		}
 
-		@Override public String visit(final Test test) {
-			return alias(list(test.getPass(), test.getFail()));
+		@Override public String visit(final Option option) {
+			return alias(list(option.getPass(), option.getFail()));
 		}
 
 

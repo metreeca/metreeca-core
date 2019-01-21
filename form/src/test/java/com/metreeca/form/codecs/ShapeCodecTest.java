@@ -106,8 +106,8 @@ final class ShapeCodecTest {
 		assertCoded("singleton disjunction", or(MinCount.minCount(1)));
 		assertCoded("proper disjunction", or(MinCount.minCount(1), MinCount.minCount(10)));
 
-		assertCoded("one-way option", com.metreeca.form.shapes.Test.test(and(), MinCount.minCount(1)));
-		assertCoded("two-way option", com.metreeca.form.shapes.Test.test(and(), MinCount.minCount(1), MinCount.minCount(10)));
+		assertCoded("one-way option", Option.condition(and(), MinCount.minCount(1)));
+		assertCoded("two-way option", Option.condition(and(), MinCount.minCount(1), MinCount.minCount(10)));
 
 		assertCoded("singleton condition", When.when(RDF.VALUE, Values.literal(1)));
 		assertCoded("proper condition", When.when(RDF.VALUE, Values.literal(1), Values.literal(10)));

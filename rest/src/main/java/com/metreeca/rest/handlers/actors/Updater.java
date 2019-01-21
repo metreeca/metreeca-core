@@ -44,7 +44,7 @@ import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
+import static com.metreeca.form.shapes.Option.condition;
 import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
@@ -212,11 +212,11 @@ public final class Updater extends Actor<Updater> {
 						return or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
 					}
 
-					@Override public Shape visit(final Test test) {
-						return test(
-								test.getTest(),
-								test.getPass().accept(this),
-								test.getFail().accept(this)
+					@Override public Shape visit(final Option option) {
+						return condition(
+								option.getTest(),
+								option.getPass().accept(this),
+								option.getFail().accept(this)
 						);
 					}
 
@@ -250,11 +250,11 @@ public final class Updater extends Actor<Updater> {
 						return or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
 					}
 
-					@Override public Shape visit(final Test test) {
-						return test(
-								test.getTest(),
-								test.getPass().accept(this),
-								test.getFail().accept(this)
+					@Override public Shape visit(final Option option) {
+						return condition(
+								option.getTest(),
+								option.getPass().accept(this),
+								option.getFail().accept(this)
 						);
 					}
 

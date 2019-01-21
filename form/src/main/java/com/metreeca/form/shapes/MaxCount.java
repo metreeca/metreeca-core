@@ -105,10 +105,10 @@ public final class MaxCount implements Shape {
 					.reduce(null, max);
 		}
 
-		@Override public Integer visit(final Test test) {
+		@Override public Integer visit(final Option option) {
 			return max.apply(
-					test.getPass().accept(this),
-					test.getFail().accept(this));
+					option.getPass().accept(this),
+					option.getFail().accept(this));
 		}
 
 	}

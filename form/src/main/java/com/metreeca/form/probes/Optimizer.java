@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
+import static com.metreeca.form.shapes.Option.condition;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.things.Maps.entry;
@@ -142,7 +142,7 @@ public final class Optimizer extends Shape.Probe<Shape> {
 				: or(shapes);
 	}
 
-	@Override public Shape visit(final Test option) {
+	@Override public Shape visit(final Option option) {
 
 		final Shape test=option.getTest().accept(this);
 		final Shape pass=option.getPass().accept(this);
@@ -151,7 +151,7 @@ public final class Optimizer extends Shape.Probe<Shape> {
 		return test.equals(and()) ? pass // always pass
 				: test.equals(or()) ? fail // always fail
 				: pass.equals(fail) ? pass // identical options
-				: test(test, pass, fail);
+				: condition(test, pass, fail);
 	}
 
 

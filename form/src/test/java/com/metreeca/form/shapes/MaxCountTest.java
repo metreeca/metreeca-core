@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
+import static com.metreeca.form.shapes.Option.condition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -82,15 +82,15 @@ final class MaxCountTest {
 		final MaxCount x=maxCount(10);
 		final MaxCount y=maxCount(100);
 
-		assertThat(maxCount(test(and(), x, y))
+		assertThat(maxCount(condition(and(), x, y))
 				.filter(limit1 -> limit1.equals(max(x.getLimit(), y.getLimit())))
 				.isPresent()).as("all defined").isTrue();
 
-		assertThat(maxCount(test(and(), x, and()))
+		assertThat(maxCount(condition(and(), x, and()))
 				.filter(limit -> limit.equals(x.getLimit()))
 				.isPresent()).as("some defined").isTrue();
 
-		assertThat(maxCount(test(and(), and(), and()))
+		assertThat(maxCount(condition(and(), and(), and()))
 				.isPresent()).as("none defined").isFalse();
 
 	}

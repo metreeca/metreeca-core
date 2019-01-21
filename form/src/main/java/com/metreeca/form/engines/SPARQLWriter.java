@@ -424,13 +424,13 @@ final class SPARQLWriter {
 					.reduce(Report.report(), Report::merge);
 		}
 
-		@Override public Report visit(final Test test) {
+		@Override public Report visit(final Option option) {
 
-			final boolean pass=!test.getTest().accept(this).assess(Issue.Level.Error);
+			final boolean pass=!option.getTest().accept(this).assess(Issue.Level.Error);
 
 			return pass
-					? test.getPass().accept(this)
-					: test.getFail().accept(this);
+					? option.getPass().accept(this)
+					: option.getFail().accept(this);
 
 		}
 

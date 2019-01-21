@@ -47,7 +47,7 @@ import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
+import static com.metreeca.form.shapes.Option.condition;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.shapes.When.when;
@@ -321,8 +321,8 @@ public final class Rewriter implements Wrapper {
 				return or(or.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
 			}
 
-			@Override public Test visit(final Test test) {
-				return test(rewrite(test.getTest()), rewrite(test.getPass()), rewrite(test.getFail()));
+			@Override public Option visit(final Option option) {
+				return condition(rewrite(option.getTest()), rewrite(option.getPass()), rewrite(option.getFail()));
 			}
 
 			@Override public When visit(final When when) {

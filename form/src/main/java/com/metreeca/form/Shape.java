@@ -34,7 +34,7 @@ import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
+import static com.metreeca.form.shapes.Option.condition;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
@@ -190,7 +190,7 @@ public interface Shape {
 
 	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
 		return shapes.isEmpty() ? when(variable, values)
-				: test(when(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+				: Option.condition(when(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}
 
 
@@ -296,7 +296,7 @@ public interface Shape {
 
 		public V visit(final Or or) { return fallback(or); }
 
-		public V visit(final Test test) { return fallback(test); }
+		public V visit(final Option option) { return fallback(option); }
 
 		public V visit(final When when) { return fallback(when); }
 

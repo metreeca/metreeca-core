@@ -307,10 +307,10 @@ abstract class SPARQL { // ! refactor
 			return or.getShapes().stream().flatMap(shape -> shape.accept(this));
 		}
 
-		@Override public Stream<Statement> visit(final Test test) {
+		@Override public Stream<Statement> visit(final Option option) {
 			return Stream.concat(
-					test.getPass().accept(this),
-					test.getFail().accept(this)
+					option.getPass().accept(this),
+					option.getFail().accept(this)
 			);
 		}
 
@@ -422,7 +422,7 @@ abstract class SPARQL { // ! refactor
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
-		@Override public Object visit(final Test test) {
+		@Override public Object visit(final Option option) {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
@@ -542,7 +542,7 @@ abstract class SPARQL { // ! refactor
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
-		@Override public Object visit(final Test test) {
+		@Override public Object visit(final Option option) {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 

@@ -134,7 +134,7 @@ public final class ShapeCodec {
 
 			@Override public Resource visit(final Or or) { return or(or, model); }
 
-			@Override public Resource visit(final Test test) { return test(test, model); }
+			@Override public Resource visit(final Option option) { return test(option, model); }
 
 			@Override public Resource visit(final When when) { return when(when, model); }
 
@@ -543,20 +543,20 @@ public final class ShapeCodec {
 	}
 
 
-	private Resource test(final Test test, final Collection<Statement> model) {
+	private Resource test(final Option option, final Collection<Statement> model) {
 
 		final Resource node=bnode();
 
 		model.add(statement(node, RDF.TYPE, Form.Test));
-		model.add(statement(node, Form.test, shape(test.getTest(), model)));
-		model.add(statement(node, Form.pass, shape(test.getPass(), model)));
-		model.add(statement(node, Form.fail, shape(test.getFail(), model)));
+		model.add(statement(node, Form.test, shape(option.getTest(), model)));
+		model.add(statement(node, Form.pass, shape(option.getPass(), model)));
+		model.add(statement(node, Form.fail, shape(option.getFail(), model)));
 
 		return node;
 	}
 
 	private Shape test(final Resource root, final Collection<Statement> model) {
-		return Test.test(
+		return Option.condition(
 				shape(resource(root, Form.test, model), model),
 				shape(resource(root, Form.pass, model), model),
 				shape(resource(root, Form.fail, model), model)

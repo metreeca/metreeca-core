@@ -56,7 +56,7 @@ import static com.metreeca.form.shapes.Like.like;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Test.test;
+import static com.metreeca.form.shapes.Option.condition;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.things.Lists.concat;
@@ -571,7 +571,7 @@ final class SPARQLReaderTest {
 				+"\n"
 				+"}")).isIsomorphicTo(model(edges(and(
 				trait(term("employee")),
-				test(filter(), trait(term("employee"), any(item("employees/1002"), item("employees/1188"))))
+				Option.condition(filter(), trait(term("employee"), any(item("employees/1002"), item("employees/1188"))))
 		))));
 	}
 
