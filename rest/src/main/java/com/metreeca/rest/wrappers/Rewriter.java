@@ -40,12 +40,10 @@ import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Custom.custom;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Default.dflt;
-import static com.metreeca.form.shapes.Group.group;
-import static com.metreeca.form.shapes.Hint.hint;
 import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
+import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Or.or;
@@ -263,6 +261,10 @@ public final class Rewriter implements Wrapper {
 
 		private final class ShapeEngine extends Shape.Probe<Shape> {
 
+			@Override public Meta visit(final Meta meta) {
+				return meta(rewrite(meta.getIRI()), rewrite(meta.getValue()));
+			}
+
 			@Override public Datatype visit(final Datatype datatype) {
 				return datatype(rewrite(datatype.getIRI()));
 			}
@@ -327,17 +329,6 @@ public final class Rewriter implements Wrapper {
 				return when(rewrite(when.getIRI()), rewrite(when.getValues(), Engine.this::rewrite));
 			}
 
-			@Override public Default visit(final Default dflt) {
-				return dflt(rewrite(dflt.getValue()));
-			}
-
-			@Override public Hint visit(final Hint hint) {
-				return hint(rewrite(hint.getIRI()));
-			}
-
-			@Override public Group visit(final Group group) {
-				return group(rewrite(group.getShape()));
-			}
 
 			@Override protected Shape fallback(final Shape shape) {
 				return shape;

@@ -138,11 +138,6 @@ final class SPARQLWriter {
 		}
 
 
-		@Override public Report visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
-
 		@Override public Report visit(final MinCount minCount) {
 			return focus.size() >= minCount.getLimit() ? Report.report() : Report.report(issue(
 					Issue.Level.Error, "invalid item count", minCount, focus

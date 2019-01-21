@@ -27,7 +27,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.shapes.Alias.alias;
+import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Or.or;

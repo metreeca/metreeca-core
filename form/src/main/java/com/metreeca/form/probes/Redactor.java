@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Group.group;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
@@ -73,10 +72,6 @@ public final class Redactor extends Shape.Probe<Shape> {
 		return shape;
 	}
 
-
-	@Override public Shape visit(final Group group) {
-		return group(group.getShape().accept(this));
-	}
 
 	@Override public Shape visit(final Trait trait) {
 		return trait(trait.getStep(), trait.getShape().accept(this));

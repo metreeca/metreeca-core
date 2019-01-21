@@ -17,6 +17,7 @@
 
 package com.metreeca.form.probes;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
@@ -29,7 +30,12 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.Set;
 
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.MinCount.minCount;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.literal;
 
@@ -47,21 +53,17 @@ public final class Inferencer extends Shape.Probe<Shape> {
 	@Override protected Shape fallback(final Shape shape) { return shape; }
 
 
-	@Override public Shape visit(final Hint hint) {
-		return And.and(hint, Datatype.datatype(Values.ResoureType));
-	}
-
-	@Override public Shape visit(final Group group) {
-		return Group.group(group.getShape().accept(this));
+	@Override public Shape visit(final Meta meta) {
+		return meta.getIRI().equals(Form.Hint) ? and(meta, datatype(Values.ResoureType)) : meta;
 	}
 
 
 	@Override public Shape visit(final All all) {
-		return And.and(all, MinCount.minCount(all.getValues().size()));
+		return and(all, minCount(all.getValues().size()));
 	}
 
 	@Override public Shape visit(final Any any) {
-		return And.and(any, MinCount.minCount(1));
+		return and(any, minCount(1));
 	}
 
 	@Override public Shape visit(final In in) {
@@ -70,20 +72,20 @@ public final class Inferencer extends Shape.Probe<Shape> {
 		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
-		final Shape type=types.size() == 1 ? Datatype.datatype(types.iterator().next()) : And.and();
+		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();
 
-		return And.and(in, count, type);
+		return and(in, count, type);
 	}
 
 
 	@Override public Shape visit(final Datatype datatype) {
-		return datatype.getIRI().equals(XMLSchema.BOOLEAN) ? And.and(datatype,
+		return datatype.getIRI().equals(XMLSchema.BOOLEAN) ? and(datatype,
 				In.in(literal(false), literal(true)), maxCount(1)
 		) : datatype;
 	}
 
 	@Override public Shape visit(final Clazz clazz) {
-		return And.and(clazz, Datatype.datatype(Values.ResoureType));
+		return and(clazz, datatype(Values.ResoureType));
 	}
 
 
@@ -92,9 +94,9 @@ public final class Inferencer extends Shape.Probe<Shape> {
 		final Step step=trait.getStep();
 		final Shape shape=trait.getShape().accept(this);
 
-		return step.getIRI().equals(RDF.TYPE) ? And.and(trait(step, And.and(shape, Datatype.datatype(Values.ResoureType))), Datatype.datatype(Values.ResoureType))
-				: step.isInverse() ? trait(step, And.and(shape, Datatype.datatype(Values.ResoureType)))
-				: And.and(trait(step, shape), Datatype.datatype(Values.ResoureType));
+		return step.getIRI().equals(RDF.TYPE) ? and(trait(step, and(shape, datatype(Values.ResoureType))), datatype(Values.ResoureType))
+				: step.isInverse() ? trait(step, and(shape, datatype(Values.ResoureType)))
+				: and(trait(step, shape), datatype(Values.ResoureType));
 	}
 
 	@Override public Shape visit(final Virtual virtual) {
@@ -107,15 +109,19 @@ public final class Inferencer extends Shape.Probe<Shape> {
 	}
 
 	@Override public Shape visit(final And and) {
-		return And.and(and.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+		return and(and.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
 	}
 
 	@Override public Shape visit(final Or or) {
-		return Or.or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+		return or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
 	}
 
 	@Override public Shape visit(final Test test) {
-		return Test.test(test.getTest().accept(this), test.getPass().accept(this), test.getFail().accept(this));
+		return test(
+				test.getTest().accept(this),
+				test.getPass().accept(this),
+				test.getFail().accept(this)
+		);
 	}
 
 }

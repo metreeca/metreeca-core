@@ -30,9 +30,13 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
+import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Meta.hint;
 import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Lists.list;
@@ -46,33 +50,33 @@ final class InferencerTest {
 	@Test void testHint() {
 
 		assertImplies("hinted shapes are resources",
-				Hint.hint(RDF.NIL), Datatype.datatype(Values.ResoureType));
+				hint(RDF.NIL), datatype(Values.ResoureType));
 
 	}
 
 	@Test void testUniversal() {
 		assertImplies("minimum focus size is equal to the size of the required value set",
-				All.all(literal(1), literal(2)), MinCount.minCount(2));
+				all(literal(1), literal(2)), MinCount.minCount(2));
 	}
 
 	@Test void testExistential() {
 		assertImplies("minimum focus size is 1",
-				Any.any(literal(1), literal(2)), MinCount.minCount(1));
+				any(literal(1), literal(2)), MinCount.minCount(1));
 	}
 
 	@Test void testType() { // !!! improve testing of multiple implications
 
 		assertImplies("xsd:boolean has closed range",
-				Datatype.datatype(XMLSchema.BOOLEAN), and(maxCount(1), In.in(literal(false), literal(true))));
+				datatype(XMLSchema.BOOLEAN), and(maxCount(1), In.in(literal(false), literal(true))));
 
 		assertImplies("xsd:boolean has exclusive values",
-				Datatype.datatype(XMLSchema.BOOLEAN), and(maxCount(1), In.in(literal(false), literal(true))));
+				datatype(XMLSchema.BOOLEAN), and(maxCount(1), In.in(literal(false), literal(true))));
 
 	}
 
 	@Test void testClazz() {
 		assertImplies("classed values are resources",
-				clazz(RDF.NIL), Datatype.datatype(Values.ResoureType));
+				clazz(RDF.NIL), datatype(Values.ResoureType));
 	}
 
 	@Test void testRange() {
@@ -81,49 +85,49 @@ final class InferencerTest {
 				In.in(literal(1), literal(2.0)), maxCount(2));
 
 		assertImplies("if unique, focus values share the datatype of the allowed value set",
-				In.in(literal(1), literal(2)), and(maxCount(2), Datatype.datatype(XMLSchema.INT)));
+				In.in(literal(1), literal(2)), and(maxCount(2), datatype(XMLSchema.INT)));
 
 	}
 
 	@Test void testTrait() {
 
 		assertImplies("trait subjects are resources",
-				trait(Step.step(RDF.VALUE)), Datatype.datatype(Values.ResoureType));
+				trait(Step.step(RDF.VALUE)), datatype(Values.ResoureType));
 
 		assertImplies("reverse trait objects are resources",
-				trait(Step.step(RDF.VALUE, true)), Datatype.datatype(Values.ResoureType), (s, i) -> trait(s.getStep(), and(s.getShape(), i)));
+				trait(Step.step(RDF.VALUE, true)), datatype(Values.ResoureType), (s, i) -> trait(s.getStep(), and(s.getShape(), i)));
 
 		assertImplies("both subject and object of a rdf:type trait are resources",
-				trait(Step.step(RDF.TYPE)), Datatype.datatype(Values.ResoureType),
+				trait(Step.step(RDF.TYPE)), datatype(Values.ResoureType),
 				(s, i) -> and(trait(s.getStep(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",
-				trait(RDF.VALUE, clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
-				(s, i) -> and(trait(s.getStep(), and(and(s.getShape(), i), Datatype.datatype(Values.ResoureType))), Datatype.datatype(Values.ResoureType)));
+				trait(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResoureType),
+				(s, i) -> and(trait(s.getStep(), and(and(s.getShape(), i), datatype(Values.ResoureType))), datatype(Values.ResoureType)));
 	}
 
 	@Disabled @Test void testVirtual() {
 
 		assertImplies("virtual traits are expanded",
-				Virtual.virtual(trait(RDF.VALUE), Step.step(RDF.NIL)), Datatype.datatype(Values.ResoureType),
+				Virtual.virtual(trait(RDF.VALUE), Step.step(RDF.NIL)), datatype(Values.ResoureType),
 				(s, i) -> Virtual.virtual(trait(RDF.VALUE, i), Step.step(RDF.NIL)));
 
 	}
 
 
 	@Test void testConjunction() {
-		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
+		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Values.ResoureType),
 				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer and() stripped by optimization
 	}
 
 	@Test void testDisjunction() {
-		assertImplies("nested shapes are expanded", Or.or(clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
+		assertImplies("nested shapes are expanded", Or.or(clazz(RDF.NIL)), datatype(Values.ResoureType),
 				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer or() stripped by optimization
 	}
 
 	@Test void testOption() {
 		assertImplies("nested shapes are expanded",
-				test(clazz(RDF.NIL), clazz(RDF.NIL), clazz(RDF.NIL)), Datatype.datatype(Values.ResoureType),
+				test(clazz(RDF.NIL), clazz(RDF.NIL), clazz(RDF.NIL)), datatype(Values.ResoureType),
 				(s, i) -> test(and(s.getTest(), i), and(s.getPass(), i), and(s.getFail(), i)));
 	}
 

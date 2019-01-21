@@ -237,6 +237,11 @@ public interface Shape {
 
 	public abstract static class Probe<V> {
 
+		//// Annotations ///////////////////////////////////////////////////////////////////////////////////////////////
+
+		public V visit(final Meta meta) { return fallback(meta); }
+
+
 		//// Term Constraints //////////////////////////////////////////////////////////////////////////////////////////
 
 		public V visit(final Datatype datatype) { return fallback(datatype); }
@@ -294,23 +299,6 @@ public interface Shape {
 		public V visit(final Test test) { return fallback(test); }
 
 		public V visit(final When when) { return fallback(when); }
-
-
-		//// Annotations ///////////////////////////////////////////////////////////////////////////////////////////////
-
-		public V visit(final Alias alias) { return fallback(alias); }
-
-		public V visit(final Label label) { return fallback(label); }
-
-		public V visit(final Notes notes) { return fallback(notes); }
-
-		public V visit(final Placeholder placeholder) { return fallback(placeholder); }
-
-		public V visit(final Default dflt) { return fallback(dflt); }
-
-		public V visit(final Hint hint) { return fallback(hint); }
-
-		public V visit(final Group group) { return fallback(group); }
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////

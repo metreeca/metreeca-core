@@ -39,7 +39,7 @@ import java.util.Map;
 import javax.json.*;
 
 import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.shapes.Alias.alias;
+import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;

@@ -30,7 +30,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Group.group;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
@@ -54,10 +53,6 @@ public final class Optimizer extends Shape.Probe<Shape> {
 		return shape;
 	}
 
-
-	@Override public Shape visit(final Group group) {
-		return group(group.getShape().accept(this));
-	}
 
 	@Override public Shape visit(final Trait trait) {
 
@@ -105,8 +100,8 @@ public final class Optimizer extends Shape.Probe<Shape> {
 
 		}.merge(flatten(and.getShapes(), And::and, new Shape.Probe<Stream<Shape>>() {
 
-			@Override public Stream<Shape> visit(final And conjunction) {
-				return conjunction.getShapes().stream();
+			@Override public Stream<Shape> visit(final And and) {
+				return and.getShapes().stream();
 			}
 
 			@Override protected Stream<Shape> fallback(final Shape shape) {
@@ -136,8 +131,8 @@ public final class Optimizer extends Shape.Probe<Shape> {
 				return Stream.of(shape);
 			}
 
-			@Override public Stream<Shape> visit(final Or disjunction) {
-				return disjunction.getShapes().stream();
+			@Override public Stream<Shape> visit(final Or or) {
+				return or.getShapes().stream();
 			}
 
 		}));

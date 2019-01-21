@@ -277,11 +277,6 @@ abstract class SPARQL { // ! refactor
 		}
 
 
-		@Override public Stream<Statement> visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
-
 		@Override public Stream<Statement> visit(final Trait trait) {
 
 			final Step step=trait.getStep();
@@ -337,11 +332,6 @@ abstract class SPARQL { // ! refactor
 
 		private FilterProbe(final Shape source) {
 			this.source=source;
-		}
-
-
-		@Override public Object visit(final Group group) {
-			return group.getShape().accept(this);
 		}
 
 
@@ -453,11 +443,6 @@ abstract class SPARQL { // ! refactor
 			this.shape=shape;
 		}
 
-
-		@Override public Object visit(final Group group) {
-			return group.getShape().accept(this);
-
-		}
 
 		@Override public Object visit(final Trait trait) {
 

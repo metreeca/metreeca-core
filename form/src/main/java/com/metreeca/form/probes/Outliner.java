@@ -70,10 +70,6 @@ public final class Outliner extends Shape.Probe<Set<Statement>> { // !!! review/
 	@Override protected Set<Statement> fallback(final Shape shape) { return set(); }
 
 
-	@Override public Set<Statement> visit(final Group group) {
-		return group.getShape().accept(this);
-	}
-
 	@Override public Set<Statement> visit(final Clazz clazz) {
 
 		final Set<Statement> statements=new LinkedHashSet<>();

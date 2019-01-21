@@ -89,10 +89,6 @@ public final class MaxCount implements Shape {
 		private static final BinaryOperator<Integer> max=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) >= 0 ? x : y;
 
 
-		@Override public Integer visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
 		@Override public Integer visit(final MaxCount maxCount) {
 			return maxCount.getLimit();
 		}

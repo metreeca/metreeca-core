@@ -35,7 +35,6 @@ import java.util.regex.Matcher;
 
 import javax.json.JsonException;
 
-import static com.metreeca.form.shapes.Alias.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -44,6 +43,7 @@ import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.MaxLength.maxLength;
+import static com.metreeca.form.shapes.Meta.aliases;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
@@ -77,7 +77,6 @@ import static java.util.stream.Collectors.toList;
 
 
 	/**
-	 *
 	 * Parses a JSON object encoding a query.
 	 *
 	 * @param json the JSON object encodinf a shape-driven linked data query

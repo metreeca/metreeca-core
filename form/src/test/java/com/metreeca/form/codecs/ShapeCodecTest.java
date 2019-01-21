@@ -31,19 +31,15 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.metreeca.form.shapes.Alias.alias;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
-import static com.metreeca.form.shapes.Default.dflt;
-import static com.metreeca.form.shapes.Group.group;
 import static com.metreeca.form.shapes.Like.like;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
-import static com.metreeca.form.shapes.Notes.notes;
+import static com.metreeca.form.shapes.Meta.*;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Placeholder.placeholder;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
 
@@ -55,12 +51,12 @@ final class ShapeCodecTest {
 	@Test void testAnnotations() {
 
 		assertCoded("alias", alias("alias"));
-		assertCoded("label", Label.label("label"));
+		assertCoded("label", label("label"));
 		assertCoded("notes", notes("notes"));
 		assertCoded("placeholder", placeholder("placeholder"));
 		assertCoded("default", dflt(Values.literal("default")));
-		assertCoded("default", Hint.hint(RDF.NIL));
-		assertCoded("group", group(MinCount.minCount(10)));
+		assertCoded("default", hint(RDF.NIL));
+		assertCoded("group", group(RDF.NIL));
 
 	}
 

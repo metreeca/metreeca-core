@@ -131,11 +131,6 @@ public final class Trait implements Shape {
 		@Override protected Map<Step, Shape> fallback(final Shape shape) { return map(); }
 
 
-		@Override public Map<Step, Shape> visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
-
 		@Override public Map<Step, Shape> visit(final Trait trait) {
 			return singletonMap(trait.getStep(), trait.getShape());
 		}

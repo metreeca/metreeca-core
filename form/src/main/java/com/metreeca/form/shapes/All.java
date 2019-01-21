@@ -109,10 +109,6 @@ public final class All implements Shape {
 
 	private static final class UniversalProbe extends Probe<Set<Value>> {
 
-		@Override public Set<Value> visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
 		@Override public Set<Value> visit(final All all) {
 			return all.getValues();
 		}

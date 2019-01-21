@@ -404,10 +404,6 @@ public final class Processor implements Wrapper {
 			return Stream.concat(test.getPass().accept(this), test.getFail().accept(this));
 		}
 
-		@Override public Stream<Statement> visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
 	}
 
 }

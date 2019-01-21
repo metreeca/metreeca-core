@@ -18,9 +18,7 @@
 package com.metreeca.form.codecs;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Alias;
 import com.metreeca.form.shapes.All;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
@@ -43,7 +41,9 @@ import java.math.BigInteger;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.ValuesTest.decode;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -182,24 +182,26 @@ final class JSONParserTest extends JSONAdapterTest {
 		assertThat((Object)decode("[] rdf:value [] .")).as("inverse inferred").isEqualTo(rdf(
 				blank(field("valueOf", blank())),
 				null,
-				trait(Step.step(RDF.VALUE, true))
+				trait(step(RDF.VALUE, true))
 		));
 
 		assertThat((Object)decode("[] rdf:value [] .")).as("user-defined").isEqualTo(rdf(
 				blank(field("alias", blank())),
 				null,
-				trait(RDF.VALUE, Alias.alias("alias"))
+				trait(RDF.VALUE, alias("alias"))
 		));
 
 	}
 
 	@Test void testParseAliasedNestedTraits() {
 
-		assertThat((Object)decode("[] rdf:value [rdf:value []] .")).as("aliased nested trait").isEqualTo(rdf(
+		assertThat(rdf(
 				blank(field("value", blank(field("alias", blank())))),
 				null,
-				trait(RDF.VALUE, trait(Step.step(RDF.VALUE), Alias.alias("alias")))
-		));
+				trait(RDF.VALUE, trait(step(RDF.VALUE), alias("alias")))
+		))
+				.as("aliased nested trait")
+				.isEqualTo(decode("[] rdf:value [rdf:value []] ."));
 
 	}
 
@@ -265,7 +267,7 @@ final class JSONParserTest extends JSONAdapterTest {
 						))
 				),
 				null,
-				trait(Step.step(RDF.VALUE, true))
+				trait(step(RDF.VALUE, true))
 		));
 	}
 
@@ -273,7 +275,7 @@ final class JSONParserTest extends JSONAdapterTest {
 		assertThat((Object)decode("[] rdf:value [] .")).as("blank reverse links").isEqualTo(rdf(
 				blank(field("valueOf", blank())),
 				null,
-				trait(Step.step(RDF.VALUE, true))
+				trait(step(RDF.VALUE, true))
 		));
 	}
 

@@ -84,6 +84,9 @@ public final class ShapeCodec {
 	private Resource shape(final Shape shape, final Collection<Statement> model) {
 		return shape.accept(new Shape.Probe<Resource>() {
 
+			@Override public Resource visit(final Meta meta) { return meta(meta, model); }
+
+
 			@Override public Resource visit(final Datatype datatype) { return datatype(datatype, model); }
 
 			@Override public Resource visit(final Clazz clazz) { return clazz(clazz, model); }
@@ -136,25 +139,6 @@ public final class ShapeCodec {
 			@Override public Resource visit(final When when) { return when(when, model); }
 
 
-			@Override public Resource visit(final Alias alias) {
-				return alias(alias, model);
-			}
-
-			@Override public Resource visit(final Label label) { return label(label, model); }
-
-			@Override public Resource visit(final Notes notes) { return notes(notes, model); }
-
-			@Override public Resource visit(final Placeholder placeholder) { return placeholder(placeholder, model); }
-
-			@Override public Resource visit(final Default dflt) { return dflt(dflt, model); }
-
-			@Override public Resource visit(final Hint hint) { return hint(hint, model); }
-
-			@Override public Resource visit(final Group group) {
-				return group(group, model);
-			}
-
-
 			@Override protected Resource fallback(final Shape shape) {
 				throw new UnsupportedOperationException("unsupported shape ["+shape+"]");
 			}
@@ -166,7 +150,9 @@ public final class ShapeCodec {
 
 		final Set<Value> types=types(root, model);
 
-		return types.contains(Form.Datatype) ? datatype(root, model)
+		return types.contains(Form.Meta) ? meta(root, model)
+
+				:types.contains(Form.Datatype) ? datatype(root, model)
 				: types.contains(Form.Class) ? clazz(root, model)
 				: types.contains(Form.MinExclusive) ? minExclusive(root, model)
 				: types.contains(Form.MaxExclusive) ? maxExclusive(root, model)
@@ -197,15 +183,7 @@ public final class ShapeCodec {
 				: types.contains(Form.Test) ? test(root, model)
 				: types.contains(Form.When) ? when(root, model)
 
-				: types.contains(Form.Alias) ? alias(root, model)
-				: types.contains(Form.Label) ? label(root, model)
-				: types.contains(Form.Notes) ? notes(root, model)
-				: types.contains(Form.Placeholder) ? placeholder(root, model)
-				: types.contains(Form.Default) ? dflt(root, model)
-				: types.contains(Form.Hint) ? hint(root, model)
-				: types.contains(Form.Group) ? group(root, model)
-
-				: types.contains(Form.create) ? create(root, model)
+				:  types.contains(Form.create) ? create(root, model)
 				: types.contains(Form.relate) ? relate(root, model)
 				: types.contains(Form.update) ? update(root, model)
 				: types.contains(Form.delete) ? delete(root, model)
@@ -220,6 +198,22 @@ public final class ShapeCodec {
 				: types.contains(Form.filter) ? filter(root, model)
 
 				: error("unknown shape type "+types);
+	}
+
+
+	private Resource meta(final Meta meta, final Collection<Statement> model) {
+
+		final Resource node=bnode();
+
+		model.add(statement(node, RDF.TYPE, Form.Meta));
+		model.add(statement(node, Form.iri, meta.getIRI()));
+		model.add(statement(node, Form.value, meta.getValue()));
+
+		return node;
+	}
+
+	private Shape meta(final Resource root, final Collection<Statement> model) {
+		return Meta.meta(iri(root, Form.iri, model), value(root, Form.value, model));
 	}
 
 
@@ -586,112 +580,6 @@ public final class ShapeCodec {
 				iri(root, Form.iri, model),
 				values(resource(root, Form.values, model), model)
 		);
-	}
-
-
-	private Resource alias(final Alias alias, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Alias));
-		model.add(statement(node, Form.text, Values.literal(alias.getText())));
-
-		return node;
-	}
-
-	private Shape alias(final Resource root, final Collection<Statement> model) {
-		return Alias.alias(literal(root, Form.text, model).stringValue());
-	}
-
-
-	private Resource label(final Label label, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Label));
-		model.add(statement(node, Form.text, Values.literal(label.getText())));
-
-		return node;
-	}
-
-	private Shape label(final Resource root, final Collection<Statement> model) {
-		return Label.label(literal(root, Form.text, model).stringValue());
-	}
-
-
-	private Resource notes(final Notes notes, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Notes));
-		model.add(statement(node, Form.text, Values.literal(notes.getText())));
-
-		return node;
-	}
-
-	private Shape notes(final Resource root, final Collection<Statement> model) {
-		return Notes.notes(literal(root, Form.text, model).stringValue());
-	}
-
-
-	private Resource placeholder(final Placeholder placeholder, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Placeholder));
-		model.add(statement(node, Form.text, Values.literal(placeholder.getText())));
-
-		return node;
-	}
-
-	private Shape placeholder(final Resource root, final Collection<Statement> model) {
-		return Placeholder.placeholder(literal(root, Form.text, model).stringValue());
-	}
-
-
-	private Resource dflt(final Default dflt, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Default));
-		model.add(statement(node, Form.value, dflt.getValue()));
-
-		return node;
-	}
-
-	private Shape dflt(final Resource root, final Collection<Statement> model) {
-		return Default.dflt(value(root, Form.value, model));
-	}
-
-
-	private Resource hint(final Hint hint, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Hint));
-		model.add(statement(node, Form.iri, hint.getIRI()));
-
-		return node;
-	}
-
-	private Shape hint(final Resource root, final Collection<Statement> model) {
-		return Hint.hint(iri(root, Form.iri, model));
-	}
-
-
-	private Resource group(final Group group, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Group));
-		model.add(statement(node, Form.shape, shape(group.getShape(), model)));
-
-
-		return node;
-	}
-
-	private Shape group(final Resource root, final Collection<Statement> model) {
-		return Group.group(shape(resource(root, Form.shape, model), model));
 	}
 
 

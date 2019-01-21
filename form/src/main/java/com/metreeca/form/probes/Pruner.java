@@ -24,6 +24,9 @@ import com.metreeca.form.shifts.Step;
 
 import java.util.List;
 
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.Trait.trait;
 
 import static java.util.stream.Collectors.toList;
@@ -37,13 +40,9 @@ import static java.util.stream.Collectors.toList;
 public final class Pruner extends Shape.Probe<Shape> {
 
 	@Override protected Shape fallback(final Shape shape) {
-		return And.and();
+		return and();
 	}
 
-
-	@Override public Shape visit(final Group group) {
-		return group.getShape().accept(this);
-	}
 
 	@Override public Shape visit(final MinCount minCount) { return minCount; }
 
@@ -79,7 +78,7 @@ public final class Pruner extends Shape.Probe<Shape> {
 		final Step step=trait.getStep();
 		final Shape shape=trait.getShape().accept(this);
 
-		return shape.equals(And.and()) ? And.and() : trait(step, shape);
+		return shape.equals(and()) ? and() : trait(step, shape);
 	}
 
 	@Override public Shape visit(final Virtual virtual) {
@@ -90,7 +89,7 @@ public final class Pruner extends Shape.Probe<Shape> {
 		final Step step=trait.getStep();
 		final Shape shape=trait.getShape().accept(this);
 
-		return shape.equals(And.and()) ? And.and() : Virtual.virtual(trait(step, shape), shift);
+		return shape.equals(and()) ? and() : Virtual.virtual(trait(step, shape), shift);
 	}
 
 
@@ -98,24 +97,28 @@ public final class Pruner extends Shape.Probe<Shape> {
 
 		final List<Shape> shapes=and.getShapes().stream()
 				.map(shape -> shape.accept(this))
-				.filter(shape -> !shape.equals(And.and()))
+				.filter(shape -> !shape.equals(and()))
 				.collect(toList());
 
-		return shapes.isEmpty() ? And.and() : And.and(shapes);
+		return shapes.isEmpty() ? and() : and(shapes);
 	}
 
 	@Override public Shape visit(final Or or) {
 
 		final List<Shape> shapes=or.getShapes().stream()
 				.map(shape -> shape.accept(this))
-				.filter(shape -> !shape.equals(And.and()))
+				.filter(shape -> !shape.equals(and()))
 				.collect(toList());
 
-		return shapes.isEmpty() ? And.and() : Or.or(shapes);
+		return shapes.isEmpty() ? and() : or(shapes);
 	}
 
 	@Override public Shape visit(final Test test) {
-		return Test.test(test.getTest(), test.getPass().accept(this), test.getFail().accept(this));
+		return test(
+				test.getTest(),
+				test.getPass().accept(this),
+				test.getFail().accept(this)
+		);
 	}
 
 }

@@ -23,6 +23,7 @@ import com.metreeca.form.things.Values;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -111,10 +112,6 @@ public final class Datatype implements Shape {
 
 	private static final class DatatypeProbe extends Probe<IRI> {
 
-		@Override public IRI visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
 		@Override public IRI visit(final Datatype datatype) {
 			return datatype.getIRI();
 		}
@@ -123,7 +120,7 @@ public final class Datatype implements Shape {
 
 			final Set<IRI> iris=and.getShapes().stream()
 					.map(shape -> shape.accept(this))
-					.filter(iri -> iri != null)
+					.filter(Objects::nonNull)
 					.collect(toSet());
 
 			return iris.size() == 1 ? iris.iterator().next() : null;

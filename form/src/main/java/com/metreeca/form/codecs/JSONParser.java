@@ -22,7 +22,6 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.shapes.Alias;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
@@ -50,6 +49,7 @@ import javax.json.stream.JsonParsingException;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Meta.aliases;
 import static com.metreeca.form.shapes.Trait.traits;
 import static com.metreeca.form.shifts.Step.step;
 
@@ -363,7 +363,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 			} else if ( shape != null ) {
 
-				final Map<String, Step> aliases=Alias.aliases(shape, JSONCodec.Reserved)
+				final Map<String, Step> aliases=aliases(shape, JSONCodec.Reserved)
 						.entrySet().stream()
 						.collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 

@@ -30,8 +30,66 @@ public final class Form {
 	public static final String Namespace="app://form.metreeca.com/terms#";
 
 
+	//// Shape Metadata ////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Alias annotation.
+	 *
+	 * <p>The associated {@code xsd:string} value provides an alternate short property name for reporting values for
+	 * the enclosing shape (e.g. in the context of JSON-based RDF serialization results).</p>
+	 */
+	public static final IRI Alias=iri(Namespace, "alias");
+
+	/**
+	 * Label annotation.
+	 *
+	 * <p>The associated {@code xsd:string} value provides a human-readable textual label for the enclosing shape.</p>
+	 */
+	public static final IRI Label=iri(Namespace, "label");
+
+	/**
+	 * Textual annotation.
+	 *
+	 * <p>The associated {@code xsd:string} value provides a human-readable textual description for the enclosing
+	 * shape.</p>
+	 */
+	public static final IRI Notes=iri(Namespace, "notes");
+
+	/**
+	 * Placeholder annotation.
+	 *
+	 * <p>The associated {@code xsd:string} value provides a human-readable textual placeholder for the expected values
+	 * of the enclosing shape.</p>
+	 */
+	public static final IRI Placeholder=iri(Namespace, "placeholder");
+
+	/**
+	 * Default value annotation.
+	 *
+	 * <p>The associated RDF value provides the default for the expected values of enclosing shape.</p>
+	 */
+	public static final IRI Default=iri(Namespace, "default");
+
+	/**
+	 * Hint annotation.
+	 *
+	 * <p>The associated IRI identifies a resource hinting at possible values for the enclosing shape (e.g. an LDP
+	 * container).</p>
+	 */
+	public static final IRI Hint=iri(Namespace, "hint");
+
+	/**
+	 * Group annotation.
+	 *
+	 * <p>Identifies the enclosing shape as a group for presentation purposes; the associated value provides a
+	 * client-dependent suggested representation mode (list, form, tabbed panes, …).</p>
+	 */
+	public static final IRI Group=iri(Namespace, "group"); // !!! define standard representations hints
+
+
 	//// Shape Types ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static final IRI Meta=iri(Namespace, "Meta");
 	public static final IRI Datatype=iri(Namespace, "Datatype");
 	public static final IRI Class=iri(Namespace, "Class");
 	public static final IRI MinExclusive=iri(Namespace, "MinExclusive");
@@ -56,14 +114,6 @@ public final class Form {
 	public static final IRI Or=iri(Namespace, "Or");
 	public static final IRI Test=iri(Namespace, "Test");
 	public static final IRI When=iri(Namespace, "When");
-
-	public static final IRI Alias=iri(Namespace, "Alias");
-	public static final IRI Label=iri(Namespace, "Label");
-	public static final IRI Notes=iri(Namespace, "Notes");
-	public static final IRI Placeholder=iri(Namespace, "Placeholder");
-	public static final IRI Default=iri(Namespace, "Default");
-	public static final IRI Hint=iri(Namespace, "Hint");
-	public static final IRI Group=iri(Namespace, "Group");
 
 
 	//// Shape Shorthands ////////////////////////////////////////////////////////////////////////////////// !!! remove?
@@ -149,7 +199,10 @@ public final class Form {
 	public static final IRI verify=iri(Namespace, "verify");
 	public static final IRI filter=iri(Namespace, "filter");
 
-	public static final IRI any=iri(Namespace, "any"); // wildcard axis value
+	/**
+	 * Wildcard axis value.
+	 */
+	public static final IRI any=iri(Namespace, "any");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -192,7 +192,9 @@ final class RewriterTest {
 				.accept(response -> {
 
 					response.body(rdf()).use(
-							model -> assertThat(singleton(external("s", "p", "o"))).as("response rdf rewritten").isIsomorphicTo(model),
+							model -> assertThat(singleton(external("s", "p", "o")))
+									.as("response rdf rewritten")
+									.isIsomorphicTo(model),
 							error -> fail("missing RDF payload")
 					);
 
