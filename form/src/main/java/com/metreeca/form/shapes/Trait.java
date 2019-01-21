@@ -25,7 +25,7 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
-import static com.metreeca.form.Shape.only;
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.Lists.list;
@@ -49,7 +49,7 @@ public final class Trait implements Shape {
 	}
 
 	public static Trait trait(final IRI iri, final Value... values) {
-		return trait(step(iri), only(values));
+		return trait(step(iri), all(values));
 	}
 
 	public static Trait trait(final IRI iri, final Shape shape) {
