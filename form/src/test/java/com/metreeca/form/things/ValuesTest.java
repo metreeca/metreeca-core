@@ -48,7 +48,7 @@ import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Option.condition;
+import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Values.integer;
@@ -94,7 +94,7 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
-	public static final Shape Employee=Option.condition(
+	public static final Shape Employee=Option.option(
 
 			or(
 
@@ -116,7 +116,7 @@ public final class ValuesTest {
 									trait(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
 									trait(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
 							),
-							Option.condition(when(Form.role, Manager), and(
+							Option.option(when(Form.role, Manager), and(
 
 									trait(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
 											minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),

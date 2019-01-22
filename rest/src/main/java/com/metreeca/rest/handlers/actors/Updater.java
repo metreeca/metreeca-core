@@ -44,7 +44,7 @@ import javax.json.JsonValue;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Option.condition;
+import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -216,7 +216,7 @@ public final class Updater extends Actor<Updater> {
 					}
 
 					@Override public Shape probe(final Option option) {
-						return condition(
+						return option(
 								option.getTest(),
 								option.getPass().map(this),
 								option.getFail().map(this)
@@ -256,7 +256,7 @@ public final class Updater extends Actor<Updater> {
 					}
 
 					@Override public Shape probe(final Option option) {
-						return condition(
+						return option(
 								option.getTest(),
 								option.getPass().map(this),
 								option.getFail().map(this)

@@ -30,7 +30,7 @@ import java.util.Set;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Option.condition;
+import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
 
@@ -100,7 +100,7 @@ public final class Redactor extends Traverser<Shape> {
 	}
 
 	@Override public Shape probe(final Option option) {
-		return condition(
+		return option(
 				option.getTest().map(this),
 				option.getPass().map(this),
 				option.getFail().map(this)

@@ -35,7 +35,7 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Option.condition;
+import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.literal;
 
@@ -118,7 +118,7 @@ public final class Inferencer extends Visitor<Shape> {
 	}
 
 	@Override public Shape probe(final Option option) {
-		return condition(
+		return option(
 				option.getTest().map(this),
 				option.getPass().map(this),
 				option.getFail().map(this)

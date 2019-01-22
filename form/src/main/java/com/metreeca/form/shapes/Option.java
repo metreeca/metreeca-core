@@ -31,11 +31,11 @@ import static com.metreeca.form.things.Strings.indent;
  */
 public final class Option implements Shape {
 
-	public static Option condition(final Shape test, final Shape pass) {
+	public static Option option(final Shape test, final Shape pass) {
 		return new Option(test, pass, and());
 	}
 
-	public static Option condition(final Shape test, final Shape pass, final Shape fail) {
+	public static Option option(final Shape test, final Shape pass, final Shape fail) {
 		return new Option(test, pass, fail);
 	}
 

@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Trait.traits;
 import static com.metreeca.form.shapes.Virtual.virtual;
@@ -56,6 +58,7 @@ final class TraitTest {
 
 	}
 
+
 	@Test void testInspectConjunctions() {
 
 		final Trait x=trait(RDF.VALUE, and());
@@ -76,6 +79,49 @@ final class TraitTest {
 				));
 
 	}
+
+	@Test void testInspectDisjunctions() {
+
+		final Trait x=trait(RDF.VALUE, and());
+		final Trait y=trait(RDF.TYPE, and());
+		final Trait z=trait(RDF.TYPE, maxCount(1));
+
+		assertThat(traits(or(x, y)))
+				.as("union trait map")
+				.isEqualTo(map(
+						entry(x.getStep(), x.getShape()),
+						entry(y.getStep(), y.getShape())
+				));
+
+		assertThat(traits(or(y, z)))
+				.as("merged trait map")
+				.isEqualTo(map(
+						entry(y.getStep(), and(y.getShape(), z.getShape()))
+				));
+
+	}
+
+	@Test void testInspectOptions() {
+
+		final Trait x=trait(RDF.VALUE, and());
+		final Trait y=trait(RDF.TYPE, and());
+		final Trait z=trait(RDF.TYPE, maxCount(1));
+
+		assertThat(traits(option(and(), x, y)))
+				.as("union trait map")
+				.isEqualTo(map(
+						entry(x.getStep(), x.getShape()),
+						entry(y.getStep(), y.getShape())
+				));
+
+		assertThat(traits(option(or(), y, z)))
+				.as("merged trait map")
+				.isEqualTo(map(
+						entry(y.getStep(), and(y.getShape(), z.getShape()))
+				));
+
+	}
+
 
 	@Test void testInspectOtherShapes() {
 		assertThat(traits(and())).as("no traits").isEmpty();

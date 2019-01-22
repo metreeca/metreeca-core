@@ -190,7 +190,7 @@ public interface Shape {
 
 	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
 		return shapes.isEmpty() ? when(variable, values)
-				: Option.condition(when(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+				: Option.option(when(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}
 
 

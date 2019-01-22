@@ -47,7 +47,7 @@ import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Option.condition;
+import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.shapes.When.when;
@@ -342,7 +342,7 @@ public final class Rewriter implements Wrapper {
 			}
 
 			@Override public Option probe(final Option option) {
-				return condition(rewrite(option.getTest()), rewrite(option.getPass()), rewrite(option.getFail()));
+				return option(rewrite(option.getTest()), rewrite(option.getPass()), rewrite(option.getFail()));
 			}
 
 		}

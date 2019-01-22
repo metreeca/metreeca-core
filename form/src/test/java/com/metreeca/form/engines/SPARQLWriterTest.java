@@ -460,7 +460,7 @@ final class SPARQLWriterTest {
 
 	@Test void testValidateOption() {
 
-		final Shape shape=Option.condition(any(Values.literal(1)), any(Values.literal(2)), any(Values.literal(3)));
+		final Shape shape=Option.option(any(Values.literal(1)), any(Values.literal(2)), any(Values.literal(3)));
 
 		assertThat(validate(shape, Values.literal(1), Values.literal(2))).as("true / pass").isTrue();
 		assertThat(validate(shape, Values.literal(1), Values.literal(3))).as("true / fail").isFalse();

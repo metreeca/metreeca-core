@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Option.condition;
+import static com.metreeca.form.shapes.Option.option;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -96,7 +96,7 @@ final class PrunerTest {
 		assertThat((Object)and()).as("dead").isEqualTo(prune(or(or())));
 
 		// test shape is not pruned
-		assertThat((Object)condition(or(), maxCount(1), and())).as("live").isEqualTo(prune(condition(or(), maxCount(1), or())));
+		assertThat((Object)option(or(), maxCount(1), and())).as("live").isEqualTo(prune(option(or(), maxCount(1), or())));
 
 	}
 

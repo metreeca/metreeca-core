@@ -37,7 +37,7 @@ import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Meta.hint;
-import static com.metreeca.form.shapes.Option.condition;
+import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.literal;
@@ -127,8 +127,8 @@ final class InferencerTest {
 
 	@Test void testOption() {
 		assertImplies("nested shapes are expanded",
-				condition(clazz(RDF.NIL), clazz(RDF.NIL), clazz(RDF.NIL)), datatype(Values.ResoureType),
-				(s, i) -> condition(and(s.getTest(), i), and(s.getPass(), i), and(s.getFail(), i)));
+				option(clazz(RDF.NIL), clazz(RDF.NIL), clazz(RDF.NIL)), datatype(Values.ResoureType),
+				(s, i) -> option(and(s.getTest(), i), and(s.getPass(), i), and(s.getFail(), i)));
 	}
 
 

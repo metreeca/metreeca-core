@@ -556,7 +556,7 @@ public final class ShapeCodec {
 	}
 
 	private Shape test(final Resource root, final Collection<Statement> model) {
-		return Option.condition(
+		return Option.option(
 				shape(resource(root, Form.test, model), model),
 				shape(resource(root, Form.pass, model), model),
 				shape(resource(root, Form.fail, model), model)
