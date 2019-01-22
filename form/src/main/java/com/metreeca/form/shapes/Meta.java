@@ -30,8 +30,10 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.literal;
 
 import static java.util.Collections.emptyMap;
@@ -82,6 +84,14 @@ public final class Meta implements Shape {
 		return new Meta(label, value);
 	}
 
+
+	public static Map<IRI, Value> metas(final Shape shape) {
+		return shape == null ? emptyMap() : shape.map(new MetaProbe()).collect(toMap(
+				Map.Entry::getKey,
+				Map.Entry::getValue,
+				(x, y) -> Objects.equals(x, y) ? x : null
+		));
+	}
 
 
 	public static Map<Step, String> aliases(final Shape shape) {
@@ -166,6 +176,42 @@ public final class Meta implements Shape {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class MetaProbe extends Traverser<Stream<Map.Entry<IRI, Value>>> {
+
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final Shape shape) {
+			return Stream.empty();
+		}
+
+
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final Meta meta) {
+			return Stream.of(entry(meta.getIRI(), meta.getValue()));
+		}
+
+
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final Trait trait) {
+			return Stream.empty();
+		}
+
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final Virtual virtual) {
+			return Stream.empty();
+		}
+
+
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final And and) {
+			return and.getShapes().stream().flatMap(s -> s.map(this));
+		}
+
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final Or or) {
+			return or.getShapes().stream().flatMap(s -> s.map(this));
+		}
+
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final Option option) {
+			return Stream.of(option.getPass(), option.getFail()).flatMap(s -> s.map(this));
+		}
+
+	}
+
 
 	private abstract static class AliasesProbe extends Traverser<Map<Step, String>> {
 
@@ -278,7 +324,7 @@ public final class Meta implements Shape {
 	private static final class AliasProbe extends Traverser<String> {
 
 		@Override public String probe(final Meta meta) {
-			return meta.getIRI().equals(Form.Alias)? meta.getValue().stringValue() : null;
+			return meta.getIRI().equals(Form.Alias) ? meta.getValue().stringValue() : null;
 		}
 
 		@Override public String probe(final Trait trait) { return null; }

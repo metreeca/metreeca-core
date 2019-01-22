@@ -17,21 +17,25 @@
 
 package com.metreeca.form.shapes;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Meta.alias;
-import static com.metreeca.form.shapes.Meta.aliases;
+import static com.metreeca.form.shapes.Meta.*;
+import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.Values.literal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,10 +45,108 @@ import static java.util.Collections.singletonMap;
 
 final class MetaTest {
 
-	private final Step Value=step(RDF.VALUE);
+	@Nested final class MetasTest {
 
+		@Test void testCollectMetadataFromAnnotationShapes() {
+			assertThat(metas(label("label")))
+					.as("collected from metadata")
+					.containsOnly(
+							entry(Form.Label, literal("label"))
+					);
+		}
+
+		@Test void testCollectMetadataFromLogicalShapes() {
+
+			assertThat(metas(and(
+					label("label"),
+					notes("notes")
+			)))
+					.as("collected from conjunctions")
+					.containsOnly(
+							entry(Form.Label, literal("label")),
+							entry(Form.Notes, literal("notes"))
+					);
+
+			assertThat(metas(or(
+					label("label"),
+					notes("notes")
+			)))
+					.as("collected from disjunctions")
+					.containsOnly(
+							entry(Form.Label, literal("label")),
+							entry(Form.Notes, literal("notes"))
+					);
+
+			assertThat(metas(option(
+					pass(),
+					label("label"),
+					notes("notes")
+			)))
+					.as("collected from option")
+					.containsOnly(
+							entry(Form.Label, literal("label")),
+							entry(Form.Notes, literal("notes"))
+					);
+		}
+
+		@Test void testCollectMetadataFromNestedLogicalShapes() {
+
+			assertThat(metas(and(
+					and(
+							label("label"),
+							notes("notes")
+					),
+					or(
+							alias("alias"),
+							placeholder("placeholder")
+					)
+			)))
+					.as("collected from nested logical shapes")
+					.containsOnly(
+							entry(Form.Label, literal("label")),
+							entry(Form.Notes, literal("notes")),
+							entry(Form.Alias, literal("alias")),
+							entry(Form.Placeholder, literal("placeholder"))
+					);
+
+		}
+
+
+		@Test void testCollectDuplicateMetadata() {
+			assertThat(metas(and(
+					label("label"),
+					label("label")
+			))).containsOnly(
+					entry(Form.Label, literal("label"))
+			);
+		}
+
+		@Test void testIgnoreConflictingMetadata() {
+			assertThat(metas(and(
+					label("label"),
+					label("other")
+			))).isEmpty();
+		}
+
+
+		@Test void testIgnoreMetadataFromStructuralShapes() {
+
+			assertThat(metas(trait(RDF.VALUE, trait(RDF.VALUE, label("label")))))
+					.as("ignored in traits")
+					.isEmpty();
+
+			assertThat(metas(virtual(trait(RDF.VALUE, trait(RDF.VALUE, label("label"))), step(RDF.NIL))))
+					.as("ignored in virtuals")
+					.isEmpty();
+
+		}
+
+	}
 
 	@Nested final class AliasTest {
+
+		private final Step Value=step(RDF.VALUE);
+
 
 		@Test void testGuessAliasFromIRI() {
 
