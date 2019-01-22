@@ -17,9 +17,7 @@
 
 package com.metreeca.form.engines;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Pruner;
 import com.metreeca.form.queries.Edges;
@@ -100,7 +98,7 @@ final class SPARQLReader {
 	private Map<Resource, Collection<Statement>> edges(final Edges edges) {
 
 		final Shape shape=edges.getShape();
-		final List<Query.Order> orders=edges.getOrders();
+		final List<Order> orders=edges.getOrders();
 		final int offset=edges.getOffset();
 		final int limit=edges.getLimit();
 

@@ -17,9 +17,7 @@
 
 package com.metreeca.form.engines;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -45,8 +43,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.metreeca.form.Query.decreasing;
-import static com.metreeca.form.Query.increasing;
+import static com.metreeca.form.Order.decreasing;
+import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
@@ -578,7 +576,7 @@ final class SPARQLReaderTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map<Resource, Collection<Statement>> edges(final Shape shape, final Query.Order... orders) {
+	private Map<Resource, Collection<Statement>> edges(final Shape shape, final Order... orders) {
 		return process(new Edges(shape, list(orders), 0, 0));
 	}
 

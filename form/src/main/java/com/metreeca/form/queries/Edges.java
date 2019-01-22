@@ -17,6 +17,7 @@
 
 package com.metreeca.form.queries;
 
+import com.metreeca.form.Order;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 

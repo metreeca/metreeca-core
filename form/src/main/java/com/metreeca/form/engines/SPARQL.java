@@ -17,9 +17,7 @@
 
 package com.metreeca.form.engines;
 
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
+import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Pruner;
 import com.metreeca.form.probes.Traverser;
@@ -111,7 +109,7 @@ abstract class SPARQL { // ! refactor
 				.collect(toList());
 	}
 
-	protected Object filter(final Shape shape, final Collection<Query.Order> orders, final int offset, final int limit) {
+	protected Object filter(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
 
 		final Object root=term(shape);
 
@@ -150,13 +148,13 @@ abstract class SPARQL { // ! refactor
 		return shape.map(new FilterProbe(shape));
 	}
 
-	protected Object sorters(final Object root, final Collection<Query.Order> orders) {
+	protected Object sorters(final Object root, final Collection<Order> orders) {
 		return orders.stream()
 				.filter(order -> !order.getPath().isEmpty()) // root already included
 				.map(order -> list(" optional { ", root, path(order.getPath()), var(id(order)), " }\n"));
 	}
 
-	protected Object criteria(final Object root, final Collection<Query.Order> orders) {
+	protected Object criteria(final Object root, final Collection<Order> orders) {
 		return Stream.concat(
 
 				orders.stream().map(order -> list(order.isInverse() ? "desc" : "asc",

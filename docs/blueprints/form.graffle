@@ -205,7 +205,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-01-22 09:18:01 +0000</string>
+	<string>2019-01-22 10:28:59 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro Bollini</string>
 	<key>MovementHandleVisible</key>
@@ -15769,13 +15769,13 @@ path:List&lt;Edge&gt;}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
-{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+{\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\b\fs16 \cf0 Graph}</string>
+\f0\b\fs16 \cf0 Edges}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -15821,7 +15821,7 @@ path:List&lt;Edge&gt;}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -16032,7 +16032,7 @@ limit:int}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{327.12707184612771, 254.67643585184533}, {13, 21}}</string>
+					<string>{{327.28572596537583, 254.67643585184533}, {13, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16078,7 +16078,7 @@ limit:int}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -16121,19 +16121,19 @@ limit:int}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{256.7923387959317, 165.0258002658789}</string>
+								<string>{257.35433275333537, 167.52579986692837}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{299.7298387959317, 165.0258002658789}</string>
+								<string>{300.29183275333537, 167.52579986692837}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{299.7298387959317, 265.17643585184533}</string>
+								<string>{300.29183275333537, 265.17643585184533}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -16151,7 +16151,7 @@ limit:int}</string>
 					<real>43.253105163574219</real>
 					<key>Points</key>
 					<array>
-						<string>{256.7923387959317, 165.0258002658789}</string>
+						<string>{257.35433275333537, 167.52579986692837}</string>
 						<string>{343.29854553092099, 265.17643585184533}</string>
 					</array>
 					<key>Style</key>
@@ -16192,7 +16192,7 @@ limit:int}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{341.83072173486198, 142.77578142384993}, {13, 21}}</string>
+					<string>{{341.92849559021994, 142.7757813544429}, {13, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16238,7 +16238,7 @@ limit:int}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -16279,7 +16279,7 @@ limit:int}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{256.79233879593164, 153.27580026587887}</string>
+								<string>{257.35433275333543, 153.27579986692834}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -16297,7 +16297,7 @@ limit:int}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{256.79233879593164, 153.27580026587887}</string>
+						<string>{257.35433275333543, 153.27579986692834}</string>
 						<string>{367.61000518950073, 153.27577745545105}</string>
 					</array>
 					<key>Style</key>
@@ -16728,7 +16728,7 @@ traits:Map&lt;Shift, T&gt;}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{224.79233879593164, 129.77580026587887}, {32, 15}}</string>
+							<string>{{225.35433275333537, 124.77579986692834}, {32, 25}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -16765,20 +16765,20 @@ traits:Map&lt;Shift, T&gt;}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
-{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+{\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\b\fs16 \cf0 Trace}</string>
+\f0\b\fs16 \cf0 Report}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{224.79233879593164, 144.77580026587887}, {32, 16}}</string>
+							<string>{{225.35433275333537, 149.77579986692834}, {32, 16}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -16822,7 +16822,7 @@ traits:Map&lt;Shift, T&gt;}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{224.79233879593164, 160.77580026587887}, {32, 16}}</string>
+							<string>{{225.35433275333537, 165.77579986692834}, {32, 16}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -16976,7 +16976,7 @@ traits:Map&lt;Shift, T&gt;}</string>
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>1</integer>
+		<integer>4</integer>
 		<key>Frame</key>
 		<string>{{0, 0}, {1440, 853}}</string>
 		<key>ShowInfo</key>
@@ -16988,7 +16988,7 @@ traits:Map&lt;Shift, T&gt;}</string>
 		<key>Sidebar_Tab</key>
 		<integer>0</integer>
 		<key>VisibleRegion</key>
-		<string>{{-19.999999999999996, 0}, {847.24867724867727, 536}}</string>
+		<string>{{0, -8.0000000000000409}, {806, 553.07112970711285}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
 			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>

@@ -17,6 +17,7 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Order;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
@@ -113,21 +114,21 @@ final class QueryParserTest {
 
 	@Test void testParseSortingCriteria() {
 
-		edges("{ \"order\": \"\" }", shape, edges -> assertThat(Lists.list(Query.increasing())).as("empty path").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"\" }", shape, edges -> assertThat(Lists.list(Order.increasing())).as("empty path").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"+\" }", shape, edges -> assertThat(Lists.list(Query.increasing())).as("empty path increasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"+\" }", shape, edges -> assertThat(Lists.list(Order.increasing())).as("empty path increasing").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"-\" }", shape, edges -> assertThat(Lists.list(Query.decreasing())).as("empty path decreasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"-\" }", shape, edges -> assertThat(Lists.list(Order.decreasing())).as("empty path decreasing").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"first.rest\" }", shape, edges -> assertThat(Lists.list(Query.increasing(first, rest))).as("path").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"first.rest\" }", shape, edges -> assertThat(Lists.list(Order.increasing(first, rest))).as("path").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"+first.rest\" }", shape, edges -> assertThat(Lists.list(Query.increasing(first, rest))).as("path increasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"+first.rest\" }", shape, edges -> assertThat(Lists.list(Order.increasing(first, rest))).as("path increasing").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"-first.rest\" }", shape, edges -> assertThat(Lists.list(Query.decreasing(first, rest))).as("path decreasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"-first.rest\" }", shape, edges -> assertThat(Lists.list(Order.decreasing(first, rest))).as("path decreasing").isEqualTo(edges.getOrders()));
 
 		edges("{ \"order\": [] }", shape, edges -> assertThat(Lists.list()).as("empty list").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": [\"+first\", \"-first.rest\"] }", shape, edges -> assertThat(Lists.list(Query.increasing(first), Query.decreasing(first, rest))).as("list").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": [\"+first\", \"-first.rest\"] }", shape, edges -> assertThat(Lists.list(Order.increasing(first), Order.decreasing(first, rest))).as("list").isEqualTo(edges.getOrders()));
 
 	}
 
