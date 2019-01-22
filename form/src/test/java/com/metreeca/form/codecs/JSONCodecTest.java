@@ -33,7 +33,7 @@ import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.format;
 
 
-public abstract class JSONAdapterTest {
+public abstract class JSONCodecTest {
 
 	protected static final String value="http://www.w3.org/1999/02/22-rdf-syntax-ns#value";
 

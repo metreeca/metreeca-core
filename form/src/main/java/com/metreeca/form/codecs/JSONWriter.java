@@ -41,7 +41,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static com.metreeca.form.Shape.mode;
-import static com.metreeca.form.shapes.Meta.aliases;
+import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.traits;

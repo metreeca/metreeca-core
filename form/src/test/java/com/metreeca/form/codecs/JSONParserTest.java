@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
-final class JSONParserTest extends JSONAdapterTest {
+final class JSONParserTest extends JSONCodecTest {
 
 	@Test void testReportRDFParseException() {
 		assertThatExceptionOfType(RDFParseException.class).isThrownBy(() ->

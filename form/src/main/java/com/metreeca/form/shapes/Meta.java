@@ -20,28 +20,20 @@ package com.metreeca.form.shapes;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Traverser;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Maps;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.literal;
 
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -91,28 +83,6 @@ public final class Meta implements Shape {
 				Map.Entry::getValue,
 				(x, y) -> Objects.equals(x, y) ? x : null
 		));
-	}
-
-
-	public static Map<Step, String> aliases(final Shape shape) {
-		return aliases(shape, emptySet());
-	}
-
-	public static Map<Step, String> aliases(final Shape shape, final Collection<String> reserved) {
-
-		if ( reserved == null ) {
-			throw new NullPointerException("null reserved");
-		}
-
-		if ( shape == null ) { return emptyMap(); } else {
-
-			final Map<Step, String> aliases=new LinkedHashMap<>();
-
-			aliases.putAll(shape.map(new SystemAliasesProbe(reserved)));
-			aliases.putAll(shape.map(new UserAliasesProbe(reserved)));
-
-			return aliases;
-		}
 	}
 
 
@@ -208,153 +178,6 @@ public final class Meta implements Shape {
 
 		@Override public Stream<Map.Entry<IRI, Value>> probe(final Option option) {
 			return Stream.of(option.getPass(), option.getFail()).flatMap(s -> s.map(this));
-		}
-
-	}
-
-
-	private abstract static class AliasesProbe extends Traverser<Map<Step, String>> {
-
-		@Override public Map<Step, String> probe(final Shape shape) { return Maps.map(); }
-
-
-		@Override public Map<Step, String> probe(final Virtual virtual) {
-			return virtual.getTrait().map(this);
-		}
-
-
-		@Override public Map<Step, String> probe(final And and) {
-			return aliases(and.getShapes());
-		}
-
-		@Override public Map<Step, String> probe(final Or or) {
-			return aliases(or.getShapes());
-		}
-
-		@Override public Map<Step, String> probe(final Option option) {
-			return aliases(list(option.getPass(), option.getFail()));
-		}
-
-
-		private Map<Step, String> aliases(final Collection<Shape> shapes) {
-			return shapes.stream()
-
-					// collect edge-to-alias mappings from nested shapes
-
-					.flatMap(shape -> shape.map(this).entrySet().stream())
-
-					// remove duplicate mappings
-
-					.distinct()
-
-					// group by edge and remove edges mapped to multiple aliases
-
-					.collect(groupingBy(Map.Entry::getKey)).values().stream()
-					.filter(group -> group.size() == 1)
-					.map(group -> group.get(0))
-
-					// group by alias and remove aliases mapped from multiple edges
-
-					.collect(groupingBy(Map.Entry::getValue)).values().stream()
-					.filter(group -> group.size() == 1)
-					.map(group -> group.get(0))
-
-					// collect non-clashing mappings
-
-					.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-		}
-
-	}
-
-
-	private static final class SystemAliasesProbe extends AliasesProbe {
-
-		private static final java.util.regex.Pattern NamedIRIPattern=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
-
-
-		private final Collection<String> reserved;
-
-
-		private SystemAliasesProbe(final Collection<String> reserved) {
-			this.reserved=reserved;
-		}
-
-
-		@Override public Map<Step, String> probe(final Trait trait) {
-
-			final Step step=trait.getStep();
-
-			return Optional
-					.of(NamedIRIPattern.matcher(step.getIRI().stringValue()))
-					.filter(Matcher::find)
-					.map(matcher -> matcher.group("name"))
-					.map(name -> step.isInverse() ? name+"Of" : name)
-					.filter(alias -> !reserved.contains(alias))
-					.map(alias -> singletonMap(step, alias))
-					.orElse(emptyMap());
-		}
-
-	}
-
-	private static final class UserAliasesProbe extends AliasesProbe {
-
-		private final Collection<String> reserved;
-
-
-		private UserAliasesProbe(final Collection<String> reserved) {
-			this.reserved=reserved;
-		}
-
-
-		@Override public Map<Step, String> probe(final Trait trait) {
-
-			final Step step=trait.getStep();
-			final Shape shape=trait.getShape();
-
-			return Optional
-					.ofNullable(shape.map(new AliasProbe()))
-					.filter(alias -> !reserved.contains(alias))
-					.map(alias -> singletonMap(step, alias))
-					.orElse(emptyMap());
-		}
-
-	}
-
-
-	private static final class AliasProbe extends Traverser<String> {
-
-		@Override public String probe(final Meta meta) {
-			return meta.getIRI().equals(Form.Alias) ? meta.getValue().stringValue() : null;
-		}
-
-		@Override public String probe(final Trait trait) { return null; }
-
-		@Override public String probe(final Virtual virtual) { return null; }
-
-
-		@Override public String probe(final And and) {
-			return alias(and.getShapes());
-		}
-
-		@Override public String probe(final Or or) {
-			return alias(or.getShapes());
-		}
-
-		@Override public String probe(final Option option) {
-			return alias(list(option.getPass(), option.getFail()));
-		}
-
-
-		private String alias(final Collection<Shape> shapes) {
-			return Optional
-					.of(shapes.stream()
-							.map(shape -> shape.map(this))
-							.filter(alias -> alias != null && !alias.isEmpty())
-							.collect(toSet())
-					)
-					.filter(aliases -> aliases.size() == 1)
-					.map(aliases -> aliases.iterator().next())
-					.orElse(null);
 		}
 
 	}

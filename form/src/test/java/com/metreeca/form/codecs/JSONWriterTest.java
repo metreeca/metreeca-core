@@ -48,7 +48,7 @@ import static com.metreeca.form.shapes.Trait.trait;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class JSONWriterTest extends JSONAdapterTest {
+final class JSONWriterTest extends JSONCodecTest {
 
 	//// Objects ///////////////////////////////////////////////////////////////////////////////////////////////////////
 

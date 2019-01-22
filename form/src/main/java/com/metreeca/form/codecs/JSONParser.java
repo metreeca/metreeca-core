@@ -49,7 +49,7 @@ import javax.json.stream.JsonParsingException;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Meta.aliases;
+import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.Trait.traits;
 import static com.metreeca.form.shifts.Step.step;
 
