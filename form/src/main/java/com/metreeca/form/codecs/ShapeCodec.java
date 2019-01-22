@@ -23,6 +23,7 @@ import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Count;
 import com.metreeca.form.shifts.Step;
+import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -634,18 +635,20 @@ public final class ShapeCodec {
 	//// Shifts ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Resource shift(final Shift shift, final Collection<Statement> model) {
-		return shift.accept(new Shift.Probe<Resource>() {
+		return shift.map(new Shift.Probe<Resource>() {
 
-			@Override protected Resource fallback(final Shift shift) {
-				throw new UnsupportedOperationException("unsupported shift ["+shift+"]");
-			}
-
-
-			@Override public Resource visit(final Step step) {
+			@Override public Resource probe(final Step step) {
 				return step(step, model);
 			}
 
-			@Override public Resource visit(final Count count) { return count(count, model); }
+			@Override public Resource probe(final Table table) { return probe((Shift)table); }
+
+			@Override public Resource probe(final Count count) { return count(count, model); }
+
+
+			private Resource probe(final Shift shift) {
+				throw new UnsupportedOperationException("unsupported shift ["+shift.getClass().getName()+"]");
+			}
 
 		});
 	}

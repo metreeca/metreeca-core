@@ -19,7 +19,9 @@ package com.metreeca.form.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
+import com.metreeca.form.shifts.Count;
 import com.metreeca.form.shifts.Step;
+import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Sets;
 
@@ -379,7 +381,7 @@ final class SPARQLWriter {
 
 				// compute the new focus set expanding the trait shift from the focus value
 
-				final Set<Value> focus=step.accept(new FocusProbe(value));
+				final Set<Value> focus=step.map(new FocusProbe(value));
 
 				// validate the trait shape on the new focus set
 
@@ -441,7 +443,7 @@ final class SPARQLWriter {
 	/**
 	 * Expands a source value into a focus value set applying a shift operator.
 	 */
-	private final class FocusProbe extends Shift.Probe<Set<Value>> {
+	private final class FocusProbe implements Shift.Probe<Set<Value>> {
 
 		private final Value source;
 
@@ -451,12 +453,8 @@ final class SPARQLWriter {
 		}
 
 
-		@Override protected Set<Value> fallback(final Shift shift) {
-			throw new UnsupportedOperationException("unsupported shift type ["+shift.getClass().getName()+"]");
-		}
 
-
-		@Override public Set<Value> visit(final Step step) {
+		@Override public Set<Value> probe(final Step step) {
 
 			final Set<Value> values=new HashSet<>();
 
@@ -477,6 +475,15 @@ final class SPARQLWriter {
 			}
 
 			return values;
+		}
+
+		@Override public Set<Value> probe(final Table table) { return probe((Shift)table); }
+
+		@Override public Set<Value> probe(final Count count) { return probe((Shift)count); }
+
+
+		private Set<Value> probe(final Shift shift) {
+			throw new UnsupportedOperationException("unsupported shift ["+shift.getClass().getName()+"]");
 		}
 
 	}

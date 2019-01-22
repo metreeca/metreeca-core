@@ -19,6 +19,7 @@ package com.metreeca.form.shifts;
 
 import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.Trait;
+import com.metreeca.form.things.Maps;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,7 +33,7 @@ import static java.util.stream.Collectors.joining;
 public final class Table implements Shift {
 
 	@SafeVarargs public static Table table(final Map.Entry<Trait, Shift>... fields) {
-		return table(map(fields));
+		return table(Maps.map(fields));
 	}
 
 	public static Table table(final Map<Trait, Shift> fields) {
@@ -73,13 +74,13 @@ public final class Table implements Shift {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 

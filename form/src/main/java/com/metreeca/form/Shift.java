@@ -27,23 +27,25 @@ import com.metreeca.form.shifts.Table;
  */
 public interface Shift {
 
-	public <V> V accept(final Probe<V> probe);
+	public <V> V map(final Probe<V> probe);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public abstract static class Probe<V> {
+	/**
+	 * Shift probe.
+	 *
+	 * <p>Generates a result by probing shifts.</p>
+	 *
+	 * @param <V> the type of the generated result value
+	 */
+	public static interface Probe<V> {
 
-		public V visit(final Step step) { return fallback(step); }
+		public V probe(final Step step);
 
-		public V visit(final Count count) { return fallback(count); }
+		public V probe(final Table table);
 
-		public V visit(final Table table) { return fallback(table); }
-
-
-		protected V fallback(final Shift shift) {
-			return null;
-		}
+		public V probe(final Count count);
 
 	}
 

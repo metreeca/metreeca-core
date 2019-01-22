@@ -216,7 +216,7 @@ public final class Rewriter implements Wrapper {
 		}
 
 		private Shift rewrite(final Shift shift) {
-			return shift.accept(shifts);
+			return shift.map(shifts);
 		}
 
 
@@ -325,7 +325,7 @@ public final class Rewriter implements Wrapper {
 
 
 			@Override public Trait probe(final Trait trait) {
-				return trait(shifts.visit(trait.getStep()), rewrite(trait.getShape()));
+				return trait(shifts.probe(trait.getStep()), rewrite(trait.getShape()));
 			}
 
 			@Override public Virtual probe(final Virtual virtual) {
@@ -347,25 +347,21 @@ public final class Rewriter implements Wrapper {
 
 		}
 
-		private final class ShiftEngine extends Shift.Probe<Shift> {
+		private final class ShiftEngine implements Shift.Probe<Shift> {
 
-			@Override public Step visit(final Step step) {
+			@Override public Step probe(final Step step) {
 				return step(rewrite(step.getIRI()), step.isInverse());
 			}
 
-			@Override public Count visit(final Count count) {
-				return count(count.getShift().accept(this));
-			}
-
-			@Override public Table visit(final Table table) {
+			@Override public Table probe(final Table table) {
 				return table(table.getFields().entrySet().stream().collect(toMap(
 						entry -> shapes.probe(entry.getKey()),
 						entry -> rewrite(entry.getValue())
 				)));
 			}
 
-			@Override protected Shift fallback(final Shift shift) {
-				return shift;
+			@Override public Count probe(final Count count) {
+				return count(count.getShift().map(this));
 			}
 
 		}

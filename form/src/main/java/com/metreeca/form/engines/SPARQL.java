@@ -26,6 +26,7 @@ import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Count;
 import com.metreeca.form.shifts.Step;
+import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -222,25 +223,31 @@ abstract class SPARQL { // ! refactor
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private boolean isAggregate(final Shift shift) {
-		return shift.accept(new Shift.Probe<Boolean>() {
+		return shift.map(new Shift.Probe<Boolean>() {
 
-			@Override protected Boolean fallback(final Shift shift) { return false; }
+			@Override public Boolean probe(final Step step) { return false; }
 
-			@Override public Boolean visit(final Count count) { return true; }
+			@Override public Boolean probe(final Count count) { return true; }
+
+			@Override public Boolean probe(final Table table) { return false; }
 
 		});
 	}
 
 
 	private Object projection(final Shift source, final Object target) {
-		return list(" (", source.accept(new Shift.Probe<Object>() {
+		return list(" (", source.map(new Shift.Probe<Object>() {
 
-			@Override public Object visit(final Count count) {
-				return list(" count(distinct ", var(id(source)), ")");
+			@Override public Object probe(final Step step) {
+				return var(id(source));
 			}
 
-			@Override protected Object fallback(final Shift shift) {
+			@Override public Object probe(final Table table) {
 				return var(id(source));
+			}
+
+			@Override public Object probe(final Count count) {
+				return list(" count(distinct ", var(id(source)), ")");
 			}
 
 		}), " as", target, ")");
@@ -251,15 +258,19 @@ abstract class SPARQL { // ! refactor
 	}
 
 	private Object shift(final Shift shift, final boolean required, final Object source, final Object target) {
-		return shift.accept(new Shift.Probe<Object>() {
+		return shift.map(new Shift.Probe<Object>() {
 
-			@Override public Object visit(final Step step) {
+			@Override public Object probe(final Step step) {
 				return required ? edge(source, step, target)
 						: list("\foptional {\f", edge(source, step, target), "\f}\f");
 			}
 
-			@Override public Object visit(final Count count) {
-				return count.getShift().accept(this);
+			@Override public Object probe(final Table table) {
+				return null;
+			}
+
+			@Override public Object probe(final Count count) {
+				return count.getShift().map(this);
 			}
 
 		});
