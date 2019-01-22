@@ -23,12 +23,14 @@ import com.metreeca.form.shifts.Step;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shifts.Step.step;
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.map;
 
 import static java.util.Collections.emptyMap;
@@ -141,20 +143,20 @@ public final class Trait implements Shape {
 
 
 		@Override public Map<Step, Shape> visit(final And and) {
-			return traits(and.getShapes());
+			return traits(and.getShapes().stream());
 		}
 
 		@Override public Map<Step, Shape> visit(final Or or) {
-			return traits(or.getShapes());
+			return traits(or.getShapes().stream());
 		}
 
 		@Override public Map<Step, Shape> visit(final Option option) {
-			return traits(list(option.getPass(), option.getFail()));
+			return traits(Stream.of(option.getPass(), option.getFail()));
 		}
 
 
-		private Map<Step, Shape> traits(final Collection<Shape> shapes) {
-			return shapes.stream()
+		private Map<Step, Shape> traits(final Stream<Shape> stream) {
+			return stream
 
 					// collect step-to-shape mappings from nested shapes
 

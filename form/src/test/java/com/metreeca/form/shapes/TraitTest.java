@@ -17,8 +17,6 @@
 
 package com.metreeca.form.shapes;
 
-import com.metreeca.form.shifts.Step;
-
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +25,7 @@ import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Trait.traits;
 import static com.metreeca.form.shapes.Virtual.virtual;
+import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 
@@ -41,15 +40,19 @@ final class TraitTest {
 
 		final Trait trait=trait(RDF.VALUE, and());
 
-		assertThat(singletonMap(trait.getStep(), trait.getShape())).as("singleton trait map").isEqualTo(traits(trait));
+		assertThat(traits(trait))
+				.as("singleton trait map")
+				.isEqualTo(singletonMap(trait.getStep(), trait.getShape()));
 
 	}
 
 	@Test void testInspectVirtuals() {
 
-		final Virtual virtual=virtual(trait(RDF.VALUE), Step.step(RDF.NIL));
+		final Virtual virtual=virtual(trait(RDF.VALUE), step(RDF.NIL));
 
-		assertThat((Object)traits(virtual.getTrait())).as("singleton trait map").isEqualTo(traits(virtual));
+		assertThat(traits(virtual))
+				.as("singleton trait map")
+				.isEqualTo(traits(virtual.getTrait()));
 
 	}
 
@@ -59,19 +62,23 @@ final class TraitTest {
 		final Trait y=trait(RDF.TYPE, and());
 		final Trait z=trait(RDF.TYPE, maxCount(1));
 
-		assertThat(map(
-				entry(x.getStep(), x.getShape()),
-				entry(y.getStep(), y.getShape())
-		)).as("union trait map").isEqualTo(traits(and(x, y)));
+		assertThat(traits(and(x, y)))
+				.as("union trait map")
+				.isEqualTo(map(
+						entry(x.getStep(), x.getShape()),
+						entry(y.getStep(), y.getShape())
+				));
 
-		assertThat(map(
-				entry(y.getStep(), and(y.getShape(), z.getShape()))
-		)).as("merged trait map").isEqualTo(traits(and(y, z)));
+		assertThat(traits(and(y, z)))
+				.as("merged trait map")
+				.isEqualTo(map(
+						entry(y.getStep(), and(y.getShape(), z.getShape()))
+				));
 
 	}
 
 	@Test void testInspectOtherShapes() {
-		assertThat(traits(and()).isEmpty()).as("no traits").isTrue();
+		assertThat(traits(and())).as("no traits").isEmpty();
 	}
 
 }
