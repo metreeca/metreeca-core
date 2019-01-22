@@ -43,10 +43,28 @@ public interface Query {
 	}
 
 
-	public <V> V accept(final Probe<V> probe);
+	public <V> V map(final Probe<V> probe);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Query probe.
+	 *
+	 * <p>Generates a result by probing queries.</p>
+	 *
+	 * @param <V> the type of the generated result value
+	 */
+	public static interface Probe<V> {
+
+		public V probe(final Edges edges);
+
+		public V probe(final Stats stats);
+
+		public V probe(final Items items);
+
+	}
+
 
 	public static final class Order {
 
@@ -102,21 +120,6 @@ public interface Query {
 			}
 
 			return builder.insert(0, inverse ? "-" : "+").toString();
-		}
-
-	}
-
-	public abstract static class Probe<V> {
-
-		public V visit(final Edges edges) { return fallback(edges); }
-
-		public V visit(final Stats stats) { return fallback(stats); }
-
-		public V visit(final Items items) { return fallback(items); }
-
-
-		protected V fallback(final Query query) {
-			throw new UnsupportedOperationException("unsupported query type ["+query.getClass().getName()+"]");
 		}
 
 	}

@@ -251,40 +251,69 @@ final class QueryParserTest {
 
 	private void edges(final String json, final Shape shape, final Consumer<Edges> tester) {
 		test(json, shape, new Query.Probe<Boolean>() {
-			@Override public Boolean visit(final Edges edges) {
+
+			@Override public Boolean probe(final Edges edges) {
 
 				tester.accept(edges);
 
 				return true;
 			}
+
+			@Override public Boolean probe(final Stats stats) {
+				return false;
+			}
+
+			@Override public Boolean probe(final Items items) {
+				return false;
+			}
+
 		});
 	}
 
 	private void stats(final String json, final Shape shape, final Consumer<Stats> tester) {
 		test(json, shape, new Query.Probe<Boolean>() {
-			@Override public Boolean visit(final Stats stats) {
+
+			@Override public Boolean probe(final Edges edges) {
+				return false;
+			}
+
+			@Override public Boolean probe(final Stats stats) {
 
 				tester.accept(stats);
 
 				return true;
+			}
+
+			@Override public Boolean probe(final Items items) {
+				return false;
 			}
 		});
 	}
 
 	private void items(final String json, final Shape shape, final Consumer<Items> tester) {
 		test(json, shape, new Query.Probe<Boolean>() {
-			@Override public Boolean visit(final Items items) {
+
+			@Override public Boolean probe(final Edges edges) {
+				return false;
+			}
+
+			@Override public Boolean probe(final Stats stats) {
+				return false;
+			}
+
+			@Override public Boolean probe(final Items items) {
 
 				tester.accept(items);
 
 				return true;
 			}
+
 		});
 	}
 
 
 	private void test(final String json, final Shape shape, final Query.Probe<Boolean> probe) {
-		assertThat(new QueryParser(shape).parse(json).accept(probe)).as("query processed").isTrue();
+		assertThat(new QueryParser(shape).parse(json).map(probe)).as("query processed").isTrue();
 	}
 
 	private Shape filter(final Shape shape, final Shape filter) {

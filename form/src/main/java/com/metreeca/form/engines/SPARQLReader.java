@@ -83,13 +83,13 @@ final class SPARQLReader {
 			throw new NullPointerException("null query");
 		}
 
-		return query.accept(new Query.Probe<Map<Resource, Collection<Statement>>>() {
+		return query.map(new Query.Probe<Map<Resource, Collection<Statement>>>() {
 
-			@Override public Map<Resource, Collection<Statement>> visit(final Edges edges) { return edges(edges); }
+			@Override public Map<Resource, Collection<Statement>> probe(final Edges edges) { return edges(edges); }
 
-			@Override public Map<Resource, Collection<Statement>> visit(final Stats stats) { return stats(stats); }
+			@Override public Map<Resource, Collection<Statement>> probe(final Stats stats) { return stats(stats); }
 
-			@Override public Map<Resource, Collection<Statement>> visit(final Items items) { return items(items); }
+			@Override public Map<Resource, Collection<Statement>> probe(final Items items) { return items(items); }
 
 		});
 	}

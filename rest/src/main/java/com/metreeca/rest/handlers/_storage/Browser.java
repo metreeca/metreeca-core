@@ -143,15 +143,15 @@ public final class Browser extends Actor<Browser> {
 	private Responder driven(final Request request) {
 		return request.reply(response -> request.query(request.shape()).fold(
 
-				query -> query.accept(new Query.Probe<Response>() {
+				query -> query.map(new Query.Probe<Response>() {
 
-					@Override public Response visit(final Edges edges) {
+					@Override public Response probe(final Edges edges) {
 						return edges(edges, response);
 					}
 
-					@Override public Response visit(final Stats stats) { return stats(stats, response); }
+					@Override public Response probe(final Stats stats) { return stats(stats, response); }
 
-					@Override public Response visit(final Items items) { return items(items, response); }
+					@Override public Response probe(final Items items) { return items(items, response); }
 
 				}),
 

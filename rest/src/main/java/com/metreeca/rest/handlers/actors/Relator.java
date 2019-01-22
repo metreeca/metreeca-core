@@ -153,19 +153,19 @@ public final class Relator extends Actor<Relator> {
 
 			} else {
 
-				return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
+				return response.status(Response.OK).map(r -> query.map(new Query.Probe<Response>() { // !!! factor
 
-					@Override public Response visit(final Edges edges) {
+					@Override public Response probe(final Edges edges) {
 						return r.shape(shape.map(mode(Form.verify))) // hide filtering constraints
 								.body(rdf(), model);
 					}
 
-					@Override public Response visit(final Stats stats) {
+					@Override public Response probe(final Stats stats) {
 						return r.shape(StatsShape)
 								.body(rdf(), rewrite(model, Form.meta, focus));
 					}
 
-					@Override public Response visit(final Items items) {
+					@Override public Response probe(final Items items) {
 						return r.shape(ItemsShape)
 								.body(rdf(), rewrite(model, Form.meta, focus));
 					}
