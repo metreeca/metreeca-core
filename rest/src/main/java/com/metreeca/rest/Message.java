@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.Value;
@@ -57,7 +57,7 @@ public abstract class Message<T extends Message<T>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape=wild();
+	private Shape shape=Shape.pass();
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
@@ -328,7 +328,7 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the linked data shape.
 	 *
-	 * @return the linked data shape associated to this message; defaults to the {@linkplain Shape#wild() wildcard} shape
+	 * @return the linked data shape associated to this message; defaults to the {@linkplain Shape#pass() wildcard} shape
 	 */
 	public Shape shape() {
 		return shape;

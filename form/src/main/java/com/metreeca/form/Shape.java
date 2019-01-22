@@ -48,35 +48,40 @@ import static java.util.Arrays.asList;
  */
 public interface Shape {
 
-	public static final Shape Wild=and(); // !!! replace with wildcard?
-	public static final Shape Empty=or();
+	public static final Shape Pass=and();
+	public static final Shape Fail=or();
 
 
-	public static Shape wild() {
-		return Wild;
+	public static Shape pass() {
+		return Pass;
 	}
 
-	public static boolean wild(final Shape shape) {
+	public static boolean pass(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		return wild().equals(shape);
+		return Pass.equals(shape);
 	}
 
 
-	public static Shape empty() {
-		return Empty;
+	public static Shape fail() {
+		return Fail;
 	}
+
+	public static boolean fail(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return Fail.equals(shape);
+	}
+
 
 	public static boolean empty(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return empty().equals(shape);
+		return pass(shape) || fail(shape);
 	}
 
 

@@ -45,7 +45,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Values.*;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
@@ -336,7 +336,7 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> Collection<Statement> trim(final Value focus, final Shape shape, final Model model) {
-		return wild(shape) ? model : shape // !!! migrate wildcard handling to Trimmer
+		return pass(shape) ? model : shape // !!! migrate wildcard handling to Trimmer
 				.map(new Trimmer(model, singleton(focus)))
 				.collect(toList());
 	}

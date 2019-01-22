@@ -20,6 +20,7 @@ package com.metreeca.form.engines;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Report;
+import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -30,7 +31,7 @@ import java.util.Collection;
 
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Report.report;
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Structures.cell;
 
 import static java.util.stream.Collectors.toList;
@@ -170,7 +171,7 @@ public final class CellEngine {
 				.collect(toList());
 
 		return outliers.isEmpty() ? report() : report(outliers.stream()
-				.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier, wild()))
+				.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier, Shape.pass()))
 				.collect(toList()));
 
 	}

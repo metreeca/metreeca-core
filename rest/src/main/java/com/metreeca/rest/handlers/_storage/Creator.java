@@ -203,7 +203,7 @@ public final class Creator extends Actor<Creator> {
 				final Shape shape=request.shape();
 				final Collection<Statement> rewritten=trace(rewrite(model, source, target));
 
-				final Report report=wild(shape)
+				final Report report=pass(shape)
 						? new CellEngine(connection).create(target, rewritten)
 						: new SPARQLEngine(connection).create(target, shape, rewritten);
 

@@ -42,7 +42,7 @@ import java.util.function.BiFunction;
 import javax.json.JsonValue;
 
 import static com.metreeca.form.Shape.mode;
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
@@ -143,7 +143,7 @@ public final class Updater extends Actor<Updater> {
 				final Shape shape=resource(request.shape());
 				final Collection<Statement> update=trace(expand(focus, shape, model));
 
-				final Report report=wild(shape)
+				final Report report=pass(shape)
 						? new CellEngine(connection).update(focus, update)
 						: new SPARQLEngine(connection).update(focus, shape, update);
 

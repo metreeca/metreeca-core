@@ -287,7 +287,7 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 
 			final Shape shape=request.shape();
 
-			if ( wild(shape) ) {
+			if ( pass(shape) ) {
 
 				return !roles.isEmpty() && disjoint(roles, request.roles()) ?
 						refused(request) : handler.handle(request);
@@ -301,8 +301,8 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 				final Shape authorized=redacted
 						.map(role(roles(request)));
 
-				return wild(redacted) || empty(redacted) ? forbidden(request)
-						: wild(authorized) || empty(authorized) ? refused(request)
+				return empty(redacted) ? forbidden(request)
+						: empty(authorized) ? refused(request)
 						: handler.handle(request.shape(authorized));
 
 			}

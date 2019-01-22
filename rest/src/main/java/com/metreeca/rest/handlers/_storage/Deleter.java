@@ -28,7 +28,7 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -94,7 +94,7 @@ public final class Deleter extends Actor<Deleter> {
 
 			} else {
 
-				if ( wild(shape) ) {
+				if ( pass(shape) ) {
 					new CellEngine(connection).delete(focus);
 				} else {
 					new SPARQLEngine(connection).delete(focus, shape);

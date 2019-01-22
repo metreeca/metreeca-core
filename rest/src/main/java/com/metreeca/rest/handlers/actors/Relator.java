@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.function.BiFunction;
 
 import static com.metreeca.form.Shape.mode;
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.All.all;
@@ -90,7 +90,7 @@ public final class Relator extends Actor<Relator> {
 	public Relator() {
 		delegate(action(Form.relate, Form.detail).wrap((Request request) -> (
 
-				wild(request.shape()) ? direct(request) : driven(request))
+				pass(request.shape()) ? direct(request) : driven(request))
 
 				.map(response -> response.success() ?
 

@@ -168,7 +168,7 @@ public final class Driver implements Wrapper {
 								.map(new Inferencer())
 								.map(new Optimizer());
 
-						if ( !wild(spec) ) {
+						if ( !pass(spec) ) {
 							model.add(statement(specs, task, codec.encode(spec, model)));
 						}
 

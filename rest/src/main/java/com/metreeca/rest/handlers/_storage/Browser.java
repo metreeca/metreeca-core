@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.form.Shape.optional;
 import static com.metreeca.form.Shape.verify;
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.And.and;
@@ -107,7 +107,7 @@ public final class Browser extends Actor<Browser> {
 	public Browser() {
 		delegate(action(Form.relate, Form.digest).wrap((Request request) -> (
 
-				wild(request.shape()) ? direct(request) : driven(request))
+				pass(request.shape()) ? direct(request) : driven(request))
 
 				.map(response -> response.headers("+Link",
 
