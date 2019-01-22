@@ -19,7 +19,9 @@ package com.metreeca.form;
 
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.probes.Visitor;
 import com.metreeca.form.shapes.*;
+import com.metreeca.form.things.Maps;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -34,10 +36,8 @@ import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Option.condition;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 
 import static java.util.Arrays.asList;
@@ -218,11 +218,11 @@ public interface Shape {
 
 
 	public static Probe<Shape> probe(final IRI variable, final Set<? extends Value> values) {
-		return new Probe<Shape>() {
-			@Override protected Shape fallback(final Shape shape) {
+		return new Visitor<Shape>() {
+			@Override public Shape probe(final Shape shape) {
 				return shape
-						.accept(new Redactor(map(entry(variable, values))))
-						.accept(new Optimizer());
+						.map(new Redactor(Maps.map(entry(variable, values))))
+						.map(new Optimizer());
 			}
 		};
 	}
@@ -230,80 +230,82 @@ public interface Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public <V> V accept(final Probe<V> probe);
+	public <V> V map(final Probe<V> probe);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public abstract static class Probe<V> {
+	/**
+	 * Shape probe.
+	 *
+	 * <p>Generates a result by probing shapes.</p>
+	 *
+	 * @param <V> the type of the generated result value
+	 */
+	public static interface Probe<V> {
 
 		//// Annotations ///////////////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final Meta meta) { return fallback(meta); }
+		public V probe(final Meta meta);
+
+		public V probe(final When when);
 
 
 		//// Term Constraints //////////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final Datatype datatype) { return fallback(datatype); }
+		public V probe(final Datatype datatype);
 
-		public V visit(final Clazz clazz) { return fallback(clazz); }
-
-
-		public V visit(final MinExclusive minExclusive) { return fallback(minExclusive); }
-
-		public V visit(final MaxExclusive maxExclusive) { return fallback(maxExclusive); }
-
-		public V visit(final MinInclusive minInclusive) { return fallback(minInclusive); }
-
-		public V visit(final MaxInclusive maxInclusive) { return fallback(maxInclusive); }
+		public V probe(final Clazz clazz);
 
 
-		public V visit(final MinLength minLength) { return fallback(minLength); }
+		public V probe(final MinExclusive minExclusive);
 
-		public V visit(final MaxLength maxLength) { return fallback(maxLength); }
+		public V probe(final MaxExclusive maxExclusive);
 
-		public V visit(final Pattern pattern) { return fallback(pattern); }
+		public V probe(final MinInclusive minInclusive);
 
-		public V visit(final Like like) { return fallback(like); }
+		public V probe(final MaxInclusive maxInclusive);
 
 
-		public V visit(final Custom custom) { return fallback(custom); }
+		public V probe(final MinLength minLength);
+
+		public V probe(final MaxLength maxLength);
+
+		public V probe(final Pattern pattern);
+
+		public V probe(final Like like);
+
+
+		public V probe(final Custom custom);
 
 
 		//// Set Constraints ///////////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final MinCount minCount) { return fallback(minCount); }
+		public V probe(final MinCount minCount);
 
-		public V visit(final MaxCount maxCount) { return fallback(maxCount); }
+		public V probe(final MaxCount maxCount);
 
-		public V visit(final In in) { return fallback(in); }
+		public V probe(final In in);
 
-		public V visit(final All all) { return fallback(all); }
+		public V probe(final All all);
 
-		public V visit(final Any any) { return fallback(any); }
+		public V probe(final Any any);
 
 
 		//// Structural Constraints ////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final Trait trait) { return fallback(trait); }
+		public V probe(final Trait trait);
 
-		public V visit(final Virtual virtual) { return fallback(virtual); }
+		public V probe(final Virtual virtual);
 
 
 		//// Logical Constraints ///////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final And and) { return fallback(and); }
+		public V probe(final And and);
 
-		public V visit(final Or or) { return fallback(or); }
+		public V probe(final Or or);
 
-		public V visit(final Option option) { return fallback(option); }
-
-		public V visit(final When when) { return fallback(when); }
-
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		protected V fallback(final Shape shape) { return null; }
+		public V probe(final Option option);
 
 	}
 

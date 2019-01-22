@@ -113,9 +113,9 @@ public final class JSONParser extends AbstractRDFParser {
 
 		final Shape driver=(shape == null) ? null : shape // infer implicit constraints to drive json shorthands
 
-				.accept(mode(Form.verify))
-				.accept(new Inferencer())
-				.accept(new Optimizer());
+				.map(mode(Form.verify))
+				.map(new Inferencer())
+				.map(new Optimizer());
 
 		if ( rdfHandler != null ) {
 			rdfHandler.startRDF();

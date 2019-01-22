@@ -18,6 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Visitor;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -61,7 +62,7 @@ public final class Datatype implements Shape {
 	}
 
 	public static Optional<IRI> datatype(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.accept(new DatatypeProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new DatatypeProbe()));
 	}
 
 
@@ -84,13 +85,13 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
@@ -110,16 +111,16 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class DatatypeProbe extends Probe<IRI> {
+	private static final class DatatypeProbe extends Visitor<IRI> {
 
-		@Override public IRI visit(final Datatype datatype) {
+		@Override public IRI probe(final Datatype datatype) {
 			return datatype.getIRI();
 		}
 
-		@Override public IRI visit(final And and) {
+		@Override public IRI probe(final And and) {
 
 			final Set<IRI> iris=and.getShapes().stream()
-					.map(shape -> shape.accept(this))
+					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());
 

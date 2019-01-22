@@ -47,32 +47,97 @@ import static java.util.stream.Collectors.*;
  *
  * <p>Recursively removes redundant and non-validating constructs from a shape.</p>
  */
-public final class Optimizer extends Shape.Probe<Shape> {
+public final class Optimizer extends Traverser<Shape> {
 
-	@Override protected Shape fallback(final Shape shape) {
+	@Override public Shape probe(final Shape shape) {
 		return shape;
 	}
 
 
-	@Override public Shape visit(final Trait trait) {
+	@Override public Shape probe(final Trait trait) {
 
 		final Step step=trait.getStep();
-		final Shape shape=trait.getShape().accept(this);
+		final Shape shape=trait.getShape().map(this);
 
 		return shape.equals(or()) ? and() : trait(step, shape);
 	}
 
-	@Override public Shape visit(final Virtual virtual) {
+	@Override public Shape probe(final Virtual virtual) {
 
 		final Trait trait=virtual.getTrait();
 		final Shift shift=virtual.getShift();
 
 		final Step step=trait.getStep();
-		final Shape shape=trait.getShape().accept(this);
+		final Shape shape=trait.getShape().map(this);
 
 		return shape.equals(or()) ? and() : virtual(trait(step, shape), shift);
 	}
 
+
+	@Override public Shape probe(final And and) {
+
+		final Collection<Shape> shapes=new Merger() {
+
+			@Override protected int minCount(final int x, final int y) { return max(x, y); }
+
+			@Override protected int maxCount(final int x, final int y) { return min(x, y); }
+
+			@Override protected IRI type(final IRI x, final IRI y) { return derives(x, y) ? y : derives(y, x) ? x : null; }
+
+		}.merge(flatten(and.getShapes(), And::and, new Visitor<Stream<Shape>>() {
+
+			@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
+
+			@Override public Stream<Shape> probe(final And and) { return and.getShapes().stream(); }
+
+		}));
+
+		return shapes.contains(or()) ? or() // always fail
+				: shapes.size() == 1 ? shapes.iterator().next()
+				: and(shapes);
+	}
+
+	@Override public Shape probe(final Or or) {
+
+		final Collection<Shape> shapes=new Merger() {
+
+			@Override protected int minCount(final int x, final int y) { return min(x, y); }
+
+			@Override protected int maxCount(final int x, final int y) { return max(x, y); }
+
+			@Override protected IRI type(final IRI x, final IRI y) { return derives(x, y) ? x : derives(y, x) ? y : null; }
+
+		}.merge(flatten(or.getShapes(), Or::or, new Visitor<Stream<Shape>>() {
+
+			@Override public Stream<Shape> probe(final Shape shape) {
+				return Stream.of(shape);
+			}
+
+			@Override public Stream<Shape> probe(final Or or) {
+				return or.getShapes().stream();
+			}
+
+		}));
+
+		return shapes.contains(and()) ? and() // always pass
+				: shapes.size() == 1 ? shapes.iterator().next()
+				: or(shapes);
+	}
+
+	@Override public Shape probe(final Option option) {
+
+		final Shape test=option.getTest().map(this);
+		final Shape pass=option.getPass().map(this);
+		final Shape fail=option.getFail().map(this);
+
+		return test.equals(and()) ? pass // always pass
+				: test.equals(or()) ? fail // always fail
+				: pass.equals(fail) ? pass // identical options
+				: condition(test, pass, fail);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static boolean derives(final IRI x, final IRI y) {
 		return x.equals(Values.ValueType)
@@ -88,87 +153,19 @@ public final class Optimizer extends Shape.Probe<Shape> {
 		return type.equals(Values.LiteralType) || !type.equals(Values.ValueType) && !resource(type);
 	}
 
-	@Override public Shape visit(final And and) {
-
-		final Collection<Shape> shapes=new Merger() {
-
-			@Override protected int minCount(final int x, final int y) { return max(x, y); }
-
-			@Override protected int maxCount(final int x, final int y) { return min(x, y); }
-
-			@Override protected IRI type(final IRI x, final IRI y) { return derives(x, y) ? y : derives(y, x) ? x : null; }
-
-		}.merge(flatten(and.getShapes(), And::and, new Shape.Probe<Stream<Shape>>() {
-
-			@Override public Stream<Shape> visit(final And and) {
-				return and.getShapes().stream();
-			}
-
-			@Override protected Stream<Shape> fallback(final Shape shape) {
-				return Stream.of(shape);
-			}
-
-		}));
-
-		return shapes.contains(or()) ? or() // always fail
-				: shapes.size() == 1 ? shapes.iterator().next()
-				: and(shapes);
-	}
-
-	@Override public Shape visit(final Or or) {
-
-		final Collection<Shape> shapes=new Merger() {
-
-			@Override protected int minCount(final int x, final int y) { return min(x, y); }
-
-			@Override protected int maxCount(final int x, final int y) { return max(x, y); }
-
-			@Override protected IRI type(final IRI x, final IRI y) { return derives(x, y) ? x : derives(y, x) ? y : null; }
-
-		}.merge(flatten(or.getShapes(), Or::or, new Shape.Probe<Stream<Shape>>() {
-
-			@Override protected Stream<Shape> fallback(final Shape shape) {
-				return Stream.of(shape);
-			}
-
-			@Override public Stream<Shape> visit(final Or or) {
-				return or.getShapes().stream();
-			}
-
-		}));
-
-		return shapes.contains(and()) ? and() // always pass
-				: shapes.size() == 1 ? shapes.iterator().next()
-				: or(shapes);
-	}
-
-	@Override public Shape visit(final Option option) {
-
-		final Shape test=option.getTest().accept(this);
-		final Shape pass=option.getPass().accept(this);
-		final Shape fail=option.getFail().accept(this);
-
-		return test.equals(and()) ? pass // always pass
-				: test.equals(or()) ? fail // always fail
-				: pass.equals(fail) ? pass // identical options
-				: condition(test, pass, fail);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Set<Shape> flatten(final Collection<Shape> collection,
 			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter) {
 
-		final Shape.Probe<Map.Entry<Step, Shape>> splitter=new Shape.Probe<Map.Entry<Step, Shape>>() {
+		final Shape.Probe<Map.Entry<Step, Shape>> splitter=new Visitor<Map.Entry<Step, Shape>>() {
 
 			private int id;
 
-			@Override protected Map.Entry<Step, Shape> fallback(final Shape shape) {
+			@Override public Map.Entry<Step, Shape> probe(final Shape shape) {
 				return entry(Step.step(iri("_:", "id"+id++)), shape); // assign non-traits a unique step
 			}
 
-			@Override public Map.Entry<Step, Shape> visit(final Trait trait) {
+			@Override public Map.Entry<Step, Shape> probe(final Trait trait) {
 				return entry(trait.getStep(), trait.getShape());
 			}
 
@@ -176,10 +173,10 @@ public final class Optimizer extends Shape.Probe<Shape> {
 
 		return collection.stream()
 
-				.map(shape -> shape.accept(this)) // optimize nested shapes
-				.flatMap(shape -> shape.accept(lifter)) // merge nested collections
+				.map(shape -> shape.map(this)) // optimize nested shapes
+				.flatMap(shape -> shape.map(lifter)) // merge nested collections
 
-				.map(shape -> shape.accept(splitter)) // split traits into Map.Entry<Step, Shape>
+				.map(shape -> shape.map(splitter)) // split traits into Map.Entry<Step, Shape>
 
 				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<Step, List<Shape>>
 						LinkedHashMap::new, mapping(Map.Entry::getValue, toList())))
@@ -190,7 +187,7 @@ public final class Optimizer extends Shape.Probe<Shape> {
 					final List<Shape> values=e.getValue();
 
 					return step.getIRI().getNamespace().equals("_:") ? values.stream()
-							: Stream.of(trait(step, packer.apply(values).accept(this)));
+							: Stream.of(trait(step, packer.apply(values).map(this)));
 
 				})
 
@@ -198,7 +195,7 @@ public final class Optimizer extends Shape.Probe<Shape> {
 	}
 
 
-	private abstract static class Merger extends Shape.Probe<Merger> {
+	private abstract static class Merger extends Visitor<Merger> {
 
 		private int minCount=-1;
 		private int maxCount=-1;
@@ -209,20 +206,16 @@ public final class Optimizer extends Shape.Probe<Shape> {
 		private final Collection<Shape> shapes=new ArrayList<>();
 
 
-		protected Collection<Shape> merge(final Iterable<Shape> shapes) {
 
-			shapes.forEach(shape -> shape.accept(this));
+		@Override public Merger probe(final Shape shape) {
 
-			if ( minCount >= 0 ) { this.shapes.add(MinCount.minCount(minCount)); }
-			if ( maxCount >= 0 ) { this.shapes.add(MaxCount.maxCount(maxCount)); }
+			shapes.add(shape);
 
-			if ( type != null ) { this.shapes.add(Datatype.datatype(type)); }
-
-			return this.shapes;
+			return this;
 		}
 
 
-		@Override public Merger visit(final MinCount minCount) {
+		@Override public Merger probe(final MinCount minCount) {
 
 			final int limit=minCount.getLimit();
 
@@ -231,7 +224,7 @@ public final class Optimizer extends Shape.Probe<Shape> {
 			return this;
 		}
 
-		@Override public Merger visit(final MaxCount maxCount) {
+		@Override public Merger probe(final MaxCount maxCount) {
 
 			final int limit=maxCount.getLimit();
 
@@ -240,7 +233,7 @@ public final class Optimizer extends Shape.Probe<Shape> {
 			return this;
 		}
 
-		@Override public Merger visit(final Datatype datatype) { // !!! refactor
+		@Override public Merger probe(final Datatype datatype) { // !!! refactor
 
 			final IRI iri=datatype.getIRI();
 
@@ -266,19 +259,25 @@ public final class Optimizer extends Shape.Probe<Shape> {
 		}
 
 
-		@Override protected Merger fallback(final Shape shape) {
-
-			shapes.add(shape);
-
-			return this;
-		}
-
 
 		protected abstract int minCount(final int x, final int y);
 
 		protected abstract int maxCount(final int x, final int y);
 
 		protected abstract IRI type(final IRI x, final IRI y);
+
+
+		protected Collection<Shape> merge(final Iterable<Shape> shapes) {
+
+			shapes.forEach(shape -> shape.map(this));
+
+			if ( minCount >= 0 ) { this.shapes.add(MinCount.minCount(minCount)); }
+			if ( maxCount >= 0 ) { this.shapes.add(MaxCount.maxCount(maxCount)); }
+
+			if ( type != null ) { this.shapes.add(Datatype.datatype(type)); }
+
+			return this.shapes;
+		}
 
 	}
 

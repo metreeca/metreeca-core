@@ -137,7 +137,7 @@ final class OptimizerTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape optimize(final Shape shape) {
-		return shape.accept(new Optimizer());
+		return shape.map(new Optimizer());
 	}
 
 }

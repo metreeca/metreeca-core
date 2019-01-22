@@ -48,25 +48,36 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Recursively expands shapes with additional implied constraints.</p>
  */
-public final class Inferencer extends Shape.Probe<Shape> {
+public final class Inferencer extends Visitor<Shape> {
 
-	@Override protected Shape fallback(final Shape shape) { return shape; }
+	@Override public Shape probe(final Shape shape) { return shape; }
 
 
-	@Override public Shape visit(final Meta meta) {
+	@Override public Shape probe(final Meta meta) {
 		return meta.getIRI().equals(Form.Hint) ? and(meta, datatype(Values.ResoureType)) : meta;
 	}
 
 
-	@Override public Shape visit(final All all) {
+	@Override public Shape probe(final Datatype datatype) {
+		return datatype.getIRI().equals(XMLSchema.BOOLEAN) ? and(datatype,
+				In.in(literal(false), literal(true)), maxCount(1)
+		) : datatype;
+	}
+
+	@Override public Shape probe(final Clazz clazz) {
+		return and(clazz, datatype(Values.ResoureType));
+	}
+
+
+	@Override public Shape probe(final All all) {
 		return and(all, minCount(all.getValues().size()));
 	}
 
-	@Override public Shape visit(final Any any) {
+	@Override public Shape probe(final Any any) {
 		return and(any, minCount(1));
 	}
 
-	@Override public Shape visit(final In in) {
+	@Override public Shape probe(final In in) {
 
 		final Set<Value> values=in.getValues();
 		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
@@ -78,28 +89,17 @@ public final class Inferencer extends Shape.Probe<Shape> {
 	}
 
 
-	@Override public Shape visit(final Datatype datatype) {
-		return datatype.getIRI().equals(XMLSchema.BOOLEAN) ? and(datatype,
-				In.in(literal(false), literal(true)), maxCount(1)
-		) : datatype;
-	}
-
-	@Override public Shape visit(final Clazz clazz) {
-		return and(clazz, datatype(Values.ResoureType));
-	}
-
-
-	@Override public Shape visit(final Trait trait) {
+	@Override public Shape probe(final Trait trait) {
 
 		final Step step=trait.getStep();
-		final Shape shape=trait.getShape().accept(this);
+		final Shape shape=trait.getShape().map(this);
 
 		return step.getIRI().equals(RDF.TYPE) ? and(trait(step, and(shape, datatype(Values.ResoureType))), datatype(Values.ResoureType))
 				: step.isInverse() ? trait(step, and(shape, datatype(Values.ResoureType)))
 				: and(trait(step, shape), datatype(Values.ResoureType));
 	}
 
-	@Override public Shape visit(final Virtual virtual) {
+	@Override public Shape probe(final Virtual virtual) {
 
 		return virtual;
 
@@ -108,19 +108,20 @@ public final class Inferencer extends Shape.Probe<Shape> {
 		// !!! return Virtual.virtual(virtual.getTrait().accept((Shape.Probe<Shape>)this), virtual.getShift());
 	}
 
-	@Override public Shape visit(final And and) {
-		return and(and.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+
+	@Override public Shape probe(final And and) {
+		return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
-	@Override public Shape visit(final Or or) {
-		return or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+	@Override public Shape probe(final Or or) {
+		return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
-	@Override public Shape visit(final Option option) {
+	@Override public Shape probe(final Option option) {
 		return condition(
-				option.getTest().accept(this),
-				option.getPass().accept(this),
-				option.getFail().accept(this)
+				option.getTest().map(this),
+				option.getPass().map(this),
+				option.getFail().map(this)
 		);
 	}
 

@@ -44,7 +44,7 @@ import static java.util.stream.Collectors.toCollection;
  *
  * <p>Recursively extracts implied RDF statements from a shape.</p>
  */
-public final class Outliner extends Shape.Probe<Set<Statement>> { // !!! review/optimize
+public final class Outliner extends Visitor<Set<Statement>> { // !!! review/optimize
 
 	private final Collection<Value> sources;
 
@@ -67,10 +67,10 @@ public final class Outliner extends Shape.Probe<Set<Statement>> { // !!! review/
 	}
 
 
-	@Override protected Set<Statement> fallback(final Shape shape) { return set(); }
+	@Override public Set<Statement> probe(final Shape shape) { return set(); }
 
 
-	@Override public Set<Statement> visit(final Clazz clazz) {
+	@Override public Set<Statement> probe(final Clazz clazz) {
 
 		final Set<Statement> statements=new LinkedHashSet<>();
 
@@ -83,7 +83,7 @@ public final class Outliner extends Shape.Probe<Set<Statement>> { // !!! review/
 		return statements;
 	}
 
-	@Override public Set<Statement> visit(final Trait trait) {
+	@Override public Set<Statement> probe(final Trait trait) {
 
 		final Step step=trait.getStep();
 		final Shape shape=trait.getShape();
@@ -96,16 +96,16 @@ public final class Outliner extends Shape.Probe<Set<Statement>> { // !!! review/
 
 					for (final Value source : sources) {
 						for (final Value target : targets) {
-							if ( !step.isInverse() ) {
+							if ( step.isInverse() ) {
 
-								if ( source instanceof Resource ) {
-									statements.add(statement((Resource)source, step.getIRI(), target));
+								if ( target instanceof Resource ) {
+									statements.add(statement((Resource)target, step.getIRI(), source));
 								}
 
 							} else {
 
-								if ( target instanceof Resource ) {
-									statements.add(statement((Resource)target, step.getIRI(), source));
+								if ( source instanceof Resource ) {
+									statements.add(statement((Resource)source, step.getIRI(), target));
 								}
 
 							}
@@ -116,21 +116,21 @@ public final class Outliner extends Shape.Probe<Set<Statement>> { // !!! review/
 
 				}).orElse(set()),
 
-				shape.accept(new Outliner()));
+				shape.map(new Outliner()));
 	}
 
 
-	@Override public Set<Statement> visit(final And and) {
+	@Override public Set<Statement> probe(final And and) {
 		return union(
 
 				and.getShapes().stream()
 
-						.flatMap(shape -> shape.accept(this).stream())
+						.flatMap(shape -> shape.map(this).stream())
 						.collect(toCollection(LinkedHashSet::new)),
 
 				all(and).map(values -> and.getShapes().stream()
 
-						.flatMap(shape -> shape.accept(new Outliner(values)).stream())
+						.flatMap(shape -> shape.map(new Outliner(values)).stream())
 						.collect(toCollection(LinkedHashSet::new))
 
 				).orElseGet(LinkedHashSet::new));

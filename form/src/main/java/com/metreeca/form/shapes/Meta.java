@@ -19,7 +19,9 @@ package com.metreeca.form.shapes;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shifts.Step;
+import com.metreeca.form.things.Maps;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -30,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Values.literal;
 
 import static java.util.Collections.emptyMap;
@@ -97,8 +98,8 @@ public final class Meta implements Shape {
 
 			final Map<Step, String> aliases=new LinkedHashMap<>();
 
-			aliases.putAll(shape.accept(new SystemAliasesProbe(reserved)));
-			aliases.putAll(shape.accept(new UserAliasesProbe(reserved)));
+			aliases.putAll(shape.map(new SystemAliasesProbe(reserved)));
+			aliases.putAll(shape.map(new UserAliasesProbe(reserved)));
 
 			return aliases;
 		}
@@ -139,13 +140,13 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
@@ -166,25 +167,25 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private abstract static class AliasesProbe extends Probe<Map<Step, String>> {
+	private abstract static class AliasesProbe extends Traverser<Map<Step, String>> {
 
-		@Override protected Map<Step, String> fallback(final Shape shape) { return map(); }
+		@Override public Map<Step, String> probe(final Shape shape) { return Maps.map(); }
 
 
-		@Override public Map<Step, String> visit(final Virtual virtual) {
-			return virtual.getTrait().accept(this);
+		@Override public Map<Step, String> probe(final Virtual virtual) {
+			return virtual.getTrait().map(this);
 		}
 
 
-		@Override public Map<Step, String> visit(final And and) {
+		@Override public Map<Step, String> probe(final And and) {
 			return aliases(and.getShapes());
 		}
 
-		@Override public Map<Step, String> visit(final Or or) {
+		@Override public Map<Step, String> probe(final Or or) {
 			return aliases(or.getShapes());
 		}
 
-		@Override public Map<Step, String> visit(final Option option) {
+		@Override public Map<Step, String> probe(final Option option) {
 			return aliases(list(option.getPass(), option.getFail()));
 		}
 
@@ -194,7 +195,7 @@ public final class Meta implements Shape {
 
 					// collect edge-to-alias mappings from nested shapes
 
-					.flatMap(shape -> shape.accept(this).entrySet().stream())
+					.flatMap(shape -> shape.map(this).entrySet().stream())
 
 					// remove duplicate mappings
 
@@ -233,7 +234,7 @@ public final class Meta implements Shape {
 		}
 
 
-		@Override public Map<Step, String> visit(final Trait trait) {
+		@Override public Map<Step, String> probe(final Trait trait) {
 
 			final Step step=trait.getStep();
 
@@ -259,13 +260,13 @@ public final class Meta implements Shape {
 		}
 
 
-		@Override public Map<Step, String> visit(final Trait trait) {
+		@Override public Map<Step, String> probe(final Trait trait) {
 
 			final Step step=trait.getStep();
 			final Shape shape=trait.getShape();
 
 			return Optional
-					.ofNullable(shape.accept(new AliasProbe()))
+					.ofNullable(shape.map(new AliasProbe()))
 					.filter(alias -> !reserved.contains(alias))
 					.map(alias -> singletonMap(step, alias))
 					.orElse(emptyMap());
@@ -274,22 +275,26 @@ public final class Meta implements Shape {
 	}
 
 
-	private static final class AliasProbe extends Probe<String> {
+	private static final class AliasProbe extends Traverser<String> {
 
-		@Override public String visit(final Meta meta) {
+		@Override public String probe(final Meta meta) {
 			return meta.getIRI().equals(Form.Alias)? meta.getValue().stringValue() : null;
 		}
 
+		@Override public String probe(final Trait trait) { return null; }
 
-		@Override public String visit(final And and) {
+		@Override public String probe(final Virtual virtual) { return null; }
+
+
+		@Override public String probe(final And and) {
 			return alias(and.getShapes());
 		}
 
-		@Override public String visit(final Or or) {
+		@Override public String probe(final Or or) {
 			return alias(or.getShapes());
 		}
 
-		@Override public String visit(final Option option) {
+		@Override public String probe(final Option option) {
 			return alias(list(option.getPass(), option.getFail()));
 		}
 
@@ -297,7 +302,7 @@ public final class Meta implements Shape {
 		private String alias(final Collection<Shape> shapes) {
 			return Optional
 					.of(shapes.stream()
-							.map(shape -> shape.accept(this))
+							.map(shape -> shape.map(this))
 							.filter(alias -> alias != null && !alias.isEmpty())
 							.collect(toSet())
 					)

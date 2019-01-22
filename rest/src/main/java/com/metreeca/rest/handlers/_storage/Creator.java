@@ -130,8 +130,8 @@ public final class Creator extends Actor<Creator> {
 				.value(model -> { // add implied statements
 
 					model.addAll(request.shape()
-							.accept(mode(Form.verify))
-							.accept(new Outliner(request.item()))
+							.map(mode(Form.verify))
+							.map(new Outliner(request.item()))
 					);
 
 					return model;
@@ -270,9 +270,9 @@ public final class Creator extends Actor<Creator> {
 		}
 
 		final Shape matcher=shape
-				.accept(task(Form.relate))
-				.accept(view(Form.digest))
-				.accept(role(Form.any));
+				.map(task(Form.relate))
+				.map(view(Form.digest))
+				.map(role(Form.any));
 
 		return (request, model) -> tool(Graph.Factory).query(connection -> {
 

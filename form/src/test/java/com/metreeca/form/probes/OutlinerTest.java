@@ -62,7 +62,7 @@ public class OutlinerTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Collection<Statement> outline(final Shape shape) {
-		return new LinkedHashModel(shape.accept(new Outliner()));
+		return new LinkedHashModel(shape.map(new Outliner()));
 	}
 
 }

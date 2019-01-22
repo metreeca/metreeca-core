@@ -105,9 +105,9 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 			final Shape driver=(shape == null) ? null : shape
 
-					.accept(mode(Form.verify)) // remove internal filtering shapes
-					.accept(new Inferencer()) // infer implicit constraints to drive json shorthands
-					.accept(new Optimizer());
+					.map(mode(Form.verify)) // remove internal filtering shapes
+					.map(new Inferencer()) // infer implicit constraints to drive json shorthands
+					.map(new Optimizer());
 
 			final Predicate<Resource> trail=resource -> false;
 

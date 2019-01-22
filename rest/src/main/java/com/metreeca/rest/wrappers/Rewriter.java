@@ -212,7 +212,7 @@ public final class Rewriter implements Wrapper {
 
 
 		private Shape rewrite(final Shape shape) {
-			return shape.accept(shapes);
+			return shape.map(shapes);
 		}
 
 		private Shift rewrite(final Shift shift) {
@@ -259,79 +259,90 @@ public final class Rewriter implements Wrapper {
 
 		//// !!! as interfaces /////////////////////////////////////////////////////////////////////////////////////////
 
-		private final class ShapeEngine extends Shape.Probe<Shape> {
+		private final class ShapeEngine implements Shape.Probe<Shape> {
 
-			@Override public Meta visit(final Meta meta) {
+			@Override public Meta probe(final Meta meta) {
 				return meta(rewrite(meta.getIRI()), rewrite(meta.getValue()));
 			}
 
-			@Override public Datatype visit(final Datatype datatype) {
-				return datatype(rewrite(datatype.getIRI()));
-			}
-
-			@Override public Clazz visit(final Clazz clazz) {
-				return clazz(rewrite(clazz.getIRI()));
-			}
-
-			@Override public MinExclusive visit(final MinExclusive minExclusive) {
-				return minExclusive(rewrite(minExclusive.getValue()));
-			}
-
-			@Override public MaxExclusive visit(final MaxExclusive maxExclusive) {
-				return maxExclusive(rewrite(maxExclusive.getValue()));
-			}
-
-			@Override public MinInclusive visit(final MinInclusive minInclusive) {
-				return minInclusive(rewrite(minInclusive.getValue()));
-			}
-
-			@Override public MaxInclusive visit(final MaxInclusive maxInclusive) {
-				return maxInclusive(rewrite(maxInclusive.getValue()));
-			}
-
-			@Override public Custom visit(final Custom custom) {
-				return custom(custom.getLevel(), custom.getMessage(), rewrite(custom.getQuery()));
-			}
-
-			@Override public In visit(final In in) {
-				return in(rewrite(in.getValues(), Engine.this::rewrite));
-			}
-
-			@Override public All visit(final All all) {
-				return all(rewrite(all.getValues(), Engine.this::rewrite));
-			}
-
-			@Override public Any visit(final Any any) {
-				return any(rewrite(any.getValues(), Engine.this::rewrite));
-			}
-
-			@Override public Trait visit(final Trait trait) {
-				return trait(shifts.visit(trait.getStep()), rewrite(trait.getShape()));
-			}
-
-			@Override public Virtual visit(final Virtual virtual) {
-				return virtual(shapes.visit(virtual.getTrait()), rewrite(virtual.getShift()));
-			}
-
-			@Override public And visit(final And and) {
-				return and(and.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
-			}
-
-			@Override public Or visit(final Or or) {
-				return or(or.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
-			}
-
-			@Override public Option visit(final Option option) {
-				return condition(rewrite(option.getTest()), rewrite(option.getPass()), rewrite(option.getFail()));
-			}
-
-			@Override public When visit(final When when) {
+			@Override public When probe(final When when) {
 				return when(rewrite(when.getIRI()), rewrite(when.getValues(), Engine.this::rewrite));
 			}
 
 
-			@Override protected Shape fallback(final Shape shape) {
-				return shape;
+			@Override public Datatype probe(final Datatype datatype) {
+				return datatype(rewrite(datatype.getIRI()));
+			}
+
+			@Override public Clazz probe(final Clazz clazz) {
+				return clazz(rewrite(clazz.getIRI()));
+			}
+
+			@Override public MinExclusive probe(final MinExclusive minExclusive) {
+				return minExclusive(rewrite(minExclusive.getValue()));
+			}
+
+			@Override public MaxExclusive probe(final MaxExclusive maxExclusive) {
+				return maxExclusive(rewrite(maxExclusive.getValue()));
+			}
+
+			@Override public MinInclusive probe(final MinInclusive minInclusive) {
+				return minInclusive(rewrite(minInclusive.getValue()));
+			}
+
+			@Override public MaxInclusive probe(final MaxInclusive maxInclusive) {
+				return maxInclusive(rewrite(maxInclusive.getValue()));
+			}
+
+			@Override public Shape probe(final MinLength minLength) { return minLength; }
+
+			@Override public Shape probe(final MaxLength maxLength) { return maxLength; }
+
+			@Override public Shape probe(final com.metreeca.form.shapes.Pattern pattern) { return pattern; }
+
+			@Override public Shape probe(final Like like) { return like; }
+
+			@Override public Custom probe(final Custom custom) {
+				return custom(custom.getLevel(), custom.getMessage(), rewrite(custom.getQuery()));
+			}
+
+
+			@Override public Shape probe(final MinCount minCount) { return minCount; }
+
+			@Override public Shape probe(final MaxCount maxCount) { return maxCount; }
+
+			@Override public In probe(final In in) {
+				return in(rewrite(in.getValues(), Engine.this::rewrite));
+			}
+
+			@Override public All probe(final All all) {
+				return all(rewrite(all.getValues(), Engine.this::rewrite));
+			}
+
+			@Override public Any probe(final Any any) {
+				return any(rewrite(any.getValues(), Engine.this::rewrite));
+			}
+
+
+			@Override public Trait probe(final Trait trait) {
+				return trait(shifts.visit(trait.getStep()), rewrite(trait.getShape()));
+			}
+
+			@Override public Virtual probe(final Virtual virtual) {
+				return virtual(shapes.probe(virtual.getTrait()), rewrite(virtual.getShift()));
+			}
+
+
+			@Override public And probe(final And and) {
+				return and(and.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
+			}
+
+			@Override public Or probe(final Or or) {
+				return or(or.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
+			}
+
+			@Override public Option probe(final Option option) {
+				return condition(rewrite(option.getTest()), rewrite(option.getPass()), rewrite(option.getFail()));
 			}
 
 		}
@@ -348,7 +359,7 @@ public final class Rewriter implements Wrapper {
 
 			@Override public Table visit(final Table table) {
 				return table(table.getFields().entrySet().stream().collect(toMap(
-						entry -> shapes.visit(entry.getKey()),
+						entry -> shapes.probe(entry.getKey()),
 						entry -> rewrite(entry.getValue())
 				)));
 			}

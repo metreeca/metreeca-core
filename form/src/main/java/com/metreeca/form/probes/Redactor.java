@@ -41,9 +41,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * Shape redactor.
  *
- * <p>Recursively evaluates and replace {@linkplain When conditional} shapes from a shape.</p>
+ * <p>Recursively evaluates {@linkplain When conditional} section in a shape.</p>
  */
-public final class Redactor extends Shape.Probe<Shape> {
+public final class Redactor extends Traverser<Shape> {
 
 	private final Map<IRI, Set<? extends Value>> variables;
 
@@ -66,39 +66,12 @@ public final class Redactor extends Shape.Probe<Shape> {
 	}
 
 
+	@Override public Shape probe(final Shape shape) { return shape; }
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override protected Shape fallback(final Shape shape) {
-		return shape;
-	}
-
-
-	@Override public Shape visit(final Trait trait) {
-		return trait(trait.getStep(), trait.getShape().accept(this));
-	}
-
-	@Override public Shape visit(final Virtual virtual) {
-		return virtual((Trait)virtual.getTrait().accept(this), virtual.getShift());
-	}
-
-
-	@Override public Shape visit(final And and) {
-		return and(and.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
-	}
-
-	@Override public Shape visit(final Or or) {
-		return or(or.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
-	}
-
-	@Override public Shape visit(final Option option) {
-		return condition(
-				option.getTest().accept(this),
-				option.getPass().accept(this),
-				option.getFail().accept(this)
-		);
-	}
-
-	@Override public Shape visit(final When when) {
+	@Override public Shape probe(final When when) {
 
 		final Set<? extends Value> actual=variables.get(when.getIRI());
 		final Set<? extends Value> accepted=when.getValues();
@@ -106,6 +79,32 @@ public final class Redactor extends Shape.Probe<Shape> {
 		return actual == null ? when // ignore undefined variables
 				: !disjoint(accepted, actual) || actual.contains(Form.any) ? and()
 				: or();
+	}
+
+
+	@Override public Shape probe(final Trait trait) {
+		return trait(trait.getStep(), trait.getShape().map(this));
+	}
+
+	@Override public Shape probe(final Virtual virtual) {
+		return virtual((Trait)virtual.getTrait().map(this), virtual.getShift());
+	}
+
+
+	@Override public Shape probe(final And and) {
+		return and(and.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
+	}
+
+	@Override public Shape probe(final Or or) {
+		return or(or.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
+	}
+
+	@Override public Shape probe(final Option option) {
+		return condition(
+				option.getTest().map(this),
+				option.getPass().map(this),
+				option.getFail().map(this)
+		);
 	}
 
 }

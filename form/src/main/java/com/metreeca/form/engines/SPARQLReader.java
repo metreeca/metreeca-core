@@ -115,8 +115,8 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape pattern=shape.accept(mode(Form.verify));
-				final Shape selector=shape.accept(mode(Form.filter)).accept(new Pruner()).accept(new Optimizer());
+				final Shape pattern=shape.map(mode(Form.verify));
+				final Shape selector=shape.map(mode(Form.filter)).map(new Pruner()).map(new Optimizer());
 
 				link(pattern, root);
 				link(selector, root);
@@ -193,7 +193,7 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape selector=shape.accept(mode(Form.filter)).accept(new Pruner()).accept(new Optimizer());
+				final Shape selector=shape.map(mode(Form.filter)).map(new Pruner()).map(new Optimizer());
 
 				final Object source=var(id(selector));
 				final Object target=path.isEmpty() ? source : var(id());
@@ -278,7 +278,7 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape selector=shape.accept(mode(Form.filter)).accept(new Pruner()).accept(new Optimizer());
+				final Shape selector=shape.map(mode(Form.filter)).map(new Pruner()).map(new Optimizer());
 
 				final Object source=var(id(selector));
 				final Object target=path.isEmpty() ? source : var(id());

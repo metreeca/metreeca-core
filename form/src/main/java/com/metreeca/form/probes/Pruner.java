@@ -37,87 +37,63 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Recursively removes non-filtering constraints from a shape.</p>
  */
-public final class Pruner extends Shape.Probe<Shape> {
+public final class Pruner extends Traverser<Shape> {
 
-	@Override protected Shape fallback(final Shape shape) {
-		return and();
+	@Override public Shape probe(final Shape shape) {
+		return shape;
 	}
 
 
-	@Override public Shape visit(final MinCount minCount) { return minCount; }
+	@Override public Shape probe(final Meta meta) { return and(); }
 
-	@Override public Shape visit(final MaxCount maxCount) { return maxCount; }
-
-	@Override public Shape visit(final Clazz clazz) { return clazz; }
-
-	@Override public Shape visit(final Datatype datatype) { return datatype; }
-
-	@Override public Shape visit(final All all) { return all; }
-
-	@Override public Shape visit(final Any any) { return any; }
-
-	@Override public Shape visit(final MinInclusive minInclusive) { return minInclusive; }
-
-	@Override public Shape visit(final MaxInclusive maxInclusive) { return maxInclusive; }
-
-	@Override public Shape visit(final MinExclusive minExclusive) { return minExclusive; }
-
-	@Override public Shape visit(final MaxExclusive maxExclusive) { return maxExclusive; }
-
-	@Override public Shape visit(final Pattern pattern) { return pattern; }
-
-	@Override public Shape visit(final Like like) { return like; }
-
-	@Override public Shape visit(final MinLength minLength) { return minLength; }
-
-	@Override public Shape visit(final MaxLength maxLength) { return maxLength; }
+	@Override public Shape probe(final When when) { return and(); }
 
 
-	@Override public Shape visit(final Trait trait) {
+	@Override public Shape probe(final Trait trait) {
 
 		final Step step=trait.getStep();
-		final Shape shape=trait.getShape().accept(this);
+		final Shape shape=trait.getShape().map(this);
 
 		return shape.equals(and()) ? and() : trait(step, shape);
 	}
 
-	@Override public Shape visit(final Virtual virtual) {
+	@Override public Shape probe(final Virtual virtual) {
 
 		final Trait trait=virtual.getTrait();
 		final Shift shift=virtual.getShift();
 
 		final Step step=trait.getStep();
-		final Shape shape=trait.getShape().accept(this);
+		final Shape shape=trait.getShape().map(this);
 
 		return shape.equals(and()) ? and() : Virtual.virtual(trait(step, shape), shift);
 	}
 
 
-	@Override public Shape visit(final And and) {
+	@Override public Shape probe(final And and) {
 
 		final List<Shape> shapes=and.getShapes().stream()
-				.map(shape -> shape.accept(this))
+				.map(shape -> shape.map(this))
 				.filter(shape -> !shape.equals(and()))
 				.collect(toList());
 
 		return shapes.isEmpty() ? and() : and(shapes);
 	}
 
-	@Override public Shape visit(final Or or) {
+	@Override public Shape probe(final Or or) {
 
 		final List<Shape> shapes=or.getShapes().stream()
-				.map(shape -> shape.accept(this))
+				.map(shape -> shape.map(this))
 				.filter(shape -> !shape.equals(and()))
 				.collect(toList());
 
 		return shapes.isEmpty() ? and() : or(shapes);
 	}
 
-	@Override public Shape visit(final Option option) {
+	@Override public Shape probe(final Option option) {
 		return condition(
 				option.getTest(),
-				option.getPass().accept(this),
-				option.getFail().accept(this)
+				option.getPass().map(this),
+				option.getFail().map(this)
 		);
 	}
 

@@ -145,11 +145,11 @@ final class InferencerTest {
 
 
 	private <S extends Shape, I extends Shape> Shape optimize(final Shape shape) {
-		return shape.accept(new Optimizer());
+		return shape.map(new Optimizer());
 	}
 
 	private Shape expand(final Shape shape) {
-		return optimize(shape.accept(new Inferencer()));
+		return optimize(shape.map(new Inferencer()));
 	}
 
 }

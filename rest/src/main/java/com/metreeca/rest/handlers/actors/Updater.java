@@ -23,6 +23,7 @@ import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Outliner;
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
@@ -43,8 +44,8 @@ import javax.json.JsonValue;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.wild;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Option.condition;
+import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
@@ -174,8 +175,8 @@ public final class Updater extends Actor<Updater> {
 	private Collection<Statement> expand(final IRI focus, final Shape shape, final Collection<Statement> model) {
 
 		model.addAll(shape // add implied statements
-				.accept(mode(Form.verify))
-				.accept(new Outliner(focus))
+				.map(mode(Form.verify))
+				.map(new Outliner(focus))
 		);
 
 		return model;
@@ -190,77 +191,81 @@ public final class Updater extends Actor<Updater> {
 	private Shape container(final Shape shape) { // prune ldp:contains trait // !!! review
 		return shape
 
-				.accept(new Shape.Probe<Shape>() {
+				.map(new Traverser<Shape>() {
 
-					@Override protected Shape fallback(final Shape shape) {
+					@Override public Shape probe(final Shape shape) {
 						return shape;
 					}
 
-					@Override public Shape visit(final Trait trait) {
+
+					@Override public Shape probe(final Trait trait) {
 						return trait.getStep().equals(Contains) ? and() : trait;
 					}
 
-					@Override public Shape visit(final Virtual virtual) {
+					@Override public Shape probe(final Virtual virtual) {
 						return virtual.getTrait().getStep().equals(Contains) ? and() : virtual;
 					}
 
-					@Override public Shape visit(final And and) {
-						return and(and.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+
+					@Override public Shape probe(final And and) {
+						return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 					}
 
-					@Override public Shape visit(final Or or) {
-						return or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+					@Override public Shape probe(final Or or) {
+						return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 					}
 
-					@Override public Shape visit(final Option option) {
+					@Override public Shape probe(final Option option) {
 						return condition(
 								option.getTest(),
-								option.getPass().accept(this),
-								option.getFail().accept(this)
+								option.getPass().map(this),
+								option.getFail().map(this)
 						);
 					}
 
 				})
 
-				.accept(new Optimizer());
+				.map(new Optimizer());
 	}
 
 	private Shape resource(final Shape shape) {
 		return container(shape).equals(shape) ? shape : shape // !!! optimize using parallel container/resource probing
 
-				.accept(new Shape.Probe<Shape>() {
+				.map(new Traverser<Shape>() {
 
-					@Override protected Shape fallback(final Shape shape1) {
+					@Override public Shape probe(final Shape shape1) {
 						return and();
 					}
 
-					@Override public Shape visit(final Trait trait) {
+
+					@Override public Shape probe(final Trait trait) {
 						return trait.getStep().equals(Contains) ? trait.getShape() : and();
 					}
 
-					@Override public Shape visit(final Virtual virtual) {
+					@Override public Shape probe(final Virtual virtual) {
 						throw new UnsupportedOperationException();
 					}
 
-					@Override public Shape visit(final And and) {
-						return and(and.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+
+					@Override public Shape probe(final And and) {
+						return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 					}
 
-					@Override public Shape visit(final Or or) {
-						return or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
+					@Override public Shape probe(final Or or) {
+						return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 					}
 
-					@Override public Shape visit(final Option option) {
+					@Override public Shape probe(final Option option) {
 						return condition(
 								option.getTest(),
-								option.getPass().accept(this),
-								option.getFail().accept(this)
+								option.getPass().map(this),
+								option.getFail().map(this)
 						);
 					}
 
 				})
 
-				.accept(new Optimizer());
+				.map(new Optimizer());
 	}
 
 }

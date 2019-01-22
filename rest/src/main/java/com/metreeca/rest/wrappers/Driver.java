@@ -121,7 +121,7 @@ public final class Driver implements Wrapper {
 			throw new NullPointerException("null shape");
 		}
 
-		this.shape=shape.accept(new Optimizer());
+		this.shape=shape.map(new Optimizer());
 
 		return this;
 	}
@@ -156,17 +156,17 @@ public final class Driver implements Wrapper {
 					model.add(statement(focus, LDP.CONSTRAINED_BY, specs));
 
 					final Shape shape=this.shape
-							.accept(role(request.roles())) // limit shape to user-visible details
-							.accept(mode(Form.verify)); // hide internal filtering specs
+							.map(role(request.roles())) // limit shape to user-visible details
+							.map(mode(Form.verify)); // hide internal filtering specs
 
 					final ShapeCodec codec=new ShapeCodec();
 
 					for (final IRI task : list(Form.create, Form.relate, Form.update, Form.delete)) {
 
 						final Shape spec=shape
-								.accept(task(task))
-								.accept(new Inferencer())
-								.accept(new Optimizer());
+								.map(task(task))
+								.map(new Inferencer())
+								.map(new Optimizer());
 
 						if ( !wild(spec) ) {
 							model.add(statement(specs, task, codec.encode(spec, model)));

@@ -90,8 +90,8 @@ final class SPARQLWriter {
 		connection.add(model);
 
 		return shape
-				.accept(mode(Form.verify))
-				.accept(new TracesProbe(new LinkedHashSet<>(asList(focus))));
+				.map(mode(Form.verify))
+				.map(new TracesProbe(new LinkedHashSet<>(asList(focus))));
 	}
 
 
@@ -123,7 +123,7 @@ final class SPARQLWriter {
 	/**
 	 * Validate constraints on a focus value set.
 	 */
-	private final class TracesProbe extends Shape.Probe<Report> {
+	private final class TracesProbe implements Shape.Probe<Report> {
 
 		private final Collection<Value> focus;
 
@@ -133,58 +133,20 @@ final class SPARQLWriter {
 		}
 
 
-		@Override protected Report fallback(final Shape shape) {
-			return Report.report();
-		}
+		@Override public Report probe(final Meta meta) { return report(); }
+
+		@Override public Report probe(final When when) { return report(); }
 
 
-		@Override public Report visit(final MinCount minCount) {
-			return focus.size() >= minCount.getLimit() ? Report.report() : Report.report(issue(
-					Issue.Level.Error, "invalid item count", minCount, focus
-			));
-		}
-
-		@Override public Report visit(final MaxCount maxCount) {
-			return focus.size() <= maxCount.getLimit() ? Report.report() : Report.report(issue(
-					Issue.Level.Error, "invalid item count", maxCount, focus
-			));
-		}
-
-		@Override public Report visit(final In in) {
-
-			final Set<Value> values=in.getValues();
-
-			return Report.report(focus.stream()
-					.filter(value -> !values.contains(value))
-					.map(value -> issue(Issue.Level.Error, "out of range value", in, value))
-					.collect(toList()));
-		}
-
-		@Override public Report visit(final All all) {
-			return Report.report(all.getValues().stream()
-					.filter(value -> !focus.contains(value))
-					.map(value -> issue(Issue.Level.Error, "missing required value", all, value))
-					.collect(toList()));
-		}
-
-		@Override public Report visit(final Any any) {
-			return any.getValues().stream()
-					.filter(focus::contains)
-					.findAny()
-					.map(values -> Report.report())
-					.orElseGet(() -> Report.report(issue(Issue.Level.Error, "missing alternative value", any, focus)));
-		}
-
-
-		@Override public Report visit(final Datatype datatype) {
-			return Report.report(focus.stream()
+		@Override public Report probe(final Datatype datatype) {
+			return report(focus.stream()
 					.filter(value -> !is(value, datatype.getIRI()))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid datatype", datatype, value))
 					.collect(toList()));
 		}
 
-		@Override public Report visit(final Clazz clazz) {
-			if ( focus.isEmpty() ) { return Report.report(); } else {
+		@Override public Report probe(final Clazz clazz) {
+			if ( focus.isEmpty() ) { return report(); } else {
 
 				final Collection<Issue> issues=new ArrayList<>();
 
@@ -220,42 +182,40 @@ final class SPARQLWriter {
 				});
 
 				return report(issues, focus.stream()
-						.map(value -> frame(value, Frame.slot(Step.step(RDF.TYPE), Report.report(emptySet(), frame(clazz.getIRI())))))
+						.map(value -> frame(value, Frame.slot(Step.step(RDF.TYPE), report(emptySet(), frame(clazz.getIRI())))))
 						.collect(toList()));
 			}
 		}
 
-
-		@Override public Report visit(final MinExclusive minExclusive) {
-			return Report.report(focus.stream()
+		@Override public Report probe(final MinExclusive minExclusive) {
+			return report(focus.stream()
 					.filter(value -> !(compare(value, minExclusive.getValue()) > 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", minExclusive, value))
 					.collect(toList()));
 		}
 
-		@Override public Report visit(final MaxExclusive maxExclusive) {
-			return Report.report(focus.stream()
+		@Override public Report probe(final MaxExclusive maxExclusive) {
+			return report(focus.stream()
 					.filter(value -> !(compare(value, maxExclusive.getValue()) < 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", maxExclusive, value))
 					.collect(toList()));
 		}
 
-		@Override public Report visit(final MinInclusive minInclusive) {
-			return Report.report(focus.stream()
+		@Override public Report probe(final MinInclusive minInclusive) {
+			return report(focus.stream()
 					.filter(value -> !(compare(value, minInclusive.getValue()) >= 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", minInclusive, value))
 					.collect(toList()));
 		}
 
-		@Override public Report visit(final MaxInclusive maxInclusive) {
-			return Report.report(focus.stream()
+		@Override public Report probe(final MaxInclusive maxInclusive) {
+			return report(focus.stream()
 					.filter(value -> !(compare(value, maxInclusive.getValue()) <= 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", maxInclusive, value))
 					.collect(toList()));
 		}
 
-
-		@Override public Report visit(final Pattern pattern) {
+		@Override public Report probe(final Pattern pattern) {
 
 			final String expression=pattern.getText();
 			final String flags=pattern.getFlags();
@@ -265,13 +225,13 @@ final class SPARQLWriter {
 
 			// match the whole string: don't use compiled.asPredicate() (implemented using .find())
 
-			return Report.report(focus.stream()
+			return report(focus.stream()
 					.filter(value -> !compiled.matcher(text(value)).matches())
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", pattern, value))
 					.collect(toList()));
 		}
 
-		@Override public Report visit(final Like like) {
+		@Override public Report probe(final Like like) {
 
 			final String expression=like.toExpression();
 
@@ -279,35 +239,34 @@ final class SPARQLWriter {
 					.compile(expression)
 					.asPredicate();
 
-			return Report.report(focus.stream()
+			return report(focus.stream()
 					.filter(value -> !predicate.test(text(value)))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", like, value))
 					.collect(toList()));
 		}
 
-		@Override public Report visit(final MaxLength maxLength) {
+		@Override public Report probe(final MaxLength maxLength) {
 
 			final int limit=maxLength.getLimit();
 
-			return Report.report(focus.stream()
+			return report(focus.stream()
 					.filter(value -> !(text(value).length() <= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", maxLength, value))
 					.collect(toList()));
 		}
 
-		@Override public Report visit(final MinLength minLength) {
+		@Override public Report probe(final MinLength minLength) {
 
 			final int limit=minLength.getLimit();
 
-			return Report.report(focus.stream()
+			return report(focus.stream()
 					.filter(value -> !(text(value).length() >= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", minLength, value))
 					.collect(toList()));
 		}
 
-
-		@Override public Report visit(final Custom custom) {
-			if ( focus.isEmpty() ) { return Report.report(); } else {
+		@Override public Report probe(final Custom custom) {
+			if ( focus.isEmpty() ) { return report(); } else {
 
 				final Collection<Issue> issues=new ArrayList<>();
 
@@ -367,13 +326,51 @@ final class SPARQLWriter {
 
 				});
 
-				return Report.report(issues);
+				return report(issues);
 
 			}
 		}
 
 
-		@Override public Report visit(final Trait trait) {
+		@Override public Report probe(final MinCount minCount) {
+			return focus.size() >= minCount.getLimit() ? report() : report(issue(
+					Issue.Level.Error, "invalid item count", minCount, focus
+			));
+		}
+
+		@Override public Report probe(final MaxCount maxCount) {
+			return focus.size() <= maxCount.getLimit() ? report() : report(issue(
+					Issue.Level.Error, "invalid item count", maxCount, focus
+			));
+		}
+
+		@Override public Report probe(final In in) {
+
+			final Set<Value> values=in.getValues();
+
+			return report(focus.stream()
+					.filter(value -> !values.contains(value))
+					.map(value -> issue(Issue.Level.Error, "out of range value", in, value))
+					.collect(toList()));
+		}
+
+		@Override public Report probe(final All all) {
+			return report(all.getValues().stream()
+					.filter(value -> !focus.contains(value))
+					.map(value -> issue(Issue.Level.Error, "missing required value", all, value))
+					.collect(toList()));
+		}
+
+		@Override public Report probe(final Any any) {
+			return any.getValues().stream()
+					.filter(focus::contains)
+					.findAny()
+					.map(values -> report())
+					.orElseGet(() -> report(issue(Issue.Level.Error, "missing alternative value", any, focus)));
+		}
+
+
+		@Override public Report probe(final Trait trait) {
 
 			final Step step=trait.getStep();
 			final Shape shape=trait.getShape();
@@ -386,7 +383,7 @@ final class SPARQLWriter {
 
 				// validate the trait shape on the new focus set
 
-				final Report report=shape.accept(new TracesProbe(focus));
+				final Report report=shape.map(new TracesProbe(focus));
 
 				// identifies the values in the new focus set referenced in report frames
 
@@ -411,26 +408,30 @@ final class SPARQLWriter {
 
 		}
 
+		@Override public Report probe(final Virtual virtual) {
+			return report();
+		}
 
-		@Override public Report visit(final And and) {
+
+		@Override public Report probe(final And and) {
 			return and.getShapes().stream()
-					.map(shape -> shape.accept(this))
-					.reduce(Report.report(), Report::merge);
+					.map(shape -> shape.map(this))
+					.reduce(report(), Report::merge);
 		}
 
-		@Override public Report visit(final Or or) {
+		@Override public Report probe(final Or or) {
 			return or.getShapes().stream()
-					.map(shape -> shape.accept(this))
-					.reduce(Report.report(), Report::merge);
+					.map(shape -> shape.map(this))
+					.reduce(report(), Report::merge);
 		}
 
-		@Override public Report visit(final Option option) {
+		@Override public Report probe(final Option option) {
 
-			final boolean pass=!option.getTest().accept(this).assess(Issue.Level.Error);
+			final boolean pass=!option.getTest().map(this).assess(Issue.Level.Error);
 
 			return pass
-					? option.getPass().accept(this)
-					: option.getFail().accept(this);
+					? option.getPass().map(this)
+					: option.getFail().map(this);
 
 		}
 

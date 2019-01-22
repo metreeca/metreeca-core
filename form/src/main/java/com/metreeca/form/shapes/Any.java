@@ -18,6 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Visitor;
 
 import org.eclipse.rdf4j.model.Value;
 
@@ -48,7 +49,7 @@ public final class Any implements Shape {
 
 
 	public static Optional<Set<Value>> any(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.accept(new ExistentialProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ExistentialProbe()));
 	}
 
 
@@ -78,13 +79,13 @@ public final class Any implements Shape {
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
@@ -107,15 +108,15 @@ public final class Any implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class ExistentialProbe extends Probe<Set<Value>> {
+	private static final class ExistentialProbe extends Visitor<Set<Value>> {
 
-		@Override public Set<Value> visit(final Any any) {
+		@Override public Set<Value> probe(final Any any) {
 			return any.getValues();
 		}
 
-		@Override public Set<Value> visit(final And and) {
+		@Override public Set<Value> probe(final And and) {
 			return and.getShapes().stream()
-					.map(shape -> shape.accept(this))
+					.map(shape -> shape.map(this))
 					.reduce(null, (x, y) -> x == null ? y : y == null ? x : intersection(x, y));
 		}
 

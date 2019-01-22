@@ -18,6 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Traverser;
 
 import java.util.Optional;
 import java.util.function.BinaryOperator;
@@ -35,7 +36,7 @@ public final class MaxCount implements Shape {
 	}
 
 	public static Optional<Integer> maxCount(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.accept(new MaxCountProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MaxCountProbe()));
 	}
 
 
@@ -57,13 +58,13 @@ public final class MaxCount implements Shape {
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
@@ -81,7 +82,7 @@ public final class MaxCount implements Shape {
 	}
 
 
-	private static final class MaxCountProbe extends Probe<Integer> {
+	private static final class MaxCountProbe extends Traverser<Integer> {
 
 		// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
 
@@ -89,26 +90,32 @@ public final class MaxCount implements Shape {
 		private static final BinaryOperator<Integer> max=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) >= 0 ? x : y;
 
 
-		@Override public Integer visit(final MaxCount maxCount) {
+		@Override public Integer probe(final MaxCount maxCount) {
 			return maxCount.getLimit();
 		}
 
-		@Override public Integer visit(final And and) {
+
+		@Override public Integer probe(final Trait trait) { return null; }
+
+		@Override public Integer probe(final Virtual virtual) { return null; }
+
+
+		@Override public Integer probe(final And and) {
 			return and.getShapes().stream()
-					.map(shape -> shape.accept(this))
+					.map(shape -> shape.map(this))
 					.reduce(null, min);
 		}
 
-		@Override public Integer visit(final Or or) {
+		@Override public Integer probe(final Or or) {
 			return or.getShapes().stream()
-					.map(shape -> shape.accept(this))
+					.map(shape -> shape.map(this))
 					.reduce(null, max);
 		}
 
-		@Override public Integer visit(final Option option) {
+		@Override public Integer probe(final Option option) {
 			return max.apply(
-					option.getPass().accept(this),
-					option.getFail().accept(this));
+					option.getPass().map(this),
+					option.getFail().map(this));
 		}
 
 	}

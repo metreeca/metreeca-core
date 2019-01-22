@@ -156,7 +156,7 @@ public final class Relator extends Actor<Relator> {
 				return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
 
 					@Override public Response visit(final Edges edges) {
-						return r.shape(shape.accept(mode(Form.verify))) // hide filtering constraints
+						return r.shape(shape.map(mode(Form.verify))) // hide filtering constraints
 								.body(rdf(), model);
 					}
 

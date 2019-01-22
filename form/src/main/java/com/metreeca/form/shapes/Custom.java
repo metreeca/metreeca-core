@@ -115,13 +115,13 @@ public final class Custom implements Shape {
 	}
 
 
-	@Override public <V> V accept(final Probe<V> probe) {
+	@Override public <V> V map(final Probe<V> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 

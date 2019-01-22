@@ -36,9 +36,10 @@ Non-validating shapes documenting presentation-driving metadata, to be used for 
 
 | shape                                                        | value                                                        |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [meta](../javadocs/com/metreeca/form/shapes/Meta.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html), [value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | the annotation property identified by the given IRI is associated with the given value in the enclosing shape |
+| [meta](../javadocs/com/metreeca/form/shapes/Meta.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html), [value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | the metadata property identified by the given IRI is associated with the given value in the enclosing shape |
+| [when](../javadocs/com/metreeca/form/shapes/When.html)([variable](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html), [value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …) | the focus set is consistent with this shape only if the value of an [externally assigned variable](../javadocs/com/metreeca/form/probes/Redactor.html) is included in a given set of target values |
 
-Common annotations are directly available as shorthand shapes.
+Common metadada annotations are directly available as shorthand shapes.
 
 | shorthand shape                                              | value                                                        |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
@@ -110,8 +111,6 @@ Composite shapes specifying logical combinations of shapes.
 | [and](../javadocs/com/metreeca/form/shapes/And.html)([shape](../javadocs/com/metreeca/form/Shape.html), …) | the focus set is consistent with all shapes in a given target set |
 | [or](../javadocs/com/metreeca/form/shapes/Or.html)([shape](../javadocs/com/metreeca/form/Shape.html), …) | the focus set is consistent with at least one shape in a given target set |
 | [option](../javadocs/com/metreeca/form/shapes/Option.html)([test](../javadocs/com/metreeca/form/Shape.html),[pass](../javadocs/com/metreeca/form/Shape.html), [fail](../javadocs/com/metreeca/form/Shape.html)) | the focus set is consistent either with a *pass* shape, if consistent also with a *test* shape, or with a *fail* shape, otherwise |
-| [when](../javadocs/com/metreeca/form/shapes/When.html)([variable](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html), [value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …) | the focus set is consistent with this shape only if the value of an [externally assigned variable](../javadocs/com/metreeca/form/probes/Redactor.html) is included in a given set of target values |
-
 
 # Shifts
 

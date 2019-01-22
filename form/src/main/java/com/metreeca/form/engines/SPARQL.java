@@ -22,6 +22,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.Shift;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Pruner;
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Count;
 import com.metreeca.form.shifts.Step;
@@ -98,7 +99,7 @@ abstract class SPARQL { // ! refactor
 	}
 
 	protected List<String> template(final Shape shape, final Collection<Statement> template) {
-		return shape.accept(new TemplateProbe(shape))
+		return shape.map(new TemplateProbe(shape))
 				.collect(toCollection(() -> template))
 				.stream()
 				.flatMap(statement -> Stream.of(statement.getSubject(), statement.getObject()))
@@ -132,7 +133,7 @@ abstract class SPARQL { // ! refactor
 	}
 
 	protected Object pattern(final Shape shape) {
-		return shape.accept(new PatternProbe(shape));
+		return shape.map(new PatternProbe(shape));
 	}
 
 
@@ -145,7 +146,7 @@ abstract class SPARQL { // ! refactor
 	}
 
 	protected Object filters(final Shape shape) {
-		return shape.accept(new FilterProbe(shape));
+		return shape.map(new FilterProbe(shape));
 	}
 
 	protected Object sorters(final Object root, final Collection<Query.Order> orders) {
@@ -223,9 +224,9 @@ abstract class SPARQL { // ! refactor
 	private boolean isAggregate(final Shift shift) {
 		return shift.accept(new Shift.Probe<Boolean>() {
 
-			@Override public Boolean visit(final Count count) { return true; }
-
 			@Override protected Boolean fallback(final Shift shift) { return false; }
+
+			@Override public Boolean visit(final Count count) { return true; }
 
 		});
 	}
@@ -234,12 +235,12 @@ abstract class SPARQL { // ! refactor
 	private Object projection(final Shift source, final Object target) {
 		return list(" (", source.accept(new Shift.Probe<Object>() {
 
-			@Override protected Object fallback(final Shift shift) {
-				return var(id(source));
-			}
-
 			@Override public Object visit(final Count count) {
 				return list(" count(distinct ", var(id(source)), ")");
+			}
+
+			@Override protected Object fallback(final Shift shift) {
+				return var(id(source));
 			}
 
 		}), " as", target, ")");
@@ -267,7 +268,7 @@ abstract class SPARQL { // ! refactor
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class TemplateProbe extends Shape.Probe<Stream<Statement>> {
+	private final class TemplateProbe extends Traverser<Stream<Statement>> {
 
 		private final Shape focus;
 
@@ -277,7 +278,10 @@ abstract class SPARQL { // ! refactor
 		}
 
 
-		@Override public Stream<Statement> visit(final Trait trait) {
+		@Override public Stream<Statement> probe(final Shape shape) { return Stream.empty(); }
+
+
+		@Override public Stream<Statement> probe(final Trait trait) {
 
 			final Step step=trait.getStep();
 			final Shape shape=trait.getShape();
@@ -289,43 +293,35 @@ abstract class SPARQL { // ! refactor
 
 			return Stream.concat(
 					Stream.of(step.isInverse() ? statement(target, iri, source) : statement(source, iri, target)),
-					shape.accept(new TemplateProbe(shape))
+					shape.map(new TemplateProbe(shape))
 			);
 
 		}
 
-		@Override public Stream<Statement> visit(final Virtual virtual) {
-			return virtual.getTrait().accept(this); // !!! visit shift to generate additional specific edges
+		@Override public Stream<Statement> probe(final Virtual virtual) {
+			return virtual.getTrait().map(this); // !!! visit shift to generate additional specific edges
 		}
 
 
-		@Override public Stream<Statement> visit(final And and) {
-			return and.getShapes().stream().flatMap(shape -> shape.accept(this));
+		@Override public Stream<Statement> probe(final And and) {
+			return and.getShapes().stream().flatMap(shape -> shape.map(this));
 		}
 
-		@Override public Stream<Statement> visit(final Or or) {
-			return or.getShapes().stream().flatMap(shape -> shape.accept(this));
+		@Override public Stream<Statement> probe(final Or or) {
+			return or.getShapes().stream().flatMap(shape -> shape.map(this));
 		}
 
-		@Override public Stream<Statement> visit(final Option option) {
+		@Override public Stream<Statement> probe(final Option option) {
 			return Stream.concat(
-					option.getPass().accept(this),
-					option.getFail().accept(this)
+					option.getPass().map(this),
+					option.getFail().map(this)
 			);
 		}
 
-		@Override public Stream<Statement> visit(final When when) {
-			return Stream.empty();
-		}
-
-
-		@Override protected Stream<Statement> fallback(final Shape shape) {
-			return Stream.empty();
-		}
 
 	}
 
-	private final class FilterProbe extends Shape.Probe<Object> {
+	private final class FilterProbe implements Shape.Probe<Object> {
 
 		private final Shape source;
 
@@ -335,15 +331,78 @@ abstract class SPARQL { // ! refactor
 		}
 
 
-		@Override public Object visit(final Clazz clazz) {
+		@Override public Object probe(final Meta meta) {
+			return null;
+		}
+
+		@Override public Object probe(final When when) {
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		}
+
+
+		@Override public Object probe(final Datatype datatype) {
+			return null;
+		}
+
+		@Override public Object probe(final Clazz clazz) {
 			return list(term(source), " a/rdfs:subClassOf*", term(clazz.getIRI()), " .\n");
 		}
 
-		@Override public Object visit(final All all) {
+		@Override public Object probe(final MinExclusive minExclusive) {
+			return list("\ffilter ( ", term(source), " > ", term(minExclusive.getValue()), " )\f");
+		}
+
+		@Override public Object probe(final MaxExclusive maxExclusive) {
+			return list("\ffilter ( ", term(source), " < ", term(maxExclusive.getValue()), " )\f");
+		}
+
+		@Override public Object probe(final MinInclusive minInclusive) {
+			return list("\ffilter ( ", term(source), " >= ", term(minInclusive.getValue()), " )\f");
+		}
+
+		@Override public Object probe(final MaxInclusive maxInclusive) {
+			return list("\ffilter ( ", term(source), " <= ", term(maxInclusive.getValue()), " )\f");
+		}
+
+		@Override public Object probe(final Pattern pattern) {
+			return list("\ffilter regex(", term(source), ", '",
+					pattern.getText().replace("\\", "\\\\"), "', '", pattern.getFlags(), "')\f");
+		}
+
+		@Override public Object probe(final Like like) {
+			return list("\ffilter regex(str(", term(source), "), '", like.toExpression().replace("\\", "\\\\"), "')\f");
+		}
+
+		@Override public Object probe(final MinLength minLength) {
+			return list("\ffilter (strlen(str(", term(source), ")) >= ", minLength.getLimit(), ")\f");
+		}
+
+		@Override public Object probe(final MaxLength maxLength) {
+			return list("\ffilter (strlen(str(", term(source), ")) <= ", maxLength.getLimit(), ")\f");
+		}
+
+		@Override public Object probe(final Custom custom) {
+			return null;
+		}
+
+		@Override public Object probe(final MinCount minCount) {
+			return null;
+		}
+
+		@Override public Object probe(final MaxCount maxCount) {
+			return null;
+		}
+
+
+		@Override public Object probe(final In in) {
+			return null;
+		}
+
+		@Override public Object probe(final All all) {
 			return list(); // universal constraints handled by trait visitor
 		}
 
-		@Override public Object visit(final Any any) {
+		@Override public Object probe(final Any any) {
 
 			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
 
@@ -352,41 +411,9 @@ abstract class SPARQL { // ! refactor
 					"\n}\f");
 		}
 
-		@Override public Object visit(final MinExclusive minExclusive) {
-			return list("\ffilter ( ", term(source), " > ", term(minExclusive.getValue()), " )\f");
-		}
-
-		@Override public Object visit(final MaxExclusive maxExclusive) {
-			return list("\ffilter ( ", term(source), " < ", term(maxExclusive.getValue()), " )\f");
-		}
-
-		@Override public Object visit(final MinInclusive minInclusive) {
-			return list("\ffilter ( ", term(source), " >= ", term(minInclusive.getValue()), " )\f");
-		}
-
-		@Override public Object visit(final MaxInclusive maxInclusive) {
-			return list("\ffilter ( ", term(source), " <= ", term(maxInclusive.getValue()), " )\f");
-		}
-
-		@Override public Object visit(final Pattern pattern) {
-			return list("\ffilter regex(", term(source), ", '",
-					pattern.getText().replace("\\", "\\\\"), "', '", pattern.getFlags(), "')\f");
-		}
-
-		@Override public Object visit(final Like like) {
-			return list("\ffilter regex(str(", term(source), "), '", like.toExpression().replace("\\", "\\\\"), "')\f");
-		}
-
-		@Override public Object visit(final MinLength minLength) {
-			return list("\ffilter (strlen(str(", term(source), ")) >= ", minLength.getLimit(), ")\f");
-		}
-
-		@Override public Object visit(final MaxLength maxLength) {
-			return list("\ffilter (strlen(str(", term(source), ")) <= ", maxLength.getLimit(), ")\f");
-		}
 
 
-		@Override public Object visit(final Trait trait) {
+		@Override public Object probe(final Trait trait) {
 
 			final Step step=trait.getStep();
 			final Shape shape=trait.getShape();
@@ -405,34 +432,30 @@ abstract class SPARQL { // ! refactor
 			);
 		}
 
-		@Override public Object visit(final Virtual virtual) {
+		@Override public Object probe(final Virtual virtual) {
 
 			final Shift shift=virtual.getShift();
 			final Shape shape=virtual.getTrait().getShape();
 
-			return list(shift(shift, true, term(source), term(shape)), shape.accept(new FilterProbe(shape)));
+			return list(shift(shift, true, term(source), term(shape)), shape.map(new FilterProbe(shape)));
 		}
 
 
-		@Override public Object visit(final And and) {
-			return and.getShapes().stream().map(shape -> shape.accept(this));
+		@Override public Object probe(final And and) {
+			return and.getShapes().stream().map(shape -> shape.map(this));
 		}
 
-		@Override public Object visit(final Or or) {
+		@Override public Object probe(final Or or) {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
-		@Override public Object visit(final Option option) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-		}
-
-		@Override public Object visit(final When when) {
+		@Override public Object probe(final Option option) {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
 	}
 
-	private final class PatternProbe extends Shape.Probe<Object> {
+	private final class PatternProbe extends Traverser<Object> {
 
 		// !!! (€) remove optionals if term is required or if exists a filter on the same path
 
@@ -444,7 +467,12 @@ abstract class SPARQL { // ! refactor
 		}
 
 
-		@Override public Object visit(final Trait trait) {
+		@Override public Object probe(final When when) {
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		}
+
+
+		@Override public Object probe(final Trait trait) {
 
 			final Step step=trait.getStep();
 			final Shape shape=trait.getShape();
@@ -459,7 +487,7 @@ abstract class SPARQL { // ! refactor
 			return list("\f", All.all(shape).isPresent() ? pattern : list("\foptional {\f", pattern, "\f}"), "\f");
 		}
 
-		@Override public Object visit(final Virtual virtual) {
+		@Override public Object probe(final Virtual virtual) {
 
 			final Shift shift=virtual.getShift();
 			final Shape shape=virtual.getTrait().getShape();
@@ -469,8 +497,8 @@ abstract class SPARQL { // ! refactor
 				final boolean singleton=false; // !!!
 
 				final Shape anchor=this.shape // shape is already redacted for filtering mode
-						.accept(new Pruner())
-						.accept(new Optimizer());
+						.map(new Pruner())
+						.map(new Optimizer());
 
 				link(anchor, this.shape);
 
@@ -503,7 +531,7 @@ abstract class SPARQL { // ! refactor
 			}
 		}
 
-		//@Override public Object visit(final Table table) {
+		//@Override public Object probe(final Table table) {
 		//
 		//	final Map<Boolean, List<Map.Entry<Trait, Shift>>> roles=table.getFields().entrySet().stream()
 		//			.collect(partitioningBy(field -> isAggregate((Object)field)));
@@ -534,19 +562,15 @@ abstract class SPARQL { // ! refactor
 		//}
 
 
-		@Override public Object visit(final And and) {
-			return and.getShapes().stream().map(shape -> shape.accept(this));
+		@Override public Object probe(final And and) {
+			return and.getShapes().stream().map(shape -> shape.map(this));
 		}
 
-		@Override public Object visit(final Or or) {
+		@Override public Object probe(final Or or) {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
-		@Override public Object visit(final Option option) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-		}
-
-		@Override public Object visit(final When when) {
+		@Override public Object probe(final Option option) {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 

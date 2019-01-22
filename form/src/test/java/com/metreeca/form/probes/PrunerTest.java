@@ -104,7 +104,7 @@ final class PrunerTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape prune(final Shape shape) {
-		return shape.accept(new Pruner());
+		return shape.map(new Pruner());
 	}
 
 }

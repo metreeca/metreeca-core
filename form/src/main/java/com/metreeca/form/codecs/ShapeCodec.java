@@ -82,66 +82,65 @@ public final class ShapeCodec {
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Resource shape(final Shape shape, final Collection<Statement> model) {
-		return shape.accept(new Shape.Probe<Resource>() {
+		return shape.map(new Shape.Probe<Resource>() {
 
-			@Override public Resource visit(final Meta meta) { return meta(meta, model); }
-
-
-			@Override public Resource visit(final Datatype datatype) { return datatype(datatype, model); }
-
-			@Override public Resource visit(final Clazz clazz) { return clazz(clazz, model); }
-
-			@Override public Resource visit(final MinExclusive minExclusive) { return minExclusive(minExclusive, model); }
-
-			@Override public Resource visit(final MaxExclusive maxExclusive) { return maxExclusive(maxExclusive, model); }
-
-			@Override public Resource visit(final MinInclusive minInclusive) { return minInclusive(minInclusive, model); }
-
-			@Override public Resource visit(final MaxInclusive maxInclusive) { return maxInclusive(maxInclusive, model); }
-
-			@Override public Resource visit(final Pattern pattern) { return pattern(pattern, model); }
-
-			@Override public Resource visit(final Like like) { return like(like, model); }
-
-			@Override public Resource visit(final MinLength minLength) { return minLength(minLength, model); }
-
-			@Override public Resource visit(final MaxLength maxLength) { return maxLength(maxLength, model); }
+			@Override public Resource probe(final Meta meta) { return meta(meta, model); }
 
 
-			@Override public Resource visit(final MinCount minCount) {
+			@Override public Resource probe(final Datatype datatype) { return datatype(datatype, model); }
+
+			@Override public Resource probe(final Clazz clazz) { return clazz(clazz, model); }
+
+			@Override public Resource probe(final MinExclusive minExclusive) { return minExclusive(minExclusive, model); }
+
+			@Override public Resource probe(final MaxExclusive maxExclusive) { return maxExclusive(maxExclusive, model); }
+
+			@Override public Resource probe(final MinInclusive minInclusive) { return minInclusive(minInclusive, model); }
+
+			@Override public Resource probe(final MaxInclusive maxInclusive) { return maxInclusive(maxInclusive, model); }
+
+			@Override public Resource probe(final Pattern pattern) { return pattern(pattern, model); }
+
+			@Override public Resource probe(final Like like) { return like(like, model); }
+
+			@Override public Resource probe(final MinLength minLength) { return minLength(minLength, model); }
+
+			@Override public Resource probe(final MaxLength maxLength) { return maxLength(maxLength, model); }
+
+			@Override public Resource probe(final Custom custom) {
+				throw new UnsupportedOperationException("unsupported shape ["+custom+"]");
+			}
+
+
+			@Override public Resource probe(final MinCount minCount) {
 				return minCount(minCount, model);
 			}
 
-			@Override public Resource visit(final MaxCount maxCount) { return maxCount(maxCount, model); }
+			@Override public Resource probe(final MaxCount maxCount) { return maxCount(maxCount, model); }
 
-			@Override public Resource visit(final In in) { return in(in, model); }
+			@Override public Resource probe(final In in) { return in(in, model); }
 
-			@Override public Resource visit(final All all) { return all(all, model); }
+			@Override public Resource probe(final All all) { return all(all, model); }
 
-			@Override public Resource visit(final Any any) { return any(any, model); }
+			@Override public Resource probe(final Any any) { return any(any, model); }
 
 
-			@Override public Resource visit(final Trait trait) {
+			@Override public Resource probe(final Trait trait) {
 				return trait(trait, model);
 			}
 
-			@Override public Resource visit(final Virtual virtual) { return virtual(virtual, model); }
+			@Override public Resource probe(final Virtual virtual) { return virtual(virtual, model); }
 
 
-			@Override public Resource visit(final And and) {
+			@Override public Resource probe(final And and) {
 				return and(and, model);
 			}
 
-			@Override public Resource visit(final Or or) { return or(or, model); }
+			@Override public Resource probe(final Or or) { return or(or, model); }
 
-			@Override public Resource visit(final Option option) { return test(option, model); }
+			@Override public Resource probe(final Option option) { return test(option, model); }
 
-			@Override public Resource visit(final When when) { return when(when, model); }
-
-
-			@Override protected Resource fallback(final Shape shape) {
-				throw new UnsupportedOperationException("unsupported shape ["+shape+"]");
-			}
+			@Override public Resource probe(final When when) { return when(when, model); }
 
 		});
 	}

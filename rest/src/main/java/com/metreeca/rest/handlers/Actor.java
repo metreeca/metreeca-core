@@ -295,11 +295,11 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 			} else { // !!! cache redacted shapes?
 
 				final Shape redacted=shape
-						.accept(task(task))
-						.accept(view(view));
+						.map(task(task))
+						.map(view(view));
 
 				final Shape authorized=redacted
-						.accept(role(roles(request)));
+						.map(role(roles(request)));
 
 				return wild(redacted) || empty(redacted) ? forbidden(request)
 						: wild(authorized) || empty(authorized) ? refused(request)
@@ -312,10 +312,10 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 
 	private Wrapper post(final IRI task, final IRI view) { // !!! cache redacted shapes?
 		return handler -> request -> handler.handle(request).map(response -> response.shape(response.shape()
-				.accept(task(task))
-				.accept(view(view))
-				.accept(mode(Form.verify))
-				.accept(role(roles(request)))
+				.map(task(task))
+				.map(view(view))
+				.map(mode(Form.verify))
+				.map(role(roles(request)))
 		));
 	}
 

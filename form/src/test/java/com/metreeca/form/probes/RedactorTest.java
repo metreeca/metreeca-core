@@ -51,7 +51,7 @@ final class RedactorTest {
 
 		final Shape shape=and();
 
-		assertThat((Object)shape).as("unconditional shape").isEqualTo(shape.accept(empty));
+		assertThat((Object)shape).as("unconditional shape").isEqualTo(shape.map(empty));
 
 	}
 
@@ -59,7 +59,7 @@ final class RedactorTest {
 
 		final When when=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)when).as("undefined variable").isEqualTo(when.accept(empty));
+		assertThat((Object)when).as("undefined variable").isEqualTo(when.map(empty));
 
 	}
 
@@ -67,9 +67,9 @@ final class RedactorTest {
 
 		final When when=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)and()).as("included value").isEqualTo(when.accept(first));
-		assertThat((Object)or()).as("excluded value").isEqualTo(when.accept(rest));
-		assertThat((Object)and()).as("wildcard value").isEqualTo(when.accept(any));
+		assertThat((Object)and()).as("included value").isEqualTo(when.map(first));
+		assertThat((Object)or()).as("excluded value").isEqualTo(when.map(rest));
+		assertThat((Object)and()).as("wildcard value").isEqualTo(when.map(any));
 
 	}
 
@@ -77,13 +77,13 @@ final class RedactorTest {
 
 		final When nested=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)trait(RDF.VALUE, and())).as("trait").isEqualTo(trait(RDF.VALUE, nested).accept(first));
+		assertThat((Object)trait(RDF.VALUE, and())).as("trait").isEqualTo(trait(RDF.VALUE, nested).map(first));
 
-		assertThat((Object)virtual(trait(RDF.VALUE, and()), Step.step(RDF.NIL))).as("virtual").isEqualTo(virtual(trait(RDF.VALUE, nested), Step.step(RDF.NIL)).accept(first));
+		assertThat((Object)virtual(trait(RDF.VALUE, and()), Step.step(RDF.NIL))).as("virtual").isEqualTo(virtual(trait(RDF.VALUE, nested), Step.step(RDF.NIL)).map(first));
 
-		assertThat((Object)and(and())).as("conjunction").isEqualTo(and(nested).accept(first));
-		assertThat((Object)or(and())).as("disjunction").isEqualTo(or(nested).accept(first));
-		assertThat((Object)condition(and(), and(), and())).as("option").isEqualTo(condition(and(), and(), nested).accept(first));
+		assertThat((Object)and(and())).as("conjunction").isEqualTo(and(nested).map(first));
+		assertThat((Object)or(and())).as("disjunction").isEqualTo(or(nested).map(first));
+		assertThat((Object)condition(and(), and(), and())).as("option").isEqualTo(condition(and(), and(), nested).map(first));
 
 	}
 

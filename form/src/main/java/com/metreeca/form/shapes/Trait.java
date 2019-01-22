@@ -18,7 +18,9 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shifts.Step;
+import com.metreeca.form.things.Maps;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -31,7 +33,6 @@ import java.util.stream.Stream;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shifts.Step.step;
-import static com.metreeca.form.things.Maps.map;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -69,7 +70,7 @@ public final class Trait implements Shape {
 
 
 	public static Map<Step, Shape> traits(final Shape shape) {
-		return shape == null ? emptyMap() : shape.accept(new TraitProbe());
+		return shape == null ? emptyMap() : shape.map(new TraitProbe());
 	}
 
 
@@ -101,13 +102,13 @@ public final class Trait implements Shape {
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
@@ -128,29 +129,29 @@ public final class Trait implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TraitProbe extends Probe<Map<Step, Shape>> {
+	private static final class TraitProbe extends Traverser<Map<Step, Shape>> {
 
-		@Override protected Map<Step, Shape> fallback(final Shape shape) { return map(); }
+		@Override public Map<Step, Shape> probe(final Shape shape) { return Maps.map();}
 
 
-		@Override public Map<Step, Shape> visit(final Trait trait) {
+		@Override public Map<Step, Shape> probe(final Trait trait) {
 			return singletonMap(trait.getStep(), trait.getShape());
 		}
 
-		@Override public Map<Step, Shape> visit(final Virtual virtual) {
-			return virtual.getTrait().accept(this);
+		@Override public Map<Step, Shape> probe(final Virtual virtual) {
+			return virtual.getTrait().map(this);
 		}
 
 
-		@Override public Map<Step, Shape> visit(final And and) {
+		@Override public Map<Step, Shape> probe(final And and) {
 			return traits(and.getShapes().stream());
 		}
 
-		@Override public Map<Step, Shape> visit(final Or or) {
+		@Override public Map<Step, Shape> probe(final Or or) {
 			return traits(or.getShapes().stream());
 		}
 
-		@Override public Map<Step, Shape> visit(final Option option) {
+		@Override public Map<Step, Shape> probe(final Option option) {
 			return traits(Stream.of(option.getPass(), option.getFail()));
 		}
 
@@ -160,7 +161,7 @@ public final class Trait implements Shape {
 
 					// collect step-to-shape mappings from nested shapes
 
-					.flatMap(shape -> shape.accept(this).entrySet().stream())
+					.flatMap(shape -> shape.map(this).entrySet().stream())
 
 					// group by step, collect to a set of shapes and convert to an optimized conjunction
 

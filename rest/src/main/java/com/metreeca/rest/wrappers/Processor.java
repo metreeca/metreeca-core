@@ -19,6 +19,7 @@ package com.metreeca.rest.wrappers;
 
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
@@ -336,7 +337,7 @@ public final class Processor implements Wrapper {
 
 	private <T extends Message<T>> Collection<Statement> trim(final Value focus, final Shape shape, final Model model) {
 		return wild(shape) ? model : shape // !!! migrate wildcard handling to Trimmer
-				.accept(new Trimmer(model, singleton(focus)))
+				.map(new Trimmer(model, singleton(focus)))
 				.collect(toList());
 	}
 
@@ -349,7 +350,7 @@ public final class Processor implements Wrapper {
 	 * <p>Recursively extracts all the statements compatible with a shape from a model and an initial collection of
 	 * source values .</p>
 	 */
-	private static final class Trimmer extends Shape.Probe<Stream<Statement>> {
+	private static final class Trimmer extends Traverser<Stream<Statement>> {
 
 		private final Collection<Statement> model;
 		private final Collection<Value> focus;
@@ -361,12 +362,12 @@ public final class Processor implements Wrapper {
 		}
 
 
-		@Override protected Stream<Statement> fallback(final Shape shape) {
+		@Override public Stream<Statement> probe(final Shape shape) {
 			return Stream.empty();
 		}
 
 
-		@Override public Stream<Statement> visit(final Trait trait) {
+		@Override public Stream<Statement> probe(final Trait trait) {
 
 			final Step step=trait.getStep();
 
@@ -389,19 +390,24 @@ public final class Processor implements Wrapper {
 					.map(target)
 					.collect(toSet());
 
-			return Stream.concat(restricted.stream(), trait.getShape().accept(new Trimmer(model, focus)));
+			return Stream.concat(restricted.stream(), trait.getShape().map(new Trimmer(model, focus)));
 		}
 
-		@Override public Stream<Statement> visit(final And and) {
-			return and.getShapes().stream().flatMap(shape -> shape.accept(this));
+		@Override public Stream<Statement> probe(final Virtual virtual) {
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
-		@Override public Stream<Statement> visit(final Or or) {
-			return or.getShapes().stream().flatMap(shape -> shape.accept(this));
+
+		@Override public Stream<Statement> probe(final And and) {
+			return and.getShapes().stream().flatMap(shape -> shape.map(this));
 		}
 
-		@Override public Stream<Statement> visit(final Option option) {
-			return Stream.concat(option.getPass().accept(this), option.getFail().accept(this));
+		@Override public Stream<Statement> probe(final Or or) {
+			return or.getShapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<Statement> probe(final Option option) {
+			return Stream.concat(option.getPass().map(this), option.getFail().map(this));
 		}
 
 	}
