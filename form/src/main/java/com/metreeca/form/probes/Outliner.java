@@ -18,25 +18,21 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.*;
+import com.metreeca.form.shapes.And;
+import com.metreeca.form.shapes.Clazz;
+import com.metreeca.form.shapes.Trait;
 import com.metreeca.form.shifts.Step;
 
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Sets.union;
 import static com.metreeca.form.things.Values.statement;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toCollection;
 
 
 /**
@@ -44,7 +40,7 @@ import static java.util.stream.Collectors.toCollection;
  *
  * <p>Recursively extracts implied RDF statements from a shape.</p>
  */
-public final class Outliner extends Visitor<Set<Statement>> { // !!! review/optimize
+public final class Outliner extends Visitor<Stream<Statement>> {
 
 	private final Collection<Value> sources;
 
@@ -67,73 +63,55 @@ public final class Outliner extends Visitor<Set<Statement>> { // !!! review/opti
 	}
 
 
-	@Override public Set<Statement> probe(final Shape shape) { return set(); }
-
-
-	@Override public Set<Statement> probe(final Clazz clazz) {
-
-		final Set<Statement> statements=new LinkedHashSet<>();
-
-		for (final Value source : sources) {
-			if ( source instanceof Resource ) {
-				statements.add(statement((Resource)source, RDF.TYPE, clazz.getIRI()));
-			}
-		}
-
-		return statements;
+	@Override public Stream<Statement> probe(final Shape shape) {
+		return Stream.empty();
 	}
 
-	@Override public Set<Statement> probe(final Trait trait) {
+
+	@Override public Stream<Statement> probe(final Clazz clazz) {
+		return sources.stream()
+				.filter(source -> source instanceof Resource)
+				.map(source -> statement((Resource)source, RDF.TYPE, clazz.getIRI()));
+	}
+
+	@Override public Stream<Statement> probe(final Trait trait) {
 
 		final Step step=trait.getStep();
 		final Shape shape=trait.getShape();
 
-		return union(
+		final boolean inverse=step.isInverse();
+		final IRI iri=step.getIRI();
 
-				all(shape).map(targets -> {
+		return Stream.concat(
 
-					final Set<Statement> statements=new LinkedHashSet<>();
+				all(shape).map(targets -> targets.stream().flatMap(target -> sources.stream().flatMap(source -> inverse
 
-					for (final Value source : sources) {
-						for (final Value target : targets) {
-							if ( step.isInverse() ) {
+						? target instanceof Resource ? Stream.of(statement((Resource)target, iri, source)) : Stream.empty()
+						: source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
 
-								if ( target instanceof Resource ) {
-									statements.add(statement((Resource)target, step.getIRI(), source));
-								}
+				))).orElse(Stream.empty()),
 
-							} else {
+				shape.map(new Outliner())
 
-								if ( source instanceof Resource ) {
-									statements.add(statement((Resource)source, step.getIRI(), target));
-								}
-
-							}
-						}
-					}
-
-					return statements;
-
-				}).orElse(set()),
-
-				shape.map(new Outliner()));
+		);
 	}
 
 
-	@Override public Set<Statement> probe(final And and) {
-		return union(
+	@Override public Stream<Statement> probe(final And and) {
+		return Stream.concat(
 
 				and.getShapes().stream()
 
-						.flatMap(shape -> shape.map(this).stream())
-						.collect(toCollection(LinkedHashSet::new)),
+						.flatMap(shape -> shape.map(this)),
+
 
 				all(and).map(values -> and.getShapes().stream()
 
-						.flatMap(shape -> shape.map(new Outliner(values)).stream())
-						.collect(toCollection(LinkedHashSet::new))
+						.flatMap(shape -> shape.map(new Outliner(values)))
 
-				).orElseGet(LinkedHashSet::new));
+				).orElseGet(Stream::empty)
+
+		);
 	}
 
 }

@@ -177,6 +177,7 @@ public final class Updater extends Actor<Updater> {
 		model.addAll(shape // add implied statements
 				.map(mode(Form.verify))
 				.map(new Outliner(focus))
+				.collect(toList())
 		);
 
 		return model;

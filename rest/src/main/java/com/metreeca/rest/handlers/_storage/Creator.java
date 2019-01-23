@@ -50,6 +50,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -132,6 +133,7 @@ public final class Creator extends Actor<Creator> {
 					model.addAll(request.shape()
 							.map(mode(Form.verify))
 							.map(new Outliner(request.item()))
+							.collect(toList())
 					);
 
 					return model;
