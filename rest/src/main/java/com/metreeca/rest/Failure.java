@@ -17,14 +17,22 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.Frame;
+import com.metreeca.form.Issue;
+import com.metreeca.form.Report;
+import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.formats.JSONFormat;
 
-import java.util.Optional;
+import org.eclipse.rdf4j.model.Value;
+
+import java.util.*;
 import java.util.function.Function;
 
 import javax.json.*;
 
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.form.things.Values.format;
+
+import static java.util.stream.Collectors.groupingBy;
 
 
 /**
@@ -47,9 +55,14 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 public final class Failure implements Function<Response, Response> {
 
 	/**
-	 * The machine readable error tag for failures due to malformed data in message body.
+	 * The machine readable error tag for failures due to malformed message body.
 	 */
 	public static final String BodyMalformed="body-malformed";
+
+	/**
+	 * The machine readable error tag for failures due to invalid data.
+	 */
+	public static final String DataInvalid="data-invalid";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,6 +177,28 @@ public final class Failure implements Function<Response, Response> {
 		return this;
 	}
 
+	/**
+	 * Configures the error trace.
+	 *
+	 * @param report a shape validation report describing the error condition defined by this failure
+	 *
+	 * @return this failure
+	 *
+	 * @throws NullPointerException if {@code report} is null
+	 */
+	public Failure trace(final Report report) {
+
+		if ( report == null ) {
+			throw new NullPointerException("null report");
+		}
+
+		// !!! rewrite report value references to original target iri
+		// !!! rewrite references to external base IRI
+		// !!! support other formats with content negotiation
+
+		return trace(json(report));
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -185,7 +220,7 @@ public final class Failure implements Function<Response, Response> {
 		return response
 				.status(status)
 				.cause(cause)
-				.body(json(), ticket());
+				.body(JSONFormat.json(), ticket());
 	}
 
 
@@ -217,6 +252,79 @@ public final class Failure implements Function<Response, Response> {
 		}
 
 		return builder.build();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private JsonObject json(final Report report) {
+
+		final Map<Issue.Level, List<Issue>> issues=report.getIssues().stream().collect(groupingBy(Issue::getLevel));
+
+		final JsonObjectBuilder json=Json.createObjectBuilder();
+
+		Optional.ofNullable(issues.get(Issue.Level.Error)).ifPresent(errors ->
+				json.add("errors", json(errors, this::json))
+		);
+
+		Optional.ofNullable(issues.get(Issue.Level.Warning)).ifPresent(warnings ->
+				json.add("warnings", json(warnings, this::json))
+		);
+
+		report.getFrames().forEach(frame -> {
+
+			final String property=format(frame.getValue());
+			final JsonObject value=json(frame);
+
+			if ( !value.isEmpty() ) {
+				json.add(property, value);
+			}
+		});
+
+		return json.build();
+	}
+
+
+	private JsonObject json(final Frame<Report> frame) {
+
+		final JsonObjectBuilder json=Json.createObjectBuilder();
+
+		for (final Map.Entry<Step, Report> slot : frame.getSlots().entrySet()) {
+
+			final String property=slot.getKey().format();
+			final JsonObject value=json(slot.getValue());
+
+			if ( !value.isEmpty() ) {
+				json.add(property, value);
+			}
+		}
+
+		return json.build();
+	}
+
+	private JsonObject json(final Issue issue) {
+
+		final JsonObjectBuilder json=Json.createObjectBuilder();
+
+		json.add("cause", issue.getMessage());
+		json.add("shape", issue.getShape().toString());
+
+		final Set<Value> values=issue.getValues();
+
+		if ( !values.isEmpty() ) {
+			json.add("values", json(values, v -> Json.createValue(format(v))));
+		}
+
+		return json.build();
+	}
+
+	private <V> JsonArray json(final Iterable<V> errors, final Function<V, JsonValue> reporter) {
+
+		final JsonArrayBuilder json=Json.createArrayBuilder();
+
+		errors.forEach(item -> json.add(reporter.apply(item)));
+
+		return json.build();
 	}
 
 }
