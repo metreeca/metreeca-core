@@ -18,13 +18,13 @@
 package com.metreeca.rest.wrappers;
 
 
-import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Extractor;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
@@ -40,23 +40,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Values.*;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
 
-import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 
 
 /**
  * RDF processor.
  *
- * <p>Process and trims to shape {@linkplain RDFFormat RDF} payloads for incoming request and outgoing responses and
- * executes SPARQL Update housekeeping scripts.</p>
+ * <p>Processes request and response {@linkplain RDFFormat RDF} payloads and executes SPARQL Update housekeeping
+ * scripts.</p>
  *
- * <p>If the incoming request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single
+ * <p>When processing {@linkplain Request#safe() unsafe} requests, wrapped handlers are executed inside a single
  * transaction on the system {@linkplain Graph#Factory graph database}, which is automatically committed on {@linkplain
  * Response#success() successful} response or rolled back otherwise.</p>
  */
@@ -116,49 +113,10 @@ public final class Processor implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Enables request RDF payload trimming.
-	 *
-	 * <p>If incoming requests include a {@linkplain Message#shape() shape}, their {@linkplain RDFFormat RDF} payload
-	 * is
-	 * trimmed to remove statements outside the allowed shape envelope.</p>
-	 *
-	 * @return this processor
-	 */
-	public Processor pre() {
-
-		if ( pre == null ) {
-			pre=(request, model) -> model;
-		}
-
-		return this;
-	}
-
-	/**
-	 * Enables response RDF payload trimming.
-	 *
-	 * <p>If outgoing responses include a {@linkplain Message#shape() shape}, their {@linkplain RDFFormat RDF} payload
-	 * is trimmed to remove statements outside the allowed shape envelope.</p>
-	 *
-	 * @return this processor
-	 */
-	public Processor post() {
-
-		if ( post == null ) {
-			post=(request, model) -> model;
-		}
-
-		return this;
-	}
-
-
-	/**
 	 * Inserts a request RDF pre-processing filter.
 	 *
 	 * <p>The filter is chained after previously inserted pre-processing filters and executed on incoming requests and
 	 * their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
-	 *
-	 * <p>If the request includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
-	 * statements outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
 	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -184,9 +142,6 @@ public final class Processor implements Wrapper {
 	 * <p>The filter is chained after previously inserted post-processing filters and executed on {@linkplain
 	 * Response#success() successful} outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is
 	 * present, or ignored, otherwise.</p>
-	 *
-	 * <p>If the response includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
-	 * statements outside the allowed shape envelope.</p>
 	 *
 	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
 	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
@@ -354,21 +309,9 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> T process(final T message, final BiFunction<T, Model, Model> filter) {
-
-		// ;( memoize current message state, before it's possibly altered by downstream wrappers
-
-		final IRI focus=message.item();
-		final Shape shape=message.shape();
-
-		return message.pipe(RDFFormat.rdf(), statements -> Value((filter == null) ?
-				statements : trim(focus, shape, filter.apply(message, new LinkedHashModel(statements)))
+		return message.pipe(RDFFormat.rdf(), statements -> Value(
+				filter == null ? statements : filter.apply(message, new LinkedHashModel(statements))
 		));
-	}
-
-	private <T extends Message<T>> Collection<Statement> trim(final Value focus, final Shape shape, final Model model) {
-		return pass(shape) ? model : shape // !!! trim to reachable cell / migrate wildcard handling to Extractor?
-				.map(new Extractor(model, singleton(focus)))
-				.collect(toList());
 	}
 
 }

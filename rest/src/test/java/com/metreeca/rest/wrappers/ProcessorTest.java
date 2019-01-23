@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
@@ -129,34 +128,6 @@ final class ProcessorTest {
 				.accept(response -> assertThat(response).hasBody(rdf())));
 	}
 
-	@Test void testTrimRequestRDFPayloadToRequestShape() {
-		exec(() -> new Processor()
-
-				.pre((response, model) -> {
-
-					model.add(response.item(), RDF.FIRST, RDF.NIL);
-					model.add(response.item(), RDF.REST, RDF.NIL);
-
-					return model;
-
-				})
-
-				.wrap(echo())
-
-				.handle(new Request()
-
-						.shape(trait(RDF.FIRST))
-						.body(rdf(), emptyList())) // empty body to activate pre-processing
-
-				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
-								.as("statements outside shape envelope trimmed")
-								.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
-						)
-				)
-		);
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -196,34 +167,6 @@ final class ProcessorTest {
 				.handle(new Request()) // no RDF payload
 
 				.accept(response -> assertThat(response).hasBody(rdf()))
-		);
-	}
-
-	@Test void testTrimResponseRDFPayloadToResponseShape() {
-		exec(() -> new Processor()
-
-				.post((response, model) -> {
-
-					model.add(response.item(), RDF.FIRST, RDF.NIL);
-					model.add(response.item(), RDF.REST, RDF.NIL);
-
-					return model;
-
-				})
-
-				.wrap(echo())
-
-				.handle(new Request()
-
-						.shape(trait(RDF.FIRST))
-						.body(rdf(), emptyList())) // empty body to activate post-processing
-
-				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
-								.as("statements outside shape envelope trimmed")
-								.isIsomorphicTo(statement(response.item(), RDF.FIRST, RDF.NIL))
-						)
-				)
 		);
 	}
 
