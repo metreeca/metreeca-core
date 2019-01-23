@@ -53,7 +53,7 @@ public final class Structures {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code model} is null
 	 */
-	public static Model cell(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
+	public static Model description(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -63,7 +63,7 @@ public final class Structures {
 			throw new NullPointerException("null model");
 		}
 
-		return cell(focus, labelled, (s, p, o) ->
+		return description(focus, labelled, (s, p, o) ->
 				StreamSupport.stream(model.spliterator(), true).filter(statement
 						-> (s == null || s.equals(statement.getSubject()))
 						&& (p == null || p.equals(statement.getPredicate()))
@@ -84,7 +84,7 @@ public final class Structures {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code connection} is null
 	 */
-	public static Model cell(final Resource focus, final boolean labelled, final RepositoryConnection connection) {
+	public static Model description(final Resource focus, final boolean labelled, final RepositoryConnection connection) {
 
 		// !!! optimize for SPARQL
 
@@ -96,15 +96,15 @@ public final class Structures {
 			throw new NullPointerException("null connection");
 		}
 
-		return cell(focus, labelled, (s, p, o) ->
+		return description(focus, labelled, (s, p, o) ->
 				Iterations.stream(connection.getStatements(s, p, o, true))
 		);
 	}
 
 
-	private static Model cell(final Resource focus, final boolean labelled, final Source source) {
+	private static Model description(final Resource focus, final boolean labelled, final Source source) {
 
-		final Model cell=new LinkedHashModel();
+		final Model description=new LinkedHashModel();
 
 		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
 		final Collection<Value> visited=new HashSet<>();
@@ -118,23 +118,78 @@ public final class Structures {
 
 					source.match((Resource)value, null, null)
 							.peek(statement -> pending.add(statement.getObject()))
-							.forEach(cell::add);
+							.forEach(description::add);
 
 					source.match(null, null, value)
 							.peek(statement -> pending.add(statement.getSubject()))
-							.forEach(cell::add);
+							.forEach(description::add);
 
 				} else if ( labelled && value instanceof IRI ) {
 
-					source.match((Resource)value, RDFS.LABEL, null).forEach(cell::add);
-					source.match((Resource)value, RDFS.COMMENT, null).forEach(cell::add);
+					source.match((Resource)value, RDFS.LABEL, null).forEach(description::add);
+					source.match((Resource)value, RDFS.COMMENT, null).forEach(description::add);
 
 				}
 			}
 
 		}
 
-		return cell;
+		return description;
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves a reachable network from a statement source.
+	 *
+	 * @param focus    the resource whose reachable network is to be retrieved
+	 * @param model    the statement source the description is to be retrieved from
+	 *
+	 * @return the reachable network of {@code focus} retrieved from {@code model}
+	 *
+	 * @throws NullPointerException if either {@code focus} or {@code model} is null
+	 */
+	public static Model network(final IRI focus, final Iterable<Statement> model) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		final Model network=new LinkedHashModel();
+
+		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
+		final Collection<Value> visited=new HashSet<>();
+
+		while ( !pending.isEmpty() ) {
+
+			final Value value=pending.remove();
+
+			if ( visited.add(value) ) {
+				model.forEach(statement -> {
+					if ( statement.getSubject().equals(value)) {
+
+						network.add(statement);
+						pending.add(statement.getObject());
+
+					} else if ( statement.getObject().equals(value) ) {
+
+						network.add(statement);
+						pending.add(statement.getSubject());
+
+					}
+
+				});
+			}
+
+		}
+
+		return network;
 	}
 
 

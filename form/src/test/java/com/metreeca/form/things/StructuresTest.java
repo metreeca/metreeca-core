@@ -86,7 +86,7 @@ final class StructuresTest {
 
 	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromModel() {
 
-			final Model cell=Structures.cell(focus, false, model);
+			final Model cell=Structures.description(focus, false, model);
 
 			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
 			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
@@ -95,7 +95,7 @@ final class StructuresTest {
 
 	@Test void testRetrieveLabelledSymmetricConciseBoundedDescriptionFromModel() {
 
-		final Model cell=Structures.cell(focus, true, model);
+		final Model cell=Structures.description(focus, true, model);
 
 		assertThat(cell.subjects())
 				.containsOnly(focus, _dblank, _iblank, direct, inverse);
@@ -120,7 +120,7 @@ final class StructuresTest {
 
 		try (final RepositoryConnection connection=sandbox(model).get()) {
 
-			final Model cell=Structures.cell(focus, false, connection);
+			final Model cell=Structures.description(focus, false, connection);
 
 			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
 			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
@@ -133,7 +133,7 @@ final class StructuresTest {
 
 		try (final RepositoryConnection connection=sandbox(model).get()) {
 
-			final Model cell=Structures.cell(focus, true, connection);
+			final Model cell=Structures.description(focus, true, connection);
 
 			assertThat(cell.subjects())
 					.containsOnly(focus, _dblank, _iblank, direct, inverse);

@@ -20,10 +20,10 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Extractor;
 import com.metreeca.form.things.Sets;
+import com.metreeca.form.things.Structures;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.*;
 
@@ -164,7 +164,7 @@ public final class Modulator implements Wrapper { // !!! tbd
 				} else {
 
 					final Collection<Statement> model=request.body(rdf()).value().orElseGet(Sets::set);
-					final Collection<Statement> envelope=connectivity(request.item(), model);
+					final Collection<Statement> envelope=Structures.network(request.item(), model);
 
 					final Report report=report(model.stream()
 							.filter(statement -> !envelope.contains(statement))
@@ -214,7 +214,7 @@ public final class Modulator implements Wrapper { // !!! tbd
 			if ( pass(shape) ) {
 
 				return response
-						.pipe(rdf(), rdf -> Value(connectivity(request.item(), rdf)));
+						.pipe(rdf(), rdf -> Value(Structures.network(request.item(), rdf)));
 
 			} else {
 
@@ -241,39 +241,5 @@ public final class Modulator implements Wrapper { // !!! tbd
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Model connectivity(final IRI focus, final Iterable<Statement> model) {
-
-		final Model connectivity=new LinkedHashModel();
-
-		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
-		final Collection<Value> visited=new HashSet<>();
-
-		while ( !pending.isEmpty() ) {
-
-			final Value value=pending.remove();
-
-			if ( visited.add(value) ) {
-				model.forEach(statement -> {
-					if ( statement.getSubject().equals(value)) {
-
-						connectivity.add(statement);
-						pending.add(statement.getObject());
-
-					} else if ( statement.getObject().equals(value) ) {
-
-						connectivity.add(statement);
-						pending.add(statement.getSubject());
-
-					}
-
-				});
-			}
-
-		}
-
-		return connectivity;
-
-	}
 
 }
