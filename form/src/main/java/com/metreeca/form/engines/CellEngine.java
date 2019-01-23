@@ -20,7 +20,6 @@ package com.metreeca.form.engines;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Report;
-import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -32,7 +31,7 @@ import java.util.Collection;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Report.report;
 import static com.metreeca.form.Shape.pass;
-import static com.metreeca.form.things.Structures.cell;
+import static com.metreeca.form.things.Structures.description;
 
 import static java.util.stream.Collectors.toList;
 
@@ -75,7 +74,7 @@ public final class CellEngine {
 			throw new NullPointerException("null focus");
 		}
 
-		return cell(focus, true, connection);
+		return description(focus, true, connection);
 	}
 
 	/**
@@ -135,7 +134,7 @@ public final class CellEngine {
 
 		if ( !report.assess(Level.Error) ) {
 
-			connection.remove(cell(focus, false, connection));
+			connection.remove(description(focus, false, connection));
 			connection.add(model);
 
 		}
@@ -156,7 +155,7 @@ public final class CellEngine {
 			throw new NullPointerException("null focus");
 		}
 
-		connection.remove(cell(focus, false, connection));
+		connection.remove(description(focus, false, connection));
 	}
 
 
@@ -164,15 +163,13 @@ public final class CellEngine {
 
 	private Report validate(final Resource focus, final Collection<Statement> model) {
 
-		final Model envelope=cell(focus, false, model);
+		final Model envelope=description(focus, false, model);
 
-		final Collection<Statement> outliers=model.stream()
+		return report(model.stream()
 				.filter(statement -> !envelope.contains(statement))
-				.collect(toList());
-
-		return outliers.isEmpty() ? report() : report(outliers.stream()
-				.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier, Shape.pass()))
-				.collect(toList()));
+				.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier, pass()))
+				.collect(toList())
+		);
 
 	}
 

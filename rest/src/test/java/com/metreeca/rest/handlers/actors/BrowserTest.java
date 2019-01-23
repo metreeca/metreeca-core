@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers._virtual;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
@@ -33,7 +33,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 
-final class VRelatorTest {
+final class BrowserTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
@@ -79,7 +79,7 @@ final class VRelatorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testBuild() {
-		exec(() -> new VRelator().model(virtual())
+		exec(() -> new Browser().model(virtual())
 
 				.handle(driven())
 
@@ -101,7 +101,7 @@ final class VRelatorTest {
 	}
 
 	@Test void testBuildLimited() {
-		exec(() -> new VRelator().model(virtual())
+		exec(() -> new Browser().model(virtual())
 
 				.handle(driven().roles(Salesman))
 
@@ -125,7 +125,7 @@ final class VRelatorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenUnauthorized() {
-		exec(() -> new VRelator()
+		exec(() -> new Browser()
 
 				.handle(driven().roles(Form.none))
 
@@ -135,7 +135,7 @@ final class VRelatorTest {
 	}
 
 	@Test void testDrivenForbidden() {
-		exec(() -> new VRelator()
+		exec(() -> new Browser()
 
 				.handle(driven().shape(or()))
 
@@ -145,7 +145,7 @@ final class VRelatorTest {
 	}
 
 	@Test void testDrivenUnknownOnEmptyModel() {
-		exec(() -> new VRelator()
+		exec(() -> new Browser()
 
 				.handle(driven())
 

@@ -17,39 +17,25 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.form.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.wrappers.Modulator;
 import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.sys.Trace;
 
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.Collection;
 
-import javax.json.*;
-
-import static com.metreeca.form.Shape.*;
-import static com.metreeca.form.things.Sets.intersection;
 import static com.metreeca.form.things.Strings.indent;
-import static com.metreeca.form.things.Values.format;
-import static com.metreeca.rest.Handler.forbidden;
-import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.disjoint;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.groupingBy;
 
 
 /**
@@ -57,17 +43,17 @@ import static java.util.stream.Collectors.groupingBy;
  *
  * <p>Handles actions on linked data resources.</p>
  *
- * <p>The abstract base:</p>
+ * <p>The abstract base class:</p>
  *
  * <ul>
  *
- * <li>redact request and response {@linkplain Message#shape() shape} according to task/view parameters {@linkplain
- * #action(IRI, IRI) provided} by the concrete implementation;</li>
+ * <li>delegates content access control and redaction to a {@linkplain #modulator()} wrapper;</li>
  *
- * <li>enforces role-based access control; access to the managed resource action is public, unless explicitly
- * {@linkplain #roles(Value...) limited} to specific user roles;</li>
+ * <li>delegates content pre/post-processing and housekeeping to a {@linkplain #processor()} wrapper;</li>
  *
- * <li>adds default LDP {@code Link} response headers for RDF sources.</li>
+ * <li>provides wrapper factories for handling {@linkplain #query(boolean) query} strings, splitting {@linkplain
+ * #container() container} and {@linkplain #resource() resource} shape components and {@linkplain #trace(Collection)
+ * tracing} RDF payloads.</li>
  *
  * </ul>
  *
@@ -80,34 +66,9 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	private final Trace trace=tool(Trace.Factory);
 
 
-	/**
-	 * Creates a {@code Link} header value.
-	 *
-	 * @param resource the target resource to be linked through the header
-	 * @param relation the relation with the target {@code resource}
-	 *
-	 * @return the header value linking the target {@code resource} with the given {@code relation}
-	 *
-	 * @throws NullPointerException if either {@code resource} or {@code relation} is null
-	 */
-	public static String link(final IRI resource, final String relation) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( relation == null ) {
-			throw new NullPointerException("null relation");
-		}
-
-		return String.format("<%s>; rel=\"%s\"", resource, relation);
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Set<Value> roles=emptySet();
-
+	private final Modulator modulator=new Modulator();
 	private final Processor processor=new Processor();
 
 
@@ -126,9 +87,10 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * @return this actor
 	 *
 	 * @throws NullPointerException if either {@code roles} is null or contains null values
+	 * @see Modulator#role(Value...)
 	 */
-	public T roles(final Value... roles) {
-		return roles(asList(roles));
+	public T role(final Value... roles) {
+		return role(asList(roles));
 	}
 
 	/**
@@ -141,8 +103,9 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 	 * @return this actor
 	 *
 	 * @throws NullPointerException if either {@code roles} is null or contains null values
+	 * @see Modulator#role(Collection)
 	 */
-	public T roles(final Collection<? extends Value> roles) {
+	public T role(final Collection<? extends Value> roles) {
 
 		if ( roles == null ) {
 			throw new NullPointerException("null roles");
@@ -152,7 +115,7 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 			throw new NullPointerException("null role");
 		}
 
-		this.roles=new HashSet<>(roles);
+		modulator.role(roles);
 
 		return self();
 	}
@@ -160,172 +123,24 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Inserts a request RDF pre-processing filter.
-	 *
-	 * @param filter the request RDF request pre-processing filter to be inserted; takes as argument an incoming request
-	 *               and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model; if the
-	 *               request includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
-	 *               statements outside the allowed envelope after shape redaction
-	 *
-	 * @return this actor
-	 *
-	 * @throws NullPointerException if {@code filter} is null
-	 * @see Processor#pre(BiFunction)
-	 */
-	protected T pre(final BiFunction<Request, Model, Model> filter) {
+	protected Modulator modulator() { return modulator; }
 
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		processor.pre(filter);
-
-		return self();
-	}
-
-	/**
-	 * Inserts a response post-processing RDF filter.
-	 *
-	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
-	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model;
-	 *               if the response includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to
-	 *               remove statements outside the allowed envelope after shape redaction
-	 *
-	 * @return this actor
-	 *
-	 * @throws NullPointerException if {@code filter} is null
-	 * @see Processor#post(BiFunction)
-	 */
-	protected T post(final BiFunction<Response, Model, Model> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		processor.post(filter);
-
-		return self();
-	}
-
-	/**
-	 * Inserts a SPARQL Update housekeeping script.
-	 *
-	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
-	 *               processing; empty scripts are ignored
-	 *
-	 * @return this actor
-	 *
-	 * @throws NullPointerException if {@code script} is null
-	 * @see Processor#sync(String)
-	 */
-	protected T sync(final String script) {
-
-		if ( script == null ) {
-			throw new NullPointerException("null script");
-		}
-
-		processor.sync(script);
-
-		return self();
-	}
+	protected Processor processor() { return processor; }
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates a shape-driven action wrapper.
-	 *
-	 * <p>Redacts request and response {@linkplain Message#shape() shapes} according to {@code task} and {@code view}
-	 * parameters and the {@linkplain Request#roles() roles} of the user performing the request; response shape is also
-	 * redacted according to the {@link Shape#verify(Shape...)} mode; request {@code mode} redaction is left to final
-	 * shape consumers.</p>
-	 *
-	 * @param task a IRI identifying the {@linkplain Form#task task} to be performed by the wrapped handler
-	 * @param view a IRI identifying the {@linkplain Form#view view} level for the wrapped handler
-	 *
-	 * @return an handler for the specified shape driven action
-	 *
-	 * @throws NullPointerException if either {@code task} or {@code view} is null
-	 */
-	protected Wrapper action(final IRI task, final IRI view) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		if ( view == null ) {
-			throw new NullPointerException("null view");
-		}
-
-		return query().wrap(headers())
-
-				.wrap(pre(task, view)) // redact request shape before pre-processor shape-driven RDF payload trimming
-				.wrap(processor)
-				.wrap(post(task, view)); // redact response shape before post-processor shape-driven RDF payload trimming
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Wrapper query() {
-		return handler -> request -> request.safe() || request.query().isEmpty()
-				? handler.handle(request)
+	protected Wrapper query(final boolean accepted) {
+		return handler -> request -> accepted || request.query().isEmpty() ? handler.handle(request)
 				: request.reply(new Failure().status(Response.BadRequest).cause("unexpected query parameters"));
 	}
 
-	private Wrapper headers() {
-		return handler -> request -> handler.handle(request).map(response -> response.headers("+Link",
-				link(LDP.RESOURCE, "type"),
-				link(LDP.RDF_SOURCE, "type")
-		));
+	protected Wrapper container() {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-
-	private Wrapper pre(final IRI task, final IRI view) {
-		return handler -> request -> {
-
-			final Shape shape=request.shape();
-
-			if ( pass(shape) ) {
-
-				return !roles.isEmpty() && disjoint(roles, request.roles()) ?
-						refused(request) : handler.handle(request);
-
-			} else { // !!! cache redacted shapes?
-
-				final Shape redacted=shape
-						.map(task(task))
-						.map(view(view));
-
-				final Shape authorized=redacted
-						.map(role(roles(request)));
-
-				return empty(redacted) ? forbidden(request)
-						: empty(authorized) ? refused(request)
-						: handler.handle(request.shape(authorized));
-
-			}
-
-		};
+	protected Wrapper resource() {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	private Wrapper post(final IRI task, final IRI view) { // !!! cache redacted shapes?
-		return handler -> request -> handler.handle(request).map(response -> response.shape(response.shape()
-				.map(task(task))
-				.map(view(view))
-				.map(mode(Form.verify))
-				.map(role(roles(request)))
-		));
-	}
-
-
-	private Set<Value> roles(final Request request) {
-		return roles.isEmpty() ? request.roles() : intersection(roles, request.roles());
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected Collection<Statement> trace(final Collection<Statement> model) {
 
@@ -344,79 +159,6 @@ public abstract class Actor<T extends Actor<T>> extends Delegator {
 		}, null);
 
 		return model;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	protected JsonObject report(final Report report) {
-
-		final Map<Issue.Level, List<Issue>> issues=report.getIssues().stream().collect(groupingBy(Issue::getLevel));
-
-		final JsonObjectBuilder json=Json.createObjectBuilder();
-
-		Optional.ofNullable(issues.get(Issue.Level.Error)).ifPresent(errors ->
-				json.add("errors", report(errors, this::report))
-		);
-
-		Optional.ofNullable(issues.get(Issue.Level.Warning)).ifPresent(warnings ->
-				json.add("warnings", report(warnings, this::report))
-		);
-
-		report.getFrames().forEach(frame -> {
-
-			final String property=format(frame.getValue());
-			final JsonObject value=report(frame);
-
-			if ( !value.isEmpty() ) {
-				json.add(property, value);
-			}
-		});
-
-		return json.build();
-	}
-
-
-	private JsonObject report(final Frame<Report> frame) {
-
-		final JsonObjectBuilder json=Json.createObjectBuilder();
-
-		for (final Map.Entry<Step, Report> slot : frame.getSlots().entrySet()) {
-
-			final String property=slot.getKey().format();
-			final JsonObject value=report(slot.getValue());
-
-			if ( !value.isEmpty() ) {
-				json.add(property, value);
-			}
-		}
-
-		return json.build();
-	}
-
-	private JsonObject report(final Issue issue) {
-
-		final JsonObjectBuilder json=Json.createObjectBuilder();
-
-		json.add("cause", issue.getMessage());
-		json.add("shape", issue.getShape().toString());
-
-		final Set<Value> values=issue.getValues();
-
-		if ( !values.isEmpty() ) {
-			json.add("values", report(values, v -> Json.createValue(format(v))));
-		}
-
-		return json.build();
-	}
-
-	private <V> JsonArray report(final Iterable<V> errors, final Function<V, JsonValue> reporter) {
-
-		final JsonArrayBuilder json=Json.createArrayBuilder();
-
-		errors.forEach(item -> json.add(reporter.apply(item)));
-
-		return json.build();
 	}
 
 }

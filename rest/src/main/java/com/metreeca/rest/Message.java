@@ -55,9 +55,33 @@ public abstract class Message<T extends Message<T>> {
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 
 
+	/**
+	 * Creates a {@code Link} header value.
+	 *
+	 * @param resource the target resource to be linked through the header
+	 * @param relation the relation with the target {@code resource}
+	 *
+	 * @return the header value linking the target {@code resource} with the given {@code relation}
+	 *
+	 * @throws NullPointerException if either {@code resource} or {@code relation} is null
+	 */
+	public static String link(final IRI resource, final String relation) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( relation == null ) {
+			throw new NullPointerException("null relation");
+		}
+
+		return String.format("<%s>; rel=\"%s\"", resource, relation);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape=Shape.pass();
+	private Shape shape=pass();
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 

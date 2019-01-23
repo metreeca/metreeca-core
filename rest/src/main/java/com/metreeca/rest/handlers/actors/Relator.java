@@ -29,6 +29,7 @@ import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -51,7 +52,7 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * Stored resource relator.
+ * LDP resource relator.
  *
  * <p>Handles retrieval requests on the stored linked data resource identified by the request {@linkplain
  * Request#item() focus item}.</p>
@@ -78,7 +79,8 @@ import static com.metreeca.tray.Tray.tool;
  *
  * </ul>
  *
- * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph} database.</p>
+ * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
+ * database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
@@ -88,21 +90,47 @@ public final class Relator extends Actor<Relator> {
 
 
 	public Relator() {
-		delegate(action(Form.relate, Form.detail).wrap((Request request) -> (
+		delegate(query(true)
+				.wrap(modulator().task(Form.relate).view(Form.detail))
+				.wrap(processor())
+				.wrap((Request request) -> (
 
-				pass(request.shape()) ? direct(request) : driven(request))
+						pass(request.shape()) ? direct(request) : driven(request))
 
-				.map(response -> response.success() ?
+						.map(response -> response.success() ?
 
-						response.headers("Vary", "Accept") : response
+								response.headers("Vary", "Accept") : response
 
-				)));
+						)
+				)
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Relator post(final BiFunction<Response, Model, Model> filter) { return super.post(filter); }
+	/**
+	 * Inserts a response post-processing RDF filter.
+	 *
+	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
+	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 *
+	 * @return this relator
+	 *
+	 * @throws NullPointerException if {@code filter} is null
+	 * @see Processor#post(BiFunction)
+	 */
+	public Relator post(final BiFunction<Response, Model, Model> filter) {
+
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
+
+		processor().post(filter);
+
+		return this;
+	}
+
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

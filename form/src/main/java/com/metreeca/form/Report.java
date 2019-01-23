@@ -19,7 +19,6 @@ package com.metreeca.form;
 
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Maps;
-import com.metreeca.form.things.Sets;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -27,6 +26,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Frame.frames;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Sets.union;
 import static com.metreeca.form.things.Values.statement;
 
@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.*;
  */
 public final class Report {
 
-	private static final Report empty=new Report(Sets.set(), Sets.set());
+	private static final Report empty=new Report(set(), set());
 
 
 	public static Report report() {
@@ -47,11 +47,11 @@ public final class Report {
 	}
 
 	public static Report report(final Issue... issues) {
-		return new Report(Sets.set(issues), Sets.set());
+		return new Report(set(issues), set());
 	}
 
 	@SafeVarargs public static Report report(final Collection<Issue> issues, final Frame<Report>... frames) {
-		return new Report(issues, Sets.set(frames));
+		return new Report(issues, set(frames));
 	}
 
 	public static Report report(final Collection<Issue> issues, final Collection<Frame<Report>> frames) {

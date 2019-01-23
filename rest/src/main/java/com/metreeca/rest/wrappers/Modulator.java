@@ -61,6 +61,14 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Modulator implements Wrapper { // !!! tbd
 
+	// 	 * <p>Redacts request and response {@linkplain Message#shape() shapes} according to {@code task} and {@code view}
+	//	 * parameters and the {@linkplain Request#roles() roles} of the user performing the request; response shape is also
+	//	 * redacted according to the {@link Shape#verify(Shape...)} mode; request {@code mode} redaction is left to final
+	//	 * shape consumers.</p>
+	//	 *
+	//	 * @param task a IRI identifying the {@linkplain Form#task task} to be performed by the wrapped handler
+	//	 * @param view a IRI identifying the {@linkplain Form#view view} level for the wrapped handler
+
 	//	 * <p>If the request includes a {@linkplain Message#shape() shape}, the filtered model is trimmed to remove
 	//	 * statements outside the allowed shape envelope.</p>
 
@@ -197,6 +205,8 @@ public final class Modulator implements Wrapper { // !!! tbd
 				final Shape authorized=redacted
 						.map(Shape.role(roles));
 
+				// !!! checking
+
 				return empty(redacted) ? forbidden(request)
 						: empty(authorized) ? refused(request)
 						: handler.handle(request.shape(authorized));
@@ -239,7 +249,5 @@ public final class Modulator implements Wrapper { // !!! tbd
 	private Set<Value> roles(final Request request) {
 		return roles.isEmpty() ? request.roles() : intersection(roles, request.roles());
 	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

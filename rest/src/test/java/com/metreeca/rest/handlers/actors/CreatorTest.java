@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers._storage;
+package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Codecs;
@@ -147,7 +147,7 @@ final class CreatorTest {
 
 
 	@Test void testDirectUnauthorized() {
-		exec(() -> new Creator().roles(Manager)
+		exec(() -> new Creator().role(Manager)
 
 				.handle(direct().user(Form.none).roles(Salesman))
 
@@ -166,7 +166,7 @@ final class CreatorTest {
 	}
 
 	@Test void testDirectForbidden() {
-		exec(() -> new Creator().roles(Manager)
+		exec(() -> new Creator().role(Manager)
 
 				.handle(direct().user(RDF.NIL).roles(Salesman))
 

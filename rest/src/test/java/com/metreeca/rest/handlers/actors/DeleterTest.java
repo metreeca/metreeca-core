@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers._storage;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
@@ -88,7 +88,7 @@ final class DeleterTest {
 
 
 	@Test void testDirectUnauthorized() {
-		exec(() -> new Deleter().roles(Manager)
+		exec(() -> new Deleter().role(Manager)
 
 				.handle(direct().user(Form.none).roles(Salesman))
 
@@ -106,7 +106,7 @@ final class DeleterTest {
 	}
 
 	@Test void testDirectForbidden() {
-		exec(() -> new Deleter().roles(Manager)
+		exec(() -> new Deleter().role(Manager)
 
 				.handle(direct().user(RDF.NIL).roles(Salesman))
 

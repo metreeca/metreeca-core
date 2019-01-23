@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers._virtual;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
@@ -24,6 +24,7 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
@@ -46,7 +47,7 @@ import static java.util.Collections.emptySet;
 
 
 /**
- * Virtual resource relator.
+ * Virtual resource browser.
  *
  * <p>Handles retrieval requests on the virtual linked data resource identified by the request {@linkplain
  * Request#item() focus item}.</p>
@@ -75,32 +76,33 @@ import static java.util.Collections.emptySet;
  *
  * <p>Empty generated models are reported with a {@link Response#NotFound} status code.</p>
  */
-public final class VRelator extends Actor<VRelator> {
+public final class Browser extends Actor<Browser> {
 
 	private Function<Request, Collection<Statement>> model=request -> emptySet();
 
 	private final Graph graph=tool(Graph.Factory);
 
 
-	public VRelator() {
-		post(
-				(response, model) -> model // non-empty filter forces shape-driven RDF body trimming in Processor
+	public Browser() {
+		delegate(query(false)
+				.wrap(modulator().task(Form.relate).view(Form.detail))
+				.wrap(processor())
+				.wrap((Request request) -> {
 
-		).delegate(action(Form.relate, Form.detail).wrap((Request request) -> {
+					final Collection<Statement> model=this.model.apply(request);
 
-			final Collection<Statement> model=this.model.apply(request);
+					return request.reply(response -> model.isEmpty()
 
-			return request.reply(response -> model.isEmpty()
+							? response.status(Response.NotFound)
 
-					? response.status(Response.NotFound)
+							: response.status(Response.OK)
 
-					: response.status(Response.OK)
+							.map(r -> pass(request.shape()) ? r : r.shape(request.shape()))
 
-					.map(r -> pass(request.shape()) ? r : r.shape(request.shape()))
-
-					.body(rdf(), model)
-			);
-		}));
+							.body(rdf(), model)
+					);
+				})
+		);
 	}
 
 
@@ -151,7 +153,7 @@ public final class VRelator extends Actor<VRelator> {
 	 *
 	 * @throws NullPointerException if {@code graph} is null
 	 */
-	public VRelator model(final String graph) {
+	public Browser model(final String graph) {
 
 		if ( graph == null ) {
 			throw new NullPointerException("null graph query");
@@ -185,7 +187,7 @@ public final class VRelator extends Actor<VRelator> {
 	 *
 	 * @throws NullPointerException if {@code model} is null
 	 */
-	public VRelator model(final Function<Request, Collection<Statement>> model) {
+	public Browser model(final Function<Request, Collection<Statement>> model) {
 
 		if ( model == null ) {
 			throw new NullPointerException("null model");
@@ -197,10 +199,26 @@ public final class VRelator extends Actor<VRelator> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Inserts a response post-processing RDF filter.
+	 *
+	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
+	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 *
+	 * @return this browser
+	 *
+	 * @throws NullPointerException if {@code filter} is null
+	 * @see Processor#post(BiFunction)
+	 */
+	public Browser post(final BiFunction<Response, Model, Model> filter) {
 
-	@Override public VRelator post(final BiFunction<Response, Model, Model> filter) {
-		return super.post(filter);
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
+
+		processor().post(filter);
+
+		return this;
 	}
 
 }

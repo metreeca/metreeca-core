@@ -41,7 +41,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 
 /**
- * Model-driven RDF body manager.
+ * Shape-based content driver.
  *
  * <p>Drives the lifecycle of linked data resources managed by the wrapped handler associating them to a {@linkplain
  * #shape(Shape) shape} model:
@@ -79,11 +79,11 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
  *
  * <ul>
  *
- * <li>redacting the shape read associated with incoming request as  a {@linkplain Message#shape() shape} according to the task to
- * be performed;</li>
+ * <li>redacting the shape read associated with incoming request as  a {@linkplain Message#shape() shape} according to
+ * the task to be performed;</li>
  *
- * <li>associating a shape to outgoing responses as  a {@linkplain Message#shape() shape} in order to drive further processing
- * (e.g. RDF to JSON body mapping).</li>
+ * <li>associating a shape to outgoing responses as  a {@linkplain Message#shape() shape} in order to drive further
+ * processing (e.g. RDF to JSON body mapping).</li>
  *
  * </ul>
  *

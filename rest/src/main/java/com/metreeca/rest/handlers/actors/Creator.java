@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers._storage;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
@@ -28,6 +28,7 @@ import com.metreeca.form.probes.Outliner;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -126,32 +127,75 @@ public final class Creator extends Actor<Creator> {
 
 
 	public Creator() {
-		delegate(action(Form.create, Form.detail).wrap((Request request) -> request.body(rdf())
+		delegate(query(false)
+				.wrap(modulator().task(Form.create).view(Form.detail))
+				.wrap(processor())
+				.wrap((Request request) -> request.body(rdf())
 
-				.value(model -> { // add implied statements
+						.value(model -> { // add implied statements
 
-					model.addAll(request.shape()
-							.map(mode(Form.verify))
-							.map(new Outliner(request.item()))
-							.collect(toList())
-					);
+							model.addAll(request.shape()
+									.map(mode(Form.verify))
+									.map(new Outliner(request.item()))
+									.collect(toList())
+							);
 
-					return model;
+							return model;
 
-				})
+						})
 
-				.fold(
-						model -> process(request, model),
-						request::reply
-				)));
+						.fold(
+								model -> process(request, model),
+								request::reply
+						)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Creator pre(final BiFunction<Request, Model, Model> filter) { return super.pre(filter); }
+	/**
+	 * Inserts a request RDF pre-processing filter.
+	 *
+	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
+	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 *
+	 * @return this creator
+	 *
+	 * @throws NullPointerException if {@code filter} is null
+	 * @see Processor#pre(BiFunction)
+	 */
+	public Creator pre(final BiFunction<Request, Model, Model> filter) {
 
-	@Override public Creator sync(final String script) { return super.sync(script); }
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
+
+		processor().pre(filter);
+
+		return this;
+	}
+
+	/**
+	 * Inserts a SPARQL Update housekeeping script.
+	 *
+	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
+	 *               processing; empty scripts are ignored
+	 *
+	 * @return this creator
+	 *
+	 * @throws NullPointerException if {@code script} is null
+	 * @see Processor#sync(String)
+	 */
+	public Creator sync(final String script) {
+
+		if ( script == null ) {
+			throw new NullPointerException("null script");
+		}
+
+		processor().sync(script);
+
+		return this;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,14 +257,11 @@ public final class Creator extends Actor<Creator> {
 
 					connection.rollback();
 
-					// !!! rewrite report value references to original target iri
-					// !!! rewrite references to external base IRI
-					// !!! factor with Updater
-
 					return response.map(new Failure()
 							.status(Response.UnprocessableEntity)
-							.error("data-invalid")
-							.trace(report(report)));
+							.error(Failure.DataInvalid)
+							.trace(report)
+					);
 
 				} else { // valid data
 
@@ -274,7 +315,7 @@ public final class Creator extends Actor<Creator> {
 		final Shape matcher=shape
 				.map(task(Form.relate))
 				.map(view(Form.digest))
-				.map(role(Form.any));
+				.map(Shape.role(Form.any));
 
 		return (request, model) -> tool(Graph.Factory).query(connection -> {
 

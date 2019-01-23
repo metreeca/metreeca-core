@@ -109,15 +109,6 @@ final class SPARQLWriter {
 		return query;
 	}
 
-	// support patterns for Custom shape validation // !!! refactor
-
-	private static final java.util.regex.Pattern ValuesPattern=java.util.regex.Pattern.compile(
-			"(.*)\\s*\\bvalues\\s*[?$]this\\s*\\{\\s*\\}\\s*(.*)",
-			java.util.regex.Pattern.DOTALL|java.util.regex.Pattern.CASE_INSENSITIVE);
-
-	private static final java.util.regex.Pattern TailPattern=java.util.regex.Pattern.compile(
-			"(.*)(\\s*}\\s*)", java.util.regex.Pattern.DOTALL);
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

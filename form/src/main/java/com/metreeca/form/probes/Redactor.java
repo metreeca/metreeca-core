@@ -77,7 +77,7 @@ public final class Redactor extends Traverser<Shape> {
 		final Set<? extends Value> accepted=when.getValues();
 
 		return actual == null ? when // ignore undefined variables
-				: !disjoint(accepted, actual) || actual.contains(Form.any) ? and()
+				: actual.contains(Form.any) || !disjoint(accepted, actual) ? and()
 				: or();
 	}
 

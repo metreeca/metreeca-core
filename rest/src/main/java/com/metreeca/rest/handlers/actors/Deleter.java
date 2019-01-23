@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers._storage;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
@@ -24,6 +24,7 @@ import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -68,14 +69,37 @@ public final class Deleter extends Actor<Deleter> {
 
 
 	public Deleter() {
-		delegate(action(Form.delete, Form.detail).wrap(this::process));
+		delegate(query(false)
+				.wrap(modulator().task(Form.delete).view(Form.detail))
+				.wrap(processor())
+				.wrap(this::process)
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Deleter sync(final String script) { return super.sync(script); }
+	/**
+	 * Inserts a SPARQL Update housekeeping script.
+	 *
+	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
+	 *               processing; empty scripts are ignored
+	 *
+	 * @return this deleter
+	 *
+	 * @throws NullPointerException if {@code script} is null
+	 * @see Processor#sync(String)
+	 */
+	public Deleter sync(final String script) {
 
+		if ( script == null ) {
+			throw new NullPointerException("null script");
+		}
+
+		processor().sync(script);
+
+		return this;
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -29,6 +29,7 @@ import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -107,20 +108,65 @@ public final class Updater extends Actor<Updater> {
 
 
 	public Updater() {
-		delegate(action(Form.update, Form.detail).wrap((Request request) ->
-				request.container() ? container(request) : resource(request)
-		));
+		delegate(query(false)
+				.wrap(modulator().task(Form.update).view(Form.detail))
+				.wrap(processor())
+				.wrap(this::process)
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Updater pre(final BiFunction<Request, Model, Model> filter) { return super.pre(filter); }
+	/**
+	 * Inserts a request RDF pre-processing filter.
+	 *
+	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
+	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
+	 *
+	 * @return this updater
+	 *
+	 * @throws NullPointerException if {@code filter} is null
+	 * @see Processor#pre(BiFunction)
+	 */
+	public Updater pre(final BiFunction<Request, Model, Model> filter) {
 
-	@Override public Updater sync(final String script) { return super.sync(script); }
+		if ( filter == null ) {
+			throw new NullPointerException("null filter");
+		}
 
+		processor().pre(filter);
+
+		return this;
+	}
+
+	/**
+	 * Inserts a SPARQL Update housekeeping script.
+	 *
+	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
+	 *               processing; empty scripts are ignored
+	 *
+	 * @return this updater
+	 *
+	 * @throws NullPointerException if {@code script} is null
+	 * @see Processor#sync(String)
+	 */
+	public Updater sync(final String script) {
+
+		if ( script == null ) {
+			throw new NullPointerException("null script");
+		}
+
+		processor().sync(script);
+
+		return this;
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Responder process(final Request request) {
+		return request.container() ? container(request) : resource(request);
+	}
 
 	private Responder container(final Request request) {
 		return request.reply(response -> response.status(Response.NotImplemented));
@@ -151,14 +197,10 @@ public final class Updater extends Actor<Updater> {
 
 					connection.rollback();
 
-					// !!! rewrite report value references to original target iri
-					// !!! rewrite references to external base IRI
-					// !!! factor with Creator
-
 					return response.map(new Failure()
 							.status(Response.UnprocessableEntity)
-							.error("data-invalid")
-							.trace(report(report)));
+							.error(Failure.DataInvalid)
+							.trace(report));
 
 				} else { // valid data
 
