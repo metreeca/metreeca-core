@@ -19,9 +19,7 @@ package com.metreeca.rest.wrappers;
 
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Traverser;
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
+import com.metreeca.form.probes.Extractor;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.tray.rdf.Graph;
@@ -40,10 +38,7 @@ import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Values.*;
@@ -53,13 +48,12 @@ import static com.metreeca.tray.Tray.tool;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
  * RDF processor.
  *
- * <p>Process and trims to shape {@linkplain RDFFormat RDF}payloads for incoming request and outgoing responses and
+ * <p>Process and trims to shape {@linkplain RDFFormat RDF} payloads for incoming request and outgoing responses and
  * executes SPARQL Update post-processing scripts.</p>
  *
  * <p>If the incoming request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single
@@ -336,80 +330,9 @@ public final class Processor implements Wrapper {
 	}
 
 	private <T extends Message<T>> Collection<Statement> trim(final Value focus, final Shape shape, final Model model) {
-		return pass(shape) ? model : shape // !!! trim to reachable cell / migrate wildcard handling to Trimmer?
-				.map(new Trimmer(model, singleton(focus)))
+		return pass(shape) ? model : shape // !!! trim to reachable cell / migrate wildcard handling to Extractor?
+				.map(new Extractor(model, singleton(focus)))
 				.collect(toList());
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Model trimmer.
-	 *
-	 * <p>Recursively extracts all the statements compatible with a shape from a model and an initial collection of
-	 * source values .</p>
-	 */
-	private static final class Trimmer extends Traverser<Stream<Statement>> {
-
-		private final Collection<Statement> model;
-		private final Collection<Value> focus;
-
-
-		private Trimmer(final Collection<Statement> model, final Collection<Value> focus) {
-			this.model=model;
-			this.focus=focus;
-		}
-
-
-		@Override public Stream<Statement> probe(final Shape shape) {
-			return Stream.empty();
-		}
-
-
-		@Override public Stream<Statement> probe(final Trait trait) {
-
-			final Step step=trait.getStep();
-
-			final IRI iri=step.getIRI();
-			final boolean inverse=step.isInverse();
-
-			final Function<Statement, Value> source=inverse
-					? Statement::getObject
-					: Statement::getSubject;
-
-			final Function<Statement, Value> target=inverse
-					? Statement::getSubject
-					: Statement::getObject;
-
-			final Collection<Statement> restricted=model.stream()
-					.filter(s -> focus.contains(source.apply(s)) && iri.equals(s.getPredicate()))
-					.collect(toList());
-
-			final Set<Value> focus=restricted.stream()
-					.map(target)
-					.collect(toSet());
-
-			return Stream.concat(restricted.stream(), trait.getShape().map(new Trimmer(model, focus)));
-		}
-
-		@Override public Stream<Statement> probe(final Virtual virtual) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-		}
-
-
-		@Override public Stream<Statement> probe(final And and) {
-			return and.getShapes().stream().flatMap(shape -> shape.map(this));
-		}
-
-		@Override public Stream<Statement> probe(final Or or) {
-			return or.getShapes().stream().flatMap(shape -> shape.map(this));
-		}
-
-		@Override public Stream<Statement> probe(final Option option) {
-			return Stream.concat(option.getPass().map(this), option.getFail().map(this));
-		}
-
 	}
 
 }

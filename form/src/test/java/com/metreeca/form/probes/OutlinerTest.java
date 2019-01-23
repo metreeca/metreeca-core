@@ -36,7 +36,7 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static java.util.stream.Collectors.toSet;
 
 
-class OutlinerTest {
+final class OutlinerTest {
 
 	@Test void testOutlineClasses() {
 		assertThat(outline(and(all(RDF.FIRST), clazz(RDFS.RESOURCE))))
