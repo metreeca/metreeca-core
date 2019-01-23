@@ -204,25 +204,10 @@ where:
 | `boolean`       | `xsd:boolean` RDF literal                |
 | `int`           | `xsd:integer` RDF literal                |
 
-Shorthands for [set constraints](#set-constraints) and task/view/mode [parametric shapes](#parameters) may be directly encoded acoording to the folloing patterns:
-
-```
-@prefix form: <app://form.metreeca.com/terms#>.
-
-[] a form:{shorthand}.
-[] a form:{shorthand}; form:values ({value}, …).
-[] a form:{shorthand}; form:shapes ({shape}, …).
-```
-
-where:
-
-- `{shorthand}` is the lowercase name of the shorthand factory method;
-- `({value}, …)` and `({shape}, …)` are RDF lists of RDF values and RDF-encoded shapes.
-
 For instance, applying these rules the following shape:
 
 ```java
-and(required(), datatype(xsd:string))
+and(optional(), datatype(xsd:string))
 ```
 
 will be encoded in RDF as:
@@ -231,7 +216,7 @@ will be encoded in RDF as:
 @prefix form: <app://form.metreeca.com/terms#>.
 
 [] a form:And; form:shapes (
-    [a form:required],
+    [a form:MaxCount; form:limit 1],
     [a form:Datatype; form:iri xsd:string]
 ).
 ```
@@ -239,3 +224,4 @@ will be encoded in RDF as:
 <p class="note">Support for direct import of RDF-encoded SHACL specs is planned.</p>
 
 <!-- idiomatic JSON support? => RDF list support in idiomatic JSON -->
+

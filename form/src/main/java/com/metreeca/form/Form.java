@@ -116,15 +116,6 @@ public final class Form {
 	public static final IRI When=iri(Namespace, "When");
 
 
-	//// Shape Shorthands ////////////////////////////////////////////////////////////////////////////////// !!! remove?
-
-	public static final IRI required=iri(Namespace, "required");
-	public static final IRI optional=iri(Namespace, "optional");
-	public static final IRI repeatable=iri(Namespace, "repeatable");
-	public static final IRI multiple=iri(Namespace, "multiple");
-	public static final IRI only=iri(Namespace, "only");
-
-
 	//// Shift Types ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI Step=iri(Namespace, "Step");

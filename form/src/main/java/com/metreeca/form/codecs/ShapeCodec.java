@@ -81,6 +81,8 @@ public final class ShapeCodec {
 
 			@Override public Resource probe(final Meta meta) { return meta(meta, model); }
 
+			@Override public Resource probe(final When when) { return when(when, model); }
+
 
 			@Override public Resource probe(final Datatype datatype) { return datatype(datatype, model); }
 
@@ -129,9 +131,7 @@ public final class ShapeCodec {
 
 			@Override public Resource probe(final Or or) { return or(or, model); }
 
-			@Override public Resource probe(final Option option) { return test(option, model); }
-
-			@Override public Resource probe(final When when) { return when(when, model); }
+			@Override public Resource probe(final Option option) { return option(option, model); }
 
 		});
 	}
@@ -159,33 +159,13 @@ public final class ShapeCodec {
 				: types.contains(Form.All) ? all(root, model)
 				: types.contains(Form.Any) ? any(root, model)
 
-				: types.contains(Form.required) ? required(root, model)
-				: types.contains(Form.optional) ? optional(root, model)
-				: types.contains(Form.repeatable) ? repeatable(root, model)
-				: types.contains(Form.multiple) ? multiple(root, model)
-				: types.contains(Form.only) ? only(root, model)
-
 				: types.contains(Form.Trait) ? trait(root, model)
 				: types.contains(Form.Virtual) ? virtual(root, model)
 
 				: types.contains(Form.And) ? and(root, model)
 				: types.contains(Form.Or) ? or(root, model)
-				: types.contains(Form.Test) ? test(root, model)
+				: types.contains(Form.Test) ? option(root, model)
 				: types.contains(Form.When) ? when(root, model)
-
-				:  types.contains(Form.create) ? create(root, model)
-				: types.contains(Form.relate) ? relate(root, model)
-				: types.contains(Form.update) ? update(root, model)
-				: types.contains(Form.delete) ? delete(root, model)
-
-				: types.contains(Form.client) ? client(root, model)
-				: types.contains(Form.server) ? server(root, model)
-
-				: types.contains(Form.digest) ? digest(root, model)
-				: types.contains(Form.detail) ? detail(root, model)
-
-				: types.contains(Form.verify) ? verify(root, model)
-				: types.contains(Form.filter) ? filter(root, model)
 
 				: error("unknown shape type "+types);
 	}
@@ -204,6 +184,25 @@ public final class ShapeCodec {
 
 	private Shape meta(final Resource root, final Collection<Statement> model) {
 		return Meta.meta(iri(root, Form.iri, model), value(root, Form.value, model));
+	}
+
+
+	private Resource when(final When when, final Collection<Statement> model) {
+
+		final Resource node=bnode();
+
+		model.add(statement(node, RDF.TYPE, Form.When));
+		model.add(statement(node, Form.iri, when.getIRI()));
+		model.add(statement(node, Form.values, values(when.getValues(), model)));
+
+		return node;
+	}
+
+	private Shape when(final Resource root, final Collection<Statement> model) {
+		return When.when(
+				iri(root, Form.iri, model),
+				values(resource(root, Form.values, model), model)
+		);
 	}
 
 
@@ -436,27 +435,6 @@ public final class ShapeCodec {
 	}
 
 
-	private Shape required(final Resource root, final Collection<Statement> model) {
-		return Shape.required();
-	}
-
-	private Shape optional(final Resource root, final Collection<Statement> model) {
-		return Shape.optional();
-	}
-
-	private Shape repeatable(final Resource root, final Collection<Statement> model) {
-		return Shape.repeatable();
-	}
-
-	private Shape multiple(final Resource root, final Collection<Statement> model) {
-		return Shape.multiple();
-	}
-
-	private Shape only(final Resource root, final Collection<Statement> model) {
-		return Shape.only(values(resource(root, Form.values, model), model));
-	}
-
-
 	private Resource trait(final Trait trait, final Collection<Statement> model) {
 
 		final Resource node=bnode();
@@ -533,7 +511,7 @@ public final class ShapeCodec {
 	}
 
 
-	private Resource test(final Option option, final Collection<Statement> model) {
+	private Resource option(final Option option, final Collection<Statement> model) {
 
 		final Resource node=bnode();
 
@@ -545,75 +523,12 @@ public final class ShapeCodec {
 		return node;
 	}
 
-	private Shape test(final Resource root, final Collection<Statement> model) {
+	private Shape option(final Resource root, final Collection<Statement> model) {
 		return Option.option(
 				shape(resource(root, Form.test, model), model),
 				shape(resource(root, Form.pass, model), model),
 				shape(resource(root, Form.fail, model), model)
 		);
-	}
-
-
-	private Resource when(final When when, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.When));
-		model.add(statement(node, Form.iri, when.getIRI()));
-		model.add(statement(node, Form.values, values(when.getValues(), model)));
-
-		return node;
-	}
-
-	private Shape when(final Resource root, final Collection<Statement> model) {
-		return When.when(
-				iri(root, Form.iri, model),
-				values(resource(root, Form.values, model), model)
-		);
-	}
-
-
-	private Shape create(final Resource root, final Collection<Statement> model) {
-		return Shape.create(shapes(resource(root, Form.shapes, model), model));
-	}
-
-	private Shape relate(final Resource root, final Collection<Statement> model) {
-		return Shape.relate(shapes(resource(root, Form.shapes, model), model));
-	}
-
-	private Shape update(final Resource root, final Collection<Statement> model) {
-		return Shape.update(shapes(resource(root, Form.shapes, model), model));
-	}
-
-	private Shape delete(final Resource root, final Collection<Statement> model) {
-		return Shape.delete(shapes(resource(root, Form.shapes, model), model));
-	}
-
-
-	private Shape client(final Resource root, final Collection<Statement> model) {
-		return Shape.client(shapes(resource(root, Form.shapes, model), model));
-	}
-
-	private Shape server(final Resource root, final Collection<Statement> model) {
-		return Shape.server(shapes(resource(root, Form.shapes, model), model));
-	}
-
-
-	private Shape digest(final Resource root, final Collection<Statement> model) {
-		return Shape.digest(shapes(resource(root, Form.shapes, model), model));
-	}
-
-	private Shape detail(final Resource root, final Collection<Statement> model) {
-		return Shape.detail(shapes(resource(root, Form.shapes, model), model));
-	}
-
-
-	private Shape verify(final Resource root, final Collection<Statement> model) {
-		return Shape.verify(shapes(resource(root, Form.shapes, model), model));
-	}
-
-	private Shape filter(final Resource root, final Collection<Statement> model) {
-		return Shape.filter(shapes(resource(root, Form.shapes, model), model));
 	}
 
 
