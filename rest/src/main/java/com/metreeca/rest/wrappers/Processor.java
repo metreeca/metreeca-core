@@ -54,7 +54,7 @@ import static java.util.stream.Collectors.toList;
  * RDF processor.
  *
  * <p>Process and trims to shape {@linkplain RDFFormat RDF} payloads for incoming request and outgoing responses and
- * executes SPARQL Update post-processing scripts.</p>
+ * executes SPARQL Update housekeeping scripts.</p>
  *
  * <p>If the incoming request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single
  * transaction on the system {@linkplain Graph#Factory graph database}, which is automatically committed on {@linkplain
@@ -114,6 +114,42 @@ public final class Processor implements Wrapper {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Enables request RDF payload trimming.
+	 *
+	 * <p>If incoming requests include a {@linkplain Message#shape() shape}, their {@linkplain RDFFormat RDF} payload
+	 * is
+	 * trimmed to remove statements outside the allowed shape envelope.</p>
+	 *
+	 * @return this processor
+	 */
+	public Processor pre() {
+
+		if ( pre == null ) {
+			pre=(request, model) -> model;
+		}
+
+		return this;
+	}
+
+	/**
+	 * Enables response RDF payload trimming.
+	 *
+	 * <p>If outgoing responses include a {@linkplain Message#shape() shape}, their {@linkplain RDFFormat RDF} payload
+	 * is trimmed to remove statements outside the allowed shape envelope.</p>
+	 *
+	 * @return this processor
+	 */
+	public Processor post() {
+
+		if ( post == null ) {
+			post=(request, model) -> model;
+		}
+
+		return this;
+	}
+
 
 	/**
 	 * Inserts a request RDF pre-processing filter.
@@ -249,25 +285,25 @@ public final class Processor implements Wrapper {
 		}
 
 		return new Connector()
-				.wrap(pre())
-				.wrap(post())
-				.wrap(sync())
+				.wrap(preprocessor())
+				.wrap(postprocessor())
+				.wrap(housekeeper())
 				.wrap(handler);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Wrapper pre() {
+	private Wrapper preprocessor() {
 		return handler -> request -> handler.handle(process(request, pre));
 	}
 
-	private Wrapper post() {
+	private Wrapper postprocessor() {
 		return handler -> request -> handler.handle(request)
 				.map(response -> response.success() ? process(response, post) : response);
 	}
 
-	private Wrapper sync() {
+	private Wrapper housekeeper() {
 		return handler -> request -> handler.handle(request).map(response -> {
 
 			if ( response.success() && !scripts.isEmpty() ) {
