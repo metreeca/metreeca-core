@@ -36,7 +36,6 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
@@ -265,72 +264,6 @@ final class SPARQLWriter {
 					.filter(value -> !(text(value).length() >= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", minLength, value))
 					.collect(toList()));
-		}
-
-		@Override public Report probe(final Custom custom) {
-			if ( focus.isEmpty() ) { return report(); } else {
-
-				final Collection<Issue> issues=new ArrayList<>();
-
-				connection.prepareTupleQuery(compile(new SPARQL() {
-
-					@Override public Object code() {
-
-						final String query=custom.getQuery().replaceFirst("\\bselect\\b(\\s*\\*)?", "select ?this");
-
-						final Matcher valuesMatcher=ValuesPattern.matcher(query);
-						final Matcher tailMatcher=TailPattern.matcher(query);
-
-						final List<Object> values=Lists.list(
-								"values ?this {\f",
-								items(focus.stream().map(this::term), "\n"),
-								"\f}"
-						);
-
-						return Lists.list(
-
-								"# custom constraint (", custom.getMessage(), ")\f",
-
-								prefixes(),
-
-								valuesMatcher.matches() ? Lists.list(
-
-										// values placeholder found: replace
-
-										valuesMatcher.group(1), " ", values, " ", valuesMatcher.group(2)
-
-								) : tailMatcher.matches() ? Lists.list(
-
-										// no placeholder: insert inside select
-										// ;( widespread issues with filter not/exists clauses and external values
-
-										tailMatcher.group(1), "\f", values, "\f", tailMatcher.group(2)
-
-								) : Lists.list()
-
-						);
-					}
-
-				})).evaluate(new AbstractTupleQueryResultHandler() {
-
-					@Override public void handleSolution(final BindingSet bindings) {
-
-						final String message=Custom.message(custom.getMessage(), bindings);
-						final Collection<Value> focus=focus(bindings.getValue("this"));
-
-						issues.add(issue(custom.getLevel(), message, custom, focus));
-
-					}
-
-					private Collection<Value> focus(final Value value) {
-						return value != null ? Sets.set(value) : focus;
-					}
-
-				});
-
-				return report(issues);
-
-			}
 		}
 
 

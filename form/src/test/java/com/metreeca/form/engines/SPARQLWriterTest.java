@@ -393,53 +393,6 @@ final class SPARQLWriterTest {
 	}
 
 
-	@Test void testValidateCustom() {
-
-		final Shape shape=Custom.custom(Issue.Level.Error, "test custom shape",
-				"select * { filter not exists { ?this rdf:value rdf:first } }");
-
-		final Model model=ValuesTest.decode(""
-				+"<x> rdf:value rdf:first.\n"
-				+"<y> rdf:value rdf:first, rdf:rest.\n"
-				+"<z> rdf:value rdf:rest. ");
-
-		assertThat(validate(shape, model)).as("pass / empty").isTrue();
-		assertThat(validate(shape, model, x)).as("pass / single").isTrue();
-		assertThat(validate(shape, model, x, y)).as("pass / multiple").isTrue();
-
-		assertThat(validate(shape, model, z)).as("fail / single").isFalse();
-		assertThat(validate(shape, model, x, y, z)).as("fail / multiple").isFalse();
-	}
-
-	@Test void testValidateCustomWithReportingDetails() {
-
-		final Shape shape=Custom.custom(Issue.Level.Warning, "custom {?type}",
-				"select ('shape' as ?type) {}");
-
-		final IRI focus=x;
-
-		final Report report=process(shape, focus);
-
-		assertThat(report.assess(Issue.Level.Warning)).as("reported issue level").isTrue();
-
-		assertThat(Sets.set(focus)).as("reported focus node").isEqualTo(report.getIssues().stream().flatMap(issue -> issue.getValues().stream()).collect(toSet()));
-
-		assertThat((Object)"custom shape").as("populated message template").isEqualTo(report.getIssues().stream().map(Issue::getMessage).findFirst().orElse(null));
-
-	}
-
-	@Test void testValidateCustomOnAggregates() {
-
-		final Shape shape=Custom.custom(Issue.Level.Error, "count={?count}",
-				"select ?count { { select (count(?this) as ?count) {} values ?this {} } }");
-
-		final Report report=process(shape, x, y, z);
-
-		assertThat((Object)"count=3").as("custom aggregate validation").isEqualTo(report.getIssues().stream().map(Issue::getMessage).findFirst().orElse(""));
-
-	}
-
-
 	@Test void testValidateConjunction() {
 
 		final Shape shape=and(any(Values.literal(1)), any(Values.literal(2)));

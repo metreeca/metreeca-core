@@ -68,8 +68,6 @@ Primitive shapes specifying constraints to be individually met by each RDF term 
 | [pattern](../javadocs/com/metreeca/form/shapes/Pattern.html)("pattern") | the lexical representation of each term in the focus set matches a given [regular expression](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#sum) pattern |
 | [like](../javadocs/com/metreeca/form/shapes/Like.html)("keywords") | the lexical representation of each term in the focus set matches the given full-text keywords |
 
-<!--| [custom](../javadocs/com/metreeca/form/shapes/Custom.html)("SPARQL") | each term in the focus set meets a custom constraint, defined as a *select* SPARQL query | -->
-
 ## Set Constraints
 
 Primitive shapes specifying constraints to be collectively met by the RDF terms in the focus set.

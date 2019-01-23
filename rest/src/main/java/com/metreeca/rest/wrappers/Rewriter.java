@@ -302,10 +302,6 @@ public final class Rewriter implements Wrapper {
 
 			@Override public Shape probe(final Like like) { return like; }
 
-			@Override public Custom probe(final Custom custom) {
-				return custom(custom.getLevel(), custom.getMessage(), rewrite(custom.getQuery()));
-			}
-
 
 			@Override public Shape probe(final MinCount minCount) { return minCount; }
 

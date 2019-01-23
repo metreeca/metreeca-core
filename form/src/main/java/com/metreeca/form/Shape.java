@@ -281,9 +281,6 @@ public interface Shape {
 		public V probe(final Like like);
 
 
-		public V probe(final Custom custom);
-
-
 		//// Set Constraints ///////////////////////////////////////////////////////////////////////////////////////////
 
 		public V probe(final MinCount minCount);

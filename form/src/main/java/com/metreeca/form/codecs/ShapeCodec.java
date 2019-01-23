@@ -30,7 +30,6 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.RDFCollections;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.rio.RDFFormat;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,11 +46,6 @@ import static java.util.stream.Collectors.toSet;
 
 
 public final class ShapeCodec {
-
-	private static final RDFFormat Format=RDFFormat.NTRIPLES;
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Resource encode(final Shape shape, final Collection<Statement> model) {
 
@@ -107,10 +101,6 @@ public final class ShapeCodec {
 			@Override public Resource probe(final MinLength minLength) { return minLength(minLength, model); }
 
 			@Override public Resource probe(final MaxLength maxLength) { return maxLength(maxLength, model); }
-
-			@Override public Resource probe(final Custom custom) {
-				throw new UnsupportedOperationException("unsupported shape ["+custom+"]");
-			}
 
 
 			@Override public Resource probe(final MinCount minCount) {

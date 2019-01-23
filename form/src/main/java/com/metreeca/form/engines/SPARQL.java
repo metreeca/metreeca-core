@@ -390,10 +390,6 @@ abstract class SPARQL { // ! refactor
 			return list("\ffilter (strlen(str(", term(source), ")) <= ", maxLength.getLimit(), ")\f");
 		}
 
-		@Override public Object probe(final Custom custom) {
-			return null;
-		}
-
 		@Override public Object probe(final MinCount minCount) {
 			return null;
 		}

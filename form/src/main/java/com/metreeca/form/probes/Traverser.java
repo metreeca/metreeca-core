@@ -72,9 +72,6 @@ public abstract class Traverser<V> implements Shape.Probe<V> {
 	@Override public V probe(final Like like) { return probe((Shape)like); }
 
 
-	@Override public V probe(final Custom custom) { return probe((Shape)custom); }
-
-
 	//// Set Constraints ///////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public V probe(final MinCount minCount) { return probe((Shape)minCount); }
