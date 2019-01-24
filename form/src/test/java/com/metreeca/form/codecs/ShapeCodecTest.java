@@ -41,7 +41,6 @@ import static com.metreeca.form.shapes.Meta.*;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -92,8 +91,6 @@ final class ShapeCodecTest {
 		assertCoded("inverse trait", trait(Step.step(RDF.VALUE, true)));
 		assertCoded("shaped trait", trait(RDF.VALUE, MinCount.minCount(10)));
 
-		assertCoded("virtual trait", virtual(trait(RDF.VALUE, MinCount.minCount(10)), Step.step(RDF.NIL)));
-
 	}
 
 	@Test void testLogicals() {
@@ -124,7 +121,7 @@ final class ShapeCodecTest {
 
 		try {
 
-			assertThat((Object)shape).as(message).isEqualTo(codec.decode(codec.encode(shape, model), model));
+			assertThat(codec.decode(codec.encode(shape, model), model)).as(message).isEqualTo(shape);
 
 		} finally {
 			Rio.write(model, System.out, RDFFormat.TURTLE);

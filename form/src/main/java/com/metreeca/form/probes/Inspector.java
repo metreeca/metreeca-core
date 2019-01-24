@@ -51,8 +51,6 @@ public abstract class Inspector<V> implements Shape.Probe<V> {
 
 	@Override public V probe(final Trait trait) { return probe((Shape)trait); }
 
-	@Override public V probe(final Virtual virtual) { return probe((Shape)virtual); }
-
 
 	//// Logical Constraints ///////////////////////////////////////////////////////////////////////////////////////
 

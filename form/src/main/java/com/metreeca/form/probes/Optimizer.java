@@ -18,7 +18,6 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
@@ -30,10 +29,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.iri;
 
@@ -60,17 +58,6 @@ public final class Optimizer extends Traverser<Shape> {
 		final Shape shape=trait.getShape().map(this);
 
 		return shape.equals(or()) ? and() : trait(step, shape);
-	}
-
-	@Override public Shape probe(final Virtual virtual) {
-
-		final Trait trait=virtual.getTrait();
-		final Shift shift=virtual.getShift();
-
-		final Step step=trait.getStep();
-		final Shape shape=trait.getShape().map(this);
-
-		return shape.equals(or()) ? and() : virtual(trait(step, shape), shift);
 	}
 
 

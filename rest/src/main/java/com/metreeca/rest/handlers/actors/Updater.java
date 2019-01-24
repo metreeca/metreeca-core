@@ -245,10 +245,6 @@ public final class Updater extends Actor<Updater> {
 						return trait.getStep().equals(Contains) ? and() : trait;
 					}
 
-					@Override public Shape probe(final Virtual virtual) {
-						return virtual.getTrait().getStep().equals(Contains) ? and() : virtual;
-					}
-
 
 					@Override public Shape probe(final And and) {
 						return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
@@ -283,10 +279,6 @@ public final class Updater extends Actor<Updater> {
 
 					@Override public Shape probe(final Trait trait) {
 						return trait.getStep().equals(Contains) ? trait.getShape() : and();
-					}
-
-					@Override public Shape probe(final Virtual virtual) {
-						throw new UnsupportedOperationException();
 					}
 
 

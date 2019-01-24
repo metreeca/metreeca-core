@@ -108,7 +108,6 @@ public final class Form {
 	public static final IRI Any=iri(Namespace, "Any");
 
 	public static final IRI Trait=iri(Namespace, "Trait");
-	public static final IRI Virtual=iri(Namespace, "Virtual");
 
 	public static final IRI And=iri(Namespace, "And");
 	public static final IRI Or=iri(Namespace, "Or");

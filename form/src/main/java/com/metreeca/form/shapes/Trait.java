@@ -138,10 +138,6 @@ public final class Trait implements Shape {
 			return singletonMap(trait.getStep(), trait.getShape());
 		}
 
-		@Override public Map<Step, Shape> probe(final Virtual virtual) {
-			return virtual.getTrait().map(this);
-		}
-
 
 		@Override public Map<Step, Shape> probe(final And and) {
 			return traits(and.getShapes().stream());

@@ -122,8 +122,6 @@ public final class ShapeCodec {
 				return trait(trait, model);
 			}
 
-			@Override public Resource probe(final Virtual virtual) { return virtual(virtual, model); }
-
 
 			@Override public Resource probe(final And and) {
 				return and(and, model);
@@ -160,7 +158,6 @@ public final class ShapeCodec {
 				: types.contains(Form.Any) ? any(root, model)
 
 				: types.contains(Form.Trait) ? trait(root, model)
-				: types.contains(Form.Virtual) ? virtual(root, model)
 
 				: types.contains(Form.And) ? and(root, model)
 				: types.contains(Form.Or) ? or(root, model)
@@ -450,25 +447,6 @@ public final class ShapeCodec {
 		return Trait.trait(
 				step(resource(root, Form.step, model), model),
 				shape(resource(root, Form.shape, model), model)
-		);
-	}
-
-
-	private Resource virtual(final Virtual virtual, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Virtual));
-		model.add(statement(node, Form.trait, shape(virtual.getTrait(), model)));
-		model.add(statement(node, Form.shift, shift(virtual.getShift(), model)));
-
-		return node;
-	}
-
-	private Shape virtual(final Resource root, final Collection<Statement> model) {
-		return Virtual.virtual(
-				trait(resource(root, Form.trait, model), model),
-				shift(resource(root, Form.shift, model), model)
 		);
 	}
 

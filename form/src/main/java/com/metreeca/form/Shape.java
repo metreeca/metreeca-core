@@ -298,8 +298,6 @@ public interface Shape {
 
 		public V probe(final Trait trait);
 
-		public V probe(final Virtual virtual);
-
 
 		//// Logical Constraints ///////////////////////////////////////////////////////////////////////////////////////
 

@@ -83,10 +83,6 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 		return Stream.concat(restricted.stream(), trait.getShape().map(new Extractor(model, focus)));
 	}
 
-	@Override public Stream<Statement> probe(final Virtual virtual) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
-
 
 	@Override public Stream<Statement> probe(final And and) {
 		return and.getShapes().stream().flatMap(shape -> shape.map(this));

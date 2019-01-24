@@ -20,16 +20,14 @@ package com.metreeca.form.probes;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.When;
-import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,7 +49,7 @@ final class RedactorTest {
 
 		final Shape shape=and();
 
-		assertThat((Object)shape).as("unconditional shape").isEqualTo(shape.map(empty));
+		assertThat(shape.map(empty)).as("unconditional shape").isEqualTo(shape);
 
 	}
 
@@ -59,7 +57,7 @@ final class RedactorTest {
 
 		final When when=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)when).as("undefined variable").isEqualTo(when.map(empty));
+		assertThat(when.map(empty)).as("undefined variable").isEqualTo(when);
 
 	}
 
@@ -67,9 +65,9 @@ final class RedactorTest {
 
 		final When when=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)and()).as("included value").isEqualTo(when.map(first));
-		assertThat((Object)or()).as("excluded value").isEqualTo(when.map(rest));
-		assertThat((Object)and()).as("wildcard value").isEqualTo(when.map(any));
+		assertThat(when.map(first)).as("included value").isEqualTo(and());
+		assertThat(when.map(rest)).as("excluded value").isEqualTo(or());
+		assertThat(when.map(any)).as("wildcard value").isEqualTo(and());
 
 	}
 
@@ -77,13 +75,11 @@ final class RedactorTest {
 
 		final When nested=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)trait(RDF.VALUE, and())).as("trait").isEqualTo(trait(RDF.VALUE, nested).map(first));
+		assertThat(trait(RDF.VALUE, nested).map(first)).as("trait").isEqualTo(trait(RDF.VALUE, and()));
 
-		assertThat((Object)virtual(trait(RDF.VALUE, and()), Step.step(RDF.NIL))).as("virtual").isEqualTo(virtual(trait(RDF.VALUE, nested), Step.step(RDF.NIL)).map(first));
-
-		assertThat((Object)and(and())).as("conjunction").isEqualTo(and(nested).map(first));
-		assertThat((Object)or(and())).as("disjunction").isEqualTo(or(nested).map(first));
-		assertThat((Object)option(and(), and(), and())).as("option").isEqualTo(option(and(), and(), nested).map(first));
+		assertThat(and(nested).map(first)).as("conjunction").isEqualTo(and(and()));
+		assertThat(or(nested).map(first)).as("disjunction").isEqualTo(or(and()));
+		assertThat(option(and(), and(), nested).map(first)).as("option").isEqualTo(option(and(), and(), and()));
 
 	}
 

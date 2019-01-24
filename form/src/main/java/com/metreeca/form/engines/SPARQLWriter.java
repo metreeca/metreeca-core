@@ -334,10 +334,6 @@ final class SPARQLWriter {
 
 		}
 
-		@Override public Report probe(final Virtual virtual) {
-			return report();
-		}
-
 
 		@Override public Report probe(final And and) {
 			return and.getShapes().stream()

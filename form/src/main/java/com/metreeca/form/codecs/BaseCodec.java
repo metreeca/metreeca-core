@@ -71,11 +71,6 @@ final class BaseCodec { // !! review/optimize
 		@Override public Map<Step, String> probe(final Shape shape) { return Maps.map(); }
 
 
-		@Override public Map<Step, String> probe(final Virtual virtual) {
-			return virtual.getTrait().map(this);
-		}
-
-
 		@Override public Map<Step, String> probe(final And and) {
 			return aliases(and.getShapes());
 		}
@@ -179,8 +174,6 @@ final class BaseCodec { // !! review/optimize
 		}
 
 		@Override public String probe(final Trait trait) { return null; }
-
-		@Override public String probe(final Virtual virtual) { return null; }
 
 
 		@Override public String probe(final And and) {

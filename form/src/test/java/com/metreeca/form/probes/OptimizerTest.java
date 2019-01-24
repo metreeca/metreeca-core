@@ -21,19 +21,17 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Datatype;
 import com.metreeca.form.shapes.MinCount;
 import com.metreeca.form.shapes.Option;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,90 +44,81 @@ final class OptimizerTest {
 
 
 	@Test void testRetainAliases() { // required by formatters
-		assertThat((Object)alias("alias")).as("alias").isEqualTo(optimize(alias("alias")));
+		assertThat(optimize(alias("alias"))).as("alias").isEqualTo(alias("alias"));
 	}
 
 
 	@Test void testOptimizeMinCount() {
 
-		assertThat((Object)MinCount.minCount(100)).as("conjunction").isEqualTo(optimize(and(MinCount.minCount(10), MinCount.minCount(100))));
-		assertThat((Object)MinCount.minCount(10)).as("disjunction").isEqualTo(optimize(or(MinCount.minCount(10), MinCount.minCount(100))));
+		assertThat(optimize(and(MinCount.minCount(10), MinCount.minCount(100)))).as("conjunction").isEqualTo(MinCount.minCount(100));
+		assertThat(optimize(or(MinCount.minCount(10), MinCount.minCount(100)))).as("disjunction").isEqualTo(MinCount.minCount(10));
 
 	}
 
 	@Test void testOptimizeMaxCount() {
 
-		assertThat((Object)maxCount(10)).as("conjunction").isEqualTo(optimize(and(maxCount(10), maxCount(100))));
-		assertThat((Object)maxCount(100)).as("disjunction").isEqualTo(optimize(or(maxCount(10), maxCount(100))));
+		assertThat(optimize(and(maxCount(10), maxCount(100)))).as("conjunction").isEqualTo(maxCount(10));
+		assertThat(optimize(or(maxCount(10), maxCount(100)))).as("disjunction").isEqualTo(maxCount(100));
 
 	}
 
 
 	@Test void testOptimizeType() {
 
-		assertThat((Object)Datatype.datatype(Values.IRIType)).as("conjunction / superclass").isEqualTo(optimize(and(Datatype.datatype(Values.IRIType), Datatype.datatype(Values.ResoureType))));
-		assertThat((Object)Datatype.datatype(XMLSchema.STRING)).as("conjunction / literal").isEqualTo(optimize(and(Datatype.datatype(Values.LiteralType), Datatype.datatype(XMLSchema.STRING))));
-		assertThat((Object)and(Datatype.datatype(Values.ResoureType), Datatype.datatype(XMLSchema.STRING))).as("conjunction / unrelated").isEqualTo(optimize(and(Datatype.datatype(Values.ResoureType), Datatype.datatype(XMLSchema.STRING))));
+		assertThat(optimize(and(Datatype.datatype(Values.IRIType), Datatype.datatype(Values.ResoureType)))).as("conjunction / superclass").isEqualTo(Datatype.datatype(Values.IRIType));
+		assertThat(optimize(and(Datatype.datatype(Values.LiteralType), Datatype.datatype(XMLSchema.STRING)))).as("conjunction / literal").isEqualTo(Datatype.datatype(XMLSchema.STRING));
+		assertThat(optimize(and(Datatype.datatype(Values.ResoureType), Datatype.datatype(XMLSchema.STRING)))).as("conjunction / unrelated").isEqualTo(and(Datatype.datatype(Values.ResoureType), Datatype.datatype(XMLSchema.STRING)));
 
-		assertThat((Object)Datatype.datatype(Values.ResoureType)).as("disjunction / superclass").isEqualTo(optimize(or(Datatype.datatype(Values.IRIType), Datatype.datatype(Values.ResoureType))));
-		assertThat((Object)Datatype.datatype(Values.LiteralType)).as("disjunction / literal").isEqualTo(optimize(or(Datatype.datatype(Values.LiteralType), Datatype.datatype(RDF.NIL))));
-		assertThat((Object)or(Datatype.datatype(Values.ResoureType), Datatype.datatype(RDF.NIL))).as("disjunction / unrelated").isEqualTo(optimize(or(Datatype.datatype(Values.ResoureType), Datatype.datatype(RDF.NIL))));
+		assertThat(optimize(or(Datatype.datatype(Values.IRIType), Datatype.datatype(Values.ResoureType)))).as("disjunction / superclass").isEqualTo(Datatype.datatype(Values.ResoureType));
+		assertThat(optimize(or(Datatype.datatype(Values.LiteralType), Datatype.datatype(RDF.NIL)))).as("disjunction / literal").isEqualTo(Datatype.datatype(Values.LiteralType));
+		assertThat(optimize(or(Datatype.datatype(Values.ResoureType), Datatype.datatype(RDF.NIL)))).as("disjunction / unrelated").isEqualTo(or(Datatype.datatype(Values.ResoureType), Datatype.datatype(RDF.NIL)));
 
 	}
 
 
 	@Test void testOptimizeTraits() {
 
-		assertThat((Object)trait(RDF.VALUE, x)).as("optimize nested shape").isEqualTo(optimize(trait(RDF.VALUE, and(x))));
-		assertThat((Object)and()).as("remove dead traits").isEqualTo(optimize(trait(RDF.VALUE, or())));
+		assertThat(optimize(trait(RDF.VALUE, and(x)))).as("optimize nested shape").isEqualTo(trait(RDF.VALUE, x));
+		assertThat(optimize(trait(RDF.VALUE, or()))).as("remove dead traits").isEqualTo(and());
 
-		assertThat((Object)and(alias("alias"), trait(RDF.VALUE, and(MinCount.minCount(1), maxCount(3))))).as("merge conjunctive traits").isEqualTo(optimize(and(alias("alias"), trait(RDF.VALUE, MinCount.minCount(1)), trait(RDF.VALUE, maxCount(3)))));
+		assertThat(optimize(and(alias("alias"), trait(RDF.VALUE, MinCount.minCount(1)), trait(RDF.VALUE, maxCount(3))))).as("merge conjunctive traits").isEqualTo(and(alias("alias"), trait(RDF.VALUE, and(MinCount.minCount(1), maxCount(3)))));
 
-		assertThat((Object)or(alias("alias"), trait(RDF.VALUE, or(MinCount.minCount(1), maxCount(3))))).as("merge disjunctive traits").isEqualTo(optimize(or(alias("alias"), trait(RDF.VALUE, MinCount.minCount(1)), trait(RDF.VALUE, maxCount(3)))));
-
-	}
-
-	@Test void testOptimizeVirtuals() {
-
-		assertThat((Object)virtual(trait(RDF.VALUE, x), Step.step(RDF.NIL))).as("optimize nested shape").isEqualTo(optimize(virtual(trait(RDF.VALUE, and(x)), Step.step(RDF.NIL))));
-
-		assertThat((Object)and()).as("remove dead traits").isEqualTo(optimize(virtual(trait(RDF.VALUE, or()), Step.step(RDF.NIL))));
+		assertThat(optimize(or(alias("alias"), trait(RDF.VALUE, MinCount.minCount(1)), trait(RDF.VALUE, maxCount(3))))).as("merge disjunctive traits").isEqualTo(or(alias("alias"), trait(RDF.VALUE, or(MinCount.minCount(1), maxCount(3)))));
 
 	}
-
 
 	@Test void testOptimizeConjunctions() {
 
-		assertThat((Object)or()).as("simplify constants").isEqualTo(optimize(and(or(), trait(RDF.TYPE))));
-		assertThat((Object)x).as("unwrap singletons").isEqualTo(optimize(and(x)));
-		assertThat((Object)x).as("unwrap unique values").isEqualTo(optimize(and(x, x)));
-		assertThat((Object)and(x, y)).as("remove duplicates").isEqualTo(optimize(and(x, x, y)));
-		assertThat((Object)and(x, y, z)).as("merge nested conjunction").isEqualTo(optimize(and(and(x), and(y, z))));
+		assertThat(optimize(and(or(), trait(RDF.TYPE)))).as("simplify constants").isEqualTo(or());
+		assertThat(optimize(and(x))).as("unwrap singletons").isEqualTo(x);
+		assertThat(optimize(and(x, x))).as("unwrap unique values").isEqualTo(x);
+		assertThat(optimize(and(x, x, y))).as("remove duplicates").isEqualTo(and(x, y));
+		assertThat(optimize(and(and(x), and(y, z)))).as("merge nested conjunction").isEqualTo(and(x, y, z));
 
 	}
 
 	@Test void testOptimizeDisjunctions() {
 
-		assertThat((Object)and()).as("simplify constants").isEqualTo(optimize(or(and(), trait(RDF.TYPE))));
-		assertThat((Object)x).as("unwrap singletons").isEqualTo(optimize(or(x)));
-		assertThat((Object)x).as("unwrap unique values").isEqualTo(optimize(or(x, x)));
-		assertThat((Object)or(x, y)).as("remove duplicates").isEqualTo(optimize(or(x, x, y)));
-		assertThat((Object)or(x, y, z)).as("merge nested disjunctions").isEqualTo(optimize(or(or(x), or(y, z))));
+		assertThat(optimize(or(and(), trait(RDF.TYPE)))).as("simplify constants").isEqualTo(and());
+		assertThat(optimize(or(x))).as("unwrap singletons").isEqualTo(x);
+		assertThat(optimize(or(x, x))).as("unwrap unique values").isEqualTo(x);
+		assertThat(optimize(or(x, x, y))).as("remove duplicates").isEqualTo(or(x, y));
+		assertThat(optimize(or(or(x), or(y, z)))).as("merge nested disjunctions").isEqualTo(or(x, y, z));
 
 	}
 
 	@Test void testOptimizeOption() {
 
-		assertThat((Object)x).as("always pass").isEqualTo(optimize(Option.option(and(), x, y)));
-		assertThat((Object)y).as("always fail").isEqualTo(optimize(Option.option(or(), x, y)));
+		assertThat(optimize(Option.option(and(), x, y))).as("always pass").isEqualTo(x);
+		assertThat(optimize(Option.option(or(), x, y))).as("always fail").isEqualTo(y);
 
-		assertThat((Object)y).as("identical options").isEqualTo(optimize(Option.option(x, y, y)));
+		assertThat(optimize(Option.option(x, y, y))).as("identical options").isEqualTo(y);
 
-		assertThat((Object)Option.option(x, y, z)).as("optimized test shape").isEqualTo(optimize(Option.option(and(x), y, z)));
-		assertThat((Object)Option.option(x, y, z)).as("optimized pass shape").isEqualTo(optimize(Option.option(x, and(y), z)));
-		assertThat((Object)Option.option(x, y, z)).as("optimized fail shape").isEqualTo(optimize(Option.option(x, y, and(z))));
+		assertThat(optimize(Option.option(and(x), y, z))).as("optimized test shape").isEqualTo(Option.option(x, y, z));
+		assertThat(optimize(Option.option(x, and(y), z))).as("optimized pass shape").isEqualTo(Option.option(x, y, z));
+		assertThat(optimize(Option.option(x, y, and(z)))).as("optimized fail shape").isEqualTo(Option.option(x, y, z));
 
-		assertThat((Object)Option.option(x, y, z)).as("material").isEqualTo(optimize(Option.option(x, y, z)));
+		assertThat(optimize(Option.option(x, y, z))).as("material").isEqualTo(Option.option(x, y, z));
 
 	}
 

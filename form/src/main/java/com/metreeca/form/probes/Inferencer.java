@@ -99,15 +99,6 @@ public final class Inferencer extends Visitor<Shape> {
 				: and(trait(step, shape), datatype(Values.ResoureType));
 	}
 
-	@Override public Shape probe(final Virtual virtual) {
-
-		return virtual;
-
-		// !!! currently unable to implement as trait inference returns Shape whereas virtual constructor expects Trait
-
-		// !!! return Virtual.virtual(virtual.getTrait().accept((Shape.Probe<Shape>)this), virtual.getShift());
-	}
-
 
 	@Override public Shape probe(final And and) {
 		return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));

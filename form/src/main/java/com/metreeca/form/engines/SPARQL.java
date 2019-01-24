@@ -18,8 +18,6 @@
 package com.metreeca.form.engines;
 
 import com.metreeca.form.*;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Pruner;
 import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.shifts.Count;
@@ -307,10 +305,6 @@ abstract class SPARQL { // ! refactor
 
 		}
 
-		@Override public Stream<Statement> probe(final Virtual virtual) {
-			return virtual.getTrait().map(this); // !!! visit shift to generate additional specific edges
-		}
-
 
 		@Override public Stream<Statement> probe(final And and) {
 			return and.getShapes().stream().flatMap(shape -> shape.map(this));
@@ -437,14 +431,6 @@ abstract class SPARQL { // ! refactor
 			);
 		}
 
-		@Override public Object probe(final Virtual virtual) {
-
-			final Shift shift=virtual.getShift();
-			final Shape shape=virtual.getTrait().getShape();
-
-			return list(shift(shift, true, term(source), term(shape)), shape.map(new FilterProbe(shape)));
-		}
-
 
 		@Override public Object probe(final And and) {
 			return and.getShapes().stream().map(shape -> shape.map(this));
@@ -490,50 +476,6 @@ abstract class SPARQL { // ! refactor
 			// !!! (€) optional unless universal constraints are present
 
 			return list("\f", All.all(shape).isPresent() ? pattern : list("\foptional {\f", pattern, "\f}"), "\f");
-		}
-
-		@Override public Object probe(final Virtual virtual) {
-
-			final Shift shift=virtual.getShift();
-			final Shape shape=virtual.getTrait().getShape();
-
-			if ( isAggregate(shift) ) {
-
-				final boolean singleton=false; // !!!
-
-				final Shape anchor=this.shape // shape is already redacted for filtering mode
-						.map(new Pruner())
-						.map(new Optimizer());
-
-				link(anchor, this.shape);
-
-				return list(
-
-						"\foptional { select ",
-
-						singleton ? "" : term(this.shape),
-						projection(shift, term(shape)),
-
-						" {\f",
-
-						roots(anchor),
-						filters(anchor),
-
-						shift(shift, false, term(this.shape), var(id(shift))),
-
-						"\f}",
-
-						singleton ? "" : list(" group by ", term(this.shape)),
-
-						" }\f"
-
-				);
-
-			} else {
-
-				return shift(shift, false, term(this.shape), term(shape));
-
-			}
 		}
 
 		//@Override public Object probe(final Table table) {

@@ -29,8 +29,6 @@ import static com.metreeca.form.shapes.Meta.*;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
-import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.literal;
 
@@ -127,10 +125,6 @@ final class MetaTest {
 
 			assertThat(metas(trait(RDF.VALUE, trait(RDF.VALUE, label("label")))))
 					.as("ignored in traits")
-					.isEmpty();
-
-			assertThat(metas(virtual(trait(RDF.VALUE, trait(RDF.VALUE, label("label"))), step(RDF.NIL))))
-					.as("ignored in virtuals")
 					.isEmpty();
 
 		}

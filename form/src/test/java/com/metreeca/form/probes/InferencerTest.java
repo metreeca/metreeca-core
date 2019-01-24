@@ -18,14 +18,15 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.*;
+import com.metreeca.form.shapes.In;
+import com.metreeca.form.shapes.MinCount;
+import com.metreeca.form.shapes.Or;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
@@ -106,15 +107,6 @@ final class InferencerTest {
 				(s, i) -> and(trait(s.getStep(), and(and(s.getShape(), i), datatype(Values.ResoureType))), datatype(Values.ResoureType)));
 	}
 
-	@Disabled @Test void testVirtual() {
-
-		assertImplies("virtual traits are expanded",
-				Virtual.virtual(trait(RDF.VALUE), Step.step(RDF.NIL)), datatype(Values.ResoureType),
-				(s, i) -> Virtual.virtual(trait(RDF.VALUE, i), Step.step(RDF.NIL)));
-
-	}
-
-
 	@Test void testConjunction() {
 		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Values.ResoureType),
 				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer and() stripped by optimization
@@ -135,12 +127,12 @@ final class InferencerTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private void assertImplies(final String message, final Shape shape, final Shape inferred) {
-		assertThat((Object)optimize(and(shape, inferred))).as(message).isEqualTo(expand(shape));
+		assertThat(expand(shape)).as(message).isEqualTo(optimize(and(shape, inferred)));
 	}
 
 	private <S extends Shape, I extends Shape> void assertImplies(
 			final String message, final S shape, final I inferred, final BiFunction<S, I, Shape> mapper) {
-		assertThat((Object)optimize(mapper.apply(shape, inferred))).as(message).isEqualTo(expand(shape));
+		assertThat(expand(shape)).as(message).isEqualTo(optimize(mapper.apply(shape, inferred)));
 	}
 
 

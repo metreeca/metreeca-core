@@ -163,10 +163,6 @@ public final class Meta implements Shape {
 			return Stream.empty();
 		}
 
-		@Override public Stream<Map.Entry<IRI, Value>> probe(final Virtual virtual) {
-			return Stream.empty();
-		}
-
 
 		@Override public Stream<Map.Entry<IRI, Value>> probe(final And and) {
 			return and.getShapes().stream().flatMap(s -> s.map(this));

@@ -22,7 +22,6 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Count;
 import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
@@ -34,7 +33,6 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -54,16 +52,14 @@ import static com.metreeca.form.shapes.Like.like;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -425,135 +421,6 @@ final class SPARQLReaderTest {
 				+"\n"
 				+"}")).isIsomorphicTo(model(edges(trait(term("sell"), MaxLength.maxLength(5)))));
 	}
-
-
-	//// Derivates /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testDerivateEdge() {
-		assertThat(model("construct {\n"
-				+"\n"
-				+"\t?product a :Product; :price ?price.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\t?product a :Product; :sell ?price.\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(and(
-				trait(RDF.TYPE, all(term("Product"))),
-				virtual(trait(term("price")), Step.step(term("sell")))
-		))));
-	}
-
-	// !!! nested expressions
-
-	@Disabled @Test void testDerivateInternalFiltering() {
-		assertThat(model("construct {\n"
-				+"\n"
-				+"\t?product a :Product; :price ?price.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\t?product a :Product; :sell ?price filter ( ?price >= 200 )\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(and(
-				trait(RDF.TYPE, all(term("Product"))),
-				virtual(
-						trait(term("price"), MinInclusive.minInclusive(Values.literal(Values.integer(200)))),
-						Step.step(term("sell"))
-				)
-		))));
-	}
-
-	@Disabled @Test void testDerivateExternalFiltering() {
-		assertThat(model("construct {\n"
-				+"\n"
-				+"\t?product a :Product; :price ?price.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\t?product a :Product; :sell ?price filter ( ?price >= 200 )\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(and(
-				trait(RDF.TYPE, all(term("Product"))),
-				virtual(trait(term("price")), Step.step(term("sell"))),
-				trait(term("price"), MinInclusive.minInclusive(Values.literal(Values.integer(200))))
-		))));
-	}
-
-
-	@Disabled @Test void testDerivateSorting() {
-		// convert to lists to assert ordering
-		Assertions.assertThat(list(model("construct {\n"
-				+"\n"
-				+"\t?product a :Product; :price ?price.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\t?product a :Product; :sell ?price\n"
-				+"\n"
-				+"} order by ?price"))).isEqualTo(list(model(edges(and(
-
-				trait(RDF.TYPE, all(term("Product"))),
-				virtual(trait(term("price")), Step.step(term("sell")))
-
-		))), increasing(Step.step(term("price")))));
-	}
-
-	@Disabled @Test void testDerivateStats() {
-		assertThat(model(stats(trait(RDF.TYPE), Step.step(RDF.TYPE)))).isIsomorphicTo(model(stats(virtual(trait(RDF.VALUE), Step.step(RDF.TYPE)), Step.step(RDF.VALUE))));
-	}
-
-	@Disabled @Test void testDerivateItems() {
-		assertThat(model(items(trait(RDF.TYPE), Step.step(RDF.TYPE)))).isIsomorphicTo(model(items(virtual(trait(RDF.VALUE), Step.step(RDF.TYPE)), Step.step(RDF.VALUE))));
-	}
-
-
-	//// Aggregates ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testAggregateCount() {
-		// subordinates may be 0
-		assertThat(model("construct {\n"
-				+"\n"
-				+"\t?employee a :Employee; :subordinates ?subordinates.\n" // subordinates may be 0
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\t{ select ?employee (count(distinct ?subordinate) as ?subordinates) { \n"
-				+"\t\n"
-				+"\t\t?employee a :Employee optional { ?employee :subordinate ?subordinate }\n"
-				+"\n"
-				+"\t} group by ?employee }\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(and(
-				trait(RDF.TYPE, all(term("Employee"))),
-				virtual(trait(term("subordinates")), Count.count(Step.step(term("subordinate"))))
-		))));
-	}
-
-	@Test void testAggregateCountOnSingleton() {
-		assertThat(model("construct {\n"
-				+"\n"
-				+"\t<product-lines/ships> :size ?size.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\t{ select (count(distinct ?product) as ?size) { \n"
-				+"\t\n"
-				+"\t\t<product-lines/ships> :product ?product. \n"
-				+"\t\t\n"
-				+"\t} }\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(and(
-				all(item("product-lines/ships")),
-				virtual(trait(term("size")), Count.count(Step.step(term("product"))))
-		))));
-	}
-
-	// !!! sorting (($) project and reuse aggregates computed for filtering/sorting)
-	// !!! grouping
-	// !!! filtering
-	// !!! stats/items
-	// !!! nested expressions
 
 
 	//// Layout ////////////////////////////////////////////////////////////////////////////////////////////////////////

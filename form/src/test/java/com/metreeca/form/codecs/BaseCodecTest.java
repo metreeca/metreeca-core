@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
@@ -68,10 +67,6 @@ final class BaseCodecTest {
 	@Test void testRetrieveAliasFromNestedShapes() {
 
 		assertThat(map(entry(Value, "alias"))).as("group").isEqualTo(BaseCodec.aliases(and(trait(Value, alias("alias")))));
-
-		assertThat(map(entry(Value, "value"))).as("system-guessed virtual").isEqualTo(BaseCodec.aliases(virtual(trait(Value), step(RDF.NIL))));
-
-		assertThat(map(entry(Value, "alias"))).as("user-defined virtual").isEqualTo(BaseCodec.aliases(virtual(trait(Value, alias("alias")), step(RDF.NIL))));
 
 		assertThat(map(entry(Value, "alias"))).as("conjunction").isEqualTo(BaseCodec.aliases(trait(Value, and(alias("alias")))));
 

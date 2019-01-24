@@ -26,8 +26,6 @@ import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Trait.traits;
-import static com.metreeca.form.shapes.Virtual.virtual;
-import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 
@@ -47,17 +45,6 @@ final class TraitTest {
 				.isEqualTo(singletonMap(trait.getStep(), trait.getShape()));
 
 	}
-
-	@Test void testInspectVirtuals() {
-
-		final Virtual virtual=virtual(trait(RDF.VALUE), step(RDF.NIL));
-
-		assertThat(traits(virtual))
-				.as("singleton trait map")
-				.isEqualTo(traits(virtual.getTrait()));
-
-	}
-
 
 	@Test void testInspectConjunctions() {
 

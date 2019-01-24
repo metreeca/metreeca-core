@@ -99,8 +99,6 @@ public final class MinCount implements Shape {
 
 		@Override public Integer probe(final Trait trait) { return null; }
 
-		@Override public Integer probe(final Virtual virtual) { return null; }
-
 
 		@Override public Integer probe(final And and) {
 			return and.getShapes().stream()
