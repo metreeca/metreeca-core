@@ -18,8 +18,8 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -59,10 +59,10 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 
 	@Override public Stream<Statement> probe(final Trait trait) {
 
-		final Step step=trait.getStep();
+		final Shift shift=trait.getShift();
 
-		final IRI iri=step.getIRI();
-		final boolean inverse=step.isInverse();
+		final IRI iri=shift.getIRI();
+		final boolean inverse=shift.isInverse();
 
 		final Function<Statement, Value> source=inverse
 				? Statement::getObject

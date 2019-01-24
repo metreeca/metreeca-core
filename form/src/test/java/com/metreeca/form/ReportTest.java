@@ -17,7 +17,6 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
@@ -29,6 +28,7 @@ import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Frame.slot;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Report.report;
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
@@ -57,15 +57,15 @@ final class ReportTest {
 		assertThat(report(list(warning)).assess(Issue.Level.Error)).as("no matching issue").isFalse();
 
 		assertThat(report(list(), set(
-				frame(RDF.NIL, slot(Step.step(RDF.VALUE), new Report(set(error), set())))
+				frame(RDF.NIL, slot(shift(RDF.VALUE), report(set(error), set())))
 		)).assess(Issue.Level.Error)).as("matching frame").isTrue();
 
 	}
 
 	@Test void testPrune() {
 
-		final Frame<Report> first=frame(x, slot(Step.step(RDF.FIRST), report(info)));
-		final Frame<Report> rest=frame(x, slot(Step.step(RDF.REST), report(warning)));
+		final Frame<Report> first=frame(x, slot(shift(RDF.FIRST), report(info)));
+		final Frame<Report> rest=frame(x, slot(shift(RDF.REST), report(warning)));
 
 		final Report report=report(set(info, warning, error), set(first, rest))
 				.prune(Issue.Level.Warning)
@@ -80,19 +80,19 @@ final class ReportTest {
 
 		assertThat(decode("<x> rdf:value <y>.")).as("direct edge").isIsomorphicTo(trace(
 
-				frame(x, slot(Step.step(RDF.VALUE), trace(frame(y))))
+				frame(x, slot(shift(RDF.VALUE), trace(frame(y))))
 
 		).outline());
 
 		assertThat(decode("<y> rdf:value <x>.")).as("inverse edge").isIsomorphicTo(trace(
 
-				frame(x, slot(Step.step(RDF.VALUE, true), trace(frame(y))))
+				frame(x, slot(shift(RDF.VALUE).inverse(), trace(frame(y))))
 
 		).outline());
 
 		assertThat(decode("<x> rdf:value <y>, <z>.")).as("multiple traces").isIsomorphicTo(trace(
 
-				frame(x, slot(Step.step(RDF.VALUE), trace(frame(y), frame(z))))
+				frame(x, slot(shift(RDF.VALUE), trace(frame(y), frame(z))))
 
 		).outline());
 
@@ -100,28 +100,28 @@ final class ReportTest {
 
 				frame(x,
 
-						slot(Step.step(RDF.FIRST), trace(frame(y))),
-						slot(Step.step(RDF.REST), trace(frame(z)))
+						slot(shift(RDF.FIRST), trace(frame(y))),
+						slot(shift(RDF.REST), trace(frame(z)))
 				)
 
 		).outline());
 
 		assertThat(set()).as("illegal direct edge").isIsomorphicTo(trace(
 
-				frame(Values.literal("x"), slot(Step.step(RDF.VALUE), trace(frame(y))))
+				frame(Values.literal("x"), slot(shift(RDF.VALUE), trace(frame(y))))
 
 		).outline());
 
 		assertThat(set()).as("illegal inverse edge").isIsomorphicTo(trace(
 
-				frame(x, slot(Step.step(RDF.VALUE, true), trace(frame(Values.literal("y")))))
+				frame(x, slot(shift(RDF.VALUE).inverse(), trace(frame(Values.literal("y")))))
 
 		).outline());
 
 		assertThat(decode("<x> rdf:value <y>. <y> rdf:value <z>.")).as("nested edges").isIsomorphicTo(trace(
 
-				frame(x, slot(Step.step(RDF.VALUE),
-						trace(frame(y, slot(Step.step(RDF.VALUE),
+				frame(x, slot(shift(RDF.VALUE),
+						trace(frame(y, slot(shift(RDF.VALUE),
 								trace(frame(z)))))))
 
 		).outline());

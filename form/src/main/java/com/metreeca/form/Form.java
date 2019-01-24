@@ -115,13 +115,7 @@ public final class Form {
 	public static final IRI When=iri(Namespace, "When");
 
 
-	//// Shift Types ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI Step=iri(Namespace, "Step");
-	public static final IRI Count=iri(Namespace, "Count");
-
-
-	//// Shape/Shifts Properties ///////////////////////////////////////////////////////////////////////////////////////
+	//// Shape Properties //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI shape=iri(Namespace, "shape");
 	public static final IRI shapes=iri(Namespace, "shapes");
@@ -131,14 +125,9 @@ public final class Form {
 
 	public static final IRI iri=iri(Namespace, "iri");
 	public static final IRI text=iri(Namespace, "text");
+	public static final IRI shift=iri(Namespace, "shift");
 	public static final IRI flags=iri(Namespace, "flags");
 	public static final IRI limit=iri(Namespace, "limit");
-
-	public static final IRI trait=iri(Namespace, "trait");
-	public static final IRI shift=iri(Namespace, "shift");
-
-	public static final IRI step=iri(Namespace, "step");
-	public static final IRI inverse=iri(Namespace, "inverse");
 
 	public static final IRI test=iri(Namespace, "test");
 	public static final IRI pass=iri(Namespace, "pass");
@@ -156,6 +145,11 @@ public final class Form {
 	public static final IRI max=iri(Namespace, "max");
 	public static final IRI min=iri(Namespace, "min");
 	public static final IRI count=iri(Namespace, "count");
+
+
+	//// Shift Properties //////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final IRI inverse=iri(Namespace, "inverse");
 
 
 	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////

@@ -18,8 +18,8 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
@@ -54,10 +55,10 @@ public final class Optimizer extends Traverser<Shape> {
 
 	@Override public Shape probe(final Trait trait) {
 
-		final Step step=trait.getStep();
+		final Shift shift=trait.getShift();
 		final Shape shape=trait.getShape().map(this);
 
-		return shape.equals(or()) ? and() : trait(step, shape);
+		return shape.equals(or()) ? and() : trait(shift, shape);
 	}
 
 
@@ -144,16 +145,16 @@ public final class Optimizer extends Traverser<Shape> {
 	private Set<Shape> flatten(final Collection<Shape> collection,
 			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter) {
 
-		final Shape.Probe<Map.Entry<Step, Shape>> splitter=new Visitor<Map.Entry<Step, Shape>>() {
+		final Shape.Probe<Map.Entry<Shift, Shape>> splitter=new Visitor<Map.Entry<Shift, Shape>>() {
 
 			private int id;
 
-			@Override public Map.Entry<Step, Shape> probe(final Shape shape) {
-				return entry(Step.step(iri("_:", "id"+id++)), shape); // assign non-traits a unique step
+			@Override public Map.Entry<Shift, Shape> probe(final Shape shape) {
+				return entry(shift(iri("_:", "id"+id++)), shape); // assign non-traits a unique step
 			}
 
-			@Override public Map.Entry<Step, Shape> probe(final Trait trait) {
-				return entry(trait.getStep(), trait.getShape());
+			@Override public Map.Entry<Shift, Shape> probe(final Trait trait) {
+				return entry(trait.getShift(), trait.getShape());
 			}
 
 		};
@@ -163,18 +164,18 @@ public final class Optimizer extends Traverser<Shape> {
 				.map(shape -> shape.map(this)) // optimize nested shapes
 				.flatMap(shape -> shape.map(lifter)) // merge nested collections
 
-				.map(shape -> shape.map(splitter)) // split traits into Map.Entry<Step, Shape>
+				.map(shape -> shape.map(splitter)) // split traits into Map.Entry<Shift, Shape>
 
-				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<Step, List<Shape>>
+				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<Shift, List<Shape>>
 						LinkedHashMap::new, mapping(Map.Entry::getValue, toList())))
 
 				.entrySet().stream().flatMap(e -> { // reassemble traits merging and optimizing multiple definitions
 
-					final Step step=e.getKey();
+					final Shift shift=e.getKey();
 					final List<Shape> values=e.getValue();
 
-					return step.getIRI().getNamespace().equals("_:") ? values.stream()
-							: Stream.of(trait(step, packer.apply(values).map(this)));
+					return shift.getIRI().getNamespace().equals("_:") ? values.stream()
+							: Stream.of(trait(shift, packer.apply(values).map(this)));
 
 				})
 

@@ -18,6 +18,7 @@
 package com.metreeca.form.codecs;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.All;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
@@ -43,7 +44,7 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shifts.Step.step;
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.things.ValuesTest.decode;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -182,7 +183,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat((Object)decode("[] rdf:value [] .")).as("inverse inferred").isEqualTo(rdf(
 				blank(field("valueOf", blank())),
 				null,
-				trait(step(RDF.VALUE, true))
+				trait(shift(RDF.VALUE).inverse())
 		));
 
 		assertThat((Object)decode("[] rdf:value [] .")).as("user-defined").isEqualTo(rdf(
@@ -198,7 +199,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blank(field("value", blank(field("alias", blank())))),
 				null,
-				trait(RDF.VALUE, trait(step(RDF.VALUE), alias("alias")))
+				trait(RDF.VALUE, trait(Shift.shift(RDF.VALUE), alias("alias")))
 		))
 				.as("aliased nested trait")
 				.isEqualTo(decode("[] rdf:value [rdf:value []] ."));
@@ -267,7 +268,7 @@ final class JSONParserTest extends JSONCodecTest {
 						))
 				),
 				null,
-				trait(step(RDF.VALUE, true))
+				trait(shift(RDF.VALUE).inverse())
 		));
 	}
 
@@ -275,7 +276,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat((Object)decode("[] rdf:value [] .")).as("blank reverse links").isEqualTo(rdf(
 				blank(field("valueOf", blank())),
 				null,
-				trait(step(RDF.VALUE, true))
+				trait(shift(RDF.VALUE).inverse())
 		));
 	}
 

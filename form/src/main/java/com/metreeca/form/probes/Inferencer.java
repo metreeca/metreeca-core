@@ -17,10 +17,8 @@
 
 package com.metreeca.form.probes;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -91,12 +89,12 @@ public final class Inferencer extends Visitor<Shape> {
 
 	@Override public Shape probe(final Trait trait) {
 
-		final Step step=trait.getStep();
+		final Shift shift=trait.getShift();
 		final Shape shape=trait.getShape().map(this);
 
-		return step.getIRI().equals(RDF.TYPE) ? and(trait(step, and(shape, datatype(Values.ResoureType))), datatype(Values.ResoureType))
-				: step.isInverse() ? trait(step, and(shape, datatype(Values.ResoureType)))
-				: and(trait(step, shape), datatype(Values.ResoureType));
+		return shift.getIRI().equals(RDF.TYPE) ? and(trait(shift, and(shape, datatype(Values.ResoureType))), datatype(Values.ResoureType))
+				: shift.isInverse() ? trait(shift, and(shape, datatype(Values.ResoureType)))
+				: and(trait(shift, shape), datatype(Values.ResoureType));
 	}
 
 

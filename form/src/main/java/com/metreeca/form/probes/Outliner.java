@@ -18,10 +18,10 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.And;
 import com.metreeca.form.shapes.Clazz;
 import com.metreeca.form.shapes.Trait;
-import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -76,11 +76,11 @@ public final class Outliner extends Visitor<Stream<Statement>> {
 
 	@Override public Stream<Statement> probe(final Trait trait) {
 
-		final Step step=trait.getStep();
+		final Shift shift=trait.getShift();
 		final Shape shape=trait.getShape();
 
-		final boolean inverse=step.isInverse();
-		final IRI iri=step.getIRI();
+		final boolean inverse=shift.isInverse();
+		final IRI iri=shift.getIRI();
 
 		return Stream.concat(
 

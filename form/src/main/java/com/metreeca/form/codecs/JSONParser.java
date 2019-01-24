@@ -18,11 +18,9 @@
 package com.metreeca.form.codecs;
 
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -51,7 +49,7 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.Trait.traits;
-import static com.metreeca.form.shifts.Step.step;
+import static com.metreeca.form.Shift.shift;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
@@ -182,7 +180,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 				if ( !label.equals("this") ) {
 
-					final Step property=property(label, base, shape);
+					final Shift property=property(label, base, shape);
 					final Stream<Value> targets=parse(value, base, null, traits(shape).get(property));
 
 					if ( rdfHandler != null ) {
@@ -341,7 +339,7 @@ public final class JSONParser extends AbstractRDFParser {
 	}
 
 
-	private Step property(final String label, final String base, final Shape shape) {
+	private Shift property(final String label, final String base, final Shape shape) {
 
 		final Matcher matcher=EdgePattern.matcher(label);
 
@@ -355,25 +353,25 @@ public final class JSONParser extends AbstractRDFParser {
 
 			if ( naked != null ) {
 
-				return step(createIRI(base, naked), inverse);
+				return shift(createIRI(base, naked)).inverse(inverse);
 
 			} else if ( bracketed != null ) {
 
-				return step(createIRI(base, bracketed), inverse);
+				return shift(createIRI(base, bracketed)).inverse(inverse);
 
 			} else if ( shape != null ) {
 
-				final Map<String, Step> aliases=aliases(shape, JSONCodec.Reserved)
+				final Map<String, Shift> aliases=aliases(shape, JSONCodec.Reserved)
 						.entrySet().stream()
 						.collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 
-				final Step step=aliases.get(alias);
+				final Shift shift=aliases.get(alias);
 
-				if ( step == null ) {
+				if ( shift == null ) {
 					error(format("undefined property alias [%s]", alias));
 				}
 
-				return step;
+				return shift;
 
 			} else {
 

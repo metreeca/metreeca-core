@@ -18,8 +18,8 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 
 import java.util.List;
 
@@ -50,10 +50,10 @@ public final class Pruner extends Traverser<Shape> {
 
 	@Override public Shape probe(final Trait trait) {
 
-		final Step step=trait.getStep();
+		final Shift shift=trait.getShift();
 		final Shape shape=trait.getShape().map(this);
 
-		return shape.equals(and()) ? and() : trait(step, shape);
+		return shape.equals(and()) ? and() : trait(shift, shape);
 	}
 
 

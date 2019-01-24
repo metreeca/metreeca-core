@@ -23,7 +23,6 @@ import com.metreeca.form.probes.Pruner;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
-import com.metreeca.form.shifts.Step;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -179,7 +178,7 @@ final class SPARQLReader {
 	private Map<Resource, Collection<Statement>> stats(final Stats stats) {
 
 		final Shape shape=stats.getShape();
-		final List<Step> path=stats.getPath();
+		final List<Shift> path=stats.getPath();
 
 		final Model model=new LinkedHashModel();
 
@@ -268,7 +267,7 @@ final class SPARQLReader {
 	private Map<Resource, Collection<Statement>> items(final Items items) {
 
 		final Shape shape=items.getShape();
-		final List<Step> path=items.getPath();
+		final List<Shift> path=items.getPath();
 
 		final Model model=new LinkedHashModel();
 

@@ -17,14 +17,11 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Order;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Values;
 
@@ -37,6 +34,7 @@ import java.util.function.Consumer;
 
 import javax.json.JsonException;
 
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
@@ -62,12 +60,12 @@ final class QueryParserTest {
 	private static final Literal One=Values.literal(ONE);
 	private static final Literal Ten=Values.literal(TEN);
 
-	private static final Step first=Step.step(RDF.FIRST);
-	private static final Step rest=Step.step(RDF.REST);
+	private static final Shift first=shift(RDF.FIRST);
+	private static final Shift rest=shift(RDF.REST);
 
 	private static final Shape shape=and(
 			trait(first, trait(rest)),
-			trait(first.invert(), trait(rest))
+			trait(first.inverse(), trait(rest))
 	);
 
 
@@ -93,21 +91,21 @@ final class QueryParserTest {
 
 		stats("{ \"stats\": \""+RDF.FIRST+"\" }", shape, stats -> assertThat(Lists.list(first)).as("direct naked iri").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"^"+RDF.FIRST+"\" }", shape, stats -> assertThat(Lists.list(first.invert())).as("inverse naked iri").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"^"+RDF.FIRST+"\" }", shape, stats -> assertThat(Lists.list(first.inverse())).as("inverse naked iri").isEqualTo(stats.getPath()));
 
 		stats("{ \"stats\": \"<"+RDF.FIRST+">\" }", shape, stats -> assertThat(Lists.list(first)).as("direct brackets iri").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"^<"+RDF.FIRST+">\" }", shape, stats -> assertThat(Lists.list(first.invert())).as("inverse brackets iri").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"^<"+RDF.FIRST+">\" }", shape, stats -> assertThat(Lists.list(first.inverse())).as("inverse brackets iri").isEqualTo(stats.getPath()));
 
 		stats("{ \"stats\": \"<"+RDF.FIRST+">/<"+RDF.REST+">\" }", shape, stats -> assertThat(Lists.list(first, rest)).as("iri slash path").isEqualTo(stats.getPath()));
 
 		stats("{ \"stats\": \"first\" }", shape, stats -> assertThat(Lists.list(first)).as("direct alias").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"firstOf\" }", shape, stats -> assertThat(Lists.list(first.invert())).as("inverse alias").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"firstOf\" }", shape, stats -> assertThat(Lists.list(first.inverse())).as("inverse alias").isEqualTo(stats.getPath()));
 
 		stats("{ \"stats\": \"first/rest\" }", shape, stats -> assertThat(Lists.list(first, rest)).as("alias slash path").isEqualTo(stats.getPath()));
 
-		stats("{ \"stats\": \"firstOf.rest\" }", shape, stats -> assertThat(Lists.list(first.invert(), rest)).as("alias dot path").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"firstOf.rest\" }", shape, stats -> assertThat(Lists.list(first.inverse(), rest)).as("alias dot path").isEqualTo(stats.getPath()));
 
 	}
 

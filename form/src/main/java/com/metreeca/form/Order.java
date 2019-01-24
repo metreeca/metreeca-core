@@ -17,8 +17,6 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.shifts.Step;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,20 +29,20 @@ import static java.util.Collections.unmodifiableList;
  */
 public final class Order {
 
-	public static Order increasing(final Step... steps) {
-		return new Order(asList(steps), false);
+	public static Order increasing(final Shift... shifts) {
+		return new Order(asList(shifts), false);
 	}
 
-	public static Order decreasing(final Step... steps) {
-		return new Order(asList(steps), true);
+	public static Order decreasing(final Shift... shifts) {
+		return new Order(asList(shifts), true);
 	}
 
 
-	private final List<Step> path;
+	private final List<Shift> path;
 	private final boolean inverse;
 
 
-	public Order(final List<Step> path, final boolean inverse) {
+	public Order(final List<Shift> path, final boolean inverse) { // !!! make private
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
@@ -59,7 +57,7 @@ public final class Order {
 	}
 
 
-	public List<Step> getPath() {
+	public List<Shift> getPath() {
 		return unmodifiableList(path);
 	}
 
@@ -82,13 +80,13 @@ public final class Order {
 
 		final StringBuilder builder=new StringBuilder(20*path.size());
 
-		for (final Step step : path) {
+		for (final Shift shift : path) {
 
 			if ( builder.length() > 0 ) {
 				builder.append('/');
 			}
 
-			builder.append(step.format());
+			builder.append(shift.toString());
 		}
 
 		return builder.insert(0, inverse ? "-" : "+").toString();

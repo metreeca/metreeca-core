@@ -17,11 +17,9 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -152,7 +150,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 		final String id=resource.stringValue();
 		final Optional<IRI> datatype=datatype(shape);
-		final Map<Step, Shape> traits=traits(shape);
+		final Map<Shift, Shape> traits=traits(shape);
 
 		if ( datatype.filter(iri -> iri.equals(Values.IRIType)).isPresent() && traits.isEmpty() ) {
 
@@ -187,17 +185,17 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 				} else { // write direct/inverse traits as specified by the shape
 
-					final Map<Step, String> aliases=aliases(shape, JSONCodec.Reserved);
+					final Map<Shift, String> aliases=aliases(shape, JSONCodec.Reserved);
 
-					for (final Map.Entry<Step, Shape> entry : traits.entrySet()) {
+					for (final Map.Entry<Shift, Shape> entry : traits.entrySet()) {
 
-						final Step step=entry.getKey();
+						final Shift shift=entry.getKey();
 						final Shape nestedShape=entry.getValue();
 
-						final IRI predicate=step.getIRI();
-						final boolean inverse=step.isInverse();
+						final IRI predicate=shift.getIRI();
+						final boolean inverse=shift.isInverse();
 
-						final String alias=Optional.ofNullable(aliases.get(step))
+						final String alias=Optional.ofNullable(aliases.get(shift))
 								.orElseGet(() -> (inverse ? "^" : "")+predicate.stringValue());
 
 						final Collection<? extends Value> values=inverse

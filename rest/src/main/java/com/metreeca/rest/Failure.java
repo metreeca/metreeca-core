@@ -17,10 +17,7 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Frame;
-import com.metreeca.form.Issue;
-import com.metreeca.form.Report;
-import com.metreeca.form.shifts.Step;
+import com.metreeca.form.*;
 import com.metreeca.rest.formats.JSONFormat;
 
 import org.eclipse.rdf4j.model.Value;
@@ -289,9 +286,9 @@ public final class Failure implements Function<Response, Response> {
 
 		final JsonObjectBuilder json=Json.createObjectBuilder();
 
-		for (final Map.Entry<Step, Report> slot : frame.getSlots().entrySet()) {
+		for (final Map.Entry<Shift, Report> slot : frame.getSlots().entrySet()) {
 
-			final String property=slot.getKey().format();
+			final String property=slot.getKey().toString();
 			final JsonObject value=json(slot.getValue());
 
 			if ( !value.isEmpty() ) {

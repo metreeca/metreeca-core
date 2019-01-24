@@ -17,11 +17,8 @@
 
 package com.metreeca.form.engines;
 
-import com.metreeca.form.Issue;
-import com.metreeca.form.Report;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Sets;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
@@ -37,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.function.Supplier;
 
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
@@ -83,7 +81,7 @@ final class SPARQLWriterTest {
 
 	@Test void testValidateDirectEdgeTraits() {
 
-		final Shape shape=trait(Step.step(RDF.VALUE), any(RDF.NIL));
+		final Shape shape=trait(shift(RDF.VALUE), any(RDF.NIL));
 
 		final Report report=process(shape, x, y);
 
@@ -93,7 +91,7 @@ final class SPARQLWriterTest {
 
 	@Test void testValidateInverseEdgeTraits() {
 
-		final Shape shape=trait(Step.step(RDF.VALUE, true), any(RDF.NIL));
+		final Shape shape=trait(shift(RDF.VALUE).inverse(), any(RDF.NIL));
 
 		final Report report=process(shape, x, y);
 
@@ -118,7 +116,7 @@ final class SPARQLWriterTest {
 
 	@Test void testOutlineDirectEdgeTraits() {
 
-		final Shape shape=trait(Step.step(RDF.VALUE), any(RDF.NIL));
+		final Shape shape=trait(shift(RDF.VALUE), any(RDF.NIL));
 		final Model model=ValuesTest.decode("<x> rdf:value rdf:nil. <y> rdf:value rdf:nil.");
 
 		final Report report=process(shape, model, x, y);
@@ -130,7 +128,7 @@ final class SPARQLWriterTest {
 
 	@Test void testOutlineInverseEdgeTraits() {
 
-		final Shape shape=trait(Step.step(RDF.VALUE, true), any(RDF.NIL));
+		final Shape shape=trait(shift(RDF.VALUE).inverse(), any(RDF.NIL));
 		final Model model=ValuesTest.decode("rdf:nil rdf:value <x>. rdf:nil rdf:value <y>.");
 
 		final Report report=process(shape, model, x, y);
@@ -144,7 +142,7 @@ final class SPARQLWriterTest {
 
 	@Test void testOutlineMultipleObjects() {
 
-		final Shape shape=trait(Step.step(RDF.VALUE), and());
+		final Shape shape=trait(shift(RDF.VALUE), and());
 		final Model model=ValuesTest.decode("<x> rdf:value rdf:first, rdf:rest. <y> rdf:value rdf:first, rdf:rest.");
 
 		final Report report=process(shape, model, x, y);
@@ -156,7 +154,7 @@ final class SPARQLWriterTest {
 
 	@Test void testOutlineMultipleSources() {
 
-		final Shape shape=trait(Step.step(RDF.VALUE, true), and());
+		final Shape shape=trait(shift(RDF.VALUE).inverse(), and());
 		final Model model=ValuesTest.decode(
 				"rdf:first rdf:value <x>. rdf:rest rdf:value <x>. rdf:first rdf:value <y>. rdf:rest rdf:value <y>."
 		);
@@ -171,8 +169,8 @@ final class SPARQLWriterTest {
 	@Test void testOutlineMultipleDirectEdges() {
 
 		final Shape shape=and(
-				trait(Step.step(RDF.FIRST), and()),
-				trait(Step.step(RDF.REST), and())
+				trait(shift(RDF.FIRST), and()),
+				trait(shift(RDF.REST), and())
 		);
 
 		final Model model=ValuesTest.decode(
@@ -188,8 +186,8 @@ final class SPARQLWriterTest {
 	@Test void testOutlineMultipleInverseEdges() {
 
 		final Shape shape=and(
-				trait(Step.step(RDF.FIRST, true), and()),
-				trait(Step.step(RDF.REST, true), and())
+				trait(shift(RDF.FIRST).inverse(), and()),
+				trait(shift(RDF.REST).inverse(), and())
 		);
 
 		final Model model=ValuesTest.decode(
@@ -205,8 +203,8 @@ final class SPARQLWriterTest {
 	@Test void testOutlineMultipleDirectEdgeValuePairs() {
 
 		final Shape shape=and(
-				trait(Step.step(RDF.FIRST, true), and()),
-				trait(Step.step(RDF.REST, true), and())
+				trait(shift(RDF.FIRST).inverse(), and()),
+				trait(shift(RDF.REST).inverse(), and())
 		);
 
 		final Model model=ValuesTest.decode(""

@@ -17,36 +17,72 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.shifts.Count;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.shifts.Table;
+import org.eclipse.rdf4j.model.IRI;
 
 
 /**
  * Focus-shifting operator.
  */
-public interface Shift {
+public final class Shift {
 
-	public <V> V map(final Probe<V> probe);
+	public static Shift shift(final IRI iri) {
+		return new Shift(iri, false);
+	}
+
+
+	private final IRI iri;
+
+	private final boolean inverse;
+	// !!! private final boolean optional;
+	// !!! private final boolean repeatable;
+
+
+	private Shift(final IRI iri, final boolean inverse) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		this.iri=iri;
+		this.inverse=inverse;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Shift probe.
-	 *
-	 * <p>Generates a result by probing shifts.</p>
-	 *
-	 * @param <V> the type of the generated result value
-	 */
-	public static interface Probe<V> {
+	public IRI getIRI() {
+		return iri;
+	}
 
-		public V probe(final Step step);
 
-		public V probe(final Table table);
+	public boolean isInverse() {
+		return inverse;
+	}
 
-		public V probe(final Count count);
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Shift inverse() { return inverse(!inverse); }
+
+	public Shift inverse(final boolean inverse) {
+		return inverse == this.inverse ? this  : new Shift(iri, inverse);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof Shift
+				&& iri.equals(((Shift)object).iri)
+				&& inverse == ((Shift)object).inverse;
+	}
+
+	@Override public int hashCode() {
+		return iri.hashCode()^Boolean.hashCode(inverse);
+	}
+
+	@Override public String toString() {
+		return (inverse ? "^<" : "<")+iri.stringValue()+">";
 	}
 
 }

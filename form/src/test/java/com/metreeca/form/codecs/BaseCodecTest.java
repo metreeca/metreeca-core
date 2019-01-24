@@ -17,7 +17,7 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.shifts.Step;
+import com.metreeca.form.Shift;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shifts.Step.step;
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Values.iri;
@@ -38,7 +38,7 @@ import static java.util.Collections.singletonMap;
 
 final class BaseCodecTest {
 
-	private final Step Value=step(RDF.VALUE);
+	private final Shift Value=Shift.shift(RDF.VALUE);
 
 
 	@Test void testGuessAliasFromIRI() {
@@ -47,9 +47,9 @@ final class BaseCodecTest {
 				.as("direct")
 				.isEqualTo(BaseCodec.aliases(trait(Value)));
 
-		assertThat(singletonMap(step(RDF.VALUE, true), "valueOf"))
+		assertThat(singletonMap(shift(RDF.VALUE).inverse(), "valueOf"))
 				.as("inverse")
-				.isEqualTo(BaseCodec.aliases(trait(step(RDF.VALUE, true))));
+				.isEqualTo(BaseCodec.aliases(trait(shift(RDF.VALUE).inverse())));
 
 	}
 
@@ -93,7 +93,7 @@ final class BaseCodecTest {
 	}
 
 	@Test void testMergeAliases() {
-		assertThat(map(entry(step(RDF.TYPE), "type"), entry(Value, "value")))
+		assertThat(map(entry(Shift.shift(RDF.TYPE), "type"), entry(Value, "value")))
 				.as("merged")
 				.isEqualTo(BaseCodec.aliases(and(trait(RDF.TYPE), trait(Value))));
 	}

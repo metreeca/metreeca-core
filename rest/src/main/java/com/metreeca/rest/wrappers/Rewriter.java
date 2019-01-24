@@ -20,9 +20,6 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Shape;
 import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Count;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
@@ -34,6 +31,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -49,9 +47,6 @@ import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.shifts.Count.count;
-import static com.metreeca.form.shifts.Step.step;
-import static com.metreeca.form.shifts.Table.table;
 import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.iri;
@@ -156,7 +151,7 @@ public final class Rewriter implements Wrapper {
 
 				.base(engine.rewrite(request.base()))
 
-				.map(r -> {    // re-encode rewritten query only if it was actually encoded
+				.map(r -> { // re-encode rewritten query only if it was actually encoded
 
 					final String encoded=r.query();
 					final String decoded=decode(encoded);
@@ -196,7 +191,6 @@ public final class Rewriter implements Wrapper {
 		private final String target;
 
 		private final ShapeEngine shapes;
-		private final ShiftEngine shifts;
 
 
 		private Engine(final String source, final String target) {
@@ -205,7 +199,6 @@ public final class Rewriter implements Wrapper {
 			this.target=target;
 
 			this.shapes=new ShapeEngine();
-			this.shifts=new ShiftEngine();
 		}
 
 
@@ -214,7 +207,7 @@ public final class Rewriter implements Wrapper {
 		}
 
 		private Shift rewrite(final Shift shift) {
-			return shift.map(shifts);
+			return shift(rewrite(shift.getIRI())).inverse(shift.isInverse());
 		}
 
 
@@ -255,7 +248,7 @@ public final class Rewriter implements Wrapper {
 		}
 
 
-		//// !!! as interfaces /////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		private final class ShapeEngine implements Shape.Probe<Shape> {
 
@@ -319,7 +312,7 @@ public final class Rewriter implements Wrapper {
 
 
 			@Override public Trait probe(final Trait trait) {
-				return trait(shifts.probe(trait.getStep()), rewrite(trait.getShape()));
+				return trait(rewrite(trait.getShift()), rewrite(trait.getShape()));
 			}
 
 
@@ -333,25 +326,6 @@ public final class Rewriter implements Wrapper {
 
 			@Override public Option probe(final Option option) {
 				return option(rewrite(option.getTest()), rewrite(option.getPass()), rewrite(option.getFail()));
-			}
-
-		}
-
-		private final class ShiftEngine implements Shift.Probe<Shift> {
-
-			@Override public Step probe(final Step step) {
-				return step(rewrite(step.getIRI()), step.isInverse());
-			}
-
-			@Override public Table probe(final Table table) {
-				return table(table.getFields().entrySet().stream().collect(toMap(
-						entry -> shapes.probe(entry.getKey()),
-						entry -> rewrite(entry.getValue())
-				)));
-			}
-
-			@Override public Count probe(final Count count) {
-				return count(count.getShift().map(this));
 			}
 
 		}

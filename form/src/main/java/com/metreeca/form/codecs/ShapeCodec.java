@@ -17,13 +17,8 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
+import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Count;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -437,7 +432,7 @@ public final class ShapeCodec {
 		final Resource node=bnode();
 
 		model.add(statement(node, RDF.TYPE, Form.Trait));
-		model.add(statement(node, Form.step, step(trait.getStep(), model)));
+		model.add(statement(node, Form.shift, shift(trait.getShift(), model)));
 		model.add(statement(node, Form.shape, shape(trait.getShape(), model)));
 
 		return node;
@@ -445,7 +440,7 @@ public final class ShapeCodec {
 
 	private Trait trait(final Resource root, final Collection<Statement> model) {
 		return Trait.trait(
-				step(resource(root, Form.step, model), model),
+				shift(resource(root, Form.shift, model), model),
 				shape(resource(root, Form.shape, model), model)
 		);
 	}
@@ -518,72 +513,18 @@ public final class ShapeCodec {
 	//// Shifts ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Resource shift(final Shift shift, final Collection<Statement> model) {
-		return shift.map(new Shift.Probe<Resource>() {
 
-			@Override public Resource probe(final Step step) {
-				return step(step, model);
-			}
+		final Resource node=bnode();
 
-			@Override public Resource probe(final Table table) { return probe((Shift)table); }
+		model.add(statement(node, Form.iri, shift.getIRI()));
+		model.add(statement(node, Form.inverse, Values.literal(shift.isInverse())));
 
-			@Override public Resource probe(final Count count) { return count(count, model); }
-
-
-			private Resource probe(final Shift shift) {
-				throw new UnsupportedOperationException("unsupported shift ["+shift.getClass().getName()+"]");
-			}
-
-		});
+		return node;
 	}
 
 	private Shift shift(final Resource root, final Collection<Statement> model) {
-
-		final Set<Value> types=types(root, model);
-
-		return types.contains(Form.Step) ? step(root, model)
-
-				: types.contains(Form.Count) ? count(root, model)
-
-				: shift("unknown shape type "+types);
-	}
-
-
-	private Resource step(final Step step, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Step));
-		model.add(statement(node, Form.iri, step.getIRI()));
-		model.add(statement(node, Form.inverse, Values.literal(step.isInverse())));
-
-		return node;
-	}
-
-	private Step step(final Resource root, final Collection<Statement> model) {
-		return Step.step(
-				iri(root, Form.iri, model),
-				literal(root, Form.inverse, model).booleanValue()
-		);
-	}
-
-
-	private Resource count(final Count count, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, RDF.TYPE, Form.Count));
-		model.add(statement(node, Form.shift, shift(count.getShift(), model)));
-
-		return node;
-	}
-
-	private Count count(final Resource root, final Collection<Statement> model) {
-		return Count.count(shift(root, model));
-	}
-
-
-	private Shift shift(final String message) {
-		throw new UnsupportedOperationException(message);
+		return Shift.shift(iri(root, Form.iri, model))
+				.inverse(literal(root, Form.inverse, model).booleanValue());
 	}
 
 

@@ -25,7 +25,6 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
@@ -44,10 +43,10 @@ import javax.json.JsonValue;
 
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shifts.Step.step;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
@@ -228,7 +227,7 @@ public final class Updater extends Actor<Updater> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final Step Contains=step(LDP.CONTAINS);
+	private static final Shift Contains=shift(LDP.CONTAINS);
 
 
 	private Shape container(final Shape shape) { // prune ldp:contains trait // !!! review
@@ -242,7 +241,7 @@ public final class Updater extends Actor<Updater> {
 
 
 					@Override public Shape probe(final Trait trait) {
-						return trait.getStep().equals(Contains) ? and() : trait;
+						return trait.getShift().equals(Contains) ? and() : trait;
 					}
 
 
@@ -278,7 +277,7 @@ public final class Updater extends Actor<Updater> {
 
 
 					@Override public Shape probe(final Trait trait) {
-						return trait.getStep().equals(Contains) ? trait.getShape() : and();
+						return trait.getShift().equals(Contains) ? trait.getShape() : and();
 					}
 
 

@@ -17,7 +17,6 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Maps;
 
 import org.eclipse.rdf4j.model.*;
@@ -65,7 +64,7 @@ public final class Report {
 	private final Set<Frame<Report>> frames;
 
 
-	public Report(final Collection<Issue> issues, final Collection<Frame<Report>> frames) {
+	private Report(final Collection<Issue> issues, final Collection<Frame<Report>> frames) {
 
 		if ( issues == null ) {
 			throw new NullPointerException("null issues");
@@ -195,7 +194,7 @@ public final class Report {
 
 		final Value value=frame.getValue();
 
-		final List<Map.Entry<Step, Report>> slots=frame.getSlots().entrySet().stream()
+		final List<Map.Entry<Shift, Report>> slots=frame.getSlots().entrySet().stream()
 				.map(slot -> slot.getValue().prune(limit).map(trace -> Maps.entry(slot.getKey(), trace)))
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toList());
@@ -209,10 +208,10 @@ public final class Report {
 
 		return frame.getSlots().entrySet().stream().flatMap(slot -> {
 
-			final Step step=slot.getKey();
+			final Shift shift=slot.getKey();
 
-			final IRI iri=step.getIRI();
-			final boolean inverse=step.isInverse();
+			final IRI iri=shift.getIRI();
+			final boolean inverse=shift.isInverse();
 
 			final Stream<Value> targets=slot.getValue().frames.stream().map(Frame::getValue);
 

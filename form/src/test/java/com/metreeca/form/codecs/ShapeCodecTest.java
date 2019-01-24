@@ -19,7 +19,6 @@ package com.metreeca.form.codecs;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.Statement;
@@ -31,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Like.like;
@@ -38,9 +38,11 @@ import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.Meta.*;
+import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.When.when;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -88,7 +90,7 @@ final class ShapeCodecTest {
 	@Test void testStructurals() {
 
 		assertCoded("direct trait", trait(RDF.VALUE));
-		assertCoded("inverse trait", trait(Step.step(RDF.VALUE, true)));
+		assertCoded("inverse trait", trait(shift(RDF.VALUE).inverse()));
 		assertCoded("shaped trait", trait(RDF.VALUE, MinCount.minCount(10)));
 
 	}
@@ -103,11 +105,11 @@ final class ShapeCodecTest {
 		assertCoded("singleton disjunction", or(MinCount.minCount(1)));
 		assertCoded("proper disjunction", or(MinCount.minCount(1), MinCount.minCount(10)));
 
-		assertCoded("one-way option", Option.option(and(), MinCount.minCount(1)));
-		assertCoded("two-way option", Option.option(and(), MinCount.minCount(1), MinCount.minCount(10)));
+		assertCoded("one-way option", option(and(), MinCount.minCount(1)));
+		assertCoded("two-way option", option(and(), MinCount.minCount(1), MinCount.minCount(10)));
 
-		assertCoded("singleton condition", When.when(RDF.VALUE, Values.literal(1)));
-		assertCoded("proper condition", When.when(RDF.VALUE, Values.literal(1), Values.literal(10)));
+		assertCoded("singleton condition", when(RDF.VALUE, Values.literal(1)));
+		assertCoded("proper condition", when(RDF.VALUE, Values.literal(1), Values.literal(10)));
 
 	}
 

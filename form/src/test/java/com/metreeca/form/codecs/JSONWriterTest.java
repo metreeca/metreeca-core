@@ -19,7 +19,6 @@ package com.metreeca.form.codecs;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Or;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
@@ -39,10 +38,11 @@ import java.util.Map;
 import javax.json.*;
 
 import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.shapes.Meta.alias;
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Trait.trait;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -188,7 +188,7 @@ final class JSONWriterTest extends JSONCodecTest {
 				json(
 						ValuesTest.decode("_:y rdf:value _:x ."),
 						Values.bnode("x"),
-						trait(Step.step(RDF.VALUE, true))
+						trait(shift(RDF.VALUE).inverse())
 				));
 
 		assertEquivalent("user-defined",
@@ -208,7 +208,7 @@ final class JSONWriterTest extends JSONCodecTest {
 				json(
 						ValuesTest.decode("_:x rdf:value [rdf:value _:y] ."),
 						Values.bnode("x"),
-						trait(RDF.VALUE, trait(Step.step(RDF.VALUE), alias("alias")))
+						trait(RDF.VALUE, trait(shift(RDF.VALUE), alias("alias")))
 				));
 
 	}
@@ -267,7 +267,7 @@ final class JSONWriterTest extends JSONCodecTest {
 		))).as("named reverse links").isEqualTo(json(
 				ValuesTest.decode("<y> rdf:value <x> ."),
 				Values.iri("http://example.com/x"),
-				trait(Step.step(RDF.VALUE, true))
+				trait(shift(RDF.VALUE).inverse())
 		));
 	}
 
@@ -277,7 +277,7 @@ final class JSONWriterTest extends JSONCodecTest {
 				json(
 						ValuesTest.decode("_:y rdf:value _:x ."),
 						Values.bnode("x"),
-						trait(Step.step(RDF.VALUE, true))
+						trait(shift(RDF.VALUE).inverse())
 				));
 	}
 

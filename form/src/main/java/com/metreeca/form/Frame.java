@@ -18,8 +18,6 @@
 package com.metreeca.form;
 
 
-import com.metreeca.form.shifts.Step;
-
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
@@ -46,16 +44,16 @@ import static java.util.stream.Collectors.*;
  */
 public final class Frame<T> {
 
-	@SafeVarargs public static <T> Frame<T> frame(final Value value, final Map.Entry<Step, T>... slots) {
+	@SafeVarargs public static <T> Frame<T> frame(final Value value, final Map.Entry<Shift, T>... slots) {
 		return frame(value, map(slots));
 	}
 
-	public static <T> Frame<T> frame(final Value value, final Map<Step, T> slots) {
+	public static <T> Frame<T> frame(final Value value, final Map<Shift, T> slots) {
 		return new Frame<>(value, slots);
 	}
 
-	public static <T> Map.Entry<Step, T> slot(final Step step, final T value) {
-		return entry(step, value);
+	public static <T> Map.Entry<Shift, T> slot(final Shift shift, final T value) {
+		return entry(shift, value);
 	}
 
 
@@ -81,14 +79,14 @@ public final class Frame<T> {
 
 		// slot maps merge operator
 
-		final BinaryOperator<Map<Step, T>> operator=(x, y) -> Stream.of(x, y)
+		final BinaryOperator<Map<Shift, T>> operator=(x, y) -> Stream.of(x, y)
 				.flatMap(slot -> slot.entrySet().stream())
 				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
 						mapping(Map.Entry::getValue, collector)));
 
 		// group slot maps by frame value and merge
 
-		final Map<Value, Map<Step, T>> map=frames.stream().collect(
+		final Map<Value, Map<Shift, T>> map=frames.stream().collect(
 				groupingBy(Frame::getValue, LinkedHashMap::new,
 						mapping(Frame::getSlots, reducing(map(), operator))));
 
@@ -103,10 +101,10 @@ public final class Frame<T> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Value value;
-	private final Map<Step, T> slots;
+	private final Map<Shift, T> slots;
 
 
-	public Frame(final Value value, final Map<Step, T> slots) {
+	public Frame(final Value value, final Map<Shift, T> slots) { // !!! make private
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
@@ -135,7 +133,7 @@ public final class Frame<T> {
 		return value;
 	}
 
-	public Map<Step, T> getSlots() {
+	public Map<Shift, T> getSlots() {
 		return unmodifiableMap(slots);
 	}
 

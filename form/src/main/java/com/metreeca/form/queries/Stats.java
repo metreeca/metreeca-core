@@ -17,18 +17,15 @@
 
 package com.metreeca.form.queries;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
-import com.metreeca.form.shifts.Step;
+import com.metreeca.form.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shifts.Step.step;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -40,9 +37,9 @@ public final class Stats implements Query {
 			trait(Form.min, maxCount(1)),
 			trait(Form.max, maxCount(1)),
 			trait(Form.stats, and(
-					trait(step(Form.count), maxCount(1)),
-					trait(step(Form.min), maxCount(1)),
-					trait(step(Form.max), maxCount(1))
+					trait(shift(Form.count), maxCount(1)),
+					trait(shift(Form.min), maxCount(1)),
+					trait(shift(Form.max), maxCount(1))
 			))
 	);
 
@@ -51,10 +48,10 @@ public final class Stats implements Query {
 
 	private final Shape shape;
 
-	private final List<Step> path;
+	private final List<Shift> path;
 
 
-	public Stats(final Shape shape, final List<Step> path) {
+	public Stats(final Shape shape, final List<Shift> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -79,7 +76,7 @@ public final class Stats implements Query {
 		return shape;
 	}
 
-	public List<Step> getPath() {
+	public List<Shift> getPath() {
 		return unmodifiableList(path);
 	}
 

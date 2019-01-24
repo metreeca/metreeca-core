@@ -19,9 +19,6 @@ package com.metreeca.form.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Count;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Sets;
 
@@ -113,6 +110,33 @@ final class SPARQLWriter {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Expands a source value into a focus value set applying a shift operator.
+	 */
+	private Set<Value> shift(final Value source, final Shift shift) {
+
+		final Set<Value> values=new HashSet<>();
+
+		final IRI iri=shift.getIRI();
+
+		if ( shift.isInverse() ) {
+
+			try (final RepositoryResult<Statement> statements=connection.getStatements(null, iri, source)) {
+				while ( statements.hasNext() ) { values.add(statements.next().getSubject()); }
+			}
+
+		} else if ( source instanceof Resource ) {
+
+			try (final RepositoryResult<Statement> statements=connection.getStatements((Resource)source, iri, null)) {
+				while ( statements.hasNext() ) { values.add(statements.next().getObject()); }
+			}
+
+		}
+
+		return values;
+	}
+
+
+	/**
 	 * Validate constraints on a focus value set.
 	 */
 	private final class TracesProbe implements Shape.Probe<Report> {
@@ -174,7 +198,7 @@ final class SPARQLWriter {
 				});
 
 				return report(issues, focus.stream()
-						.map(value -> frame(value, Frame.slot(Step.step(RDF.TYPE), report(emptySet(), frame(clazz.getIRI())))))
+						.map(value -> frame(value, Frame.slot(Shift.shift(RDF.TYPE), report(emptySet(), frame(clazz.getIRI())))))
 						.collect(toList()));
 			}
 		}
@@ -298,14 +322,14 @@ final class SPARQLWriter {
 
 		@Override public Report probe(final Trait trait) {
 
-			final Step step=trait.getStep();
+			final Shift shift=trait.getShift();
 			final Shape shape=trait.getShape();
 
 			return report(Sets.set(), focus.stream().map(value -> { // for each focus value
 
 				// compute the new focus set expanding the trait shift from the focus value
 
-				final Set<Value> focus=step.map(new FocusProbe(value));
+				final Set<Value> focus=shift(value, shift);
 
 				// validate the trait shape on the new focus set
 
@@ -328,7 +352,7 @@ final class SPARQLWriter {
 
 				// return trait validation results
 
-				return frame(value, Frame.slot(step, report(issues, Lists.concat(frames, placeholders))));
+				return frame(value, Frame.slot(shift, report(issues, Lists.concat(frames, placeholders))));
 
 			}).collect(toList()));
 
@@ -355,55 +379,6 @@ final class SPARQLWriter {
 					? option.getPass().map(this)
 					: option.getFail().map(this);
 
-		}
-
-	}
-
-
-	/**
-	 * Expands a source value into a focus value set applying a shift operator.
-	 */
-	private final class FocusProbe implements Shift.Probe<Set<Value>> {
-
-		private final Value source;
-
-
-		private FocusProbe(final Value source) {
-			this.source=source;
-		}
-
-
-
-		@Override public Set<Value> probe(final Step step) {
-
-			final Set<Value> values=new HashSet<>();
-
-			final IRI iri=step.getIRI();
-
-			if ( step.isInverse() ) {
-
-				try (final RepositoryResult<Statement> statements=connection.getStatements(null, iri, source)) {
-					while ( statements.hasNext() ) { values.add(statements.next().getSubject()); }
-				}
-
-			} else if ( source instanceof Resource ) {
-
-				try (final RepositoryResult<Statement> statements=connection.getStatements((Resource)source, iri, null)) {
-					while ( statements.hasNext() ) { values.add(statements.next().getObject()); }
-				}
-
-			}
-
-			return values;
-		}
-
-		@Override public Set<Value> probe(final Table table) { return probe((Shift)table); }
-
-		@Override public Set<Value> probe(final Count count) { return probe((Shift)count); }
-
-
-		private Set<Value> probe(final Shift shift) {
-			throw new UnsupportedOperationException("unsupported shift ["+shift.getClass().getName()+"]");
 		}
 
 	}

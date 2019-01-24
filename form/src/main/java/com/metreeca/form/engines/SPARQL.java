@@ -20,9 +20,6 @@ package com.metreeca.form.engines;
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Count;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -164,22 +161,22 @@ abstract class SPARQL { // ! refactor
 	}
 
 
-	private Object edge(final Object source, final Step step, final Object target) {
+	private Object edge(final Object source, final Shift shift, final Object target) {
 
-		final Object link=term(step.getIRI());
+		final Object link=term(shift.getIRI());
 
-		return step.isInverse()
+		return shift.isInverse()
 				? list(target, link, source, " .\n")
 				: list(source, link, target, " .\n");
 	}
 
 
-	protected Object path(final Collection<Step> path) {
+	protected Object path(final Collection<Shift> path) {
 		return items(path.stream().map(this::step).collect(toList()), '/');
 	}
 
-	private Object step(final Step step) {
-		return step.isInverse() ? list("^", term(step.getIRI())) : term(step.getIRI());
+	private Object step(final Shift shift) {
+		return shift.isInverse() ? list("^", term(shift.getIRI())) : term(shift.getIRI());
 	}
 
 
@@ -218,63 +215,6 @@ abstract class SPARQL { // ! refactor
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private boolean isAggregate(final Shift shift) {
-		return shift.map(new Shift.Probe<Boolean>() {
-
-			@Override public Boolean probe(final Step step) { return false; }
-
-			@Override public Boolean probe(final Count count) { return true; }
-
-			@Override public Boolean probe(final Table table) { return false; }
-
-		});
-	}
-
-
-	private Object projection(final Shift source, final Object target) {
-		return list(" (", source.map(new Shift.Probe<Object>() {
-
-			@Override public Object probe(final Step step) {
-				return var(id(source));
-			}
-
-			@Override public Object probe(final Table table) {
-				return var(id(source));
-			}
-
-			@Override public Object probe(final Count count) {
-				return list(" count(distinct ", var(id(source)), ")");
-			}
-
-		}), " as", target, ")");
-	}
-
-	private Object grouping(final Map.Entry<Trait, Shift> field) {
-		return var(id(field.getValue()));
-	}
-
-	private Object shift(final Shift shift, final boolean required, final Object source, final Object target) {
-		return shift.map(new Shift.Probe<Object>() {
-
-			@Override public Object probe(final Step step) {
-				return required ? edge(source, step, target)
-						: list("\foptional {\f", edge(source, step, target), "\f}\f");
-			}
-
-			@Override public Object probe(final Table table) {
-				return null;
-			}
-
-			@Override public Object probe(final Count count) {
-				return count.getShift().map(this);
-			}
-
-		});
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private final class TemplateProbe extends Traverser<Stream<Statement>> {
 
 		private final Shape focus;
@@ -290,16 +230,16 @@ abstract class SPARQL { // ! refactor
 
 		@Override public Stream<Statement> probe(final Trait trait) {
 
-			final Step step=trait.getStep();
+			final Shift shift=trait.getShift();
 			final Shape shape=trait.getShape();
 
-			final IRI iri=step.getIRI();
+			final IRI iri=shift.getIRI();
 
 			final BNode source=bnode(id(focus).toString());
 			final BNode target=bnode(id(shape).toString());
 
 			return Stream.concat(
-					Stream.of(step.isInverse() ? statement(target, iri, source) : statement(source, iri, target)),
+					Stream.of(shift.isInverse() ? statement(target, iri, source) : statement(source, iri, target)),
 					shape.map(new TemplateProbe(shape))
 			);
 
@@ -414,17 +354,17 @@ abstract class SPARQL { // ! refactor
 
 		@Override public Object probe(final Trait trait) {
 
-			final Step step=trait.getStep();
+			final Shift shift=trait.getShift();
 			final Shape shape=trait.getShape();
 
 			return list(
 
 					shape instanceof All // filtering hook
 							? null // ($) only if actually referenced by filters
-							: edge(term(source), step, term(shape)),
+							: edge(term(source), shift, term(shape)),
 
 					All.all(shape) // target universal constraints
-							.map(values -> values.stream().map(value -> edge(term(source), step, term(value))))
+							.map(values -> values.stream().map(value -> edge(term(source), shift, term(value))))
 							.orElse(null),
 
 					filters(shape)
@@ -465,11 +405,11 @@ abstract class SPARQL { // ! refactor
 
 		@Override public Object probe(final Trait trait) {
 
-			final Step step=trait.getStep();
+			final Shift shift=trait.getShift();
 			final Shape shape=trait.getShape();
 
 			final Object pattern=list(
-					edge(term(this.shape), step, term(shape)),
+					edge(term(this.shape), shift, term(shape)),
 					pattern(shape)
 			);
 
@@ -477,36 +417,6 @@ abstract class SPARQL { // ! refactor
 
 			return list("\f", All.all(shape).isPresent() ? pattern : list("\foptional {\f", pattern, "\f}"), "\f");
 		}
-
-		//@Override public Object probe(final Table table) {
-		//
-		//	final Map<Boolean, List<Map.Entry<Trait, Shift>>> roles=table.getFields().entrySet().stream()
-		//			.collect(partitioningBy(field -> isAggregate((Object)field)));
-		//
-		//	final Collection<Map.Entry<Trait, Shift>> aggregates=roles.get(true);
-		//	final Collection<Map.Entry<Trait, Shift>> derivates=roles.get(false);
-		//
-		//	if ( aggregates.isEmpty() ) {
-		//
-		//		return derivates.stream().map(field -> shift(link(field.getValue(), field.getKey().getShape())));
-		//
-		//	} else {
-		//
-		//		return list(
-		//
-		//				"\f{ select ", var(id(shape)), aggregates.stream().map(this::projection), " {\f",
-		//
-		//				// !!! insert recoverable constraints from outer shape
-		//
-		//				aggregates.stream().map(field -> shift(field.getValue())),
-		//				derivates.stream().map(field -> shift(field.getValue())),
-		//
-		//				"\f} group by ", var(id(shape)), derivates.stream().map(this::grouping), " }\f"
-		//
-		//		);
-		//
-		//	}
-		//}
 
 
 		@Override public Object probe(final And and) {

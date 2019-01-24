@@ -57,7 +57,7 @@ public final class Issue {
 	private final Set<Value> values; // the values this issue refers to
 
 
-	public Issue(final Level level, final String message, final Shape shape, final Collection<Value> values) {
+	private Issue(final Level level, final String message, final Shape shape, final Collection<Value> values) {
 
 		if ( level == null ) {
 			throw new NullPointerException("null level");

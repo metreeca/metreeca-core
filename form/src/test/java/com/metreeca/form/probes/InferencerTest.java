@@ -21,7 +21,6 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.In;
 import com.metreeca.form.shapes.MinCount;
 import com.metreeca.form.shapes.Or;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Values;
 
@@ -31,6 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -93,18 +93,18 @@ final class InferencerTest {
 	@Test void testTrait() {
 
 		assertImplies("trait subjects are resources",
-				trait(Step.step(RDF.VALUE)), datatype(Values.ResoureType));
+				trait(shift(RDF.VALUE)), datatype(Values.ResoureType));
 
 		assertImplies("reverse trait objects are resources",
-				trait(Step.step(RDF.VALUE, true)), datatype(Values.ResoureType), (s, i) -> trait(s.getStep(), and(s.getShape(), i)));
+				trait(shift(RDF.VALUE).inverse()), datatype(Values.ResoureType), (s, i) -> trait(s.getShift(), and(s.getShape(), i)));
 
 		assertImplies("both subject and object of a rdf:type trait are resources",
-				trait(Step.step(RDF.TYPE)), datatype(Values.ResoureType),
-				(s, i) -> and(trait(s.getStep(), and(s.getShape(), i)), i));
+				trait(shift(RDF.TYPE)), datatype(Values.ResoureType),
+				(s, i) -> and(trait(s.getShift(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",
 				trait(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResoureType),
-				(s, i) -> and(trait(s.getStep(), and(and(s.getShape(), i), datatype(Values.ResoureType))), datatype(Values.ResoureType)));
+				(s, i) -> and(trait(s.getShift(), and(and(s.getShape(), i), datatype(Values.ResoureType))), datatype(Values.ResoureType)));
 	}
 
 	@Test void testConjunction() {
