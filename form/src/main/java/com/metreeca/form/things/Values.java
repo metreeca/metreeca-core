@@ -84,7 +84,7 @@ public final class Values {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI ValueType=iri(SESAME.NAMESPACE, "value"); // abstract datatype IRI for values
-	public static final IRI ResoureType=iri(SESAME.NAMESPACE, "resource"); // abstract datatype IRI for resources
+	public static final IRI ResourceType=iri(SESAME.NAMESPACE, "resource"); // abstract datatype IRI for resources
 	public static final IRI LiteralType=iri(SESAME.NAMESPACE, "literal"); // abstract datatype IRI for literals
 
 	public static final IRI BNodeType=iri(SESAME.NAMESPACE, "bnode"); // datatype IRI for blank nodes
@@ -98,7 +98,7 @@ public final class Values {
 
 	public static boolean is(final Value value, final IRI type) {
 		return value != null && type(value).equals(type)
-				|| value instanceof Resource && ResoureType.equals(type) // abstract resource datatype
+				|| value instanceof Resource && ResourceType.equals(type) // abstract resource datatype
 				|| value instanceof Literal && LiteralType.equals(type) // abstract literal datatype
 				|| value instanceof Literal && RDFS.LITERAL.equals(type); // abstract resource datatype using rdfs: IRI
 	}

@@ -51,7 +51,7 @@ final class InferencerTest {
 	@Test void testHint() {
 
 		assertImplies("hinted shapes are resources",
-				hint(RDF.NIL), datatype(Values.ResoureType));
+				hint(RDF.NIL), datatype(Values.ResourceType));
 
 	}
 
@@ -77,7 +77,7 @@ final class InferencerTest {
 
 	@Test void testClazz() {
 		assertImplies("classed values are resources",
-				clazz(RDF.NIL), datatype(Values.ResoureType));
+				clazz(RDF.NIL), datatype(Values.ResourceType));
 	}
 
 	@Test void testRange() {
@@ -93,33 +93,33 @@ final class InferencerTest {
 	@Test void testTrait() {
 
 		assertImplies("trait subjects are resources",
-				trait(shift(RDF.VALUE)), datatype(Values.ResoureType));
+				trait(shift(RDF.VALUE)), datatype(Values.ResourceType));
 
 		assertImplies("reverse trait objects are resources",
-				trait(shift(RDF.VALUE).inverse()), datatype(Values.ResoureType), (s, i) -> trait(s.getShift(), and(s.getShape(), i)));
+				trait(shift(RDF.VALUE).inverse()), datatype(Values.ResourceType), (s, i) -> trait(s.getShift(), and(s.getShape(), i)));
 
 		assertImplies("both subject and object of a rdf:type trait are resources",
-				trait(shift(RDF.TYPE)), datatype(Values.ResoureType),
+				trait(shift(RDF.TYPE)), datatype(Values.ResourceType),
 				(s, i) -> and(trait(s.getShift(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",
-				trait(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResoureType),
-				(s, i) -> and(trait(s.getShift(), and(and(s.getShape(), i), datatype(Values.ResoureType))), datatype(Values.ResoureType)));
+				trait(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResourceType),
+				(s, i) -> and(trait(s.getShift(), and(and(s.getShape(), i), datatype(Values.ResourceType))), datatype(Values.ResourceType)));
 	}
 
 	@Test void testConjunction() {
-		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Values.ResoureType),
+		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Values.ResourceType),
 				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer and() stripped by optimization
 	}
 
 	@Test void testDisjunction() {
-		assertImplies("nested shapes are expanded", Or.or(clazz(RDF.NIL)), datatype(Values.ResoureType),
+		assertImplies("nested shapes are expanded", Or.or(clazz(RDF.NIL)), datatype(Values.ResourceType),
 				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer or() stripped by optimization
 	}
 
 	@Test void testOption() {
 		assertImplies("nested shapes are expanded",
-				option(clazz(RDF.NIL), clazz(RDF.NIL), clazz(RDF.NIL)), datatype(Values.ResoureType),
+				option(clazz(RDF.NIL), clazz(RDF.NIL), clazz(RDF.NIL)), datatype(Values.ResourceType),
 				(s, i) -> option(and(s.getTest(), i), and(s.getPass(), i), and(s.getFail(), i)));
 	}
 

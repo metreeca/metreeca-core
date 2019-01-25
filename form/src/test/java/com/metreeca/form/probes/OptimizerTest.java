@@ -65,13 +65,13 @@ final class OptimizerTest {
 
 	@Test void testOptimizeType() {
 
-		assertThat(optimize(and(Datatype.datatype(Values.IRIType), Datatype.datatype(Values.ResoureType)))).as("conjunction / superclass").isEqualTo(Datatype.datatype(Values.IRIType));
+		assertThat(optimize(and(Datatype.datatype(Values.IRIType), Datatype.datatype(Values.ResourceType)))).as("conjunction / superclass").isEqualTo(Datatype.datatype(Values.IRIType));
 		assertThat(optimize(and(Datatype.datatype(Values.LiteralType), Datatype.datatype(XMLSchema.STRING)))).as("conjunction / literal").isEqualTo(Datatype.datatype(XMLSchema.STRING));
-		assertThat(optimize(and(Datatype.datatype(Values.ResoureType), Datatype.datatype(XMLSchema.STRING)))).as("conjunction / unrelated").isEqualTo(and(Datatype.datatype(Values.ResoureType), Datatype.datatype(XMLSchema.STRING)));
+		assertThat(optimize(and(Datatype.datatype(Values.ResourceType), Datatype.datatype(XMLSchema.STRING)))).as("conjunction / unrelated").isEqualTo(and(Datatype.datatype(Values.ResourceType), Datatype.datatype(XMLSchema.STRING)));
 
-		assertThat(optimize(or(Datatype.datatype(Values.IRIType), Datatype.datatype(Values.ResoureType)))).as("disjunction / superclass").isEqualTo(Datatype.datatype(Values.ResoureType));
+		assertThat(optimize(or(Datatype.datatype(Values.IRIType), Datatype.datatype(Values.ResourceType)))).as("disjunction / superclass").isEqualTo(Datatype.datatype(Values.ResourceType));
 		assertThat(optimize(or(Datatype.datatype(Values.LiteralType), Datatype.datatype(RDF.NIL)))).as("disjunction / literal").isEqualTo(Datatype.datatype(Values.LiteralType));
-		assertThat(optimize(or(Datatype.datatype(Values.ResoureType), Datatype.datatype(RDF.NIL)))).as("disjunction / unrelated").isEqualTo(or(Datatype.datatype(Values.ResoureType), Datatype.datatype(RDF.NIL)));
+		assertThat(optimize(or(Datatype.datatype(Values.ResourceType), Datatype.datatype(RDF.NIL)))).as("disjunction / unrelated").isEqualTo(or(Datatype.datatype(Values.ResourceType), Datatype.datatype(RDF.NIL)));
 
 	}
 

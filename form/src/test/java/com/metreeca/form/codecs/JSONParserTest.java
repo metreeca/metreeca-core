@@ -324,7 +324,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat((Object)decode("[] rdf:value [], <x> .")).as("proved resources").isEqualTo(rdf(
 				blanks("_:x", "http://example.com/x"),
 				null,
-				trait(RDF.VALUE, datatype(Values.ResoureType))
+				trait(RDF.VALUE, datatype(Values.ResourceType))
 		));
 	}
 

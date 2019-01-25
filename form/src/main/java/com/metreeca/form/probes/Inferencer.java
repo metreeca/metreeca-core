@@ -52,7 +52,7 @@ public final class Inferencer extends Visitor<Shape> {
 
 
 	@Override public Shape probe(final Meta meta) {
-		return meta.getIRI().equals(Form.Hint) ? and(meta, datatype(Values.ResoureType)) : meta;
+		return meta.getIRI().equals(Form.Hint) ? and(meta, datatype(Values.ResourceType)) : meta;
 	}
 
 
@@ -63,7 +63,7 @@ public final class Inferencer extends Visitor<Shape> {
 	}
 
 	@Override public Shape probe(final Clazz clazz) {
-		return and(clazz, datatype(Values.ResoureType));
+		return and(clazz, datatype(Values.ResourceType));
 	}
 
 
@@ -92,9 +92,9 @@ public final class Inferencer extends Visitor<Shape> {
 		final Shift shift=trait.getShift();
 		final Shape shape=trait.getShape().map(this);
 
-		return shift.getIRI().equals(RDF.TYPE) ? and(trait(shift, and(shape, datatype(Values.ResoureType))), datatype(Values.ResoureType))
-				: shift.isInverse() ? trait(shift, and(shape, datatype(Values.ResoureType)))
-				: and(trait(shift, shape), datatype(Values.ResoureType));
+		return shift.getIRI().equals(RDF.TYPE) ? and(trait(shift, and(shape, datatype(Values.ResourceType))), datatype(Values.ResourceType))
+				: shift.isInverse() ? trait(shift, and(shape, datatype(Values.ResourceType)))
+				: and(trait(shift, shape), datatype(Values.ResourceType));
 	}
 
 

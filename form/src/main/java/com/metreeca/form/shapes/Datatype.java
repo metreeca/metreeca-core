@@ -47,7 +47,7 @@ public final class Datatype implements Shape {
 	 * Beyond literal datatypes, the datatype {@code iri} may be one of the following extend values:
 	 *
 	 * - {@link Values#BNodeType} for blank nodes; - {@link Values#IRIType} for IRI references; - {@link
-	 * Values#ResoureType} for blank nodes or IRI references; - {@link Values#LiteralType} or {@link RDFS#LITERAL} for
+	 * Values#ResourceType} for blank nodes or IRI references; - {@link Values#LiteralType} or {@link RDFS#LITERAL} for
 	 * any literal.
 	 *
 	 * @param iri the expected extended datatype

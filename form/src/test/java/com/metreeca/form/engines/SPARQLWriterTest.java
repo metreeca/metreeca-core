@@ -282,8 +282,8 @@ final class SPARQLWriterTest {
 
 		assertThat(validate(datatype(Values.IRIType), Values.bnode())).as("fail").isFalse();
 
-		assertThat(validate(datatype(Values.ResoureType), Values.bnode())).as("pass / generic resource").isTrue();
-		assertThat(validate(datatype(Values.ResoureType), Values.literal(true))).as("fail / generic resource").isFalse();
+		assertThat(validate(datatype(Values.ResourceType), Values.bnode())).as("pass / generic resource").isTrue();
+		assertThat(validate(datatype(Values.ResourceType), Values.literal(true))).as("fail / generic resource").isFalse();
 
 		assertThat(validate(datatype(RDFS.LITERAL), Values.literal(true))).as("pass / generic literal").isTrue();
 		assertThat(validate(datatype(RDFS.LITERAL), Values.bnode())).as("fail / generic literal").isFalse();

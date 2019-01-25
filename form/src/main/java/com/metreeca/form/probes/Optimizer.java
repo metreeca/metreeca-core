@@ -129,12 +129,12 @@ public final class Optimizer extends Traverser<Shape> {
 
 	private static boolean derives(final IRI x, final IRI y) {
 		return x.equals(Values.ValueType)
-				|| x.equals(Values.ResoureType) && resource(y)
+				|| x.equals(Values.ResourceType) && resource(y)
 				|| x.equals(Values.LiteralType) && literal(y);
 	}
 
 	private static boolean resource(final IRI type) {
-		return type.equals(Values.ResoureType) || type.equals(Values.BNodeType) || type.equals(Values.IRIType);
+		return type.equals(Values.ResourceType) || type.equals(Values.BNodeType) || type.equals(Values.IRIType);
 	}
 
 	private static boolean literal(final IRI type) {
