@@ -230,7 +230,7 @@ public final class Updater extends Actor<Updater> {
 	private static final Shift Contains=shift(LDP.CONTAINS);
 
 
-	private Shape container(final Shape shape) { // prune ldp:contains trait // !!! review
+	private Shape container(final Shape shape) { // prune ldp:contains field // !!! review
 		return shape
 
 				.map(new Traverser<Shape>() {
@@ -240,8 +240,8 @@ public final class Updater extends Actor<Updater> {
 					}
 
 
-					@Override public Shape probe(final Trait trait) {
-						return trait.getIRI().equals(Contains) ? and() : trait;
+					@Override public Shape probe(final Field field) {
+						return field.getIRI().equals(Contains) ? and() : field;
 					}
 
 
@@ -276,8 +276,8 @@ public final class Updater extends Actor<Updater> {
 					}
 
 
-					@Override public Shape probe(final Trait trait) {
-						return trait.getIRI().equals(Contains) ? trait.getShape() : and();
+					@Override public Shape probe(final Field field) {
+						return field.getIRI().equals(Contains) ? field.getShape() : and();
 					}
 
 

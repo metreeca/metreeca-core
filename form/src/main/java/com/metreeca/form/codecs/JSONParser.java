@@ -49,7 +49,7 @@ import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Trait.traits;
+import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -183,7 +183,7 @@ public final class JSONParser extends AbstractRDFParser {
 				if ( !label.equals("this") ) {
 
 					final IRI property=property(label, base, shape);
-					final Stream<Value> targets=parse(value, base, null, traits(shape).get(property));
+					final Stream<Value> targets=parse(value, base, null, fields(shape).get(property));
 
 					if ( rdfHandler != null ) {
 						targets.forEachOrdered(target -> {

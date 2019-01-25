@@ -40,7 +40,7 @@ import static com.metreeca.form.shapes.Meta.*;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -89,9 +89,9 @@ final class ShapeCodecTest {
 
 	@Test void testStructurals() {
 
-		assertCoded("direct trait", trait(RDF.VALUE));
-		assertCoded("inverse trait", trait(inverse(RDF.VALUE)));
-		assertCoded("shaped trait", trait(RDF.VALUE, MinCount.minCount(10)));
+		assertCoded("direct field", Field.field(RDF.VALUE));
+		assertCoded("inverse field", Field.field(inverse(RDF.VALUE)));
+		assertCoded("shaped field", field(RDF.VALUE, MinCount.minCount(10)));
 
 	}
 

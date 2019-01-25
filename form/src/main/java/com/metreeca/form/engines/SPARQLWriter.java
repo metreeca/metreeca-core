@@ -318,19 +318,19 @@ final class SPARQLWriter {
 		}
 
 
-		@Override public Report probe(final Trait trait) {
+		@Override public Report probe(final Field field) {
 
-			final IRI iri=trait.getIRI();
+			final IRI iri=field.getIRI();
 			final boolean direct=direct(iri);
-			final Shape shape=trait.getShape();
+			final Shape shape=field.getShape();
 
 			return report(Sets.set(), focus.stream().map(value -> { // for each focus value
 
-				// compute the new focus set expanding the trait shift from the focus value
+				// compute the new focus set expanding the field shift from the focus value
 
 				final Set<Value> focus=shift(value, iri);
 
-				// validate the trait shape on the new focus set
+				// validate the field shape on the new focus set
 
 				final Report report=shape.map(new TracesProbe(focus));
 
@@ -349,7 +349,7 @@ final class SPARQLWriter {
 						.map(v -> Frame.<Report>frame(v))
 						.collect(toList());
 
-				// return trait validation results
+				// return field validation results
 
 				return frame(value, slot(direct? Shift.shift(iri) : Shift.shift(inverse(iri)).inverse(), report(issues, Lists.concat(frames, placeholders))));
 

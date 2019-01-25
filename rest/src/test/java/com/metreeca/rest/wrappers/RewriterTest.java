@@ -18,6 +18,7 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.truths.ModelAssert;
@@ -38,7 +39,7 @@ import javax.json.Json;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
@@ -166,8 +167,8 @@ final class RewriterTest {
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
 
 					assertThat(request.shape()).isEqualTo(and(
-							trait(internal("p")),
-							trait(inverse(internal("p")))
+							Field.field(internal("p")),
+							Field.field(inverse(internal("p")))
 					));
 
 					return request.reply(response -> response
@@ -181,8 +182,8 @@ final class RewriterTest {
 						.base(External)
 
 						.shape(and(
-								trait(external("p")),
-								trait(inverse(external("p")))
+								Field.field(external("p")),
+								Field.field(inverse(external("p")))
 						))
 
 				)
@@ -190,8 +191,8 @@ final class RewriterTest {
 				.accept(response -> {
 
 					assertThat(response.shape()).isEqualTo(and(
-							trait(external("p")),
-							trait(inverse(external("p")))
+							Field.field(external("p")),
+							Field.field(inverse(external("p")))
 					));
 
 				});
@@ -235,7 +236,7 @@ final class RewriterTest {
 
 	@Test void testJSONRewriting() {
 
-		final Shape TestShape=trait(internal("p"), and(required(), datatype(Values.IRIType)));
+		final Shape TestShape=field(internal("p"), and(required(), datatype(Values.IRIType)));
 
 		new Tray()
 

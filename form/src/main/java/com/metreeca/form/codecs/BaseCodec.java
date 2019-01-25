@@ -128,9 +128,9 @@ final class BaseCodec { // !! review/optimize
 		}
 
 
-		@Override public Map<IRI, String> probe(final Trait trait) {
+		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI iri=trait.getIRI();
+			final IRI iri=field.getIRI();
 
 			return Optional
 					.of(NamedIRIPattern.matcher(iri.stringValue()))
@@ -154,10 +154,10 @@ final class BaseCodec { // !! review/optimize
 		}
 
 
-		@Override public Map<IRI, String> probe(final Trait trait) {
+		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI shift=trait.getIRI();
-			final Shape shape=trait.getShape();
+			final IRI shift=field.getIRI();
+			final Shape shape=field.getShape();
 
 			return Optional
 					.ofNullable(shape.map(new AliasProbe()))
@@ -174,7 +174,7 @@ final class BaseCodec { // !! review/optimize
 			return meta.getIRI().equals(Form.Alias) ? meta.getValue().stringValue() : null;
 		}
 
-		@Override public String probe(final Trait trait) { return null; }
+		@Override public String probe(final Field field) { return null; }
 
 
 		@Override public String probe(final And and) {

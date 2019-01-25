@@ -115,8 +115,8 @@ public final class ShapeCodec {
 			@Override public Resource probe(final Any any) { return any(any, model); }
 
 
-			@Override public Resource probe(final Trait trait) {
-				return trait(trait, model);
+			@Override public Resource probe(final Field field) {
+				return field(field, model);
 			}
 
 
@@ -154,7 +154,7 @@ public final class ShapeCodec {
 				: types.contains(Form.All) ? all(root, model)
 				: types.contains(Form.Any) ? any(root, model)
 
-				: types.contains(Form.Trait) ? trait(root, model)
+				: types.contains(Form.Field) ? field(root, model)
 
 				: types.contains(Form.And) ? and(root, model)
 				: types.contains(Form.Or) ? or(root, model)
@@ -429,19 +429,19 @@ public final class ShapeCodec {
 	}
 
 
-	private Resource trait(final Trait trait, final Collection<Statement> model) {
+	private Resource field(final Field field, final Collection<Statement> model) {
 
 		final Resource node=bnode();
 
-		model.add(statement(node, RDF.TYPE, Form.Trait));
-		model.add(statement(node, Form.iri, step(trait.getIRI())));
-		model.add(statement(node, Form.shape, shape(trait.getShape(), model)));
+		model.add(statement(node, RDF.TYPE, Form.Field));
+		model.add(statement(node, Form.iri, step(field.getIRI())));
+		model.add(statement(node, Form.shape, shape(field.getShape(), model)));
 
 		return node;
 	}
 
-	private Trait trait(final Resource root, final Collection<Statement> model) {
-		return Trait.trait(
+	private Field field(final Resource root, final Collection<Statement> model) {
+		return Field.field(
 				step(root, Form.iri, model),
 				shape(resource(root, Form.shape, model), model)
 		);

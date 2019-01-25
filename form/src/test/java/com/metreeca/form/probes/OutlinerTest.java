@@ -29,7 +29,7 @@ import java.util.Collection;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Clazz.clazz;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 
@@ -45,25 +45,25 @@ final class OutlinerTest {
 	}
 
 	@Test void testOutlineSubjectExistentials() {
-		assertThat(outline(and(all(RDF.FIRST, RDF.REST), trait(RDF.VALUE, all(RDF.NIL)))))
+		assertThat(outline(and(all(RDF.FIRST, RDF.REST), field(RDF.VALUE, all(RDF.NIL)))))
 				.as("subject existentials")
 				.isEqualTo(decode("rdf:first rdf:value rdf:nil. rdf:rest rdf:value rdf:nil."));
 	}
 
 	@Test void testOutlineObjectExistentials() {
-		assertThat(outline(and(all(RDF.NIL), trait(RDF.VALUE, all(RDF.FIRST, RDF.REST)))))
+		assertThat(outline(and(all(RDF.NIL), field(RDF.VALUE, all(RDF.FIRST, RDF.REST)))))
 				.as("object existentials")
 				.isEqualTo(decode("rdf:nil rdf:value rdf:first, rdf:rest."));
 	}
 
 	@Test void testOutlineConjunctions() {
-		assertThat(outline(and(all(RDF.NIL), and(trait(RDF.VALUE, all(RDF.FIRST))))))
+		assertThat(outline(and(all(RDF.NIL), and(field(RDF.VALUE, all(RDF.FIRST))))))
 				.as("value union")
 				.isEqualTo(decode("rdf:nil rdf:value rdf:first."));
 	}
 
 	@Test void testOutlineNestedConjunctions() {
-		assertThat(outline(and(all(RDF.NIL), trait(RDF.VALUE, and(all(RDF.FIRST), all(RDF.REST))))))
+		assertThat(outline(and(all(RDF.NIL), field(RDF.VALUE, and(all(RDF.FIRST), all(RDF.REST))))))
 				.as("value union")
 				.isEqualTo(decode("rdf:nil rdf:value rdf:first, rdf:rest."));
 	}

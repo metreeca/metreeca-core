@@ -19,6 +19,7 @@ package com.metreeca.form.things;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.Field;
 import com.metreeca.form.shapes.Option;
 
 import org.eclipse.rdf4j.model.*;
@@ -49,7 +50,7 @@ import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Values.*;
 
@@ -106,23 +107,23 @@ public final class ValuesTest {
 					clazz(term("Employee")), // implies ?this a :Employee
 					verify(
 							server(
-									trait(RDF.TYPE, and(required(), datatype(Values.IRIType))),
-									trait(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
-									trait(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
+									field(RDF.TYPE, and(required(), datatype(Values.IRIType))),
+									field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
+									field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
 							),
 							and(
-									trait(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									trait(term("surname"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									trait(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									trait(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
+									field(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+									field(term("surname"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+									field(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+									field(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
 							),
 							Option.option(when(Form.role, Manager), and(
 
-									trait(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
+									field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
 											minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
 
-									trait(term("supervisor"), and(optional(), datatype(Values.IRIType), clazz(term("User")))),
-									trait(term("subordinate"), and(optional(), datatype(Values.IRIType), clazz(term("User"))))
+									field(term("supervisor"), and(optional(), datatype(Values.IRIType), clazz(term("User")))),
+									field(term("subordinate"), and(optional(), datatype(Values.IRIType), clazz(term("User"))))
 
 							))
 					)
@@ -131,11 +132,11 @@ public final class ValuesTest {
 
 	public static final Shape Employees=and(
 			server(
-					trait(RDF.TYPE, LDP.BASIC_CONTAINER)
+					Field.field(RDF.TYPE, LDP.BASIC_CONTAINER)
 			),
-			trait(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
-			trait(RDFS.COMMENT, and(required(), datatype(XMLSchema.STRING))),
-			trait(LDP.CONTAINS, and(multiple(), Employee))
+			field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
+			field(RDFS.COMMENT, and(required(), datatype(XMLSchema.STRING))),
+			field(LDP.CONTAINS, and(multiple(), Employee))
 	);
 
 

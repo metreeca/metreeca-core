@@ -28,7 +28,7 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.*;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.literal;
 
@@ -123,8 +123,8 @@ final class MetaTest {
 
 		@Test void testIgnoreMetadataFromStructuralShapes() {
 
-			assertThat(metas(trait(RDF.VALUE, trait(RDF.VALUE, label("label")))))
-					.as("ignored in traits")
+			assertThat(metas(field(RDF.VALUE, field(RDF.VALUE, label("label")))))
+					.as("ignored in fields")
 					.isEmpty();
 
 		}

@@ -45,7 +45,7 @@ import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
@@ -312,8 +312,8 @@ public final class Rewriter implements Wrapper {
 			}
 
 
-			@Override public Trait probe(final Trait trait) {
-				return trait(rewrite(trait.getIRI()), rewrite(trait.getShape()));
+			@Override public Field probe(final Field field) {
+				return field(rewrite(field.getIRI()), rewrite(field.getShape()));
 			}
 
 

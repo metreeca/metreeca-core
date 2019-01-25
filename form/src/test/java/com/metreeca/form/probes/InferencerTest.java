@@ -36,7 +36,7 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Meta.hint;
 import static com.metreeca.form.shapes.Option.option;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.literal;
@@ -88,21 +88,21 @@ final class InferencerTest {
 
 	}
 
-	@Test void testTrait() {
+	@Test void testField() {
 
-		assertImplies("trait subjects are resources",
-				trait(RDF.VALUE), datatype(Values.ResourceType));
+		assertImplies("field subjects are resources",
+				Field.field(RDF.VALUE), datatype(Values.ResourceType));
 
-		assertImplies("reverse trait objects are resources",
-				trait(inverse(RDF.VALUE)), datatype(Values.ResourceType), (s, i) -> trait(s.getIRI(), and(s.getShape(), i)));
+		assertImplies("reverse field objects are resources",
+				Field.field(inverse(RDF.VALUE)), datatype(Values.ResourceType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
 
-		assertImplies("both subject and object of a rdf:type trait are resources",
-				trait(RDF.TYPE), datatype(Values.ResourceType),
-				(s, i) -> and(trait(s.getIRI(), and(s.getShape(), i)), i));
+		assertImplies("both subject and object of a rdf:type field are resources",
+				Field.field(RDF.TYPE), datatype(Values.ResourceType),
+				(s, i) -> and(field(s.getIRI(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",
-				trait(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> and(trait(s.getIRI(), and(and(s.getShape(), i), datatype(Values.ResourceType))), datatype(Values.ResourceType)));
+				field(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResourceType),
+				(s, i) -> and(field(s.getIRI(), and(and(s.getShape(), i), datatype(Values.ResourceType))), datatype(Values.ResourceType)));
 	}
 
 	@Test void testConjunction() {

@@ -205,7 +205,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-01-25 16:52:44 +0000</string>
+	<string>2019-01-25 17:32:31 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro Bollini</string>
 	<key>MovementHandleVisible</key>
@@ -9618,7 +9618,7 @@ values:Set&lt;Value&gt;}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{291.79528574042433, 159.88043750490127}, {41.999984741210938, 15}}</string>
+							<string>{{291.79528574042433, 159.88043750490127}, {48, 15}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -9668,11 +9668,11 @@ values:Set&lt;Value&gt;}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{291.79528574042433, 174.88043750490127}, {41.999984741210938, 35}}</string>
+							<string>{{291.79528574042433, 174.88043750490127}, {48, 35}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
-							<string>Vertical</string>
+							<string>YES</string>
 							<key>Flow</key>
 							<string>Resize</string>
 							<key>FontInfo</key>
@@ -9713,16 +9713,18 @@ values:Set&lt;Value&gt;}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f0\i\fs16 \cf0 x:Shift\
-y:Shift\
+\f0\i\fs16 \cf0 x:List&lt;IRI&gt;\
+y:List&lt;IRI&gt;\
 :Relation}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
+							<key>Wrap</key>
+							<string>NO</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{291.79528574042433, 209.88043750490127}, {41.999984741210938, 16}}</string>
+							<string>{{291.79528574042433, 209.88043750490127}, {48, 16}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>

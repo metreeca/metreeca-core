@@ -24,8 +24,8 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Trait.traits;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 
@@ -34,33 +34,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Collections.singletonMap;
 
 
-final class TraitTest {
+final class FieldTest {
 
-	@Test void testInspectTraits() {
+	@Test void testInspectFields() {
 
-		final Trait trait=trait(RDF.VALUE, and());
+		final Field field=field(RDF.VALUE, and());
 
-		assertThat(traits(trait))
-				.as("singleton trait map")
-				.isEqualTo(singletonMap(trait.getIRI(), trait.getShape()));
+		assertThat(fields(field))
+				.as("singleton field map")
+				.isEqualTo(singletonMap(field.getIRI(), field.getShape()));
 
 	}
 
 	@Test void testInspectConjunctions() {
 
-		final Trait x=trait(RDF.VALUE, and());
-		final Trait y=trait(RDF.TYPE, and());
-		final Trait z=trait(RDF.TYPE, maxCount(1));
+		final Field x=field(RDF.VALUE, and());
+		final Field y=field(RDF.TYPE, and());
+		final Field z=field(RDF.TYPE, maxCount(1));
 
-		assertThat(traits(and(x, y)))
-				.as("union trait map")
+		assertThat(fields(and(x, y)))
+				.as("union field map")
 				.isEqualTo(map(
 						entry(x.getIRI(), x.getShape()),
 						entry(y.getIRI(), y.getShape())
 				));
 
-		assertThat(traits(and(y, z)))
-				.as("merged trait map")
+		assertThat(fields(and(y, z)))
+				.as("merged field map")
 				.isEqualTo(map(
 						entry(y.getIRI(), and(y.getShape(), z.getShape()))
 				));
@@ -69,19 +69,19 @@ final class TraitTest {
 
 	@Test void testInspectDisjunctions() {
 
-		final Trait x=trait(RDF.VALUE, and());
-		final Trait y=trait(RDF.TYPE, and());
-		final Trait z=trait(RDF.TYPE, maxCount(1));
+		final Field x=field(RDF.VALUE, and());
+		final Field y=field(RDF.TYPE, and());
+		final Field z=field(RDF.TYPE, maxCount(1));
 
-		assertThat(traits(or(x, y)))
-				.as("union trait map")
+		assertThat(fields(or(x, y)))
+				.as("union field map")
 				.isEqualTo(map(
 						entry(x.getIRI(), x.getShape()),
 						entry(y.getIRI(), y.getShape())
 				));
 
-		assertThat(traits(or(y, z)))
-				.as("merged trait map")
+		assertThat(fields(or(y, z)))
+				.as("merged field map")
 				.isEqualTo(map(
 						entry(y.getIRI(), and(y.getShape(), z.getShape()))
 				));
@@ -90,19 +90,19 @@ final class TraitTest {
 
 	@Test void testInspectOptions() {
 
-		final Trait x=trait(RDF.VALUE, and());
-		final Trait y=trait(RDF.TYPE, and());
-		final Trait z=trait(RDF.TYPE, maxCount(1));
+		final Field x=field(RDF.VALUE, and());
+		final Field y=field(RDF.TYPE, and());
+		final Field z=field(RDF.TYPE, maxCount(1));
 
-		assertThat(traits(option(and(), x, y)))
-				.as("union trait map")
+		assertThat(fields(option(and(), x, y)))
+				.as("union field map")
 				.isEqualTo(map(
 						entry(x.getIRI(), x.getShape()),
 						entry(y.getIRI(), y.getShape())
 				));
 
-		assertThat(traits(option(or(), y, z)))
-				.as("merged trait map")
+		assertThat(fields(option(or(), y, z)))
+				.as("merged field map")
 				.isEqualTo(map(
 						entry(y.getIRI(), and(y.getShape(), z.getShape()))
 				));
@@ -111,7 +111,7 @@ final class TraitTest {
 
 
 	@Test void testInspectOtherShapes() {
-		assertThat(traits(and())).as("no traits").isEmpty();
+		assertThat(fields(and())).as("no fields").isEmpty();
 	}
 
 }

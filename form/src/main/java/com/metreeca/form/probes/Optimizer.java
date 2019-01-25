@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.iri;
 
@@ -51,12 +51,12 @@ public final class Optimizer extends Traverser<Shape> {
 	}
 
 
-	@Override public Shape probe(final Trait trait) {
+	@Override public Shape probe(final Field field) {
 
-		final IRI iri=trait.getIRI();
-		final Shape shape=trait.getShape().map(this);
+		final IRI iri=field.getIRI();
+		final Shape shape=field.getShape().map(this);
 
-		return shape.equals(or()) ? and() : trait(iri, shape);
+		return shape.equals(or()) ? and() : field(iri, shape);
 	}
 
 
@@ -148,11 +148,11 @@ public final class Optimizer extends Traverser<Shape> {
 			private int id;
 
 			@Override public Map.Entry<IRI, Shape> probe(final Shape shape) {
-				return entry(iri("_:", "id"+id++), shape); // assign non-traits a unique step
+				return entry(iri("_:", "id"+id++), shape); // assign non-fields a unique step
 			}
 
-			@Override public Map.Entry<IRI, Shape> probe(final Trait trait) {
-				return entry(trait.getIRI(), trait.getShape());
+			@Override public Map.Entry<IRI, Shape> probe(final Field field) {
+				return entry(field.getIRI(), field.getShape());
 			}
 
 		};
@@ -162,18 +162,18 @@ public final class Optimizer extends Traverser<Shape> {
 				.map(shape -> shape.map(this)) // optimize nested shapes
 				.flatMap(shape -> shape.map(lifter)) // merge nested collections
 
-				.map(shape -> shape.map(splitter)) // split traits into Map.Entry<Shift, Shape>
+				.map(shape -> shape.map(splitter)) // split fields into Map.Entry<IRI, Shape>
 
 				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<Shift, List<Shape>>
 						LinkedHashMap::new, mapping(Map.Entry::getValue, toList())))
 
-				.entrySet().stream().flatMap(e -> { // reassemble traits merging and optimizing multiple definitions
+				.entrySet().stream().flatMap(e -> { // reassemble fields merging and optimizing multiple definitions
 
 					final IRI iri=e.getKey();
 					final List<Shape> values=e.getValue();
 
 					return iri.getNamespace().equals("_:") ? values.stream()
-							: Stream.of(trait(iri, packer.apply(values).map(this)));
+							: Stream.of(field(iri, packer.apply(values).map(this)));
 
 				})
 

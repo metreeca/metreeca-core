@@ -31,7 +31,7 @@ import java.util.Set;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 
 import static java.util.Collections.disjoint;
 import static java.util.stream.Collectors.toList;
@@ -81,8 +81,8 @@ public final class Redactor extends Traverser<Shape> {
 	}
 
 
-	@Override public Shape probe(final Trait trait) {
-		return trait(trait.getIRI(), trait.getShape().map(this));
+	@Override public Shape probe(final Field field) {
+		return field(field.getIRI(), field.getShape().map(this));
 	}
 
 

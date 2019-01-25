@@ -49,7 +49,7 @@ import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -66,8 +66,8 @@ final class QueryParserTest {
 	private static final Literal Ten=Values.literal(TEN);
 
 	private static final Shape shape=and(
-			trait(RDF.FIRST, trait(RDF.REST)),
-			trait(inverse(RDF.FIRST), trait(RDF.REST))
+			field(RDF.FIRST, Field.field(RDF.REST)),
+			field(inverse(RDF.FIRST), Field.field(RDF.REST))
 	);
 
 
@@ -207,11 +207,11 @@ final class QueryParserTest {
 
 		edges("{\n\t\"filter\": {}\n}", shape, edges -> assertThat(filter(shape, and())).as("empty filter").isEqualTo(edges.getShape()));
 
-		edges("{ \"filter\": { \"first.rest\": { \">=\": 1 } } }", shape, edges -> assertThat(filter(shape, trait(RDF.FIRST, trait(RDF.REST, MinInclusive.minInclusive(One))))).as("nested filter").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": { \">=\": 1 } } }", shape, edges -> assertThat(filter(shape, field(RDF.FIRST, field(RDF.REST, MinInclusive.minInclusive(One))))).as("nested filter").isEqualTo(edges.getShape()));
 
-		edges("{ \"filter\": { \"first.rest\": 1 } }", shape, edges -> assertThat(filter(shape, trait(RDF.FIRST, trait(RDF.REST, any(One))))).as("nested filter singleton shorthand").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": 1 } }", shape, edges -> assertThat(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One))))).as("nested filter singleton shorthand").isEqualTo(edges.getShape()));
 
-		edges("{ \"filter\": { \"first.rest\": [1, 10] } }", shape, edges -> assertThat(filter(shape, trait(RDF.FIRST, trait(RDF.REST, any(One, Ten))))).as("nested filter multiple shorthand").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": [1, 10] } }", shape, edges -> assertThat(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten))))).as("nested filter multiple shorthand").isEqualTo(edges.getShape()));
 
 	}
 

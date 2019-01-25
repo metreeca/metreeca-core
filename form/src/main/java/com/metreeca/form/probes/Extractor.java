@@ -58,9 +58,9 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 	}
 
 
-	@Override public Stream<Statement> probe(final Trait trait) {
+	@Override public Stream<Statement> probe(final Field field) {
 
-		final IRI iri=trait.getIRI();
+		final IRI iri=field.getIRI();
 
 		final boolean direct=direct(iri);
 
@@ -75,7 +75,7 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 				.map(target)
 				.collect(toSet());
 
-		return Stream.concat(restricted.stream(), trait.getShape().map(new Extractor(model, focus)));
+		return Stream.concat(restricted.stream(), field.getShape().map(new Extractor(model, focus)));
 	}
 
 

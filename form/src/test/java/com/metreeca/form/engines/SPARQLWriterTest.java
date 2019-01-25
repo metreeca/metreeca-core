@@ -43,7 +43,7 @@ import static com.metreeca.form.shapes.Like.like;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.decode;
@@ -83,23 +83,23 @@ final class SPARQLWriterTest {
 	}
 
 
-	@Test void testValidateDirectEdgeTraits() {
+	@Test void testValidateDirectEdgeFields() {
 
-		final Shape shape=trait(RDF.VALUE, any(RDF.NIL));
+		final Shape shape=field(RDF.VALUE, any(RDF.NIL));
 
 		final Report report=process(shape, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("identify invalid trait").isTrue();
+		assertThat(report.assess(Issue.Level.Error)).as("identify invalid field").isTrue();
 
 	}
 
-	@Test void testValidateInverseEdgeTraits() {
+	@Test void testValidateInverseEdgeFields() {
 
-		final Shape shape=trait(inverse(RDF.VALUE), any(RDF.NIL));
+		final Shape shape=field(inverse(RDF.VALUE), any(RDF.NIL));
 
 		final Report report=process(shape, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("identify invalid trait").isTrue();
+		assertThat(report.assess(Issue.Level.Error)).as("identify invalid field").isTrue();
 
 	}
 
@@ -120,9 +120,9 @@ final class SPARQLWriterTest {
 
 	}
 
-	@Test void testOutlineDirectEdgeTraits() {
+	@Test void testOutlineDirectEdgeFields() {
 
-		final Shape shape=trait(RDF.VALUE, any(RDF.NIL));
+		final Shape shape=field(RDF.VALUE, any(RDF.NIL));
 		final Model model=decode("<x> rdf:value rdf:nil. <y> rdf:value rdf:nil.");
 
 		final Report report=process(shape, model, x, y);
@@ -134,9 +134,9 @@ final class SPARQLWriterTest {
 
 	}
 
-	@Test void testOutlineInverseEdgeTraits() {
+	@Test void testOutlineInverseEdgeFields() {
 
-		final Shape shape=trait(inverse(RDF.VALUE), any(RDF.NIL));
+		final Shape shape=field(inverse(RDF.VALUE), any(RDF.NIL));
 		final Model model=decode("rdf:nil rdf:value <x>. rdf:nil rdf:value <y>.");
 
 		final Report report=process(shape, model, x, y);
@@ -152,7 +152,7 @@ final class SPARQLWriterTest {
 
 	@Test void testOutlineMultipleObjects() {
 
-		final Shape shape=trait(RDF.VALUE, and());
+		final Shape shape=field(RDF.VALUE, and());
 		final Model model=decode("<x> rdf:value rdf:first, rdf:rest. <y> rdf:value rdf:first, rdf:rest.");
 
 		final Report report=process(shape, model, x, y);
@@ -166,7 +166,7 @@ final class SPARQLWriterTest {
 
 	@Test void testOutlineMultipleSources() {
 
-		final Shape shape=trait(inverse(RDF.VALUE), and());
+		final Shape shape=field(inverse(RDF.VALUE), and());
 		final Model model=decode(
 				"rdf:first rdf:value <x>. rdf:rest rdf:value <x>. rdf:first rdf:value <y>. rdf:rest rdf:value <y>."
 		);
@@ -181,8 +181,8 @@ final class SPARQLWriterTest {
 	@Test void testOutlineMultipleDirectEdges() {
 
 		final Shape shape=and(
-				trait(RDF.FIRST, and()),
-				trait(RDF.REST, and())
+				field(RDF.FIRST, and()),
+				field(RDF.REST, and())
 		);
 
 		final Model model=decode(
@@ -200,8 +200,8 @@ final class SPARQLWriterTest {
 	@Test void testOutlineMultipleInverseEdges() {
 
 		final Shape shape=and(
-				trait(inverse(RDF.FIRST), and()),
-				trait(inverse(RDF.REST), and())
+				field(inverse(RDF.FIRST), and()),
+				field(inverse(RDF.REST), and())
 		);
 
 		final Model model=decode(
@@ -219,8 +219,8 @@ final class SPARQLWriterTest {
 	@Test void testOutlineMultipleDirectEdgeValuePairs() {
 
 		final Shape shape=and(
-				trait(inverse(RDF.FIRST), and()),
-				trait(inverse(RDF.REST), and())
+				field(inverse(RDF.FIRST), and()),
+				field(inverse(RDF.REST), and())
 		);
 
 		final Model model=decode(""

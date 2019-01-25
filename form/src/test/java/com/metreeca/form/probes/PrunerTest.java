@@ -18,6 +18,7 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.Field;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ import static com.metreeca.form.shapes.MinLength.minLength;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,10 +70,10 @@ final class PrunerTest {
 
 	}
 
-	@Test void testTrait() {
+	@Test void testField() {
 
-		assertThat(prune(trait(RDF.VALUE))).as("dead").isEqualTo(and());
-		assertThat(prune(trait(RDF.VALUE, maxCount(1)))).as("live").isEqualTo(trait(RDF.VALUE, maxCount(1)));
+		assertThat(prune(Field.field(RDF.VALUE))).as("dead").isEqualTo(and());
+		assertThat(prune(field(RDF.VALUE, maxCount(1)))).as("live").isEqualTo(field(RDF.VALUE, maxCount(1)));
 
 	}
 

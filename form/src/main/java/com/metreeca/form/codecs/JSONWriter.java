@@ -42,7 +42,7 @@ import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.Trait.traits;
+import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.codecs.JSON.encode;
 import static com.metreeca.form.codecs.JSON.field;
 import static com.metreeca.form.codecs.JSON.object;
@@ -152,9 +152,9 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 		final String id=resource.stringValue();
 		final Optional<IRI> datatype=datatype(shape);
-		final Map<IRI, Shape> traits=traits(shape);
+		final Map<IRI, Shape> fields=fields(shape);
 
-		if ( datatype.filter(iri -> iri.equals(Values.IRIType)).isPresent() && traits.isEmpty() ) {
+		if ( datatype.filter(iri -> iri.equals(Values.IRIType)).isPresent() && fields.isEmpty() ) {
 
 			return id; // inline proved leaf IRI
 
@@ -164,7 +164,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 			object.put("this", resource instanceof BNode ? "_:"+id : id);
 
-			if ( !trail.test(resource) ) { // not a back-reference to an enclosing copy of self -> include traits
+			if ( !trail.test(resource) ) { // not a back-reference to an enclosing copy of self -> include fields
 
 				final Collection<Resource> references=new ArrayList<>();
 
@@ -178,18 +178,18 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 				};
 
-				if ( shape == null ) { // write all direct traits
+				if ( shape == null ) { // write all direct fields
 
 					for (final IRI predicate : model.filter(resource, null, null).predicates()) {
 						object.put(predicate.stringValue(),
 								json(model.filter(resource, predicate, null).objects(), null, nestedTrail));
 					}
 
-				} else { // write direct/inverse traits as specified by the shape
+				} else { // write direct/inverse fields as specified by the shape
 
 					final Map<IRI, String> aliases=aliases(shape, JSONCodec.Reserved);
 
-					for (final Map.Entry<IRI, Shape> entry : traits.entrySet()) {
+					for (final Map.Entry<IRI, Shape> entry : fields.entrySet()) {
 
 						final IRI predicate=entry.getKey();
 						final boolean direct=direct(predicate);

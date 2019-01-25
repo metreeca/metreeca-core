@@ -19,6 +19,7 @@ package com.metreeca.form.codecs;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.All;
+import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
@@ -43,7 +44,6 @@ import java.math.BigInteger;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Meta.alias;
-import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.ValuesTest.decode;
@@ -92,7 +92,7 @@ final class JSONParserTest extends JSONCodecTest {
 				.as("preserve bnode id")
 				.isTrue();
 
-		assertThat(rdf(blanks("_:x"), null, trait(RDF.VALUE, datatype(Values.BNodeType))).stream()
+		assertThat(rdf(blanks("_:x"), null, Field.field(RDF.VALUE, datatype(Values.BNodeType))).stream()
 				.allMatch(statement -> statement.getObject().equals(bnode("x"))))
 				.as("preserve bnode id / shorthand")
 				.isTrue();
@@ -218,12 +218,12 @@ final class JSONParserTest extends JSONCodecTest {
 
 	//// Aliases ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testParseAliasedTraits() {
+	@Test void testParseAliasedFields() {
 
 		assertThat(rdf(
 				blank(field("value", blank())),
 				null,
-				trait(RDF.VALUE)
+				Field.field(RDF.VALUE)
 		))
 				.as("direct inferred")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -231,7 +231,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blank(field("valueOf", blank())),
 				null,
-				trait(inverse(RDF.VALUE))
+				Field.field(inverse(RDF.VALUE))
 		))
 				.as("inverse inferred")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -239,21 +239,21 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blank(field("alias", blank())),
 				null,
-				trait(RDF.VALUE, alias("alias"))
+				Field.field(RDF.VALUE, alias("alias"))
 		))
 				.as("user-defined")
 				.isEqualTo(decode("[] rdf:value [] ."));
 
 	}
 
-	@Test void testParseAliasedNestedTraits() {
+	@Test void testParseAliasedNestedFields() {
 
 		Assertions.assertThat(rdf(
 				blank(field("value", blank(field("alias", blank())))),
 				null,
-				trait(RDF.VALUE, trait(RDF.VALUE, alias("alias")))
+				Field.field(RDF.VALUE, Field.field(RDF.VALUE, alias("alias")))
 		))
-				.as("aliased nested trait")
+				.as("aliased nested field")
 				.isEqualTo(decode("[] rdf:value [rdf:value []] ."));
 
 	}
@@ -263,8 +263,8 @@ final class JSONParserTest extends JSONCodecTest {
 				object(field("value", object())),
 				null,
 				and(
-						trait(RDF.VALUE),
-						trait(ValuesTest.term("value"))
+						Field.field(RDF.VALUE),
+						Field.field(ValuesTest.term("value"))
 				)
 		));
 	}
@@ -285,7 +285,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("this", "x"), field(value, "http://example.com/y")),
 				null,
-				trait(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Values.IRIType))
 		))
 				.as("base relative subject")
 				.isEqualTo(decode("<x> rdf:value <y> ."));
@@ -293,7 +293,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("this", "/x"), field(value, "http://example.com/y")),
 				null,
-				trait(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Values.IRIType))
 		))
 				.as("root-relative subject")
 				.isEqualTo(decode("<x> rdf:value <y>."));
@@ -301,7 +301,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("this", "http://example.com/x"), field(value, "y")),
 				null,
-				trait(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Values.IRIType))
 		))
 				.as("base relative object")
 				.isEqualTo(decode("<x> rdf:value <y> ."));
@@ -309,7 +309,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("this", "http://example.com/x"), field(value, "/z")),
 				null,
-				trait(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Values.IRIType))
 		))
 				.as("root-relative object")
 				.isEqualTo(decode("<x> rdf:value <http://example.com/z>."));
@@ -328,7 +328,7 @@ final class JSONParserTest extends JSONCodecTest {
 						))
 				),
 				null,
-				trait(inverse(RDF.VALUE))
+				Field.field(inverse(RDF.VALUE))
 		))
 				.as("named reverse links")
 				.isEqualTo(decode("<y> rdf:value <x> ."));
@@ -338,7 +338,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blank(field("valueOf", blank())),
 				null,
-				trait(inverse(RDF.VALUE))
+				Field.field(inverse(RDF.VALUE))
 		))
 				.as("blank reverse links")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -348,7 +348,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blank(field("value", "2016-08-11")),
 				null,
-				trait(RDF.VALUE, datatype(XMLSchema.DATE))
+				Field.field(RDF.VALUE, datatype(XMLSchema.DATE))
 		))
 				.as("simplified literal with known datatype")
 				.isEqualTo(decode("[] rdf:value '2016-08-11'^^xsd:date."));
@@ -358,7 +358,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("value", object())),
 				null,
-				and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
+				and(datatype(Values.BNodeType), Field.field(RDF.VALUE, datatype(Values.BNodeType)))
 		))
 				.as("proved blanks")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -368,7 +368,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("value", blank())),
 				null,
-				and(All.all(Values.iri("http://example.com/x")), trait(RDF.VALUE))
+				and(All.all(Values.iri("http://example.com/x")), Field.field(RDF.VALUE))
 		))
 				.as("proved named")
 				.isEqualTo(decode("<x> rdf:value [] ."));
@@ -378,7 +378,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blanks("_:x"),
 				null,
-				trait(RDF.VALUE, datatype(Values.BNodeType))
+				Field.field(RDF.VALUE, datatype(Values.BNodeType))
 		))
 				.as("proved blank")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -388,7 +388,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blanks("http://example.com/x"),
 				null,
-				trait(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Values.IRIType))
 		))
 				.as("proved named")
 				.isEqualTo(decode("[] rdf:value <x> ."));
@@ -398,7 +398,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blanks("_:x", "http://example.com/x"),
 				null,
-				trait(RDF.VALUE, datatype(Values.ResourceType))
+				Field.field(RDF.VALUE, datatype(Values.ResourceType))
 		))
 				.as("proved resources")
 				.isEqualTo(decode("[] rdf:value [], <x> ."));
@@ -408,7 +408,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blanks(Values.decimal(1), Values.integer(1), 1.0),
 				null,
-				trait(RDF.VALUE, datatype(XMLSchema.DECIMAL))
+				Field.field(RDF.VALUE, datatype(XMLSchema.DECIMAL))
 		))
 				.as("proved decimal")
 				.isEqualTo(decode("[] rdf:value 1.0 ."));
@@ -418,7 +418,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blanks(1.0, Values.integer(1), Values.decimal(1)),
 				null,
-				trait(RDF.VALUE, datatype(XMLSchema.DOUBLE))
+				Field.field(RDF.VALUE, datatype(XMLSchema.DOUBLE))
 		))
 				.as("proved decimal")
 				.isEqualTo(decode("[] rdf:value 1.0E0 ."));
@@ -426,7 +426,7 @@ final class JSONParserTest extends JSONCodecTest {
 
 	@Test void testRejectMalformedLiterals() {
 		assertThatExceptionOfType(RDFParseException.class).isThrownBy(() ->
-				rdf(blanks("22/5/2018"), null, trait(RDF.VALUE, datatype(XMLSchema.DATETIME)))
+				rdf(blanks("22/5/2018"), null, Field.field(RDF.VALUE, datatype(XMLSchema.DATETIME)))
 		);
 	}
 

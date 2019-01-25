@@ -48,8 +48,8 @@ import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.MinLength.minLength;
-import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Trait.traits;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.things.Values.*;
 
 import static java.util.Collections.*;
@@ -241,12 +241,12 @@ import static java.util.stream.Collectors.toList;
 	private Shape nested(final Shape shape, final List<IRI> path, final Map<String, Object> object) {
 		if ( path.isEmpty() ) { return filters(object, shape); } else {
 
-			final Map<IRI, Shape> traits=traits(shape); // !!! optimize (already explored during path parsing)
+			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
 
 			final IRI head=path.get(0);
 			final List<IRI> tail=path.subList(1, path.size());
 
-			return trait(head, nested(traits.get(head), tail, object));
+			return field(head, nested(fields.get(head), tail, object));
 		}
 	}
 
@@ -379,14 +379,14 @@ import static java.util.stream.Collectors.toList;
 
 		for (final String step : steps) {
 
-			final Map<IRI, Shape> traits=traits(reference);
+			final Map<IRI, Shape> fields=fields(reference);
 			final Map<IRI, String> aliases=aliases(reference);
 
 			final Map<String, IRI> index=new HashMap<>();
 
 			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
 
-			for (final IRI edge : traits.keySet()) {
+			for (final IRI edge : fields.keySet()) {
 				index.put(format(edge), edge); // inside angle brackets
 				index.put(edge.toString(), edge); // naked IRI
 			}
@@ -402,7 +402,7 @@ import static java.util.stream.Collectors.toList;
 			}
 
 			edges.add(edge);
-			reference=traits.get(edge);
+			reference=fields.get(edge);
 
 		}
 

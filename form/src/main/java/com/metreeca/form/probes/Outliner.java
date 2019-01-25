@@ -20,7 +20,7 @@ package com.metreeca.form.probes;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.And;
 import com.metreeca.form.shapes.Clazz;
-import com.metreeca.form.shapes.Trait;
+import com.metreeca.form.shapes.Field;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -74,10 +74,10 @@ public final class Outliner extends Visitor<Stream<Statement>> {
 				.map(source -> statement((Resource)source, RDF.TYPE, clazz.getIRI()));
 	}
 
-	@Override public Stream<Statement> probe(final Trait trait) {
+	@Override public Stream<Statement> probe(final Field field) {
 
-		final IRI iri=trait.getIRI();
-		final Shape shape=trait.getShape();
+		final IRI iri=field.getIRI();
+		final Shape shape=field.getShape();
 
 		return Stream.concat(
 

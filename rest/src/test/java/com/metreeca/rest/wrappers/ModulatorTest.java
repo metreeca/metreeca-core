@@ -203,7 +203,7 @@ final class ModulatorTest {
 		//
 		//			.handle(new Request()
 		//
-		//					.shape(trait(RDF.FIRST))
+		//					.shape(field(RDF.FIRST))
 		//					.body(rdf(), emptyList())) // empty body to activate pre-processing
 		//
 		//			.accept(response -> assertThat(response)
@@ -231,7 +231,7 @@ final class ModulatorTest {
 		//
 		//			.handle(new Request()
 		//
-		//					.shape(trait(RDF.FIRST))
+		//					.shape(field(RDF.FIRST))
 		//					.body(rdf(), emptyList())) // empty body to activate post-processing
 		//
 		//			.accept(response -> assertThat(response)

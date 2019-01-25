@@ -18,7 +18,7 @@
 package com.metreeca.form.queries;
 
 import com.metreeca.form.*;
-import com.metreeca.form.shapes.Trait;
+import com.metreeca.form.shapes.Field;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -27,7 +27,7 @@ import java.util.List;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -35,13 +35,13 @@ import static java.util.Collections.unmodifiableList;
 public final class Stats implements Query {
 
 	public static final Shape StatsShape=and(
-			trait(Form.count, maxCount(1)),
-			trait(Form.min, maxCount(1)),
-			trait(Form.max, maxCount(1)),
-			trait(Form.stats, and(
-					Trait.trait(Form.count, maxCount(1)),
-					Trait.trait(Form.min, maxCount(1)),
-					Trait.trait(Form.max, maxCount(1))
+			field(Form.count, maxCount(1)),
+			field(Form.min, maxCount(1)),
+			field(Form.max, maxCount(1)),
+			field(Form.stats, and(
+					Field.field(Form.count, maxCount(1)),
+					Field.field(Form.min, maxCount(1)),
+					Field.field(Form.max, maxCount(1))
 			))
 	);
 

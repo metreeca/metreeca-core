@@ -225,10 +225,10 @@ abstract class SPARQL { // ! refactor
 		@Override public Stream<Statement> probe(final Shape shape) { return Stream.empty(); }
 
 
-		@Override public Stream<Statement> probe(final Trait trait) {
+		@Override public Stream<Statement> probe(final Field field) {
 
-			final IRI iri=trait.getIRI();
-			final Shape shape=trait.getShape();
+			final IRI iri=field.getIRI();
+			final Shape shape=field.getShape();
 
 			final BNode source=bnode(id(focus).toString());
 			final BNode target=bnode(id(shape).toString());
@@ -333,7 +333,7 @@ abstract class SPARQL { // ! refactor
 		}
 
 		@Override public Object probe(final All all) {
-			return list(); // universal constraints handled by trait visitor
+			return list(); // universal constraints handled by field probe
 		}
 
 		@Override public Object probe(final Any any) {
@@ -347,10 +347,10 @@ abstract class SPARQL { // ! refactor
 
 
 
-		@Override public Object probe(final Trait trait) {
+		@Override public Object probe(final Field field) {
 
-			final IRI iri=trait.getIRI();
-			final Shape shape=trait.getShape();
+			final IRI iri=field.getIRI();
+			final Shape shape=field.getShape();
 
 			return list(
 
@@ -398,10 +398,10 @@ abstract class SPARQL { // ! refactor
 		}
 
 
-		@Override public Object probe(final Trait trait) {
+		@Override public Object probe(final Field field) {
 
-			final IRI iri=trait.getIRI();
-			final Shape shape=trait.getShape();
+			final IRI iri=field.getIRI();
+			final Shape shape=field.getShape();
 
 			final Object pattern=list(
 					edge(term(this.shape), iri, term(shape)),

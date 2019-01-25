@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,7 +75,7 @@ final class RedactorTest {
 
 		final When nested=When.when(RDF.VALUE, RDF.FIRST);
 
-		assertThat(trait(RDF.VALUE, nested).map(first)).as("trait").isEqualTo(trait(RDF.VALUE, and()));
+		assertThat(field(RDF.VALUE, nested).map(first)).as("field").isEqualTo(field(RDF.VALUE, and()));
 
 		assertThat(and(nested).map(first)).as("conjunction").isEqualTo(and(and()));
 		assertThat(or(nested).map(first)).as("disjunction").isEqualTo(or(and()));

@@ -49,7 +49,7 @@ import static com.metreeca.form.shapes.Like.like;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Sets.set;
@@ -81,7 +81,7 @@ final class SPARQLReaderTest {
 
 	@Test void testEdgesEmptyResultSet() {
 
-		final Map<Resource, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Resource, Collection<Statement>> matches=edges(field(RDF.TYPE, all(RDF.NIL)));
 
 		assertThat(matches.isEmpty()).as("empty focus").isTrue();
 
@@ -103,7 +103,7 @@ final class SPARQLReaderTest {
 
 	@Test void testEdgesMatching() {
 
-		final Map<Resource, Collection<Statement>> matches=edges(trait(RDF.TYPE, all(term("Product"))));
+		final Map<Resource, Collection<Statement>> matches=edges(field(RDF.TYPE, all(term("Product"))));
 
 		assertThat((Object)focus(
 
@@ -124,7 +124,7 @@ final class SPARQLReaderTest {
 		final String query="construct { ?product a :Product }"
 				+" where { ?product a :Product; rdfs:label ?label; :line ?line }";
 
-		final Shape shape=trait(RDF.TYPE, all(term("Product")));
+		final Shape shape=field(RDF.TYPE, all(term("Product")));
 
 		// convert to lists to assert ordering
 
@@ -145,7 +145,7 @@ final class SPARQLReaderTest {
 
 	@Test void testStatsEmptyResultSet() {
 
-		final Map<Resource, Collection<Statement>> matches=stats(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Resource, Collection<Statement>> matches=stats(field(RDF.TYPE, all(RDF.NIL)));
 
 		assertThat(set(Form.meta)).as("meta focus").isEqualTo(matches.keySet());
 
@@ -214,7 +214,7 @@ final class SPARQLReaderTest {
 
 	@Test void testItemsEmptyResultSet() {
 
-		final Map<Resource, Collection<Statement>> matches=items(trait(RDF.TYPE, all(RDF.NIL)));
+		final Map<Resource, Collection<Statement>> matches=items(field(RDF.TYPE, all(RDF.NIL)));
 
 		assertThat(set(Form.meta)).isEqualTo(matches.keySet());
 
@@ -278,13 +278,13 @@ final class SPARQLReaderTest {
 	@Test void testClassConstraint() {
 		assertThat(model(edges(and(
 				clazz(term("Product")),
-				trait(RDF.TYPE)
+				Field.field(RDF.TYPE)
 		))))
 				.isIsomorphicTo(model("construct where { ?product a :Product }"));
 	}
 
 	@Test void testDirectUniversalConstraint() {
-		assertThat(model(edges(trait(
+		assertThat(model(edges(field(
 				term("product"),
 				all(item("products/S10_2016"), item("products/S24_2022"))
 		))))
@@ -294,7 +294,7 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testInverseUniversalConstraint() {
-		assertThat(model(edges(trait(inverse(term("customer")), all(item("products/S10_2016"), item("products/S24_2022"))))))
+		assertThat(model(edges(field(inverse(term("customer")), all(item("products/S10_2016"), item("products/S24_2022"))))))
 				.isIsomorphicTo(model("construct { ?product :customer ?customer } where {\n"
 						+"\t?customer ^:customer ?product, <products/S10_2016>, <products/S24_2022>.\n"
 						+"}"
@@ -304,7 +304,7 @@ final class SPARQLReaderTest {
 	@Test void testRootUniversalConstraint() {
 		assertThat(model(edges(and(
 				all(item("products/S18_2248"), item("products/S24_3969")),
-				trait(RDF.TYPE)
+				Field.field(RDF.TYPE)
 		))))
 				.isIsomorphicTo(model("construct { ?product a ?type } where {\n"
 						+"\n"
@@ -316,14 +316,14 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testSingletonUniversalConstraint() {
-		assertThat(model(edges(trait(term("product"), all(item("products/S10_2016"))))))
+		assertThat(model(edges(field(term("product"), all(item("products/S10_2016"))))))
 				.isIsomorphicTo(model("construct { ?customer :product ?product } where {\n"
 						+"\t?customer :product ?product, <products/S10_2016>\n"
 						+"}"));
 	}
 
 	@Test void testExistentialConstraint() {
-		assertThat(model(edges(trait(term("product"), any(item("products/S18_2248"), item("products/S24_3969"))))))
+		assertThat(model(edges(field(term("product"), any(item("products/S18_2248"), item("products/S24_3969"))))))
 				.isIsomorphicTo(model("construct { ?item :product ?product } where {\n"
 						+"\t?item :product ?product, ?value filter (?value in (<products/S18_2248>, <products/S24_3969>))\n"
 						+"}"));
@@ -332,13 +332,13 @@ final class SPARQLReaderTest {
 	@Test void testSingletonExistentialConstraint() {
 		assertThat(model(edges(and(
 				any(item("products/S18_2248")),
-				trait(RDFS.LABEL)
+				Field.field(RDFS.LABEL)
 		))))
 				.isIsomorphicTo(model("construct where { <products/S18_2248> rdfs:label ?label }"));
 	}
 
 	@Test void testMinExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
-		assertThat(model(edges(trait(term("sell"), MinExclusive.minExclusive(Values.literal(BigDecimal.valueOf(100.17)))))))
+		assertThat(model(edges(field(term("sell"), MinExclusive.minExclusive(Values.literal(BigDecimal.valueOf(100.17)))))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
 						+"\t?product :sell ?sell.\n"
@@ -351,7 +351,7 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testMaxExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
-		assertThat(model(edges(trait(term("sell"), maxExclusive(Values.literal(BigDecimal.valueOf(100.17)))))))
+		assertThat(model(edges(field(term("sell"), maxExclusive(Values.literal(BigDecimal.valueOf(100.17)))))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
 						+"\t?product :sell ?sell.\n"
@@ -364,7 +364,7 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testMinInclusiveConstraint() {
-		assertThat(model(edges(trait(term("sell"), MinInclusive.minInclusive(Values.literal(BigDecimal.valueOf(100)))))))
+		assertThat(model(edges(field(term("sell"), MinInclusive.minInclusive(Values.literal(BigDecimal.valueOf(100)))))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
 						+"\t?product :sell ?sell.\n"
@@ -377,7 +377,7 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testMaxInclusiveConstraint() {
-		assertThat(model(edges(trait(term("sell"), maxInclusive(Values.literal(BigDecimal.valueOf(100)))))))
+		assertThat(model(edges(field(term("sell"), maxInclusive(Values.literal(BigDecimal.valueOf(100)))))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
 						+"\t?product :sell ?sell.\n"
@@ -390,7 +390,7 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testPattern() {
-		assertThat(model(edges(trait(RDFS.LABEL, pattern("\\bferrari\\b", "i")))))
+		assertThat(model(edges(field(RDFS.LABEL, pattern("\\bferrari\\b", "i")))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
 						+"\t?item rdfs:label ?label\n"
@@ -403,7 +403,7 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testLike() {
-		assertThat(model(edges(trait(RDFS.LABEL, like("alf ro")))))
+		assertThat(model(edges(field(RDFS.LABEL, like("alf ro")))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
 						+"\t?item rdfs:label ?label\n"
@@ -416,7 +416,7 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testMinLength() {
-		assertThat(model(edges(trait(term("sell"), MinLength.minLength(5)))))
+		assertThat(model(edges(field(term("sell"), MinLength.minLength(5)))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
 						+"\t?item birt:sell ?sell\n"
@@ -429,7 +429,7 @@ final class SPARQLReaderTest {
 	}
 
 	@Test void testMaxLength() {
-		assertThat(model(edges(trait(term("sell"), MaxLength.maxLength(5)))))
+		assertThat(model(edges(field(term("sell"), MaxLength.maxLength(5)))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
 						+"\t?item birt:sell ?sell\n"
@@ -446,8 +446,8 @@ final class SPARQLReaderTest {
 
 	@Test void testUseIndependentPatternsAndFilters() {
 		assertThat(model(edges(and(
-				trait(term("employee")),
-				Option.option(filter(), trait(term("employee"), any(item("employees/1002"), item("employees/1188"))))
+				Field.field(term("employee")),
+				Option.option(filter(), field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
 		))))
 				.isIsomorphicTo(model("construct {\n"
 						+"\n"

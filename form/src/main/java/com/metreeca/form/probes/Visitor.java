@@ -87,7 +87,7 @@ public abstract class Visitor<V> implements Shape.Probe<V> {
 
 	//// Structural Constraints ////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public V probe(final Trait trait) { return probe((Shape)trait); }
+	@Override public V probe(final Field field) { return probe((Shape)field); }
 
 
 	//// Logical Constraints ///////////////////////////////////////////////////////////////////////////////////////

@@ -34,7 +34,7 @@ import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Option.option;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.literal;
 
@@ -88,14 +88,14 @@ public final class Inferencer extends Visitor<Shape> {
 	}
 
 
-	@Override public Shape probe(final Trait trait) {
+	@Override public Shape probe(final Field field) {
 
-		final IRI iri=trait.getIRI();
-		final Shape shape=trait.getShape().map(this);
+		final IRI iri=field.getIRI();
+		final Shape shape=field.getShape().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(trait(iri, and(shape, datatype(Values.ResourceType))), datatype(Values.ResourceType))
-				: direct(iri) ? and(trait(iri, shape), datatype(Values.ResourceType))
-				: trait(iri, and(shape, datatype(Values.ResourceType)));
+		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(Values.ResourceType))), datatype(Values.ResourceType))
+				: direct(iri) ? and(field(iri, shape), datatype(Values.ResourceType))
+				: field(iri, and(shape, datatype(Values.ResourceType)));
 	}
 
 

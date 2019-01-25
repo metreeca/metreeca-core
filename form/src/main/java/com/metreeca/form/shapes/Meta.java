@@ -159,7 +159,7 @@ public final class Meta implements Shape {
 		}
 
 
-		@Override public Stream<Map.Entry<IRI, Value>> probe(final Trait trait) {
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final Field field) {
 			return Stream.empty();
 		}
 
