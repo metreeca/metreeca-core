@@ -22,11 +22,14 @@ import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Maps;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Values.direct;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
@@ -37,11 +40,11 @@ import static java.util.stream.Collectors.toSet;
 
 final class BaseCodec { // !! review/optimize
 
-	static Map<Shift, String> aliases(final Shape shape) {
+	static Map<IRI, String> aliases(final Shape shape) {
 		return aliases(shape, emptySet());
 	}
 
-	static Map<Shift, String> aliases(final Shape shape, final Collection<String> reserved) {
+	static Map<IRI, String> aliases(final Shape shape, final Collection<String> reserved) {
 
 		if ( reserved == null ) {
 			throw new NullPointerException("null reserved");
@@ -49,7 +52,7 @@ final class BaseCodec { // !! review/optimize
 
 		if ( shape == null ) { return emptyMap(); } else {
 
-			final Map<Shift, String> aliases=new LinkedHashMap<>();
+			final Map<IRI, String> aliases=new LinkedHashMap<>();
 
 			aliases.putAll(shape.map(new SystemAliasesProbe(reserved)));
 			aliases.putAll(shape.map(new UserAliasesProbe(reserved)));
@@ -64,25 +67,25 @@ final class BaseCodec { // !! review/optimize
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private abstract static class AliasesProbe extends Traverser<Map<Shift, String>> {
+	private abstract static class AliasesProbe extends Traverser<Map<IRI, String>> {
 
-		@Override public Map<Shift, String> probe(final Shape shape) { return Maps.map(); }
+		@Override public Map<IRI, String> probe(final Shape shape) { return Maps.map(); }
 
 
-		@Override public Map<Shift, String> probe(final And and) {
+		@Override public Map<IRI, String> probe(final And and) {
 			return aliases(and.getShapes());
 		}
 
-		@Override public Map<Shift, String> probe(final Or or) {
+		@Override public Map<IRI, String> probe(final Or or) {
 			return aliases(or.getShapes());
 		}
 
-		@Override public Map<Shift, String> probe(final Option option) {
+		@Override public Map<IRI, String> probe(final Option option) {
 			return aliases(list(option.getPass(), option.getFail()));
 		}
 
 
-		private Map<Shift, String> aliases(final Collection<Shape> shapes) {
+		private Map<IRI, String> aliases(final Collection<Shape> shapes) {
 			return shapes.stream()
 
 					// collect edge-to-alias mappings from nested shapes
@@ -125,17 +128,17 @@ final class BaseCodec { // !! review/optimize
 		}
 
 
-		@Override public Map<Shift, String> probe(final Trait trait) {
+		@Override public Map<IRI, String> probe(final Trait trait) {
 
-			final Shift shift=trait.getShift();
+			final IRI iri=trait.getIRI();
 
 			return Optional
-					.of(NamedIRIPattern.matcher(shift.getIRI().stringValue()))
+					.of(NamedIRIPattern.matcher(iri.stringValue()))
 					.filter(Matcher::find)
 					.map(matcher -> matcher.group("name"))
-					.map(name -> shift.isInverse() ? name+"Of" : name)
+					.map(name -> direct(iri) ? name : name+"Of")
 					.filter(alias -> !reserved.contains(alias))
-					.map(alias -> singletonMap(shift, alias))
+					.map(alias -> singletonMap(iri, alias))
 					.orElse(emptyMap());
 		}
 
@@ -151,9 +154,9 @@ final class BaseCodec { // !! review/optimize
 		}
 
 
-		@Override public Map<Shift, String> probe(final Trait trait) {
+		@Override public Map<IRI, String> probe(final Trait trait) {
 
-			final Shift shift=trait.getShift();
+			final IRI shift=trait.getIRI();
 			final Shape shape=trait.getShape();
 
 			return Optional

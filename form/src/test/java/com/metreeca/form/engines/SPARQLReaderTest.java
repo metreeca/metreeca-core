@@ -41,7 +41,6 @@ import java.util.function.Supplier;
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.Shape.filter;
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -54,6 +53,7 @@ import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.term;
@@ -130,11 +130,11 @@ final class SPARQLReaderTest {
 
 		Assertions.assertThat(list(model(query+" order by ?product"))).as("default (on value)").isEqualTo(list(model(edges(shape))));
 
-		Assertions.assertThat(list(model(query+" order by ?label"))).as("custom increasing").isEqualTo(list(model(edges(shape, increasing(shift(RDFS.LABEL))))));
+		Assertions.assertThat(list(model(query+" order by ?label"))).as("custom increasing").isEqualTo(list(model(edges(shape, increasing(RDFS.LABEL)))));
 
-		Assertions.assertThat(list(model(query+" order by desc(?label)"))).as("custom decreasing").isEqualTo(list(model(edges(shape, decreasing(shift(RDFS.LABEL))))));
+		Assertions.assertThat(list(model(query+" order by desc(?label)"))).as("custom decreasing").isEqualTo(list(model(edges(shape, decreasing(RDFS.LABEL)))));
 
-		Assertions.assertThat(list(model(query+" order by ?line ?label"))).as("custom combined").isEqualTo(list(model(edges(shape, increasing(shift(term("line"))), increasing(shift(RDFS.LABEL))))));
+		Assertions.assertThat(list(model(query+" order by ?line ?label"))).as("custom combined").isEqualTo(list(model(edges(shape, increasing(term("line")), increasing(RDFS.LABEL)))));
 
 		Assertions.assertThat(list(model(query+" order by desc(?product)"))).as("custom on root").isEqualTo(list(model(edges(shape, decreasing()))));
 
@@ -149,60 +149,63 @@ final class SPARQLReaderTest {
 
 		assertThat(set(Form.meta)).as("meta focus").isEqualTo(matches.keySet());
 
-		assertThat(model("prefix spec: <"+Form.Namespace+"> construct { spec:meta spec:count 0 } where {}")).isIsomorphicTo(model(matches));
+		assertThat(model(matches))
+				.isIsomorphicTo(model("prefix spec: <"+Form.Namespace+"> construct { spec:meta spec:count 0 } where {}"));
 	}
 
 	@Test void testStatsEmptyProjection() {
 
 		final Map<Resource, Collection<Statement>> matches=stats(clazz(term("Product")));
 
-		assertThat(model("prefix spec: <"+Form.Namespace+">\n"
-				+"\n"
-				+"construct { \n"
-				+"\n"
-				+"\tspec:meta \n"
-				+"\t\tspec:count ?count; spec:min ?min; spec:max ?max;\n"
-				+"\t\tspec:stats rdfs:Resource.\n"
-				+"\t\n"
-				+"\trdfs:Resource \n"
-				+"\t\tspec:count ?count; spec:min ?min; spec:max ?max.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\tselect (count(?p) as ?count) (min(?p) as ?min) (max(?p) as ?max) {\n"
-				+"\n"
-				+"\t\t?p a :Product\n"
-				+"\n"
-				+"}\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(matches));
+		assertThat(model(matches))
+				.isIsomorphicTo(model("prefix spec: <"+Form.Namespace+">\n"
+						+"\n"
+						+"construct { \n"
+						+"\n"
+						+"\tspec:meta \n"
+						+"\t\tspec:count ?count; spec:min ?min; spec:max ?max;\n"
+						+"\t\tspec:stats rdfs:Resource.\n"
+						+"\t\n"
+						+"\trdfs:Resource \n"
+						+"\t\tspec:count ?count; spec:min ?min; spec:max ?max.\n"
+						+"\n"
+						+"} where {\n"
+						+"\n"
+						+"\tselect (count(?p) as ?count) (min(?p) as ?min) (max(?p) as ?max) {\n"
+						+"\n"
+						+"\t\t?p a :Product\n"
+						+"\n"
+						+"}\n"
+						+"\n"
+						+"}"));
 
 	}
 
 	@Test void testStatsRootConstraints() {
 
-		final Map<Resource, Collection<Statement>> matches=stats(all(item("employees/1370")), shift(term("account")));
+		final Map<Resource, Collection<Statement>> matches=stats(all(item("employees/1370")), term("account"));
 
-		assertThat(model("prefix spec: <"+Form.Namespace+">\n"
-				+"\n"
-				+"construct { \n"
-				+"\n"
-				+"\tspec:meta \n"
-				+"\t\tspec:count ?count; spec:min ?min; spec:max ?max;\n"
-				+"\t\tspec:stats rdfs:Resource.\n"
-				+"\t\n"
-				+"\trdfs:Resource \n"
-				+"\t\tspec:count ?count; spec:min ?min; spec:max ?max.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\tselect (count(?account) as ?count) (min(?account) as ?min) (max(?account) as ?max) {\n"
-				+"\n"
-				+"\t\t<employees/1370> :account ?account\n"
-				+"\n"
-				+"\t}\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(matches));
+		assertThat(model(matches))
+				.isIsomorphicTo(model("prefix spec: <"+Form.Namespace+">\n"
+						+"\n"
+						+"construct { \n"
+						+"\n"
+						+"\tspec:meta \n"
+						+"\t\tspec:count ?count; spec:min ?min; spec:max ?max;\n"
+						+"\t\tspec:stats rdfs:Resource.\n"
+						+"\t\n"
+						+"\trdfs:Resource \n"
+						+"\t\tspec:count ?count; spec:min ?min; spec:max ?max.\n"
+						+"\n"
+						+"} where {\n"
+						+"\n"
+						+"\tselect (count(?account) as ?count) (min(?account) as ?min) (max(?account) as ?max) {\n"
+						+"\n"
+						+"\t\t<employees/1370> :account ?account\n"
+						+"\n"
+						+"\t}\n"
+						+"\n"
+						+"}"));
 
 	}
 
@@ -215,54 +218,57 @@ final class SPARQLReaderTest {
 
 		assertThat(set(Form.meta)).isEqualTo(matches.keySet());
 
-		assertThat(model("construct {} where {}")).isIsomorphicTo(model(matches));
+		assertThat(model(matches))
+				.isIsomorphicTo(model("construct {} where {}"));
 	}
 
 	@Test void testItemsEmptyProjection() {
 
 		final Map<Resource, Collection<Statement>> matches=items(clazz(term("Product")));
 
-		assertThat(model("prefix spec: <"+Form.Namespace+">\n"
-				+"\n"
-				+"construct { \n"
-				+"\n"
-				+"\tspec:meta spec:items [\n"
-				+"\t\tspec:value ?product;\n"
-				+"\t\tspec:count 1\n"
-				+"\t].\n"
-				+"\t\n"
-				+"\t?product rdfs:label ?label.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\t?product a :Product; rdfs:label ?label\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(matches));
+		assertThat(model(matches))
+				.isIsomorphicTo(model("prefix spec: <"+Form.Namespace+">\n"
+						+"\n"
+						+"construct { \n"
+						+"\n"
+						+"\tspec:meta spec:items [\n"
+						+"\t\tspec:value ?product;\n"
+						+"\t\tspec:count 1\n"
+						+"\t].\n"
+						+"\t\n"
+						+"\t?product rdfs:label ?label.\n"
+						+"\n"
+						+"} where {\n"
+						+"\n"
+						+"\t?product a :Product; rdfs:label ?label\n"
+						+"\n"
+						+"}"));
 
 	}
 
 	@Test void testItemsRootConstraints() {
 
-		final Map<Resource, Collection<Statement>> matches=items(all(item("employees/1370")), shift(term("account")));
+		final Map<Resource, Collection<Statement>> matches=items(all(item("employees/1370")), term("account"));
 
-		assertThat(model("prefix spec: <"+Form.Namespace+">\n"
-				+"\n"
-				+"construct { \n"
-				+"\n"
-				+"\tspec:meta spec:items [\n"
-				+"\t\tspec:value ?account;\n"
-				+"\t\tspec:count 1\n"
-				+"\t].\n"
-				+"\t\n"
-				+"\t?account rdfs:label ?label.\n"
-				+"\n"
-				+"} where {\n"
-				+"\n"
-				+"\t<employees/1370> :account ?account.\n"
-				+"\t\n"
-				+"\t?account rdfs:label ?label.\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(matches));
+		assertThat(model(matches))
+				.isIsomorphicTo(model("prefix spec: <"+Form.Namespace+">\n"
+						+"\n"
+						+"construct { \n"
+						+"\n"
+						+"\tspec:meta spec:items [\n"
+						+"\t\tspec:value ?account;\n"
+						+"\t\tspec:count 1\n"
+						+"\t].\n"
+						+"\t\n"
+						+"\t?account rdfs:label ?label.\n"
+						+"\n"
+						+"} where {\n"
+						+"\n"
+						+"\t<employees/1370> :account ?account.\n"
+						+"\t\n"
+						+"\t?account rdfs:label ?label.\n"
+						+"\n"
+						+"}"));
 
 	}
 
@@ -270,174 +276,188 @@ final class SPARQLReaderTest {
 	//// Constraints ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testClassConstraint() {
-		assertThat(model("construct where { ?product a :Product }")).isIsomorphicTo(model(edges(and(
+		assertThat(model(edges(and(
 				clazz(term("Product")),
 				trait(RDF.TYPE)
-		))));
+		))))
+				.isIsomorphicTo(model("construct where { ?product a :Product }"));
 	}
 
 	@Test void testDirectUniversalConstraint() {
-		assertThat(model("construct { ?root :product ?product } where {\n"
-				+"\t?root :product ?product, <products/S10_2016>, <products/S24_2022>\n"
-				+"}")).isIsomorphicTo(model(edges(trait(
+		assertThat(model(edges(trait(
 				term("product"),
 				all(item("products/S10_2016"), item("products/S24_2022"))
-		))));
+		))))
+				.isIsomorphicTo(model("construct { ?root :product ?product } where {\n"
+						+"\t?root :product ?product, <products/S10_2016>, <products/S24_2022>\n"
+						+"}"));
 	}
 
 	@Test void testInverseUniversalConstraint() {
-		assertThat(model("construct { ?product :customer ?customer } where {\n"
-				+"\t?customer ^:customer ?product, <products/S10_2016>, <products/S24_2022>.\n"
-				+"}")).isIsomorphicTo(model(edges(trait(
-				shift(term("customer")).inverse(),
-				all(item("products/S10_2016"), item("products/S24_2022"))
-		))));
+		assertThat(model(edges(trait(inverse(term("customer")), all(item("products/S10_2016"), item("products/S24_2022"))))))
+				.isIsomorphicTo(model("construct { ?product :customer ?customer } where {\n"
+						+"\t?customer ^:customer ?product, <products/S10_2016>, <products/S24_2022>.\n"
+						+"}"
+				));
 	}
 
 	@Test void testRootUniversalConstraint() {
-		assertThat(model("construct { ?product a ?type } where {\n"
-				+"\n"
-				+"\tvalues ?product { <products/S18_2248> <products/S24_3969> }\n"
-				+"\t\n"
-				+"\t?product a ?type\n"
-				+"\t\n"
-				+"}")).isIsomorphicTo(model(edges(and(
+		assertThat(model(edges(and(
 				all(item("products/S18_2248"), item("products/S24_3969")),
 				trait(RDF.TYPE)
-		))));
+		))))
+				.isIsomorphicTo(model("construct { ?product a ?type } where {\n"
+						+"\n"
+						+"\tvalues ?product { <products/S18_2248> <products/S24_3969> }\n"
+						+"\t\n"
+						+"\t?product a ?type\n"
+						+"\t\n"
+						+"}"));
 	}
 
 	@Test void testSingletonUniversalConstraint() {
-		assertThat(model("construct { ?customer :product ?product } where {\n"
-				+"\t?customer :product ?product, <products/S10_2016>\n"
-				+"}")).isIsomorphicTo(model(edges(trait(term("product"), all(item("products/S10_2016"))))));
+		assertThat(model(edges(trait(term("product"), all(item("products/S10_2016"))))))
+				.isIsomorphicTo(model("construct { ?customer :product ?product } where {\n"
+						+"\t?customer :product ?product, <products/S10_2016>\n"
+						+"}"));
 	}
 
 	@Test void testExistentialConstraint() {
-		assertThat(model("construct { ?item :product ?product } where {\n"
-				+"\t?item :product ?product, ?value filter (?value in (<products/S18_2248>, <products/S24_3969>))\n"
-				+"}")).isIsomorphicTo(model(edges(trait(term("product"), any(item("products/S18_2248"), item("products/S24_3969"))))));
+		assertThat(model(edges(trait(term("product"), any(item("products/S18_2248"), item("products/S24_3969"))))))
+				.isIsomorphicTo(model("construct { ?item :product ?product } where {\n"
+						+"\t?item :product ?product, ?value filter (?value in (<products/S18_2248>, <products/S24_3969>))\n"
+						+"}"));
 	}
 
 	@Test void testSingletonExistentialConstraint() {
-		assertThat(model("construct where { <products/S18_2248> rdfs:label ?label }")).isIsomorphicTo(model(edges(and(
+		assertThat(model(edges(and(
 				any(item("products/S18_2248")),
 				trait(RDFS.LABEL)
-		))));
+		))))
+				.isIsomorphicTo(model("construct where { <products/S18_2248> rdfs:label ?label }"));
 	}
 
 	@Test void testMinExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
-		assertThat(model("construct { \n"
-				+"\n"
-				+"\t?product :sell ?sell.\n"
-				+"\t \n"
-				+"} where { \n"
-				+"\n"
-				+"\t?product :sell ?sell filter (?sell > 100.17)\n"
-				+"\t\n"
-				+"}")).isIsomorphicTo(model(edges(trait(term("sell"), MinExclusive.minExclusive(Values.literal(BigDecimal.valueOf(100.17)))))));
+		assertThat(model(edges(trait(term("sell"), MinExclusive.minExclusive(Values.literal(BigDecimal.valueOf(100.17)))))))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\t?product :sell ?sell.\n"
+						+"\t \n"
+						+"} where { \n"
+						+"\n"
+						+"\t?product :sell ?sell filter (?sell > 100.17)\n"
+						+"\t\n"
+						+"}"));
 	}
 
 	@Test void testMaxExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
-		assertThat(model("construct { \n"
-				+"\n"
-				+"\t?product :sell ?sell.\n"
-				+"\t \n"
-				+"} where { \n"
-				+"\n"
-				+"\t?product :sell ?sell filter (?sell < 100.17)\n"
-				+"\t\n"
-				+"}")).isIsomorphicTo(model(edges(trait(term("sell"), maxExclusive(Values.literal(BigDecimal.valueOf(100.17)))))));
+		assertThat(model(edges(trait(term("sell"), maxExclusive(Values.literal(BigDecimal.valueOf(100.17)))))))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\t?product :sell ?sell.\n"
+						+"\t \n"
+						+"} where { \n"
+						+"\n"
+						+"\t?product :sell ?sell filter (?sell < 100.17)\n"
+						+"\t\n"
+						+"}"));
 	}
 
 	@Test void testMinInclusiveConstraint() {
-		assertThat(model("construct { \n"
-				+"\n"
-				+"\t?product :sell ?sell.\n"
-				+"\t \n"
-				+"} where { \n"
-				+"\n"
-				+"\t?product :sell ?sell filter (?sell >= 100)\n"
-				+"\t\n"
-				+"}")).isIsomorphicTo(model(edges(trait(term("sell"), MinInclusive.minInclusive(Values.literal(BigDecimal.valueOf(100)))))));
+		assertThat(model(edges(trait(term("sell"), MinInclusive.minInclusive(Values.literal(BigDecimal.valueOf(100)))))))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\t?product :sell ?sell.\n"
+						+"\t \n"
+						+"} where { \n"
+						+"\n"
+						+"\t?product :sell ?sell filter (?sell >= 100)\n"
+						+"\t\n"
+						+"}"));
 	}
 
 	@Test void testMaxInclusiveConstraint() {
-		assertThat(model("construct { \n"
-				+"\n"
-				+"\t?product :sell ?sell.\n"
-				+"\t \n"
-				+"} where { \n"
-				+"\n"
-				+"\t?product :sell ?sell filter (?sell <= 100)\n"
-				+"\t\n"
-				+"}")).isIsomorphicTo(model(edges(trait(term("sell"), maxInclusive(Values.literal(BigDecimal.valueOf(100)))))));
+		assertThat(model(edges(trait(term("sell"), maxInclusive(Values.literal(BigDecimal.valueOf(100)))))))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\t?product :sell ?sell.\n"
+						+"\t \n"
+						+"} where { \n"
+						+"\n"
+						+"\t?product :sell ?sell filter (?sell <= 100)\n"
+						+"\t\n"
+						+"}"));
 	}
 
 	@Test void testPattern() {
-		assertThat(model("construct { \n"
-				+"\n"
-				+"\t?item rdfs:label ?label\n"
-				+"\t \n"
-				+"} where { \n"
-				+"\n"
-				+"\t?item rdfs:label ?label filter regex(?label, '\\\\bferrari\\\\b', 'i')\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(trait(RDFS.LABEL, pattern("\\bferrari\\b", "i")))));
+		assertThat(model(edges(trait(RDFS.LABEL, pattern("\\bferrari\\b", "i")))))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\t?item rdfs:label ?label\n"
+						+"\t \n"
+						+"} where { \n"
+						+"\n"
+						+"\t?item rdfs:label ?label filter regex(?label, '\\\\bferrari\\\\b', 'i')\n"
+						+"\n"
+						+"}"));
 	}
 
 	@Test void testLike() {
-		assertThat(model("construct { \n"
-				+"\n"
-				+"\t?item rdfs:label ?label\n"
-				+"\t \n"
-				+"} where { \n"
-				+"\n"
-				+"\t?item rdfs:label ?label filter regex(?label, '\\\\bromeo\\\\b', 'i')\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(trait(RDFS.LABEL, like("alf ro")))));
+		assertThat(model(edges(trait(RDFS.LABEL, like("alf ro")))))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\t?item rdfs:label ?label\n"
+						+"\t \n"
+						+"} where { \n"
+						+"\n"
+						+"\t?item rdfs:label ?label filter regex(?label, '\\\\bromeo\\\\b', 'i')\n"
+						+"\n"
+						+"}"));
 	}
 
 	@Test void testMinLength() {
-		assertThat(model("construct { \n"
-				+"\n"
-				+"\t?item birt:sell ?sell\n"
-				+"\t \n"
-				+"} where { \n"
-				+"\n"
-				+"\t?item birt:sell ?sell filter (strlen(str(?sell)) >= 5)\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(trait(term("sell"), MinLength.minLength(5)))));
+		assertThat(model(edges(trait(term("sell"), MinLength.minLength(5)))))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\t?item birt:sell ?sell\n"
+						+"\t \n"
+						+"} where { \n"
+						+"\n"
+						+"\t?item birt:sell ?sell filter (strlen(str(?sell)) >= 5)\n"
+						+"\n"
+						+"}"));
 	}
 
 	@Test void testMaxLength() {
-		assertThat(model("construct { \n"
-				+"\n"
-				+"\t?item birt:sell ?sell\n"
-				+"\t \n"
-				+"} where { \n"
-				+"\n"
-				+"\t?item birt:sell ?sell filter (strlen(str(?sell)) <= 5)\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(trait(term("sell"), MaxLength.maxLength(5)))));
+		assertThat(model(edges(trait(term("sell"), MaxLength.maxLength(5)))))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\t?item birt:sell ?sell\n"
+						+"\t \n"
+						+"} where { \n"
+						+"\n"
+						+"\t?item birt:sell ?sell filter (strlen(str(?sell)) <= 5)\n"
+						+"\n"
+						+"}"));
 	}
 
 
 	//// Layout ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testUseIndependentPatternsAndFilters() {
-		assertThat(model("construct {\n"
-				+"\n"
-				+"\t?office :employee ?employee\n"
-				+"\t\n"
-				+"} where {\n"
-				+"\n"
-				+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
-				+"\n"
-				+"}")).isIsomorphicTo(model(edges(and(
+		assertThat(model(edges(and(
 				trait(term("employee")),
 				Option.option(filter(), trait(term("employee"), any(item("employees/1002"), item("employees/1188"))))
-		))));
+		))))
+				.isIsomorphicTo(model("construct {\n"
+						+"\n"
+						+"\t?office :employee ?employee\n"
+						+"\t\n"
+						+"} where {\n"
+						+"\n"
+						+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
+						+"\n"
+						+"}"));
 	}
 
 
@@ -447,11 +467,11 @@ final class SPARQLReaderTest {
 		return process(new Edges(shape, list(orders), 0, 0));
 	}
 
-	private Map<Resource, Collection<Statement>> stats(final Shape shape, final Shift... path) {
+	private Map<Resource, Collection<Statement>> stats(final Shape shape, final IRI... path) {
 		return process(new Stats(shape, list(path)));
 	}
 
-	private Map<Resource, Collection<Statement>> items(final Shape shape, final Shift... path) {
+	private Map<Resource, Collection<Statement>> items(final Shape shape, final IRI... path) {
 		return process(new Items(shape, list(path)));
 	}
 

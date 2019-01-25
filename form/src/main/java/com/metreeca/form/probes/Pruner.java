@@ -18,8 +18,9 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
+
+import org.eclipse.rdf4j.model.IRI;
 
 import java.util.List;
 
@@ -50,10 +51,10 @@ public final class Pruner extends Traverser<Shape> {
 
 	@Override public Shape probe(final Trait trait) {
 
-		final Shift shift=trait.getShift();
+		final IRI iri=trait.getIRI();
 		final Shape shape=trait.getShape().map(this);
 
-		return shape.equals(and()) ? and() : trait(shift, shape);
+		return shape.equals(and()) ? and() : trait(iri, shape);
 	}
 
 

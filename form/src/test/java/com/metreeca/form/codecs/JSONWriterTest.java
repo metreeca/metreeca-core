@@ -38,12 +38,15 @@ import java.util.Map;
 import javax.json.*;
 
 import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.things.Values.bnode;
+import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.ValuesTest.decode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,46 +56,46 @@ final class JSONWriterTest extends JSONCodecTest {
 	//// Objects ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testNoObjects() {
-		assertThat((Object)json(array())).as("no objects").isEqualTo(json(ValuesTest.decode("")));
+		assertThat((Object)json(array())).as("no objects").isEqualTo(json(decode("")));
 	}
 
 	@Test void testBlankObjects() {
 		assertThat((Object)json(array(object(
 				field("this", "_:x"),
 				field(value, array("x"))
-		)))).as("blank objects").isEqualTo(json(ValuesTest.decode("_:x rdf:value 'x'.")));
+		)))).as("blank objects").isEqualTo(json(decode("_:x rdf:value 'x'.")));
 	}
 
 	@Test void testNamedObjects() {
 		assertThat((Object)json(array(object(
 				field("this", "http://example.com/x"),
 				field(value, array("x"))
-		)))).as("named objects").isEqualTo(json(ValuesTest.decode("<x> rdf:value 'x'.")));
+		)))).as("named objects").isEqualTo(json(decode("<x> rdf:value 'x'.")));
 	}
 
 	@Test void testTypedObjects() {
 
-		assertEquivalent("boolean", json(blanks(true)), json(ValuesTest.decode("_:focus rdf:value true .")));
-		assertEquivalent("string", json(blanks("string")), json(ValuesTest.decode("[] rdf:value 'string' .")));
-		assertEquivalent("integer", json(blanks(BigInteger.ONE)), json(ValuesTest.decode("[] rdf:value 1 .")));
-		assertEquivalent("decimal", json(blanks(new BigDecimal("1.0"))), json(ValuesTest.decode("[] rdf:value 1.0 .")));
-		assertEquivalent("double", json(blanks(1.0)), json(ValuesTest.decode("[] rdf:value 1e0 .")));
+		assertEquivalent("boolean", json(blanks(true)), json(decode("_:focus rdf:value true .")));
+		assertEquivalent("string", json(blanks("string")), json(decode("[] rdf:value 'string' .")));
+		assertEquivalent("integer", json(blanks(BigInteger.ONE)), json(decode("[] rdf:value 1 .")));
+		assertEquivalent("decimal", json(blanks(new BigDecimal("1.0"))), json(decode("[] rdf:value 1.0 .")));
+		assertEquivalent("double", json(blanks(1.0)), json(decode("[] rdf:value 1e0 .")));
 
 		assertEquivalent("numeric",
 				json(blanks(object(field("text", "1"), field("type", XMLSchema.INT.stringValue())))),
-				json(ValuesTest.decode("[] rdf:value '1'^^xsd:int .")));
+				json(decode("[] rdf:value '1'^^xsd:int .")));
 
 		assertEquivalent("custom",
 				json(blanks(object(field("text", "text"), field("type", ValuesTest.term("type").stringValue())))),
-				json(ValuesTest.decode("[] rdf:value 'text'^^:type .")));
+				json(decode("[] rdf:value 'text'^^:type .")));
 
 		assertEquivalent("tagged",
 				json(blanks(object(field("text", "text"), field("lang", "en")))),
-				json(ValuesTest.decode("[] rdf:value 'text'@en .")));
+				json(decode("[] rdf:value 'text'@en .")));
 
 		assertEquivalent("malformed",
 				json(blanks(object(field("text", "malformed"), field("type", XMLSchema.BOOLEAN.stringValue())))),
-				json(ValuesTest.decode("[] rdf:value 'malformed'^^xsd:boolean .")));
+				json(decode("[] rdf:value 'malformed'^^xsd:boolean .")));
 
 	}
 
@@ -104,8 +107,8 @@ final class JSONWriterTest extends JSONCodecTest {
 				field("this", "http://example.com/x"),
 				field(value, array("x"))
 		))).as("focus node only").isEqualTo(json(
-				ValuesTest.decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
-				Values.iri("http://example.com/x")
+				decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
+				iri("http://example.com/x")
 		));
 	}
 
@@ -113,8 +116,8 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("unknown focus",
 				json(object()),
 				json(
-						ValuesTest.decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
-						Values.bnode()
+						decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
+						bnode()
 				));
 	}
 
@@ -135,8 +138,8 @@ final class JSONWriterTest extends JSONCodecTest {
 						)
 				))
 		))).as("expanded shared trees").isEqualTo(json(
-				ValuesTest.decode("<x> rdf:value <w>, <y>. <w> rdf:value <z>. <y> rdf:value <z>."),
-				Values.iri("http://example.com/x")
+				decode("<x> rdf:value <w>, <y>. <w> rdf:value <z>. <y> rdf:value <z>."),
+				iri("http://example.com/x")
 		));
 	}
 
@@ -150,8 +153,8 @@ final class JSONWriterTest extends JSONCodecTest {
 						)
 				))
 		))).as("named loops").isEqualTo(json(
-				ValuesTest.decode("<x> rdf:value <y>. <y> rdf:value <x>."),
-				Values.iri("http://example.com/x")
+				decode("<x> rdf:value <y>. <y> rdf:value <x>."),
+				iri("http://example.com/x")
 		));
 	}
 
@@ -165,8 +168,8 @@ final class JSONWriterTest extends JSONCodecTest {
 						)
 				))
 		))).as("named loops").isEqualTo(json(
-				ValuesTest.decode("_:x rdf:value _:y. _:y rdf:value _:x."),
-				Values.bnode("x")
+				decode("_:x rdf:value _:y. _:y rdf:value _:x."),
+				bnode("x")
 		));
 	}
 
@@ -178,24 +181,24 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("direct inferred",
 				json(object(field("value", array(object())))),
 				json(
-						ValuesTest.decode("_:x rdf:value _:y ."),
-						Values.bnode("x"),
+						decode("_:x rdf:value _:y ."),
+						bnode("x"),
 						trait(RDF.VALUE)
 				));
 
 		assertEquivalent("inverse inferred",
 				json(object(field("valueOf", array(object())))),
 				json(
-						ValuesTest.decode("_:y rdf:value _:x ."),
-						Values.bnode("x"),
-						trait(shift(RDF.VALUE).inverse())
+						decode("_:y rdf:value _:x ."),
+						bnode("x"),
+						trait(inverse(RDF.VALUE))
 				));
 
 		assertEquivalent("user-defined",
 				json(object(field("alias", array(object())))),
 				json(
-						ValuesTest.decode("_:x rdf:value _:y ."),
-						Values.bnode("x"),
+						decode("_:x rdf:value _:y ."),
+						bnode("x"),
 						trait(RDF.VALUE, alias("alias"))
 				));
 
@@ -206,9 +209,9 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("aliased nested trait",
 				json(object(field("value", array(object(field("alias", array(object()))))))),
 				json(
-						ValuesTest.decode("_:x rdf:value [rdf:value _:y] ."),
-						Values.bnode("x"),
-						trait(RDF.VALUE, trait(shift(RDF.VALUE), alias("alias")))
+						decode("_:x rdf:value [rdf:value _:y] ."),
+						bnode("x"),
+						trait(RDF.VALUE, trait(RDF.VALUE, alias("alias")))
 				));
 
 	}
@@ -220,8 +223,8 @@ final class JSONWriterTest extends JSONCodecTest {
 						field(ValuesTest.term("value").stringValue(), array(object()))
 				)),
 				json(
-						ValuesTest.decode("_:x rdf:value _:y; :value _:z."),
-						Values.bnode("x"),
+						decode("_:x rdf:value _:y; :value _:z."),
+						bnode("x"),
 						and(
 								trait(RDF.VALUE),
 								trait(ValuesTest.term("value"))
@@ -233,8 +236,8 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("reserved alias",
 				json(object(field("value", array(object())))),
 				json(
-						ValuesTest.decode("_:x rdf:value _:y ."),
-						Values.bnode("x"),
+						decode("_:x rdf:value _:y ."),
+						bnode("x"),
 						trait(RDF.VALUE, alias("this"))
 				));
 	}
@@ -249,8 +252,8 @@ final class JSONWriterTest extends JSONCodecTest {
 						field("rest", "y")
 				)),
 				json(
-						ValuesTest.decode("_:focus rdf:first 'x'; rdf:rest 'y'."), // invalid shape (forces content on both branches)
-						Values.bnode("focus"),
+						decode("_:focus rdf:first 'x'; rdf:rest 'y'."), // invalid shape (forces content on both branches)
+						bnode("focus"),
 						Or.or(
 								trait(RDF.FIRST, required()),
 								trait(RDF.REST, required())
@@ -265,9 +268,9 @@ final class JSONWriterTest extends JSONCodecTest {
 						field("this", "http://example.com/y")
 				)))
 		))).as("named reverse links").isEqualTo(json(
-				ValuesTest.decode("<y> rdf:value <x> ."),
-				Values.iri("http://example.com/x"),
-				trait(shift(RDF.VALUE).inverse())
+				decode("<y> rdf:value <x> ."),
+				iri("http://example.com/x"),
+				trait(inverse(RDF.VALUE))
 		));
 	}
 
@@ -275,9 +278,9 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("blank reverse links",
 				json(object(field("valueOf", array(object())))),
 				json(
-						ValuesTest.decode("_:y rdf:value _:x ."),
-						Values.bnode("x"),
-						trait(shift(RDF.VALUE).inverse())
+						decode("_:y rdf:value _:x ."),
+						bnode("x"),
+						trait(inverse(RDF.VALUE))
 				));
 	}
 
@@ -285,8 +288,8 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("omitted empty array",
 				json(object()),
 				json(
-						ValuesTest.decode("_:focus rdf:value 'x'."),
-						Values.bnode("focus"),
+						decode("_:focus rdf:value 'x'."),
+						bnode("focus"),
 						trait(RDF.TYPE, required())
 				));
 
@@ -296,8 +299,8 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("omitted empty array",
 				json(object()),
 				json(
-						ValuesTest.decode("_:focus rdf:value 'x'."),
-						Values.bnode("focus"),
+						decode("_:focus rdf:value 'x'."),
+						bnode("focus"),
 						trait(RDF.TYPE)
 				));
 
@@ -307,8 +310,8 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("simplified unrepeatable value",
 				json(object(field("value", "x"))),
 				json(
-						ValuesTest.decode("_:focus rdf:value 'x'."),
-						Values.bnode("focus"),
+						decode("_:focus rdf:value 'x'."),
+						bnode("focus"),
 						trait(RDF.VALUE, maxCount(1))
 				));
 	}
@@ -317,8 +320,8 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("simplified leaf IRI",
 				json(object(field("value", RDF.NIL.stringValue()))),
 				json(
-						ValuesTest.decode("_:focus rdf:value rdf:nil."),
-						Values.bnode("focus"),
+						decode("_:focus rdf:value rdf:nil."),
+						bnode("focus"),
 						trait(RDF.VALUE, and(datatype(Values.IRIType), maxCount(1)))
 				));
 	}
@@ -327,8 +330,8 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertEquivalent("simplified literal with known datatype",
 				json(object(field("value", "2016-08-11"))),
 				json(
-						ValuesTest.decode("_:focus rdf:value '2016-08-11'^^xsd:date."),
-						Values.bnode("focus"),
+						decode("_:focus rdf:value '2016-08-11'^^xsd:date."),
+						bnode("focus"),
 						trait(RDF.VALUE, and(datatype(XMLSchema.DATE), maxCount(1)))
 				));
 	}
@@ -336,16 +339,16 @@ final class JSONWriterTest extends JSONCodecTest {
 	@Test void testOmitThisForUnreferencedProvedBlanks() {
 
 		assertThat((Object)json(object(field("value", array(object()))))).as("unreferenced proved blank").isEqualTo(json(
-				ValuesTest.decode("_:x rdf:value _:y ."),
-				Values.bnode("x"),
+				decode("_:x rdf:value _:y ."),
+				bnode("x"),
 				and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
 		));
 
 		assertThat((Object)json(object(
 				field("this", "_:x"),
 				field("value", array(object(field("this", "_:x"))))))).as("back-referenced proved blank").isEqualTo(json(
-				ValuesTest.decode("_:x rdf:value _:x ."),
-				Values.bnode("x"),
+				decode("_:x rdf:value _:x ."),
+				bnode("x"),
 				and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
 		));
 

@@ -17,10 +17,10 @@
 
 package com.metreeca.form.engines;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Order;
+import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -31,8 +31,7 @@ import java.util.stream.Stream;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Values.bnode;
-import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.Values.*;
 
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
@@ -161,22 +160,20 @@ abstract class SPARQL { // ! refactor
 	}
 
 
-	private Object edge(final Object source, final Shift shift, final Object target) {
+	private Object edge(final Object source, final IRI iri, final Object target) {
 
-		final Object link=term(shift.getIRI());
-
-		return shift.isInverse()
-				? list(target, link, source, " .\n")
-				: list(source, link, target, " .\n");
+		return direct(iri)
+				? list(source, term(iri), target, " .\n")
+				: list(target, term(inverse(iri)), source, " .\n");
 	}
 
 
-	protected Object path(final Collection<Shift> path) {
+	protected Object path(final Collection<IRI> path) {
 		return items(path.stream().map(this::step).collect(toList()), '/');
 	}
 
-	private Object step(final Shift shift) {
-		return shift.isInverse() ? list("^", term(shift.getIRI())) : term(shift.getIRI());
+	private Object step(final IRI step  ) {
+		return direct(step) ? term(step) : list("^", term(inverse(step)));
 	}
 
 
@@ -185,7 +182,7 @@ abstract class SPARQL { // ! refactor
 	}
 
 	protected Object term(final Value value) {
-		return list(" ", Values.format(value));
+		return list(" ", format(value));
 	}
 
 
@@ -230,16 +227,14 @@ abstract class SPARQL { // ! refactor
 
 		@Override public Stream<Statement> probe(final Trait trait) {
 
-			final Shift shift=trait.getShift();
+			final IRI iri=trait.getIRI();
 			final Shape shape=trait.getShape();
-
-			final IRI iri=shift.getIRI();
 
 			final BNode source=bnode(id(focus).toString());
 			final BNode target=bnode(id(shape).toString());
 
 			return Stream.concat(
-					Stream.of(shift.isInverse() ? statement(target, iri, source) : statement(source, iri, target)),
+					Stream.of(direct(iri) ? statement(source, iri, target) : statement(target, inverse(iri), source)),
 					shape.map(new TemplateProbe(shape))
 			);
 
@@ -354,17 +349,17 @@ abstract class SPARQL { // ! refactor
 
 		@Override public Object probe(final Trait trait) {
 
-			final Shift shift=trait.getShift();
+			final IRI iri=trait.getIRI();
 			final Shape shape=trait.getShape();
 
 			return list(
 
 					shape instanceof All // filtering hook
 							? null // ($) only if actually referenced by filters
-							: edge(term(source), shift, term(shape)),
+							: edge(term(source), iri, term(shape)),
 
 					All.all(shape) // target universal constraints
-							.map(values -> values.stream().map(value -> edge(term(source), shift, term(value))))
+							.map(values -> values.stream().map(value -> edge(term(source), iri, term(value))))
 							.orElse(null),
 
 					filters(shape)
@@ -405,11 +400,11 @@ abstract class SPARQL { // ! refactor
 
 		@Override public Object probe(final Trait trait) {
 
-			final Shift shift=trait.getShift();
+			final IRI iri=trait.getIRI();
 			final Shape shape=trait.getShape();
 
 			final Object pattern=list(
-					edge(term(this.shape), shift, term(shape)),
+					edge(term(this.shape), iri, term(shape)),
 					pattern(shape)
 			);
 

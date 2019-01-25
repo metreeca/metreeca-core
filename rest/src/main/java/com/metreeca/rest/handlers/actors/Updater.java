@@ -241,7 +241,7 @@ public final class Updater extends Actor<Updater> {
 
 
 					@Override public Shape probe(final Trait trait) {
-						return trait.getShift().equals(Contains) ? and() : trait;
+						return trait.getIRI().equals(Contains) ? and() : trait;
 					}
 
 
@@ -277,7 +277,7 @@ public final class Updater extends Actor<Updater> {
 
 
 					@Override public Shape probe(final Trait trait) {
-						return trait.getShift().equals(Contains) ? trait.getShape() : and();
+						return trait.getIRI().equals(Contains) ? trait.getShape() : and();
 					}
 
 

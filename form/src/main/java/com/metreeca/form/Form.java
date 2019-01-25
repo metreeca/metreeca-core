@@ -125,13 +125,14 @@ public final class Form {
 
 	public static final IRI iri=iri(Namespace, "iri");
 	public static final IRI text=iri(Namespace, "text");
-	public static final IRI shift=iri(Namespace, "shift");
 	public static final IRI flags=iri(Namespace, "flags");
 	public static final IRI limit=iri(Namespace, "limit");
 
 	public static final IRI test=iri(Namespace, "test");
 	public static final IRI pass=iri(Namespace, "pass");
 	public static final IRI fail=iri(Namespace, "fail");
+
+	public static final IRI inverse=iri(Namespace, "inverse");
 
 
 	//// Query Properties //////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,11 +146,6 @@ public final class Form {
 	public static final IRI max=iri(Namespace, "max");
 	public static final IRI min=iri(Namespace, "min");
 	public static final IRI count=iri(Namespace, "count");
-
-
-	//// Shift Properties //////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI inverse=iri(Namespace, "inverse");
 
 
 	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////

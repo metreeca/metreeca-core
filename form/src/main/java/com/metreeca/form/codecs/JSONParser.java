@@ -18,7 +18,8 @@
 package com.metreeca.form.codecs;
 
 
-import com.metreeca.form.*;
+import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.things.Values;
@@ -45,11 +46,12 @@ import javax.json.JsonException;
 import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.Trait.traits;
-import static com.metreeca.form.Shift.shift;
+import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.inverse;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
@@ -180,19 +182,19 @@ public final class JSONParser extends AbstractRDFParser {
 
 				if ( !label.equals("this") ) {
 
-					final Shift property=property(label, base, shape);
+					final IRI property=property(label, base, shape);
 					final Stream<Value> targets=parse(value, base, null, traits(shape).get(property));
 
 					if ( rdfHandler != null ) {
 						targets.forEachOrdered(target -> {
 
-							if ( !property.isInverse() ) {
+							if ( direct(property) ) {
 
-								rdfHandler.handleStatement(createStatement(source, property.getIRI(), target));
+								rdfHandler.handleStatement(createStatement(source, property, target));
 
 							} else if ( target instanceof Resource ) {
 
-								rdfHandler.handleStatement(createStatement((Resource)target, property.getIRI(), source));
+								rdfHandler.handleStatement(createStatement((Resource)target, inverse(property), source));
 
 							} else {
 
@@ -339,7 +341,7 @@ public final class JSONParser extends AbstractRDFParser {
 	}
 
 
-	private Shift property(final String label, final String base, final Shape shape) {
+	private IRI property(final String label, final String base, final Shape shape) {
 
 		final Matcher matcher=EdgePattern.matcher(label);
 
@@ -353,25 +355,29 @@ public final class JSONParser extends AbstractRDFParser {
 
 			if ( naked != null ) {
 
-				return shift(createIRI(base, naked)).inverse(inverse);
+				final IRI iri=createIRI(base, naked);
+
+				return inverse ? inverse(iri) : iri;
 
 			} else if ( bracketed != null ) {
 
-				return shift(createIRI(base, bracketed)).inverse(inverse);
+				final IRI iri=createIRI(base, bracketed);
+
+				return inverse ? inverse(iri) : iri;
 
 			} else if ( shape != null ) {
 
-				final Map<String, Shift> aliases=aliases(shape, JSONCodec.Reserved)
+				final Map<String, IRI> aliases=aliases(shape, JSONCodec.Reserved)
 						.entrySet().stream()
 						.collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 
-				final Shift shift=aliases.get(alias);
+				final IRI iri=aliases.get(alias);
 
-				if ( shift == null ) {
+				if ( iri == null ) {
 					error(format("undefined property alias [%s]", alias));
 				}
 
-				return shift;
+				return iri;
 
 			} else {
 

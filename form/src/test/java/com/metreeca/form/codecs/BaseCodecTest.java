@@ -17,17 +17,16 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Shift;
-
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,81 +37,80 @@ import static java.util.Collections.singletonMap;
 
 final class BaseCodecTest {
 
-	private final Shift Value=Shift.shift(RDF.VALUE);
-
-
 	@Test void testGuessAliasFromIRI() {
 
-		assertThat(singletonMap(Value, "value"))
+		assertThat(singletonMap(RDF.VALUE, "value"))
 				.as("direct")
-				.isEqualTo(BaseCodec.aliases(trait(Value)));
+				.isEqualTo(aliases(trait(RDF.VALUE)));
 
-		assertThat(singletonMap(shift(RDF.VALUE).inverse(), "valueOf"))
+		assertThat(singletonMap(inverse(RDF.VALUE), "valueOf"))
 				.as("inverse")
-				.isEqualTo(BaseCodec.aliases(trait(shift(RDF.VALUE).inverse())));
+				.isEqualTo(aliases(trait(inverse(RDF.VALUE))));
 
 	}
 
 	@Test void testRetrieveUserDefinedAlias() {
-		assertThat(singletonMap(Value, "alias"))
+		assertThat(singletonMap(RDF.VALUE, "alias"))
 				.as("user-defined")
-				.isEqualTo(BaseCodec.aliases(trait(Value, alias("alias"))));
+				.isEqualTo(aliases(trait(RDF.VALUE, alias("alias"))));
 	}
 
 	@Test void testPreferUserDefinedAliases() {
-		assertThat(map(entry(Value, "alias"))).as("user-defined").isEqualTo(BaseCodec.aliases(and(trait(Value, alias("alias")), trait(Value))));
+		assertThat(map(entry(RDF.VALUE, "alias")))
+				.as("user-defined")
+				.isEqualTo(aliases(and(trait(RDF.VALUE, alias("alias")), trait(RDF.VALUE))));
 	}
 
 
 	@Test void testRetrieveAliasFromNestedShapes() {
 
-		assertThat(map(entry(Value, "alias"))).as("group").isEqualTo(BaseCodec.aliases(and(trait(Value, alias("alias")))));
+		assertThat(map(entry(RDF.VALUE, "alias"))).as("group").isEqualTo(aliases(and(trait(RDF.VALUE, alias("alias")))));
 
-		assertThat(map(entry(Value, "alias"))).as("conjunction").isEqualTo(BaseCodec.aliases(trait(Value, and(alias("alias")))));
+		assertThat(map(entry(RDF.VALUE, "alias"))).as("conjunction").isEqualTo(aliases(trait(RDF.VALUE, and(alias("alias")))));
 
 	}
 
 	@Test void testMergeDuplicateTraits() {
 
 		// nesting required to prevent and() from collapsing duplicates
-		assertThat(map(entry(Value, "value"))).as("system-guessed").isEqualTo(BaseCodec.aliases(and(trait(Value), and(trait(Value)))));
+		assertThat(map(entry(RDF.VALUE, "value"))).as("system-guessed").isEqualTo(aliases(and(trait(RDF.VALUE), and(trait(RDF.VALUE)))));
 
 		// nesting required to prevent and() from collapsing duplicates
-		assertThat(map(entry(Value, "alias"))).as("user-defined")
-				.isEqualTo(BaseCodec.aliases(and(trait(Value, alias("alias")), and(trait(Value, alias("alias"))))));
+		assertThat(map(entry(RDF.VALUE, "alias"))).as("user-defined")
+				.isEqualTo(aliases(and(trait(RDF.VALUE, alias("alias")), and(trait(RDF.VALUE, alias("alias"))))));
 
 	}
 
 
 	@Test void testHandleMultipleAliases() {
 
-		assertThat(map(entry(Value, "value"))).as("clashing").isEqualTo(BaseCodec.aliases(trait(Value, and(alias("one"), alias("two")))));
+		assertThat(map(entry(RDF.VALUE, "value"))).as("clashing").isEqualTo(aliases(trait(RDF.VALUE, and(alias("one"), alias("two")))));
 
-		assertThat(map(entry(Value, "one"))).as("repeated").isEqualTo(BaseCodec.aliases(trait(Value, and(alias("one"), alias("one")))));
+		assertThat(map(entry(RDF.VALUE, "one"))).as("repeated").isEqualTo(aliases(trait(RDF.VALUE, and(alias("one"), alias("one")))));
 
 	}
 
 	@Test void testMergeAliases() {
-		assertThat(map(entry(Shift.shift(RDF.TYPE), "type"), entry(Value, "value")))
+		assertThat(map(entry(RDF.TYPE, "type"), entry(RDF.VALUE, "value")))
 				.as("merged")
-				.isEqualTo(BaseCodec.aliases(and(trait(RDF.TYPE), trait(Value))));
+				.isEqualTo(aliases(and(trait(RDF.TYPE), trait(RDF.VALUE))));
 	}
 
 	@Test void testIgnoreClashingAliases() {
 
-		assertThat(BaseCodec.aliases(and(trait(Value), trait(iri("urn:example:value")))).isEmpty()).as("different traits").isTrue();
+		assertThat(aliases(and(trait(RDF.VALUE), trait(iri("urn:example:value")))).isEmpty()).as("different traits").isTrue();
 
 		// fall back to system-guess alias
-		assertThat(map(entry(Value, "value"))).as("same trait")
-				.isEqualTo(BaseCodec.aliases(and(trait(Value, alias("one")), trait(Value, alias("two")))));
+		assertThat(map(entry(RDF.VALUE, "value"))).as("same trait")
+				.isEqualTo(aliases(and(trait(RDF.VALUE, alias("one")), trait(RDF.VALUE, alias("two")))));
 
 	}
 
 	@Test void testIgnoreReservedAliases() {
 
-		assertThat(BaseCodec.aliases(trait(Value), singleton("value")).isEmpty()).as("ignore reserved system-guessed aliases").isTrue();
+		assertThat(aliases(trait(RDF.VALUE), singleton("value")).isEmpty()).as("ignore reserved system-guessed aliases").isTrue();
 
-		assertThat(singletonMap(Value, "value")).as("ignore reserved user-defined aliases").isEqualTo(BaseCodec.aliases(trait(Value, alias("reserved")), singleton("reserved")));
+		assertThat(singletonMap(RDF.VALUE, "value")).as("ignore reserved user-defined aliases").isEqualTo(aliases(trait(RDF.VALUE, alias("reserved")), singleton("reserved")));
 
 	}
 

@@ -40,6 +40,7 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Codecs.encode;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
@@ -59,13 +60,6 @@ final class RewriterTest {
 
 	private static final String External="app://external/";
 	private static final String Internal="app://internal/";
-
-	private static final Shape TestShape=trait(internal("p"), and(required(), datatype(Values.IRIType)));
-
-
-	private static void exec(final Runnable... tasks) {
-		new Tray().exec(tasks).clear();
-	}
 
 
 	private static IRI external(final String name) {
@@ -166,6 +160,44 @@ final class RewriterTest {
 				.accept(response -> {});
 	}
 
+	@Test void testShapeRewriting() {
+		new Tray()
+
+				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+
+					assertThat(request.shape()).isEqualTo(and(
+							trait(internal("p")),
+							trait(inverse(internal("p")))
+					));
+
+					return request.reply(response -> response
+							.status(Response.OK)
+							.shape(request.shape()));
+
+				}))
+
+				.handle(new Request()
+
+						.base(External)
+
+						.shape(and(
+								trait(external("p")),
+								trait(inverse(external("p")))
+						))
+
+				)
+
+				.accept(response -> {
+
+					assertThat(response.shape()).isEqualTo(and(
+							trait(external("p")),
+							trait(inverse(external("p")))
+					));
+
+				});
+
+	}
+
 	@Test void testRDFRewriting() {
 		new Tray()
 
@@ -202,6 +234,9 @@ final class RewriterTest {
 	}
 
 	@Test void testJSONRewriting() {
+
+		final Shape TestShape=trait(internal("p"), and(required(), datatype(Values.IRIType)));
+
 		new Tray()
 
 				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {

@@ -42,7 +42,7 @@ final class TraitTest {
 
 		assertThat(traits(trait))
 				.as("singleton trait map")
-				.isEqualTo(singletonMap(trait.getShift(), trait.getShape()));
+				.isEqualTo(singletonMap(trait.getIRI(), trait.getShape()));
 
 	}
 
@@ -55,14 +55,14 @@ final class TraitTest {
 		assertThat(traits(and(x, y)))
 				.as("union trait map")
 				.isEqualTo(map(
-						entry(x.getShift(), x.getShape()),
-						entry(y.getShift(), y.getShape())
+						entry(x.getIRI(), x.getShape()),
+						entry(y.getIRI(), y.getShape())
 				));
 
 		assertThat(traits(and(y, z)))
 				.as("merged trait map")
 				.isEqualTo(map(
-						entry(y.getShift(), and(y.getShape(), z.getShape()))
+						entry(y.getIRI(), and(y.getShape(), z.getShape()))
 				));
 
 	}
@@ -76,14 +76,14 @@ final class TraitTest {
 		assertThat(traits(or(x, y)))
 				.as("union trait map")
 				.isEqualTo(map(
-						entry(x.getShift(), x.getShape()),
-						entry(y.getShift(), y.getShape())
+						entry(x.getIRI(), x.getShape()),
+						entry(y.getIRI(), y.getShape())
 				));
 
 		assertThat(traits(or(y, z)))
 				.as("merged trait map")
 				.isEqualTo(map(
-						entry(y.getShift(), and(y.getShape(), z.getShape()))
+						entry(y.getIRI(), and(y.getShape(), z.getShape()))
 				));
 
 	}
@@ -97,14 +97,14 @@ final class TraitTest {
 		assertThat(traits(option(and(), x, y)))
 				.as("union trait map")
 				.isEqualTo(map(
-						entry(x.getShift(), x.getShape()),
-						entry(y.getShift(), y.getShape())
+						entry(x.getIRI(), x.getShape()),
+						entry(y.getIRI(), y.getShape())
 				));
 
 		assertThat(traits(option(or(), y, z)))
 				.as("merged trait map")
 				.isEqualTo(map(
-						entry(y.getShift(), and(y.getShape(), z.getShape()))
+						entry(y.getIRI(), and(y.getShape(), z.getShape()))
 				));
 
 	}

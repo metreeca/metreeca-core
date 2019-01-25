@@ -178,7 +178,7 @@ final class SPARQLReader {
 	private Map<Resource, Collection<Statement>> stats(final Stats stats) {
 
 		final Shape shape=stats.getShape();
-		final List<Shift> path=stats.getPath();
+		final List<IRI> path=stats.getPath();
 
 		final Model model=new LinkedHashModel();
 
@@ -267,7 +267,7 @@ final class SPARQLReader {
 	private Map<Resource, Collection<Statement>> items(final Items items) {
 
 		final Shape shape=items.getShape();
-		final List<Shift> path=items.getPath();
+		final List<IRI> path=items.getPath();
 
 		final Model model=new LinkedHashModel();
 

@@ -46,6 +46,8 @@ import static com.metreeca.form.shapes.Trait.traits;
 import static com.metreeca.form.codecs.JSON.encode;
 import static com.metreeca.form.codecs.JSON.field;
 import static com.metreeca.form.codecs.JSON.object;
+import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.inverse;
 
 import static java.util.stream.Collectors.toList;
 
@@ -150,7 +152,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 		final String id=resource.stringValue();
 		final Optional<IRI> datatype=datatype(shape);
-		final Map<Shift, Shape> traits=traits(shape);
+		final Map<IRI, Shape> traits=traits(shape);
 
 		if ( datatype.filter(iri -> iri.equals(Values.IRIType)).isPresent() && traits.isEmpty() ) {
 
@@ -185,22 +187,21 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 				} else { // write direct/inverse traits as specified by the shape
 
-					final Map<Shift, String> aliases=aliases(shape, JSONCodec.Reserved);
+					final Map<IRI, String> aliases=aliases(shape, JSONCodec.Reserved);
 
-					for (final Map.Entry<Shift, Shape> entry : traits.entrySet()) {
+					for (final Map.Entry<IRI, Shape> entry : traits.entrySet()) {
 
-						final Shift shift=entry.getKey();
+						final IRI predicate=entry.getKey();
+						final boolean direct=direct(predicate);
+
 						final Shape nestedShape=entry.getValue();
 
-						final IRI predicate=shift.getIRI();
-						final boolean inverse=shift.isInverse();
+						final String alias=Optional.ofNullable(aliases.get(entry.getKey()))
+								.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue());
 
-						final String alias=Optional.ofNullable(aliases.get(shift))
-								.orElseGet(() -> (inverse ? "^" : "")+predicate.stringValue());
-
-						final Collection<? extends Value> values=inverse
-								? model.filter(null, predicate, resource).subjects()
-								: model.filter(resource, predicate, null).objects();
+						final Collection<? extends Value> values=direct
+								? model.filter(resource, predicate, null).objects()
+								: model.filter(null, inverse(predicate), resource).subjects();
 
 						if ( !values.isEmpty() ) { // omit null value and empty arrays
 

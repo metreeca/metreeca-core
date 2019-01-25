@@ -18,14 +18,15 @@
 package com.metreeca.form.queries;
 
 import com.metreeca.form.*;
+import com.metreeca.form.shapes.Trait;
 import com.metreeca.form.things.Values;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
@@ -39,10 +40,10 @@ public final class Items implements Query {
 	public static final Shape ItemsShape=and(
 			trait(Form.items, and(
 					datatype(Values.BNodeType),
-					trait(shift(Form.count), maxCount(1)),
-					trait(shift(Form.value), and(
+					Trait.trait(Form.count, maxCount(1)),
+					Trait.trait(Form.value, and(
 							maxCount(1),
-							trait(shift(RDFS.LABEL), maxCount(1))
+							Trait.trait(RDFS.LABEL, maxCount(1))
 					))
 			))
 	);
@@ -50,10 +51,10 @@ public final class Items implements Query {
 
 	private final Shape shape;
 
-	private final List<Shift> path;
+	private final List<IRI> path;
 
 
-	public Items(final Shape shape, final List<Shift> path) {
+	public Items(final Shape shape, final List<IRI> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -76,7 +77,7 @@ public final class Items implements Query {
 		return shape;
 	}
 
-	public List<Shift> getPath() {
+	public List<IRI> getPath() {
 		return unmodifiableList(path);
 	}
 

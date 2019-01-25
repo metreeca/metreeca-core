@@ -49,8 +49,7 @@ import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.Values.*;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
@@ -240,7 +239,9 @@ public final class Rewriter implements Wrapper {
 		}
 
 		private IRI rewrite(final IRI iri) {
-			return iri == null ? null : iri(rewrite(iri.toString()));
+			return iri == null ? null
+					: direct(iri) ? iri(rewrite(iri.stringValue()))
+					: inverse(iri(rewrite(iri.stringValue())));
 		}
 
 		private String rewrite(final CharSequence string) {
@@ -312,7 +313,7 @@ public final class Rewriter implements Wrapper {
 
 
 			@Override public Trait probe(final Trait trait) {
-				return trait(rewrite(trait.getShift()), rewrite(trait.getShape()));
+				return trait(rewrite(trait.getIRI()), rewrite(trait.getShape()));
 			}
 
 

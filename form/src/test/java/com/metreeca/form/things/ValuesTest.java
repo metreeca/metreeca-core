@@ -399,7 +399,7 @@ public final class ValuesTest {
 		assertThat(direct(RDF.NIL)).isTrue();
 		assertThat(direct(inverse(RDF.NIL))).isFalse();
 
-		assertThat(direct(inverse(inverse(RDF.NIL)))).as("idempotent").isFalse();
+		assertThat(inverse(inverse(RDF.NIL))).as("symmetric").isEqualTo(RDF.NIL);
 
 	}
 

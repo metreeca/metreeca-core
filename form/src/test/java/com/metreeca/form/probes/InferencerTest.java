@@ -18,9 +18,7 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.In;
-import com.metreeca.form.shapes.MinCount;
-import com.metreeca.form.shapes.Or;
+import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Values;
 
@@ -30,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -41,6 +38,7 @@ import static com.metreeca.form.shapes.Meta.hint;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.literal;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,18 +91,18 @@ final class InferencerTest {
 	@Test void testTrait() {
 
 		assertImplies("trait subjects are resources",
-				trait(shift(RDF.VALUE)), datatype(Values.ResourceType));
+				trait(RDF.VALUE), datatype(Values.ResourceType));
 
 		assertImplies("reverse trait objects are resources",
-				trait(shift(RDF.VALUE).inverse()), datatype(Values.ResourceType), (s, i) -> trait(s.getShift(), and(s.getShape(), i)));
+				trait(inverse(RDF.VALUE)), datatype(Values.ResourceType), (s, i) -> trait(s.getIRI(), and(s.getShape(), i)));
 
 		assertImplies("both subject and object of a rdf:type trait are resources",
-				trait(shift(RDF.TYPE)), datatype(Values.ResourceType),
-				(s, i) -> and(trait(s.getShift(), and(s.getShape(), i)), i));
+				trait(RDF.TYPE), datatype(Values.ResourceType),
+				(s, i) -> and(trait(s.getIRI(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",
 				trait(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> and(trait(s.getShift(), and(and(s.getShape(), i), datatype(Values.ResourceType))), datatype(Values.ResourceType)));
+				(s, i) -> and(trait(s.getIRI(), and(and(s.getShape(), i), datatype(Values.ResourceType))), datatype(Values.ResourceType)));
 	}
 
 	@Test void testConjunction() {

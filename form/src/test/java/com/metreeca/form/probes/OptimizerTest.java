@@ -18,9 +18,7 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Datatype;
-import com.metreeca.form.shapes.MinCount;
-import com.metreeca.form.shapes.Option;
+import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;

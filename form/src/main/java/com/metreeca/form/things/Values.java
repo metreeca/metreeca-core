@@ -80,6 +80,10 @@ public final class Values {
 
 		@Override public int hashCode() { return -super.hashCode(); }
 
+		@Override public String toString() {
+			return "^"+super.toString();
+		}
+
 	}
 
 
@@ -254,12 +258,14 @@ public final class Values {
 		return iri(Internal, name);
 	}
 
+
 	/**
-	 * Creates an inverse predicate.
+	 * Inverts the direction of a predicate.
 	 *
 	 * @param iri the IRI identifying the predicate
 	 *
-	 * @return an {@linkplain #direct(IRI) inverse predicate} identified by {@code iri}
+	 * @return a inverse predicate IRI identified by the textual value of {@code iri}, if {@code iri} is an {@linkplain
+	 * #direct(IRI) predicate}; a direct predicate IRI identified by the textual value of {@code iri}, otherwise
 	 *
 	 * @throws NullPointerException if {@code iri} is null
 	 */
@@ -269,7 +275,7 @@ public final class Values {
 			throw new NullPointerException("null iri");
 		}
 
-		return iri instanceof Inverse ? iri : new Inverse(iri.stringValue());
+		return iri instanceof Inverse ? factory.createIRI(iri.stringValue()) : new Inverse(iri.stringValue());
 	}
 
 
@@ -544,6 +550,7 @@ public final class Values {
 	public static String format(final IRI iri, final Map<String, String> namespaces) {
 		if ( iri == null ) { return null; } else {
 
+			final String role=direct(iri) ? "" : "^";
 			final String text=iri.stringValue();
 
 			if ( namespaces != null ) {
@@ -565,13 +572,13 @@ public final class Values {
 						final String name=text.substring(namespace.length());
 
 						if ( name.isEmpty() ) { // !!! || namespaces.name(name)
-							return prefix+':'+name;
+							return role+prefix+':'+name;
 						}
 					}
 				}
 			}
 
-			return '<'+text+'>'; // !!! relativize wrt to base
+			return role+'<'+text+'>'; // !!! relativize wrt to base
 		}
 	}
 

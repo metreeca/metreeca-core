@@ -17,14 +17,15 @@
 
 package com.metreeca.form.engines;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Issue;
+import com.metreeca.form.Report;
+import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Sets;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -34,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
@@ -44,6 +44,10 @@ import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,23 +69,23 @@ final class SPARQLWriterTest {
 
 	@Test void testGenerateTraceNodes() {
 
-		final Shape shape=maxInclusive(Values.literal(10));
+		final Shape shape=maxInclusive(literal(10));
 
-		final Report report=process(shape, Values.literal(1), Values.literal(100));
+		final Report report=process(shape, literal(1), literal(100));
 		final Collection<Issue> issues=report.getIssues();
 
 		assertThat(report.assess(Issue.Level.Error)).as("report severity level").isTrue();
 
 		assertThat(issues.stream().anyMatch(issue1 -> issue1.getShape().equals(shape))).as("reference failed shape").isTrue();
 
-		assertThat(Sets.set(Values.literal(100))).as("reference offending values").isEqualTo(issues.stream().flatMap(issue -> issue.getValues().stream()).collect(toSet()));
+		assertThat(Sets.set(literal(100))).as("reference offending values").isEqualTo(issues.stream().flatMap(issue -> issue.getValues().stream()).collect(toSet()));
 
 	}
 
 
 	@Test void testValidateDirectEdgeTraits() {
 
-		final Shape shape=trait(shift(RDF.VALUE), any(RDF.NIL));
+		final Shape shape=trait(RDF.VALUE, any(RDF.NIL));
 
 		final Report report=process(shape, x, y);
 
@@ -91,7 +95,7 @@ final class SPARQLWriterTest {
 
 	@Test void testValidateInverseEdgeTraits() {
 
-		final Shape shape=trait(shift(RDF.VALUE).inverse(), any(RDF.NIL));
+		final Shape shape=trait(inverse(RDF.VALUE), any(RDF.NIL));
 
 		final Report report=process(shape, x, y);
 
@@ -105,109 +109,121 @@ final class SPARQLWriterTest {
 	@Test void testOutlineClasses() {
 
 		final Shape shape=clazz(RDFS.RESOURCE);
-		final Model model=ValuesTest.decode("rdf:first a rdfs:Resource.");
+		final Model model=decode("rdf:first a rdfs:Resource.");
 
 		final Report report=process(shape, model, RDF.FIRST);
 
 		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(Models.isomorphic(model, report.outline())).as("outline computed").isTrue();
+		assertThat(report.outline())
+				.as("outline computed")
+				.isIsomorphicTo(model);
 
 	}
 
 	@Test void testOutlineDirectEdgeTraits() {
 
-		final Shape shape=trait(shift(RDF.VALUE), any(RDF.NIL));
-		final Model model=ValuesTest.decode("<x> rdf:value rdf:nil. <y> rdf:value rdf:nil.");
+		final Shape shape=trait(RDF.VALUE, any(RDF.NIL));
+		final Model model=decode("<x> rdf:value rdf:nil. <y> rdf:value rdf:nil.");
 
 		final Report report=process(shape, model, x, y);
 
 		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(Models.isomorphic(model, report.outline())).as("outline computed").isTrue();
+		assertThat(report.outline())
+				.as("outline computed")
+				.isIsomorphicTo(model);
 
 	}
 
 	@Test void testOutlineInverseEdgeTraits() {
 
-		final Shape shape=trait(shift(RDF.VALUE).inverse(), any(RDF.NIL));
-		final Model model=ValuesTest.decode("rdf:nil rdf:value <x>. rdf:nil rdf:value <y>.");
+		final Shape shape=trait(inverse(RDF.VALUE), any(RDF.NIL));
+		final Model model=decode("rdf:nil rdf:value <x>. rdf:nil rdf:value <y>.");
 
 		final Report report=process(shape, model, x, y);
 
 		System.out.println(report);
 
 		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(Models.isomorphic(model, report.outline())).as("outline computed").isTrue();
+		assertThat(report.outline())
+				.as("outline computed")
+				.isIsomorphicTo(model);
 
 	}
 
 	@Test void testOutlineMultipleObjects() {
 
-		final Shape shape=trait(shift(RDF.VALUE), and());
-		final Model model=ValuesTest.decode("<x> rdf:value rdf:first, rdf:rest. <y> rdf:value rdf:first, rdf:rest.");
+		final Shape shape=trait(RDF.VALUE, and());
+		final Model model=decode("<x> rdf:value rdf:first, rdf:rest. <y> rdf:value rdf:first, rdf:rest.");
 
 		final Report report=process(shape, model, x, y);
 
 		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(Models.isomorphic(model, report.outline())).as("outline computed").isTrue();
+		assertThat(report.outline())
+				.as("outline computed")
+				.isIsomorphicTo(model);
 
 	}
 
 	@Test void testOutlineMultipleSources() {
 
-		final Shape shape=trait(shift(RDF.VALUE).inverse(), and());
-		final Model model=ValuesTest.decode(
+		final Shape shape=trait(inverse(RDF.VALUE), and());
+		final Model model=decode(
 				"rdf:first rdf:value <x>. rdf:rest rdf:value <x>. rdf:first rdf:value <y>. rdf:rest rdf:value <y>."
 		);
 
 		final Report report=process(shape, model, x, y);
 
 		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(Models.isomorphic(model, report.outline())).as("outline computed").isTrue();
+		assertThat(report.outline()).as("outline computed").isIsomorphicTo(model);
 
 	}
 
 	@Test void testOutlineMultipleDirectEdges() {
 
 		final Shape shape=and(
-				trait(shift(RDF.FIRST), and()),
-				trait(shift(RDF.REST), and())
+				trait(RDF.FIRST, and()),
+				trait(RDF.REST, and())
 		);
 
-		final Model model=ValuesTest.decode(
+		final Model model=decode(
 				"<x> rdf:first rdf:value; rdf:rest rdf:value . <y> rdf:first rdf:value; rdf:rest rdf:value .");
 
 		final Report report=process(shape, model, x, y);
 
 		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(Models.isomorphic(model, report.outline())).as("outline computed").isTrue();
+		assertThat(report.outline())
+				.as("outline computed")
+				.isIsomorphicTo(model);
 
 	}
 
 	@Test void testOutlineMultipleInverseEdges() {
 
 		final Shape shape=and(
-				trait(shift(RDF.FIRST).inverse(), and()),
-				trait(shift(RDF.REST).inverse(), and())
+				trait(inverse(RDF.FIRST), and()),
+				trait(inverse(RDF.REST), and())
 		);
 
-		final Model model=ValuesTest.decode(
+		final Model model=decode(
 				"rdf:value rdf:first <x>. rdf:value rdf:rest <x>. rdf:value rdf:first <y>. rdf:value rdf:rest <y>.");
 
 		final Report report=process(shape, model, x, y);
 
 		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(Models.isomorphic(model, report.outline())).as("outline computed").isTrue();
+		assertThat(report.outline())
+				.as("outline computed")
+				.isIsomorphicTo(model);
 
 	}
 
 	@Test void testOutlineMultipleDirectEdgeValuePairs() {
 
 		final Shape shape=and(
-				trait(shift(RDF.FIRST).inverse(), and()),
-				trait(shift(RDF.REST).inverse(), and())
+				trait(inverse(RDF.FIRST), and()),
+				trait(inverse(RDF.REST), and())
 		);
 
-		final Model model=ValuesTest.decode(""
+		final Model model=decode(""
 				+"rdf:first rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest ."
 				+"rdf:rest rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest ."
 		);
@@ -215,7 +231,9 @@ final class SPARQLWriterTest {
 		final Report report=process(shape, model, RDF.FIRST, RDF.REST);
 
 		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(Models.isomorphic(model, report.outline())).as("outline computed").isTrue();
+		assertThat(report.outline())
+				.as("outline computed")
+				.isIsomorphicTo(model);
 
 	}
 
@@ -276,16 +294,16 @@ final class SPARQLWriterTest {
 		assertThat(validate(datatype(Values.BNodeType))).as("pass / empty").isTrue();
 		assertThat(validate(datatype(Values.BNodeType), Values.bnode())).as("pass / blank").isTrue();
 		assertThat(validate(datatype(Values.IRIType), ValuesTest.term("iri"))).as("pass / iri").isTrue();
-		assertThat(validate(datatype(XMLSchema.STRING), Values.literal("text"))).as("pass / plain literal").isTrue();
-		assertThat(validate(datatype(RDF.LANGSTRING), Values.literal("text", "en"))).as("pass / tagged literal").isTrue();
-		assertThat(validate(datatype(XMLSchema.BOOLEAN), Values.literal(true))).as("pass / typed literal").isTrue();
+		assertThat(validate(datatype(XMLSchema.STRING), literal("text"))).as("pass / plain literal").isTrue();
+		assertThat(validate(datatype(RDF.LANGSTRING), literal("text", "en"))).as("pass / tagged literal").isTrue();
+		assertThat(validate(datatype(XMLSchema.BOOLEAN), literal(true))).as("pass / typed literal").isTrue();
 
 		assertThat(validate(datatype(Values.IRIType), Values.bnode())).as("fail").isFalse();
 
 		assertThat(validate(datatype(Values.ResourceType), Values.bnode())).as("pass / generic resource").isTrue();
-		assertThat(validate(datatype(Values.ResourceType), Values.literal(true))).as("fail / generic resource").isFalse();
+		assertThat(validate(datatype(Values.ResourceType), literal(true))).as("fail / generic resource").isFalse();
 
-		assertThat(validate(datatype(RDFS.LITERAL), Values.literal(true))).as("pass / generic literal").isTrue();
+		assertThat(validate(datatype(RDFS.LITERAL), literal(true))).as("pass / generic literal").isTrue();
 		assertThat(validate(datatype(RDFS.LITERAL), Values.bnode())).as("fail / generic literal").isFalse();
 
 	}
@@ -293,7 +311,7 @@ final class SPARQLWriterTest {
 	@Test void testValidateClazz() {
 
 		final Shape shape=clazz(z);
-		final Model model=ValuesTest.decode("<x> a <y>. <y> rdfs:subClassOf <z>.");
+		final Model model=decode("<x> a <y>. <y> rdfs:subClassOf <z>.");
 
 		assertThat(validate(shape, model, x)).as("pass").isTrue();
 		assertThat(validate(shape, model, y)).as("fail").isFalse();
@@ -303,41 +321,41 @@ final class SPARQLWriterTest {
 
 	@Test void testValidateMinExclusive() {
 
-		final Shape shape=MinExclusive.minExclusive(Values.literal(1));
+		final Shape shape=MinExclusive.minExclusive(literal(1));
 
-		assertThat(validate(shape, Values.literal(2))).as("integer / pass").isTrue();
-		assertThat(validate(shape, Values.literal(1))).as("integer / fail / equal").isFalse();
-		assertThat(validate(shape, Values.literal(0))).as("integer / fail").isFalse();
+		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
+		assertThat(validate(shape, literal(1))).as("integer / fail / equal").isFalse();
+		assertThat(validate(shape, literal(0))).as("integer / fail").isFalse();
 
 	}
 
 	@Test void testValidateMaxExclusive() {
 
-		final Shape shape=maxExclusive(Values.literal(10));
+		final Shape shape=maxExclusive(literal(10));
 
-		assertThat(validate(shape, Values.literal(2))).as("integer / pass").isTrue();
-		assertThat(validate(shape, Values.literal(10))).as("integer / fail / equal").isFalse();
-		assertThat(validate(shape, Values.literal(100))).as("integer / fail").isFalse();
+		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
+		assertThat(validate(shape, literal(10))).as("integer / fail / equal").isFalse();
+		assertThat(validate(shape, literal(100))).as("integer / fail").isFalse();
 
 	}
 
 	@Test void testValidateMinInclusive() {
 
-		final Shape shape=MinInclusive.minInclusive(Values.literal(1));
+		final Shape shape=MinInclusive.minInclusive(literal(1));
 
-		assertThat(validate(shape, Values.literal(2))).as("integer / pass").isTrue();
-		assertThat(validate(shape, Values.literal(1))).as("integer / pass / equal").isTrue();
-		assertThat(validate(shape, Values.literal(0))).as("integer / fail").isFalse();
+		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
+		assertThat(validate(shape, literal(1))).as("integer / pass / equal").isTrue();
+		assertThat(validate(shape, literal(0))).as("integer / fail").isFalse();
 
 	}
 
 	@Test void testValidateMaxInclusive() {
 
-		final Shape shape=maxInclusive(Values.literal(10));
+		final Shape shape=maxInclusive(literal(10));
 
-		assertThat(validate(shape, Values.literal(2))).as("integer / pass").isTrue();
-		assertThat(validate(shape, Values.literal(10))).as("integer / pass / equal").isTrue();
-		assertThat(validate(shape, Values.literal(100))).as("integer / fail").isFalse();
+		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
+		assertThat(validate(shape, literal(10))).as("integer / pass / equal").isTrue();
+		assertThat(validate(shape, literal(100))).as("integer / fail").isFalse();
 
 	}
 
@@ -349,8 +367,8 @@ final class SPARQLWriterTest {
 		assertThat(validate(shape, Values.iri("http://exampe.org"))).as("iri / pass").isTrue();
 		assertThat(validate(shape, Values.iri("http://exampe.com"))).as("iri / fail").isFalse();
 
-		assertThat(validate(shape, Values.literal("example.org"))).as("string / pass").isTrue();
-		assertThat(validate(shape, Values.literal("example.com"))).as("string / fail").isFalse();
+		assertThat(validate(shape, literal("example.org"))).as("string / pass").isTrue();
+		assertThat(validate(shape, literal("example.com"))).as("string / fail").isFalse();
 
 	}
 
@@ -361,8 +379,8 @@ final class SPARQLWriterTest {
 		assertThat(validate(shape, Values.iri("http://exampe.org/"))).as("iri / pass").isTrue();
 		assertThat(validate(shape, Values.iri("http://exampe.com/"))).as("iri / fail").isFalse();
 
-		assertThat(validate(shape, Values.literal("example.org"))).as("string / pass").isTrue();
-		assertThat(validate(shape, Values.literal("example.com"))).as("string / fail").isFalse();
+		assertThat(validate(shape, literal("example.org"))).as("string / pass").isTrue();
+		assertThat(validate(shape, literal("example.com"))).as("string / fail").isFalse();
 
 	}
 
@@ -370,11 +388,11 @@ final class SPARQLWriterTest {
 
 		final Shape shape=MinLength.minLength(3);
 
-		assertThat(validate(shape, Values.literal(100))).as("number / pass").isTrue();
-		assertThat(validate(shape, Values.literal(99))).as("number / fail").isFalse();
+		assertThat(validate(shape, literal(100))).as("number / pass").isTrue();
+		assertThat(validate(shape, literal(99))).as("number / fail").isFalse();
 
-		assertThat(validate(shape, Values.literal("100"))).as("string / pass").isTrue();
-		assertThat(validate(shape, Values.literal("99"))).as("string / fail").isFalse();
+		assertThat(validate(shape, literal("100"))).as("string / pass").isTrue();
+		assertThat(validate(shape, literal("99"))).as("string / fail").isFalse();
 
 	}
 
@@ -382,42 +400,42 @@ final class SPARQLWriterTest {
 
 		final Shape shape=MaxLength.maxLength(2);
 
-		assertThat(validate(shape, Values.literal(99))).as("number / pass").isTrue();
-		assertThat(validate(shape, Values.literal(100))).as("number / fail").isFalse();
+		assertThat(validate(shape, literal(99))).as("number / pass").isTrue();
+		assertThat(validate(shape, literal(100))).as("number / fail").isFalse();
 
-		assertThat(validate(shape, Values.literal("99"))).as("string / pass").isTrue();
-		assertThat(validate(shape, Values.literal("100"))).as("string / fail").isFalse();
+		assertThat(validate(shape, literal("99"))).as("string / pass").isTrue();
+		assertThat(validate(shape, literal("100"))).as("string / fail").isFalse();
 
 	}
 
 
 	@Test void testValidateConjunction() {
 
-		final Shape shape=and(any(Values.literal(1)), any(Values.literal(2)));
+		final Shape shape=and(any(literal(1)), any(literal(2)));
 
-		assertThat(validate(shape, Values.literal(1), Values.literal(2), Values.literal(3))).as("pass").isTrue();
-		assertThat(validate(shape, Values.literal(1), Values.literal(3))).as("fail").isFalse();
+		assertThat(validate(shape, literal(1), literal(2), literal(3))).as("pass").isTrue();
+		assertThat(validate(shape, literal(1), literal(3))).as("fail").isFalse();
 
 	}
 
 	@Test void testValidateDisjunction() {
 
-		final Shape shape=Or.or(All.all(Values.literal(1), Values.literal(2)), All.all(Values.literal(1), Values.literal(3)));
+		final Shape shape=Or.or(All.all(literal(1), literal(2)), All.all(literal(1), literal(3)));
 
-		assertThat(validate(shape, Values.literal(3), Values.literal(2), Values.literal(1))).as("pass").isTrue();
-		assertThat(validate(shape, Values.literal(3), Values.literal(2))).as("fail").isFalse();
+		assertThat(validate(shape, literal(3), literal(2), literal(1))).as("pass").isTrue();
+		assertThat(validate(shape, literal(3), literal(2))).as("fail").isFalse();
 
 	}
 
 	@Test void testValidateOption() {
 
-		final Shape shape=Option.option(any(Values.literal(1)), any(Values.literal(2)), any(Values.literal(3)));
+		final Shape shape=Option.option(any(literal(1)), any(literal(2)), any(literal(3)));
 
-		assertThat(validate(shape, Values.literal(1), Values.literal(2))).as("true / pass").isTrue();
-		assertThat(validate(shape, Values.literal(1), Values.literal(3))).as("true / fail").isFalse();
+		assertThat(validate(shape, literal(1), literal(2))).as("true / pass").isTrue();
+		assertThat(validate(shape, literal(1), literal(3))).as("true / fail").isFalse();
 
-		assertThat(validate(shape, Values.literal(3))).as("false / pass").isTrue();
-		assertThat(validate(shape, Values.literal(2))).as("false / fail").isFalse();
+		assertThat(validate(shape, literal(3))).as("false / pass").isTrue();
+		assertThat(validate(shape, literal(2))).as("false / fail").isFalse();
 
 	}
 

@@ -17,7 +17,9 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
+import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 
@@ -32,9 +34,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.things.Values.bnode;
-import static com.metreeca.form.things.Values.integer;
-import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.Values.*;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -135,7 +135,7 @@ public final class ShapeCodec {
 
 		return types.contains(Form.Meta) ? meta(root, model)
 
-				:types.contains(Form.Datatype) ? datatype(root, model)
+				: types.contains(Form.Datatype) ? datatype(root, model)
 				: types.contains(Form.Class) ? clazz(root, model)
 				: types.contains(Form.MinExclusive) ? minExclusive(root, model)
 				: types.contains(Form.MaxExclusive) ? maxExclusive(root, model)
@@ -429,10 +429,14 @@ public final class ShapeCodec {
 
 	private Resource trait(final Trait trait, final Collection<Statement> model) {
 
+		final IRI iri=trait.getIRI();
+		final boolean direct=direct(iri);
+
 		final Resource node=bnode();
 
 		model.add(statement(node, RDF.TYPE, Form.Trait));
-		model.add(statement(node, Form.shift, shift(trait.getShift(), model)));
+		model.add(statement(node, Form.iri, direct ? iri : inverse(iri)));
+		model.add(statement(node, Form.inverse, Values.literal(!direct)));
 		model.add(statement(node, Form.shape, shape(trait.getShape(), model)));
 
 		return node;
@@ -440,7 +444,9 @@ public final class ShapeCodec {
 
 	private Trait trait(final Resource root, final Collection<Statement> model) {
 		return Trait.trait(
-				shift(resource(root, Form.shift, model), model),
+				literal(root, Form.inverse, model).booleanValue()
+						? inverse(iri(root, Form.iri, model))
+						: iri(root, Form.iri, model),
 				shape(resource(root, Form.shape, model), model)
 		);
 	}

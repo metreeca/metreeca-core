@@ -18,7 +18,6 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.And;
 import com.metreeca.form.shapes.Clazz;
 import com.metreeca.form.shapes.Trait;
@@ -30,6 +29,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.All.all;
+import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.statement;
 
 import static java.util.Arrays.asList;
@@ -76,18 +76,15 @@ public final class Outliner extends Visitor<Stream<Statement>> {
 
 	@Override public Stream<Statement> probe(final Trait trait) {
 
-		final Shift shift=trait.getShift();
+		final IRI iri=trait.getIRI();
 		final Shape shape=trait.getShape();
-
-		final boolean inverse=shift.isInverse();
-		final IRI iri=shift.getIRI();
 
 		return Stream.concat(
 
-				all(shape).map(targets -> targets.stream().flatMap(target -> sources.stream().flatMap(source -> inverse
+				all(shape).map(targets -> targets.stream().flatMap(target -> sources.stream().flatMap(source -> direct(iri)
 
-						? target instanceof Resource ? Stream.of(statement((Resource)target, iri, source)) : Stream.empty()
-						: source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
+						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
+						: target instanceof Resource ? Stream.of(statement((Resource)target, iri, source)) : Stream.empty()
 
 				))).orElse(Stream.empty()),
 

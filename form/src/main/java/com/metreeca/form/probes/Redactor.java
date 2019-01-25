@@ -82,7 +82,7 @@ public final class Redactor extends Traverser<Shape> {
 
 
 	@Override public Shape probe(final Trait trait) {
-		return trait(trait.getShift(), trait.getShape().map(this));
+		return trait(trait.getIRI(), trait.getShape().map(this));
 	}
 
 

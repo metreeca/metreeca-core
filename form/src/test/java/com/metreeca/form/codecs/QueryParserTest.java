@@ -17,7 +17,8 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -25,6 +26,7 @@ import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Values;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
@@ -34,7 +36,8 @@ import java.util.function.Consumer;
 
 import javax.json.JsonException;
 
-import static com.metreeca.form.Shift.shift;
+import static com.metreeca.form.Order.decreasing;
+import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
@@ -47,6 +50,8 @@ import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Values.inverse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -60,12 +65,9 @@ final class QueryParserTest {
 	private static final Literal One=Values.literal(ONE);
 	private static final Literal Ten=Values.literal(TEN);
 
-	private static final Shift first=shift(RDF.FIRST);
-	private static final Shift rest=shift(RDF.REST);
-
 	private static final Shape shape=and(
-			trait(first, trait(rest)),
-			trait(first.inverse(), trait(rest))
+			trait(RDF.FIRST, trait(RDF.REST)),
+			trait(inverse(RDF.FIRST), trait(RDF.REST))
 	);
 
 
@@ -85,48 +87,69 @@ final class QueryParserTest {
 		});
 	}
 
+
 	@Test void testParsePaths() {
 
-		stats("{ \"stats\": \"\" }", shape, stats -> assertThat(Lists.list()).as("empty path").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"\" }", shape, stats -> assertThat(stats.getPath())
+				.as("empty path")
+				.isEqualTo(Lists.<IRI>list()));
 
-		stats("{ \"stats\": \""+RDF.FIRST+"\" }", shape, stats -> assertThat(Lists.list(first)).as("direct naked iri").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \""+RDF.FIRST+"\" }", shape, stats -> assertThat(stats.getPath())
+				.as("direct naked iri")
+				.isEqualTo(list(RDF.FIRST)));
 
-		stats("{ \"stats\": \"^"+RDF.FIRST+"\" }", shape, stats -> assertThat(Lists.list(first.inverse())).as("inverse naked iri").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"^"+RDF.FIRST+"\" }", shape, stats -> assertThat(stats.getPath())
+				.as("inverse naked iri")
+				.isEqualTo(list(inverse(RDF.FIRST))));
 
-		stats("{ \"stats\": \"<"+RDF.FIRST+">\" }", shape, stats -> assertThat(Lists.list(first)).as("direct brackets iri").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"<"+RDF.FIRST+">\" }", shape, stats -> assertThat(stats.getPath())
+				.as("direct brackets iri")
+				.isEqualTo(list(RDF.FIRST)));
 
-		stats("{ \"stats\": \"^<"+RDF.FIRST+">\" }", shape, stats -> assertThat(Lists.list(first.inverse())).as("inverse brackets iri").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"^<"+RDF.FIRST+">\" }", shape, stats -> assertThat(stats.getPath())
+				.as("inverse brackets iri")
+				.isEqualTo(list(inverse(RDF.FIRST))));
 
-		stats("{ \"stats\": \"<"+RDF.FIRST+">/<"+RDF.REST+">\" }", shape, stats -> assertThat(Lists.list(first, rest)).as("iri slash path").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"<"+RDF.FIRST+">/<"+RDF.REST+">\" }", shape, stats -> assertThat(stats.getPath())
+				.as("iri slash path")
+				.isEqualTo(list(RDF.FIRST, RDF.REST)));
 
-		stats("{ \"stats\": \"first\" }", shape, stats -> assertThat(Lists.list(first)).as("direct alias").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"first\" }", shape, stats -> assertThat(stats.getPath())
+				.as("direct alias")
+				.isEqualTo(list(RDF.FIRST)));
 
-		stats("{ \"stats\": \"firstOf\" }", shape, stats -> assertThat(Lists.list(first.inverse())).as("inverse alias").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"firstOf\" }", shape, stats -> assertThat(stats.getPath())
+				.as("inverse alias")
+				.isEqualTo(list(inverse(RDF.FIRST))));
 
-		stats("{ \"stats\": \"first/rest\" }", shape, stats -> assertThat(Lists.list(first, rest)).as("alias slash path").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"first/rest\" }", shape, stats -> assertThat(stats.getPath())
+				.as("alias slash path")
+				.isEqualTo(list(RDF.FIRST, RDF.REST)));
 
-		stats("{ \"stats\": \"firstOf.rest\" }", shape, stats -> assertThat(Lists.list(first.inverse(), rest)).as("alias dot path").isEqualTo(stats.getPath()));
+		stats("{ \"stats\": \"firstOf.rest\" }", shape, stats -> assertThat(stats.getPath())
+				.as("alias dot path")
+				.isEqualTo(list(inverse(RDF.FIRST), RDF.REST)));
 
 	}
 
 
 	@Test void testParseSortingCriteria() {
 
-		edges("{ \"order\": \"\" }", shape, edges -> assertThat(Lists.list(Order.increasing())).as("empty path").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"\" }", shape, edges -> assertThat(list(increasing())).as("empty path").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"+\" }", shape, edges -> assertThat(Lists.list(Order.increasing())).as("empty path increasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"+\" }", shape, edges -> assertThat(list(increasing())).as("empty path increasing").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"-\" }", shape, edges -> assertThat(Lists.list(Order.decreasing())).as("empty path decreasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"-\" }", shape, edges -> assertThat(list(decreasing())).as("empty path decreasing").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"first.rest\" }", shape, edges -> assertThat(Lists.list(Order.increasing(first, rest))).as("path").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"first.rest\" }", shape, edges -> assertThat(list(increasing(RDF.FIRST, RDF.REST))).as("path").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"+first.rest\" }", shape, edges -> assertThat(Lists.list(Order.increasing(first, rest))).as("path increasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"+first.rest\" }", shape, edges -> assertThat(list(increasing(RDF.FIRST, RDF.REST))).as("path increasing").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": \"-first.rest\" }", shape, edges -> assertThat(Lists.list(Order.decreasing(first, rest))).as("path decreasing").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": \"-first.rest\" }", shape, edges -> assertThat(list(decreasing(RDF.FIRST, RDF.REST))).as("path decreasing").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": [] }", shape, edges -> assertThat(Lists.list()).as("empty list").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": [] }", shape, edges -> assertThat(list()).as("empty list").isEqualTo(edges.getOrders()));
 
-		edges("{ \"order\": [\"+first\", \"-first.rest\"] }", shape, edges -> assertThat(Lists.list(Order.increasing(first), Order.decreasing(first, rest))).as("list").isEqualTo(edges.getOrders()));
+		edges("{ \"order\": [\"+first\", \"-first.rest\"] }", shape, edges -> assertThat(list(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))).as("list").isEqualTo(edges.getOrders()));
 
 	}
 
@@ -184,11 +207,11 @@ final class QueryParserTest {
 
 		edges("{\n\t\"filter\": {}\n}", shape, edges -> assertThat(filter(shape, and())).as("empty filter").isEqualTo(edges.getShape()));
 
-		edges("{ \"filter\": { \"first.rest\": { \">=\": 1 } } }", shape, edges -> assertThat(filter(shape, trait(first, trait(rest, MinInclusive.minInclusive(One))))).as("nested filter").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": { \">=\": 1 } } }", shape, edges -> assertThat(filter(shape, trait(RDF.FIRST, trait(RDF.REST, MinInclusive.minInclusive(One))))).as("nested filter").isEqualTo(edges.getShape()));
 
-		edges("{ \"filter\": { \"first.rest\": 1 } }", shape, edges -> assertThat(filter(shape, trait(first, trait(rest, any(One))))).as("nested filter singleton shorthand").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": 1 } }", shape, edges -> assertThat(filter(shape, trait(RDF.FIRST, trait(RDF.REST, any(One))))).as("nested filter singleton shorthand").isEqualTo(edges.getShape()));
 
-		edges("{ \"filter\": { \"first.rest\": [1, 10] } }", shape, edges -> assertThat(filter(shape, trait(first, trait(rest, any(One, Ten))))).as("nested filter multiple shorthand").isEqualTo(edges.getShape()));
+		edges("{ \"filter\": { \"first.rest\": [1, 10] } }", shape, edges -> assertThat(filter(shape, trait(RDF.FIRST, trait(RDF.REST, any(One, Ten))))).as("nested filter multiple shorthand").isEqualTo(edges.getShape()));
 
 	}
 
@@ -210,7 +233,9 @@ final class QueryParserTest {
 		stats("{ \"filter\": {}, \"stats\": \"\" }", shape, stats -> {
 
 			assertThat(filter(shape, and())).as("shape").isEqualTo(stats.getShape());
-			assertThat(Lists.list()).as("path").isEqualTo(stats.getPath());
+			assertThat(stats.getPath())
+					.as("path")
+					.isEqualTo(Lists.<IRI>list());
 
 		});
 
@@ -221,7 +246,9 @@ final class QueryParserTest {
 		items("{ \"filter\": {}, \"items\": \"\" }", shape, items -> {
 
 			assertThat(filter(shape, and())).as("shape").isEqualTo(items.getShape());
-			assertThat(Lists.list()).as("path").isEqualTo(items.getPath());
+			assertThat(items.getPath())
+					.as("path")
+					.isEqualTo(Lists.<IRI>list());
 
 		});
 

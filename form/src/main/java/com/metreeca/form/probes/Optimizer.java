@@ -18,7 +18,6 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 
@@ -28,7 +27,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
@@ -55,10 +53,10 @@ public final class Optimizer extends Traverser<Shape> {
 
 	@Override public Shape probe(final Trait trait) {
 
-		final Shift shift=trait.getShift();
+		final IRI iri=trait.getIRI();
 		final Shape shape=trait.getShape().map(this);
 
-		return shape.equals(or()) ? and() : trait(shift, shape);
+		return shape.equals(or()) ? and() : trait(iri, shape);
 	}
 
 
@@ -145,16 +143,16 @@ public final class Optimizer extends Traverser<Shape> {
 	private Set<Shape> flatten(final Collection<Shape> collection,
 			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter) {
 
-		final Shape.Probe<Map.Entry<Shift, Shape>> splitter=new Visitor<Map.Entry<Shift, Shape>>() {
+		final Shape.Probe<Map.Entry<IRI, Shape>> splitter=new Visitor<Map.Entry<IRI, Shape>>() {
 
 			private int id;
 
-			@Override public Map.Entry<Shift, Shape> probe(final Shape shape) {
-				return entry(shift(iri("_:", "id"+id++)), shape); // assign non-traits a unique step
+			@Override public Map.Entry<IRI, Shape> probe(final Shape shape) {
+				return entry(iri("_:", "id"+id++), shape); // assign non-traits a unique step
 			}
 
-			@Override public Map.Entry<Shift, Shape> probe(final Trait trait) {
-				return entry(trait.getShift(), trait.getShape());
+			@Override public Map.Entry<IRI, Shape> probe(final Trait trait) {
+				return entry(trait.getIRI(), trait.getShape());
 			}
 
 		};
@@ -171,11 +169,11 @@ public final class Optimizer extends Traverser<Shape> {
 
 				.entrySet().stream().flatMap(e -> { // reassemble traits merging and optimizing multiple definitions
 
-					final Shift shift=e.getKey();
+					final IRI iri=e.getKey();
 					final List<Shape> values=e.getValue();
 
-					return shift.getIRI().getNamespace().equals("_:") ? values.stream()
-							: Stream.of(trait(shift, packer.apply(values).map(this)));
+					return iri.getNamespace().equals("_:") ? values.stream()
+							: Stream.of(trait(iri, packer.apply(values).map(this)));
 
 				})
 

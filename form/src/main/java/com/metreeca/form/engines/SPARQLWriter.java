@@ -40,9 +40,7 @@ import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Report.report;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Strings.indent;
-import static com.metreeca.form.things.Values.compare;
-import static com.metreeca.form.things.Values.is;
-import static com.metreeca.form.things.Values.text;
+import static com.metreeca.form.things.Values.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
@@ -113,15 +111,13 @@ final class SPARQLWriter {
 	/**
 	 * Expands a source value into a focus value set applying a shift operator.
 	 */
-	private Set<Value> shift(final Value source, final Shift shift) {
+	private Set<Value> shift(final Value source, final IRI iri) {
 
 		final Set<Value> values=new HashSet<>();
 
-		final IRI iri=shift.getIRI();
+		if ( !direct(iri) ) {
 
-		if ( shift.isInverse() ) {
-
-			try (final RepositoryResult<Statement> statements=connection.getStatements(null, iri, source)) {
+			try (final RepositoryResult<Statement> statements=connection.getStatements(null, inverse(iri), source)) {
 				while ( statements.hasNext() ) { values.add(statements.next().getSubject()); }
 			}
 
@@ -324,14 +320,15 @@ final class SPARQLWriter {
 
 		@Override public Report probe(final Trait trait) {
 
-			final Shift shift=trait.getShift();
+			final IRI iri=trait.getIRI();
+			final boolean direct=direct(iri);
 			final Shape shape=trait.getShape();
 
 			return report(Sets.set(), focus.stream().map(value -> { // for each focus value
 
 				// compute the new focus set expanding the trait shift from the focus value
 
-				final Set<Value> focus=shift(value, shift);
+				final Set<Value> focus=shift(value, iri);
 
 				// validate the trait shape on the new focus set
 
@@ -354,7 +351,7 @@ final class SPARQLWriter {
 
 				// return trait validation results
 
-				return frame(value, slot(shift, report(issues, Lists.concat(frames, placeholders))));
+				return frame(value, slot(direct? Shift.shift(iri) : Shift.shift(inverse(iri)).inverse(), report(issues, Lists.concat(frames, placeholders))));
 
 			}).collect(toList()));
 

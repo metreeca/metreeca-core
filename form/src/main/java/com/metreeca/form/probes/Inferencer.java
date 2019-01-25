@@ -35,6 +35,7 @@ import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.literal;
 
 import static java.util.stream.Collectors.toList;
@@ -89,12 +90,12 @@ public final class Inferencer extends Visitor<Shape> {
 
 	@Override public Shape probe(final Trait trait) {
 
-		final Shift shift=trait.getShift();
+		final IRI iri=trait.getIRI();
 		final Shape shape=trait.getShape().map(this);
 
-		return shift.getIRI().equals(RDF.TYPE) ? and(trait(shift, and(shape, datatype(Values.ResourceType))), datatype(Values.ResourceType))
-				: shift.isInverse() ? trait(shift, and(shape, datatype(Values.ResourceType)))
-				: and(trait(shift, shape), datatype(Values.ResourceType));
+		return iri.equals(RDF.TYPE) ? and(trait(iri, and(shape, datatype(Values.ResourceType))), datatype(Values.ResourceType))
+				: direct(iri) ? and(trait(iri, shape), datatype(Values.ResourceType))
+				: trait(iri, and(shape, datatype(Values.ResourceType)));
 	}
 
 

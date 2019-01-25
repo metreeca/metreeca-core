@@ -18,7 +18,6 @@
 package com.metreeca.form.probes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,6 +28,8 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static com.metreeca.form.things.Values.direct;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -59,18 +60,12 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 
 	@Override public Stream<Statement> probe(final Trait trait) {
 
-		final Shift shift=trait.getShift();
+		final IRI iri=trait.getIRI();
 
-		final IRI iri=shift.getIRI();
-		final boolean inverse=shift.isInverse();
+		final boolean direct=direct(iri);
 
-		final Function<Statement, Value> source=inverse
-				? Statement::getObject
-				: Statement::getSubject;
-
-		final Function<Statement, Value> target=inverse
-				? Statement::getSubject
-				: Statement::getObject;
+		final Function<Statement, Value> source=direct ? Statement::getSubject : Statement::getObject;
+		final Function<Statement, Value> target=direct ? Statement::getObject : Statement::getSubject;
 
 		final Collection<Statement> restricted=model.stream()
 				.filter(s -> focus.contains(source.apply(s)) && iri.equals(s.getPredicate()))

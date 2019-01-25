@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Like.like;
@@ -43,6 +42,7 @@ import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.things.Values.inverse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -90,7 +90,7 @@ final class ShapeCodecTest {
 	@Test void testStructurals() {
 
 		assertCoded("direct trait", trait(RDF.VALUE));
-		assertCoded("inverse trait", trait(shift(RDF.VALUE).inverse()));
+		assertCoded("inverse trait", trait(inverse(RDF.VALUE)));
 		assertCoded("shaped trait", trait(RDF.VALUE, MinCount.minCount(10)));
 
 	}

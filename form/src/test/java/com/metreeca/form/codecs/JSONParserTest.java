@@ -18,11 +18,11 @@
 package com.metreeca.form.codecs;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.All;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -44,8 +44,10 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.Shift.shift;
+import static com.metreeca.form.things.Values.bnode;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -63,59 +65,93 @@ final class JSONParserTest extends JSONCodecTest {
 	//// Objects ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testNoObjects() {
-		assertThat((Object)decode("")).as("empty object").isEqualTo(rdf(object()));
-		assertThat((Object)decode("")).as("empty array").isEqualTo(rdf(array()));
+		assertThat(rdf(object()))
+				.as("empty object")
+				.isEqualTo(decode(""));
+		assertThat(rdf(array()))
+				.as("empty array")
+				.isEqualTo(decode(""));
 	}
 
 	@Test void testBlankObjects() {
 
-		assertThat((Object)decode("[] rdf:value [] .")).as("blank object").isEqualTo(rdf(blanks(object(field("this", "_:x")))));
+		assertThat(rdf(blanks(object(field("this", "_:x")))))
+				.as("blank object")
+				.isEqualTo(decode("[] rdf:value [] ."));
 
-		assertThat((Object)decode("[] rdf:value [] .")).as("empty id blank object").isEqualTo(rdf(blanks(object(field("this", "")))));
+		assertThat(rdf(blanks(object(field("this", "")))))
+				.as("empty id blank object")
+				.isEqualTo(decode("[] rdf:value [] ."));
 
-		assertThat((Object)decode("[] rdf:value [] .")).as("null id blank object").isEqualTo(rdf(blanks(object(field("this", null)))));
+		assertThat(rdf(blanks(object(field("this", null)))))
+				.as("null id blank object")
+				.isEqualTo(decode("[] rdf:value [] ."));
 
 		assertThat(rdf(blanks(object(field("this", "_:x")))).stream()
-				.allMatch(statement1 -> statement1.getObject().equals(Values.bnode("x")))).as("preserve bnode id").isTrue();
+				.allMatch(statement -> statement.getObject().equals(bnode("x"))))
+				.as("preserve bnode id")
+				.isTrue();
 
 		assertThat(rdf(blanks("_:x"), null, trait(RDF.VALUE, datatype(Values.BNodeType))).stream()
-				.allMatch(statement -> statement.getObject().equals(Values.bnode("x")))).as("preserve bnode id / shorthand").isTrue();
+				.allMatch(statement -> statement.getObject().equals(bnode("x"))))
+				.as("preserve bnode id / shorthand")
+				.isTrue();
 
 	}
 
 	@Test void testNamedObjects() {
 
-		assertThat((Object)decode("<x> rdf:value <y>. <z> rdf:value <x>.")).as("named objects with naked predicate IRIs").isEqualTo(rdf(object(
+		assertThat(rdf(object(
 				field("this", "http://example.com/x"),
 				field(value, object(field("this", "http://example.com/y"))),
 				field("^"+value, object(field("this", "http://example.com/z")))
-		)));
+		)))
+				.as("named objects with naked predicate IRIs")
+				.isEqualTo(decode("<x> rdf:value <y>. <z> rdf:value <x>."));
 
-		assertThat((Object)decode("<x> rdf:value <y>. <z> rdf:value <x>.")).as("named objects with bracketed predicate IRIs").isEqualTo(rdf(object(
+		assertThat(rdf(object(
 				field("this", "http://example.com/x"),
 				field("<"+value+">", object(field("this", "http://example.com/y"))),
 				field("^<"+value+">", object(field("this", "http://example.com/z")))
-		)));
+		)))
+				.as("named objects with bracketed predicate IRIs")
+				.isEqualTo(decode("<x> rdf:value <y>. <z> rdf:value <x>."));
 
 	}
 
 	@Test void testTypedObjects() {
 
-		assertThat((Object)decode("")).as("null").isEqualTo(rdf(blanks((Object)null)));
-		assertThat((Object)decode("[] rdf:value true .")).as("boolean").isEqualTo(rdf(blanks(true)));
-		assertThat((Object)decode("[] rdf:value 'string' .")).as("string").isEqualTo(rdf(blanks("string")));
-		assertThat((Object)decode("[] rdf:value 1.0 .")).as("decimal").isEqualTo(rdf(blanks(new BigDecimal("1.0"))));
-		assertThat((Object)decode("[] rdf:value 1 .")).as("integer").isEqualTo(rdf(blanks(BigInteger.ONE)));
+		assertThat(rdf(blanks((Object)null)))
+				.as("null")
+				.isEqualTo(decode(""));
+		assertThat(rdf(blanks(true)))
+				.as("boolean")
+				.isEqualTo(decode("[] rdf:value true ."));
+		assertThat(rdf(blanks("string")))
+				.as("string")
+				.isEqualTo(decode("[] rdf:value 'string' ."));
+		assertThat(rdf(blanks(new BigDecimal("1.0"))))
+				.as("decimal")
+				.isEqualTo(decode("[] rdf:value 1.0 ."));
+		assertThat(rdf(blanks(BigInteger.ONE)))
+				.as("integer")
+				.isEqualTo(decode("[] rdf:value 1 ."));
 
 		// !!! unable to test for exponent presence using JSON-P
 		//assertEquals("double", parse("[] rdf:value 1.0E0 ."), // special support for doubles
 		//		rdf("[{\"this\": \"_:node1bcl7j42cx10\", \"http://www.w3.org/1999/02/22-rdf-syntax-ns#value\": [1.0e0]}]"));
 
-		assertThat((Object)decode("[] rdf:value '1'^^xsd:int .")).as("numeric").isEqualTo(rdf(blanks(object(field("text", "1"), field("type", XMLSchema.INT.stringValue())))));
+		assertThat(rdf(blanks(object(field("text", "1"), field("type", XMLSchema.INT.stringValue())))))
+				.as("numeric")
+				.isEqualTo(decode("[] rdf:value '1'^^xsd:int ."));
 
-		assertThat((Object)decode("[] rdf:value 'text'^^:type .")).as("custom").isEqualTo(rdf(blanks(object(field("text", "text"), field("type", ValuesTest.term("type").stringValue())))));
+		assertThat(rdf(blanks(object(field("text", "text"), field("type", ValuesTest.term("type").stringValue())))))
+				.as("custom")
+				.isEqualTo(decode("[] rdf:value 'text'^^:type ."));
 
-		assertThat((Object)decode("[] rdf:value 'text'@en .")).as("tagged").isEqualTo(rdf(blanks(object(field("text", "text"), field("lang", "en")))));
+		assertThat(rdf(blanks(object(field("text", "text"), field("lang", "en")))))
+				.as("tagged")
+				.isEqualTo(decode("[] rdf:value 'text'@en ."));
 
 	}
 
@@ -123,50 +159,60 @@ final class JSONParserTest extends JSONCodecTest {
 	//// Focus /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testParseOnlyFocusNode() {
-		assertThat((Object)decode("<x> rdf:value 'x' .")).as("focus node only").isEqualTo(rdf(
+		assertThat(rdf(
 				array(
 						object(field("this", "http://example.com/x"), field(value, "x")),
 						object(field("this", "http://example.com/y"), field(value, "y"))
 				),
 				Values.iri("http://example.com/x")
-		));
+		))
+				.as("focus node only")
+				.isEqualTo(decode("<x> rdf:value 'x' ."));
 	}
 
 	@Test void testHandleUnknownFocusNode() {
-		assertThat((Object)decode("")).as("unknown focus").isEqualTo(rdf(
+		assertThat(rdf(
 				object(field("this", "http://example.com/x"), field(value, "x")),
-				Values.bnode()
-		));
+				bnode()
+		))
+				.as("unknown focus")
+				.isEqualTo(decode(""));
 	}
 
 	@Test void testAssumeFocusAsSubject() {
-		assertThat((Object)decode("<x> rdf:value 'x' .")).as("focus assumed as subject").isEqualTo(rdf(
+		assertThat(rdf(
 				array(
 						object(field(value, "x"))
 				),
 				Values.iri("http://example.com/x")
-		));
+		))
+				.as("focus assumed as subject")
+				.isEqualTo(decode("<x> rdf:value 'x' ."));
 	}
 
 
 	//// Shared References /////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testHandleNamedLoops() {
-		assertThat((Object)decode("<x> rdf:value <y>. <y> rdf:value <x>.")).as("named loops").isEqualTo(rdf(object(
+		assertThat(rdf(object(
 				field("this", "http://example.com/x"),
 				field(value, object(
 						field("this", "http://example.com/y"),
 						field(value, array(object(field("this", "http://example.com/x"))))
 						)
 				)
-		)));
+		)))
+				.as("named loops")
+				.isEqualTo(decode("<x> rdf:value <y>. <y> rdf:value <x>."));
 	}
 
 	@Test void testHandleBlankLoops() {
-		assertThat((Object)decode("_:x rdf:value [rdf:value _:x] .")).as("named loops").isEqualTo(rdf(object(
+		assertThat(rdf(object(
 				field("this", "_:a"),
 				field(value, blank(field(value, object(field("this", "_:a")))))
-		)));
+		)))
+				.as("named loops")
+				.isEqualTo(decode("_:x rdf:value [rdf:value _:x] ."));
 	}
 
 
@@ -174,32 +220,38 @@ final class JSONParserTest extends JSONCodecTest {
 
 	@Test void testParseAliasedTraits() {
 
-		assertThat((Object)decode("[] rdf:value [] .")).as("direct inferred").isEqualTo(rdf(
+		assertThat(rdf(
 				blank(field("value", blank())),
 				null,
 				trait(RDF.VALUE)
-		));
+		))
+				.as("direct inferred")
+				.isEqualTo(decode("[] rdf:value [] ."));
 
-		assertThat((Object)decode("[] rdf:value [] .")).as("inverse inferred").isEqualTo(rdf(
+		assertThat(rdf(
 				blank(field("valueOf", blank())),
 				null,
-				trait(shift(RDF.VALUE).inverse())
-		));
+				trait(inverse(RDF.VALUE))
+		))
+				.as("inverse inferred")
+				.isEqualTo(decode("[] rdf:value [] ."));
 
-		assertThat((Object)decode("[] rdf:value [] .")).as("user-defined").isEqualTo(rdf(
+		assertThat(rdf(
 				blank(field("alias", blank())),
 				null,
 				trait(RDF.VALUE, alias("alias"))
-		));
+		))
+				.as("user-defined")
+				.isEqualTo(decode("[] rdf:value [] ."));
 
 	}
 
 	@Test void testParseAliasedNestedTraits() {
 
-		assertThat(rdf(
+		Assertions.assertThat(rdf(
 				blank(field("value", blank(field("alias", blank())))),
 				null,
-				trait(RDF.VALUE, trait(Shift.shift(RDF.VALUE), alias("alias")))
+				trait(RDF.VALUE, trait(RDF.VALUE, alias("alias")))
 		))
 				.as("aliased nested trait")
 				.isEqualTo(decode("[] rdf:value [rdf:value []] ."));
@@ -230,29 +282,37 @@ final class JSONParserTest extends JSONCodecTest {
 
 	@Test void testResolveRelativeIRIs() {
 
-		assertThat((Object)decode("<x> rdf:value <y> .")).as("base relative subject").isEqualTo(rdf(
+		assertThat(rdf(
 				object(field("this", "x"), field(value, "http://example.com/y")),
 				null,
 				trait(RDF.VALUE, datatype(Values.IRIType))
-		));
+		))
+				.as("base relative subject")
+				.isEqualTo(decode("<x> rdf:value <y> ."));
 
-		assertThat((Object)decode("<x> rdf:value <y>.")).as("root-relative subject").isEqualTo(rdf(
+		assertThat(rdf(
 				object(field("this", "/x"), field(value, "http://example.com/y")),
 				null,
 				trait(RDF.VALUE, datatype(Values.IRIType))
-		));
+		))
+				.as("root-relative subject")
+				.isEqualTo(decode("<x> rdf:value <y>."));
 
-		assertThat((Object)decode("<x> rdf:value <y> .")).as("base relative object").isEqualTo(rdf(
+		assertThat(rdf(
 				object(field("this", "http://example.com/x"), field(value, "y")),
 				null,
 				trait(RDF.VALUE, datatype(Values.IRIType))
-		));
+		))
+				.as("base relative object")
+				.isEqualTo(decode("<x> rdf:value <y> ."));
 
-		assertThat((Object)decode("<x> rdf:value <http://example.com/z>.")).as("root-relative object").isEqualTo(rdf(
+		assertThat(rdf(
 				object(field("this", "http://example.com/x"), field(value, "/z")),
 				null,
 				trait(RDF.VALUE, datatype(Values.IRIType))
-		));
+		))
+				.as("root-relative object")
+				.isEqualTo(decode("<x> rdf:value <http://example.com/z>."));
 
 	}
 
@@ -260,7 +320,7 @@ final class JSONParserTest extends JSONCodecTest {
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testParseNamedReverseLinks() {
-		assertThat((Object)decode("<y> rdf:value <x> .")).as("named reverse links").isEqualTo(rdf(
+		assertThat(rdf(
 				object(
 						field("this", "http://example.com/x"),
 						field("valueOf", object(
@@ -268,80 +328,100 @@ final class JSONParserTest extends JSONCodecTest {
 						))
 				),
 				null,
-				trait(shift(RDF.VALUE).inverse())
-		));
+				trait(inverse(RDF.VALUE))
+		))
+				.as("named reverse links")
+				.isEqualTo(decode("<y> rdf:value <x> ."));
 	}
 
 	@Test void testParseBlankReverseLinks() {
-		assertThat((Object)decode("[] rdf:value [] .")).as("blank reverse links").isEqualTo(rdf(
+		assertThat(rdf(
 				blank(field("valueOf", blank())),
 				null,
-				trait(shift(RDF.VALUE).inverse())
-		));
+				trait(inverse(RDF.VALUE))
+		))
+				.as("blank reverse links")
+				.isEqualTo(decode("[] rdf:value [] ."));
 	}
 
 	@Test void testParseInlinedProvedTypedLiterals() {
-		assertThat((Object)decode("[] rdf:value '2016-08-11'^^xsd:date.")).as("simplified literal with known datatype").isEqualTo(rdf(
+		assertThat(rdf(
 				blank(field("value", "2016-08-11")),
 				null,
 				trait(RDF.VALUE, datatype(XMLSchema.DATE))
-		));
+		))
+				.as("simplified literal with known datatype")
+				.isEqualTo(decode("[] rdf:value '2016-08-11'^^xsd:date."));
 	}
 
 	@Test void testParseThisLessProvedBlanks() {
-		assertThat((Object)decode("[] rdf:value [] .")).as("proved blanks").isEqualTo(rdf(
+		assertThat(rdf(
 				object(field("value", object())),
 				null,
 				and(datatype(Values.BNodeType), trait(RDF.VALUE, datatype(Values.BNodeType)))
-		));
+		))
+				.as("proved blanks")
+				.isEqualTo(decode("[] rdf:value [] ."));
 	}
 
 	@Test void testParseThisLessProvedNameds() {
-		assertThat((Object)decode("<x> rdf:value [] .")).as("proved named").isEqualTo(rdf(
+		assertThat(rdf(
 				object(field("value", blank())),
 				null,
 				and(All.all(Values.iri("http://example.com/x")), trait(RDF.VALUE))
-		));
+		))
+				.as("proved named")
+				.isEqualTo(decode("<x> rdf:value [] ."));
 	}
 
 	@Test void testParseIDOnlyProvedBlanks() {
-		assertThat((Object)decode("[] rdf:value [] .")).as("proved blank").isEqualTo(rdf(
+		assertThat(rdf(
 				blanks("_:x"),
 				null,
 				trait(RDF.VALUE, datatype(Values.BNodeType))
-		));
+		))
+				.as("proved blank")
+				.isEqualTo(decode("[] rdf:value [] ."));
 	}
 
 	@Test void testParseIRIOnlyProvedNameds() {
-		assertThat((Object)decode("[] rdf:value <x> .")).as("proved named").isEqualTo(rdf(
+		assertThat(rdf(
 				blanks("http://example.com/x"),
 				null,
 				trait(RDF.VALUE, datatype(Values.IRIType))
-		));
+		))
+				.as("proved named")
+				.isEqualTo(decode("[] rdf:value <x> ."));
 	}
 
 	@Test void testParseStringOnlyProvedResources() {
-		assertThat((Object)decode("[] rdf:value [], <x> .")).as("proved resources").isEqualTo(rdf(
+		assertThat(rdf(
 				blanks("_:x", "http://example.com/x"),
 				null,
 				trait(RDF.VALUE, datatype(Values.ResourceType))
-		));
+		))
+				.as("proved resources")
+				.isEqualTo(decode("[] rdf:value [], <x> ."));
 	}
 
 	@Test void testParseProvedDecimalsLeniently() {
-		assertThat((Object)decode("[] rdf:value 1.0 .")).as("proved decimal").isEqualTo(rdf(
+		assertThat(rdf(
 				blanks(Values.decimal(1), Values.integer(1), 1.0),
 				null,
 				trait(RDF.VALUE, datatype(XMLSchema.DECIMAL))
-		));
+		))
+				.as("proved decimal")
+				.isEqualTo(decode("[] rdf:value 1.0 ."));
 	}
 
 	@Test void testParseProvedDoublesLeniently() {
-		assertThat((Object)decode("[] rdf:value 1.0E0 .")).as("proved decimal").isEqualTo(rdf(
+		assertThat(rdf(
 				blanks(1.0, Values.integer(1), Values.decimal(1)),
 				null,
 				trait(RDF.VALUE, datatype(XMLSchema.DOUBLE))
-		));
+		))
+				.as("proved decimal")
+				.isEqualTo(decode("[] rdf:value 1.0E0 ."));
 	}
 
 	@Test void testRejectMalformedLiterals() {

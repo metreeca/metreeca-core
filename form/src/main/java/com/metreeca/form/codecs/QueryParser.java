@@ -23,6 +23,7 @@ import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ import javax.json.JsonException;
 
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
+import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -42,15 +44,13 @@ import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.MaxLength.maxLength;
-import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.MinLength.minLength;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.Trait.traits;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.Values.*;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
@@ -97,8 +97,8 @@ import static java.util.stream.Collectors.toList;
 
 		final Shape filter=filter(query);
 
-		final List<Shift> stats=stats(query);
-		final List<Shift> items=items(query);
+		final List<IRI> stats=stats(query);
+		final List<IRI> items=items(query);
 
 		final List<Order> order=order(query);
 
@@ -238,27 +238,27 @@ import static java.util.stream.Collectors.toList;
 	}
 
 
-	private Shape nested(final Shape shape, final List<Shift> path, final Map<String, Object> object) {
+	private Shape nested(final Shape shape, final List<IRI> path, final Map<String, Object> object) {
 		if ( path.isEmpty() ) { return filters(object, shape); } else {
 
-			final Map<Shift, Shape> traits=traits(shape); // !!! optimize (already explored during path parsing)
+			final Map<IRI, Shape> traits=traits(shape); // !!! optimize (already explored during path parsing)
 
-			final Shift head=path.get(0);
-			final List<Shift> tail=path.subList(1, path.size());
+			final IRI head=path.get(0);
+			final List<IRI> tail=path.subList(1, path.size());
 
 			return trait(head, nested(traits.get(head), tail, object));
 		}
 	}
 
 
-	private List<Shift> stats(final Map<String, Object> query) {
+	private List<IRI> stats(final Map<String, Object> query) {
 		return Optional.ofNullable(query.get("stats"))
 				.map(v -> v instanceof String ? (String)v : error("stats field is not a string"))
 				.map((path) -> path(path, shape))
 				.orElse(null);
 	}
 
-	private List<Shift> items(final Map<String, Object> query) {
+	private List<IRI> items(final Map<String, Object> query) {
 		return Optional.ofNullable(query.get("items"))
 				.map(v -> v instanceof String ? (String)v : error("items field is not a string"))
 				.map((path) -> path(path, shape))
@@ -349,7 +349,7 @@ import static java.util.stream.Collectors.toList;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<Shift> path(final String path, final Shape shape) {
+	private List<IRI> path(final String path, final Shape shape) {
 
 		final Collection<String> steps=new ArrayList<>();
 
@@ -371,29 +371,31 @@ import static java.util.stream.Collectors.toList;
 		return path(steps, shape);
 	}
 
-	private List<Shift> path(final Iterable<String> steps, final Shape shape) {
+	private List<IRI> path(final Iterable<String> steps, final Shape shape) {
 
-		final List<Shift> edges=new ArrayList<>();
+		final List<IRI> edges=new ArrayList<>();
 
 		Shape reference=shape;
 
 		for (final String step : steps) {
 
-			final Map<Shift, Shape> traits=traits(reference);
-			final Map<Shift, String> aliases=aliases(reference);
+			final Map<IRI, Shape> traits=traits(reference);
+			final Map<IRI, String> aliases=aliases(reference);
 
-			final Map<String, Shift> index=new HashMap<>();
+			final Map<String, IRI> index=new HashMap<>();
 
-			for (final Shift edge : traits.keySet()) {
-				index.put(edge.toString(), edge); // inside angle brackets
-				index.put((edge.isInverse() ? "^" : "")+edge.getIRI(), edge); // naked IRI
+			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
+
+			for (final IRI edge : traits.keySet()) {
+				index.put(format(edge), edge); // inside angle brackets
+				index.put(edge.toString(), edge); // naked IRI
 			}
 
-			for (final Map.Entry<Shift, String> entry : aliases.entrySet()) {
+			for (final Map.Entry<IRI, String> entry : aliases.entrySet()) {
 				index.put(entry.getValue(), entry.getKey());
 			}
 
-			final Shift edge=index.get(step);
+			final IRI edge=index.get(step);
 
 			if ( edge == null ) {
 				throw new NoSuchElementException("unknown path step ["+step+"]");

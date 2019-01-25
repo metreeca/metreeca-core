@@ -30,9 +30,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.things.Values.format;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -48,53 +48,45 @@ import static java.util.stream.Collectors.*;
 public final class Trait implements Shape {
 
 	public static Trait trait(final IRI iri) {
-		return trait(shift(iri));
+		return new Trait(iri, and());
 	}
 
 	public static Trait trait(final IRI iri, final Value... values) {
-		return trait(shift(iri), all(values));
+		return new Trait(iri, all(values));
 	}
 
 	public static Trait trait(final IRI iri, final Shape shape) {
-		return trait(shift(iri), shape);
+		return new Trait(iri, shape);
 	}
 
 
-	public static Trait trait(final Shift shift) {
-		return trait(shift, and());
-	}
 
-	public static Trait trait(final Shift shift, final Shape shape) {
-		return new Trait(shift, shape);
-	}
-
-
-	public static Map<Shift, Shape> traits(final Shape shape) {
+	public static Map<IRI, Shape> traits(final Shape shape) {
 		return shape == null ? emptyMap() : shape.map(new TraitProbe());
 	}
 
 
-	private final Shift shift;
+	private final IRI iri;
 	private final Shape shape;
 
 
-	private Trait(final Shift shift, final Shape shape) {
+	private Trait(final IRI iri, final Shape shape) {
 
-		if ( shift == null ) {
-			throw new NullPointerException("null shift");
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
 		}
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		this.shift=shift;
+		this.iri=iri;
 		this.shape=shape;
 	}
 
 
-	public Shift getShift() {
-		return shift;
+	public IRI getIRI() {
+		return iri;
 	}
 
 	public Shape getShape() {
@@ -114,45 +106,45 @@ public final class Trait implements Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Trait
-				&& shift.equals(((Trait)object).shift)
+				&& iri.equals(((Trait)object).iri)
 				&& shape.equals(((Trait)object).shape);
 	}
 
 	@Override public int hashCode() {
-		return shift.hashCode()^shape.hashCode();
+		return iri.hashCode()^shape.hashCode();
 	}
 
 	@Override public String toString() {
-		return "trait("+shift+(shape.equals(and()) ? "" : ", "+shape)+")";
+		return "trait("+format(iri)+(shape.equals(and()) ? "" : ", "+shape)+")";
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TraitProbe extends Traverser<Map<Shift, Shape>> {
+	private static final class TraitProbe extends Traverser<Map<IRI, Shape>> {
 
-		@Override public Map<Shift, Shape> probe(final Shape shape) { return Maps.map();}
+		@Override public Map<IRI, Shape> probe(final Shape shape) { return Maps.map();}
 
 
-		@Override public Map<Shift, Shape> probe(final Trait trait) {
-			return singletonMap(trait.getShift(), trait.getShape());
+		@Override public Map<IRI, Shape> probe(final Trait trait) {
+			return singletonMap(trait.getIRI(), trait.getShape());
 		}
 
 
-		@Override public Map<Shift, Shape> probe(final And and) {
+		@Override public Map<IRI, Shape> probe(final And and) {
 			return traits(and.getShapes().stream());
 		}
 
-		@Override public Map<Shift, Shape> probe(final Or or) {
+		@Override public Map<IRI, Shape> probe(final Or or) {
 			return traits(or.getShapes().stream());
 		}
 
-		@Override public Map<Shift, Shape> probe(final Option option) {
+		@Override public Map<IRI, Shape> probe(final Option option) {
 			return traits(Stream.of(option.getPass(), option.getFail()));
 		}
 
 
-		private Map<Shift, Shape> traits(final Stream<Shape> stream) {
+		private Map<IRI, Shape> traits(final Stream<Shape> stream) {
 			return stream
 
 					// collect shift-to-shape mappings from nested shapes
