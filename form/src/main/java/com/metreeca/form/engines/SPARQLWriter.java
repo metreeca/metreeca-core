@@ -190,12 +190,17 @@ final class SPARQLWriter {
 
 						frames.add(frame(
 								bindings.getValue("value"),
-								set(issue(Issue.Level.Error, "not an instance of target class", clazz)),
-								singletonMap(RDF.TYPE, focus(set(), set(frame(clazz.getIRI()))))
+								set(issue(Issue.Level.Error, "not an instance of target class", clazz))
 						));
 
 					}
 				});
+
+				final Map<IRI, Focus> type=singletonMap(RDF.TYPE, focus(set(), set(frame(clazz.getIRI()))));
+
+				focus.stream() // add rdf:type outlining frames
+						.map(value -> frame(value, set(), type))
+						.forEach(frames::add);
 
 				return focus(set(), frames);
 			}
