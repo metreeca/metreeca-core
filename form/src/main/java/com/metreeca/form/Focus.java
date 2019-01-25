@@ -22,10 +22,12 @@ import com.metreeca.form.things.Maps;
 import org.eclipse.rdf4j.model.*;
 
 import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Frame.frame;
-import static com.metreeca.form.Frame.frames;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Sets.union;
@@ -36,27 +38,27 @@ import static java.util.stream.Collectors.*;
 
 
 /**
- * Shape validation report.
+ * Shape focus validation report.
  */
-public final class Report {
+public final class Focus {
 
-	private static final Report empty=new Report(set(), set());
+	private static final Focus empty=new Focus(set(), set());
 
 
-	public static Report report() {
+	public static Focus focus() {
 		return empty;
 	}
 
-	public static Report report(final Issue... issues) {
-		return new Report(set(issues), set());
+	public static Focus focus(final Issue... issues) {
+		return new Focus(set(issues), set());
 	}
 
-	public static Report report(final Collection<Issue> issues, final Frame... frames) {
-		return new Report(issues, set(frames));
+	public static Focus focus(final Collection<Issue> issues, final Frame... frames) {
+		return new Focus(issues, set(frames));
 	}
 
-	public static Report report(final Collection<Issue> issues, final Collection<Frame> frames) {
-		return new Report(issues, frames);
+	public static Focus focus(final Collection<Issue> issues, final Collection<Frame> frames) {
+		return new Focus(issues, frames);
 	}
 
 
@@ -66,7 +68,7 @@ public final class Report {
 	private final Set<Frame> frames;
 
 
-	private Report(final Collection<Issue> issues, final Collection<Frame> frames) {
+	private Focus(final Collection<Issue> issues, final Collection<Frame> frames) {
 
 		if ( issues == null ) {
 			throw new NullPointerException("null issues");
@@ -102,20 +104,20 @@ public final class Report {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Report merge(final Report report) {
+	public Focus merge(final Focus focus) {
 
-		if ( report == null ) {
-			throw new NullPointerException("null report");
+		if ( focus == null ) {
+			throw new NullPointerException("null focus report");
 		}
 
-		final Set<Issue> issues=union(getIssues(), report.getIssues());
-		final Collection<Frame> frames=frames(union(getFrames(), report.getFrames()), reducing(report(), Report::merge));
+		final Set<Issue> issues=union(getIssues(), focus.getIssues());
+		final Collection<Frame> frames=frames(union(getFrames(), focus.getFrames()), reducing(focus(), Focus::merge));
 
-		return report(issues, frames);
+		return focus(issues, frames);
 	}
 
 	/**
-	 * Tests if the overall severity of this trace node reaches an expected level.
+	 * Tests if the overall severity of this report reaches an expected level.
 	 *
 	 * @param limit the expected severity level
 	 *
@@ -141,7 +143,7 @@ public final class Report {
 	 * @return an optional pruned trace retaining only issues and frames from this trace with severity greater or equal
 	 * to {@code limit}; an empty optional if no issue or frame in this trace reaches the severity {@code limit}
 	 */
-	public Optional<Report> prune(final Issue.Level limit) {
+	public Optional<Focus> prune(final Issue.Level limit) {
 
 		if ( limit == null ) {
 			throw new NullPointerException("null limit");
@@ -156,13 +158,13 @@ public final class Report {
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toCollection(LinkedHashSet::new));
 
-		return issues.isEmpty() && frames.isEmpty() ? Optional.empty() : Optional.of(report(issues, frames));
+		return issues.isEmpty() && frames.isEmpty() ? Optional.empty() : Optional.of(focus(issues, frames));
 	}
 
 	/**
-	 * Computes the statement outline of this trace node.
+	 * Computes the statement outline of this report.
 	 *
-	 * @return a collection of statements recursively generated from {@linkplain Frame frames} in this trace node
+	 * @return a collection of statements recursively generated from {@linkplain Frame frames} in this report
 	 */
 	public Collection<Statement> outline() {
 		return frames.stream()
@@ -174,9 +176,9 @@ public final class Report {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Report
-				&& issues.equals(((Report)object).issues)
-				&& frames.equals(((Report)object).frames);
+		return this == object || object instanceof Focus
+				&& issues.equals(((Focus)object).issues)
+				&& frames.equals(((Focus)object).frames);
 	}
 
 	@Override public int hashCode() {
@@ -196,7 +198,7 @@ public final class Report {
 
 		final Value value=frame.getValue();
 
-		final List<Map.Entry<Shift, Report>> slots=frame.getSlots().entrySet().stream()
+		final List<Map.Entry<Shift, Focus>> slots=frame.getSlots().entrySet().stream()
 				.map(slot -> slot.getValue().prune(limit).map(trace -> Maps.entry(slot.getKey(), trace)))
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toList());
@@ -235,4 +237,37 @@ public final class Report {
 			);
 		});
 	}
+
+
+	/**
+	 * Merges a collection of frames.
+	 *
+	 * @param frames    the frames to be merged
+	 * @param collector a collector transforming a stream of values into a merged value (usually a {@linkplain
+	 *                  Collectors#reducing} collector)
+	 *
+	 * @return a merged collection of frames where each frame value appears only once
+	 */
+	private  Collection<Frame> frames(final Collection<Frame> frames, final Collector<Focus, ?, Focus> collector) {
+
+		// slot maps merge operator
+
+		final BinaryOperator<Map<Shift, Focus>> operator=(x, y) -> Stream.of(x, y)
+				.flatMap(slot -> slot.entrySet().stream())
+				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
+						mapping(Map.Entry::getValue, collector)));
+
+		// group slot maps by frame value and merge
+
+		final Map<Value, Map<Shift, Focus>> map=frames.stream().collect(
+				groupingBy(Frame::getValue, LinkedHashMap::new,
+						mapping(Frame::getSlots, reducing(map(), operator))));
+
+		// convert back to frames
+
+		return map.entrySet().stream()
+				.map(e -> frame(e.getKey(), e.getValue()))
+				.collect(toList());
+	}
+
 }

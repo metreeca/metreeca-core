@@ -187,7 +187,7 @@ public final class Updater extends Actor<Updater> {
 				final Shape shape=resource(request.shape());
 				final Collection<Statement> update=trace(expand(focus, shape, model));
 
-				final Report report=pass(shape)
+				final Focus report=pass(shape)
 						? new CellEngine(connection).update(focus, update)
 						: new SPARQLEngine(connection).update(focus, shape, update);
 

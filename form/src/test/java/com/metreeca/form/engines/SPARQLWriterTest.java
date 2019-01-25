@@ -17,8 +17,8 @@
 
 package com.metreeca.form.engines;
 
+import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
-import com.metreeca.form.Report;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Sets;
@@ -71,10 +71,10 @@ final class SPARQLWriterTest {
 
 		final Shape shape=maxInclusive(literal(10));
 
-		final Report report=process(shape, literal(1), literal(100));
-		final Collection<Issue> issues=report.getIssues();
+		final Focus focus=process(shape, literal(1), literal(100));
+		final Collection<Issue> issues=focus.getIssues();
 
-		assertThat(report.assess(Issue.Level.Error)).as("report severity level").isTrue();
+		assertThat(focus.assess(Issue.Level.Error)).as("report severity level").isTrue();
 
 		assertThat(issues.stream().anyMatch(issue1 -> issue1.getShape().equals(shape))).as("reference failed shape").isTrue();
 
@@ -87,9 +87,9 @@ final class SPARQLWriterTest {
 
 		final Shape shape=field(RDF.VALUE, any(RDF.NIL));
 
-		final Report report=process(shape, x, y);
+		final Focus focus=process(shape, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("identify invalid field").isTrue();
+		assertThat(focus.assess(Issue.Level.Error)).as("identify invalid field").isTrue();
 
 	}
 
@@ -97,9 +97,9 @@ final class SPARQLWriterTest {
 
 		final Shape shape=field(inverse(RDF.VALUE), any(RDF.NIL));
 
-		final Report report=process(shape, x, y);
+		final Focus focus=process(shape, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("identify invalid field").isTrue();
+		assertThat(focus.assess(Issue.Level.Error)).as("identify invalid field").isTrue();
 
 	}
 
@@ -111,10 +111,10 @@ final class SPARQLWriterTest {
 		final Shape shape=clazz(RDFS.RESOURCE);
 		final Model model=decode("rdf:first a rdfs:Resource.");
 
-		final Report report=process(shape, model, RDF.FIRST);
+		final Focus focus=process(shape, model, RDF.FIRST);
 
-		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(report.outline())
+		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus.outline())
 				.as("outline computed")
 				.isIsomorphicTo(model);
 
@@ -125,10 +125,10 @@ final class SPARQLWriterTest {
 		final Shape shape=field(RDF.VALUE, any(RDF.NIL));
 		final Model model=decode("<x> rdf:value rdf:nil. <y> rdf:value rdf:nil.");
 
-		final Report report=process(shape, model, x, y);
+		final Focus focus=process(shape, model, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(report.outline())
+		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus.outline())
 				.as("outline computed")
 				.isIsomorphicTo(model);
 
@@ -139,12 +139,12 @@ final class SPARQLWriterTest {
 		final Shape shape=field(inverse(RDF.VALUE), any(RDF.NIL));
 		final Model model=decode("rdf:nil rdf:value <x>. rdf:nil rdf:value <y>.");
 
-		final Report report=process(shape, model, x, y);
+		final Focus focus=process(shape, model, x, y);
 
-		System.out.println(report);
+		System.out.println(focus);
 
-		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(report.outline())
+		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus.outline())
 				.as("outline computed")
 				.isIsomorphicTo(model);
 
@@ -155,10 +155,10 @@ final class SPARQLWriterTest {
 		final Shape shape=field(RDF.VALUE, and());
 		final Model model=decode("<x> rdf:value rdf:first, rdf:rest. <y> rdf:value rdf:first, rdf:rest.");
 
-		final Report report=process(shape, model, x, y);
+		final Focus focus=process(shape, model, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(report.outline())
+		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus.outline())
 				.as("outline computed")
 				.isIsomorphicTo(model);
 
@@ -171,10 +171,10 @@ final class SPARQLWriterTest {
 				"rdf:first rdf:value <x>. rdf:rest rdf:value <x>. rdf:first rdf:value <y>. rdf:rest rdf:value <y>."
 		);
 
-		final Report report=process(shape, model, x, y);
+		final Focus focus=process(shape, model, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(report.outline()).as("outline computed").isIsomorphicTo(model);
+		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus.outline()).as("outline computed").isIsomorphicTo(model);
 
 	}
 
@@ -188,10 +188,10 @@ final class SPARQLWriterTest {
 		final Model model=decode(
 				"<x> rdf:first rdf:value; rdf:rest rdf:value . <y> rdf:first rdf:value; rdf:rest rdf:value .");
 
-		final Report report=process(shape, model, x, y);
+		final Focus focus=process(shape, model, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(report.outline())
+		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus.outline())
 				.as("outline computed")
 				.isIsomorphicTo(model);
 
@@ -207,10 +207,10 @@ final class SPARQLWriterTest {
 		final Model model=decode(
 				"rdf:value rdf:first <x>. rdf:value rdf:rest <x>. rdf:value rdf:first <y>. rdf:value rdf:rest <y>.");
 
-		final Report report=process(shape, model, x, y);
+		final Focus focus=process(shape, model, x, y);
 
-		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(report.outline())
+		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus.outline())
 				.as("outline computed")
 				.isIsomorphicTo(model);
 
@@ -228,10 +228,10 @@ final class SPARQLWriterTest {
 				+"rdf:rest rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest ."
 		);
 
-		final Report report=process(shape, model, RDF.FIRST, RDF.REST);
+		final Focus focus=process(shape, model, RDF.FIRST, RDF.REST);
 
-		assertThat(report.assess(Issue.Level.Error)).as("validated").isFalse();
-		assertThat(report.outline())
+		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus.outline())
 				.as("outline computed")
 				.isIsomorphicTo(model);
 
@@ -451,11 +451,11 @@ final class SPARQLWriterTest {
 	}
 
 
-	private Report process(final Shape shape, final Value... focus) {
+	private Focus process(final Shape shape, final Value... focus) {
 		return process(shape, emptySet(), focus);
 	}
 
-	private Report process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
+	private Focus process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
 		try (final RepositoryConnection connection=sandbox.get()) {
 			return new SPARQLWriter(connection).process(shape, statements, focus);
 		}

@@ -20,7 +20,7 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
-import com.metreeca.form.Report;
+import com.metreeca.form.Focus;
 import com.metreeca.form.Shape;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
@@ -249,18 +249,18 @@ public final class Creator extends Actor<Creator> {
 				final Shape shape=request.shape();
 				final Collection<Statement> rewritten=trace(rewrite(source, target, model));
 
-				final Report report=pass(shape)
+				final Focus focus=pass(shape)
 						? new CellEngine(connection).create(target, rewritten)
 						: new SPARQLEngine(connection).create(target, shape, rewritten);
 
-				if ( report.assess(Level.Error) ) { // cell/shape violations
+				if ( focus.assess(Level.Error) ) { // cell/shape violations
 
 					connection.rollback();
 
 					return response.map(new Failure()
 							.status(Response.UnprocessableEntity)
 							.error(Failure.DataInvalid)
-							.trace(report)
+							.trace(focus)
 					);
 
 				} else { // valid data

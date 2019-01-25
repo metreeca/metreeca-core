@@ -177,23 +177,23 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error trace.
 	 *
-	 * @param report a shape validation report describing the error condition defined by this failure
+	 * @param focus a shape focus validation report describing the error condition defined by this failure
 	 *
 	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code report} is null
 	 */
-	public Failure trace(final Report report) {
+	public Failure trace(final Focus focus) {
 
-		if ( report == null ) {
-			throw new NullPointerException("null report");
+		if ( focus == null ) {
+			throw new NullPointerException("null focus report");
 		}
 
 		// !!! rewrite report value references to original target iri
 		// !!! rewrite references to external base IRI
 		// !!! support other formats with content negotiation
 
-		return trace(json(report));
+		return trace(json(focus));
 	}
 
 
@@ -254,9 +254,9 @@ public final class Failure implements Function<Response, Response> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonObject json(final Report report) {
+	private JsonObject json(final Focus focus) {
 
-		final Map<Issue.Level, List<Issue>> issues=report.getIssues().stream().collect(groupingBy(Issue::getLevel));
+		final Map<Issue.Level, List<Issue>> issues=focus.getIssues().stream().collect(groupingBy(Issue::getLevel));
 
 		final JsonObjectBuilder json=Json.createObjectBuilder();
 
@@ -268,7 +268,7 @@ public final class Failure implements Function<Response, Response> {
 				json.add("warnings", json(warnings, this::json))
 		);
 
-		report.getFrames().forEach(frame -> {
+		focus.getFrames().forEach(frame -> {
 
 			final String property=format(frame.getValue());
 			final JsonObject value=json(frame);
@@ -286,7 +286,7 @@ public final class Failure implements Function<Response, Response> {
 
 		final JsonObjectBuilder json=Json.createObjectBuilder();
 
-		for (final Map.Entry<Shift, Report> slot : frame.getSlots().entrySet()) {
+		for (final Map.Entry<Shift, Focus> slot : frame.getSlots().entrySet()) {
 
 			final String property=slot.getKey().toString();
 			final JsonObject value=json(slot.getValue());

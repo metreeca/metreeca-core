@@ -20,13 +20,8 @@ package com.metreeca.form;
 
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.BinaryOperator;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
@@ -34,74 +29,34 @@ import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
 
 import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
 
 
 /**
- * Shape validation frame.
+ * Shape value validation report.
  */
 public final class Frame {
 
-	@SafeVarargs public static  Frame frame(final Value value, final Map.Entry<Shift, Report>... slots) {
+	@SafeVarargs public static  Frame frame(final Value value, final Map.Entry<Shift, Focus>... slots) {
 		return frame(value, map(slots));
 	}
 
-	public static  Frame frame(final Value value, final Map<Shift, Report> slots) {
+	public static  Frame frame(final Value value, final Map<Shift, Focus> slots) {
 		return new Frame(value, slots);
 	}
 
-	public static  Map.Entry<Shift, Report> slot(final Shift shift, final Report value) {
+	public static  Map.Entry<Shift, Focus> slot(final Shift shift, final Focus value) {
 		return entry(shift, value);
-	}
-
-
-	/**
-	 * Merges a collection of frames.
-	 *
-	 * @param frames    the frames to be merged
-	 * @param collector a collector transforming a stream of values into a merged value (usually a {@linkplain
-	 *                  Collectors#reducing} collector)
-	 *
-	 * @return a merged collection of frames where each frame value appears only once
-	 */
-	public static  Collection<Frame> frames(final Collection<Frame> frames, final Collector<Report, ?, Report> collector) {
-
-		if ( frames == null ) {
-			throw new NullPointerException("null frames");
-		}
-
-		if ( collector == null ) {
-			throw new NullPointerException("null collector");
-		}
-
-		// slot maps merge operator
-
-		final BinaryOperator<Map<Shift, Report>> operator=(x, y) -> Stream.of(x, y)
-				.flatMap(slot -> slot.entrySet().stream())
-				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
-						mapping(Map.Entry::getValue, collector)));
-
-		// group slot maps by frame value and merge
-
-		final Map<Value, Map<Shift, Report>> map=frames.stream().collect(
-				groupingBy(Frame::getValue, LinkedHashMap::new,
-						mapping(Frame::getSlots, reducing(map(), operator))));
-
-		// convert back to frames
-
-		return map.entrySet().stream()
-				.map(e -> frame(e.getKey(), e.getValue()))
-				.collect(toList());
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Value value;
-	private final Map<Shift, Report> slots;
+	private final Map<Shift, Focus> slots;
 
 
-	private Frame(final Value value, final Map<Shift, Report> slots) {
+	private Frame(final Value value, final Map<Shift, Focus> slots) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
@@ -130,7 +85,7 @@ public final class Frame {
 		return value;
 	}
 
-	public Map<Shift, Report> getSlots() {
+	public Map<Shift, Focus> getSlots() {
 		return unmodifiableMap(slots);
 	}
 

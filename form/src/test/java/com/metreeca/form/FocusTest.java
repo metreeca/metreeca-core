@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Frame.slot;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Report.report;
+import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
@@ -38,7 +38,7 @@ import static com.metreeca.form.things.ValuesTest.decode;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class ReportTest {
+final class FocusTest {
 
 	private final IRI x=ValuesTest.item("x");
 	private final IRI y=ValuesTest.item("y");
@@ -51,28 +51,28 @@ final class ReportTest {
 
 	@Test void testAssess() {
 
-		assertThat(report(set()).assess(Issue.Level.Info)).as("no issues").isFalse();
+		assertThat(Focus.focus(set()).assess(Issue.Level.Info)).as("no issues").isFalse();
 
-		assertThat(report(list(warning)).assess(Issue.Level.Warning)).as("matching issue").isTrue();
-		assertThat(report(list(warning)).assess(Issue.Level.Error)).as("no matching issue").isFalse();
+		assertThat(Focus.focus(list(warning)).assess(Issue.Level.Warning)).as("matching issue").isTrue();
+		assertThat(Focus.focus(list(warning)).assess(Issue.Level.Error)).as("no matching issue").isFalse();
 
-		assertThat(report(list(), set(
-				frame(RDF.NIL, slot(shift(RDF.VALUE), report(set(error), set())))
+		assertThat(focus(list(), set(
+				frame(RDF.NIL, slot(shift(RDF.VALUE), focus(set(error), set())))
 		)).assess(Issue.Level.Error)).as("matching frame").isTrue();
 
 	}
 
 	@Test void testPrune() {
 
-		final Frame first=frame(x, slot(shift(RDF.FIRST), report(info)));
-		final Frame rest=frame(x, slot(shift(RDF.REST), report(warning)));
+		final Frame first=frame(x, slot(shift(RDF.FIRST), Focus.focus(info)));
+		final Frame rest=frame(x, slot(shift(RDF.REST), Focus.focus(warning)));
 
-		final Report report=report(set(info, warning, error), set(first, rest))
+		final Focus focus=focus(set(info, warning, error), set(first, rest))
 				.prune(Issue.Level.Warning)
 				.orElse(null);
 
-		assertThat(set(warning, error)).as("pruned issues").isEqualTo(report.getIssues());
-		assertThat(set(rest)).as("pruned frames").isEqualTo(report.getFrames());
+		assertThat(set(warning, error)).as("pruned issues").isEqualTo(focus.getIssues());
+		assertThat(set(rest)).as("pruned frames").isEqualTo(focus.getFrames());
 
 	}
 
@@ -131,8 +131,8 @@ final class ReportTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@SafeVarargs private final Report trace(final Frame... traces) {
-		return report(set(), set(traces));
+	@SafeVarargs private final Focus trace(final Frame... traces) {
+		return focus(set(), set(traces));
 	}
 
 }

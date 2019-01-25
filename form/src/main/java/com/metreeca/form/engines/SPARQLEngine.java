@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Report.report;
+import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
@@ -123,7 +123,7 @@ public final class SPARQLEngine {
 				.orElseGet(Collections::emptySet);
 	}
 
-	public Report create(final IRI focus, final Shape shape, final Collection<Statement> model) {
+	public Focus create(final IRI focus, final Shape shape, final Collection<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -142,7 +142,7 @@ public final class SPARQLEngine {
 		// upload statements to repository and validate against shape
 		// disable shape-driven validation if not transactional // !!! just downgrade
 
-		final Report report=new SPARQLWriter(connection).process(transactional ? shape : and(), model, focus);
+		final Focus report=new SPARQLWriter(connection).process(transactional ? shape : and(), model, focus);
 
 		// validate shape envelope // !!! validate even if not transactional
 
@@ -154,13 +154,13 @@ public final class SPARQLEngine {
 
 		// extend validation report with statements outside shape envelope
 
-		return outliers.isEmpty() ? report : report(concat(report.getIssues(), outliers.stream()
+		return outliers.isEmpty() ? report : focus(concat(report.getIssues(), outliers.stream()
 				.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier, shape))
 				.collect(toList())
 		), report.getFrames());
 	}
 
-	public Report update(final IRI focus, final Shape shape, final Collection<Statement> model) {
+	public Focus update(final IRI focus, final Shape shape, final Collection<Statement> model) {
 
 		// !!! merge retrieve/remove/insert operations into a single SPARQL update txn
 

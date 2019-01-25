@@ -17,9 +17,9 @@
 
 package com.metreeca.form.engines;
 
+import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Issue.Level;
-import com.metreeca.form.Report;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Report.report;
+import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Structures.description;
 
@@ -88,7 +88,7 @@ public final class CellEngine {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code model} is null
 	 */
-	public Report create(final Resource focus, final Collection<Statement> model) {
+	public Focus create(final Resource focus, final Collection<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -98,7 +98,7 @@ public final class CellEngine {
 			throw new NullPointerException("null model");
 		}
 
-		final Report report=validate(focus, model);
+		final Focus report=validate(focus, model);
 
 		if ( !report.assess(Level.Error) ) {
 
@@ -120,7 +120,7 @@ public final class CellEngine {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code model} is null
 	 */
-	public Report update(final Resource focus, final Collection<Statement> model) {
+	public Focus update(final Resource focus, final Collection<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -130,7 +130,7 @@ public final class CellEngine {
 			throw new NullPointerException("null model");
 		}
 
-		final Report report=validate(focus, model);
+		final Focus report=validate(focus, model);
 
 		if ( !report.assess(Level.Error) ) {
 
@@ -161,11 +161,11 @@ public final class CellEngine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Report validate(final Resource focus, final Collection<Statement> model) {
+	private Focus validate(final Resource focus, final Collection<Statement> model) {
 
 		final Model envelope=description(focus, false, model);
 
-		return report(model.stream()
+		return Focus.focus(model.stream()
 				.filter(statement -> !envelope.contains(statement))
 				.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier, pass()))
 				.collect(toList())

@@ -28,7 +28,7 @@ import org.eclipse.rdf4j.model.*;
 import java.util.*;
 
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Report.report;
+import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Sets.intersection;
@@ -174,18 +174,18 @@ public final class Modulator implements Wrapper { // !!! tbd
 					final Collection<Statement> model=request.body(rdf()).value().orElseGet(Sets::set);
 					final Collection<Statement> envelope=Structures.network(request.item(), model);
 
-					final Report report=report(model.stream()
+					final Focus focus=Focus.focus(model.stream()
 							.filter(statement -> !envelope.contains(statement))
 							.map(outlier -> issue(Issue.Level.Error, "statement outside cell envelope "+outlier, pass()))
 							.collect(toList())
 					);
 
-					if ( report.assess(Issue.Level.Error) ) {
+					if ( focus.assess(Issue.Level.Error) ) {
 
 						return request.reply(new Failure()
 								.status(Response.UnprocessableEntity)
 								.error(Failure.DataInvalid)
-								.trace(report)
+								.trace(focus)
 						);
 
 					} else {

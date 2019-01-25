@@ -28,7 +28,7 @@ Linked data [shapes](../javadocs/com/metreeca/form/Shape.html) define the expect
 
 Linked data selection tasks identify the set of subjects in an RDF graph whose RDF descriptions are consistent with a possibly composite shape. Selection results are reported either as an RDF graph or a structured report according to the choosen [query](#queries) type.
 
-Linked data validation tasks verify that the RDF description of an initial focus set is consistent with the constraints specified by a possibly composite shape. During the process, derived focus sets connected by [structural constraints](#structural-constraints) may be recursively validated. Validation results are reported as structured [validation report](../javadocs/com/metreeca/form/Report.html).
+Linked data validation tasks verify that the RDF description of an initial focus set is consistent with the constraints specified by a possibly composite shape. During the process, derived focus sets connected by [structural constraints](#structural-constraints) may be recursively validated. Validation results are reported as structured [focus validation report](../javadocs/com/metreeca/form/Focus.html).
 
 ## Annotations
 

@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Frame.slot;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Report.report;
+import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.*;
@@ -70,7 +70,7 @@ final class SPARQLWriter {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Report process(final Shape shape, final Iterable<Statement> model, final Value... focus) {
+	public Focus process(final Shape shape, final Iterable<Statement> model, final Value... focus) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -136,7 +136,7 @@ final class SPARQLWriter {
 	/**
 	 * Validate constraints on a focus value set.
 	 */
-	private final class TracesProbe implements Shape.Probe<Report> {
+	private final class TracesProbe implements Shape.Probe<Focus> {
 
 		private final Collection<Value> focus;
 
@@ -146,20 +146,20 @@ final class SPARQLWriter {
 		}
 
 
-		@Override public Report probe(final Meta meta) { return report(); }
+		@Override public Focus probe(final Meta meta) { return Focus.focus(); }
 
-		@Override public Report probe(final When when) { return report(); }
+		@Override public Focus probe(final When when) { return Focus.focus(); }
 
 
-		@Override public Report probe(final Datatype datatype) {
-			return report(focus.stream()
+		@Override public Focus probe(final Datatype datatype) {
+			return Focus.focus(focus.stream()
 					.filter(value -> !is(value, datatype.getIRI()))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid datatype", datatype, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final Clazz clazz) {
-			if ( focus.isEmpty() ) { return report(); } else {
+		@Override public Focus probe(final Clazz clazz) {
+			if ( focus.isEmpty() ) { return Focus.focus(); } else {
 
 				final Collection<Issue> issues=new ArrayList<>();
 
@@ -194,42 +194,42 @@ final class SPARQLWriter {
 					}
 				});
 
-				return report(issues, focus.stream()
-						.map(value -> frame(value, slot(Shift.shift(RDF.TYPE), report(emptySet(), frame(clazz.getIRI())))))
+				return focus(issues, focus.stream()
+						.map(value -> frame(value, slot(Shift.shift(RDF.TYPE), Focus.focus(emptySet(), frame(clazz.getIRI())))))
 						.collect(toList())
 				);
 			}
 		}
 
-		@Override public Report probe(final MinExclusive minExclusive) {
-			return report(focus.stream()
+		@Override public Focus probe(final MinExclusive minExclusive) {
+			return Focus.focus(focus.stream()
 					.filter(value -> !(compare(value, minExclusive.getValue()) > 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", minExclusive, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final MaxExclusive maxExclusive) {
-			return report(focus.stream()
+		@Override public Focus probe(final MaxExclusive maxExclusive) {
+			return Focus.focus(focus.stream()
 					.filter(value -> !(compare(value, maxExclusive.getValue()) < 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", maxExclusive, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final MinInclusive minInclusive) {
-			return report(focus.stream()
+		@Override public Focus probe(final MinInclusive minInclusive) {
+			return Focus.focus(focus.stream()
 					.filter(value -> !(compare(value, minInclusive.getValue()) >= 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", minInclusive, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final MaxInclusive maxInclusive) {
-			return report(focus.stream()
+		@Override public Focus probe(final MaxInclusive maxInclusive) {
+			return Focus.focus(focus.stream()
 					.filter(value -> !(compare(value, maxInclusive.getValue()) <= 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", maxInclusive, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final Pattern pattern) {
+		@Override public Focus probe(final Pattern pattern) {
 
 			final String expression=pattern.getText();
 			final String flags=pattern.getFlags();
@@ -239,13 +239,13 @@ final class SPARQLWriter {
 
 			// match the whole string: don't use compiled.asPredicate() (implemented using .find())
 
-			return report(focus.stream()
+			return Focus.focus(focus.stream()
 					.filter(value -> !compiled.matcher(text(value)).matches())
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", pattern, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final Like like) {
+		@Override public Focus probe(final Like like) {
 
 			final String expression=like.toExpression();
 
@@ -253,78 +253,78 @@ final class SPARQLWriter {
 					.compile(expression)
 					.asPredicate();
 
-			return report(focus.stream()
+			return Focus.focus(focus.stream()
 					.filter(value -> !predicate.test(text(value)))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", like, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final MaxLength maxLength) {
+		@Override public Focus probe(final MaxLength maxLength) {
 
 			final int limit=maxLength.getLimit();
 
-			return report(focus.stream()
+			return Focus.focus(focus.stream()
 					.filter(value -> !(text(value).length() <= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", maxLength, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final MinLength minLength) {
+		@Override public Focus probe(final MinLength minLength) {
 
 			final int limit=minLength.getLimit();
 
-			return report(focus.stream()
+			return Focus.focus(focus.stream()
 					.filter(value -> !(text(value).length() >= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", minLength, value))
 					.collect(toList()));
 		}
 
 
-		@Override public Report probe(final MinCount minCount) {
-			return focus.size() >= minCount.getLimit() ? report() : report(issue(
+		@Override public Focus probe(final MinCount minCount) {
+			return focus.size() >= minCount.getLimit() ? Focus.focus() : Focus.focus(issue(
 					Issue.Level.Error, "invalid item count", minCount, focus
 			));
 		}
 
-		@Override public Report probe(final MaxCount maxCount) {
-			return focus.size() <= maxCount.getLimit() ? report() : report(issue(
+		@Override public Focus probe(final MaxCount maxCount) {
+			return focus.size() <= maxCount.getLimit() ? Focus.focus() : Focus.focus(issue(
 					Issue.Level.Error, "invalid item count", maxCount, focus
 			));
 		}
 
-		@Override public Report probe(final In in) {
+		@Override public Focus probe(final In in) {
 
 			final Set<Value> values=in.getValues();
 
-			return report(focus.stream()
+			return Focus.focus(focus.stream()
 					.filter(value -> !values.contains(value))
 					.map(value -> issue(Issue.Level.Error, "out of range value", in, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final All all) {
-			return report(all.getValues().stream()
+		@Override public Focus probe(final All all) {
+			return Focus.focus(all.getValues().stream()
 					.filter(value -> !focus.contains(value))
 					.map(value -> issue(Issue.Level.Error, "missing required value", all, value))
 					.collect(toList()));
 		}
 
-		@Override public Report probe(final Any any) {
+		@Override public Focus probe(final Any any) {
 			return any.getValues().stream()
 					.filter(focus::contains)
 					.findAny()
-					.map(values -> report())
-					.orElseGet(() -> report(issue(Issue.Level.Error, "missing alternative value", any, focus)));
+					.map(values -> Focus.focus())
+					.orElseGet(() -> Focus.focus(issue(Issue.Level.Error, "missing alternative value", any, focus)));
 		}
 
 
-		@Override public Report probe(final Field field) {
+		@Override public Focus probe(final Field field) {
 
 			final IRI iri=field.getIRI();
 			final boolean direct=direct(iri);
 			final Shape shape=field.getShape();
 
-			return report(Sets.set(), focus.stream().map(value -> { // for each focus value
+			return focus(Sets.set(), focus.stream().map(value -> { // for each focus value
 
 				// compute the new focus set expanding the field shift from the focus value
 
@@ -332,7 +332,7 @@ final class SPARQLWriter {
 
 				// validate the field shape on the new focus set
 
-				final Report report=shape.map(new TracesProbe(focus));
+				final Focus report=shape.map(new TracesProbe(focus));
 
 				// identifies the values in the new focus set referenced in report frames
 
@@ -346,31 +346,31 @@ final class SPARQLWriter {
 				// create an empty frame for each unreferenced value to support statement outlining
 
 				final List<Frame> placeholders=Sets.complement(focus, referenced).stream()
-						.map(v -> Frame.<Report>frame(v))
+						.map(v -> Frame.<Focus>frame(v))
 						.collect(toList());
 
 				// return field validation results
 
-				return frame(value, slot(direct? Shift.shift(iri) : Shift.shift(inverse(iri)).inverse(), report(issues, Lists.concat(frames, placeholders))));
+				return frame(value, slot(direct? Shift.shift(iri) : Shift.shift(inverse(iri)).inverse(), focus(issues, Lists.concat(frames, placeholders))));
 
 			}).collect(toList()));
 
 		}
 
 
-		@Override public Report probe(final And and) {
+		@Override public Focus probe(final And and) {
 			return and.getShapes().stream()
 					.map(shape -> shape.map(this))
-					.reduce(report(), Report::merge);
+					.reduce(Focus.focus(), Focus::merge);
 		}
 
-		@Override public Report probe(final Or or) {
+		@Override public Focus probe(final Or or) {
 			return or.getShapes().stream()
 					.map(shape -> shape.map(this))
-					.reduce(report(), Report::merge);
+					.reduce(Focus.focus(), Focus::merge);
 		}
 
-		@Override public Report probe(final Option option) {
+		@Override public Focus probe(final Option option) {
 
 			final boolean pass=!option.getTest().map(this).assess(Issue.Level.Error);
 
