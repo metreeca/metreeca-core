@@ -18,6 +18,7 @@
 package com.metreeca.form.things;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -62,13 +63,23 @@ public final class Values {
 	private static final Comparator<Value> comparator=new ValueComparator();
 
 
-	public static int compare(final Value x, final Value y) {
-		return comparator.compare(x, y);
+	private static DecimalFormat exponential() { // ;( DecimalFormat is not thread-safe
+		return new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 	}
 
 
-	private static DecimalFormat exponential() { // ;( DecimalFormat is not thread-safe
-		return new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
+	private static final class Inverse extends SimpleIRI {
+
+		private static final long serialVersionUID=7576383707001017160L;
+
+
+		private Inverse(final String value) { super(value); }
+
+
+		@Override public boolean equals(final Object object) { return object instanceof Inverse && super.equals(object); }
+
+		@Override public int hashCode() { return -super.hashCode(); }
+
 	}
 
 
@@ -101,6 +112,30 @@ public final class Values {
 				|| value instanceof Resource && ResourceType.equals(type) // abstract resource datatype
 				|| value instanceof Literal && LiteralType.equals(type) // abstract literal datatype
 				|| value instanceof Literal && RDFS.LITERAL.equals(type); // abstract resource datatype using rdfs: IRI
+	}
+
+	/**
+	 * Checks predicate direction.
+	 *
+	 * @param iri the IRI identifying the predicate
+	 *
+	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
+	 * #inverse(IRI)} predicate
+	 *
+	 * @throws NullPointerException if {@code iri } is null
+	 */
+	public static boolean direct(final IRI iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		return !(iri instanceof Inverse);
+	}
+
+
+	public static int compare(final Value x, final Value y) {
+		return comparator.compare(x, y);
 	}
 
 
@@ -217,6 +252,24 @@ public final class Values {
 		}
 
 		return iri(Internal, name);
+	}
+
+	/**
+	 * Creates an inverse predicate.
+	 *
+	 * @param iri the IRI identifying the predicate
+	 *
+	 * @return an {@linkplain #direct(IRI) inverse predicate} identified by {@code iri}
+	 *
+	 * @throws NullPointerException if {@code iri} is null
+	 */
+	public static IRI inverse(final IRI iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		return iri instanceof Inverse ? iri : new Inverse(iri.stringValue());
 	}
 
 

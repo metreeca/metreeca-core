@@ -32,6 +32,7 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.net.URL;
@@ -48,12 +49,11 @@ import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Trait.trait;
 import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.things.Values.integer;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.Values.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.stream.Collectors.joining;
 
@@ -389,6 +389,18 @@ public final class ValuesTest {
 		}
 
 		return repository::getConnection;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testAnnotatedIRIs() {
+
+		assertThat(direct(RDF.NIL)).isTrue();
+		assertThat(direct(inverse(RDF.NIL))).isFalse();
+
+		assertThat(direct(inverse(inverse(RDF.NIL)))).as("idempotent").isFalse();
+
 	}
 
 
