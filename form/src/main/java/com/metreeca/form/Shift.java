@@ -33,8 +33,6 @@ public final class Shift {
 	private final IRI iri;
 
 	private final boolean inverse;
-	// !!! private final boolean optional;
-	// !!! private final boolean repeatable;
 
 
 	private Shift(final IRI iri, final boolean inverse) {

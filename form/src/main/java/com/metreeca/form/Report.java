@@ -24,7 +24,9 @@ import org.eclipse.rdf4j.model.*;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Frame.frames;
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Sets.union;
 import static com.metreeca.form.things.Values.statement;
@@ -199,7 +201,7 @@ public final class Report {
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toList());
 
-		return slots.isEmpty() ? Optional.empty() : Optional.of(new Frame<>(value, Maps.map(slots)));
+		return slots.isEmpty() ? Optional.empty() : Optional.of(frame(value, map(slots)));
 	}
 
 	private Stream<Statement> outline(final Frame<Report> frame) {

@@ -104,7 +104,7 @@ public final class Frame<T> {
 	private final Map<Shift, T> slots;
 
 
-	public Frame(final Value value, final Map<Shift, T> slots) { // !!! make private
+	private Frame(final Value value, final Map<Shift, T> slots) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");

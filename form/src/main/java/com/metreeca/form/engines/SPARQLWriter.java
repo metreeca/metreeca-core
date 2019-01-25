@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.metreeca.form.Frame.frame;
+import static com.metreeca.form.Frame.slot;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Report.report;
 import static com.metreeca.form.Shape.mode;
@@ -198,8 +199,9 @@ final class SPARQLWriter {
 				});
 
 				return report(issues, focus.stream()
-						.map(value -> frame(value, Frame.slot(Shift.shift(RDF.TYPE), report(emptySet(), frame(clazz.getIRI())))))
-						.collect(toList()));
+						.map(value -> frame(value, slot(Shift.shift(RDF.TYPE), report(emptySet(), frame(clazz.getIRI())))))
+						.collect(toList())
+				);
 			}
 		}
 
@@ -352,7 +354,7 @@ final class SPARQLWriter {
 
 				// return trait validation results
 
-				return frame(value, Frame.slot(shift, report(issues, Lists.concat(frames, placeholders))));
+				return frame(value, slot(shift, report(issues, Lists.concat(frames, placeholders))));
 
 			}).collect(toList()));
 
