@@ -247,7 +247,7 @@ public final class Creator extends Actor<Creator> {
 				final IRI target=iri(request.stem(), slug);
 
 				final Shape shape=request.shape();
-				final Collection<Statement> rewritten=trace(rewrite(model, source, target));
+				final Collection<Statement> rewritten=trace(rewrite(source, target, model));
 
 				final Report report=pass(shape)
 						? new CellEngine(connection).create(target, rewritten)

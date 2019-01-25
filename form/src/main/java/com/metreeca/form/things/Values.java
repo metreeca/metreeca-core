@@ -593,22 +593,22 @@ public final class Values {
 	}
 
 
-	//// Rewriters //////////////////////////////////////////////////////////////////////////////////// !!! permute args
+	//// Rewriters /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Collection<Statement> rewrite(final Collection<Statement> model, final IRI source, final IRI target) {
-		return model.stream().map(statement -> rewrite(statement, source, target)).collect(toList());
+	public static Collection<Statement> rewrite(final IRI source, final IRI target, final Collection<Statement> model) {
+		return model.stream().map(statement -> rewrite(source, target, statement)).collect(toList());
 	}
 
-	public static Statement rewrite(final Statement statement, final IRI source, final IRI target) {
+	public static Statement rewrite(final IRI source, final IRI target, final Statement statement) {
 		return statement(
-				rewrite(statement.getSubject(), source, target),
-				rewrite(statement.getPredicate(), source, target),
-				rewrite(statement.getObject(), source, target),
-				rewrite(statement.getContext(), source, target)
+				rewrite(source, target, statement.getSubject()),
+				rewrite(source, target, statement.getPredicate()),
+				rewrite(source, target, statement.getObject()),
+				rewrite(source, target, statement.getContext())
 		);
 	}
 
-	public static <T extends Value> T rewrite(final T value, final T source, final T target) {
+	public static <T extends Value> T rewrite(final T source, final T target, final T value) {
 		return source.equals(value) ? target : value;
 	}
 

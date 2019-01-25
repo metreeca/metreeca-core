@@ -92,7 +92,7 @@ public final class Processor implements Wrapper {
 
 		return (response, statements) -> {
 
-			statements.addAll(rewrite(collector.getStatements(), placeholder, response.item()));
+			statements.addAll(rewrite(placeholder, response.item(), collector.getStatements()));
 
 			return statements;
 

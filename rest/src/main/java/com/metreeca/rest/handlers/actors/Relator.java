@@ -190,12 +190,12 @@ public final class Relator extends Actor<Relator> {
 
 					@Override public Response probe(final Stats stats) {
 						return r.shape(StatsShape)
-								.body(rdf(), rewrite(model, Form.meta, focus));
+								.body(rdf(), rewrite(Form.meta, focus, model));
 					}
 
 					@Override public Response probe(final Items items) {
 						return r.shape(ItemsShape)
-								.body(rdf(), rewrite(model, Form.meta, focus));
+								.body(rdf(), rewrite(Form.meta, focus, model));
 					}
 
 				}));
