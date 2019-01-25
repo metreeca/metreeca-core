@@ -33,8 +33,17 @@ public final class Order {
 		return new Order(asList(shifts), false);
 	}
 
+	public static Order increasing(final List<Shift> shifts) {
+		return new Order(shifts, false);
+	}
+
+
 	public static Order decreasing(final Shift... shifts) {
 		return new Order(asList(shifts), true);
+	}
+
+	public static Order decreasing(final List<Shift> shifts) {
+		return new Order(shifts, true);
 	}
 
 
@@ -42,7 +51,7 @@ public final class Order {
 	private final boolean inverse;
 
 
-	public Order(final List<Shift> path, final boolean inverse) { // !!! make private
+	private Order(final List<Shift> path, final boolean inverse) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
@@ -86,7 +95,7 @@ public final class Order {
 				builder.append('/');
 			}
 
-			builder.append(shift.toString());
+			builder.append(shift);
 		}
 
 		return builder.insert(0, inverse ? "-" : "+").toString();

@@ -32,6 +32,8 @@ import java.util.regex.Matcher;
 
 import javax.json.JsonException;
 
+import static com.metreeca.form.Order.decreasing;
+import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -290,9 +292,9 @@ import static java.util.stream.Collectors.toList;
 	}
 
 	private Order criterion(final String criterion) {
-		return criterion.startsWith("+") ? new Order(path(criterion.substring(1), shape), false)
-				: criterion.startsWith("-") ? new Order(path(criterion.substring(1), shape), true)
-				: new Order(path(criterion, shape), false);
+		return criterion.startsWith("+") ? increasing(path(criterion.substring(1), shape))
+				: criterion.startsWith("-") ? decreasing(path(criterion.substring(1), shape))
+				: increasing(path(criterion, shape));
 	}
 
 
