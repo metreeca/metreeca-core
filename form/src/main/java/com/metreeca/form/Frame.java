@@ -20,15 +20,14 @@ package com.metreeca.form;
 
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
 
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
 
 
@@ -49,7 +48,7 @@ public final class Frame {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Value value;
-	private final Set<Issue> issue;
+	private final Set<Issue> issues;
 	private final Map<Shift, Focus> fields;
 
 
@@ -72,7 +71,7 @@ public final class Frame {
 		}
 
 		this.value=value;
-		this.issue=null; // !!!
+		this.issues=new LinkedHashSet<>(); // !!!
 		this.fields=new LinkedHashMap<>(fields);
 	}
 
@@ -81,6 +80,10 @@ public final class Frame {
 
 	public Value getValue() {
 		return value;
+	}
+
+	public Set<Issue> getIssues() {
+		return unmodifiableSet(issues);
 	}
 
 	public Map<Shift, Focus> getFields() {
@@ -93,11 +96,12 @@ public final class Frame {
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Frame
 				&& value.equals(((Frame)object).value)
+				&& issues.equals(((Frame)object).issues)
 				&& fields.equals(((Frame)object).fields);
 	}
 
 	@Override public int hashCode() {
-		return value.hashCode()^fields.hashCode();
+		return value.hashCode()^issues.hashCode()^fields.hashCode();
 	}
 
 	@Override public String toString() {
