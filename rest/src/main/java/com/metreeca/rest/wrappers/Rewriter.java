@@ -18,7 +18,6 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
@@ -31,12 +30,12 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
@@ -45,7 +44,6 @@ import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
@@ -203,10 +201,6 @@ public final class Rewriter implements Wrapper {
 
 		private Shape rewrite(final Shape shape) {
 			return shape.map(shapes);
-		}
-
-		private Shift rewrite(final Shift shift) {
-			return shift(rewrite(shift.getIRI())).inverse(shift.isInverse());
 		}
 
 

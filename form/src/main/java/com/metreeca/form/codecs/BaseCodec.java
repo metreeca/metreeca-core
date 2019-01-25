@@ -156,13 +156,13 @@ final class BaseCodec { // !! review/optimize
 
 		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI shift=field.getIRI();
+			final IRI iri=field.getIRI();
 			final Shape shape=field.getShape();
 
 			return Optional
 					.ofNullable(shape.map(new AliasProbe()))
 					.filter(alias -> !reserved.contains(alias))
-					.map(alias -> singletonMap(shift, alias))
+					.map(alias -> singletonMap(iri, alias))
 					.orElse(emptyMap());
 		}
 

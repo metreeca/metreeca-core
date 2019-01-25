@@ -146,11 +146,11 @@ public final class Field implements Shape {
 		private Map<IRI, Shape> fields(final Stream<Shape> stream) {
 			return stream
 
-					// collect shift-to-shape mappings from nested shapes
+					// collect iri-to-shape mappings from nested shapes
 
 					.flatMap(shape -> shape.map(this).entrySet().stream())
 
-					// group by shift, collect to a set of shapes and convert to an optimized conjunction
+					// group by iri, collect to a set of shapes and convert to an optimized conjunction
 
 					.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new, mapping(Map.Entry::getValue,
 							collectingAndThen(toCollection(LinkedHashSet::new), set ->

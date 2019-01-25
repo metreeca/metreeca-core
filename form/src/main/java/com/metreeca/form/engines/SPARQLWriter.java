@@ -109,7 +109,7 @@ final class SPARQLWriter {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Expands a source value into a focus value set applying a shift operator.
+	 * Expands a source value into a focus value set following a path step.
 	 */
 	private Set<Value> shift(final Value source, final IRI iri) {
 
@@ -146,20 +146,20 @@ final class SPARQLWriter {
 		}
 
 
-		@Override public Focus probe(final Meta meta) { return Focus.focus(); }
+		@Override public Focus probe(final Meta meta) { return focus(); }
 
-		@Override public Focus probe(final When when) { return Focus.focus(); }
+		@Override public Focus probe(final When when) { return focus(); }
 
 
 		@Override public Focus probe(final Datatype datatype) {
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !is(value, datatype.getIRI()))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid datatype", datatype, value))
 					.collect(toList()));
 		}
 
 		@Override public Focus probe(final Clazz clazz) {
-			if ( focus.isEmpty() ) { return Focus.focus(); } else {
+			if ( focus.isEmpty() ) { return focus(); } else {
 
 				final Collection<Issue> issues=new ArrayList<>();
 
@@ -195,35 +195,35 @@ final class SPARQLWriter {
 				});
 
 				return focus(issues, focus.stream()
-						.map(value -> frame(value, entry(Shift.shift(RDF.TYPE), Focus.focus(emptySet(), frame(clazz.getIRI())))))
+						.map(value -> frame(value, entry(RDF.TYPE, focus(emptySet(), frame(clazz.getIRI())))))
 						.collect(toList())
 				);
 			}
 		}
 
 		@Override public Focus probe(final MinExclusive minExclusive) {
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !(compare(value, minExclusive.getValue()) > 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", minExclusive, value))
 					.collect(toList()));
 		}
 
 		@Override public Focus probe(final MaxExclusive maxExclusive) {
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !(compare(value, maxExclusive.getValue()) < 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", maxExclusive, value))
 					.collect(toList()));
 		}
 
 		@Override public Focus probe(final MinInclusive minInclusive) {
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !(compare(value, minInclusive.getValue()) >= 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", minInclusive, value))
 					.collect(toList()));
 		}
 
 		@Override public Focus probe(final MaxInclusive maxInclusive) {
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !(compare(value, maxInclusive.getValue()) <= 0))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid value", maxInclusive, value))
 					.collect(toList()));
@@ -239,7 +239,7 @@ final class SPARQLWriter {
 
 			// match the whole string: don't use compiled.asPredicate() (implemented using .find())
 
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !compiled.matcher(text(value)).matches())
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", pattern, value))
 					.collect(toList()));
@@ -253,7 +253,7 @@ final class SPARQLWriter {
 					.compile(expression)
 					.asPredicate();
 
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !predicate.test(text(value)))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", like, value))
 					.collect(toList()));
@@ -263,7 +263,7 @@ final class SPARQLWriter {
 
 			final int limit=maxLength.getLimit();
 
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !(text(value).length() <= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", maxLength, value))
 					.collect(toList()));
@@ -273,7 +273,7 @@ final class SPARQLWriter {
 
 			final int limit=minLength.getLimit();
 
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !(text(value).length() >= limit))
 					.map(value -> Issue.issue(Issue.Level.Error, "invalid lexical value", minLength, value))
 					.collect(toList()));
@@ -281,13 +281,13 @@ final class SPARQLWriter {
 
 
 		@Override public Focus probe(final MinCount minCount) {
-			return focus.size() >= minCount.getLimit() ? Focus.focus() : Focus.focus(issue(
+			return focus.size() >= minCount.getLimit() ? focus() : focus(issue(
 					Issue.Level.Error, "invalid item count", minCount, focus
 			));
 		}
 
 		@Override public Focus probe(final MaxCount maxCount) {
-			return focus.size() <= maxCount.getLimit() ? Focus.focus() : Focus.focus(issue(
+			return focus.size() <= maxCount.getLimit() ? focus() : focus(issue(
 					Issue.Level.Error, "invalid item count", maxCount, focus
 			));
 		}
@@ -296,14 +296,14 @@ final class SPARQLWriter {
 
 			final Set<Value> values=in.getValues();
 
-			return Focus.focus(focus.stream()
+			return focus(focus.stream()
 					.filter(value -> !values.contains(value))
 					.map(value -> issue(Issue.Level.Error, "out of range value", in, value))
 					.collect(toList()));
 		}
 
 		@Override public Focus probe(final All all) {
-			return Focus.focus(all.getValues().stream()
+			return focus(all.getValues().stream()
 					.filter(value -> !focus.contains(value))
 					.map(value -> issue(Issue.Level.Error, "missing required value", all, value))
 					.collect(toList()));
@@ -313,15 +313,14 @@ final class SPARQLWriter {
 			return any.getValues().stream()
 					.filter(focus::contains)
 					.findAny()
-					.map(values -> Focus.focus())
-					.orElseGet(() -> Focus.focus(issue(Issue.Level.Error, "missing alternative value", any, focus)));
+					.map(values -> focus())
+					.orElseGet(() -> focus(issue(Issue.Level.Error, "missing alternative value", any, focus)));
 		}
 
 
 		@Override public Focus probe(final Field field) {
 
 			final IRI iri=field.getIRI();
-			final boolean direct=direct(iri);
 			final Shape shape=field.getShape();
 
 			return focus(Sets.set(), focus.stream().map(value -> { // for each focus value
@@ -351,8 +350,7 @@ final class SPARQLWriter {
 
 				// return field validation results
 
-				final Shift shift=direct? Shift.shift(iri) : Shift.shift(inverse(iri)).inverse();
-				return frame(value, entry(shift, focus(issues, Lists.concat(frames, placeholders))));
+				return frame(value, entry(iri, focus(issues, Lists.concat(frames, placeholders))));
 
 			}).collect(toList()));
 
@@ -362,13 +360,13 @@ final class SPARQLWriter {
 		@Override public Focus probe(final And and) {
 			return and.getShapes().stream()
 					.map(shape -> shape.map(this))
-					.reduce(Focus.focus(), Focus::merge);
+					.reduce(focus(), Focus::merge);
 		}
 
 		@Override public Focus probe(final Or or) {
 			return or.getShapes().stream()
 					.map(shape -> shape.map(this))
-					.reduce(Focus.focus(), Focus::merge);
+					.reduce(focus(), Focus::merge);
 		}
 
 		@Override public Focus probe(final Option option) {

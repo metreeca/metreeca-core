@@ -31,6 +31,8 @@ import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Sets.union;
+import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.statement;
 
 import static java.util.Collections.unmodifiableSet;
@@ -198,7 +200,7 @@ public final class Focus {
 
 		final Value value=frame.getValue();
 
-		final List<Map.Entry<Shift, Focus>> fields=frame.getFields().entrySet().stream()
+		final List<Map.Entry<IRI, Focus>> fields=frame.getFields().entrySet().stream()
 				.map(field -> field.getValue().prune(limit).map(trace -> Maps.entry(field.getKey(), trace)))
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toList());
@@ -212,25 +214,23 @@ public final class Focus {
 
 		return frame.getFields().entrySet().stream().flatMap(field -> {
 
-			final Shift shift=field.getKey();
-
-			final IRI iri=shift.getIRI();
-			final boolean inverse=shift.isInverse();
+			final IRI iri=field.getKey();
+			final boolean direct=direct(iri);
 
 			final Stream<Value> targets=field.getValue().frames.stream().map(Frame::getValue);
 
 			return Stream.concat(
 
-					!inverse && source instanceof Resource ? targets
+					direct && source instanceof Resource
 
-							.map(target -> statement((Resource)source, iri, target))
+							? targets.map(target -> statement((Resource)source, iri, target))
 
-							: inverse ? targets
+							: direct ? Stream.empty()
+
+							: targets
 
 							.filter(target -> target instanceof Resource)
-							.map(target -> statement((Resource)target, iri, source))
-
-							: Stream.empty(),
+							.map(target -> statement((Resource)target, inverse(iri), source)),
 
 					field.getValue().frames.stream().flatMap(this::outline)
 
@@ -248,18 +248,18 @@ public final class Focus {
 	 *
 	 * @return a merged collection of frames where each frame value appears only once
 	 */
-	private  Collection<Frame> frames(final Collection<Frame> frames, final Collector<Focus, ?, Focus> collector) {
+	private Collection<Frame> frames(final Collection<Frame> frames, final Collector<Focus, ?, Focus> collector) {
 
 		// field maps merge operator
 
-		final BinaryOperator<Map<Shift, Focus>> operator=(x, y) -> Stream.of(x, y)
+		final BinaryOperator<Map<IRI, Focus>> operator=(x, y) -> Stream.of(x, y)
 				.flatMap(field -> field.entrySet().stream())
 				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
 						mapping(Map.Entry::getValue, collector)));
 
 		// group field maps by frame value and merge
 
-		final Map<Value, Map<Shift, Focus>> map=frames.stream().collect(
+		final Map<Value, Map<IRI, Focus>> map=frames.stream().collect(
 				groupingBy(Frame::getValue, LinkedHashMap::new,
 						mapping(Frame::getFields, reducing(map(), operator))));
 

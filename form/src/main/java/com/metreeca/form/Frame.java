@@ -18,6 +18,7 @@
 package com.metreeca.form;
 
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
@@ -36,11 +37,11 @@ import static java.util.stream.Collectors.joining;
  */
 public final class Frame {
 
-	@SafeVarargs public static  Frame frame(final Value value, final Map.Entry<Shift, Focus>... fields) {
+	@SafeVarargs public static  Frame frame(final Value value, final Map.Entry<IRI, Focus>... fields) {
 		return frame(value, map(fields));
 	}
 
-	public static  Frame frame(final Value value, final Map<Shift, Focus> fields) {
+	public static  Frame frame(final Value value, final Map<IRI, Focus> fields) {
 		return new Frame(value, fields);
 	}
 
@@ -49,10 +50,10 @@ public final class Frame {
 
 	private final Value value;
 	private final Set<Issue> issues;
-	private final Map<Shift, Focus> fields;
+	private final Map<IRI, Focus> fields;
 
 
-	private Frame(final Value value, final Map<Shift, Focus> fields) {
+	private Frame(final Value value, final Map<IRI, Focus> fields) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
@@ -86,7 +87,7 @@ public final class Frame {
 		return unmodifiableSet(issues);
 	}
 
-	public Map<Shift, Focus> getFields() {
+	public Map<IRI, Focus> getFields() {
 		return unmodifiableMap(fields);
 	}
 

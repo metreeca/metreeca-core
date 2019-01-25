@@ -164,7 +164,7 @@ public final class Optimizer extends Traverser<Shape> {
 
 				.map(shape -> shape.map(splitter)) // split fields into Map.Entry<IRI, Shape>
 
-				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<Shift, List<Shape>>
+				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<IRI, List<Shape>>
 						LinkedHashMap::new, mapping(Map.Entry::getValue, toList())))
 
 				.entrySet().stream().flatMap(e -> { // reassemble fields merging and optimizing multiple definitions

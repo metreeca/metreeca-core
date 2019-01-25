@@ -20,6 +20,7 @@ package com.metreeca.rest;
 import com.metreeca.form.*;
 import com.metreeca.rest.formats.JSONFormat;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
@@ -286,7 +287,7 @@ public final class Failure implements Function<Response, Response> {
 
 		final JsonObjectBuilder json=Json.createObjectBuilder();
 
-		for (final Map.Entry<Shift, Focus> field : frame.getFields().entrySet()) {
+		for (final Map.Entry<IRI, Focus> field : frame.getFields().entrySet()) {
 
 			final String property=field.getKey().toString();
 			final JsonObject value=json(field.getValue());
