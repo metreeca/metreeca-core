@@ -35,10 +35,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.metreeca.form.Frame.frame;
-import static com.metreeca.form.Frame.slot;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.*;
 
@@ -195,7 +195,7 @@ final class SPARQLWriter {
 				});
 
 				return focus(issues, focus.stream()
-						.map(value -> frame(value, slot(Shift.shift(RDF.TYPE), Focus.focus(emptySet(), frame(clazz.getIRI())))))
+						.map(value -> frame(value, entry(Shift.shift(RDF.TYPE), Focus.focus(emptySet(), frame(clazz.getIRI())))))
 						.collect(toList())
 				);
 			}
@@ -351,7 +351,8 @@ final class SPARQLWriter {
 
 				// return field validation results
 
-				return frame(value, slot(direct? Shift.shift(iri) : Shift.shift(inverse(iri)).inverse(), focus(issues, Lists.concat(frames, placeholders))));
+				final Shift shift=direct? Shift.shift(iri) : Shift.shift(inverse(iri)).inverse();
+				return frame(value, entry(shift, focus(issues, Lists.concat(frames, placeholders))));
 
 			}).collect(toList()));
 

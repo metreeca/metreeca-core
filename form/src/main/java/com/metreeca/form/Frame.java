@@ -22,8 +22,8 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
-import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
@@ -37,45 +37,43 @@ import static java.util.stream.Collectors.joining;
  */
 public final class Frame {
 
-	@SafeVarargs public static  Frame frame(final Value value, final Map.Entry<Shift, Focus>... slots) {
-		return frame(value, map(slots));
+	@SafeVarargs public static  Frame frame(final Value value, final Map.Entry<Shift, Focus>... fields) {
+		return frame(value, map(fields));
 	}
 
-	public static  Frame frame(final Value value, final Map<Shift, Focus> slots) {
-		return new Frame(value, slots);
-	}
-
-	public static  Map.Entry<Shift, Focus> slot(final Shift shift, final Focus value) {
-		return entry(shift, value);
+	public static  Frame frame(final Value value, final Map<Shift, Focus> fields) {
+		return new Frame(value, fields);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Value value;
-	private final Map<Shift, Focus> slots;
+	private final Set<Issue> issue;
+	private final Map<Shift, Focus> fields;
 
 
-	private Frame(final Value value, final Map<Shift, Focus> slots) {
+	private Frame(final Value value, final Map<Shift, Focus> fields) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
 		}
 
-		if ( slots == null ) {
-			throw new NullPointerException("null slots");
+		if ( fields == null ) {
+			throw new NullPointerException("null fields");
 		}
 
-		if ( slots.containsKey(null) ) {
-			throw new NullPointerException("null slot key");
+		if ( fields.containsKey(null) ) {
+			throw new NullPointerException("null field IRI");
 		}
 
-		if ( slots.containsValue(null) ) {
-			throw new NullPointerException("null slot value");
+		if ( fields.containsValue(null) ) {
+			throw new NullPointerException("null field focus report");
 		}
 
 		this.value=value;
-		this.slots=new LinkedHashMap<>(slots);
+		this.issue=null; // !!!
+		this.fields=new LinkedHashMap<>(fields);
 	}
 
 
@@ -85,8 +83,8 @@ public final class Frame {
 		return value;
 	}
 
-	public Map<Shift, Focus> getSlots() {
-		return unmodifiableMap(slots);
+	public Map<Shift, Focus> getFields() {
+		return unmodifiableMap(fields);
 	}
 
 
@@ -95,15 +93,15 @@ public final class Frame {
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Frame
 				&& value.equals(((Frame)object).value)
-				&& slots.equals(((Frame)object).slots);
+				&& fields.equals(((Frame)object).fields);
 	}
 
 	@Override public int hashCode() {
-		return value.hashCode()^slots.hashCode();
+		return value.hashCode()^fields.hashCode();
 	}
 
 	@Override public String toString() {
-		return format(value)+" {"+(slots.isEmpty() ? "" : indent(slots.entrySet().stream().map(e -> {
+		return format(value)+" {"+(fields.isEmpty() ? "" : indent(fields.entrySet().stream().map(e -> {
 
 			final String edge=e.getKey().toString();
 			final String value=e.getValue().toString();

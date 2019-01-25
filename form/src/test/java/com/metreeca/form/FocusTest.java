@@ -25,12 +25,12 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.Frame.frame;
-import static com.metreeca.form.Frame.slot;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.ValuesTest.decode;
@@ -57,15 +57,15 @@ final class FocusTest {
 		assertThat(Focus.focus(list(warning)).assess(Issue.Level.Error)).as("no matching issue").isFalse();
 
 		assertThat(focus(list(), set(
-				frame(RDF.NIL, slot(shift(RDF.VALUE), focus(set(error), set())))
+				frame(RDF.NIL, entry(shift(RDF.VALUE), focus(set(error), set())))
 		)).assess(Issue.Level.Error)).as("matching frame").isTrue();
 
 	}
 
 	@Test void testPrune() {
 
-		final Frame first=frame(x, slot(shift(RDF.FIRST), Focus.focus(info)));
-		final Frame rest=frame(x, slot(shift(RDF.REST), Focus.focus(warning)));
+		final Frame first=frame(x, entry(shift(RDF.FIRST), Focus.focus(info)));
+		final Frame rest=frame(x, entry(shift(RDF.REST), Focus.focus(warning)));
 
 		final Focus focus=focus(set(info, warning, error), set(first, rest))
 				.prune(Issue.Level.Warning)
@@ -80,19 +80,19 @@ final class FocusTest {
 
 		assertThat(decode("<x> rdf:value <y>.")).as("direct edge").isIsomorphicTo(trace(
 
-				frame(x, slot(shift(RDF.VALUE), trace(frame(y))))
+				frame(x, entry(shift(RDF.VALUE), trace(frame(y))))
 
 		).outline());
 
 		assertThat(decode("<y> rdf:value <x>.")).as("inverse edge").isIsomorphicTo(trace(
 
-				frame(x, slot(shift(RDF.VALUE).inverse(), trace(frame(y))))
+				frame(x, entry(shift(RDF.VALUE).inverse(), trace(frame(y))))
 
 		).outline());
 
 		assertThat(decode("<x> rdf:value <y>, <z>.")).as("multiple traces").isIsomorphicTo(trace(
 
-				frame(x, slot(shift(RDF.VALUE), trace(frame(y), frame(z))))
+				frame(x, entry(shift(RDF.VALUE), trace(frame(y), frame(z))))
 
 		).outline());
 
@@ -100,29 +100,27 @@ final class FocusTest {
 
 				frame(x,
 
-						slot(shift(RDF.FIRST), trace(frame(y))),
-						slot(shift(RDF.REST), trace(frame(z)))
+						entry(shift(RDF.FIRST), trace(frame(y))),
+						entry(shift(RDF.REST), trace(frame(z)))
 				)
 
 		).outline());
 
 		assertThat(set()).as("illegal direct edge").isIsomorphicTo(trace(
 
-				frame(Values.literal("x"), slot(shift(RDF.VALUE), trace(frame(y))))
+				frame(Values.literal("x"), entry(shift(RDF.VALUE), trace(frame(y))))
 
 		).outline());
 
 		assertThat(set()).as("illegal inverse edge").isIsomorphicTo(trace(
 
-				frame(x, slot(shift(RDF.VALUE).inverse(), trace(frame(Values.literal("y")))))
+				frame(x, entry(shift(RDF.VALUE).inverse(), trace(frame(Values.literal("y")))))
 
 		).outline());
 
 		assertThat(decode("<x> rdf:value <y>. <y> rdf:value <z>.")).as("nested edges").isIsomorphicTo(trace(
 
-				frame(x, slot(shift(RDF.VALUE),
-						trace(frame(y, slot(shift(RDF.VALUE),
-								trace(frame(z)))))))
+				frame(x, entry(shift(RDF.VALUE), trace(frame(y, entry(shift(RDF.VALUE), trace(frame(z)))))))
 
 		).outline());
 

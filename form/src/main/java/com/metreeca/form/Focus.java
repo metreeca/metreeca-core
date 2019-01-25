@@ -131,7 +131,7 @@ public final class Focus {
 
 		return issues.stream()
 				.anyMatch(issue -> issue.getLevel().compareTo(limit) >= 0) || frames.stream()
-				.flatMap(frame -> frame.getSlots().values().stream())
+				.flatMap(frame -> frame.getFields().values().stream())
 				.anyMatch(trace -> trace.assess(limit));
 	}
 
@@ -198,26 +198,26 @@ public final class Focus {
 
 		final Value value=frame.getValue();
 
-		final List<Map.Entry<Shift, Focus>> slots=frame.getSlots().entrySet().stream()
-				.map(slot -> slot.getValue().prune(limit).map(trace -> Maps.entry(slot.getKey(), trace)))
+		final List<Map.Entry<Shift, Focus>> fields=frame.getFields().entrySet().stream()
+				.map(field -> field.getValue().prune(limit).map(trace -> Maps.entry(field.getKey(), trace)))
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toList());
 
-		return slots.isEmpty() ? Optional.empty() : Optional.of(frame(value, map(slots)));
+		return fields.isEmpty() ? Optional.empty() : Optional.of(frame(value, map(fields)));
 	}
 
 	private Stream<Statement> outline(final Frame frame) {
 
 		final Value source=frame.getValue();
 
-		return frame.getSlots().entrySet().stream().flatMap(slot -> {
+		return frame.getFields().entrySet().stream().flatMap(field -> {
 
-			final Shift shift=slot.getKey();
+			final Shift shift=field.getKey();
 
 			final IRI iri=shift.getIRI();
 			final boolean inverse=shift.isInverse();
 
-			final Stream<Value> targets=slot.getValue().frames.stream().map(Frame::getValue);
+			final Stream<Value> targets=field.getValue().frames.stream().map(Frame::getValue);
 
 			return Stream.concat(
 
@@ -232,7 +232,7 @@ public final class Focus {
 
 							: Stream.empty(),
 
-					slot.getValue().frames.stream().flatMap(this::outline)
+					field.getValue().frames.stream().flatMap(this::outline)
 
 			);
 		});
@@ -250,18 +250,18 @@ public final class Focus {
 	 */
 	private  Collection<Frame> frames(final Collection<Frame> frames, final Collector<Focus, ?, Focus> collector) {
 
-		// slot maps merge operator
+		// field maps merge operator
 
 		final BinaryOperator<Map<Shift, Focus>> operator=(x, y) -> Stream.of(x, y)
-				.flatMap(slot -> slot.entrySet().stream())
+				.flatMap(field -> field.entrySet().stream())
 				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
 						mapping(Map.Entry::getValue, collector)));
 
-		// group slot maps by frame value and merge
+		// group field maps by frame value and merge
 
 		final Map<Value, Map<Shift, Focus>> map=frames.stream().collect(
 				groupingBy(Frame::getValue, LinkedHashMap::new,
-						mapping(Frame::getSlots, reducing(map(), operator))));
+						mapping(Frame::getFields, reducing(map(), operator))));
 
 		// convert back to frames
 

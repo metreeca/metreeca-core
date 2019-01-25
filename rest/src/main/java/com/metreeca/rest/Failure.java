@@ -286,10 +286,10 @@ public final class Failure implements Function<Response, Response> {
 
 		final JsonObjectBuilder json=Json.createObjectBuilder();
 
-		for (final Map.Entry<Shift, Focus> slot : frame.getSlots().entrySet()) {
+		for (final Map.Entry<Shift, Focus> field : frame.getFields().entrySet()) {
 
-			final String property=slot.getKey().toString();
-			final JsonObject value=json(slot.getValue());
+			final String property=field.getKey().toString();
+			final JsonObject value=json(field.getValue());
 
 			if ( !value.isEmpty() ) {
 				json.add(property, value);
