@@ -17,9 +17,9 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.things.Maps;
-
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 import java.util.function.BinaryOperator;
@@ -31,9 +31,6 @@ import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Sets.union;
-import static com.metreeca.form.things.Values.direct;
-import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.things.Values.statement;
 
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.*;
@@ -124,6 +121,8 @@ public final class Focus {
 	 * @param limit the expected severity level
 	 *
 	 * @return {@code true} if at least a issue or a frame reaches the severity {@code limit}
+	 *
+	 * @throws NullPointerException if {@code limit} is null
 	 */
 	public boolean assess(final Issue.Level limit) {
 
@@ -131,10 +130,8 @@ public final class Focus {
 			throw new NullPointerException("null limit");
 		}
 
-		return issues.stream()
-				.anyMatch(issue -> issue.getLevel().compareTo(limit) >= 0) || frames.stream()
-				.flatMap(frame -> frame.getFields().values().stream())
-				.anyMatch(trace -> trace.assess(limit));
+		return issues.stream().anyMatch(issue -> issue.assess(limit))
+				|| frames.stream().anyMatch(trace -> trace.assess(limit));
 	}
 
 	/**
@@ -142,8 +139,8 @@ public final class Focus {
 	 *
 	 * @param limit the minimum severity level for retained issues and frames
 	 *
-	 * @return an optional pruned trace retaining only issues and frames from this trace with severity greater or equal
-	 * to {@code limit}; an empty optional if no issue or frame in this trace reaches the severity {@code limit}
+	 * @return an optional pruned focus report retaining only issues and frames with severity greater or equal to {@code
+	 * limit}; an empty optional if no issue or frame in this focus record reaches the severity {@code limit}
 	 */
 	public Optional<Focus> prune(final Issue.Level limit) {
 
@@ -151,13 +148,14 @@ public final class Focus {
 			throw new NullPointerException("null limit");
 		}
 
-		final Set<Issue> issues=this.issues.stream()
-				.filter(issue -> issue.getLevel().compareTo(limit) >= 0)
-				.collect(toCollection(LinkedHashSet::new));
+		final Collection<Issue> issues=this.issues.stream()
+				.filter(issue -> issue.assess(limit))
+				.collect(toList());
 
 		final Set<Frame> frames=this.frames.stream()
-				.map((frame) -> prune(frame, limit))
-				.filter(Optional::isPresent).map(Optional::get)
+				.map(frame -> frame.prune(limit))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
 				.collect(toCollection(LinkedHashSet::new));
 
 		return issues.isEmpty() && frames.isEmpty() ? Optional.empty() : Optional.of(focus(issues, frames));
@@ -166,12 +164,10 @@ public final class Focus {
 	/**
 	 * Computes the statement outline of this report.
 	 *
-	 * @return a collection of statements recursively generated from {@linkplain Frame frames} in this report
+	 * @return a stream of statements recursively generated from {@linkplain Frame frames} in this report
 	 */
-	public Collection<Statement> outline() {
-		return frames.stream()
-				.flatMap(this::outline)
-				.collect(toCollection(LinkedHashSet::new));
+	public Stream<Statement> outline() {
+		return frames.stream().flatMap(Frame::outline);
 	}
 
 
@@ -195,48 +191,6 @@ public final class Focus {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Optional<Frame> prune(final Frame frame, final Issue.Level limit) {
-
-		final Value value=frame.getValue();
-
-		final List<Map.Entry<IRI, Focus>> fields=frame.getFields().entrySet().stream()
-				.map(field -> field.getValue().prune(limit).map(trace -> Maps.entry(field.getKey(), trace)))
-				.filter(Optional::isPresent).map(Optional::get)
-				.collect(toList());
-
-		return fields.isEmpty() ? Optional.empty() : Optional.of(frame(value, map(fields)));
-	}
-
-	private Stream<Statement> outline(final Frame frame) {
-
-		final Value source=frame.getValue();
-
-		return frame.getFields().entrySet().stream().flatMap(field -> {
-
-			final IRI iri=field.getKey();
-			final boolean direct=direct(iri);
-
-			final Stream<Value> targets=field.getValue().frames.stream().map(Frame::getValue);
-
-			return Stream.concat(
-
-					direct && source instanceof Resource
-
-							? targets.map(target -> statement((Resource)source, iri, target))
-
-							: direct ? Stream.empty()
-
-							: targets
-
-							.filter(target -> target instanceof Resource)
-							.map(target -> statement((Resource)target, inverse(iri), source)),
-
-					field.getValue().frames.stream().flatMap(this::outline)
-
-			);
-		});
-	}
 
 
 	/**

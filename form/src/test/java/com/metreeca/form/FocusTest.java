@@ -24,18 +24,20 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import static java.util.stream.Collectors.toList;
 
 
 final class FocusTest {
@@ -82,19 +84,19 @@ final class FocusTest {
 
 				frame(x, entry(RDF.VALUE, trace(frame(y))))
 
-		).outline());
+		).outline().collect(toList()));
 
 		assertThat(decode("<y> rdf:value <x>.")).as("inverse edge").isIsomorphicTo(trace(
 
 				frame(x, entry(inverse(RDF.VALUE), trace(frame(y))))
 
-		).outline());
+		).outline().collect(toList()));
 
 		assertThat(decode("<x> rdf:value <y>, <z>.")).as("multiple traces").isIsomorphicTo(trace(
 
 				frame(x, entry(RDF.VALUE, trace(frame(y), frame(z))))
 
-		).outline());
+		).outline().collect(toList()));
 
 		assertThat(decode("<x> rdf:first <y>; rdf:rest <z>.")).as("multiple edges").isIsomorphicTo(trace(
 
@@ -104,32 +106,32 @@ final class FocusTest {
 						entry(RDF.REST, trace(frame(z)))
 				)
 
-		).outline());
+		).outline().collect(toList()));
 
 		assertThat(set()).as("illegal direct edge").isIsomorphicTo(trace(
 
 				frame(Values.literal("x"), entry(RDF.VALUE, trace(frame(y))))
 
-		).outline());
+		).outline().collect(toList()));
 
 		assertThat(set()).as("illegal inverse edge").isIsomorphicTo(trace(
 
 				frame(x, entry(inverse(RDF.VALUE), trace(frame(Values.literal("y")))))
 
-		).outline());
+		).outline().collect(toList()));
 
 		assertThat(decode("<x> rdf:value <y>. <y> rdf:value <z>.")).as("nested edges").isIsomorphicTo(trace(
 
 				frame(x, entry(RDF.VALUE, trace(frame(y, entry(RDF.VALUE, trace(frame(z)))))))
 
-		).outline());
+		).outline().collect(toList()));
 
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@SafeVarargs private final Focus trace(final Frame... traces) {
+	private final Focus trace(final Frame... traces) {
 		return focus(set(), set(traces));
 	}
 

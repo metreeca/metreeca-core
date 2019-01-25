@@ -17,13 +17,16 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Focus;
+import com.metreeca.form.Frame;
+import com.metreeca.form.Issue;
 import com.metreeca.rest.formats.JSONFormat;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import javax.json.*;
@@ -307,11 +310,6 @@ public final class Failure implements Function<Response, Response> {
 		json.add("cause", issue.getMessage());
 		json.add("shape", issue.getShape().toString());
 
-		final Set<Value> values=issue.getValues();
-
-		if ( !values.isEmpty() ) {
-			json.add("values", json(values, v -> Json.createValue(format(v))));
-		}
 
 		return json.build();
 	}

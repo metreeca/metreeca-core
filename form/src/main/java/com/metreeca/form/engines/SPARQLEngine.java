@@ -30,8 +30,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Focus.focus;
+import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
@@ -39,6 +39,7 @@ import static com.metreeca.form.things.Values.rewrite;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -146,7 +147,7 @@ public final class SPARQLEngine {
 
 		// validate shape envelope // !!! validate even if not transactional
 
-		final Collection<Statement> envelope=report.outline();
+		final Collection<Statement> envelope=report.outline().collect(toSet());
 
 		final Collection<Statement> outliers=transactional ? model.stream()
 				.filter(statement -> !envelope.contains(statement))
