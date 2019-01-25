@@ -337,7 +337,7 @@ final class SPARQLWriter {
 				// identifies the values in the new focus set referenced in report frames
 
 				final Set<Issue> issues=report.getIssues();
-				final Set<Frame<Report>> frames=report.getFrames();
+				final Set<Frame> frames=report.getFrames();
 
 				final Set<Value> referenced=frames.stream()
 						.map(Frame::getValue)
@@ -345,7 +345,7 @@ final class SPARQLWriter {
 
 				// create an empty frame for each unreferenced value to support statement outlining
 
-				final List<Frame<Report>> placeholders=Sets.complement(focus, referenced).stream()
+				final List<Frame> placeholders=Sets.complement(focus, referenced).stream()
 						.map(v -> Frame.<Report>frame(v))
 						.collect(toList());
 

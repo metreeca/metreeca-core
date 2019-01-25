@@ -282,7 +282,7 @@ public final class Failure implements Function<Response, Response> {
 	}
 
 
-	private JsonObject json(final Frame<Report> frame) {
+	private JsonObject json(final Frame frame) {
 
 		final JsonObjectBuilder json=Json.createObjectBuilder();
 

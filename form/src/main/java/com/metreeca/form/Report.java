@@ -51,11 +51,11 @@ public final class Report {
 		return new Report(set(issues), set());
 	}
 
-	@SafeVarargs public static Report report(final Collection<Issue> issues, final Frame<Report>... frames) {
+	public static Report report(final Collection<Issue> issues, final Frame... frames) {
 		return new Report(issues, set(frames));
 	}
 
-	public static Report report(final Collection<Issue> issues, final Collection<Frame<Report>> frames) {
+	public static Report report(final Collection<Issue> issues, final Collection<Frame> frames) {
 		return new Report(issues, frames);
 	}
 
@@ -63,10 +63,10 @@ public final class Report {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Set<Issue> issues;
-	private final Set<Frame<Report>> frames;
+	private final Set<Frame> frames;
 
 
-	private Report(final Collection<Issue> issues, final Collection<Frame<Report>> frames) {
+	private Report(final Collection<Issue> issues, final Collection<Frame> frames) {
 
 		if ( issues == null ) {
 			throw new NullPointerException("null issues");
@@ -95,7 +95,7 @@ public final class Report {
 		return unmodifiableSet(issues);
 	}
 
-	public Set<Frame<Report>> getFrames() {
+	public Set<Frame> getFrames() {
 		return unmodifiableSet(frames);
 	}
 
@@ -109,7 +109,7 @@ public final class Report {
 		}
 
 		final Set<Issue> issues=union(getIssues(), report.getIssues());
-		final Collection<Frame<Report>> frames=frames(union(getFrames(), report.getFrames()), reducing(report(), Report::merge));
+		final Collection<Frame> frames=frames(union(getFrames(), report.getFrames()), reducing(report(), Report::merge));
 
 		return report(issues, frames);
 	}
@@ -151,7 +151,7 @@ public final class Report {
 				.filter(issue -> issue.getLevel().compareTo(limit) >= 0)
 				.collect(toCollection(LinkedHashSet::new));
 
-		final Set<Frame<Report>> frames=this.frames.stream()
+		final Set<Frame> frames=this.frames.stream()
 				.map((frame) -> prune(frame, limit))
 				.filter(Optional::isPresent).map(Optional::get)
 				.collect(toCollection(LinkedHashSet::new));
@@ -192,7 +192,7 @@ public final class Report {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Optional<Frame<Report>> prune(final Frame<Report> frame, final Issue.Level limit) {
+	private Optional<Frame> prune(final Frame frame, final Issue.Level limit) {
 
 		final Value value=frame.getValue();
 
@@ -204,7 +204,7 @@ public final class Report {
 		return slots.isEmpty() ? Optional.empty() : Optional.of(frame(value, map(slots)));
 	}
 
-	private Stream<Statement> outline(final Frame<Report> frame) {
+	private Stream<Statement> outline(final Frame frame) {
 
 		final Value source=frame.getValue();
 

@@ -43,7 +43,6 @@ import javax.json.JsonValue;
 
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.pass;
-import static com.metreeca.form.Shift.shift;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
@@ -227,9 +226,6 @@ public final class Updater extends Actor<Updater> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final Shift Contains=shift(LDP.CONTAINS);
-
-
 	private Shape container(final Shape shape) { // prune ldp:contains field // !!! review
 		return shape
 
@@ -241,7 +237,7 @@ public final class Updater extends Actor<Updater> {
 
 
 					@Override public Shape probe(final Field field) {
-						return field.getIRI().equals(Contains) ? and() : field;
+						return field.getIRI().equals(LDP.CONTAINS) ? and() : field;
 					}
 
 
@@ -277,7 +273,7 @@ public final class Updater extends Actor<Updater> {
 
 
 					@Override public Shape probe(final Field field) {
-						return field.getIRI().equals(Contains) ? field.getShape() : and();
+						return field.getIRI().equals(LDP.CONTAINS) ? field.getShape() : and();
 					}
 
 

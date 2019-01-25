@@ -64,8 +64,8 @@ final class ReportTest {
 
 	@Test void testPrune() {
 
-		final Frame<Report> first=frame(x, slot(shift(RDF.FIRST), report(info)));
-		final Frame<Report> rest=frame(x, slot(shift(RDF.REST), report(warning)));
+		final Frame first=frame(x, slot(shift(RDF.FIRST), report(info)));
+		final Frame rest=frame(x, slot(shift(RDF.REST), report(warning)));
 
 		final Report report=report(set(info, warning, error), set(first, rest))
 				.prune(Issue.Level.Warning)
@@ -131,7 +131,7 @@ final class ReportTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@SafeVarargs private final Report trace(final Frame<Report>... traces) {
+	@SafeVarargs private final Report trace(final Frame... traces) {
 		return report(set(), set(traces));
 	}
 

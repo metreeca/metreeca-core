@@ -38,21 +38,19 @@ import static java.util.stream.Collectors.*;
 
 
 /**
- * Value-property map.
- *
- * @param <T> the type of the mapped properties
+ * Shape validation frame.
  */
-public final class Frame<T> {
+public final class Frame {
 
-	@SafeVarargs public static <T> Frame<T> frame(final Value value, final Map.Entry<Shift, T>... slots) {
+	@SafeVarargs public static  Frame frame(final Value value, final Map.Entry<Shift, Report>... slots) {
 		return frame(value, map(slots));
 	}
 
-	public static <T> Frame<T> frame(final Value value, final Map<Shift, T> slots) {
-		return new Frame<>(value, slots);
+	public static  Frame frame(final Value value, final Map<Shift, Report> slots) {
+		return new Frame(value, slots);
 	}
 
-	public static <T> Map.Entry<Shift, T> slot(final Shift shift, final T value) {
+	public static  Map.Entry<Shift, Report> slot(final Shift shift, final Report value) {
 		return entry(shift, value);
 	}
 
@@ -63,11 +61,10 @@ public final class Frame<T> {
 	 * @param frames    the frames to be merged
 	 * @param collector a collector transforming a stream of values into a merged value (usually a {@linkplain
 	 *                  Collectors#reducing} collector)
-	 * @param <T>       the  type  the frame properties
 	 *
 	 * @return a merged collection of frames where each frame value appears only once
 	 */
-	public static <T> Collection<Frame<T>> frames(final Collection<Frame<T>> frames, final Collector<T, ?, T> collector) {
+	public static  Collection<Frame> frames(final Collection<Frame> frames, final Collector<Report, ?, Report> collector) {
 
 		if ( frames == null ) {
 			throw new NullPointerException("null frames");
@@ -79,14 +76,14 @@ public final class Frame<T> {
 
 		// slot maps merge operator
 
-		final BinaryOperator<Map<Shift, T>> operator=(x, y) -> Stream.of(x, y)
+		final BinaryOperator<Map<Shift, Report>> operator=(x, y) -> Stream.of(x, y)
 				.flatMap(slot -> slot.entrySet().stream())
 				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
 						mapping(Map.Entry::getValue, collector)));
 
 		// group slot maps by frame value and merge
 
-		final Map<Value, Map<Shift, T>> map=frames.stream().collect(
+		final Map<Value, Map<Shift, Report>> map=frames.stream().collect(
 				groupingBy(Frame::getValue, LinkedHashMap::new,
 						mapping(Frame::getSlots, reducing(map(), operator))));
 
@@ -101,10 +98,10 @@ public final class Frame<T> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Value value;
-	private final Map<Shift, T> slots;
+	private final Map<Shift, Report> slots;
 
 
-	private Frame(final Value value, final Map<Shift, T> slots) {
+	private Frame(final Value value, final Map<Shift, Report> slots) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
@@ -133,7 +130,7 @@ public final class Frame<T> {
 		return value;
 	}
 
-	public Map<Shift, T> getSlots() {
+	public Map<Shift, Report> getSlots() {
 		return unmodifiableMap(slots);
 	}
 
@@ -142,8 +139,8 @@ public final class Frame<T> {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Frame
-				&& value.equals(((Frame<?>)object).value)
-				&& slots.equals(((Frame<?>)object).slots);
+				&& value.equals(((Frame)object).value)
+				&& slots.equals(((Frame)object).slots);
 	}
 
 	@Override public int hashCode() {
