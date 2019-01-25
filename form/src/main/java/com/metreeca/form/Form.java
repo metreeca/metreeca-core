@@ -132,8 +132,6 @@ public final class Form {
 	public static final IRI pass=iri(Namespace, "pass");
 	public static final IRI fail=iri(Namespace, "fail");
 
-	public static final IRI inverse=iri(Namespace, "inverse");
-
 
 	//// Query Properties //////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -169,29 +169,23 @@ Linked data shapes may be stored and exchanged as RDF models, recursively encode
     form:{property} {value};
     …
     
-[] a form:{Shift};
-    form:{property} {value};
-    …
-    
 ```
 
 where:
 
 - `{Shape}` is the simple uppercase name of the required [shape](../javadocs/com/metreeca/form/shapes/package-summary.html) class;
-- `{Shift}` is the simple uppercase name of the required [shift](../javadocs/com/metreeca/form/shifts/package-summary.html) class;
-- `{property}` is the lowercase name of a constructor argument for the `{Shape/Shift}` class;
+- `{property}` is the lowercase name of a constructor argument for the `{Shape}` class;
 - `{value}` is the value for the `{property}` constructor argument, encoded according to the following scheme.
 
-| Java type       | RDF encoding                             |
-| --------------- | ---------------------------------------- |
-| `Shape`         | RDF-encoded shape                        |
-| `Shift`         | RDF-encoded shift                        |
+| Java type       | RDF encoding                                                 |
+| --------------- | ------------------------------------------------------------ |
+| `Shape`         | RDF-encoded shape                                            |
 | `Collection<T>` | [RDF list](https://www.w3.org/TR/rdf-schema/#ch_list) of RDF-encoded `<T>` values |
-| `IRI`           | RDF IRI reference                        |
-| `Value`         | RDF IRI reference or RDF literal         |
-| `String`        | `xsd:string` RDF literal                 |
-| `boolean`       | `xsd:boolean` RDF literal                |
-| `int`           | `xsd:integer` RDF literal                |
+| `IRI`           | RDF IRI reference; IRIs identifying [inverse](../javadocs/com/metreeca/form/things/Values.html#inverse-org.eclipse.rdf4j.model.IRI-) path steps are prefixed with the `inverse:` schema |
+| `Value`         | RDF IRI reference or RDF literal                             |
+| `String`        | `xsd:string` RDF literal                                     |
+| `boolean`       | `xsd:boolean` RDF literal                                    |
+| `int`           | `xsd:integer` RDF literal                                    |
 
 For instance, applying these rules the following shape:
 

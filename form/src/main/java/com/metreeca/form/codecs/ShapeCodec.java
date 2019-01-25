@@ -19,7 +19,6 @@ package com.metreeca.form.codecs;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 
@@ -41,6 +40,9 @@ import static java.util.stream.Collectors.toSet;
 
 
 public final class ShapeCodec {
+
+	private static final String InverseScheme="inverse:";
+
 
 	public Resource encode(final Shape shape, final Collection<Statement> model) {
 
@@ -429,14 +431,10 @@ public final class ShapeCodec {
 
 	private Resource trait(final Trait trait, final Collection<Statement> model) {
 
-		final IRI iri=trait.getIRI();
-		final boolean direct=direct(iri);
-
 		final Resource node=bnode();
 
 		model.add(statement(node, RDF.TYPE, Form.Trait));
-		model.add(statement(node, Form.iri, direct ? iri : inverse(iri)));
-		model.add(statement(node, Form.inverse, Values.literal(!direct)));
+		model.add(statement(node, Form.iri, step(trait.getIRI())));
 		model.add(statement(node, Form.shape, shape(trait.getShape(), model)));
 
 		return node;
@@ -444,9 +442,7 @@ public final class ShapeCodec {
 
 	private Trait trait(final Resource root, final Collection<Statement> model) {
 		return Trait.trait(
-				literal(root, Form.inverse, model).booleanValue()
-						? inverse(iri(root, Form.iri, model))
-						: iri(root, Form.iri, model),
+				step(root, Form.iri, model),
 				shape(resource(root, Form.shape, model), model)
 		);
 	}
@@ -516,24 +512,6 @@ public final class ShapeCodec {
 	}
 
 
-	//// Shifts ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Resource shift(final Shift shift, final Collection<Statement> model) {
-
-		final Resource node=bnode();
-
-		model.add(statement(node, Form.iri, shift.getIRI()));
-		model.add(statement(node, Form.inverse, Values.literal(shift.isInverse())));
-
-		return node;
-	}
-
-	private Shift shift(final Resource root, final Collection<Statement> model) {
-		return Shift.shift(iri(root, Form.iri, model))
-				.inverse(literal(root, Form.inverse, model).booleanValue());
-	}
-
-
 	//// Shape Lists ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Value shapes(final Collection<Shape> shapes, final Collection<Statement> model) {
@@ -572,6 +550,22 @@ public final class ShapeCodec {
 
 	private Collection<Value> values(final Resource items, final Collection<Statement> model) {
 		return RDFCollections.asValues(new LinkedHashModel(model), items, new ArrayList<>()); // !!! avoid model construction
+	}
+
+
+	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private IRI step(final IRI iri) {
+		return direct(iri) ? iri : Values.iri(InverseScheme+iri.stringValue());
+	}
+
+	private IRI step(final Resource subject, final IRI predicate, final Collection<Statement> model) {
+
+		final IRI iri=iri(subject, predicate, model);
+
+		return iri.stringValue().startsWith(InverseScheme)
+				? inverse(Values.iri(iri.stringValue().substring(InverseScheme.length())))
+				: iri;
 	}
 
 
