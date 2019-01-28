@@ -24,9 +24,7 @@ import com.metreeca.rest.formats.JSONFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import javax.json.*;
@@ -260,26 +258,17 @@ public final class Failure implements Function<Response, Response> {
 
 	private JsonObject json(final Focus focus) {
 
-		final Map<Issue.Level, List<Issue>> issues=focus.getIssues().stream().collect(groupingBy(Issue::getLevel));
-
-		final JsonObjectBuilder json=Json.createObjectBuilder();
-
-		Optional.ofNullable(issues.get(Issue.Level.Error)).ifPresent(errors ->
-				json.add("errors", json(errors, this::json))
-		);
-
-		Optional.ofNullable(issues.get(Issue.Level.Warning)).ifPresent(warnings ->
-				json.add("warnings", json(warnings, this::json))
-		);
+		final JsonObjectBuilder json=json(focus.getIssues());
 
 		focus.getFrames().forEach(frame -> {
 
-			final String property=format(frame.getValue());
-			final JsonObject value=json(frame);
+			final String value=format(frame.getValue());
+			final JsonObject fields=json(frame);
 
-			if ( !value.isEmpty() ) {
-				json.add(property, value);
+			if ( !fields.isEmpty() ) {
+				json.add(value, fields);
 			}
+
 		});
 
 		return json.build();
@@ -288,31 +277,44 @@ public final class Failure implements Function<Response, Response> {
 
 	private JsonObject json(final Frame frame) {
 
-		final JsonObjectBuilder json=Json.createObjectBuilder();
+		final JsonObjectBuilder json=json(frame.getIssues());
 
 		for (final Map.Entry<IRI, Focus> field : frame.getFields().entrySet()) {
 
-			final String property=field.getKey().toString();
+			final String property=format(field.getKey());
 			final JsonObject value=json(field.getValue());
 
 			if ( !value.isEmpty() ) {
 				json.add(property, value);
 			}
+
 		}
 
 		return json.build();
 	}
 
-	private JsonObject json(final Issue issue) {
+
+	private JsonObjectBuilder json(final Collection<Issue> issues) {
 
 		final JsonObjectBuilder json=Json.createObjectBuilder();
 
-		json.add("cause", issue.getMessage());
-		json.add("shape", issue.getShape().toString());
+		final Map<Issue.Level, List<Issue>> levels=issues.stream().collect(groupingBy(Issue::getLevel));
 
+		Optional.ofNullable(levels.get(Issue.Level.Error)).ifPresent(errors ->
+				json.add("errors", json(errors, this::json))
+		);
 
-		return json.build();
+		Optional.ofNullable(levels.get(Issue.Level.Warning)).ifPresent(warnings ->
+				json.add("warnings", json(warnings, this::json))
+		);
+
+		return json;
 	}
+
+	private JsonString json(final Issue issue) {
+		return Json.createValue(issue.getMessage()+" : "+issue.getShape());
+	}
+
 
 	private <V> JsonArray json(final Iterable<V> errors, final Function<V, JsonValue> reporter) {
 
