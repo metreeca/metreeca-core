@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers.actors;
 
 
-import com.metreeca.form.Form;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -27,6 +26,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.Form.none;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
@@ -90,7 +90,7 @@ final class DeleterTest {
 	@Test void testDirectUnauthorized() {
 		exec(() -> new Deleter().role(Manager)
 
-				.handle(direct().user(Form.none).roles(Salesman))
+				.handle(direct().user(none).roles(Salesman))
 
 				.accept(response -> {
 
@@ -146,7 +146,7 @@ final class DeleterTest {
 	@Test void testDrivenUnauthorized() {
 		exec(() -> new Deleter()
 
-				.handle(driven().roles(Salesman))
+				.handle(driven().roles(none))
 
 				.accept(response -> {
 

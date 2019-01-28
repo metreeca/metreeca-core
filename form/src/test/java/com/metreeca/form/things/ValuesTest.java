@@ -19,8 +19,6 @@ package com.metreeca.form.things;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Field;
-import com.metreeca.form.shapes.Option;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -45,12 +43,12 @@ import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
-import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Values.*;
 
@@ -95,44 +93,38 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
-	public static final Shape Employee=Option.option(
+	public static final Shape Employee=option(when(Form.role, Manager, Salesman), and(
 
-			or(
+			clazz(term("Employee")), // implies rdf:type :Employee
 
-					and(when(Form.role, Manager)),
-					and(when(Form.role, Salesman), when(Form.task, Form.create, Form.relate, Form.update))
-			),
+			verify(
+					server(
+							field(RDF.TYPE, and(required(), datatype(IRIType))),
+							field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
+							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
+					),
+					and(
+							field(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+							field(term("surname"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+							field(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+							field(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
+					),
+					option(when(Form.role, Manager), and(
 
-			and(
-					clazz(term("Employee")), // implies ?this a :Employee
-					verify(
-							server(
-									field(RDF.TYPE, and(required(), datatype(Values.IRIType))),
-									field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
-									field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
-							),
-							and(
-									field(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									field(term("surname"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									field(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									field(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
-							),
-							Option.option(when(Form.role, Manager), and(
+							field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
+									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
 
-									field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
-											minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
+							field(term("supervisor"), and(optional(), datatype(IRIType), clazz(term("Employee")))),
+							field(term("subordinate"), and(optional(), datatype(IRIType), clazz(term("Employee"))))
 
-									field(term("supervisor"), and(optional(), datatype(Values.IRIType), clazz(term("User")))),
-									field(term("subordinate"), and(optional(), datatype(Values.IRIType), clazz(term("User"))))
-
-							))
-					)
+					))
 			)
-	);
+
+	));
 
 	public static final Shape Employees=and(
 			server(
-					Field.field(RDF.TYPE, LDP.BASIC_CONTAINER)
+					field(RDF.TYPE, LDP.BASIC_CONTAINER)
 			),
 			field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
 			field(RDFS.COMMENT, and(required(), datatype(XMLSchema.STRING))),
