@@ -19,18 +19,12 @@ package com.metreeca.form;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
-import java.util.function.BinaryOperator;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Frame.frame;
-import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Sets.union;
 
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.*;
@@ -86,16 +80,49 @@ public final class Focus {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Focus merge(final Focus focus) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus report");
 		}
 
-		final Collection<Issue> issues=union(getIssues(), focus.getIssues());
-		final Collection<Frame> frames=frames(Stream.concat(this.frames.stream(), focus.frames.stream()), reducing(focus(), Focus::merge));
+		return focus(this, focus);
+	}
 
-		return focus(issues, frames);
+
+	private Focus focus(final Focus x, final Focus y) {
+		return focus(issues(x.issues, y.issues), frames(x.frames, y.frames));
+	}
+
+	private Collection<Issue> issues(final Collection<Issue> x, final Collection<Issue> y) {
+		return Stream
+				.concat(x.stream(), y.stream())
+				.collect(toCollection(LinkedHashSet::new));
+	}
+
+	private Collection<Frame> frames(final Collection<Frame> x, final Collection<Frame> y) {
+		return Stream
+				.concat(x.stream(), y.stream())
+				.collect(groupingBy(Frame::getValue, LinkedHashMap::new, collectingAndThen( // group frames by value
+						reducing((_x, _y) -> frame( // merge compatible frames
+								_x.getValue(),
+								issues(_x.getIssues(), _y.getIssues()),
+								fields(_x.getFields(), _y.getFields())
+						)),
+						frame -> frame.orElseThrow(() -> new RuntimeException("unexpected"))
+				)))
+				.values();
+	}
+
+	private Map<IRI, Focus> fields(final Map<IRI, Focus> x, final Map<IRI, Focus> y) {
+		return Stream
+				.concat(x.entrySet().stream(), y.entrySet().stream())
+				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new, mapping(
+						Map.Entry::getValue,
+						reducing(focus(), this::focus)
+				)));
 	}
 
 
@@ -157,41 +184,6 @@ public final class Focus {
 		return issues.stream().map(Issue::toString).collect(joining("\n\n"))
 				+(issues.isEmpty() || frames.isEmpty() ? "" : "\n\n")
 				+frames.stream().map(Frame::toString).collect(joining("\n\n"));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	/**
-	 * Merges a collection of frames.
-	 *
-	 * @param frames
-	 * @param collector a collector transforming a stream of values into a merged value (usually a {@linkplain
-	 *                  Collectors#reducing} collector)
-	 *
-	 * @return a merged collection of frames where each frame value appears only once
-	 */
-	private Collection<Frame> frames(final Stream<Frame> frames, final Collector<Focus, ?, Focus> collector) {
-
-		// field maps merge operator
-
-		final BinaryOperator<Map<IRI, Focus>> operator=(x, y) -> Stream.of(x, y)
-				.flatMap(field -> field.entrySet().stream())
-				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
-						mapping(Map.Entry::getValue, collector)));
-
-		// group field maps by frame value and merge
-
-		final Map<Value, Map<IRI, Focus>> map=frames.collect(
-				groupingBy(Frame::getValue, LinkedHashMap::new,
-						mapping(Frame::getFields, reducing(map(), operator))));
-
-		// convert back to frames
-
-		return map.entrySet().stream()
-				.map(e -> frame(e.getKey(), set(), e.getValue()))
-				.collect(toList());
 	}
 
 }
