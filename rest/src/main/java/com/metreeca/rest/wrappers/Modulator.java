@@ -174,7 +174,7 @@ public final class Modulator implements Wrapper { // !!! tbd
 					final Collection<Statement> model=request.body(rdf()).value().orElseGet(Sets::set);
 					final Collection<Statement> envelope=Structures.network(request.item(), model);
 
-					final Focus focus=Focus.focus(model.stream()
+					final Focus focus=focus(model.stream()
 							.filter(statement -> !envelope.contains(statement))
 							.map(outlier -> issue(Issue.Level.Error, "statement outside cell envelope "+outlier, pass()))
 							.collect(toList())

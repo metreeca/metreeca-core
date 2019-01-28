@@ -37,7 +37,9 @@ import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.*;
@@ -284,15 +286,19 @@ final class SPARQLWriter {
 
 
 		@Override public Focus probe(final MinCount minCount) {
-			return focus.size() >= minCount.getLimit() ? focus() : focus(issue(
-					Issue.Level.Error, "invalid item count", minCount
-			));
+			return focus.size() >= minCount.getLimit() ? focus() : focus(set(new Issue[] {
+					issue(
+							Issue.Level.Error, "invalid item count", minCount
+					)
+			}));
 		}
 
 		@Override public Focus probe(final MaxCount maxCount) {
-			return focus.size() <= maxCount.getLimit() ? focus() : focus(issue(
-					Issue.Level.Error, "invalid item count", maxCount
-			));
+			return focus.size() <= maxCount.getLimit() ? focus() : focus(set(new Issue[] {
+					issue(
+							Issue.Level.Error, "invalid item count", maxCount
+					)
+			}));
 		}
 
 		@Override public Focus probe(final In in) {
@@ -317,7 +323,7 @@ final class SPARQLWriter {
 					.filter(focus::contains)
 					.findAny()
 					.map(values -> focus())
-					.orElseGet(() -> focus(issue(Issue.Level.Error, "missing alternative value", any)));
+					.orElseGet(() -> focus(set(new Issue[] {issue(Issue.Level.Error, "missing alternative value", any)})));
 		}
 
 
@@ -348,12 +354,12 @@ final class SPARQLWriter {
 				// create an empty frame for each unreferenced value to support statement outlining
 
 				final List<Frame> placeholders=Sets.complement(focus, referenced).stream()
-						.map(v -> Frame.<Focus>frame(v))
+						.map(Frame::frame)
 						.collect(toList());
 
 				// return field validation results
 
-				return frame(value, entry(iri, focus(issues, Lists.concat(frames, placeholders))));
+				return frame(value, set(), map(entry(iri, focus(issues, concat(frames, placeholders)))));
 
 			}).collect(toList()));
 

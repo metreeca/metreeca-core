@@ -48,12 +48,8 @@ public final class Focus {
 		return empty;
 	}
 
-	public static Focus focus(final Issue... issues) {
-		return new Focus(set(issues), set());
-	}
-
-	public static Focus focus(final Collection<Issue> issues, final Frame... frames) {
-		return new Focus(issues, set(frames));
+	public static Focus focus(final Collection<Issue> issues) {
+		return new Focus(issues, set());
 	}
 
 	public static Focus focus(final Collection<Issue> issues, final Collection<Frame> frames) {
@@ -103,18 +99,6 @@ public final class Focus {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Focus merge(final Focus focus) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus report");
-		}
-
-		final Set<Issue> issues=union(getIssues(), focus.getIssues());
-		final Collection<Frame> frames=frames(union(getFrames(), focus.getFrames()), reducing(focus(), Focus::merge));
-
-		return focus(issues, frames);
-	}
-
 	/**
 	 * Tests if the overall severity of this report reaches an expected level.
 	 *
@@ -161,6 +145,19 @@ public final class Focus {
 		return issues.isEmpty() && frames.isEmpty() ? Optional.empty() : Optional.of(focus(issues, frames));
 	}
 
+
+	public Focus merge(final Focus focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus report");
+		}
+
+		final Collection<Issue> issues=union(getIssues(), focus.getIssues());
+		final Collection<Frame> frames=frames(Stream.concat(this.frames.stream(), focus.frames.stream()), reducing(focus(), Focus::merge));
+
+		return focus(issues, frames);
+	}
+
 	/**
 	 * Computes the statement outline of this report.
 	 *
@@ -196,13 +193,13 @@ public final class Focus {
 	/**
 	 * Merges a collection of frames.
 	 *
-	 * @param frames    the frames to be merged
+	 * @param frames
 	 * @param collector a collector transforming a stream of values into a merged value (usually a {@linkplain
 	 *                  Collectors#reducing} collector)
 	 *
 	 * @return a merged collection of frames where each frame value appears only once
 	 */
-	private Collection<Frame> frames(final Collection<Frame> frames, final Collector<Focus, ?, Focus> collector) {
+	private Collection<Frame> frames(final Stream<Frame> frames, final Collector<Focus, ?, Focus> collector) {
 
 		// field maps merge operator
 
@@ -213,14 +210,14 @@ public final class Focus {
 
 		// group field maps by frame value and merge
 
-		final Map<Value, Map<IRI, Focus>> map=frames.stream().collect(
+		final Map<Value, Map<IRI, Focus>> map=frames.collect(
 				groupingBy(Frame::getValue, LinkedHashMap::new,
 						mapping(Frame::getFields, reducing(map(), operator))));
 
 		// convert back to frames
 
 		return map.entrySet().stream()
-				.map(e -> frame(e.getKey(), e.getValue()))
+				.map(e -> frame(e.getKey(), set(), e.getValue()))
 				.collect(toList());
 	}
 

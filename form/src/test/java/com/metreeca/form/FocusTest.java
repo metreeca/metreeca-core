@@ -17,21 +17,21 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 
@@ -53,23 +53,23 @@ final class FocusTest {
 
 	@Test void testAssess() {
 
-		assertThat(focus(set()).assess(Issue.Level.Info)).as("no issues").isFalse();
+		assertThat(Focus.focus(set()).assess(Issue.Level.Info)).as("no issues").isFalse();
 
-		assertThat(focus(list(warning)).assess(Issue.Level.Warning)).as("matching issue").isTrue();
-		assertThat(focus(list(warning)).assess(Issue.Level.Error)).as("no matching issue").isFalse();
+		assertThat(Focus.focus(list(warning)).assess(Issue.Level.Warning)).as("matching issue").isTrue();
+		assertThat(Focus.focus(list(warning)).assess(Issue.Level.Error)).as("no matching issue").isFalse();
 
-		assertThat(focus(list(), set(
-				frame(RDF.NIL, entry(RDF.VALUE, focus(set(error), set())))
+		assertThat(Focus.focus(list(), set(
+				frame(RDF.NIL, set(), map(entry(RDF.VALUE, Focus.focus(set(error), set()))))
 		)).assess(Issue.Level.Error)).as("matching frame").isTrue();
 
 	}
 
 	@Test void testPrune() {
 
-		final Frame first=frame(x, entry(RDF.FIRST, focus(info)));
-		final Frame rest=frame(x, entry(RDF.REST, focus(warning)));
+		final Frame first=frame(x, set(), map(entry(RDF.FIRST, Focus.focus(set(new Issue[] {info})))));
+		final Frame rest=frame(x, set(), map(entry(RDF.REST, Focus.focus(set(new Issue[] {warning})))));
 
-		final Focus focus=focus(set(info, warning, error), set(first, rest))
+		final Focus focus=Focus.focus(set(info, warning, error), set(first, rest))
 				.prune(Issue.Level.Warning)
 				.orElse(null);
 
@@ -80,49 +80,48 @@ final class FocusTest {
 
 	@Test void testOutline() {
 
-		assertThat(decode("<x> rdf:value <y>.")).as("direct edge").isIsomorphicTo(trace(
+		assertThat(decode("<x> rdf:value <y>.")).as("direct edge").isIsomorphicTo(focus(
 
-				frame(x, entry(RDF.VALUE, trace(frame(y))))
-
-		).outline().collect(toList()));
-
-		assertThat(decode("<y> rdf:value <x>.")).as("inverse edge").isIsomorphicTo(trace(
-
-				frame(x, entry(inverse(RDF.VALUE), trace(frame(y))))
+				frame(x, set(), map(entry(RDF.VALUE, focus(frame(y)))))
 
 		).outline().collect(toList()));
 
-		assertThat(decode("<x> rdf:value <y>, <z>.")).as("multiple traces").isIsomorphicTo(trace(
+		assertThat(decode("<y> rdf:value <x>.")).as("inverse edge").isIsomorphicTo(focus(
 
-				frame(x, entry(RDF.VALUE, trace(frame(y), frame(z))))
-
-		).outline().collect(toList()));
-
-		assertThat(decode("<x> rdf:first <y>; rdf:rest <z>.")).as("multiple edges").isIsomorphicTo(trace(
-
-				frame(x,
-
-						entry(RDF.FIRST, trace(frame(y))),
-						entry(RDF.REST, trace(frame(z)))
-				)
+				frame(x, set(), map(entry(inverse(RDF.VALUE), focus(frame(y)))))
 
 		).outline().collect(toList()));
 
-		assertThat(set()).as("illegal direct edge").isIsomorphicTo(trace(
+		assertThat(decode("<x> rdf:value <y>, <z>.")).as("multiple traces").isIsomorphicTo(focus(
 
-				frame(Values.literal("x"), entry(RDF.VALUE, trace(frame(y))))
-
-		).outline().collect(toList()));
-
-		assertThat(set()).as("illegal inverse edge").isIsomorphicTo(trace(
-
-				frame(x, entry(inverse(RDF.VALUE), trace(frame(Values.literal("y")))))
+				frame(x, set(), map(entry(RDF.VALUE, focus(frame(y), frame(z)))))
 
 		).outline().collect(toList()));
 
-		assertThat(decode("<x> rdf:value <y>. <y> rdf:value <z>.")).as("nested edges").isIsomorphicTo(trace(
+		assertThat(decode("<x> rdf:first <y>; rdf:rest <z>.")).as("multiple edges").isIsomorphicTo(focus(
 
-				frame(x, entry(RDF.VALUE, trace(frame(y, entry(RDF.VALUE, trace(frame(z)))))))
+				frame(x, set(), map(
+						entry(RDF.FIRST, focus(frame(y))),
+						entry(RDF.REST, focus(frame(z)))
+				))
+
+		).outline().collect(toList()));
+
+		assertThat(set()).as("illegal direct edge").isIsomorphicTo(focus(
+
+				frame(literal("x"), set(), map(entry(RDF.VALUE, focus(frame(y)))))
+
+		).outline().collect(toList()));
+
+		assertThat(set()).as("illegal inverse edge").isIsomorphicTo(focus(
+
+				frame(x, set(), map(entry(inverse(RDF.VALUE), focus(frame(literal("y"))))))
+
+		).outline().collect(toList()));
+
+		assertThat(decode("<x> rdf:value <y>. <y> rdf:value <z>.")).as("nested edges").isIsomorphicTo(focus(
+
+				frame(x, set(), map(entry(RDF.VALUE, focus(frame(y, set(), map(entry(RDF.VALUE, focus(frame(z)))))))))
 
 		).outline().collect(toList()));
 
@@ -131,8 +130,8 @@ final class FocusTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Focus trace(final Frame... traces) {
-		return focus(set(), set(traces));
+	private Focus focus(final Frame... frames) {
+		return Focus.focus(set(), set(frames));
 	}
 
 }

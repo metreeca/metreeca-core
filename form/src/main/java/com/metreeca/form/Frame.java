@@ -40,12 +40,8 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Frame {
 
-	@SafeVarargs public static Frame frame(final Value value, final Map.Entry<IRI, Focus>... fields) {
-		return frame(value, map(fields));
-	}
-
-	public static Frame frame(final Value value, final Map<IRI, Focus> fields) {
-		return frame(value, set(), fields);
+	public static Frame frame(final Value value) {
+		return new Frame(value, set(), map());
 	}
 
 	public static Frame frame(final Value value, final Collection<Issue> issues) {
@@ -161,7 +157,6 @@ public final class Frame {
 
 
 	public Stream<Statement> outline() {
-
 		return fields.entrySet().stream().flatMap(field -> {
 
 			final IRI iri=field.getKey();
