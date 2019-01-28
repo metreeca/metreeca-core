@@ -186,31 +186,6 @@ public final class ValuesTest {
 	}
 
 
-	public static Model dataset(final Class<?> master) {
-		return dataset(master, Base);
-	}
-
-	public static Model dataset(final Class<?> master, final String base) {
-
-		if ( master == null ) {
-			throw new NullPointerException("null master");
-		}
-
-		if ( base == null ) {
-			throw new NullPointerException("null base");
-		}
-
-		final String name=master.getSimpleName()+".ttl";
-		final URL url=master.getResource(name);
-
-		if ( url == null ) {
-			throw new MissingResourceException("dataset", master.getName(), name);
-		}
-
-		return dataset(url, base);
-	}
-
-
 	public static Model dataset(final URL resource) {
 		return dataset(resource, Base);
 	}
@@ -242,14 +217,14 @@ public final class ValuesTest {
 	}
 
 	public static Model decode(final String rdf, final String base) {
-		return decode(rdf, base, RDFFormat.TURTLE);
+		return decode(rdf, RDFFormat.TURTLE, base);
 	}
 
 	public static Model decode(final String rdf, final RDFFormat format) {
-		return decode(rdf, Base, format);
+		return decode(rdf, format, Base);
 	}
 
-	public static Model decode(final String rdf, final String base, final RDFFormat format) { // includes default base/prefixes
+	public static Model decode(final String rdf, final RDFFormat format, final String base) { // includes default base/prefixes
 
 		if ( rdf == null ) {
 			throw new NullPointerException("null rdf");
