@@ -87,53 +87,7 @@ public final class Form {
 	public static final IRI Group=iri(Namespace, "group"); // !!! define standard representations hints
 
 
-	//// Shape Types ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI Meta=iri(Namespace, "Meta");
-	public static final IRI Datatype=iri(Namespace, "Datatype");
-	public static final IRI Class=iri(Namespace, "Class");
-	public static final IRI MinExclusive=iri(Namespace, "MinExclusive");
-	public static final IRI MaxExclusive=iri(Namespace, "MaxExclusive");
-	public static final IRI MinInclusive=iri(Namespace, "MinInclusive");
-	public static final IRI MaxInclusive=iri(Namespace, "MaxInclusive");
-	public static final IRI MinLength=iri(Namespace, "MinLength");
-	public static final IRI MaxLength=iri(Namespace, "MaxLength");
-	public static final IRI Pattern=iri(Namespace, "Pattern");
-	public static final IRI Like=iri(Namespace, "Like");
-
-	public static final IRI MinCount=iri(Namespace, "MinCount");
-	public static final IRI MaxCount=iri(Namespace, "MaxCount");
-	public static final IRI In=iri(Namespace, "In");
-	public static final IRI All=iri(Namespace, "All");
-	public static final IRI Any=iri(Namespace, "Any");
-
-	public static final IRI Field=iri(Namespace, "Field");
-
-	public static final IRI And=iri(Namespace, "And");
-	public static final IRI Or=iri(Namespace, "Or");
-	public static final IRI Test=iri(Namespace, "Test");
-	public static final IRI When=iri(Namespace, "When");
-
-
-	//// Shape Properties //////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI shape=iri(Namespace, "shape");
-	public static final IRI shapes=iri(Namespace, "shapes");
-
-	public static final IRI value=iri(Namespace, "value");
-	public static final IRI values=iri(Namespace, "values");
-
-	public static final IRI iri=iri(Namespace, "iri");
-	public static final IRI text=iri(Namespace, "text");
-	public static final IRI flags=iri(Namespace, "flags");
-	public static final IRI limit=iri(Namespace, "limit");
-
-	public static final IRI test=iri(Namespace, "test");
-	public static final IRI pass=iri(Namespace, "pass");
-	public static final IRI fail=iri(Namespace, "fail");
-
-
-	//// Query Properties //////////////////////////////////////////////////////////////////////////////////////////////
+	//// Query Results /////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI meta=iri(Namespace, "meta"); // default subject for introspective query results
 	public static final IRI path=iri(Namespace, "path");
@@ -144,6 +98,7 @@ public final class Form {
 	public static final IRI max=iri(Namespace, "max");
 	public static final IRI min=iri(Namespace, "min");
 	public static final IRI count=iri(Namespace, "count");
+	public static final IRI value=iri(Namespace, "value");
 
 
 	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////
