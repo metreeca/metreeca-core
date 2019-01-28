@@ -17,107 +17,44 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.things.ValuesTest;
-
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.ValuesTest.decode;
-import static com.metreeca.form.truths.ModelAssert.assertThat;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static java.util.stream.Collectors.toList;
 
 
 final class FocusTest {
 
-	private final IRI x=ValuesTest.item("x");
-	private final IRI y=ValuesTest.item("y");
-	private final IRI z=ValuesTest.item("z");
-
-	private final Issue info=issue(Issue.Level.Info, "info", and());
-	private final Issue warning=issue(Issue.Level.Warning, "warning", and());
-	private final Issue error=issue(Issue.Level.Error, "error", and());
-
 
 	@Test void testAssess() {
 
-		assertThat(Focus.focus(set()).assess(Issue.Level.Info)).as("no issues").isFalse();
-
-		assertThat(Focus.focus(list(warning)).assess(Issue.Level.Warning)).as("matching issue").isTrue();
-		assertThat(Focus.focus(list(warning)).assess(Issue.Level.Error)).as("no matching issue").isFalse();
-
-		assertThat(Focus.focus(list(), set(
-				frame(RDF.NIL, set(), map(entry(RDF.VALUE, Focus.focus(set(error), set()))))
-		)).assess(Issue.Level.Error)).as("matching frame").isTrue();
-
-	}
-
-	@Test void testOutline() {
-
-		assertThat(decode("<x> rdf:value <y>.")).as("direct edge").isIsomorphicTo(focus(
-
-				frame(x, set(), map(entry(RDF.VALUE, focus(frame(y)))))
-
-		).outline().collect(toList()));
-
-		assertThat(decode("<y> rdf:value <x>.")).as("inverse edge").isIsomorphicTo(focus(
-
-				frame(x, set(), map(entry(inverse(RDF.VALUE), focus(frame(y)))))
-
-		).outline().collect(toList()));
-
-		assertThat(decode("<x> rdf:value <y>, <z>.")).as("multiple traces").isIsomorphicTo(focus(
-
-				frame(x, set(), map(entry(RDF.VALUE, focus(frame(y), frame(z)))))
-
-		).outline().collect(toList()));
-
-		assertThat(decode("<x> rdf:first <y>; rdf:rest <z>.")).as("multiple edges").isIsomorphicTo(focus(
-
-				frame(x, set(), map(
-						entry(RDF.FIRST, focus(frame(y))),
-						entry(RDF.REST, focus(frame(z)))
-				))
-
-		).outline().collect(toList()));
-
-		assertThat(set()).as("illegal direct edge").isIsomorphicTo(focus(
-
-				frame(literal("x"), set(), map(entry(RDF.VALUE, focus(frame(y)))))
-
-		).outline().collect(toList()));
-
-		assertThat(set()).as("illegal inverse edge").isIsomorphicTo(focus(
-
-				frame(x, set(), map(entry(inverse(RDF.VALUE), focus(frame(literal("y"))))))
-
-		).outline().collect(toList()));
-
-		assertThat(decode("<x> rdf:value <y>. <y> rdf:value <z>.")).as("nested edges").isIsomorphicTo(focus(
-
-				frame(x, set(), map(entry(RDF.VALUE, focus(frame(y, set(), map(entry(RDF.VALUE, focus(frame(z)))))))))
-
-		).outline().collect(toList()));
-
-	}
+		final Issue info=issue(Issue.Level.Info, "info", and());
+		final Issue warning=issue(Issue.Level.Warning, "warning", and());
+		final Issue error=issue(Issue.Level.Error, "error", and());
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		assertThat(focus(set()).assess(Issue.Level.Info))
+				.as("no issues")
+				.isFalse();
 
-	private Focus focus(final Frame... frames) {
-		return Focus.focus(set(), set(frames));
+		assertThat(focus(set(warning)).assess(Issue.Level.Warning))
+				.as("matching issue")
+				.isTrue();
+
+		assertThat(focus(set(warning)).assess(Issue.Level.Error))
+				.as("no matching issue")
+				.isFalse();
+
+		assertThat(focus(set(), set(frame(RDF.NIL, set(error)))).assess(Issue.Level.Error))
+				.as("matching frame")
+				.isTrue();
+
 	}
 
 }
