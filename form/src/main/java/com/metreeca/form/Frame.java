@@ -132,7 +132,7 @@ public final class Frame {
 	/**
 	 * Computes the statement outline of this report.
 	 *
-	 * @return a stream of statements recursively generated from {@linkplain Focus focus sets} in this report
+	 * @return a stream of statements recursively generated from fields in this report
 	 */
 	public Stream<Statement> outline() {
 		return fields.entrySet().stream().flatMap(field -> {
@@ -182,14 +182,14 @@ public final class Frame {
 	}
 
 	@Override public String toString() {
-		return format(value)+" {"+(fields.isEmpty() ? "" : indent(fields.entrySet().stream().map(e -> {
-
-			final String edge=e.getKey().toString();
-			final String value=e.getValue().toString();
-
-			return edge+" :\n\n"+indent(value);
-
-		}).collect(joining("\n\n", "\n\n", "\n\n"))))+"}";
+		return format(value)+" "+(issues.isEmpty() && fields.isEmpty() ? "{}" : "{\n"+indent((
+				issues.isEmpty() ? "" : issues.stream().map(Issue::toString)
+						.collect(joining("\n\n", "\n", "\n"))
+		)+(
+				fields.isEmpty() ? "" : fields.entrySet().stream()
+						.map(e -> format(e.getKey())+" :\n\n"+indent(e.getValue().toString()))
+						.collect(joining("\n\n", "\n", "\n"))
+		))+"\n}");
 	}
 
 }
