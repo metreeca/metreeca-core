@@ -86,6 +86,19 @@ public final class Focus {
 	}
 
 
+	public Focus merge(final Focus focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus report");
+		}
+
+		final Collection<Issue> issues=union(getIssues(), focus.getIssues());
+		final Collection<Frame> frames=frames(Stream.concat(this.frames.stream(), focus.frames.stream()), reducing(focus(), Focus::merge));
+
+		return focus(issues, frames);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Set<Issue> getIssues() {
@@ -116,46 +129,6 @@ public final class Focus {
 
 		return issues.stream().anyMatch(issue -> issue.assess(limit))
 				|| frames.stream().anyMatch(trace -> trace.assess(limit));
-	}
-
-	/**
-	 * Removes all issues and frames under a given issue {@linkplain Issue.Level severity level}.
-	 *
-	 * @param limit the minimum severity level for retained issues and frames
-	 *
-	 * @return an optional pruned focus report retaining only issues and frames with severity greater or equal to {@code
-	 * limit}; an empty optional if no issue or frame in this focus record reaches the severity {@code limit}
-	 */
-	public Optional<Focus> prune(final Issue.Level limit) {
-
-		if ( limit == null ) {
-			throw new NullPointerException("null limit");
-		}
-
-		final Collection<Issue> issues=this.issues.stream()
-				.filter(issue -> issue.assess(limit))
-				.collect(toList());
-
-		final Set<Frame> frames=this.frames.stream()
-				.map(frame -> frame.prune(limit))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.collect(toCollection(LinkedHashSet::new));
-
-		return issues.isEmpty() && frames.isEmpty() ? Optional.empty() : Optional.of(focus(issues, frames));
-	}
-
-
-	public Focus merge(final Focus focus) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus report");
-		}
-
-		final Collection<Issue> issues=union(getIssues(), focus.getIssues());
-		final Collection<Frame> frames=frames(Stream.concat(this.frames.stream(), focus.frames.stream()), reducing(focus(), Focus::merge));
-
-		return focus(issues, frames);
 	}
 
 	/**

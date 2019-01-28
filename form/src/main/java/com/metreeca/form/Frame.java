@@ -18,21 +18,22 @@
 package com.metreeca.form;
 
 
+import com.metreeca.form.things.Values;
+
 import org.eclipse.rdf4j.model.*;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Strings.indent;
-import static com.metreeca.form.things.Values.*;
+import static com.metreeca.form.things.Values.format;
+import static com.metreeca.form.things.Values.statement;
 
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -129,38 +130,15 @@ public final class Frame {
 	}
 
 	/**
-	 * Removes all issues and fields under a given issue {@linkplain Issue.Level severity level}.
+	 * Computes the statement outline of this report.
 	 *
-	 * @param limit the minimum severity level for retained issues and fields
-	 *
-	 * @return an optional pruned frame retaining only issues and fields with severity greater or equal to {@code
-	 * limit}; an empty optional if no issue or field in this report reaches the severity {@code limit}
+	 * @return a stream of statements recursively generated from {@linkplain Focus focus sets} in this report
 	 */
-	public Optional<Frame> prune(final Issue.Level limit) {
-
-		if ( limit == null ) {
-			throw new NullPointerException("null limit");
-		}
-
-		final List<Issue> issues=this.issues.stream()
-				.filter(issue -> issue.assess(limit))
-				.collect(toList());
-
-		final List<Map.Entry<IRI, Focus>> fields=this.fields.entrySet().stream()
-				.map(field -> field.getValue().prune(limit).map(focus -> entry(field.getKey(), focus)))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.collect(toList()); // preserve ordering
-
-		return issues.isEmpty() && fields.isEmpty() ? Optional.empty() : Optional.of(frame(value, issues, map(fields)));
-	}
-
-
 	public Stream<Statement> outline() {
 		return fields.entrySet().stream().flatMap(field -> {
 
 			final IRI iri=field.getKey();
-			final boolean direct=direct(iri);
+			final boolean direct=Values.direct(iri);
 
 			final Focus focus=field.getValue();
 
@@ -168,21 +146,25 @@ public final class Frame {
 
 			return Stream.concat(
 
-					direct && value instanceof Resource
-
-							? targets.map(target -> statement((Resource)value, iri, target))
-
-							: direct ? Stream.empty()
-
-							: targets
-
-							.filter(target -> target instanceof Resource)
-							.map(target -> statement((Resource)target, inverse(iri), value)),
+					direct ? direct(iri, targets) : inverse(Values.inverse(iri), targets),
 
 					focus.outline()
 
 			);
 		});
+	}
+
+
+	private Stream<Statement> direct(final IRI iri, final Stream<Value> targets) {
+		return value instanceof Resource
+				? targets.map(target -> statement((Resource)value, iri, target))
+				: Stream.empty();
+	}
+
+	private Stream<Statement> inverse(final IRI iri, final Stream<Value> targets) {
+		return targets
+				.filter(target -> target instanceof Resource)
+				.map(target -> statement((Resource)target, iri, value));
 	}
 
 

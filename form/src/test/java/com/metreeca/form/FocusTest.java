@@ -64,20 +64,6 @@ final class FocusTest {
 
 	}
 
-	@Test void testPrune() {
-
-		final Frame first=frame(x, set(), map(entry(RDF.FIRST, Focus.focus(set(new Issue[] {info})))));
-		final Frame rest=frame(x, set(), map(entry(RDF.REST, Focus.focus(set(new Issue[] {warning})))));
-
-		final Focus focus=Focus.focus(set(info, warning, error), set(first, rest))
-				.prune(Issue.Level.Warning)
-				.orElse(null);
-
-		assertThat(set(warning, error)).as("pruned issues").isEqualTo(focus.getIssues());
-		assertThat(set(rest)).as("pruned frames").isEqualTo(focus.getFrames());
-
-	}
-
 	@Test void testOutline() {
 
 		assertThat(decode("<x> rdf:value <y>.")).as("direct edge").isIsomorphicTo(focus(
