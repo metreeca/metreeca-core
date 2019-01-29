@@ -37,11 +37,13 @@ public final class Pattern implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final String text;
 	private final String flags;
 
 
-	public Pattern(final String text, final String flags) {
+	private Pattern(final String text, final String flags) {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");
@@ -62,6 +64,8 @@ public final class Pattern implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public String getText() {
 		return text;
 	}
@@ -70,6 +74,8 @@ public final class Pattern implements Shape {
 		return flags;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 

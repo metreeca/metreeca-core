@@ -252,7 +252,7 @@ public final class Rewriter implements Wrapper {
 			}
 
 			@Override public When probe(final When when) {
-				return when(rewrite(when.getIRI()), rewrite(when.getValues(), Engine.this::rewrite));
+				return when(rewrite(when.getAxis()), rewrite(when.getValues(), Engine.this::rewrite));
 			}
 
 

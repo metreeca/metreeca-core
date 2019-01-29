@@ -49,14 +49,15 @@ public final class Any implements Shape {
 
 
 	public static Optional<Set<Value>> any(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ExistentialProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AnyProbe()));
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Set<Value> values;
 
 
-	public Any(final Collection<Value> values) {
+	private Any(final Collection<Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -74,10 +75,14 @@ public final class Any implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Set<Value> getValues() {
 		return Collections.unmodifiableSet(values);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 
@@ -108,7 +113,7 @@ public final class Any implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class ExistentialProbe extends Visitor<Set<Value>> {
+	private static final class AnyProbe extends Visitor<Set<Value>> {
 
 		@Override public Set<Value> probe(final Any any) {
 			return any.getValues();

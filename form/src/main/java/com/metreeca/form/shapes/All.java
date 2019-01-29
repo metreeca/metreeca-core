@@ -49,14 +49,16 @@ public final class All implements Shape {
 
 
 	public static Optional<Set<Value>> all(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new UniversalProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AllProbe()));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Set<Value> values;
 
 
-	public All(final Collection<Value> values) {
+	private All(final Collection<Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -74,10 +76,14 @@ public final class All implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Set<Value> getValues() {
 		return Collections.unmodifiableSet(values);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 
@@ -108,7 +114,7 @@ public final class All implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class UniversalProbe extends Visitor<Set<Value>> {
+	private static final class AllProbe extends Visitor<Set<Value>> {
 
 		@Override public Set<Value> probe(final All all) {
 			return all.getValues();

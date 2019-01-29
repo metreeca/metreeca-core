@@ -40,12 +40,14 @@ public final class Option implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Shape test;
 	private final Shape pass;
 	private final Shape fail;
 
 
-	public Option(final Shape test, final Shape pass, final Shape fail) {
+	private Option(final Shape test, final Shape pass, final Shape fail) {
 
 		if ( test == null ) {
 			throw new NullPointerException("null test shape");
@@ -65,6 +67,8 @@ public final class Option implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Shape getTest() {
 		return test;
 	}
@@ -77,6 +81,8 @@ public final class Option implements Shape {
 		return fail;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 

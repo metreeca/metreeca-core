@@ -53,10 +53,12 @@ public final class Or implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Collection<Shape> shapes;
 
 
-	public Or(final Collection<Shape> shapes) {
+	private Or(final Collection<Shape> shapes) {
 
 		if ( shapes == null ) {
 			throw new NullPointerException("null shapes");
@@ -70,10 +72,14 @@ public final class Or implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Collection<Shape> getShapes() {
 		return Collections.unmodifiableCollection(shapes);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 

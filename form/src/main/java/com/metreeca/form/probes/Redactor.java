@@ -72,7 +72,7 @@ public final class Redactor extends Traverser<Shape> {
 
 	@Override public Shape probe(final When when) {
 
-		final Set<? extends Value> actual=variables.get(when.getIRI());
+		final Set<? extends Value> actual=variables.get(when.getAxis());
 		final Set<? extends Value> accepted=when.getValues();
 
 		return actual == null ? when // ignore undefined variables

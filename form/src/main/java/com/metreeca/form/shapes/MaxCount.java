@@ -35,15 +35,18 @@ public final class MaxCount implements Shape {
 		return new MaxCount(limit);
 	}
 
+
 	public static Optional<Integer> maxCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MaxCountProbe()));
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final int limit;
 
 
-	public MaxCount(final int limit) {
+	private MaxCount(final int limit) {
 
 		if ( limit < 1 ) {
 			throw new IllegalArgumentException("illegal limit ["+limit+"]");
@@ -53,10 +56,14 @@ public final class MaxCount implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public int getLimit() {
 		return limit;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 
@@ -81,6 +88,8 @@ public final class MaxCount implements Shape {
 		return "maxCount("+limit+")";
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final class MaxCountProbe extends Traverser<Integer> {
 

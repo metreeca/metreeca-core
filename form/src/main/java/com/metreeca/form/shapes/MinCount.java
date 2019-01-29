@@ -35,15 +35,18 @@ public final class MinCount implements Shape {
 		return new MinCount(limit);
 	}
 
+
 	public static Optional<Integer> minCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MinCountProbe()));
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final int limit;
 
 
-	public MinCount(final int limit) {
+	private MinCount(final int limit) {
 
 		if ( limit < 1 ) {
 			throw new IllegalArgumentException("illegal limit ["+limit+"]");
@@ -53,10 +56,14 @@ public final class MinCount implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public int getLimit() {
 		return limit;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 

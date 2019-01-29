@@ -37,9 +37,8 @@ import static java.util.stream.Collectors.joining;
 /**
  * Parametric logical constraint.
  *
- * <p>States that the focus set meets this shape only if at least one of the values of an externally defined variable
- * is
- * included in a given set of target values.</p>
+ * <p>States that the focus set meets this shape only if at least one of the values of an externally defined axis
+ * variable is included in a given set of target values.</p>
  *
  * @see com.metreeca.form.probes.Redactor
  */
@@ -54,14 +53,16 @@ public final class When implements Shape {
 	}
 
 
-	private final IRI iri;
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final IRI axis;
 	private final Set<Value> values;
 
 
-	public When(final IRI iri, final Collection<? extends Value> values) {
+	private When(final IRI axis, final Collection<? extends Value> values) {
 
-		if ( iri == null ) {
-			throw new NullPointerException("null variable IRI");
+		if ( axis == null ) {
+			throw new NullPointerException("null axis IRI");
 		}
 
 		if ( values == null ) {
@@ -76,19 +77,23 @@ public final class When implements Shape {
 			throw new NullPointerException("null value");
 		}
 
-		this.iri=iri;
+		this.axis=axis;
 		this.values=new HashSet<>(values);
 	}
 
 
-	public IRI getIRI() {
-		return iri;
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public IRI getAxis() {
+		return axis;
 	}
 
 	public Set<Value> getValues() {
 		return unmodifiableSet(values);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 
@@ -102,16 +107,16 @@ public final class When implements Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof When
-				&& iri.equals(((When)object).iri)
+				&& axis.equals(((When)object).axis)
 				&& values.equals(((When)object).values);
 	}
 
 	@Override public int hashCode() {
-		return iri.hashCode()^values.hashCode();
+		return axis.hashCode()^values.hashCode();
 	}
 
 	@Override public String toString() {
-		return "when("+format(iri)+",\n"
+		return "when("+format(axis)+",\n"
 				+values.stream().map(v -> indent(format(v))).collect(joining(",\n"))+"\n)";
 	}
 
