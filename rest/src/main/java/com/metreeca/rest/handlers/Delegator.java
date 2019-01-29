@@ -30,14 +30,11 @@ import com.metreeca.rest.Responder;
  */
 public abstract class Delegator implements Handler {
 
-	private Handler container=request -> request.reply(response -> response);
-	private Handler resource=request -> request.reply(response -> response);
+	private Handler delegate=request -> request.reply(response -> response);
 
 
 	/**
 	 * Configures the delegate handler.
-	 *
-	 * <p>Equivalent to {@code delegate(delegate, delegate)}.</p>
 	 *
 	 * @param delegate the handler request processing is delegated to
 	 *
@@ -51,33 +48,7 @@ public abstract class Delegator implements Handler {
 			throw new NullPointerException("null delegate");
 		}
 
-		return delegate(delegate, delegate);
-	}
-
-	/**
-	 * Configures container/resource delegate handlers.
-	 *
-	 * @param container the handler request processing is delegated to if the focus {@linkplain Request#item() item} of
-	 *                  the request is a {@linkplain Request#container() container}
-	 * @param resource  the handler request processing is delegated to if the focus {@linkplain Request#item() item} of
-	 *                  the request is a plain resource
-	 *
-	 * @return this delegator
-	 *
-	 * @throws NullPointerException if either {@code container} or {@code resource} is null
-	 */
-	protected Delegator delegate(final Handler container, final Handler resource) {
-
-		if ( container == null ) {
-			throw new NullPointerException("null container handler");
-		}
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource handler");
-		}
-
-		this.container=container;
-		this.resource=resource;
+		this.delegate=delegate;
 
 		return this;
 	}
@@ -86,7 +57,7 @@ public abstract class Delegator implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Responder handle(final Request request) {
-		return (request.container() ? container : resource).handle(request);
+		return delegate.handle(request);
 	}
 
 }
