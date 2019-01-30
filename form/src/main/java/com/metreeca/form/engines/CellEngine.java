@@ -29,8 +29,6 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Focus.focus;
-import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Structures.description;
 
 import static java.util.stream.Collectors.toList;
@@ -167,7 +165,7 @@ public final class CellEngine {
 
 		return Focus.focus(model.stream()
 				.filter(statement -> !envelope.contains(statement))
-				.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier, pass()))
+				.map(outlier -> issue(Level.Error, "statement outside cell envelope "+outlier))
 				.collect(toList())
 		);
 

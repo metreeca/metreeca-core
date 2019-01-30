@@ -39,6 +39,10 @@ public final class Issue {
 	}
 
 
+	public static Issue issue(final Level level, final String message) {
+		return issue(level, message, pass());
+	}
+
 	public static Issue issue(final Level level, final String message, final Shape shape) {
 		return new Issue(level, message, shape, set());
 	}
