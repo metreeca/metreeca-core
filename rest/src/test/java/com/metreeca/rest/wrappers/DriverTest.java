@@ -60,7 +60,7 @@ final class DriverTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testIgnoreUndefinedShape() {
-		new Driver()
+		new Driver(and())
 
 				.wrap((Handler)request -> {
 
@@ -79,7 +79,7 @@ final class DriverTest {
 	}
 
 	@Test void testConfigureExchangeShape() {
-		new Driver().shape(TestShape)
+		new Driver(TestShape)
 
 				.wrap((Handler)request -> {
 
@@ -97,7 +97,7 @@ final class DriverTest {
 	}
 
 	@Test void testHandleSpecsQuery() {
-		new Driver().shape(TestShape)
+		new Driver(TestShape)
 
 				.wrap((Handler)request -> request.reply(response -> response))
 
