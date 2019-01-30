@@ -21,4 +21,4 @@
  * <p>Provides default implementations for CRUD actions on LDP resources and containers.</p>
  */
 
-package com.metreeca.rest.handlers.work.actors;
+package com.metreeca.rest.handlers.actors;

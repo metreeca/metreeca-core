@@ -22,25 +22,11 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.Update;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.things.Values.*;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
 
@@ -59,55 +45,10 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Processor implements Wrapper {
 
-	/**
-	 * Creates a message processing filter for inserting static RDF content.
-	 *
-	 * @param rdf the RDF content to be inserted in the processed message; parsed using as base the {@linkplain
-	 *            Message#item() focus item} of the processed message
-	 * @param <T> the type of the processed message
-	 *
-	 * @return the new message processing filter
-	 *
-	 * @throws NullPointerException if {@code rdf} is null
-	 * @throws RDFParseException    if {@code rdf} is malformed
-	 */
-	public static <T extends Message<T>> BiFunction<T, Model, Model> rdf(final String rdf) throws RDFParseException {
-
-		if ( rdf == null ) {
-			throw new NullPointerException("null rdf");
-		}
-
-		final IRI placeholder=iri("placeholder:/");
-		final StatementCollector collector=new StatementCollector();
-
-		final RDFParser parser=new TurtleParser();
-
-		parser.setRDFHandler(collector);
-
-		try (final StringReader reader=new StringReader(rdf)) {
-			parser.parse(reader, placeholder.stringValue());
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
-
-		return (response, statements) -> {
-
-			statements.addAll(rewrite(placeholder, response.item(), collector.getStatements()));
-
-			return statements;
-
-		};
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private BiFunction<Request, Model, Model> pre;
 	private BiFunction<Response, Model, Model> post;
-
-	private final Collection<String> scripts=new ArrayList<>();
-
-	private final Graph graph=tool(Graph.Factory);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,75 +102,6 @@ public final class Processor implements Wrapper {
 		return this;
 	}
 
-	/**
-	 * Inserts a SPARQL Update housekeeping script.
-	 *
-	 * <p>The script is executed on the shared {@linkplain Graph#Factory graph} tool on {@linkplain Response#success()
-	 * successful} request processing by wrapped handlers and before applying {@linkplain #post(BiFunction)
-	 * post-processing filters}, with the following pre-defined bindings:</p>
-	 *
-	 * <table summary="pre-defined bindings">
-	 *
-	 * <thead>
-	 *
-	 * <tr>
-	 * <th>variable</th>
-	 * <th>value</th>
-	 * </tr>
-	 *
-	 * </thead>
-	 *
-	 * <tbody>
-	 *
-	 * <tr>
-	 * <td>this</td>
-	 * <td>the value of the response {@linkplain Response#item() focus item}</td>
-	 * </tr>
-	 *
-	 * <tr>
-	 * <td>stem</td>
-	 * <td>the {@linkplain IRI#getNamespace() namespace} of the IRI bound to the {@code this} variable</td>
-	 * </tr>
-	 *
-	 * <tr>
-	 * <td>name</td>
-	 * <td>the local {@linkplain IRI#getLocalName() name} of the IRI bound to the {@code this} variable</td>
-	 * </tr>
-	 *
-	 * <tr>
-	 * <td>user</td>
-	 * <td>the IRI identifying the {@linkplain Request#user() user} submitting the request</td>
-	 * </tr>
-	 *
-	 * <tr>
-	 * <td>time</td>
-	 * <td>an {@code xsd:dateTime} literal representing the current system time with millisecond precision</td>
-	 * </tr>
-	 *
-	 * </tbody>
-	 *
-	 * </table>
-	 *
-	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
-	 *               processing; empty scripts are ignored
-	 *
-	 * @return this processor
-	 *
-	 * @throws NullPointerException if {@code script} is null
-	 */
-	public Processor sync(final String script) {
-
-		if ( script == null ) {
-			throw new NullPointerException("null script script");
-		}
-
-		if ( !script.isEmpty() ) {
-			scripts.add(script);
-		}
-
-		return this;
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -242,7 +114,6 @@ public final class Processor implements Wrapper {
 		return new Connector()
 				.wrap(preprocessor())
 				.wrap(postprocessor())
-				.wrap(housekeeper())
 				.wrap(handler);
 	}
 
@@ -256,42 +127,6 @@ public final class Processor implements Wrapper {
 	private Wrapper postprocessor() {
 		return handler -> request -> handler.handle(request)
 				.map(response -> response.success() ? process(response, post) : response);
-	}
-
-	private Wrapper housekeeper() {
-		return handler -> request -> handler.handle(request).map(response -> {
-
-			if ( response.success() && !scripts.isEmpty() ) {
-				graph.update(connection -> {
-
-					final IRI item=response.item();
-					final IRI stem=iri(item.getNamespace());
-					final Literal name=literal(item.getLocalName());
-
-					final IRI user=response.request().user();
-					final Literal time=time(true);
-
-					for (final String update : scripts) {
-
-						final Update operation=connection.prepareUpdate(QueryLanguage.SPARQL, update, request.base());
-
-						operation.setBinding("this", item);
-						operation.setBinding("stem", stem);
-						operation.setBinding("name", name);
-
-						operation.setBinding("user", user);
-						operation.setBinding("time", time);
-
-						operation.execute();
-
-					}
-
-				});
-			}
-
-			return response;
-
-		});
 	}
 
 

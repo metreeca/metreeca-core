@@ -22,7 +22,6 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -32,17 +31,12 @@ import org.junit.jupiter.api.Test;
 import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.wrappers.Processor.rdf;
-import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 
 
 final class ProcessorTest {
@@ -167,85 +161,6 @@ final class ProcessorTest {
 				.handle(new Request()) // no RDF payload
 
 				.accept(response -> assertThat(response).hasBody(rdf()))
-		);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testExecuteScriptOnRequestFocus() {
-		exec(() -> new Processor()
-
-				.sync(sparql("insert { ?this rdf:value rdf:first } where {}"))
-				.sync(sparql("insert { ?this rdf:value rdf:rest } where {}"))
-
-				.wrap((Handler)request -> request.reply(response -> response.status(Response.OK)))
-
-				.handle(new Request()
-						.method(Request.POST)
-						.base(Base)
-						.path("/test"))
-
-				.accept(response -> assertThat(graph())
-						.as("repository updated")
-						.isIsomorphicTo(decode("<test> rdf:value rdf:first, rdf:rest."))
-				));
-	}
-
-	@Test void testExecuteScriptOnResponseLocation() {
-		exec(() -> new Processor()
-
-				.sync(sparql("insert { ?this rdf:value rdf:first } where {}"))
-				.sync(sparql("insert { ?this rdf:value rdf:rest } where {}"))
-
-				.wrap((Handler)request -> request.reply(response -> response
-						.status(Response.OK)
-						.header("Location", Base+"test")))
-
-				.handle(new Request()
-						.method(Request.POST)
-						.base(Base)
-						.path("/"))
-
-				.accept(response -> tool(Graph.Factory).query(connection -> {
-
-					assertThat(decode("<test> rdf:value rdf:first, rdf:rest."))
-							.as("repository updated")
-							.isIsomorphicTo(export(connection));
-
-				})));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testPreInsertStaticRDF() {
-		exec(() -> new Processor().pre(rdf(String.format("@prefix rdf: <%s> . <> rdf:value rdf:nil .", RDF.NAMESPACE)))
-
-				.wrap(echo())
-
-				.handle(new Request().body(rdf(), emptySet()))
-
-				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
-								.hasStatement(response.item(), RDF.VALUE, RDF.NIL)
-						)
-				)
-		);
-	}
-
-	@Test void testPostInsertStaticRDF() {
-		exec(() -> new Processor().post(rdf(String.format("@prefix rdf: <%s> . <> rdf:value rdf:nil .", RDF.NAMESPACE)))
-
-				.wrap(echo())
-
-				.handle(new Request().body(rdf(), emptySet()))
-
-				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
-								.hasStatement(response.item(), RDF.VALUE, RDF.NIL)
-						)
-				)
 		);
 	}
 

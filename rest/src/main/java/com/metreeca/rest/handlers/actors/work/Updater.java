@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.work.actors.work;
+package com.metreeca.rest.handlers.actors.work;
 
 
 import com.metreeca.form.*;
