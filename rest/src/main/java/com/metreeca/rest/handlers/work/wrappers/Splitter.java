@@ -122,7 +122,7 @@ public final class Splitter implements Wrapper {
 
 	@Override public Handler wrap(final Handler handler) {
 		return request -> handler.handle(request.shape(
-				cache.computeIfAbsent(request.shape(), splitter)
+				cache.computeIfAbsent(request.shape(), shape -> splitter.apply(shape).map(new Optimizer()))
 		));
 	}
 
