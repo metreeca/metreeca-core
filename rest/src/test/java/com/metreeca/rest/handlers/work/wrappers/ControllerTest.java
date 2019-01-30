@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.work;
+package com.metreeca.rest.handlers.work.wrappers;
 
 import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
@@ -33,6 +33,7 @@ final class ControllerTest {
 	private void exec(final Runnable task) {
 		new Tray().exec(task).clear();
 	}
+
 
 	private Request request() {
 		return new Request();

@@ -124,7 +124,9 @@ public final class ValuesTest {
 
 	public static final Shape Employees=and(
 			server(
-					field(RDF.TYPE, LDP.BASIC_CONTAINER)
+					field(RDF.TYPE, LDP.DIRECT_CONTAINER),
+					field(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
+					field(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 			),
 			field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
 			field(RDFS.COMMENT, and(required(), datatype(XMLSchema.STRING))),

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.work;
+package com.metreeca.rest.handlers.work.wrappers;
 
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
