@@ -18,6 +18,32 @@
 package com.metreeca.rest.formats;
 
 
+import com.metreeca.form.things.Codecs;
+import com.metreeca.rest.Request;
+
+import org.junit.jupiter.api.Test;
+
+import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+
 final class RDFFormatTest {
+
+	@Test void testHandleMissingInput() {
+		new Request().body(rdf()).fold(
+				value -> assertThat(value).isEmpty(),
+				error -> fail("unexpected error {"+error+"}")
+		);
+	}
+
+	@Test void testHandleEmptyInput() {
+		new Request().body(input(), Codecs::input).body(rdf()).fold(
+				value -> assertThat(value).isEmpty(),
+				error -> fail("unexpected error {"+error+"}")
+		);
+	}
 
 }

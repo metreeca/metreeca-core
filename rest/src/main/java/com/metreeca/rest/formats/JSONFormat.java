@@ -84,25 +84,32 @@ public final class JSONFormat implements Format<JsonObject> {
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
 		return message.headers("Content-Type").stream().anyMatch(type -> MIMEPattern.matcher(type).matches())
 				? message.body(reader())
-				.fold(source -> {
-					try (
-							final Reader reader=source.get();
-							final JsonReader jsonReader=Json.createReader(reader)
-					) {
+				.fold(
 
-						return Value(jsonReader.readObject());
+						source -> {
+							try (
+									final Reader reader=source.get();
+									final JsonReader jsonReader=Json.createReader(reader)
+							) {
 
-					} catch ( final JsonParsingException e ) {
+								return Value(jsonReader.readObject());
 
-						return Error(new Failure()
-								.status(Response.BadRequest)
-								.error(Failure.BodyMalformed)
-								.cause(e));
+							} catch ( final JsonParsingException e ) {
 
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}, Result::Error)
+								return Error(new Failure()
+										.status(Response.BadRequest)
+										.error(Failure.BodyMalformed)
+										.cause(e));
+
+							} catch ( final IOException e ) {
+								throw new UncheckedIOException(e);
+							}
+						},
+
+						error -> error.equals(Format.Missing) ? Value(JsonValue.EMPTY_JSON_OBJECT) : Error(error)
+
+				)
+
 				: Error(new Failure().status(Response.UnsupportedMediaType));
 	}
 

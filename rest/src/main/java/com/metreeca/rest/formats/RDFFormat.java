@@ -44,6 +44,8 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
+import static java.util.Collections.emptySet;
+
 
 /**
  * RDF body format.
@@ -76,78 +78,84 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 * status, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(input()).fold(supplier -> {
+		return message.body(input()).fold(
 
-			final IRI focus=message.item();
-			final Shape shape=message.shape();
+				supplier -> {
 
-			final String type=message.header("Content-Type").orElse("");
+					final IRI focus=message.item();
+					final Shape shape=message.shape();
 
-			final RDFParser parser=Formats
-					.service(RDFParserRegistry.getInstance(), TURTLE, type)
-					.getParser();
+					final String type=message.header("Content-Type").orElse("");
 
-			parser.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
-			parser.set(JSONCodec.Focus, focus);
+					final RDFParser parser=Formats
+							.service(RDFParserRegistry.getInstance(), TURTLE, type)
+							.getParser();
 
-			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
-			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
+					parser.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+					parser.set(JSONCodec.Focus, focus);
 
-			parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
-			parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
+					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
+					parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
 
-			final ParseErrorCollector errorCollector=new ParseErrorCollector();
+					parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
+					parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
 
-			parser.setParseErrorListener(errorCollector);
+					final ParseErrorCollector errorCollector=new ParseErrorCollector();
 
-			final Collection<Statement> model=new ArrayList<>();
+					parser.setParseErrorListener(errorCollector);
 
-			parser.setRDFHandler(new AbstractRDFHandler() {
-				@Override public void handleStatement(final Statement statement) { model.add(statement); }
-			});
+					final Collection<Statement> model=new ArrayList<>();
 
-			try (final InputStream input=supplier.get()) {
+					parser.setRDFHandler(new AbstractRDFHandler() {
+						@Override public void handleStatement(final Statement statement) { model.add(statement); }
+					});
 
-				parser.parse(input, focus.stringValue()); // resolve relative IRIs wrt the focus
+					try (final InputStream input=supplier.get()) {
 
-			} catch ( final RDFParseException e ) {
+						parser.parse(input, focus.stringValue()); // resolve relative IRIs wrt the focus
 
-				if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
-					errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
-				}
+					} catch ( final RDFParseException e ) {
 
-			} catch ( final IOException e ) {
+						if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
+							errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
+						}
 
-				throw new UncheckedIOException(e);
+					} catch ( final IOException e ) {
 
-			}
+						throw new UncheckedIOException(e);
 
-			final List<String> fatals=errorCollector.getFatalErrors();
-			final List<String> errors=errorCollector.getErrors();
-			final List<String> warnings=errorCollector.getWarnings();
+					}
 
-			if ( fatals.isEmpty() ) { // return model
+					final List<String> fatals=errorCollector.getFatalErrors();
+					final List<String> errors=errorCollector.getErrors();
+					final List<String> warnings=errorCollector.getWarnings();
 
-				return Value(model);
+					if ( fatals.isEmpty() ) { // return model
 
-			} else { // report errors // !!! log warnings/error/fatals?
+						return Value(model);
 
-				final JsonObjectBuilder trace=Json.createObjectBuilder()
+					} else { // report errors // !!! log warnings/error/fatals?
 
-						.add("format", parser.getRDFFormat().getDefaultMIMEType());
+						final JsonObjectBuilder trace=Json.createObjectBuilder()
 
-				if ( !fatals.isEmpty() ) { trace.add("fatals", Json.createArrayBuilder(fatals)); }
-				if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
-				if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
+								.add("format", parser.getRDFFormat().getDefaultMIMEType());
 
-				return Error(new Failure()
-						.status(Response.BadRequest)
-						.error(Failure.BodyMalformed)
-						.trace(trace.build()));
+						if ( !fatals.isEmpty() ) { trace.add("fatals", Json.createArrayBuilder(fatals)); }
+						if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
+						if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
 
-			}
+						return Error(new Failure()
+								.status(Response.BadRequest)
+								.error(Failure.BodyMalformed)
+								.trace(trace.build()));
 
-		}, Result::Error);
+					}
+
+				},
+
+				error -> error.equals(Format.Missing) ? Value(emptySet()) : Error(error)
+
+		);
 	}
 
 	/**
