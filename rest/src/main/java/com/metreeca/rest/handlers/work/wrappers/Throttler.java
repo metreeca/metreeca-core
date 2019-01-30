@@ -23,7 +23,6 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Extractor;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
-import com.metreeca.form.things.Sets;
 import com.metreeca.form.things.Structures;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
@@ -34,13 +33,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.metreeca.form.Focus.focus;
-import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
+import static com.metreeca.form.things.Structures.network;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
@@ -76,9 +75,9 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>ensures that the request {@linkplain RDFFormat RDF payload} doesn't contains statements exceeding the {@linkplain
- * Structures#description(Resource, boolean, Iterable) symmetric concise bounded description} of the request focus
- * {@linkplain Message#item() item}.</li>
+ * <li>ensures that the request {@linkplain RDFFormat RDF payload} doesn't contains statements exceeding the
+ * {@linkplain Structures#description(Resource, boolean, Iterable) symmetric concise bounded description} of the request
+ * focus {@linkplain Message#item() item}.</li>
  * </ul>
  *
  * <p>If the response includes a non-empty shape:</p>
@@ -107,6 +106,8 @@ public final class Throttler implements Wrapper {
 
 	private final Value task;
 	private final Value view;
+
+	private final Map<Map<IRI, Set<? extends Value>>, Shape> cache=new HashMap<>();
 
 
 	/**
@@ -145,36 +146,24 @@ public final class Throttler implements Wrapper {
 		return handler -> request -> {
 
 			final Shape shape=request.shape();
+			final Set<Value> roles=request.roles();
 
 			if ( pass(shape) ) {
 
-				final Collection<Statement> model=request.body(rdf()).value().orElseGet(Sets::set);
-				final Collection<Statement> envelope=description(request.item(), false, model);
+				return request.body(rdf()).fold(
 
-				final List<Issue> outliers=outliers(model, envelope);
+						value -> outliers(value, description(request.item(), false, value))
+								.map(request::reply)
+								.orElseGet(() -> handler.handle(request)),
 
-				return outliers.isEmpty() ? handler.handle(request) : request.reply(new Failure()
-						.status(Response.UnprocessableEntity)
-						.error(Failure.DataInvalid)
-						.trace(focus(outliers))
+						request::reply
+
 				);
 
 			} else {
 
-				final Shape general=shape.map(new Redactor(map(
-						entry(Form.task, set(task)),
-						entry(Form.view, set(view)),
-						entry(Form.mode, set(Form.verify)),
-						entry(Form.role, set(Form.any))
-				))).map(new Optimizer());
-
-				final Shape authorized=shape.map(new Redactor(map(
-						entry(Form.task, set(task)),
-						entry(Form.view, set(view)),
-						entry(Form.mode, set(Form.verify)),
-						entry(Form.role, request.roles())
-				))).map(new Optimizer());
-
+				final Shape general=shape(shape, Form.verify, set(Form.any));
+				final Shape authorized=shape(shape, Form.verify, roles);
 
 				if ( empty(general) ) {
 
@@ -186,22 +175,16 @@ public final class Throttler implements Wrapper {
 
 				} else {
 
-					final Shape redacted=shape.map(new Redactor(map(
-							entry(Form.task, set(task)),
-							entry(Form.view, set(view)),
-							entry(Form.role, request.roles())
-					))).map(new Optimizer());
+					final Shape redacted=shape(shape, null, roles);
 
+					return request.body(rdf()).fold(
 
-					final Collection<Statement> model=request.body(rdf()).value().orElseGet(Sets::set);
-					final Collection<Statement> envelope=envelope(model, authorized, request.item());
+							value -> outliers(value, envelope(request.item(), authorized, value))
+									.map(request::reply)
+									.orElseGet(() -> handler.handle(request.shape(redacted))),
 
-					final List<Issue> outliers=outliers(model, envelope);
+							request::reply
 
-					return outliers.isEmpty() ? handler.handle(request.shape(redacted)) : request.reply(new Failure()
-							.status(Response.UnprocessableEntity)
-							.error(Failure.DataInvalid)
-							.trace(focus(outliers))
 					);
 
 				}
@@ -214,24 +197,21 @@ public final class Throttler implements Wrapper {
 	private Wrapper post() {
 		return handler -> request -> handler.handle(request).map(response -> {
 
+			final IRI focus=request.item();
 			final Shape shape=response.shape();
 
 			if ( pass(shape) ) {
 
 				return response
-						.pipe(rdf(), rdf -> Value(Structures.network(request.item(), rdf)));
+						.pipe(rdf(), rdf -> Value(network(focus, rdf)));
 
 			} else {
 
-				final Shape redacted=shape
-						.map(Shape.task(task))
-						.map(Shape.view(view))
-						.map(Shape.role(request.roles()))
-						.map(Shape.mode(Form.verify));
+				final Shape redacted=shape(shape, Form.verify, request.roles());
 
 				return response
 						.shape(redacted)
-						.pipe(rdf(), model -> Value(empty(redacted) ? set() : envelope(model, redacted, request.item())));
+						.pipe(rdf(), model -> Value(empty(redacted) ? set() : envelope(focus, redacted, model)));
 
 			}
 
@@ -239,16 +219,42 @@ public final class Throttler implements Wrapper {
 	}
 
 
-	private Set<Statement> envelope(final Collection<Statement> model, final Shape shape, final Value focus) {
+	private Shape shape(final Shape shape, final IRI mode, final Set<Value> roles) {
+		return cache.computeIfAbsent(
+
+				mode == null ? map(
+						entry(Form.task, set(task)),
+						entry(Form.view, set(view)),
+						entry(Form.role, roles)
+				) : map(
+						entry(Form.task, set(task)),
+						entry(Form.view, set(view)),
+						entry(Form.mode, set(mode)),
+						entry(Form.role, roles)
+				),
+
+				variables -> shape.map(new Redactor(variables)).map(new Optimizer())
+
+		);
+	}
+
+	private Set<Statement> envelope(final Value focus, final Shape shape, final Collection<Statement> model) {
 		return shape.map(new Extractor(model, singleton(focus)))
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
-	private List<Issue> outliers(final Collection<Statement> model, final Collection<Statement> envelope) {
-		return model.stream()
+	private Optional<Failure> outliers(final Collection<Statement> value, final Collection<Statement> envelope) {
+
+		final List<Issue> outliers=value.stream()
 				.filter(statement -> !envelope.contains(statement))
-				.map(outlier -> issue(Issue.Level.Error, "statement outside allowed envelope "+outlier, pass()))
+				.map(outlier -> Issue.issue(Issue.Level.Error, "statement outside allowed envelope "+outlier))
 				.collect(toList());
+
+		return outliers.isEmpty() ? Optional.empty() : Optional.of(new Failure()
+				.status(Response.UnprocessableEntity)
+				.error(Failure.DataInvalid)
+				.trace(focus(outliers))
+		);
 	}
 
 }
