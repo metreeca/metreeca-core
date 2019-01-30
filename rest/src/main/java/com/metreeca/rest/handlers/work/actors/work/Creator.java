@@ -15,20 +15,17 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.work.actors.work;
 
 
+import com.metreeca.form.Focus;
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
-import com.metreeca.form.Focus;
 import com.metreeca.form.Shape;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
-import com.metreeca.form.probes.Outliner;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.Actor;
-import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -44,14 +41,14 @@ import java.util.function.Supplier;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.Shape.*;
+import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.Shape.task;
+import static com.metreeca.form.Shape.view;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.rewrite;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -109,7 +106,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Creator extends Actor<Creator> {
+public final class Creator implements Handler {
 
 	/*
 	 * Shared lock for serializing slug operations (concurrent graph txns may produce conflicting results).
@@ -126,76 +123,29 @@ public final class Creator extends Actor<Creator> {
 	private BiFunction<Request, Model, String> slug=uuid();
 
 
-	public Creator() {
-		delegate(query(false)
-				.wrap(modulator().task(Form.create).view(Form.detail))
-				.wrap(processor())
-				.wrap((Request request) -> request.body(rdf())
-
-						.value(model -> { // add implied statements
-
-							model.addAll(request.shape()
-									.map(mode(Form.verify))
-									.map(new Outliner(request.item()))
-									.collect(toList())
-							);
-
-							return model;
-
-						})
-
-						.fold(
-								model -> process(request, model),
-								request::reply
-						)));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Inserts a request RDF pre-processing filter.
-	 *
-	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
-	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
-	 *
-	 * @return this creator
-	 *
-	 * @throws NullPointerException if {@code filter} is null
-	 * @see Processor#pre(BiFunction)
-	 */
-	public Creator pre(final BiFunction<Request, Model, Model> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		processor().pre(filter);
-
-		return this;
-	}
-
-	/**
-	 * Inserts a SPARQL Update housekeeping script.
-	 *
-	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
-	 *               processing; empty scripts are ignored
-	 *
-	 * @return this creator
-	 *
-	 * @throws NullPointerException if {@code script} is null
-	 * @see Processor#sync(String)
-	 */
-	public Creator sync(final String script) {
-
-		if ( script == null ) {
-			throw new NullPointerException("null script");
-		}
-
-		processor().sync(script);
-
-		return this;
-	}
+	//public Creator() {
+	//	delegate(query(false)
+	//			// !!! .wrap(modulator().task(Form.create).view(Form.detail))
+	//			.wrap(processor())
+	//			.wrap((Request request) -> request.body(rdf())
+	//
+	//					.value(model -> { // add implied statements
+	//
+	//						model.addAll(request.shape()
+	//								.map(mode(Form.verify))
+	//								.map(new Outliner(request.item()))
+	//								.collect(toList())
+	//						);
+	//
+	//						return model;
+	//
+	//					})
+	//
+	//					.fold(
+	//							model -> process(request, model),
+	//							request::reply
+	//					)));
+	//}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +197,7 @@ public final class Creator extends Actor<Creator> {
 				final IRI target=iri(request.stem(), slug);
 
 				final Shape shape=request.shape();
-				final Collection<Statement> rewritten=trace(rewrite(source, target, model));
+				final Collection<Statement> rewritten=/* !!! trace*/(rewrite(source, target, model));
 
 				final Focus focus=pass(shape)
 						? new CellEngine(connection).create(target, rewritten)
@@ -345,6 +295,10 @@ public final class Creator extends Actor<Creator> {
 			return String.valueOf(count);
 
 		});
+	}
+
+	@Override public Responder handle(final Request request) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
 }

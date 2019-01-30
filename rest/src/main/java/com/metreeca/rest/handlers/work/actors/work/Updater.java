@@ -15,37 +15,26 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.work.actors.work;
 
 
 import com.metreeca.form.*;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
-import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Outliner;
-import com.metreeca.form.probes.Traverser;
-import com.metreeca.form.shapes.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.Actor;
-import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
-import java.util.function.BiFunction;
 
 import javax.json.JsonValue;
 
 import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.pass;
-import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Option.option;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
@@ -100,65 +89,21 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Updater extends Actor<Updater> {
+public final class Updater implements Handler{
 
 	private final Graph graph=tool(Graph.Factory);
 
 
-	public Updater() {
-		delegate(query(false)
-				.wrap(modulator().task(Form.update).view(Form.detail))
-				.wrap(processor())
-				.wrap(this::process)
-		);
-	}
+	//public Updater() {
+	//	delegate(query(false)
+	//			// !!! .wrap(modulator().task(Form.update).view(Form.detail))
+	//			.wrap(processor())
+	//			.wrap(this::process)
+	//	);
+	//}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Inserts a request RDF pre-processing filter.
-	 *
-	 * @param filter the request RDF pre-processing filter to be inserted; takes as argument an incoming request and its
-	 *               {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
-	 *
-	 * @return this updater
-	 *
-	 * @throws NullPointerException if {@code filter} is null
-	 * @see Processor#pre(BiFunction)
-	 */
-	public Updater pre(final BiFunction<Request, Model, Model> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		processor().pre(filter);
-
-		return this;
-	}
-
-	/**
-	 * Inserts a SPARQL Update housekeeping script.
-	 *
-	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
-	 *               processing; empty scripts are ignored
-	 *
-	 * @return this updater
-	 *
-	 * @throws NullPointerException if {@code script} is null
-	 * @see Processor#sync(String)
-	 */
-	public Updater sync(final String script) {
-
-		if ( script == null ) {
-			throw new NullPointerException("null script");
-		}
-
-		processor().sync(script);
-
-		return this;
-	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -184,8 +129,8 @@ public final class Updater extends Actor<Updater> {
 
 			} else {
 
-				final Shape shape=resource(request.shape());
-				final Collection<Statement> update=trace(expand(focus, shape, model));
+				final Shape shape=/* !!! resource*/(request.shape());
+				final Collection<Statement> update=/* !!! trace*/(expand(focus, shape, model));
 
 				final Focus report=pass(shape)
 						? new CellEngine(connection).update(focus, update)
@@ -224,79 +169,8 @@ public final class Updater extends Actor<Updater> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Shape container(final Shape shape) { // prune ldp:contains field // !!! review
-		return shape
-
-				.map(new Traverser<Shape>() {
-
-					@Override public Shape probe(final Shape shape) {
-						return shape;
-					}
-
-
-					@Override public Shape probe(final Field field) {
-						return field.getIRI().equals(LDP.CONTAINS) ? and() : field;
-					}
-
-
-					@Override public Shape probe(final And and) {
-						return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
-					}
-
-					@Override public Shape probe(final Or or) {
-						return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
-					}
-
-					@Override public Shape probe(final Option option) {
-						return option(
-								option.getTest(),
-								option.getPass().map(this),
-								option.getFail().map(this)
-						);
-					}
-
-				})
-
-				.map(new Optimizer());
+	@Override public Responder handle(final Request request) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
-
-	private Shape resource(final Shape shape) {
-		return container(shape).equals(shape) ? shape : shape // !!! optimize using parallel container/resource probing
-
-				.map(new Traverser<Shape>() {
-
-					@Override public Shape probe(final Shape shape1) {
-						return and();
-					}
-
-
-					@Override public Shape probe(final Field field) {
-						return field.getIRI().equals(LDP.CONTAINS) ? field.getShape() : and();
-					}
-
-
-					@Override public Shape probe(final And and) {
-						return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
-					}
-
-					@Override public Shape probe(final Or or) {
-						return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
-					}
-
-					@Override public Shape probe(final Option option) {
-						return option(
-								option.getTest(),
-								option.getPass().map(this),
-								option.getFail().map(this)
-						);
-					}
-
-				})
-
-				.map(new Optimizer());
-	}
-
 }
 

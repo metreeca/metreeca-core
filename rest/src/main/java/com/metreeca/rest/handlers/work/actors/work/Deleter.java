@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.work.actors.work;
 
 
 import com.metreeca.form.Form;
@@ -23,8 +23,6 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Actor;
-import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -63,43 +61,19 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Deleter extends Actor<Deleter> {
+public final class Deleter implements Handler {
 
 	private final Graph graph=tool(Graph.Factory);
 
 
-	public Deleter() {
-		delegate(query(false)
-				.wrap(modulator().task(Form.delete).view(Form.detail))
-				.wrap(processor())
-				.wrap(this::process)
-		);
-	}
+	//public Deleter() {
+	//	delegate(query(false)
+	//			// !!! .wrap(modulator().task(Form.delete).view(Form.detail))
+	//			.wrap(processor())
+	//			.wrap(this::process)
+	//	);
+	//}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Inserts a SPARQL Update housekeeping script.
-	 *
-	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
-	 *               processing; empty scripts are ignored
-	 *
-	 * @return this deleter
-	 *
-	 * @throws NullPointerException if {@code script} is null
-	 * @see Processor#sync(String)
-	 */
-	public Deleter sync(final String script) {
-
-		if ( script == null ) {
-			throw new NullPointerException("null script");
-		}
-
-		processor().sync(script);
-
-		return this;
-	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -131,4 +105,7 @@ public final class Deleter extends Actor<Deleter> {
 		}));
 	}
 
+	@Override public Responder handle(final Request request) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
 }

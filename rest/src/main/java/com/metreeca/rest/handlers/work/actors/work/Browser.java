@@ -15,19 +15,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.work.actors.work;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.Actor;
-import com.metreeca.rest.wrappers.Processor;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -35,12 +30,9 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Values.time;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.emptySet;
@@ -76,34 +68,34 @@ import static java.util.Collections.emptySet;
  *
  * <p>Empty generated models are reported with a {@link Response#NotFound} status code.</p>
  */
-public final class Browser extends Actor<Browser> {
+public final class Browser implements Handler {
 
 	private Function<Request, Collection<Statement>> model=request -> emptySet();
 
 	private final Graph graph=tool(Graph.Factory);
 
 
-	public Browser() {
-		delegate(query(false)
-				.wrap(modulator().task(Form.relate).view(Form.detail))
-				.wrap(processor())
-				.wrap((Request request) -> {
-
-					final Collection<Statement> model=this.model.apply(request);
-
-					return request.reply(response -> model.isEmpty()
-
-							? response.status(Response.NotFound)
-
-							: response.status(Response.OK)
-
-							.map(r -> pass(request.shape()) ? r : r.shape(request.shape()))
-
-							.body(rdf(), model)
-					);
-				})
-		);
-	}
+	//public Browser() {
+	//	delegate(query(false)
+	//			// !!! .wrap(modulator().task(Form.relate).view(Form.detail))
+	//			.wrap(processor())
+	//			.wrap((Request request) -> {
+	//
+	//				final Collection<Statement> model=this.model.apply(request);
+	//
+	//				return request.reply(response -> model.isEmpty()
+	//
+	//						? response.status(Response.NotFound)
+	//
+	//						: response.status(Response.OK)
+	//
+	//						.map(r -> pass(request.shape()) ? r : r.shape(request.shape()))
+	//
+	//						.body(rdf(), model)
+	//				);
+	//			})
+	//	);
+	//}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -198,27 +190,8 @@ public final class Browser extends Actor<Browser> {
 		return this;
 	}
 
-
-	/**
-	 * Inserts a response post-processing RDF filter.
-	 *
-	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
-	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
-	 *
-	 * @return this browser
-	 *
-	 * @throws NullPointerException if {@code filter} is null
-	 * @see Processor#post(BiFunction)
-	 */
-	public Browser post(final BiFunction<Response, Model, Model> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		processor().post(filter);
-
-		return this;
+	@Override public Responder handle(final Request request) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
 }

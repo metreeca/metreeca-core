@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.work.actors.work;
 
 
 import com.metreeca.rest.Request;
@@ -23,7 +23,6 @@ import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.Form.none;
@@ -87,41 +86,41 @@ final class DeleterTest {
 	}
 
 
-	@Test void testDirectUnauthorized() {
-		exec(() -> new Deleter().role(Manager)
+	//@Test void testDirectUnauthorized() {
+	//	exec(() -> new Deleter().role(Manager)
+	//
+	//			.handle(direct().user(none).roles(Salesman))
+	//
+	//			.accept(response -> {
+	//
+	//				assertThat(response)
+	//						.hasStatus(Response.Unauthorized)
+	//						.doesNotHaveBody();
+	//
+	//				assertThat(graph())
+	//						.as("graph unchanged")
+	//						.isIsomorphicTo(Dataset);
+	//
+	//			}));
+	//}
 
-				.handle(direct().user(none).roles(Salesman))
-
-				.accept(response -> {
-
-					assertThat(response)
-							.hasStatus(Response.Unauthorized)
-							.doesNotHaveBody();
-
-					assertThat(graph())
-							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
-
-				}));
-	}
-
-	@Test void testDirectForbidden() {
-		exec(() -> new Deleter().role(Manager)
-
-				.handle(direct().user(RDF.NIL).roles(Salesman))
-
-				.accept(response -> {
-
-					assertThat(response)
-							.hasStatus(Response.Forbidden)
-							.doesNotHaveBody();
-
-					assertThat(graph())
-							.as("graph unchanged")
-							.isIsomorphicTo(Dataset);
-
-				}));
-	}
+	//@Test void testDirectForbidden() {
+	//	exec(() -> new Deleter().role(Manager)
+	//
+	//			.handle(direct().user(RDF.NIL).roles(Salesman))
+	//
+	//			.accept(response -> {
+	//
+	//				assertThat(response)
+	//						.hasStatus(Response.Forbidden)
+	//						.doesNotHaveBody();
+	//
+	//				assertThat(graph())
+	//						.as("graph unchanged")
+	//						.isIsomorphicTo(Dataset);
+	//
+	//			}));
+	//}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

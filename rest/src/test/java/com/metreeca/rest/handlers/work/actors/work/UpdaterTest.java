@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers.work.actors.work;
 
 
 import com.metreeca.form.Form;
@@ -24,7 +24,6 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.function.Function;
 
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.JSONAssert.assertThat;
@@ -129,41 +127,41 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 		}
 
 
-		@Test void testUnauthorized() {
-			exec(() -> new Updater().role(Manager)
+		//@Test void testUnauthorized() {
+		//	exec(() -> new Updater().role(Manager)
+		//
+		//			.handle(resource().user(Form.none).roles(Salesman))
+		//
+		//			.accept(response -> {
+		//
+		//				assertThat(response)
+		//						.hasStatus(Response.Unauthorized)
+		//						.doesNotHaveBody();
+		//
+		//				assertThat(graph())
+		//						.as("graph unchanged")
+		//						.isIsomorphicTo(small());
+		//
+		//			}));
+		//}
 
-					.handle(resource().user(Form.none).roles(Salesman))
-
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(Response.Unauthorized)
-								.doesNotHaveBody();
-
-						assertThat(graph())
-								.as("graph unchanged")
-								.isIsomorphicTo(small());
-
-					}));
-		}
-
-		@Test void testForbidden() {
-			exec(() -> new Updater().role(Manager)
-
-					.handle(resource().user(RDF.NIL).roles(Salesman))
-
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(Response.Forbidden)
-								.doesNotHaveBody();
-
-						assertThat(graph())
-								.as("graph unchanged")
-								.isIsomorphicTo(small());
-
-					}));
-		}
+		//@Test void testForbidden() {
+		//	exec(() -> new Updater().role(Manager)
+		//
+		//			.handle(resource().user(RDF.NIL).roles(Salesman))
+		//
+		//			.accept(response -> {
+		//
+		//				assertThat(response)
+		//						.hasStatus(Response.Forbidden)
+		//						.doesNotHaveBody();
+		//
+		//				assertThat(graph())
+		//						.as("graph unchanged")
+		//						.isIsomorphicTo(small());
+		//
+		//			}));
+		//}
 
 		@Test void testMalformedData() {
 			exec(() -> new Updater()
@@ -268,23 +266,23 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 					}));
 		}
 
-		@Test void testForbidden() {
-			exec(() -> new Updater().role(RDF.FIRST, RDF.REST)
-
-					.handle(shaped().shape(or()))
-
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(Response.Forbidden)
-								.doesNotHaveBody();
-
-						assertThat(graph())
-								.as("graph unchanged")
-								.isIsomorphicTo(small());
-
-					}));
-		}
+		//@Test void testForbidden() {
+		//	exec(() -> new Updater().role(RDF.FIRST, RDF.REST)
+		//
+		//			.handle(shaped().shape(or()))
+		//
+		//			.accept(response -> {
+		//
+		//				assertThat(response)
+		//						.hasStatus(Response.Forbidden)
+		//						.doesNotHaveBody();
+		//
+		//				assertThat(graph())
+		//						.as("graph unchanged")
+		//						.isIsomorphicTo(small());
+		//
+		//			}));
+		//}
 
 		@Test void testMalformedData() {
 			exec(() -> new Updater()
