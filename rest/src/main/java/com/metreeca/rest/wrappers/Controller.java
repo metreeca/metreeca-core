@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.work.wrappers;
+package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
@@ -34,6 +34,9 @@ import static java.util.Arrays.asList;
 
 /**
  * Role-base access controller.
+ *
+ * <p>Authorizes request checking that their user {@linkplain Request#roles() roles} intersect a provided set of
+ * {@linkplain #Controller(Collection) enabled roles}.</p>
  */
 public final class Controller implements Wrapper {
 

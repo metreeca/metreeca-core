@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.work.wrappers;
+package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.things.ValuesTest;
@@ -34,8 +34,8 @@ import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.things.ValuesTest.Employees;
 import static com.metreeca.form.things.ValuesTest.term;
-import static com.metreeca.rest.handlers.work.wrappers.Splitter.container;
-import static com.metreeca.rest.handlers.work.wrappers.Splitter.resource;
+import static com.metreeca.rest.wrappers.Splitter.container;
+import static com.metreeca.rest.wrappers.Splitter.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;

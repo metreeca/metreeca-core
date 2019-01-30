@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.work.wrappers;
+package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;

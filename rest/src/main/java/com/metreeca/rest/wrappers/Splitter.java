@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.work.wrappers;
+package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Optimizer;
@@ -23,6 +23,7 @@ import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Sets;
 import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
 import com.metreeca.rest.Wrapper;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -48,6 +49,9 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Shape splitter.
+ *
+ * <p>Replaces the shape {@linkplain Request#shape() associated} with requests with a specific region of interest
+ * extracted using a provided {@linkplain #Splitter(UnaryOperator) splitter operator}.</p>
  */
 public final class Splitter implements Wrapper {
 
@@ -60,6 +64,12 @@ public final class Splitter implements Wrapper {
 	);
 
 
+	/**
+	 * Creates a container splitter operator.
+	 *
+	 * @return a splitting operator returning a shape pruned of {@linkplain LDP#CONTAINS ldp:contains} fields, if one is
+	 * actually included, or an empty shape, otherwise
+	 */
 	public static UnaryOperator<Shape> container() {
 		return shape -> {
 
@@ -76,6 +86,12 @@ public final class Splitter implements Wrapper {
 		};
 	}
 
+	/**
+	 * Creates a resource splitter operator.
+	 *
+	 * @return a splitting operator returning a shape limited to the shapes associated to {@linkplain LDP#CONTAINS
+	 * ldp:contains} fields, if one is actually included, or the source shape, otherwise
+	 */
 	public static UnaryOperator<Shape> resource() {
 		return shape -> {
 
@@ -108,6 +124,14 @@ public final class Splitter implements Wrapper {
 	private final Map<Shape, Shape> cache=new IdentityHashMap<>();
 
 
+	/**
+	 * Creates a shape splitter.
+	 *
+	 * @param splitter the shape operator to be used for identifying the region of interest in the request shae to be
+	 *                 replaced
+	 *
+	 * @throws NullPointerException if {@code splitter} is null
+	 */
 	public Splitter(final UnaryOperator<Shape> splitter) {
 
 		if ( splitter == null ) {
