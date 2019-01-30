@@ -84,13 +84,13 @@ final class RewriterTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testRejectRelativeBase() {
-		assertThrows(IllegalArgumentException.class, () -> new Rewriter().base("/example.org/"));
+		assertThrows(IllegalArgumentException.class, () -> new Rewriter("/example.org/"));
 	}
 
 	@Test void testHeadRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					assertThat(request.user()).as("rewritten user").isEqualTo(internal("user"));
 					assertThat(request.roles()).as("rewritten roles").containsExactly(internal("role"));
@@ -141,7 +141,7 @@ final class RewriterTest {
 	@Test void testHeadEncodedRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					assertThat(request.query())
 							.as("rewritten encoded query")
@@ -164,7 +164,7 @@ final class RewriterTest {
 	@Test void testShapeRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					assertThat(request.shape()).isEqualTo(and(
 							Field.field(internal("p")),
@@ -202,7 +202,7 @@ final class RewriterTest {
 	@Test void testRDFRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					request.body(rdf()).use(
 							model -> ModelAssert.assertThat(internal("s", "p", "o"))
@@ -240,7 +240,7 @@ final class RewriterTest {
 
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 							.as("request json rewritten")

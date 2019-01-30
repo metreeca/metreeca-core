@@ -56,9 +56,10 @@ import static java.util.stream.Collectors.toMap;
 
 
 /**
- * IRI rewriting wrapper.
+ * IRI rewriter.
  *
- * <p>Rewrites IRIs in requests and responses to/from an internal canonical IRI {@linkplain #base(String) base}.</p>
+ * <p>Rewrites IRIs in requests and responses to/from an internal canonical IRI {@linkplain #Rewriter(String)
+ * base}.</p>
  *
  * <p>The following message components are inspected for rewritable IRIs:</p>
  *
@@ -75,27 +76,23 @@ import static java.util.stream.Collectors.toMap;
  *
  * <p><strong>Warning</strong> / This wrapper is intended to ensure data portability between development and production
  * environment and may cause severe performance degradation for large payloads: setting the canonical {@linkplain
- * #base(String) base} to the expected public server base effectively disables rewriting in production.</p>
+ * #Rewriter(String) base} to the expected public server base effectively disables rewriting in production.</p>
  */
 public final class Rewriter implements Wrapper {
 
-	private String base;
+	private final String base;
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Configures the canonical IRI base.
+	 * Creates a IRI rewriter.
 	 *
 	 * @param base the canonical internal IRI base mapped to/from this rewriter; empty for no rewriting
-	 *
-	 * @return this rewriter
 	 *
 	 * @throws NullPointerException     if {@code base} is null
 	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or ends with a {@linkplain
 	 *                                  Character#isUnicodeIdentifierPart(char) Unicode identifier character}
 	 */
-	public Rewriter base(final String base) {
+	public Rewriter(final String base) {
 
 		if ( base == null ) {
 			throw new NullPointerException("null base");
@@ -110,8 +107,6 @@ public final class Rewriter implements Wrapper {
 		}
 
 		this.base=base;
-
-		return this;
 	}
 
 
