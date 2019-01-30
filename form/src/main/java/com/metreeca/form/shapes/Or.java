@@ -44,11 +44,11 @@ public final class Or implements Shape {
 		return empty;
 	}
 
-	public static Or or(final Shape... shapes) {
-		return or(list(shapes));
+	@SafeVarargs public static <S extends Shape> Or or(final S... shapes) {
+		return new Or(list(shapes));
 	}
 
-	public static Or or(final Collection<Shape> shapes) {
+	public static Or or(final Collection<? extends Shape> shapes) {
 		return new Or(shapes);
 	}
 
@@ -58,7 +58,7 @@ public final class Or implements Shape {
 	private final Collection<Shape> shapes;
 
 
-	private Or(final Collection<Shape> shapes) {
+	private Or(final Collection<? extends Shape> shapes) {
 
 		if ( shapes == null ) {
 			throw new NullPointerException("null shapes");

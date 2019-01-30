@@ -42,11 +42,11 @@ public final class And implements Shape {
 
 	public static And and() { return empty; }
 
-	public static And and(final Shape... shapes) {
-		return and(list(shapes));
+	@SafeVarargs public static  <S extends Shape> And and(final S... shapes) {
+		return new And(list(shapes));
 	}
 
-	public static And and(final Collection<Shape> shapes) {
+	public static  <S extends Shape> And and(final Collection<S> shapes) {
 		return new And(shapes);
 	}
 
@@ -56,7 +56,7 @@ public final class And implements Shape {
 	private final Collection<Shape> shapes;
 
 
-	private And(final Collection<Shape> shapes) {
+	private And(final Collection<?extends Shape> shapes) {
 
 		if ( shapes == null ) {
 			throw new NullPointerException("null shapes");
