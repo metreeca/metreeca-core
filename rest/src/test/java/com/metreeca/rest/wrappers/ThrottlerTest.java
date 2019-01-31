@@ -37,6 +37,8 @@ import java.util.Collection;
 
 import javax.json.JsonValue;
 
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
@@ -77,7 +79,7 @@ final class ThrottlerTest {
 	}
 
 
-	@Nested final class SimpleTest {
+	@Nested final class Simple {
 
 		private Throttler throttler() {
 			return new Throttler(Form.any, Form.any);
@@ -142,7 +144,7 @@ final class ThrottlerTest {
 
 	}
 
-	@Nested final class ShapedTest {
+	@Nested final class Shaped {
 
 		private final Shape shape=ValuesTest.Employee;
 
@@ -185,6 +187,17 @@ final class ThrottlerTest {
 					.wrap(handler())
 
 					.handle(request().roles(Form.none))
+
+					.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
+			);
+		}
+
+		@Test void testRejectUnauthorizedRequestsIgnoringAnnotations() {
+			exec(() -> throttler()
+
+					.wrap(handler())
+
+					.handle(request().roles(Form.none).shape(and(shape, meta(RDF.VALUE, RDF.NIL))))
 
 					.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
 			);

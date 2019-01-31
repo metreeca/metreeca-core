@@ -20,14 +20,13 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Extractor;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.probes.*;
 import com.metreeca.form.things.Structures;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,6 +39,7 @@ import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
 import static com.metreeca.form.things.Structures.network;
+import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
@@ -145,10 +145,7 @@ public final class Throttler implements Wrapper {
 	private Wrapper pre() {
 		return handler -> request -> {
 
-			final Shape shape=request.shape();
-			final Set<Value> roles=request.roles();
-
-			if ( pass(shape) ) {
+			if ( !request.driven() ) {
 
 				return request.body(rdf()).fold(
 
@@ -162,8 +159,11 @@ public final class Throttler implements Wrapper {
 
 			} else {
 
-				final Shape general=shape(shape, Form.verify, set(Form.any));
-				final Shape authorized=shape(shape, Form.verify, roles);
+				final Shape shape=request.shape();
+				final Set<Value> roles=request.roles();
+
+				final Shape general=shape(shape, true, Form.verify, set(Form.any));
+				final Shape authorized=shape(shape, true, Form.verify, roles);
 
 				if ( empty(general) ) {
 
@@ -175,7 +175,7 @@ public final class Throttler implements Wrapper {
 
 				} else {
 
-					final Shape redacted=shape(shape, null, roles);
+					final Shape redacted=shape(shape, false, null, roles);
 
 					return request.body(rdf()).fold(
 
@@ -207,7 +207,7 @@ public final class Throttler implements Wrapper {
 
 			} else {
 
-				final Shape redacted=shape(shape, Form.verify, request.roles());
+				final Shape redacted=shape(shape, false, Form.verify, request.roles());
 
 				return response
 						.shape(redacted)
@@ -219,21 +219,30 @@ public final class Throttler implements Wrapper {
 	}
 
 
-	private Shape shape(final Shape shape, final IRI mode, final Set<Value> roles) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Shape shape(final Shape shape, final boolean pruned, final IRI mode, final Set<Value> roles) {
 		return cache.computeIfAbsent(
 
 				mode == null ? map(
+						entry(RDF.VALUE, set(literal(pruned))),
 						entry(Form.task, set(task)),
 						entry(Form.view, set(view)),
 						entry(Form.role, roles)
 				) : map(
+						entry(RDF.VALUE, set(literal(pruned))),
 						entry(Form.task, set(task)),
 						entry(Form.view, set(view)),
 						entry(Form.mode, set(mode)),
 						entry(Form.role, roles)
 				),
 
-				variables -> shape.map(new Redactor(variables)).map(new Optimizer())
+				variables -> shape
+						.map(new Redactor(variables))
+						.map(pruned ? new Pruner() : new Visitor<Shape>() {
+							@Override public Shape probe(final Shape shape) { return shape; }
+						})
+						.map(new Optimizer())
 
 		);
 	}
