@@ -115,10 +115,12 @@ final class InferencerTest {
 				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer or() stripped by optimization
 	}
 
-	@Test void testOption() {
+	@Test void testOption() { // !!! uncomment when filtering constraints are accepted by when()
 		assertImplies("nested shapes are expanded",
-				when(clazz(RDF.NIL), clazz(RDF.NIL), clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> when(and(s.getTest(), i), and(s.getPass(), i), and(s.getFail(), i)));
+				when(and()/* !!! clazz(RDF.NIL) */, clazz(RDF.NIL), clazz(RDF.NIL)),
+				datatype(Values.ResourceType),
+				(s, i) -> when(and()/* !!! and(s.getTest(), i)*/, and(s.getPass(), i), and(s.getFail(), i))
+		);
 	}
 
 

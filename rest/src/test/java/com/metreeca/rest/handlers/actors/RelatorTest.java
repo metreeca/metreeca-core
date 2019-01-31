@@ -28,10 +28,10 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.form.things.ValuesTest.term;
@@ -155,7 +155,7 @@ final class RelatorTest {
 			@Test void testUnauthorized() {
 				exec(() -> new Relator()
 
-						.handle(resource().shape(role(set(Form.root), field(RDF.TYPE))))
+						.handle(resource().shape(when(guard(Form.role, Form.root), field(RDF.TYPE))))
 
 						.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
 

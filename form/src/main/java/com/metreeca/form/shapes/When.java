@@ -18,6 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Traverser;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Strings.indent;
@@ -28,6 +29,11 @@ import static com.metreeca.form.things.Strings.indent;
  *
  * <p>States that the focus set is consistent either with a {@linkplain #getPass() positive} shape, if consistent also
  * with a {@linkplain #getTest() test} shape, or with a {@linkplain #getFail() negative} shape, otherwise.</p>
+ *
+ *
+ * <p><strong>Warning</strong> / Test shapes are currently limited to non-filtering constraints, that is to parametric
+ * {@linkplain Guard guards}, logical operators and annotations: full conditional shape matching will be evaluated for
+ * future releases.</p>
  */
 public final class When implements Shape {
 
@@ -59,6 +65,10 @@ public final class When implements Shape {
 
 		if ( fail == null ) {
 			throw new NullPointerException("null fail shape");
+		}
+
+		if ( test.map(new FilteringProbe())) {
+			throw new UnsupportedOperationException("test shape are limited to non-filtering constraints");
 		}
 
 		this.test=test;
@@ -111,6 +121,39 @@ public final class When implements Shape {
 				+indent(pass.toString())
 				+(fail.equals(and()) ? "" : ",\n"+indent(fail.toString()))
 				+"\n)";
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class FilteringProbe extends Traverser<Boolean> {
+
+		@Override public Boolean probe(final Shape shape) { return true; }
+
+
+		@Override public Boolean probe(final Meta meta) { return false; }
+
+		@Override public Boolean probe(final Guard guard) { return false; }
+
+
+		@Override public Boolean probe(final Field field) {
+			return field.getShape().map(this);
+		}
+
+		@Override public Boolean probe(final And and) {
+			return and.getShapes().stream().anyMatch(shape -> shape.map(this));
+		}
+
+		@Override public Boolean probe(final Or or) {
+			return or.getShapes().stream().anyMatch(shape -> shape.map(this));
+		}
+
+		@Override public Boolean probe(final When when) {
+			return when.getTest().map(this)
+					|| when.getPass().map(this)
+					|| when.getFail().map(this);
+		}
+
 	}
 
 }

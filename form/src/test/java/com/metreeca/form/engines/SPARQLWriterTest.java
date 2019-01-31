@@ -436,17 +436,17 @@ final class SPARQLWriterTest {
 
 	}
 
-	@Test void testValidateOption() {
-
-		final Shape shape=When.when(any(literal(1)), any(literal(2)), any(literal(3)));
-
-		assertThat(validate(shape, literal(1), literal(2))).as("true / pass").isTrue();
-		assertThat(validate(shape, literal(1), literal(3))).as("true / fail").isFalse();
-
-		assertThat(validate(shape, literal(3))).as("false / pass").isTrue();
-		assertThat(validate(shape, literal(2))).as("false / fail").isFalse();
-
-	}
+	//@Test void testValidateCondition() {
+	//
+	//	final Shape shape=when(any(literal(1)), any(literal(2)), any(literal(3)));
+	//
+	//	assertThat(validate(shape, literal(1), literal(2))).as("true / pass").isTrue();
+	//	assertThat(validate(shape, literal(1), literal(3))).as("true / fail").isFalse();
+	//
+	//	assertThat(validate(shape, literal(3))).as("false / pass").isTrue();
+	//	assertThat(validate(shape, literal(2))).as("false / fail").isFalse();
+	//
+	//}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
