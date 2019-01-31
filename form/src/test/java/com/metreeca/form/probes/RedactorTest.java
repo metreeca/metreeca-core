@@ -19,12 +19,13 @@ package com.metreeca.form.probes;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.When;
+import com.metreeca.form.shapes.Guard;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
@@ -55,25 +56,25 @@ final class RedactorTest {
 
 	@Test void testIgnoreUndefinedConditions() {
 
-		final When when=When.when(RDF.VALUE, RDF.FIRST);
+		final Guard guard=guard(RDF.VALUE, RDF.FIRST);
 
-		assertThat(when.map(empty)).as("undefined variable").isEqualTo(when);
+		assertThat(guard.map(empty)).as("undefined variable").isEqualTo(guard);
 
 	}
 
 	@Test void testReplaceDefinedConditions() {
 
-		final When when=When.when(RDF.VALUE, RDF.FIRST);
+		final Guard guard=guard(RDF.VALUE, RDF.FIRST);
 
-		assertThat(when.map(first)).as("included value").isEqualTo(and());
-		assertThat(when.map(rest)).as("excluded value").isEqualTo(or());
-		assertThat(when.map(any)).as("wildcard value").isEqualTo(and());
+		assertThat(guard.map(first)).as("included value").isEqualTo(and());
+		assertThat(guard.map(rest)).as("excluded value").isEqualTo(or());
+		assertThat(guard.map(any)).as("wildcard value").isEqualTo(and());
 
 	}
 
 	@Test void testRedactNestedShapes() {
 
-		final When nested=When.when(RDF.VALUE, RDF.FIRST);
+		final Guard nested=guard(RDF.VALUE, RDF.FIRST);
 
 		assertThat(field(RDF.VALUE, nested).map(first)).as("field").isEqualTo(field(RDF.VALUE, and()));
 

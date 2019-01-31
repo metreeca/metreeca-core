@@ -150,7 +150,7 @@ final class SPARQLWriter {
 
 		@Override public Focus probe(final Meta meta) { return focus(); }
 
-		@Override public Focus probe(final When when) { return focus(); }
+		@Override public Focus probe(final Guard guard) { return focus(); }
 
 
 		@Override public Focus probe(final Datatype datatype) {

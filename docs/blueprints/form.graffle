@@ -10513,7 +10513,7 @@ lte}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\b\fs16 \cf0 *When}</string>
+\f0\b\fs16 \cf0 Guard*}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10565,7 +10565,7 @@ lte}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f0\fs16 \cf0 variable:IRI\
+\f0\fs16 \cf0 axis:IRI\
 values:Set&lt;Value&gt;}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
@@ -13008,7 +13008,7 @@ flags:Strings}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\b\fs16 \cf0 *Option}</string>
+\f0\b\fs16 \cf0 When*}</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>

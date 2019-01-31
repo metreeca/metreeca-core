@@ -273,7 +273,7 @@ abstract class SPARQL { // ! refactor
 			return null;
 		}
 
-		@Override public Object probe(final When when) {
+		@Override public Object probe(final Guard guard) {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
@@ -393,7 +393,7 @@ abstract class SPARQL { // ! refactor
 		}
 
 
-		@Override public Object probe(final When when) {
+		@Override public Object probe(final Guard guard) {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 

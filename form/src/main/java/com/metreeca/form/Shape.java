@@ -36,7 +36,7 @@ import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Sets.set;
 
@@ -194,8 +194,8 @@ public interface Shape {
 	}
 
 	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
-		return shapes.isEmpty() ? when(variable, values)
-				: Option.option(when(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+		return shapes.isEmpty() ? guard(variable, values)
+				: Option.option(guard(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}
 
 
@@ -253,7 +253,7 @@ public interface Shape {
 
 		public V probe(final Meta meta);
 
-		public V probe(final When when);
+		public V probe(final Guard guard);
 
 
 		//// Term Constraints //////////////////////////////////////////////////////////////////////////////////////////

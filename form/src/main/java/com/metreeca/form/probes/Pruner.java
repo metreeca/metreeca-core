@@ -46,7 +46,7 @@ public final class Pruner extends Traverser<Shape> {
 
 	@Override public Shape probe(final Meta meta) { return and(); }
 
-	@Override public Shape probe(final When when) { return and(); }
+	@Override public Shape probe(final Guard guard) { return and(); }
 
 
 	@Override public Shape probe(final Field field) {

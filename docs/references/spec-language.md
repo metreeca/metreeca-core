@@ -37,7 +37,7 @@ Non-validating shapes documenting presentation-driving metadata, to be used for 
 | shape                                                        | value                                                        |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [meta](../javadocs/com/metreeca/form/shapes/Meta.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html), [value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | the metadata property identified by the given IRI is associated with the given value in the enclosing shape |
-| [when](../javadocs/com/metreeca/form/shapes/When.html)([variable](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html), [value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …) | the focus set is consistent with this shape only if the value of an [externally assigned variable](../javadocs/com/metreeca/form/probes/Redactor.html) is included in a given set of target values |
+| [guard](../javadocs/com/metreeca/form/shapes/Guard.html)([axis](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html), [value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …) | the focus set is consistent with this shape only if the value of an externally assigned [axis variable](../javadocs/com/metreeca/form/probes/Redactor.html) is included in a given set of target values |
 
 Common metadada annotations are directly available as shorthand shapes.
 
@@ -112,7 +112,7 @@ Composite shapes specifying logical combinations of shapes.
 
 # Parameters
 
-The combined use of conditional (`test`) and parametric (`when`) [logical](#logical-constraints) constraints supports the definition of **parametric** shapes, which specify different sets of constraints according to the current externally-assigned value of parametric **axis** variables.
+The combined use of conditional (`when`) and parametric (`guard`) [logical](#logical-constraints) constraints supports the definition of **parametric** shapes, which specify different sets of constraints according to the current externally-assigned value of parametric **axis** variables.
 
 Parametric axes may be specified for arbitrary custom variables, but the system relies on four pre‑defined parametric variables to support fine‑grained access control rules and role‑dependent read/write resource views.
 

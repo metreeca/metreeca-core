@@ -19,6 +19,7 @@ package com.metreeca.form.things;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.Guard;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -49,7 +50,7 @@ import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.things.Values.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,7 +94,7 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
-	public static final Shape Employee=option(when(Form.role, Manager, Salesman), and(
+	public static final Shape Employee=option(guard(Form.role, Manager, Salesman), and(
 
 			clazz(term("Employee")), // implies rdf:type :Employee
 
@@ -109,7 +110,7 @@ public final class ValuesTest {
 							field(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
 							field(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
 					),
-					option(when(Form.role, Manager), and(
+					option(guard(Form.role, Manager), and(
 
 							field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
 									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),

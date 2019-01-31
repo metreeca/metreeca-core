@@ -18,6 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Redactor;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -35,21 +36,21 @@ import static java.util.stream.Collectors.joining;
 
 
 /**
- * Parametric logical constraint.
+ * Parametric constraint.
  *
- * <p>States that the focus set meets this shape only if at least one of the values of an externally defined axis
+ * <p>States that the focus set meets this shape only if at least one of the externally defined values of an axis
  * variable is included in a given set of target values.</p>
  *
- * @see com.metreeca.form.probes.Redactor
+ * @see Redactor
  */
-public final class When implements Shape {
+public final class Guard implements Shape {
 
-	public static When when(final IRI variable, final Value... values) {
-		return when(variable, asList(values));
+	public static Guard guard(final IRI axis, final Value... values) {
+		return guard(axis, asList(values));
 	}
 
-	public static When when(final IRI variable, final Collection<? extends Value> values) {
-		return new When(variable, values);
+	public static Guard guard(final IRI axis, final Collection<? extends Value> values) {
+		return new Guard(axis, values);
 	}
 
 
@@ -59,7 +60,7 @@ public final class When implements Shape {
 	private final Set<Value> values;
 
 
-	private When(final IRI axis, final Collection<? extends Value> values) {
+	private Guard(final IRI axis, final Collection<? extends Value> values) {
 
 		if ( axis == null ) {
 			throw new NullPointerException("null axis IRI");
@@ -106,9 +107,9 @@ public final class When implements Shape {
 
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof When
-				&& axis.equals(((When)object).axis)
-				&& values.equals(((When)object).values);
+		return this == object || object instanceof Guard
+				&& axis.equals(((Guard)object).axis)
+				&& values.equals(((Guard)object).values);
 	}
 
 	@Override public int hashCode() {

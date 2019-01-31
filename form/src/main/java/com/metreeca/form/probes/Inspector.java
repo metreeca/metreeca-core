@@ -44,7 +44,7 @@ public abstract class Inspector<V> implements Shape.Probe<V> {
 
 	@Override public V probe(final Meta meta) { return probe((Shape)meta); }
 
-	@Override public V probe(final When when) { return probe((Shape)when); }
+	@Override public V probe(final Guard guard) { return probe((Shape)guard); }
 
 
 	//// Structural Constraints ////////////////////////////////////////////////////////////////////////////////////

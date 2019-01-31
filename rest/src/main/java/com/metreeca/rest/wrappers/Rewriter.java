@@ -44,7 +44,7 @@ import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Option.option;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.*;
@@ -246,8 +246,8 @@ public final class Rewriter implements Wrapper {
 				return meta(rewrite(meta.getIRI()), rewrite(meta.getValue()));
 			}
 
-			@Override public When probe(final When when) {
-				return when(rewrite(when.getAxis()), rewrite(when.getValues(), Engine.this::rewrite));
+			@Override public Guard probe(final Guard guard) {
+				return guard(rewrite(guard.getAxis()), rewrite(guard.getValues(), Engine.this::rewrite));
 			}
 
 

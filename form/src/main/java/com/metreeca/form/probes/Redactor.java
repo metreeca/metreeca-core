@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Shape redactor.
  *
- * <p>Recursively evaluates {@linkplain When conditional} section in a shape.</p>
+ * <p>Recursively evaluates {@linkplain Guard parametric} constraints in a shape.</p>
  */
 public final class Redactor extends Traverser<Shape> {
 
@@ -70,12 +70,12 @@ public final class Redactor extends Traverser<Shape> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Shape probe(final When when) {
+	@Override public Shape probe(final Guard guard) {
 
-		final Set<? extends Value> actual=variables.get(when.getAxis());
-		final Set<? extends Value> accepted=when.getValues();
+		final Set<? extends Value> actual=variables.get(guard.getAxis());
+		final Set<? extends Value> accepted=guard.getValues();
 
-		return actual == null ? when // ignore undefined variables
+		return actual == null ? guard // ignore undefined variables
 				: actual.contains(Form.any) || !disjoint(accepted, actual) ? and()
 				: or();
 	}
