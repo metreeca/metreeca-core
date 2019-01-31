@@ -20,7 +20,6 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -28,7 +27,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Objects.requireNonNull;
 
@@ -38,14 +36,8 @@ import static java.util.Objects.requireNonNull;
  *
  * <p>Processes request and response {@linkplain RDFFormat RDF} payloads and executes SPARQL Update housekeeping
  * scripts.</p>
- *
- * <p>When processing {@linkplain Request#safe() unsafe} requests, wrapped handlers are executed inside a single
- * transaction on the system {@linkplain Graph#Factory graph database}, which is automatically committed on {@linkplain
- * Response#success() successful} response or rolled back otherwise.</p>
  */
 public final class Processor implements Wrapper {
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private BiFunction<Request, Model, Model> pre;
 	private BiFunction<Response, Model, Model> post;

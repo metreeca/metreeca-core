@@ -19,6 +19,8 @@ package com.metreeca.rest;
 
 import com.metreeca.form.Form;
 
+import java.util.function.Predicate;
+
 
 /**
  * Resource handler {thread-safe}.
@@ -29,6 +31,72 @@ import com.metreeca.form.Form;
  * <p>Implementations must be thread-safe.</p>
  */
 @FunctionalInterface public interface Handler {
+
+	/**
+	 * Creates a dummy handler.
+	 *
+	 * @return a dummy handler that generates an empty response regardless of the request
+	 */
+	public static Handler handler() {
+		return request -> request.reply(response -> response);
+	}
+
+	/**
+	 * Creates a conditional handler.
+	 *
+	 * @param test the request predicate used to decide if requests and responses are to be routed to the handler
+	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true} on
+	 *             the request
+	 *
+	 * @return a conditional handler that routes requests and responses to the {@code pass} handler if the {@code test}
+	 * predicate evaluates to {@code true} on the request or to a {@linkplain #handler() dummy handler} otherwise
+	 *
+	 * @throws NullPointerException if either {@code test} or {@code pass} is null
+	 */
+	public static Handler handler(final Predicate<Request> test, final Handler pass) {
+
+		if ( test == null ) {
+			throw new NullPointerException("null test predicate");
+		}
+
+		if ( pass == null ) {
+			throw new NullPointerException("null pass handler");
+		}
+
+		return handler(test, pass, handler());
+	}
+
+	/**
+	 * Creates a conditional handler.
+	 *
+	 * @param test the request predicate used to select the handler requests and responses are to be routed to
+	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true} on
+	 *             the request
+	 * @param fail the handler requests and responses are to be routed to when {@code test} evaluates to {@code false}
+	 *             on the request
+	 *
+	 * @return a conditional handler that routes requests and responses either to the {@code pass} or the {@code fail}
+	 * handler according to the results of the {@code test} predicate
+	 *
+	 * @throws NullPointerException if any of the arguments is null
+	 */
+	public static Handler handler(final Predicate<Request> test, final Handler pass, final Handler fail) {
+
+		if ( test == null ) {
+			throw new NullPointerException("null test predicate");
+		}
+
+		if ( pass == null ) {
+			throw new NullPointerException("null pass handler");
+		}
+
+		if ( fail == null ) {
+			throw new NullPointerException("null fail handler");
+		}
+
+		return request -> (test.test(request) ? pass : fail).handle(request);
+	}
+
 
 	/**
 	 * Handles refused requests.

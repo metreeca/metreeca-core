@@ -18,20 +18,6 @@
 package com.metreeca.rest.handlers.work;
 
 import com.metreeca.rest.*;
-import com.metreeca.tray.sys.Trace;
-
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
-import java.util.Collection;
-
-import static com.metreeca.form.Shape.pass;
-import static com.metreeca.form.things.Strings.indent;
-import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -52,29 +38,6 @@ public abstract class Actor implements Wrapper, Handler {
 	protected static Wrapper query(final boolean accepted) {
 		return handler -> request -> accepted || request.query().isEmpty() ? handler.handle(request)
 				: request.reply(new Failure().status(Response.BadRequest).cause("unexpected query parameters"));
-	}
-
-
-	protected static Wrapper target(final Wrapper container, final Wrapper resource) {
-		return new Wrapper() {
-
-			@Override public Wrapper wrap(final Wrapper wrapper) {
-				return target(container.wrap(wrapper), resource.wrap(wrapper));
-			}
-
-			@Override public Handler wrap(final Handler handler) {
-				return target(container.wrap(handler), resource.wrap(handler));
-			}
-
-		};
-	}
-
-	protected static Handler target(final Handler container, final Handler resource) {
-		return request -> (request.container() ? container : resource).handle(request);
-	}
-
-	protected static Handler driver(final Handler simple, final Handler shaped) {
-		return request -> (pass(request.shape()) ? simple : shaped).handle(request);
 	}
 
 
@@ -118,30 +81,6 @@ public abstract class Actor implements Wrapper, Handler {
 
 	@Override public Responder handle(final Request request) {
 		return delegate.handle(request);
-	}
-
-
-	/// !!! migrate ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final Trace trace=tool(Trace.Factory);
-
-	protected Collection<Statement> trace(final Collection<Statement> model) {
-
-		trace.entry(Trace.Level.Debug, this, () -> {
-
-			try (final StringWriter writer=new StringWriter()) {
-
-				Rio.write(model, new TurtleWriter(writer));
-
-				return "processing model\n"+indent(writer, true);
-
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-
-		}, null);
-
-		return model;
 	}
 
 }

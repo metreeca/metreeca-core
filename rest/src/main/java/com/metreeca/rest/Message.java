@@ -146,6 +146,16 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Tests if this message is shape-driven.
+	 *
+	 * @return {@code true} if the {@linkplain #shape() shape}  associated to this message is not a {@linkplain
+	 * Shape#pass() wildcard}; {@code false} otherwise
+	 */
+	public boolean driven() {
+		return !pass(shape);
+	}
+
+	/**
 	 * Tests if this message is interactive.
 	 *
 	 * @return {@code true} if an {@code Accept} or {@code Content-Type} header of this message include a MIME type
@@ -352,7 +362,8 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the linked data shape.
 	 *
-	 * @return the linked data shape associated to this message; defaults to the {@linkplain Shape#pass() wildcard} shape
+	 * @return the linked data shape associated to this message; defaults to the {@linkplain Shape#pass() wildcard}
+	 * shape
 	 */
 	public Shape shape() {
 		return shape;

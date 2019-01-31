@@ -18,6 +18,9 @@
 package com.metreeca.rest;
 
 
+import java.util.function.Predicate;
+
+
 /**
  * Handler wrapper {thread-safe}.
  *
@@ -27,6 +30,74 @@ package com.metreeca.rest;
  * <p>Implementations must be thread-safe.</p>
  */
 @FunctionalInterface public interface Wrapper {
+
+	/**
+	 * Creates a dummy wrapper.
+	 *
+	 * @return a dummy wrapper that performs no action on requests and responses
+	 */
+	public static Wrapper wrapper() {
+		return handler -> handler;
+	}
+
+	/**
+	 * Creates a conditional wrapper.
+	 *
+	 * @param test the request predicate used to decide if requests and responses are to be routed through the wrapper
+	 * @param pass the wrapper requests and responses are to be routed through when {@code test} evaluates to {@code
+	 *             true} on the request
+	 *
+	 * @return a conditional handler that routes requests and responses through the {@code pass} handler if the {@code
+	 * test} predicate evaluates to {@code true} on the request or to a {@linkplain #wrapper() dummy wrapper} otherwise
+	 *
+	 * @throws NullPointerException if either {@code test} or {@code pass} is null
+	 */
+	public static Wrapper wrapper(final Predicate<Request> test, final Wrapper pass) {
+
+		if ( test == null ) {
+			throw new NullPointerException("null test predicate");
+		}
+
+		if ( pass == null ) {
+			throw new NullPointerException("null pass wrapper");
+		}
+
+		return wrapper(test, pass, wrapper());
+	}
+
+	/**
+	 * Creates a conditional wrapper.
+	 *
+	 * @param test the request predicate used to select the wrapper requests and responses are to be routed through
+	 * @param pass the wrapper requests and responses are to be routed through when {@code test} evaluates to {@code
+	 *             true} on the request
+	 * @param fail the wrapper requests and responses are to be routed through when {@code test} evaluates to {@code
+	 *             false} on the request
+	 *
+	 * @return a conditional wrapper that routes requests and responses either through the {@code pass} or the {@code
+	 * fail} wrapper according to the results of the {@code test} predicate
+	 *
+	 * @throws NullPointerException if any of the arguments is null
+	 */
+	public static Wrapper wrapper(final Predicate<Request> test, final Wrapper pass, final Wrapper fail) {
+
+		if ( test == null ) {
+			throw new NullPointerException("null test predicate");
+		}
+
+		if ( pass == null ) {
+			throw new NullPointerException("null pass wrapper");
+		}
+
+		if ( fail == null ) {
+			throw new NullPointerException("null fail wrapper");
+		}
+
+		return handler -> Handler.handler(test, pass.wrap(handler), fail.wrap(handler));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Wraps a handler.
