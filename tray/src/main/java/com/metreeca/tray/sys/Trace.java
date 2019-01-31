@@ -18,11 +18,17 @@
 package com.metreeca.tray.sys;
 
 
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
+
 import java.io.*;
 import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.logging.*;
 import java.util.regex.Pattern;
+
+import static com.metreeca.form.things.Strings.indent;
 
 
 /**
@@ -205,6 +211,35 @@ public abstract class Trace {
 	 */
 	public final void debug(final Object source, final String message) {
 		entry(Level.Debug, source, () -> message, null);
+	}
+
+	/**
+	 * Adds a debug trace entry.
+	 *
+	 * @param source  the source object for the trace entry or {@code null} for global trace entries
+	 * @param model the RDF model to be included in the trace entry
+	 *
+	 * @return the provided {@code model}
+	 */
+	public <V extends Iterable<Statement>> V debug(final Object source, final V model) {
+
+		if ( model != null ) {
+			entry(Level.Debug, source, () -> {
+
+				try (final StringWriter writer=new StringWriter()) {
+
+					Rio.write(model, new TurtleWriter(writer));
+
+					return "processing model\n"+indent(writer, true);
+
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+
+			}, null);
+		}
+
+		return model;
 	}
 
 
