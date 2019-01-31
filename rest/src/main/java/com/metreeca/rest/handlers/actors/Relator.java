@@ -63,7 +63,7 @@ import static com.metreeca.tray.Tray.tool;
  * <ul>
  *
  * <li>!!!</li>
-
+ *
  * </ul>
  *
  * <p>Otherwise, if the focus item is a {@linkplain Request#container() container}:</p>
@@ -107,14 +107,19 @@ public final class Relator extends Actor {
 
 	public Relator() {
 		super(
-				new Shared().wrap(wrapper(Request::container,
-						new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
-						new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
-				)),
+
+				query(true)
+						.wrap(new Shared())
+						.wrap(wrapper(Request::container,
+								new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
+								new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
+						)),
+
 				handler(Request::container,
 						handler(Request::driven, new ShapedContainer(), new SimpleContainer()),
 						handler(Request::driven, new ShapedResource(), new SimpleResource())
 				)
+
 		);
 	}
 
@@ -131,28 +136,6 @@ public final class Relator extends Actor {
 
 	}
 
-
-	private static final class SimpleContainer implements Handler {
-
-		private final Graph graph=tool(Graph.Factory);
-
-
-		@Override public Responder handle(final Request request) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-		}
-
-	}
-
-	private static final class ShapedContainer implements Handler {
-
-		private final Graph graph=tool(Graph.Factory);
-
-
-		@Override public Responder handle(final Request request) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-		}
-
-	}
 
 	private static final class SimpleResource implements Handler {
 
@@ -234,6 +217,28 @@ public final class Relator extends Actor {
 
 			})), request::reply);
 
+		}
+
+	}
+
+	private static final class SimpleContainer implements Handler {
+
+		private final Graph graph=tool(Graph.Factory);
+
+
+		@Override public Responder handle(final Request request) {
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		}
+
+	}
+
+	private static final class ShapedContainer implements Handler {
+
+		private final Graph graph=tool(Graph.Factory);
+
+
+		@Override public Responder handle(final Request request) {
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
 	}
