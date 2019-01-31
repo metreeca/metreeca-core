@@ -172,8 +172,8 @@ public final class Meta implements Shape {
 			return or.getShapes().stream().flatMap(s -> s.map(this));
 		}
 
-		@Override public Stream<Map.Entry<IRI, Value>> probe(final Option option) {
-			return Stream.of(option.getPass(), option.getFail()).flatMap(s -> s.map(this));
+		@Override public Stream<Map.Entry<IRI, Value>> probe(final When when) {
+			return Stream.of(when.getPass(), when.getFail()).flatMap(s -> s.map(this));
 		}
 
 	}

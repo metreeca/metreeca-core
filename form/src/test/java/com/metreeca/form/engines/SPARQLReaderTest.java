@@ -447,7 +447,7 @@ final class SPARQLReaderTest {
 	@Test void testUseIndependentPatternsAndFilters() {
 		assertThat(model(edges(and(
 				Field.field(term("employee")),
-				Option.option(filter(), field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
+				When.when(filter(), field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
 		))))
 				.isIsomorphicTo(model("construct {\n"
 						+"\n"

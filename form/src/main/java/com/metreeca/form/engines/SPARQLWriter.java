@@ -378,13 +378,13 @@ final class SPARQLWriter {
 					.reduce(focus(), Focus::merge);
 		}
 
-		@Override public Focus probe(final Option option) {
+		@Override public Focus probe(final When when) {
 
-			final boolean pass=!option.getTest().map(this).assess(Issue.Level.Error);
+			final boolean pass=!when.getTest().map(this).assess(Issue.Level.Error);
 
 			return pass
-					? option.getPass().map(this)
-					: option.getFail().map(this);
+					? when.getPass().map(this)
+					: when.getFail().map(this);
 
 		}
 

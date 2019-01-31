@@ -195,7 +195,7 @@ public interface Shape {
 
 	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
 		return shapes.isEmpty() ? guard(variable, values)
-				: Option.option(guard(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+				: When.when(guard(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}
 
 
@@ -305,7 +305,7 @@ public interface Shape {
 
 		public V probe(final Or or);
 
-		public V probe(final Option option);
+		public V probe(final When when);
 
 	}
 

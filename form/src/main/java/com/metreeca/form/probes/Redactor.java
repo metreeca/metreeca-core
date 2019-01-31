@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
 
@@ -94,11 +94,11 @@ public final class Redactor extends Traverser<Shape> {
 		return or(or.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
 	}
 
-	@Override public Shape probe(final Option option) {
-		return option(
-				option.getTest().map(this),
-				option.getPass().map(this),
-				option.getFail().map(this)
+	@Override public Shape probe(final When when) {
+		return when(
+				when.getTest().map(this),
+				when.getPass().map(this),
+				when.getFail().map(this)
 		);
 	}
 

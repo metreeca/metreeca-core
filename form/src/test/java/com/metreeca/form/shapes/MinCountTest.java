@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -81,15 +81,15 @@ final class MinCountTest {
 		final MinCount x=MinCount.minCount(10);
 		final MinCount y=MinCount.minCount(100);
 
-		assertThat(MinCount.minCount(option(and(), x, y))
+		assertThat(MinCount.minCount(when(and(), x, y))
 				.filter(limit1 -> limit1.equals(min(x.getLimit(), y.getLimit())))
 				.isPresent()).as("all defined").isTrue();
 
-		assertThat(MinCount.minCount(option(and(), x, and()))
+		assertThat(MinCount.minCount(when(and(), x, and()))
 				.filter(limit -> limit.equals(x.getLimit()))
 				.isPresent()).as("some defined").isTrue();
 
-		assertThat(MinCount.minCount(option(and(), and(), and()))
+		assertThat(MinCount.minCount(when(and(), and(), and()))
 				.isPresent()).as("none defined").isFalse();
 
 	}

@@ -39,7 +39,7 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Sets.set;
@@ -173,11 +173,11 @@ public final class Splitter implements Wrapper {
 			return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 		}
 
-		@Override public Shape probe(final Option option) {
-			return option(
-					option.getTest(),
-					option.getPass().map(this),
-					option.getFail().map(this)
+		@Override public Shape probe(final When when) {
+			return when(
+					when.getTest(),
+					when.getPass().map(this),
+					when.getFail().map(this)
 			);
 		}
 
@@ -203,11 +203,11 @@ public final class Splitter implements Wrapper {
 			return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 		}
 
-		@Override public Shape probe(final Option option) {
-			return option(
-					option.getTest(),
-					option.getPass().map(this),
-					option.getFail().map(this)
+		@Override public Shape probe(final When when) {
+			return when(
+					when.getTest(),
+					when.getPass().map(this),
+					when.getFail().map(this)
 			);
 		}
 

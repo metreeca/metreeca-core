@@ -107,16 +107,16 @@ final class OptimizerTest {
 
 	@Test void testOptimizeOption() {
 
-		assertThat(optimize(Option.option(and(), x, y))).as("always pass").isEqualTo(x);
-		assertThat(optimize(Option.option(or(), x, y))).as("always fail").isEqualTo(y);
+		assertThat(optimize(When.when(and(), x, y))).as("always pass").isEqualTo(x);
+		assertThat(optimize(When.when(or(), x, y))).as("always fail").isEqualTo(y);
 
-		assertThat(optimize(Option.option(x, y, y))).as("identical options").isEqualTo(y);
+		assertThat(optimize(When.when(x, y, y))).as("identical options").isEqualTo(y);
 
-		assertThat(optimize(Option.option(and(x), y, z))).as("optimized test shape").isEqualTo(Option.option(x, y, z));
-		assertThat(optimize(Option.option(x, and(y), z))).as("optimized pass shape").isEqualTo(Option.option(x, y, z));
-		assertThat(optimize(Option.option(x, y, and(z)))).as("optimized fail shape").isEqualTo(Option.option(x, y, z));
+		assertThat(optimize(When.when(and(x), y, z))).as("optimized test shape").isEqualTo(When.when(x, y, z));
+		assertThat(optimize(When.when(x, and(y), z))).as("optimized pass shape").isEqualTo(When.when(x, y, z));
+		assertThat(optimize(When.when(x, y, and(z)))).as("optimized fail shape").isEqualTo(When.when(x, y, z));
 
-		assertThat(optimize(Option.option(x, y, z))).as("material").isEqualTo(Option.option(x, y, z));
+		assertThat(optimize(When.when(x, y, z))).as("material").isEqualTo(When.when(x, y, z));
 
 	}
 

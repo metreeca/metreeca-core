@@ -343,7 +343,7 @@ final class QueryParserTest {
 	}
 
 	private Shape filter(final Shape shape, final Shape filter) {
-		return and(shape, Option.option(Shape.filter(), filter));
+		return and(shape, When.when(Shape.filter(), filter));
 	}
 
 }

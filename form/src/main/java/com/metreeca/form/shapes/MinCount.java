@@ -119,10 +119,10 @@ public final class MinCount implements Shape {
 					.reduce(null, min);
 		}
 
-		@Override public Integer probe(final Option option) {
+		@Override public Integer probe(final When when) {
 			return min.apply(
-					option.getPass().map(this),
-					option.getFail().map(this));
+					when.getPass().map(this),
+					when.getFail().map(this));
 		}
 
 	}

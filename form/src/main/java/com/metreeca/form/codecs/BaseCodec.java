@@ -80,8 +80,8 @@ final class BaseCodec { // !! review/optimize
 			return aliases(or.getShapes());
 		}
 
-		@Override public Map<IRI, String> probe(final Option option) {
-			return aliases(list(option.getPass(), option.getFail()));
+		@Override public Map<IRI, String> probe(final When when) {
+			return aliases(list(when.getPass(), when.getFail()));
 		}
 
 
@@ -185,8 +185,8 @@ final class BaseCodec { // !! review/optimize
 			return alias(or.getShapes());
 		}
 
-		@Override public String probe(final Option option) {
-			return alias(list(option.getPass(), option.getFail()));
+		@Override public String probe(final When when) {
+			return alias(list(when.getPass(), when.getFail()));
 		}
 
 

@@ -108,11 +108,13 @@ Composite shapes specifying logical combinations of shapes.
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
 | [and](../javadocs/com/metreeca/form/shapes/And.html)([shape](../javadocs/com/metreeca/form/Shape.html), …) | the focus set is consistent with all shapes in a given target set |
 | [or](../javadocs/com/metreeca/form/shapes/Or.html)([shape](../javadocs/com/metreeca/form/Shape.html), …) | the focus set is consistent with at least one shape in a given target set |
-| [option](../javadocs/com/metreeca/form/shapes/Option.html)([test](../javadocs/com/metreeca/form/Shape.html),[pass](../javadocs/com/metreeca/form/Shape.html), [fail](../javadocs/com/metreeca/form/Shape.html)) | the focus set is consistent either with a *pass* shape, if consistent also with a *test* shape, or with a *fail* shape, otherwise |
+| [when](../javadocs/com/metreeca/form/shapes/When.html)([test](../javadocs/com/metreeca/form/Shape.html),[pass](../javadocs/com/metreeca/form/Shape.html) [, [fail](../javadocs/com/metreeca/form/Shape.html)]) | the focus set is consistent either with a *pass* shape, if consistent also with a *test* shape, or with a *fail* shape, otherwise; if omitted, the `fail` shape defaults to `and()`, that is it's always meet |
+
+<p class="warning">Test shapes for conditional constraints are currently limited to parametric <code>guards</code>.</p>
 
 # Parameters
 
-The combined use of conditional (`when`) and parametric (`guard`) [logical](#logical-constraints) constraints supports the definition of **parametric** shapes, which specify different sets of constraints according to the current externally-assigned value of parametric **axis** variables.
+The combined use of conditional (`when`) and parametric (`guard`)  constraints supports the definition of **parametric** shapes, which specify different sets of constraints according to the current externally-assigned value of parametric **axis** variables.
 
 Parametric axes may be specified for arbitrary custom variables, but the system relies on four pre‑defined parametric variables to support fine‑grained access control rules and role‑dependent read/write resource views.
 

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.*;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Maps.entry;
@@ -69,7 +69,7 @@ final class MetaTest {
 							entry(Form.Notes, literal("notes"))
 					);
 
-			assertThat(metas(option(
+			assertThat(metas(when(
 					pass(),
 					label("label"),
 					notes("notes")

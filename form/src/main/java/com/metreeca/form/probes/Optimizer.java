@@ -28,7 +28,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Maps.entry;
@@ -110,16 +110,16 @@ public final class Optimizer extends Traverser<Shape> {
 				: or(shapes);
 	}
 
-	@Override public Shape probe(final Option option) {
+	@Override public Shape probe(final When when) {
 
-		final Shape test=option.getTest().map(this);
-		final Shape pass=option.getPass().map(this);
-		final Shape fail=option.getFail().map(this);
+		final Shape test=when.getTest().map(this);
+		final Shape pass=when.getPass().map(this);
+		final Shape fail=when.getFail().map(this);
 
 		return test.equals(and()) ? pass // always pass
 				: test.equals(or()) ? fail // always fail
 				: pass.equals(fail) ? pass // identical options
-				: option(test, pass, fail);
+				: when(test, pass, fail);
 	}
 
 

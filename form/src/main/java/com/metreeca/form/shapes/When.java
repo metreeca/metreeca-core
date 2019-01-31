@@ -29,14 +29,14 @@ import static com.metreeca.form.things.Strings.indent;
  * <p>States that the focus set is consistent either with a {@linkplain #getPass() positive} shape, if consistent also
  * with a {@linkplain #getTest() test} shape, or with a {@linkplain #getFail() negative} shape, otherwise.</p>
  */
-public final class Option implements Shape {
+public final class When implements Shape {
 
-	public static Option option(final Shape test, final Shape pass) {
-		return new Option(test, pass, and());
+	public static When when(final Shape test, final Shape pass) {
+		return new When(test, pass, and());
 	}
 
-	public static Option option(final Shape test, final Shape pass, final Shape fail) {
-		return new Option(test, pass, fail);
+	public static When when(final Shape test, final Shape pass, final Shape fail) {
+		return new When(test, pass, fail);
 	}
 
 
@@ -47,7 +47,7 @@ public final class Option implements Shape {
 	private final Shape fail;
 
 
-	private Option(final Shape test, final Shape pass, final Shape fail) {
+	private When(final Shape test, final Shape pass, final Shape fail) {
 
 		if ( test == null ) {
 			throw new NullPointerException("null test shape");
@@ -95,10 +95,10 @@ public final class Option implements Shape {
 
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Option
-				&& test.equals(((Option)object).test)
-				&& pass.equals(((Option)object).pass)
-				&& fail.equals(((Option)object).fail);
+		return this == object || object instanceof When
+				&& test.equals(((When)object).test)
+				&& pass.equals(((When)object).pass)
+				&& fail.equals(((When)object).fail);
 	}
 
 	@Override public int hashCode() {

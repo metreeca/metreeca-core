@@ -26,7 +26,7 @@ import java.util.List;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Field.field;
 
 import static java.util.stream.Collectors.toList;
@@ -78,11 +78,11 @@ public final class Pruner extends Traverser<Shape> {
 		return shapes.isEmpty() ? and() : or(shapes);
 	}
 
-	@Override public Shape probe(final Option option) {
-		return option(
-				option.getTest(),
-				option.getPass().map(this),
-				option.getFail().map(this)
+	@Override public Shape probe(final When when) {
+		return when(
+				when.getTest(),
+				when.getPass().map(this),
+				when.getFail().map(this)
 		);
 	}
 

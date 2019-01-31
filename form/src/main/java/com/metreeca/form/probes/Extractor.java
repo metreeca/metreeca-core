@@ -87,8 +87,8 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 		return or.getShapes().stream().flatMap(shape -> shape.map(this));
 	}
 
-	@Override public Stream<Statement> probe(final Option option) {
-		return Stream.concat(option.getPass().map(this), option.getFail().map(this));
+	@Override public Stream<Statement> probe(final When when) {
+		return Stream.concat(when.getPass().map(this), when.getFail().map(this));
 	}
 
 }

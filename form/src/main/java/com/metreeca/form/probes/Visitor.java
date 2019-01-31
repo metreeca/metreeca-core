@@ -96,6 +96,6 @@ public abstract class Visitor<V> implements Shape.Probe<V> {
 
 	@Override public V probe(final Or or) { return probe((Shape)or); }
 
-	@Override public V probe(final Option option) { return probe((Shape)option); }
+	@Override public V probe(final When when) { return probe((Shape)when); }
 
 }

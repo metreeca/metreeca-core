@@ -33,7 +33,7 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.literal;
@@ -107,11 +107,11 @@ public final class Inferencer extends Visitor<Shape> {
 		return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
-	@Override public Shape probe(final Option option) {
-		return option(
-				option.getTest().map(this),
-				option.getPass().map(this),
-				option.getFail().map(this)
+	@Override public Shape probe(final When when) {
+		return when(
+				when.getTest().map(this),
+				when.getPass().map(this),
+				when.getFail().map(this)
 		);
 	}
 

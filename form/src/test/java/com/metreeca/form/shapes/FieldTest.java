@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
@@ -94,14 +94,14 @@ final class FieldTest {
 		final Field y=field(RDF.TYPE, and());
 		final Field z=field(RDF.TYPE, maxCount(1));
 
-		assertThat(fields(option(and(), x, y)))
+		assertThat(fields(when(and(), x, y)))
 				.as("union field map")
 				.isEqualTo(map(
 						entry(x.getIRI(), x.getShape()),
 						entry(y.getIRI(), y.getShape())
 				));
 
-		assertThat(fields(option(or(), y, z)))
+		assertThat(fields(when(or(), y, z)))
 				.as("merged field map")
 				.isEqualTo(map(
 						entry(y.getIRI(), and(y.getShape(), z.getShape()))

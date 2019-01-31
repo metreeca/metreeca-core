@@ -143,8 +143,8 @@ public final class Field implements Shape {
 			return fields(or.getShapes().stream());
 		}
 
-		@Override public Map<IRI, Shape> probe(final Option option) {
-			return fields(Stream.of(option.getPass(), option.getFail()));
+		@Override public Map<IRI, Shape> probe(final When when) {
+			return fields(Stream.of(when.getPass(), when.getFail()));
 		}
 
 

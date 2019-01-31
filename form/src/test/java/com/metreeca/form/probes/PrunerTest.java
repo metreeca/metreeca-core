@@ -37,7 +37,7 @@ import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.MinLength.minLength;
-import static com.metreeca.form.shapes.Option.option;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.shapes.Field.field;
@@ -101,7 +101,7 @@ final class PrunerTest {
 		assertThat(prune(or(or()))).as("dead").isEqualTo(and());
 
 		// test shape is not pruned
-		assertThat(prune(option(or(), maxCount(1), or()))).as("live").isEqualTo(option(or(), maxCount(1), and()));
+		assertThat(prune(when(or(), maxCount(1), or()))).as("live").isEqualTo(when(or(), maxCount(1), and()));
 
 	}
 

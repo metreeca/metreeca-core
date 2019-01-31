@@ -119,10 +119,10 @@ public final class MaxCount implements Shape {
 					.reduce(null, max);
 		}
 
-		@Override public Integer probe(final Option option) {
+		@Override public Integer probe(final When when) {
 			return max.apply(
-					option.getPass().map(this),
-					option.getFail().map(this));
+					when.getPass().map(this),
+					when.getFail().map(this));
 		}
 
 	}
