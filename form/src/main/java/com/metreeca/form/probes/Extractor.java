@@ -25,9 +25,11 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.metreeca.form.things.Values.direct;
 
@@ -43,13 +45,22 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Extractor extends Traverser<Stream<Statement>> {
 
-	private final Collection<Statement> model;
 	private final Collection<Value> focus;
+	private final Iterable<Statement> model;
 
 
-	public Extractor(final Collection<Statement> model, final Collection<Value> focus) {
+	public Extractor(final Iterable<Statement> model, final Collection<Value> focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		this.focus=new LinkedHashSet<>(focus);
 		this.model=model;
-		this.focus=focus;
 	}
 
 
@@ -67,7 +78,7 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 		final Function<Statement, Value> source=direct ? Statement::getSubject : Statement::getObject;
 		final Function<Statement, Value> target=direct ? Statement::getObject : Statement::getSubject;
 
-		final Collection<Statement> restricted=model.stream()
+		final Collection<Statement> restricted=StreamSupport.stream(model.spliterator(), false)
 				.filter(s -> focus.contains(source.apply(s)) && iri.equals(s.getPredicate()))
 				.collect(toList());
 
