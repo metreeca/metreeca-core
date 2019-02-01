@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors.work;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
@@ -23,11 +23,15 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
 import com.metreeca.rest.*;
+import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.wrappers.Splitter;
+import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.form.Shape.pass;
+import static com.metreeca.rest.Handler.handler;
+import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -61,24 +65,23 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Deleter implements Handler {
+public final class Deleter extends Delegator {
 
 	private final Graph graph=tool(Graph.Factory);
 
 
-	//public Deleter() {
-	//	delegate(query(false)
-	//			// !!! .wrap(modulator().task(Form.delete).view(Form.detail))
-	//			.wrap(processor())
-	//			.wrap(this::process)
-	//	);
-	//}
+	public Deleter() {
+		delegate(handler(Request::container, container(), resource())
+				.with(wrapper(Request::container, wrapper(), new Splitter(Splitter.resource())))
+				.with(new Throttler(Form.delete, Form.detail))
+		);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Responder process(final Request request) {
-		return request.reply(response -> graph.update(connection -> {
+	private Handler resource() {
+		return request -> request.reply(response -> graph.update(connection -> {
 
 			final IRI focus=request.item();
 			final Shape shape=request.shape();
@@ -92,7 +95,7 @@ public final class Deleter implements Handler {
 
 			} else {
 
-				if ( pass(shape) ) {
+				if ( !request.driven() ) {
 					new CellEngine(connection).delete(focus);
 				} else {
 					new SPARQLEngine(connection).delete(focus, shape);
@@ -105,7 +108,11 @@ public final class Deleter implements Handler {
 		}));
 	}
 
-	@Override public Responder handle(final Request request) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	private Handler container() {
+		return request -> request.reply(new Failure()
+				.status(Response.MethodNotAllowed)
+				.cause("LDP container deletion not supported")
+		);
 	}
+
 }
