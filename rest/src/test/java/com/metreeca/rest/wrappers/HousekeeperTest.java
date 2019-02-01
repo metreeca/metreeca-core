@@ -30,7 +30,7 @@ import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.things.ValuesTest.export;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
-import static com.metreeca.rest.wrappers.Housekeeper.sparql;
+import static com.metreeca.rest.wrappers.Housekeeper.update;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -62,8 +62,8 @@ final class HousekeeperTest {
 
 	@Test void testExecuteScriptOnResponseLocation() {
 		exec(() -> new Housekeeper(
-				sparql("insert { ?this rdf:value rdf:first } where {}"),
-				sparql("insert { ?this rdf:value rdf:rest } where {}")
+				update("insert { ?this rdf:value rdf:first } where {}"),
+				update("insert { ?this rdf:value rdf:rest } where {}")
 		)
 
 				.wrap((Handler)request -> request.reply(response -> response

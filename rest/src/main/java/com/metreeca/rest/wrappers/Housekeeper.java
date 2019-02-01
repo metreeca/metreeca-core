@@ -98,22 +98,22 @@ public final class Housekeeper implements Wrapper {
 	 *
 	 * </table>
 	 *
-	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
+	 * @param update the SPARQL Update housekeeping script to be executed by this processor on successful request
 	 *               processing; empty scripts are ignored
 	 *
-	 * @return an RDF housekeeping task executing the SPARQL {@code script}
+	 * @return an RDF housekeeping task executing the SPARQL {@code update}
 	 *
-	 * @throws NullPointerException if {@code script} is null
+	 * @throws NullPointerException if {@code update} is null
 	 */
-	public static BiConsumer<Response, RepositoryConnection> sparql(final String script) {
+	public static BiConsumer<Response, RepositoryConnection> update(final String update) {
 
-		if ( script == null ) {
-			throw new NullPointerException("null script");
+		if ( update == null ) {
+			throw new NullPointerException("null update");
 		}
 
 		return (response, connection) -> {
 
-			if ( !script.isEmpty() ) {
+			if ( !update.isEmpty() ) {
 
 				final IRI item=response.item();
 				final IRI stem=iri(item.getNamespace());
@@ -122,16 +122,16 @@ public final class Housekeeper implements Wrapper {
 				final IRI user=response.request().user();
 				final Literal time=time(true);
 
-				final Update update=connection.prepareUpdate(QueryLanguage.SPARQL, script, response.request().base());
+				final Update operation=connection.prepareUpdate(QueryLanguage.SPARQL, update, response.request().base());
 
-				update.setBinding("this", item);
-				update.setBinding("stem", stem);
-				update.setBinding("name", name);
+				operation.setBinding("this", item);
+				operation.setBinding("stem", stem);
+				operation.setBinding("name", name);
 
-				update.setBinding("user", user);
-				update.setBinding("time", time);
+				operation.setBinding("user", user);
+				operation.setBinding("time", time);
 
-				update.execute();
+				operation.execute();
 			}
 
 		};
@@ -154,7 +154,7 @@ public final class Housekeeper implements Wrapper {
 	 * @throws NullPointerException if {@code scripts} is null or contains null values
 	 */
 	public Housekeeper(final String... scripts) {
-		this(Arrays.stream(scripts).map(Housekeeper::sparql).collect(Collectors.toList()));
+		this(Arrays.stream(scripts).map(Housekeeper::update).collect(Collectors.toList()));
 	}
 
 	/**

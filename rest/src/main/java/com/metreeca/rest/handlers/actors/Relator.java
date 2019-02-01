@@ -107,15 +107,22 @@ public final class Relator extends Delegator {
 	// !!! activate response trimming only if a custom wrapper/handler is inserted in the pipeline
 
 	public Relator() {
-		delegate(handler(Request::container,
+		delegate(
+
+				handler(Request::container,
 						handler(Request::driven, new ShapedContainer(), new SimpleContainer()),
 						handler(Request::driven, new ShapedResource(), new SimpleResource())
 				)
-						.with(new Shared())
+
 						.with(wrapper(Request::container,
 								new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
 								new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
 						))
+
+						.with(handler -> request -> handler.handle(request).map(response ->
+								response.header("+Vary", "Accept")
+						))
+
 		);
 	}
 
