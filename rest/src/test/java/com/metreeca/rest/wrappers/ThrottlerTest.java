@@ -30,6 +30,7 @@ import com.metreeca.tray.Tray;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -38,14 +39,17 @@ import java.util.Collection;
 import javax.json.JsonValue;
 
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.JSONAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -64,10 +68,6 @@ final class ThrottlerTest {
 
 	private Request request() {
 		return new Request().base(ValuesTest.Base);
-	}
-
-	private Handler handler() {
-		return request -> request.reply(response -> response.status(Response.OK));
 	}
 
 	private Handler handler(final Collection<Statement> model) {
@@ -89,7 +89,7 @@ final class ThrottlerTest {
 		@Test void testAcceptEmptyRequestPayload() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request())
 
@@ -100,7 +100,7 @@ final class ThrottlerTest {
 		@Test void testAcceptDescriptionRequestPayload() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request().body(rdf(), decode("<> rdf:value rdf:nil.")))
 
@@ -113,7 +113,7 @@ final class ThrottlerTest {
 		@Test void testRejectExceedingRequestPayload() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request().body(rdf(), decode("<> rdf:value rdf:nil. rdf:first rdf:value rdf:rest.")))
 
@@ -167,7 +167,7 @@ final class ThrottlerTest {
 		@Test void testRedactRequestShape() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request())
 
@@ -181,10 +181,47 @@ final class ThrottlerTest {
 			);
 		}
 
+		@Test void testExpandRequestModel() {
+			exec(() -> throttler()
+
+					.wrap(echo())
+
+					.handle(new Request()
+							.shape(field(RDFS.LABEL, literal("request")))
+					)
+
+					.accept(response -> assertThat(response)
+							.hasBody(rdf(),rdf-> assertThat(rdf)
+									.isIsomorphicTo(statement(response.item(), RDFS.LABEL, literal("request")))
+							)
+					)
+			);
+
+		}
+
+		@Test void testExpandResponseModel() {
+			exec(() -> throttler()
+
+					.wrap(echo().with(handler -> request -> handler.handle(request).map(response ->
+							response.shape(field(RDFS.LABEL, literal("response")))
+					)))
+
+					.handle(new Request())
+
+					.accept(response -> assertThat(response)
+							.hasBody(rdf(),rdf-> assertThat(rdf)
+									.isIsomorphicTo(statement(response.item(), RDFS.LABEL, literal("response")))
+							)
+					)
+			);
+
+		}
+
+
 		@Test void testRejectUnauthorizedRequests() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request().roles(Form.none))
 
@@ -195,7 +232,7 @@ final class ThrottlerTest {
 		@Test void testRejectUnauthorizedRequestsIgnoringAnnotations() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request().roles(Form.none).shape(and(shape, meta(RDF.VALUE, RDF.NIL))))
 
@@ -206,7 +243,7 @@ final class ThrottlerTest {
 		@Test void testRejectForbiddenRequests() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request().user(RDF.NIL).roles(Form.none))
 
@@ -218,7 +255,7 @@ final class ThrottlerTest {
 		@Test void testAcceptEmptyRequestPayload() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request())
 
@@ -229,7 +266,7 @@ final class ThrottlerTest {
 		@Test void testAcceptCompatibleRequestPayload() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request().body(rdf(), decode("<> :email 'tino.faussone@example.com'.")))
 
@@ -242,7 +279,7 @@ final class ThrottlerTest {
 		@Test void testRejectExceedingRequestPayload() {
 			exec(() -> throttler()
 
-					.wrap(handler())
+					.wrap(echo())
 
 					.handle(request().body(rdf(), decode("<> :seniority 5 .")))
 
@@ -281,7 +318,8 @@ final class ThrottlerTest {
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
 							.hasBody(rdf(), rdf -> assertThat(rdf)
-									.isIsomorphicTo(decode("<> :email 'tino.faussone@example.com'."))
+									.as("extended with implied statements and trimmed")
+									.isIsomorphicTo(decode("<> a :Employee; :email 'tino.faussone@example.com'."))
 							)
 					)
 			);

@@ -17,6 +17,9 @@
 
 package com.metreeca.form.things;
 
+import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Extractor;
+
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -27,7 +30,10 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.metreeca.form.Shape.empty;
+
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toCollection;
 
 
 /**
@@ -144,8 +150,8 @@ public final class Structures {
 	/**
 	 * Retrieves a reachable network from a statement source.
 	 *
-	 * @param focus    the resource whose reachable network is to be retrieved
-	 * @param model    the statement source the description is to be retrieved from
+	 * @param focus the resource whose reachable network is to be retrieved
+	 * @param model the statement source the description is to be retrieved from
 	 *
 	 * @return the reachable network of {@code focus} retrieved from {@code model}
 	 *
@@ -172,7 +178,7 @@ public final class Structures {
 
 			if ( visited.add(value) ) {
 				model.forEach(statement -> {
-					if ( statement.getSubject().equals(value)) {
+					if ( statement.getSubject().equals(value) ) {
 
 						network.add(statement);
 						pending.add(statement.getObject());
@@ -190,6 +196,35 @@ public final class Structures {
 		}
 
 		return network;
+	}
+
+	/**
+	 * Retrieves a shape envelope from a statement source.
+	 *
+	 * @param focus the resource whose envelope is to be retrieved
+	 * @param shape the shape whose envelope is to be retrieved
+	 * @param model the statement source the description is to be retrieved from
+	 *
+	 * @return the {@code shape} envelope of {@code focus} retrieved from {@code model}
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static Model envelope(final Value focus, final Shape shape, final Iterable<Statement> model) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return empty(shape)? new LinkedHashModel()
+				: shape.map(new Extractor(model, singleton(focus))).collect(toCollection(LinkedHashModel::new));
 	}
 
 

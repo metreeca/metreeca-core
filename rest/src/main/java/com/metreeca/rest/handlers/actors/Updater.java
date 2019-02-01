@@ -21,9 +21,6 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.*;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Outliner;
-import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
@@ -43,11 +40,7 @@ import static com.metreeca.form.Shape.pass;
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.wrappers.Splitter.container;
-import static com.metreeca.rest.wrappers.Splitter.resource;
 import static com.metreeca.tray.Tray.tool;
-
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -100,9 +93,13 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Updater extends Delegator {
 
+	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
+
+
 	public Updater() {
-		delegate(handler(Request::container, new CommonContainer(), new CommonResource())
-				.with(wrapper(Request::container, new Splitter(container()), new Splitter(resource())))
+		delegate(handler(Request::container, this::container, this::resource)
+				.with(wrapper(Request::container, new Splitter(Splitter.container()), new Splitter(Splitter.resource())))
 				.with(new Throttler(Form.update, Form.detail))
 		);
 	}
@@ -110,84 +107,53 @@ public final class Updater extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private  Responder resource(final Request request) {
+		return request.body(rdf()).fold(model -> request.reply(response -> graph.update(connection -> {
 
-	private static Collection<Statement> expand(final IRI focus, final Shape shape, final Collection<Statement> model) {
+			final IRI focus=request.item();
 
-		// !!! cache shape outline
-		// !!! migrate to RDFFormat?
+			if ( !connection.hasStatement(focus, null, null, true)
+					&& !connection.hasStatement(null, null, focus, true) ) {
 
-		model.addAll(shape // add implied statements
-				.map(new Redactor(Form.mode, Form.verify))
-				.map(new Optimizer())
-				.map(new Outliner(focus))
-				.collect(toList())
-		);
+				// !!! 410 Gone if the resource is known to have existed (how to test?)
 
-		return model;
-	}
+				return response.status(Response.NotFound);
 
+			} else {
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				final Shape shape=request.shape();
+				final Collection<Statement> update=trace.debug(this, model);
 
-	private static final class CommonResource implements Handler {
+				final Focus report=pass(shape)
+						? new CellEngine(connection).update(focus, update)
+						: new SPARQLEngine(connection).update(focus, shape, update);
 
-		private final Graph graph=tool(Graph.Factory);
-		private final Trace trace=tool(Trace.Factory);
+				if ( report.assess(Issue.Level.Error) ) { // shape violations
 
+					connection.rollback();
 
-		@Override public Responder handle(final Request request) {
-			return request.body(rdf()).fold(model -> request.reply(response -> graph.update(connection -> {
+					return response.map(new Failure()
+							.status(Response.UnprocessableEntity)
+							.error(Failure.DataInvalid)
+							.trace(report));
 
-				final IRI focus=request.item();
+				} else { // valid data
 
-				if ( !connection.hasStatement(focus, null, null, true)
-						&& !connection.hasStatement(null, null, focus, true) ) {
+					connection.commit();
 
-					// !!! 410 Gone if the resource is known to have existed (how to test?)
+					return response.status(Response.NoContent);
 
-					return response.status(Response.NotFound);
-
-				} else {
-
-					final Shape shape=request.shape();
-					final Collection<Statement> update=trace.debug(this, expand(focus, shape, model));
-
-					final Focus report=pass(shape)
-							? new CellEngine(connection).update(focus, update)
-							: new SPARQLEngine(connection).update(focus, shape, update);
-
-					if ( report.assess(Issue.Level.Error) ) { // shape violations
-
-						connection.rollback();
-
-						return response.map(new Failure()
-								.status(Response.UnprocessableEntity)
-								.error(Failure.DataInvalid)
-								.trace(report));
-
-					} else { // valid data
-
-						connection.commit();
-
-						return response.status(Response.NoContent);
-
-					}
 				}
+			}
 
-			})), request::reply);
-		}
-
+		})), request::reply);
 	}
 
-	private static final class CommonContainer implements Handler {
-
-		@Override public Responder handle(final Request request) {
-			return request.reply(new Failure()
-					.status(Response.MethodNotAllowed)
-					.cause("LDP container updating not supported")
-			);
-		}
-
+	private Responder container(final Request request) {
+		return request.reply(new Failure()
+				.status(Response.MethodNotAllowed)
+				.cause("LDP container updating not supported")
+		);
 	}
 
 }

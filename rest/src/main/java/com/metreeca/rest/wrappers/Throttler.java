@@ -29,23 +29,24 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.metreeca.form.Focus.focus;
+import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
+import static com.metreeca.form.things.Structures.envelope;
 import static com.metreeca.form.things.Structures.network;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
+import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 
 
@@ -64,8 +65,10 @@ import static java.util.stream.Collectors.toList;
  *
  * <li>enforces shape-based access control according to the redacted request shape;</li>
  *
- * <li>ensures that the request {@linkplain RDFFormat RDF payload} doesn't contains statements outside the allowed
- * envelope of the redacted shape;</li>
+ * <li>extends the {@linkplain RDFFormat RDF payload} with the statements inferred from the redacted shape;</li>
+ *
+ * <li>ensures that the {@linkplain RDFFormat RDF payload} doesn't contains statements outside the allowed envelope of
+ * the redacted shape;</li>
  *
  * <li>associates the redacted shape to the request forwarded to the wrapped handler.</li>
  *
@@ -86,6 +89,8 @@ import static java.util.stream.Collectors.toList;
  *
  * <li>redacts the response shape according to the provided {@linkplain #Throttler(Value, Value) task/view
  * parameters} and the request user roles, hiding also filtering-only shapes;</li>
+ *
+ * <li>extends the {@linkplain RDFFormat RDF payload} with the statements inferred from the redacted shape;</li>
  *
  * <li>trims {@linkplain RDFFormat RDF payload} statements exceeding the allowed envelope of the redacted shape;</li>
  *
@@ -145,16 +150,12 @@ public final class Throttler implements Wrapper {
 	private Wrapper pre() {
 		return handler -> request -> {
 
+			final IRI focus=request.item();
+
 			if ( !request.driven() ) {
 
-				return request.body(rdf()).fold(
-
-						model -> outliers(model, description(request.item(), false, model))
-								.map(request::reply)
-								.orElseGet(() -> handler.handle(request)),
-
-						request::reply
-
+				return handler.handle(request
+						.pipe(rdf(), rdf -> verify(rdf, description(focus, false, rdf)))
 				);
 
 			} else {
@@ -179,16 +180,10 @@ public final class Throttler implements Wrapper {
 
 					final Shape redacted=shape(shape, false, null, roles);
 
-					return request.body(rdf()).fold(
-
-							model -> outliers(model, envelope(request.item(), authorized, model))
-									.map(request::reply)
-									.orElseGet(() -> handler.handle(request.shape(redacted))),
-
-							request::reply
-
+					return handler.handle(request.shape(redacted)
+							.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
+							.pipe(rdf(), rdf -> verify(rdf, envelope(focus, authorized, rdf)))
 					);
-
 				}
 
 			}
@@ -211,9 +206,9 @@ public final class Throttler implements Wrapper {
 
 				final Shape redacted=shape(shape, false, Form.verify, request.roles());
 
-				return response
-						.shape(redacted)
-						.pipe(rdf(), model -> Value(empty(redacted) ? set() : envelope(focus, redacted, model)));
+				return response.shape(redacted)
+						.pipe(rdf(), rdf -> Value(expand(focus, redacted, rdf)))
+						.pipe(rdf(), rdf -> Value(envelope(focus, redacted, rdf)));
 
 			}
 
@@ -249,23 +244,37 @@ public final class Throttler implements Wrapper {
 		);
 	}
 
-	private Set<Statement> envelope(final Value focus, final Shape shape, final Collection<Statement> model) {
-		return shape.map(new Extractor(model, singleton(focus)))
-				.collect(Collectors.toCollection(LinkedHashSet::new));
+
+	private Result<Collection<Statement>, Failure> verify(
+			final Collection<Statement> model, final Collection<Statement> envelope
+	) {
+
+		if ( model.isEmpty() ) { return Value(model); } else {
+
+			final List<Issue> outliers=model.stream()
+					.filter(statement -> !envelope.contains(statement))
+					.map(outlier -> issue(Issue.Level.Error, "statement outside allowed envelope "+outlier))
+					.collect(toList());
+
+			return outliers.isEmpty() ? Value(model) : Error(new Failure()
+					.status(Response.UnprocessableEntity)
+					.error(Failure.DataInvalid)
+					.trace(focus(outliers))
+			);
+
+		}
 	}
 
-	private Optional<Failure> outliers(final Collection<Statement> value, final Collection<Statement> envelope) {
+	private <V extends Collection<Statement>> V expand(final IRI focus, final Shape shape, final V model) {
 
-		final List<Issue> outliers=value.stream()
-				.filter(statement -> !envelope.contains(statement))
-				.map(outlier -> Issue.issue(Issue.Level.Error, "statement outside allowed envelope "+outlier))
-				.collect(toList());
+		if ( !empty(shape) ) {
+			model.addAll(shape // add implied statements
+					.map(new Outliner(focus)) // shape already redacted for verify mode
+					.collect(toList())
+			);
+		}
 
-		return outliers.isEmpty() ? Optional.empty() : Optional.of(new Failure()
-				.status(Response.UnprocessableEntity)
-				.error(Failure.DataInvalid)
-				.trace(focus(outliers))
-		);
+		return model;
 	}
 
 }
