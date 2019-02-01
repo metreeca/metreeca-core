@@ -17,8 +17,6 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -32,6 +30,7 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
@@ -39,37 +38,12 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
 
-final class ProcessorTest {
+final class PostprocessorTest {
 
 	private void exec(final Runnable... tasks) {
 		new Tray().exec(tasks).clear();
 	}
 
-
-	private Handler echo() {
-		return request -> request.reply(response -> response
-
-				.status(Response.OK)
-				.shape(request.shape())
-
-				.map(r -> request.body(rdf()).fold(
-						v -> r.body(rdf(), v),
-						e -> r
-				))
-
-		);
-	}
-
-
-	private BiFunction<Request, Model, Model> pre(final Value value) {
-		return (request, model) -> {
-
-			model.add(statement(request.item(), RDF.VALUE, value));
-
-			return model;
-
-		};
-	}
 
 	private BiFunction<Response, Model, Model> post(final Value value) {
 		return (response, model) -> {
@@ -84,60 +58,12 @@ final class ProcessorTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testProcessRequestRDFPayload() {
-		exec(() -> new Processor()
-
-				// multiple filters to test piping
-
-				.pre(pre(RDF.FIRST))
-				.pre(pre(RDF.REST))
-
-				.wrap(echo())
-
-				.handle(new Request()
-
-						.body(rdf(), emptyList())) // empty body to activate pre-processing
-
-				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
-								.as("items retrieved")
-								.hasSubset(asList(
-										statement(response.item(), RDF.VALUE, RDF.FIRST),
-										statement(response.item(), RDF.VALUE, RDF.REST)
-								))
-						)
-				)
-		);
-	}
-
-	@Test void testIgnoreMissingRequestRDFPayload() {
-		exec(() -> new Processor()
-
-				.pre(pre(RDF.FIRST))
-
-				.wrap(echo())
-
-				.handle(new Request()) // no RDF payload
-
-				.accept(response -> assertThat(response).hasBody(rdf())));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	@Test void testProcessResponseRDFPayload() {
-		exec(() -> new Processor()
-
-				// multiple filters to test piping
-
-				.post(post(RDF.FIRST))
-				.post(post(RDF.REST))
+		exec(() -> new Postprocessor(post(RDF.FIRST), post(RDF.REST)) // multiple filters to test piping
 
 				.wrap(echo())
 
-				.handle(new Request()
-
-						.body(rdf(), emptyList())) // empty body to activate post-processing
+				.handle(new Request().body(rdf(), emptyList())) // empty body to activate post-processing
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
@@ -152,9 +78,7 @@ final class ProcessorTest {
 	}
 
 	@Test void testIgnoreMissingResponseRDFPayload() {
-		exec(() -> new Processor()
-
-				.post(post(RDF.FIRST))
+		exec(() -> new Postprocessor(post(RDF.FIRST))
 
 				.wrap(echo())
 
