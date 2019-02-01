@@ -181,7 +181,7 @@ public final class Throttler implements Wrapper {
 
 					return request.body(rdf()).fold(
 
-							value -> outliers(value, envelope(request.item(), authorized, value))
+							model -> outliers(model, envelope(request.item(), authorized, model))
 									.map(request::reply)
 									.orElseGet(() -> handler.handle(request.shape(redacted))),
 

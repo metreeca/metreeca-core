@@ -20,6 +20,7 @@ package com.metreeca.form.engines;
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Pruner;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -38,7 +39,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.bnode;
@@ -112,8 +112,8 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape pattern=shape.map(mode(Form.verify));
-				final Shape selector=shape.map(mode(Form.filter)).map(new Pruner()).map(new Optimizer());
+				final Shape pattern=shape.map(new Redactor(Form.mode, Form.verify)).map(new Optimizer());
+				final Shape selector=shape.map(new Redactor(Form.mode, Form.filter)).map(new Pruner()).map(new Optimizer());
 
 				link(pattern, root);
 				link(selector, root);
@@ -190,7 +190,10 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape selector=shape.map(mode(Form.filter)).map(new Pruner()).map(new Optimizer());
+				final Shape selector=shape
+						.map(new Redactor(Form.mode, Form.filter))
+						.map(new Pruner())
+						.map(new Optimizer());
 
 				final Object source=var(id(selector));
 				final Object target=path.isEmpty() ? source : var(id());
@@ -275,7 +278,10 @@ final class SPARQLReader {
 
 			@Override public Object code() {
 
-				final Shape selector=shape.map(mode(Form.filter)).map(new Pruner()).map(new Optimizer());
+				final Shape selector=shape
+						.map(new Redactor(Form.mode, Form.filter))
+						.map(new Pruner())
+						.map(new Optimizer());
 
 				final Object source=var(id(selector));
 				final Object target=path.isEmpty() ? source : var(id());

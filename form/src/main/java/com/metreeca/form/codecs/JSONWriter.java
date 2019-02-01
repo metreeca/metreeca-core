@@ -17,9 +17,11 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -38,14 +40,13 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.codecs.BaseCodec.aliases;
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.codecs.JSON.encode;
 import static com.metreeca.form.codecs.JSON.field;
 import static com.metreeca.form.codecs.JSON.object;
+import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -105,7 +106,8 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 			final Shape driver=(shape == null) ? null : shape
 
-					.map(mode(Form.verify)) // remove internal filtering shapes
+					.map(new Redactor(Form.mode, Form.verify)) // remove internal filtering shapes
+					.map(new Optimizer())
 					.map(new Inferencer()) // infer implicit constraints to drive json shorthands
 					.map(new Optimizer());
 

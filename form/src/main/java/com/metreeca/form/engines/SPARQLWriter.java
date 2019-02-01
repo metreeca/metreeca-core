@@ -18,6 +18,8 @@
 package com.metreeca.form.engines;
 
 import com.metreeca.form.*;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Sets;
@@ -36,7 +38,6 @@ import java.util.logging.Logger;
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
@@ -89,7 +90,8 @@ final class SPARQLWriter {
 		connection.add(model);
 
 		return shape
-				.map(mode(Form.verify))
+				.map(new Redactor(Form.mode, Form.verify)) // remove internal filtering shapes
+				.map(new Optimizer())
 				.map(new FocusProbe(new LinkedHashSet<>(asList(focus))));
 	}
 

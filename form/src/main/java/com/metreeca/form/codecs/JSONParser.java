@@ -22,6 +22,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -45,7 +46,6 @@ import java.util.stream.Stream;
 import javax.json.JsonException;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
@@ -111,10 +111,11 @@ public final class JSONParser extends AbstractRDFParser {
 		final Resource focus=getParserConfig().get(JSONCodec.Focus);
 		final Shape shape=getParserConfig().get(JSONCodec.Shape);
 
-		final Shape driver=(shape == null) ? null : shape // infer implicit constraints to drive json shorthands
+		final Shape driver=(shape == null) ? null : shape
 
-				.map(mode(Form.verify))
-				.map(new Inferencer())
+				.map(new Redactor(Form.mode, Form.verify)) // remove internal filtering shapes
+				.map(new Optimizer())
+				.map(new Inferencer()) // infer implicit constraints to drive json shorthands
 				.map(new Optimizer());
 
 		if ( rdfHandler != null ) {

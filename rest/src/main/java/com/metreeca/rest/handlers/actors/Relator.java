@@ -22,6 +22,8 @@ import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -38,7 +40,6 @@ import org.eclipse.rdf4j.model.Statement;
 import java.util.Collection;
 import java.util.Collections;
 
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.All.all;
@@ -197,7 +198,10 @@ public final class Relator extends Actor {
 					return response.status(Response.OK).map(r -> query.map(new Query.Probe<Response>() { // !!! factor
 
 						@Override public Response probe(final Edges edges) {
-							return r.shape(shape.map(mode(Form.verify))) // hide filtering constraints // !!! cache returned shape
+							return r.shape(shape // !!! cache returned shape
+									.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
+									.map(new Optimizer())
+							)
 									.body(rdf(), model);
 						}
 

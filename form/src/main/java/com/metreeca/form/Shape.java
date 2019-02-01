@@ -17,27 +17,21 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
-import com.metreeca.form.probes.Inspector;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Maps;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Guard.guard;
-import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Sets.set;
 
 import static java.util.Arrays.asList;
@@ -175,7 +169,7 @@ public interface Shape {
 
 	public static Shape digest(final Collection<Shape> shapes) { return shape(Form.view, set(Form.digest), shapes); }
 
-	public static Shape detail(final Shape... shapes) {return detail(asList(shapes));}
+	public static Shape detail(final Shape... shapes) { return detail(asList(shapes)); }
 
 	public static Shape detail(final Collection<Shape> shapes) { return shape(Form.view, set(Form.detail), shapes); }
 
@@ -196,40 +190,6 @@ public interface Shape {
 	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
 		return shapes.isEmpty() ? guard(variable, values)
 				: When.when(guard(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
-	}
-
-
-	//// Parametric Probes /////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Probe<Shape> role(final Value... roles) {
-		return probe(Form.role, new HashSet<>(asList(roles)));
-	}
-
-	public static Probe<Shape> role(final Set<? extends Value> roles) {
-		return probe(Form.role, roles);
-	}
-
-	public static Probe<Shape> task(final Value task) {
-		return probe(Form.task, set(task));
-	}
-
-	public static Probe<Shape> view(final Value view) {
-		return probe(Form.view, set(view));
-	}
-
-	public static Probe<Shape> mode(final Value mode) {
-		return probe(Form.mode, set(mode));
-	}
-
-
-	public static Probe<Shape> probe(final IRI variable, final Set<? extends Value> values) {
-		return new Inspector<Shape>() {
-			@Override public Shape probe(final Shape shape) {
-				return shape
-						.map(new Redactor(Maps.map(entry(variable, values))))
-						.map(new Optimizer());
-			}
-		};
 	}
 
 

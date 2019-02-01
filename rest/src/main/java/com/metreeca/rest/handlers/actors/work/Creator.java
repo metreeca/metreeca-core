@@ -24,6 +24,8 @@ import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Shape;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.tray.rdf.Graph;
@@ -42,8 +44,9 @@ import java.util.function.Supplier;
 import javax.json.JsonValue;
 
 import static com.metreeca.form.Shape.pass;
-import static com.metreeca.form.Shape.task;
-import static com.metreeca.form.Shape.view;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.tray.Tray.tool;
@@ -262,10 +265,12 @@ public final class Creator implements Handler {
 			throw new NullPointerException("null shape");
 		}
 
-		final Shape matcher=shape
-				.map(task(Form.relate))
-				.map(view(Form.digest))
-				.map(Shape.role(Form.any));
+		final Shape matcher=shape.map(new Redactor(map(
+				entry(Form.task, set(Form.relate)),
+				entry(Form.view, set(Form.digest)),
+				entry(Form.role, set(Form.any))
+
+		))).map(new Optimizer());
 
 		return (request, model) -> tool(Graph.Factory).query(connection -> {
 
