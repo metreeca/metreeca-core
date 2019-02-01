@@ -106,7 +106,7 @@ import static java.util.stream.Collectors.toList;
 		final int limit=limit(query);
 
 		final Shape merged=filter == null ? shape
-				: and(shape, Shape.filter(filter)); // mark as filtering only >> don't include in results
+				: and(shape, Shape.filter().then(filter)); // mark as filtering only >> don't include in results
 
 		return stats != null ? new Stats(merged, stats)
 				: items != null ? new Items(merged, items)

@@ -17,9 +17,7 @@
 
 package com.metreeca.form.things;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.When;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -48,9 +46,7 @@ import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
-import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.things.Values.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,12 +90,12 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
-	public static final Shape Employee=When.when(guard(Form.role, Manager, Salesman), and(
+	public static final Shape Employee=role(Manager, Salesman).then(
 
 			clazz(term("Employee")), // implies rdf:type :Employee
 
-			verify(
-					server(
+			verify().then(
+					server().then(
 							field(RDF.TYPE, and(required(), datatype(IRIType))),
 							field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
 							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
@@ -110,7 +106,7 @@ public final class ValuesTest {
 							field(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
 							field(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
 					),
-					When.when(guard(Form.role, Manager), and(
+					role(Manager).then(
 
 							field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
 									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
@@ -119,12 +115,11 @@ public final class ValuesTest {
 							field(term("subordinate"), and(optional(), datatype(IRIType), clazz(term("Employee"))))
 
 					))
-			)
 
-	));
+	);
 
 	public static final Shape Employees=and(
-			server(
+			server().then(
 					field(RDF.TYPE, LDP.DIRECT_CONTAINER),
 					field(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 					field(LDP.MEMBERSHIP_RESOURCE, term("Employee"))

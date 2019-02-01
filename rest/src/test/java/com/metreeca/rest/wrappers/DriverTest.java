@@ -29,7 +29,7 @@ import static com.metreeca.form.Shape.optional;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -42,8 +42,8 @@ final class DriverTest {
 	private static final Shape NoneShape=required();
 
 	private static final Shape TestShape=and(
-			role(set(Form.root), RootShape),
-			role(set(Form.none), NoneShape)
+			when(role(Form.root), RootShape),
+			when(role(Form.none), NoneShape)
 	);
 
 

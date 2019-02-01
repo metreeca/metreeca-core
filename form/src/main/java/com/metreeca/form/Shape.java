@@ -19,11 +19,7 @@ package com.metreeca.form;
 
 import com.metreeca.form.shapes.*;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-
-import java.util.Collection;
-import java.util.Set;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
@@ -32,9 +28,6 @@ import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.things.Sets.set;
-
-import static java.util.Arrays.asList;
 
 
 /**
@@ -75,6 +68,11 @@ public interface Shape {
 
 
 	public static boolean empty(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
 		return pass(shape) || fail(shape);
 	}
 
@@ -90,107 +88,48 @@ public interface Shape {
 	public static Shape multiple() { return and(); }
 
 
-	public static Shape only(final Value... values) {
-		return only(asList(values));
-	}
-
-	public static Shape only(final Collection<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		if ( values.contains(null) ) {
-			throw new NullPointerException("null value");
-		}
-
-		if ( values.isEmpty() ) {
-			throw new IllegalArgumentException("empty values");
-		}
-
-		return and(all(values), in(values));
-	}
+	public static Shape only(final Value... values) { return and(all(values), in(values)); }
 
 
-	//// Parametric Shapes /////////////////////////////////////////////////////////////////////////////////////////////
+	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Shape role(final Set<? extends Value> roles, final Shape... shapes) {
-		return shape(Form.role, roles, asList(shapes));
-	}
+	public static Guard role(final Value... roles) { return guard(Form.role, roles); }
 
-	public static Shape role(final Set<? extends Value> roles, final Collection<Shape> shapes) {
-		return shape(Form.role, roles, shapes);
-	}
+	public static Guard task(final Value... tasks) { return guard(Form.task, tasks); }
+
+	public static Guard view(final Value... views) { return guard(Form.view, views); }
+
+	public static Guard mode(final Value... modes) { return guard(Form.mode, modes); }
 
 
-	public static Shape create(final Shape... shapes) { return create(asList(shapes));}
+	public static Guard create() { return task(Form.create); }
 
-	public static Shape create(final Collection<Shape> shapes) { return shape(Form.task, set(Form.create), shapes); }
+	public static Guard relate() { return task(Form.relate); }
 
-	public static Shape relate(final Shape... shapes) { return relate(asList(shapes));}
+	public static Guard update() { return task(Form.update); }
 
-	public static Shape relate(final Collection<Shape> shapes) { return shape(Form.task, set(Form.relate), shapes); }
-
-	public static Shape update(final Shape... shapes) {return update(asList(shapes));}
-
-	public static Shape update(final Collection<Shape> shapes) { return shape(Form.task, set(Form.update), shapes); }
-
-	public static Shape delete(final Shape... shapes) {return delete(asList(shapes));}
-
-	public static Shape delete(final Collection<Shape> shapes) { return shape(Form.task, set(Form.delete), shapes); }
+	public static Guard delete() { return task(Form.delete); }
 
 
 	/**
 	 * Marks shapes as server-defined read-only.
 	 */
-	public static Shape server(final Shape... shapes) { return server(asList(shapes)); }
-
-	/**
-	 * Marks shapes as server-defined read-only.
-	 */
-	public static Shape server(final Collection<Shape> shapes) {
-		return shape(Form.task, set(Form.relate, Form.delete), shapes);
-	}
+	public static Guard server() { return task(Form.relate, Form.delete); }
 
 	/**
 	 * Marks shapes as client-defined write-once.
 	 */
-	public static Shape client(final Shape... shapes) { return client(asList(shapes)); }
-
-	/**
-	 * Marks shapes as client-defined write-once.
-	 */
-	public static Shape client(final Collection<Shape> shapes) {
-		return shape(Form.task, set(Form.create, Form.relate, Form.delete), shapes);
-	}
+	public static Guard client() { return task(Form.create, Form.relate, Form.delete); }
 
 
-	public static Shape digest(final Shape... shapes) { return digest(asList(shapes)); }
+	public static Guard digest() { return view(Form.digest); }
 
-	public static Shape digest(final Collection<Shape> shapes) { return shape(Form.view, set(Form.digest), shapes); }
-
-	public static Shape detail(final Shape... shapes) { return detail(asList(shapes)); }
-
-	public static Shape detail(final Collection<Shape> shapes) { return shape(Form.view, set(Form.detail), shapes); }
+	public static Guard detail() { return view(Form.detail); }
 
 
-	public static Shape verify(final Shape... shapes) { return verify(asList(shapes)); }
+	public static Guard verify() { return mode(Form.verify); }
 
-	public static Shape verify(final Collection<Shape> shapes) { return shape(Form.mode, set(Form.verify), shapes); }
-
-	public static Shape filter(final Shape... shapes) { return filter(asList(shapes)); }
-
-	public static Shape filter(final Collection<Shape> shapes) { return shape(Form.mode, set(Form.filter), shapes); }
-
-
-	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Shape... shapes) {
-		return shape(variable, values, asList(shapes));
-	}
-
-	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
-		return shapes.isEmpty() ? guard(variable, values)
-				: When.when(guard(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
-	}
+	public static Guard filter() { return mode(Form.filter); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
