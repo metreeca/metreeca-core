@@ -24,7 +24,14 @@ import com.metreeca.form.shapes.*;
 /**
  * Shape traverser.
  *
- * <p>Generates a result by traversing structural and logical shapes.</p>
+ * <p>Generates a result by traversing shapes; concrete implementations:</p>
+ *
+ * <ul>
+ * <li>must define probing methods for structural and logical shapes;</li>
+ * <li>may override probing methods for annotations and constraints of interest;</li>
+ * <li>may override the {@linkplain #probe(Shape) generic probing method}, applied by default to annotations and
+ * constraints;</li>
+ * </ul>
  *
  * @param <V> the type of the generated result value
  */

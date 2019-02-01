@@ -19,7 +19,7 @@ package com.metreeca.form;
 
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
-import com.metreeca.form.probes.Visitor;
+import com.metreeca.form.probes.Inspector;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Maps;
 
@@ -223,7 +223,7 @@ public interface Shape {
 
 
 	public static Probe<Shape> probe(final IRI variable, final Set<? extends Value> values) {
-		return new Visitor<Shape>() {
+		return new Inspector<Shape>() {
 			@Override public Shape probe(final Shape shape) {
 				return shape
 						.map(new Redactor(Maps.map(entry(variable, values))))

@@ -70,7 +70,7 @@ public final class Optimizer extends Traverser<Shape> {
 
 			@Override protected IRI type(final IRI x, final IRI y) { return derives(x, y) ? y : derives(y, x) ? x : null; }
 
-		}.merge(flatten(and.getShapes(), And::and, new Visitor<Stream<Shape>>() {
+		}.merge(flatten(and.getShapes(), And::and, new Inspector<Stream<Shape>>() {
 
 			@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
@@ -93,7 +93,7 @@ public final class Optimizer extends Traverser<Shape> {
 
 			@Override protected IRI type(final IRI x, final IRI y) { return derives(x, y) ? x : derives(y, x) ? y : null; }
 
-		}.merge(flatten(or.getShapes(), Or::or, new Visitor<Stream<Shape>>() {
+		}.merge(flatten(or.getShapes(), Or::or, new Inspector<Stream<Shape>>() {
 
 			@Override public Stream<Shape> probe(final Shape shape) {
 				return Stream.of(shape);
@@ -143,7 +143,7 @@ public final class Optimizer extends Traverser<Shape> {
 	private Set<Shape> flatten(final Collection<Shape> collection,
 			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter) {
 
-		final Shape.Probe<Map.Entry<IRI, Shape>> splitter=new Visitor<Map.Entry<IRI, Shape>>() {
+		final Shape.Probe<Map.Entry<IRI, Shape>> splitter=new Inspector<Map.Entry<IRI, Shape>>() {
 
 			private int id;
 
@@ -181,7 +181,7 @@ public final class Optimizer extends Traverser<Shape> {
 	}
 
 
-	private abstract static class Merger extends Visitor<Merger> {
+	private abstract static class Merger extends Inspector<Merger> {
 
 		private int minCount=-1;
 		private int maxCount=-1;

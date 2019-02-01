@@ -23,6 +23,7 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.Or.or;
@@ -33,7 +34,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 
-final class BrowserTest {
+@Disabled final class BrowserTest {
 
 	private void exec(final Runnable task) {
 		new Tray()

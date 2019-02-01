@@ -21,7 +21,9 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.*;
 import com.metreeca.form.engines.CellEngine;
 import com.metreeca.form.engines.SPARQLEngine;
+import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Outliner;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.work.Actor;
@@ -37,7 +39,6 @@ import java.util.Collection;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.Shape.mode;
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Wrapper.wrapper;
@@ -121,7 +122,8 @@ public final class Updater extends Actor {
 		// !!! migrate to RDFFormat?
 
 		model.addAll(shape // add implied statements
-				.map(mode(Form.verify))
+				.map(new Redactor(Form.mode, Form.verify))
+				.map(new Optimizer())
 				.map(new Outliner(focus))
 				.collect(toList())
 		);

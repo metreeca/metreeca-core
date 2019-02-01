@@ -149,7 +149,7 @@ public final class Throttler implements Wrapper {
 
 				return request.body(rdf()).fold(
 
-						value -> outliers(value, description(request.item(), false, value))
+						model -> outliers(model, description(request.item(), false, model))
 								.map(request::reply)
 								.orElseGet(() -> handler.handle(request)),
 
@@ -161,6 +161,8 @@ public final class Throttler implements Wrapper {
 
 				final Shape shape=request.shape();
 				final Set<Value> roles=request.roles();
+
+				// remove annotations and filtering-only constraints for authorization checks
 
 				final Shape general=shape(shape, true, Form.verify, set(Form.any));
 				final Shape authorized=shape(shape, true, Form.verify, roles);
@@ -221,16 +223,16 @@ public final class Throttler implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape(final Shape shape, final boolean pruned, final IRI mode, final Set<Value> roles) {
+	private Shape shape(final Shape shape, final boolean clean, final IRI mode, final Set<Value> roles) {
 		return cache.computeIfAbsent(
 
 				mode == null ? map(
-						entry(RDF.VALUE, set(literal(pruned))),
+						entry(RDF.VALUE, set(literal(clean))),
 						entry(Form.task, set(task)),
 						entry(Form.view, set(view)),
 						entry(Form.role, roles)
 				) : map(
-						entry(RDF.VALUE, set(literal(pruned))),
+						entry(RDF.VALUE, set(literal(clean))),
 						entry(Form.task, set(task)),
 						entry(Form.view, set(view)),
 						entry(Form.mode, set(mode)),
@@ -239,7 +241,7 @@ public final class Throttler implements Wrapper {
 
 				variables -> shape
 						.map(new Redactor(variables))
-						.map(pruned ? new Pruner() : new Visitor<Shape>() {
+						.map(clean ? new Cleaner() : new Inspector<Shape>() {
 							@Override public Shape probe(final Shape shape) { return shape; }
 						})
 						.map(new Optimizer())

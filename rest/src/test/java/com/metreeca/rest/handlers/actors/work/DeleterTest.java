@@ -23,6 +23,7 @@ import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.Form.none;
@@ -33,7 +34,7 @@ import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 
 
-final class DeleterTest {
+@Disabled final class DeleterTest {
 
 	private static final Model Dataset=small();
 

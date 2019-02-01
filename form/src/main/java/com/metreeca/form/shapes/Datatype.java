@@ -18,7 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Visitor;
+import com.metreeca.form.probes.Inspector;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -111,7 +111,7 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class DatatypeProbe extends Visitor<IRI> {
+	private static final class DatatypeProbe extends Inspector<IRI> {
 
 		@Override public IRI probe(final Datatype datatype) {
 			return datatype.getIRI();

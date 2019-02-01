@@ -18,7 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Visitor;
+import com.metreeca.form.probes.Inspector;
 
 import org.eclipse.rdf4j.model.Value;
 
@@ -113,7 +113,7 @@ public final class Any implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class AnyProbe extends Visitor<Set<Value>> {
+	private static final class AnyProbe extends Inspector<Set<Value>> {
 
 		@Override public Set<Value> probe(final Any any) {
 			return any.getValues();
