@@ -38,10 +38,7 @@ public final class HandlerTest {
 				.shape(request.shape())
 				.headers(request.headers())
 
-				.map(r -> request.body(rdf()).fold(
-						v -> r.body(rdf(), v),
-						e -> r
-				))
+				.map(r -> request.body(rdf()).fold(v -> r.body(rdf(), v), r::map))
 
 		);
 	}
