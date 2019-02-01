@@ -33,7 +33,7 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * Virtual resource builder.
+ * Virtual resource generator.
  *
  * <p>Handles retrieval requests on virtual linked data resources.</p>
  *
@@ -52,7 +52,7 @@ import static com.metreeca.tray.Tray.tool;
  * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
  * Form#verify} mode and {@link Form#detail} view.</p>
  */
-public final class Builder /*extends Actor*/  implements Handler{
+public final class Generator /*extends Actor*/  implements Handler{
 
 	@Override public Responder handle(final Request request) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
@@ -108,7 +108,7 @@ public final class Builder /*extends Actor*/  implements Handler{
 	 *
 	 * @throws NullPointerException if {@code sparql} is null
 	 */
-	public Builder(final String sparql) {
+	public Generator(final String sparql) {
 
 		//if ( sparql == null ) {
 		//	throw new NullPointerException("null sparql query");
@@ -142,7 +142,7 @@ public final class Builder /*extends Actor*/  implements Handler{
 	 *
 	 * @throws NullPointerException if {@code model} is null
 	 */
-	public Builder(final Function<Request, Collection<Statement>> model) {
+	public Generator(final Function<Request, Collection<Statement>> model) {
 
 	}
 

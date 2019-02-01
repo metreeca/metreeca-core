@@ -35,7 +35,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 
-@Disabled final class BuilderTest {
+@Disabled final class GeneratorTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
@@ -81,7 +81,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testBuild() {
-		exec(() -> new Builder(virtual())
+		exec(() -> new Generator(virtual())
 
 				.handle(driven())
 
@@ -103,7 +103,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 	}
 
 	@Test void testBuildLimited() {
-		exec(() -> new Builder(virtual())
+		exec(() -> new Generator(virtual())
 
 				.handle(driven().roles(Salesman))
 
@@ -126,7 +126,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenUnauthorized() {
-		exec(() -> new Builder(virtual())
+		exec(() -> new Generator(virtual())
 
 				.handle(driven().shape(or()))
 
@@ -136,7 +136,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 	}
 
 	@Test void testDrivenForbidden() {
-		exec(() -> new Builder(virtual())
+		exec(() -> new Generator(virtual())
 
 				.handle(driven().shape(or()).user(RDF.NIL))
 
@@ -146,7 +146,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 	}
 
 	@Test void testDrivenUnknownOnEmptyModel() {
-		exec(() -> new Builder(request -> set())
+		exec(() -> new Generator(request -> set())
 
 				.handle(driven())
 
