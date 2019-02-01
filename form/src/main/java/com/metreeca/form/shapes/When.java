@@ -116,7 +116,7 @@ public final class When implements Shape {
 	}
 
 	@Override public String toString() {
-		return "condition(\n"
+		return "when(\n"
 				+indent(test.toString())+",\n"
 				+indent(pass.toString())
 				+(fail.equals(and()) ? "" : ",\n"+indent(fail.toString()))
