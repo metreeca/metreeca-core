@@ -175,7 +175,7 @@ final class UpdaterTest {
 
 									.as("graph updated")
 
-									.hasSubset(decode("@prefix : <http://example.com/terms#> . </employees/1370>"
+									.hasSubset(decode("</employees/1370>"
 											+":forename 'Tino';"
 											+":surname 'Faussone';"
 											+":email 'tfaussone@example.com';"

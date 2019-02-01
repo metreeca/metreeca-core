@@ -181,8 +181,8 @@ public final class Throttler implements Wrapper {
 					final Shape redacted=shape(shape, false, null, roles);
 
 					return handler.handle(request.shape(redacted)
-							.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
 							.pipe(rdf(), rdf -> verify(rdf, envelope(focus, authorized, rdf)))
+							.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
 					);
 				}
 
@@ -207,8 +207,8 @@ public final class Throttler implements Wrapper {
 				final Shape redacted=shape(shape, false, Form.verify, request.roles());
 
 				return response.shape(redacted)
-						.pipe(rdf(), rdf -> Value(expand(focus, redacted, rdf)))
-						.pipe(rdf(), rdf -> Value(envelope(focus, redacted, rdf)));
+						.pipe(rdf(), rdf -> Value(envelope(focus, redacted, rdf)))
+						.pipe(rdf(), rdf -> Value(expand(focus, redacted, rdf)));
 
 			}
 
