@@ -27,8 +27,10 @@ import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
@@ -52,7 +54,7 @@ public final class Housekeeper implements Wrapper {
 	/**
 	 * Creates a SPARQL Update housekeeping task.
 	 *
-	 * <p>The script is executed with the following pre-defined bindings:</p>
+	 * <p>The task is executed with the following pre-defined bindings:</p>
 	 *
 	 * <table summary="pre-defined bindings">
 	 *
@@ -96,22 +98,22 @@ public final class Housekeeper implements Wrapper {
 	 *
 	 * </table>
 	 *
-	 * @param update the SPARQL Update housekeeping script to be executed by this processor on successful request
+	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
 	 *               processing; empty scripts are ignored
 	 *
-	 * @return an RDF housekeeping task executing the SPARQL {@code update} script
+	 * @return an RDF housekeeping task executing the SPARQL {@code script}
 	 *
-	 * @throws NullPointerException if {@code update} is null
+	 * @throws NullPointerException if {@code script} is null
 	 */
-	public static BiConsumer<Response, RepositoryConnection> sparql(final String update) {
+	public static BiConsumer<Response, RepositoryConnection> sparql(final String script) {
 
-		if ( update == null ) {
-			throw new NullPointerException("null update");
+		if ( script == null ) {
+			throw new NullPointerException("null script");
 		}
 
 		return (response, connection) -> {
 
-			if ( !update.isEmpty() ) {
+			if ( !script.isEmpty() ) {
 
 				final IRI item=response.item();
 				final IRI stem=iri(item.getNamespace());
@@ -120,16 +122,16 @@ public final class Housekeeper implements Wrapper {
 				final IRI user=response.request().user();
 				final Literal time=time(true);
 
-				final Update operation=connection.prepareUpdate(QueryLanguage.SPARQL, update, response.request().base());
+				final Update update=connection.prepareUpdate(QueryLanguage.SPARQL, script, response.request().base());
 
-				operation.setBinding("this", item);
-				operation.setBinding("stem", stem);
-				operation.setBinding("name", name);
+				update.setBinding("this", item);
+				update.setBinding("stem", stem);
+				update.setBinding("name", name);
 
-				operation.setBinding("user", user);
-				operation.setBinding("time", time);
+				update.setBinding("user", user);
+				update.setBinding("time", time);
 
-				operation.execute();
+				update.execute();
 			}
 
 		};
@@ -142,6 +144,18 @@ public final class Housekeeper implements Wrapper {
 
 	private final Graph graph=tool(Graph.Factory);
 
+
+	/**
+	 * Creates an RDF housekeeper.
+	 *
+	 * @param scripts the SPARQL Update housekeeping scripts to be executed on {@linkplain Response#success() successful}
+	 *              request processing; scripts are executed in the shared {@linkplain Graph#Factory graph} tool
+	 *
+	 * @throws NullPointerException if {@code scripts} is null or contains null values
+	 */
+	public Housekeeper(final String... scripts) {
+		this(Arrays.stream(scripts).map(Housekeeper::sparql).collect(Collectors.toList()));
+	}
 
 	/**
 	 * Creates an RDF housekeeper.

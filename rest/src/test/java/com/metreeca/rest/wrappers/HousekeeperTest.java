@@ -43,8 +43,8 @@ final class HousekeeperTest {
 
 	@Test void testExecuteTaskOnRequestFocus() {
 		exec(() -> new Housekeeper(
-				sparql("insert { ?this rdf:value rdf:first } where {}"),
-				sparql("insert { ?this rdf:value rdf:rest } where {}")
+				"insert { ?this rdf:value rdf:first } where {}",
+				"insert { ?this rdf:value rdf:rest } where {}"
 		)
 
 				.wrap((Handler)request -> request.reply(response -> response.status(Response.OK)))

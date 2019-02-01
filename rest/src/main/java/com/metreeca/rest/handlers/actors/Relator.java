@@ -198,10 +198,11 @@ public final class Relator extends Actor {
 					return response.status(Response.OK).map(r -> query.map(new Query.Probe<Response>() { // !!! factor
 
 						@Override public Response probe(final Edges edges) {
-							return r.shape(shape // !!! cache returned shape
-									.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
-									.map(new Optimizer())
-							)
+							return r
+									.shape(shape // !!! cache returned shape
+											.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
+											.map(new Optimizer())
+									)
 									.body(rdf(), model);
 						}
 
