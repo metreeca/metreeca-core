@@ -41,7 +41,7 @@ final class ConnectorTest {
 
 	private static final Statement data=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 
-	private void tray(final Runnable task) {
+	private void exec(final Runnable task) {
 		new Tray().exec(task).clear();
 	}
 
@@ -79,7 +79,7 @@ final class ConnectorTest {
 		final AtomicReference<RepositoryConnection> wrapperConnection=new AtomicReference<>();
 		final AtomicReference<RepositoryConnection> handlerConnection=new AtomicReference<>();
 
-		tray(() -> new Connector()
+		exec(() -> new Connector()
 
 				.wrap(wrapper(wrapperConnection::set))
 				.wrap(handler(handlerConnection::set))
@@ -98,7 +98,7 @@ final class ConnectorTest {
 	}
 
 	@Test void testAvoidTransactionOnSafeRequests() {
-		tray(() -> new Connector()
+		exec(() -> new Connector()
 
 				.wrap(handler(connection -> assertThat(connection.isActive()).isFalse()))
 
@@ -110,7 +110,7 @@ final class ConnectorTest {
 	}
 
 	@Test void testOpenTransactionOnUnsafeRequests() {
-		tray(() -> new Connector()
+		exec(() -> new Connector()
 
 				.wrap(handler(connection -> assertThat(connection.isActive()).isTrue()))
 
@@ -122,7 +122,7 @@ final class ConnectorTest {
 	}
 
 	@Test void testCommitTransactionOnSuccessfulResponses() {
-		tray(() -> new Connector()
+		exec(() -> new Connector()
 
 				.wrap(handler(connection -> connection.add(data)))
 
@@ -143,7 +143,7 @@ final class ConnectorTest {
 	}
 
 	@Test void testRollBackTransactionOnUnsuccessfulResponses() {
-		tray(() -> new Connector()
+		exec(() -> new Connector()
 
 				.wrap((Wrapper)handler -> request ->
 						handler.handle(request).map(response -> response.status(Response.BadRequest))
