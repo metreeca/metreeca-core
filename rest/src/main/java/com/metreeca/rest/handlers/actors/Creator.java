@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors.work;
+package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Focus;
@@ -28,7 +28,11 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.wrappers.Splitter;
+import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -43,19 +47,20 @@ import java.util.function.Supplier;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.rewrite;
+import static com.metreeca.rest.Handler.handler;
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.UUID.randomUUID;
 
 
 /**
- * Stored basic container resource creator.
+ * LDP resource creator.
  *
  * <p>Handles creation requests on the stored linked data basic resource container identified by the request
  * {@linkplain Request#item() focus item}.</p>
@@ -109,7 +114,7 @@ import static java.util.UUID.randomUUID;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Creator implements Handler {
+public final class Creator extends Delegator {
 
 	/*
 	 * Shared lock for serializing slug operations (concurrent graph txns may produce conflicting results).
@@ -120,50 +125,30 @@ public final class Creator implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
+
 	private final Object lock=tool(LockFactory);
 
 
 	private BiFunction<Request, Model, String> slug=uuid();
 
 
-	//public Creator() {
-	//	delegate(query(false)
-	//			// !!! .wrap(modulator().task(Form.create).view(Form.detail))
-	//			.wrap(processor())
-	//			.wrap((Request request) -> request.body(rdf())
-	//
-	//					.value(model -> { // add implied statements
-	//
-	//						model.addAll(request.shape()
-	//								.map(mode(Form.verify))
-	//								.map(new Outliner(request.item()))
-	//								.collect(toList())
-	//						);
-	//
-	//						return model;
-	//
-	//					})
-	//
-	//					.fold(
-	//							model -> process(request, model),
-	//							request::reply
-	//					)));
-	//}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Creates a resource creator with a {@linkplain #uuid() UUID} slug generator.
+	 */
+	public Creator() {
+		this(uuid());
+	}
 
 	/**
-	 * Configures the slug generation function.
+	 * Creates a resource creator.
 	 *
-	 * @param slug a function mapping from the creation request and its RDF body to the name to be assigned to the newly
-	 *             created resource; must return a non-null and non-empty value
-	 *
-	 * @return this creator
+	 * @param slug a function mapping from the creation request and its RDF payload to the name to be assigned to the
+	 *             newly created resource; must return a non-null and non-empty value
 	 *
 	 * @throws NullPointerException if {@code slug} is null
 	 */
-	public Creator slug(final BiFunction<Request, Model, String> slug) {
+	public Creator(final BiFunction<Request, Model, String> slug) {
 
 		if ( slug == null ) {
 			throw new NullPointerException("null slug");
@@ -173,63 +158,80 @@ public final class Creator implements Handler {
 
 			this.slug=slug;
 
-		}
+			delegate(handler(Request::container, container(), resource())
+					.with(new Splitter(Splitter.resource()))
+					.with(new Throttler(Form.create, Form.detail))
+			);
 
-		return this;
+		}
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Responder process(final Request request, final Collection<Statement> model) {
-		return request.reply(response -> graph.update(connection -> {
+	private Handler resource() {
+		return request -> request.reply(new Failure()
+				.status(Response.MethodNotAllowed)
+				.cause("LDP resource creation not supported")
+		);
+	}
 
-			synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
+	private Handler container() {
+		return request -> request.body(rdf()).fold(
 
-				final String slug=this.slug.apply(request, new LinkedHashModel(model));
+				model -> request.reply(response -> graph.update(connection -> {
 
-				if ( slug == null ) {
-					throw new NullPointerException("null slug");
-				}
+					synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
 
-				if ( slug.isEmpty() ) {
-					throw new IllegalArgumentException("empty slug");
-				}
 
-				final IRI source=request.item();
-				final IRI target=iri(request.stem(), slug);
+						final String slug=this.slug.apply(request, new LinkedHashModel(model));
 
-				final Shape shape=request.shape();
-				final Collection<Statement> rewritten=/* !!! trace*/(rewrite(source, target, model));
+						if ( slug == null ) {
+							throw new NullPointerException("null slug");
+						}
 
-				final Focus focus=pass(shape)
-						? new CellEngine(connection).create(target, rewritten)
-						: new SPARQLEngine(connection).create(target, shape, rewritten);
+						if ( slug.isEmpty() ) {
+							throw new IllegalArgumentException("empty slug");
+						}
 
-				if ( focus.assess(Level.Error) ) { // cell/shape violations
+						final IRI source=request.item();
+						final IRI target=iri(request.stem(), slug);
 
-					connection.rollback();
+						final Shape shape=request.shape();
+						final Collection<Statement> rewritten=trace.debug(this, rewrite(source, target, model));
 
-					return response.map(new Failure()
-							.status(Response.UnprocessableEntity)
-							.error(Failure.DataInvalid)
-							.trace(focus)
-					);
+						final Focus focus=!request.driven()
+								? new CellEngine(connection).create(target, rewritten)
+								: new SPARQLEngine(connection).create(target, shape, rewritten);
 
-				} else { // valid data
+						if ( focus.assess(Level.Error) ) { // cell/shape violations
 
-					connection.add(source, LDP.CONTAINS, target); // insert resource into container
+							connection.rollback();
 
-					connection.commit();
+							return response.map(new Failure()
+									.status(Response.UnprocessableEntity)
+									.error(Failure.DataInvalid)
+									.trace(focus)
+							);
 
-					return response
-							.status(Response.Created)
-							.header("Location", target.stringValue());
+						} else { // valid data
 
-				}
-			}
+							connection.add(source, LDP.CONTAINS, target); // insert resource into container
 
-		}));
+							connection.commit();
+
+							return response
+									.status(Response.Created)
+									.header("Location", target.stringValue());
+
+						}
+					}
+
+				})),
+
+				request::reply
+
+		);
 	}
 
 
@@ -269,7 +271,6 @@ public final class Creator implements Handler {
 				entry(Form.task, set(Form.relate)),
 				entry(Form.view, set(Form.digest)),
 				entry(Form.role, set(Form.any))
-
 		))).map(new Optimizer());
 
 		return (request, model) -> tool(Graph.Factory).query(connection -> {
@@ -300,10 +301,6 @@ public final class Creator implements Handler {
 			return String.valueOf(count);
 
 		});
-	}
-
-	@Override public Responder handle(final Request request) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
 }
