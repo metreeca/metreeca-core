@@ -26,7 +26,7 @@ import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.work.Actor;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Splitter;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
@@ -98,17 +98,12 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Updater extends Actor {
+public final class Updater extends Delegator {
 
 	public Updater() {
-		super(
-
-				query(false)
-						.wrap(wrapper(Request::container, new Splitter(container()), new Splitter(resource())))
-						.wrap(new Throttler(Form.update, Form.detail)),
-
-				handler(Request::container, new CommonContainer(), new CommonResource())
-
+		delegate(handler(Request::container, new CommonContainer(), new CommonResource())
+				.with(wrapper(Request::container, new Splitter(container()), new Splitter(resource())))
+				.with(new Throttler(Form.update, Form.detail))
 		);
 	}
 

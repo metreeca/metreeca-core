@@ -29,7 +29,7 @@ import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.work.Actor;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Splitter;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
@@ -102,25 +102,20 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Relator extends Actor {
+public final class Relator extends Delegator {
 
 	// !!! activate response trimming only if a custom wrapper/handler is inserted in the pipeline
 
 	public Relator() {
-		super(
-
-				query(true)
-						.wrap(new Shared())
-						.wrap(wrapper(Request::container,
-								new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
-								new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
-						)),
-
-				handler(Request::container,
+		delegate(handler(Request::container,
 						handler(Request::driven, new ShapedContainer(), new SimpleContainer()),
 						handler(Request::driven, new ShapedResource(), new SimpleResource())
 				)
-
+						.with(new Shared())
+						.with(wrapper(Request::container,
+								new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
+								new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
+						))
 		);
 	}
 

@@ -22,8 +22,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.handlers.Worker;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 

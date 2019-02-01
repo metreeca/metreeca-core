@@ -47,6 +47,21 @@ public final class HandlerTest {
 	}
 
 
+	@Test void testPreserverChainedWrapperOrder() {
+		echo()
+
+				.with(handler -> request -> handler.handle(request.header("+Chain", "1")))
+				.with(handler -> request -> handler.handle(request.header("+Chain", "2")))
+				.with(handler -> request -> handler.handle(request.header("+Chain", "3")))
+
+				.handle(new Request())
+
+				.accept(response -> assertThat(response.headers("Chain"))
+						.containsExactly("1", "2", "3")
+				);
+	}
+
+
 	@Test void testResultStreaming() {
 
 		final Collection<String> transaction=new ArrayList<>();

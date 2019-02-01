@@ -17,20 +17,18 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Responder;
+import com.metreeca.rest.*;
 
 
 /**
  * Delegating handler.
  *
- * <p>Delegates request processing to a {@linkplain #delegate(Handler) delegate} handler, usually assembled as a
+ * <p>Delegates request processing to a {@linkplain #delegate(Handler) delegate} handler, possibly assembled as a
  * combination of other handlers and wrappers.</p>
  */
 public abstract class Delegator implements Handler {
 
-	private Handler delegate=request -> request.reply(response -> response);
+	private Handler delegate;
 
 
 	/**
@@ -48,6 +46,10 @@ public abstract class Delegator implements Handler {
 			throw new NullPointerException("null delegate");
 		}
 
+		if ( this.delegate != null ) {
+			throw new IllegalStateException("delegate already defined");
+		}
+
 		this.delegate=delegate;
 
 		return this;
@@ -56,7 +58,21 @@ public abstract class Delegator implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Override public Handler with(final Wrapper wrapper) {
+
+		if ( delegate == null ) {
+			throw new NullPointerException("undefined delegate");
+		}
+
+		return delegate.with(wrapper);
+	}
+
 	@Override public Responder handle(final Request request) {
+
+		if ( delegate == null ) {
+			throw new NullPointerException("undefined delegate");
+		}
+
 		return delegate.handle(request);
 	}
 
