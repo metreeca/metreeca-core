@@ -103,13 +103,13 @@ public final class Housekeeper implements Wrapper {
 	 *
 	 * @throws NullPointerException if {@code update} is null
 	 */
-	public static BiConsumer<RepositoryConnection, Response> sparql(final String update) {
+	public static BiConsumer<Response, RepositoryConnection> sparql(final String update) {
 
 		if ( update == null ) {
 			throw new NullPointerException("null update");
 		}
 
-		return (connection, response) -> {
+		return (response, connection) -> {
 
 			if ( !update.isEmpty() ) {
 
@@ -138,7 +138,7 @@ public final class Housekeeper implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Collection<BiConsumer<RepositoryConnection, Response>> tasks;
+	private final Collection<BiConsumer<Response, RepositoryConnection>> tasks;
 
 	private final Graph graph=tool(Graph.Factory);
 
@@ -147,12 +147,12 @@ public final class Housekeeper implements Wrapper {
 	 * Creates an RDF housekeeper.
 	 *
 	 * @param tasks the housekeeping tasks to be executed on {@linkplain Response#success() successful} request
-	 *              processing; each task is supplied with a a connection to the shared {@linkplain Graph#Factory graph}
-	 *              tool and the returned response
+	 *              processing; each task is handled the returned response and a connection to the shared {@linkplain
+	 *              Graph#Factory graph} tool
 	 *
 	 * @throws NullPointerException if {@code tasks} is null or contains null values
 	 */
-	@SafeVarargs public Housekeeper(final BiConsumer<RepositoryConnection, Response>... tasks) {
+	@SafeVarargs public Housekeeper(final BiConsumer<Response, RepositoryConnection>... tasks) {
 		this(asList(tasks));
 	}
 
@@ -160,12 +160,12 @@ public final class Housekeeper implements Wrapper {
 	 * Creates an RDF housekeeper.
 	 *
 	 * @param tasks the housekeeping tasks to be executed on {@linkplain Response#success() successful} request
-	 *              processing; each task is supplied with a a connection to the shared {@linkplain Graph#Factory graph}
-	 *              tool and the returned response
+	 *              processing; each task is handled the returned response and a connection to the shared {@linkplain
+	 *              Graph#Factory graph} tool
 	 *
 	 * @throws NullPointerException if {@code tasks} is null or contains null values
 	 */
-	public Housekeeper(final Collection<BiConsumer<RepositoryConnection, Response>> tasks) {
+	public Housekeeper(final Collection<BiConsumer<Response, RepositoryConnection>> tasks) {
 
 		if ( tasks == null ) {
 			throw new NullPointerException("null tasks");
@@ -199,7 +199,7 @@ public final class Housekeeper implements Wrapper {
 		return handler -> request -> handler.handle(request).map(response -> {
 
 			if ( response.success() && !tasks.isEmpty() ) {
-				graph.update(connection -> { tasks.forEach(task -> task.accept(connection, response)); });
+				graph.update(connection -> { tasks.forEach(task -> task.accept(response, connection)); });
 			}
 
 			return response;
