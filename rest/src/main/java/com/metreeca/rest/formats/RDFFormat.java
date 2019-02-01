@@ -44,8 +44,6 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
-import static java.util.Collections.emptySet;
-
 
 /**
  * RDF body format.
@@ -104,7 +102,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 					parser.setParseErrorListener(errorCollector);
 
-					final Collection<Statement> model=new ArrayList<>();
+					final Collection<Statement> model=new LinkedHashSet<>();  // order-preserving and writable
 
 					parser.setRDFHandler(new AbstractRDFHandler() {
 						@Override public void handleStatement(final Statement statement) { model.add(statement); }
@@ -153,7 +151,9 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 				},
 
-				error -> error.equals(Format.Missing) ? Value(emptySet()) : Error(error)
+				error -> error.equals(Format.Missing)
+						? Value(new LinkedHashSet<>()) // order-preserving and writable
+						: Error(error)
 
 		);
 	}
