@@ -112,7 +112,7 @@ public final class Throttler implements Wrapper {
 	private final Value task;
 	private final Value view;
 
-	private final Map<Map<IRI, Set<? extends Value>>, Shape> cache=new HashMap<>();
+	private final Map<Shape, Map<Map<IRI, Set<? extends Value>>, Shape>> cache=new IdentityHashMap<>();
 
 
 	/**
@@ -219,28 +219,29 @@ public final class Throttler implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape shape(final Shape shape, final boolean clean, final IRI mode, final Set<Value> roles) {
-		return cache.computeIfAbsent(
-
-				mode == null ? map(
-						entry(RDF.VALUE, set(literal(clean))),
-						entry(Form.task, set(task)),
-						entry(Form.view, set(view)),
-						entry(Form.role, roles)
-				) : map(
-						entry(RDF.VALUE, set(literal(clean))),
-						entry(Form.task, set(task)),
-						entry(Form.view, set(view)),
-						entry(Form.mode, set(mode)),
-						entry(Form.role, roles)
-				),
-
-				variables -> shape
+		return cache
+				.computeIfAbsent(shape, _shape -> new HashMap<>())
+				.computeIfAbsent(variables(clean, mode, roles), variables -> shape
 						.map(new Redactor(variables))
 						.map(clean ? new Cleaner() : new Inspector<Shape>() {
 							@Override public Shape probe(final Shape shape) { return shape; }
 						})
 						.map(new Optimizer())
+				);
+	}
 
+	private Map<IRI, Set<? extends Value>> variables(final boolean clean, final IRI mode, final Set<Value> roles) {
+		return mode == null ? map(
+				entry(RDF.VALUE, set(literal(clean))),
+				entry(Form.task, set(task)),
+				entry(Form.view, set(view)),
+				entry(Form.role, roles)
+		) : map(
+				entry(RDF.VALUE, set(literal(clean))),
+				entry(Form.task, set(task)),
+				entry(Form.view, set(view)),
+				entry(Form.mode, set(mode)),
+				entry(Form.role, roles)
 		);
 	}
 

@@ -27,6 +27,7 @@ import com.metreeca.tray.Tray;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +47,7 @@ import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
-final class CreatorTest {
+@Disabled final class CreatorTest {
 
 	private void exec(final Runnable task) {
 		new Tray().exec(task).clear();
