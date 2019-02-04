@@ -21,11 +21,11 @@ import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
@@ -60,13 +60,13 @@ public final class SimpleResource extends SimpleEntity {
 	}
 
 
-	@Override public Collection<Statement> relate(final IRI entity) {
+	@Override public Optional<Collection<Statement>> relate(final IRI entity) {
 
 		if ( entity == null ) {
 			throw new NullPointerException("null item");
 		}
 
-		return description(entity, true, connection);
+		return Optional.of(description(entity, true, connection)).filter(Collection::isEmpty);
 	}
 
 	/**
@@ -90,7 +90,7 @@ public final class SimpleResource extends SimpleEntity {
 			throw new NullPointerException("null model");
 		}
 
-		final Model envelope=description(entity, false, model);
+		final Collection<Statement> envelope=description(entity, false, model);
 
 		final Focus focus=focus(model.stream()
 				.filter(statement -> !envelope.contains(statement))

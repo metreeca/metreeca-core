@@ -20,14 +20,13 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.flavors._CellEngine;
-import com.metreeca.rest.flavors._SPARQLEngine;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
+import com.metreeca.rest.flavors.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Splitter;
@@ -40,12 +39,12 @@ import org.eclipse.rdf4j.model.Statement;
 import java.util.Collection;
 import java.util.Collections;
 
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Values.rewrite;
-import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.wrappers.Splitter.resource;
@@ -106,13 +105,14 @@ public final class Relator extends Delegator {
 
 	// !!! activate response trimming only if a custom wrapper/handler is inserted in the pipeline
 
+
+	private final Graph graph=tool(Graph.Factory);
+
+
 	public Relator() {
 		delegate(
 
-				handler(Request::container,
-						handler(Request::shaped, new ShapedContainer(), new SimpleContainer()),
-						handler(Request::shaped, new ShapedResource(), new SimpleResource())
-				)
+				relator()
 
 						.with(wrapper(Request::container,
 								new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
@@ -126,44 +126,39 @@ public final class Relator extends Delegator {
 		);
 	}
 
+	private Handler relator() {
+		return request -> request.reply(response -> graph.query(connection -> {
+
+			final IRI item=request.item();
+			final Shape shape=request.shape();
+
+			final boolean shaped=!pass(shape);
+
+			if ( request.container() ) {
+
+				return response;
+
+			} else {
+
+				final Flavor flavor=shaped
+						? new ShapedResource(connection, shape)
+						: new SimpleResource(connection);
+
+
+				// !!!
+
+				return response;
+
+			}
+
+		}));
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class Shared implements Wrapper {
 
-		@Override public Handler wrap(final Handler handler) {
-			return request -> handler.handle(request).map(response ->
-					response.header("Vary", "Accept")
-			);
-		}
-
-	}
-
-
-	private static final class SimpleResource implements Handler {
-
-		private final Graph graph=tool(Graph.Factory);
-
-
-		@Override public Responder handle(final Request request) {
-			return consumer -> graph.query(connection -> {
-
-				final IRI focus=request.item();
-				final Collection<Statement> model=new _CellEngine(connection).relate(focus);
-
-				request.reply(response -> model.isEmpty()
-
-						? response.status(Response.NotFound)
-						: response.status(Response.OK).body(rdf(), model)
-
-				).accept(consumer);
-
-			});
-		}
-
-	}
-
-	private static final class ShapedResource implements Handler {
+	private static final class _ShapedResource implements Handler {
 
 		private final Graph graph=tool(Graph.Factory);
 
@@ -224,28 +219,6 @@ public final class Relator extends Delegator {
 
 			})), request::reply);
 
-		}
-
-	}
-
-	private static final class SimpleContainer implements Handler {
-
-		private final Graph graph=tool(Graph.Factory);
-
-
-		@Override public Responder handle(final Request request) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-		}
-
-	}
-
-	private static final class ShapedContainer implements Handler {
-
-		private final Graph graph=tool(Graph.Factory);
-
-
-		@Override public Responder handle(final Request request) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
 	}

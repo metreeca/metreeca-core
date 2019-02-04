@@ -25,6 +25,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static com.metreeca.form.Issue.issue;
 
@@ -40,7 +41,7 @@ import static java.util.stream.Collectors.toList;
  */
 public final class _CellEngine extends SimpleEntity {
 
-	@Override public Collection<Statement> relate(final IRI entity) throws UnsupportedOperationException {
+	@Override public Optional<Collection<Statement>> relate(final IRI entity) throws UnsupportedOperationException {
 		return null;
 	}
 
@@ -177,7 +178,7 @@ public final class _CellEngine extends SimpleEntity {
 
 	private Focus validate(final Resource focus, final Collection<Statement> model) {
 
-		final Model envelope=description(focus, false, model);
+		final Collection<Statement> envelope=description(focus, false, model);
 
 		return Focus.focus(model.stream()
 				.filter(statement -> !envelope.contains(statement))

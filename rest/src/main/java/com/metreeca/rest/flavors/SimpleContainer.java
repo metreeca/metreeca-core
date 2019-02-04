@@ -25,6 +25,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Optional;
 
 
 /**
@@ -55,7 +56,7 @@ public final class SimpleContainer implements Flavor {
 	}
 
 
-	@Override public Collection<Statement> relate(final IRI entity) {
+	@Override public Optional<Collection<Statement>> relate(final IRI entity) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 

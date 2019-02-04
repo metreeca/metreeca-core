@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
+import java.util.Optional;
 
 
 /**
@@ -37,12 +38,12 @@ public interface Flavor {
 	 *
 	 * @param entity the entity whose description is to be retrieved
 	 *
-	 * @return the description of {@code entity} or an empty description if {@code entity} is not known
+	 * @return the optional description of {@code entity}; empty if {@code entity} is not known
 	 *
 	 * @throws NullPointerException          if {@code entity} is null
 	 * @throws UnsupportedOperationException if description retrieval is not supported by this entity flavor
 	 */
-	public Collection<Statement> relate(final IRI entity) throws UnsupportedOperationException;
+	public Optional<Collection<Statement>> relate(final IRI entity) throws UnsupportedOperationException;
 
 	/**
 	 * Creates a connected entity description.

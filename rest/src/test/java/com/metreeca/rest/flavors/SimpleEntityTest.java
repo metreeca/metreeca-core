@@ -21,12 +21,14 @@ import com.metreeca.form.Focus;
 import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.bnode;
@@ -88,7 +90,7 @@ final class SimpleEntityTest {
 
 	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromModel() {
 
-			final Model cell=new TestEntity().description(focus, false, model);
+			final Model cell=new LinkedHashModel(new TestEntity().description(focus, false, model));
 
 			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
 			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
@@ -97,7 +99,7 @@ final class SimpleEntityTest {
 
 	@Test void testRetrieveLabelledSymmetricConciseBoundedDescriptionFromModel() {
 
-		final Model cell=new TestEntity().description(focus, true, model);
+		final Model cell=(Model)new TestEntity().description(focus, true, model);
 
 		assertThat(cell.subjects())
 				.containsOnly(focus, _dblank, _iblank, direct, inverse);
@@ -122,7 +124,7 @@ final class SimpleEntityTest {
 
 		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
 
-			final Model cell=new TestEntity().description(focus, false, connection);
+			final Model cell=new LinkedHashModel(new TestEntity().description(focus, false, connection));
 
 			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
 			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
@@ -135,7 +137,7 @@ final class SimpleEntityTest {
 
 		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
 
-			final Model cell=new TestEntity().description(focus, true, connection);
+			final Model cell=new LinkedHashModel(new TestEntity().description(focus, true, connection));
 
 			assertThat(cell.subjects())
 					.containsOnly(focus, _dblank, _iblank, direct, inverse);
@@ -161,7 +163,7 @@ final class SimpleEntityTest {
 
 	private static final class TestEntity extends SimpleEntity {
 
-		@Override public Collection<Statement> relate(final IRI entity) {
+		@Override public Optional<Collection<Statement>> relate(final IRI entity) {
 			throw new UnsupportedOperationException();
 		}
 

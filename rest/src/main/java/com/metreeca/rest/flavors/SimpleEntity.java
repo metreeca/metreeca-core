@@ -54,7 +54,7 @@ public abstract class SimpleEntity implements Flavor {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code model} is null
 	 */
-	protected Model description(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
+	protected Collection<Statement> description(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -85,7 +85,7 @@ public abstract class SimpleEntity implements Flavor {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code connection} is null
 	 */
-	protected Model description(final Resource focus, final boolean labelled, final RepositoryConnection connection) {
+	protected Collection<Statement> description(final Resource focus, final boolean labelled, final RepositoryConnection connection) {
 
 		// !!! optimize for SPARQL
 
@@ -103,7 +103,7 @@ public abstract class SimpleEntity implements Flavor {
 	}
 
 
-	private static Model description(final Resource focus, final boolean labelled, final Source source) {
+	private static Collection<Statement> description(final Resource focus, final boolean labelled, final Source source) {
 
 		final Model description=new LinkedHashModel();
 

@@ -26,6 +26,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Optional;
 
 
 public final class ShapedContainer implements Flavor {
@@ -33,7 +34,7 @@ public final class ShapedContainer implements Flavor {
 	public ShapedContainer(final RepositoryConnection connection, final Shape shape) {}
 
 
-	@Override public Collection<Statement> relate(final IRI entity) {
+	@Override public Optional<Collection<Statement>> relate(final IRI entity) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
