@@ -16,7 +16,7 @@
  */
 
 /**
- * Query/update engines.
+ * Shape-driven query/update engines.
  */
 
 package com.metreeca.form.engines;

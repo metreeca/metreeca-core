@@ -19,8 +19,8 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.*;
-import com.metreeca.form.engines.CellEngine;
-import com.metreeca.form.engines.SPARQLEngine;
+import com.metreeca.rest.drivers.CellEngine;
+import com.metreeca.rest.drivers.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.engines;
+package com.metreeca.rest.drivers;
 
 import com.metreeca.form.*;
 import com.metreeca.form.queries.Edges;
@@ -45,11 +45,11 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Like.like;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Sets.set;
@@ -446,7 +446,7 @@ final class SPARQLReaderTest {
 
 	@Test void testUseIndependentPatternsAndFilters() {
 		assertThat(model(edges(and(
-				Field.field(term("employee")),
+				field(term("employee")),
 				When.when(filter(), field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
 		))))
 				.isIsomorphicTo(model("construct {\n"

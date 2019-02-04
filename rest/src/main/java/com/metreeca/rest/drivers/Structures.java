@@ -15,10 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.things;
-
-import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Extractor;
+package com.metreeca.rest.drivers;
 
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
@@ -30,10 +27,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.metreeca.form.Shape.empty;
-
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toCollection;
 
 
 /**
@@ -45,7 +39,7 @@ import static java.util.stream.Collectors.toCollection;
  * @see <a href="https://www.w3.org/TR/rdf-schema/#ch_collectionvocab/">RDF Schema 1.1 - § 5.2 RDF Collections</a>
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Structures {
+final class Structures {
 
 	/**
 	 * Retrieves a symmetric concise bounded description from a statement source.
@@ -143,90 +137,6 @@ public final class Structures {
 		return description;
 
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves a reachable network from a statement source.
-	 *
-	 * @param focus the resource whose reachable network is to be retrieved
-	 * @param model the statement source the description is to be retrieved from
-	 *
-	 * @return the reachable network of {@code focus} retrieved from {@code model}
-	 *
-	 * @throws NullPointerException if either {@code focus} or {@code model} is null
-	 */
-	public static Model network(final IRI focus, final Iterable<Statement> model) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
-		final Model network=new LinkedHashModel();
-
-		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
-		final Collection<Value> visited=new HashSet<>();
-
-		while ( !pending.isEmpty() ) {
-
-			final Value value=pending.remove();
-
-			if ( visited.add(value) ) {
-				model.forEach(statement -> {
-					if ( statement.getSubject().equals(value) ) {
-
-						network.add(statement);
-						pending.add(statement.getObject());
-
-					} else if ( statement.getObject().equals(value) ) {
-
-						network.add(statement);
-						pending.add(statement.getSubject());
-
-					}
-
-				});
-			}
-
-		}
-
-		return network;
-	}
-
-	/**
-	 * Retrieves a shape envelope from a statement source.
-	 *
-	 * @param focus the resource whose envelope is to be retrieved
-	 * @param shape the shape whose envelope is to be retrieved
-	 * @param model the statement source the description is to be retrieved from
-	 *
-	 * @return the {@code shape} envelope of {@code focus} retrieved from {@code model}
-	 *
-	 * @throws NullPointerException if any argument is null
-	 */
-	public static Model envelope(final Value focus, final Shape shape, final Iterable<Statement> model) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
-		return empty(shape)? new LinkedHashModel()
-				: shape.map(new Extractor(model, singleton(focus))).collect(toCollection(LinkedHashModel::new));
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

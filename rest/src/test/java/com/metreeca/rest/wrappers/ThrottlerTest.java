@@ -36,8 +36,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import javax.json.JsonValue;
-
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.meta;
@@ -47,11 +45,9 @@ import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.decode;
-import static com.metreeca.form.truths.JSONAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,20 +102,6 @@ final class ThrottlerTest {
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-					)
-			);
-		}
-
-		@Test void testRejectExceedingRequestPayload() {
-			exec(() -> throttler()
-
-					.wrap(echo())
-
-					.handle(request().body(rdf(), decode("<> rdf:value rdf:nil. rdf:first rdf:value rdf:rest.")))
-
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.UnprocessableEntity)
-							.hasBody(json(), json -> assertThat((JsonValue)json).hasField("error"))
 					)
 			);
 		}
@@ -272,20 +254,6 @@ final class ThrottlerTest {
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-					)
-			);
-		}
-
-		@Test void testRejectExceedingRequestPayload() {
-			exec(() -> throttler()
-
-					.wrap(echo())
-
-					.handle(request().body(rdf(), decode("<> :seniority 5 .")))
-
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.UnprocessableEntity)
-							.hasBody(json(), json -> assertThat((JsonValue)json).hasField("error"))
 					)
 			);
 		}

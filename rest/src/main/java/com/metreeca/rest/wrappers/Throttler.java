@@ -21,11 +21,11 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.*;
-import com.metreeca.form.things.Structures;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
@@ -37,9 +37,6 @@ import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Structures.description;
-import static com.metreeca.form.things.Structures.envelope;
-import static com.metreeca.form.things.Structures.network;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
@@ -47,6 +44,8 @@ import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 
@@ -67,20 +66,8 @@ import static java.util.stream.Collectors.toList;
  *
  * <li>extends the {@linkplain RDFFormat RDF payload} with the statements inferred from the redacted shape;</li>
  *
- * <li>ensures that the {@linkplain RDFFormat RDF payload} doesn't contains statements outside the allowed envelope of
- * the redacted shape;</li>
- *
  * <li>associates the redacted shape to the request forwarded to the wrapped handler.</li>
  *
- * </ul>
- *
- * <p>Otherwise, if the request doesn't include a non-empty shape:</p>
- *
- * <ul>
- *
- * <li>ensures that the request {@linkplain RDFFormat RDF payload} doesn't contains statements exceeding the
- * {@linkplain Structures#description(Resource, boolean, Iterable) symmetric concise bounded description} of the request
- * focus {@linkplain Message#item() item}.</li>
  * </ul>
  *
  * <p>If the response includes a non-empty shape:</p>
@@ -102,7 +89,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>trims {@linkplain RDFFormat RDF payload} statements exceeding the {@linkplain Structures#network(IRI, Iterable)
+ * <li>trims {@linkplain RDFFormat RDF payload} statements exceeding the {@linkplain Throttler#network(IRI, Iterable)
  * connectivity network} of the response focus {@linkplain Message#item() item}.</li>
  *
  * </ul>
@@ -151,22 +138,20 @@ public final class Throttler implements Wrapper {
 		return handler -> request -> {
 
 			final IRI focus=request.item();
+			final Shape shape=request.shape();
+			final Set<Value> roles=request.roles();
 
-			if ( !request.driven() ) {
+			if ( pass(shape) ) {
 
-				return handler.handle(request
-						.pipe(rdf(), rdf -> verify(rdf, description(focus, false, rdf)))
-				);
+				return handler.handle(request);
 
 			} else {
-
-				final Shape shape=request.shape();
-				final Set<Value> roles=request.roles();
 
 				// remove annotations and filtering-only constraints for authorization checks
 
 				final Shape general=shape(shape, true, Form.verify, set(Form.any));
 				final Shape authorized=shape(shape, true, Form.verify, roles);
+				final Shape redacted=shape(shape, false, null, roles);
 
 				if ( empty(general) ) {
 
@@ -178,10 +163,7 @@ public final class Throttler implements Wrapper {
 
 				} else {
 
-					final Shape redacted=shape(shape, false, null, roles);
-
 					return handler.handle(request.shape(redacted)
-							.pipe(rdf(), rdf -> verify(rdf, envelope(focus, authorized, rdf)))
 							.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
 					);
 				}
@@ -276,6 +258,89 @@ public final class Throttler implements Wrapper {
 		}
 
 		return model;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	/**
+	 * Retrieves a reachable network from a statement source.
+	 *
+	 * @param focus the resource whose reachable network is to be retrieved
+	 * @param model the statement source the description is to be retrieved from
+	 *
+	 * @return the reachable network of {@code focus} retrieved from {@code model}
+	 *
+	 * @throws NullPointerException if either {@code focus} or {@code model} is null
+	 */
+	private Model network(final IRI focus, final Iterable<Statement> model) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		final Model network=new LinkedHashModel();
+
+		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
+		final Collection<Value> visited=new HashSet<>();
+
+		while ( !pending.isEmpty() ) {
+
+			final Value value=pending.remove();
+
+			if ( visited.add(value) ) {
+				model.forEach(statement -> {
+					if ( statement.getSubject().equals(value) ) {
+
+						network.add(statement);
+						pending.add(statement.getObject());
+
+					} else if ( statement.getObject().equals(value) ) {
+
+						network.add(statement);
+						pending.add(statement.getSubject());
+
+					}
+
+				});
+			}
+
+		}
+
+		return network;
+	}
+
+	/**
+	 * Retrieves a shape envelope from a statement source.
+	 *
+	 * @param focus the resource whose envelope is to be retrieved
+	 * @param shape the shape whose envelope is to be retrieved
+	 * @param model the statement source the description is to be retrieved from
+	 *
+	 * @return the {@code shape} envelope of {@code focus} retrieved from {@code model}
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	private Model envelope(final Value focus, final Shape shape, final Iterable<Statement> model) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return empty(shape)? new LinkedHashModel()
+				: shape.map(new Extractor(model, singleton(focus))).collect(toCollection(LinkedHashModel::new));
 	}
 
 }

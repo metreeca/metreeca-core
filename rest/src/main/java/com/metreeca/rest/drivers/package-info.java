@@ -16,9 +16,9 @@
  */
 
 /**
- * LDP action handlers.
+ * LDP drivers.
  *
- * <p>Provides default handlers for CRUD actions on LDP resources and containers.</p>
+ * <p>Provides default implementations for CRUD operations on LDP resources and containers.</p>
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.drivers;

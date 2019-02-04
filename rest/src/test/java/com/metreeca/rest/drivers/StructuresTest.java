@@ -15,8 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.things;
+package com.metreeca.rest.drivers;
 
+import com.metreeca.form.things.ValuesTest;
+
+import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -30,9 +33,6 @@ import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.item;
-import static com.metreeca.form.things.ValuesTest.sandbox;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class StructuresTest {
@@ -88,8 +88,8 @@ final class StructuresTest {
 
 			final Model cell=Structures.description(focus, false, model);
 
-			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
-			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
+			Assertions.assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
+			Assertions.assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
 
 	}
 
@@ -97,13 +97,13 @@ final class StructuresTest {
 
 		final Model cell=Structures.description(focus, true, model);
 
-		assertThat(cell.subjects())
+		Assertions.assertThat(cell.subjects())
 				.containsOnly(focus, _dblank, _iblank, direct, inverse);
 
-		assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
+		Assertions.assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
 				.containsOnly(focus, _dblank, _iblank, direct);
 
-		assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
+		Assertions.assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
 
 				statement(direct, RDFS.LABEL, dlabel),
 				statement(direct, RDFS.COMMENT, dcomment),
@@ -118,12 +118,12 @@ final class StructuresTest {
 
 	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromRepository() {
 
-		try (final RepositoryConnection connection=sandbox(model).get()) {
+		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
 
 			final Model cell=Structures.description(focus, false, connection);
 
-			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
-			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
+			Assertions.assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
+			Assertions.assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
 
 		}
 
@@ -131,17 +131,17 @@ final class StructuresTest {
 
 	@Test void testRetrieveLabelledSymmetricConciseBoundedDescriptionFromRepository() {
 
-		try (final RepositoryConnection connection=sandbox(model).get()) {
+		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
 
 			final Model cell=Structures.description(focus, true, connection);
 
-			assertThat(cell.subjects())
+			Assertions.assertThat(cell.subjects())
 					.containsOnly(focus, _dblank, _iblank, direct, inverse);
 
-			assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
+			Assertions.assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
 					.containsOnly(focus, _dblank, _iblank, direct);
 
-			assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
+			Assertions.assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
 
 					statement(direct, RDFS.LABEL, dlabel),
 					statement(direct, RDFS.COMMENT, dcomment),

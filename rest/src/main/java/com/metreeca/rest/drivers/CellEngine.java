@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.engines;
+package com.metreeca.rest.drivers;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.things.Structures.description;
+import static com.metreeca.rest.drivers.Structures.description;
 
 import static java.util.stream.Collectors.toList;
 
