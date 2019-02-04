@@ -15,11 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.flavors;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.Flavor;
+import com.metreeca.rest.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -29,25 +29,31 @@ import java.util.Collection;
 import java.util.Optional;
 
 
-public final class ShapedContainer implements Flavor {
+public final class ShapedContainer implements Engine {
 
 	public ShapedContainer(final RepositoryConnection connection, final Shape shape) {}
 
 
-	@Override public Optional<Collection<Statement>> relate(final IRI entity) {
+	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	@Override public Focus create(final IRI entity, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	@Override public Focus update(final IRI entity, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	/**
+	 * {@inheritDoc} {Unsupported}
+	 */
+	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
+		throw new UnsupportedOperationException("shaped container updating not supported");
 	}
 
-	@Override public boolean delete(final IRI entity) {
-		throw new UnsupportedOperationException("LDP container deletion not supported");
+	/**
+	 * {@inheritDoc} {Unsupported}
+	 */
+	@Override public Optional<IRI> delete(final IRI resource) {
+		throw new UnsupportedOperationException("shaped container deletion not supported");
 	}
 
 }

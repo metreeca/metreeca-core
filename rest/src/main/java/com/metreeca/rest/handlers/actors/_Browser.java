@@ -21,7 +21,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.flavors._SPARQLEngine;
+import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;

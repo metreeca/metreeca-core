@@ -15,9 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.flavors;
+package com.metreeca.rest.engines;
 
-import com.metreeca.form.Focus;
 import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.*;
@@ -28,18 +27,18 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.item;
+import static com.metreeca.rest.engines.Descriptions.description;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class SimpleEntityTest {
+final class DescriptionsTest {
 
 	private static final IRI focus=item("focus");
 
@@ -90,7 +89,7 @@ final class SimpleEntityTest {
 
 	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromModel() {
 
-			final Model cell=new LinkedHashModel(new TestEntity().description(focus, false, model));
+			final Model cell=new LinkedHashModel(description(focus, false, model));
 
 			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
 			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
@@ -99,7 +98,7 @@ final class SimpleEntityTest {
 
 	@Test void testRetrieveLabelledSymmetricConciseBoundedDescriptionFromModel() {
 
-		final Model cell=(Model)new TestEntity().description(focus, true, model);
+		final Model cell=(Model)description(focus, true, model);
 
 		assertThat(cell.subjects())
 				.containsOnly(focus, _dblank, _iblank, direct, inverse);
@@ -124,7 +123,7 @@ final class SimpleEntityTest {
 
 		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
 
-			final Model cell=new LinkedHashModel(new TestEntity().description(focus, false, connection));
+			final Model cell=new LinkedHashModel(description(focus, false, connection));
 
 			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
 			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
@@ -137,7 +136,7 @@ final class SimpleEntityTest {
 
 		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
 
-			final Model cell=new LinkedHashModel(new TestEntity().description(focus, true, connection));
+			final Model cell=new LinkedHashModel(description(focus, true, connection));
 
 			assertThat(cell.subjects())
 					.containsOnly(focus, _dblank, _iblank, direct, inverse);
@@ -154,29 +153,6 @@ final class SimpleEntityTest {
 					statement(inverse, RDFS.COMMENT, icomment)
 
 			);
-		}
-
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class TestEntity extends SimpleEntity {
-
-		@Override public Optional<Collection<Statement>> relate(final IRI entity) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override public Focus create(final IRI entity, final Collection<Statement> model) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override public Focus update(final IRI entity, final Collection<Statement> model) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override public boolean delete(final IRI entity) {
-			throw new UnsupportedOperationException();
 		}
 
 	}

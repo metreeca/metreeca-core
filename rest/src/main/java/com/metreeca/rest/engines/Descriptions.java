@@ -15,9 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.flavors;
-
-import com.metreeca.rest.Flavor;
+package com.metreeca.rest.engines;
 
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
@@ -40,7 +38,7 @@ import static java.util.Collections.singleton;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public abstract class SimpleEntity implements Flavor {
+final class Descriptions {
 
 	/**
 	 * Retrieves a symmetric concise bounded description from a statement source.
@@ -54,7 +52,7 @@ public abstract class SimpleEntity implements Flavor {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code model} is null
 	 */
-	protected Collection<Statement> description(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
+	public static Collection<Statement> description(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -85,7 +83,7 @@ public abstract class SimpleEntity implements Flavor {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code connection} is null
 	 */
-	protected Collection<Statement> description(final Resource focus, final boolean labelled, final RepositoryConnection connection) {
+	public static Collection<Statement> description(final Resource focus, final boolean labelled, final RepositoryConnection connection) {
 
 		// !!! optimize for SPARQL
 
@@ -139,6 +137,11 @@ public abstract class SimpleEntity implements Flavor {
 		return description;
 
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Descriptions() {} // utility
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

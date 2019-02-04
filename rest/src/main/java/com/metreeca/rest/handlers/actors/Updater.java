@@ -19,8 +19,6 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.*;
-import com.metreeca.rest.flavors._CellEngine;
-import com.metreeca.rest.flavors._SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
@@ -36,7 +34,6 @@ import java.util.Collection;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.Shape.pass;
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -124,9 +121,11 @@ public final class Updater extends Delegator {
 				final Shape shape=request.shape();
 				final Collection<Statement> update=trace.debug(this, model);
 
-				final Focus report=pass(shape)
-						? new _CellEngine(connection).update(focus, update)
-						: new _SPARQLEngine(connection).update(focus, shape, update);
+					final Focus report=null; // !!!
+
+					//final Focus report=pass(shape)
+					//	? new _CellEngine(connection).update(focus, update)
+					//	: new _SPARQLEngine(connection).update(focus, shape, update);
 
 				if ( report.assess(Issue.Level.Error) ) { // shape violations
 

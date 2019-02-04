@@ -15,12 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.flavors;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
-import com.metreeca.rest.Flavor;
+import com.metreeca.rest.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -32,7 +32,7 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 
 
-public final class ShapedResource implements Flavor {
+public final class ShapedResource implements Engine {
 
 	private final RepositoryConnection connection;
 	private final Shape shape;
@@ -54,14 +54,14 @@ public final class ShapedResource implements Flavor {
 
 
 
-	@Override public Optional<Collection<Statement>> relate(final IRI entity) {
+	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
 
-		if ( entity == null ) {
+		if ( resource == null ) {
 			throw new NullPointerException("null entity");
 		}
 
 		return new SPARQLReader(connection)
-				.process(new Edges(and(all(entity), shape)))
+				.process(new Edges(and(all(resource), shape)))
 				.entrySet()
 				.stream()
 				.findFirst()
@@ -69,27 +69,27 @@ public final class ShapedResource implements Flavor {
 
 	}
 
-	@Override public Focus create(final IRI entity, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	@Override public Focus update(final IRI entity, final Collection<Statement> model) {
+	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	@Override public boolean delete(final IRI entity) {
+	@Override public Optional<IRI> delete(final IRI resource) {
 
 		// !!! merge retrieve/remove operations into a single SPARQL update txn
 
-		if ( entity == null ) {
+		if ( resource == null ) {
 			throw new NullPointerException("null entity");
 		}
 
-		final Optional<Collection<Statement>> model=relate(entity); // identify deletable cell
+		final Optional<Collection<Statement>> model=relate(resource); // identify deletable cell
 
 		model.ifPresent(statements -> connection.remove(statements));
 
-		return model.isPresent();
+		return model.map(statements -> resource);
 	}
 
 }

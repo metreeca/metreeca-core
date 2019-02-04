@@ -26,7 +26,9 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
-import com.metreeca.rest.flavors.*;
+import com.metreeca.rest.engines.ShapedResource;
+import com.metreeca.rest.engines.SimpleResource;
+import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Splitter;
@@ -42,8 +44,6 @@ import java.util.Collections;
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
-import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -136,11 +136,66 @@ public final class Relator extends Delegator {
 
 			if ( request.container() ) {
 
-				return response;
+				return request.query(shape).fold(
+
+						query -> {
+
+							final Collection<Statement> model=new _SPARQLEngine(connection)
+									.browse(query)
+									.values()
+									.stream()
+									.findFirst()
+									.orElseGet(Collections::emptySet);
+
+							if ( model.isEmpty() ) {
+
+								// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
+								// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
+								// !!! optimize using a single query if working on a remote repository
+
+								final boolean contains=connection.hasStatement(item, null, null, true)
+										|| connection.hasStatement(null, null, item, true);
+
+								final Response response1=contains // !!! always 404 under strict security
+										? response.status(Response.Forbidden) // resource known but empty envelope for user
+										: response.status(Response.NotFound);
+								return response1;
+
+							} else {
+
+								return response.status(Response.OK).map(r -> query.map(new Query.Probe<Response>() { // !!! factor
+
+									@Override public Response probe(final Edges edges) {
+										return r
+												.shape(shape // !!! cache returned shape
+														.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
+														.map(new Optimizer())
+												)
+												.body(rdf(), model);
+									}
+
+									@Override public Response probe(final Stats stats) {
+										return r.shape(StatsShape)
+												.body(rdf(), rewrite(Form.meta, item, model));
+									}
+
+									@Override public Response probe(final Items items) {
+										return r.shape(ItemsShape)
+												.body(rdf(), rewrite(Form.meta, item, model));
+									}
+
+								}));
+
+							}
+
+						},
+
+						response::map
+				);
 
 			} else {
 
-				final Flavor flavor=shaped
+				final Engine engine=shaped
 						? new ShapedResource(connection, shape)
 						: new SimpleResource(connection);
 
@@ -152,75 +207,6 @@ public final class Relator extends Delegator {
 			}
 
 		}));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	private static final class _ShapedResource implements Handler {
-
-		private final Graph graph=tool(Graph.Factory);
-
-
-		@Override public Responder handle(final Request request) {
-
-			final IRI focus=request.item();
-			final Shape shape=request.shape();
-
-			return request.query(and(shape, all(focus))).fold(query -> request.reply(response -> graph.query(connection -> {
-
-				final Collection<Statement> model=new _SPARQLEngine(connection)
-						.browse(query)
-						.values()
-						.stream()
-						.findFirst()
-						.orElseGet(Collections::emptySet);
-
-				if ( model.isEmpty() ) {
-
-					// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
-					// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
-					// !!! optimize using a single query if working on a remote repository
-
-					final boolean contains=connection.hasStatement(focus, null, null, true)
-							|| connection.hasStatement(null, null, focus, true);
-
-					return contains // !!! always 404 under strict security
-							? response.status(Response.Forbidden) // resource known but empty envelope for user
-							: response.status(Response.NotFound);
-
-				} else {
-
-					return response.status(Response.OK).map(r -> query.map(new Query.Probe<Response>() { // !!! factor
-
-						@Override public Response probe(final Edges edges) {
-							return r
-									.shape(shape // !!! cache returned shape
-											.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
-											.map(new Optimizer())
-									)
-									.body(rdf(), model);
-						}
-
-						@Override public Response probe(final Stats stats) {
-							return r.shape(StatsShape)
-									.body(rdf(), rewrite(Form.meta, focus, model));
-						}
-
-						@Override public Response probe(final Items items) {
-							return r.shape(ItemsShape)
-									.body(rdf(), rewrite(Form.meta, focus, model));
-						}
-
-					}));
-
-				}
-
-			})), request::reply);
-
-		}
-
 	}
 
 }

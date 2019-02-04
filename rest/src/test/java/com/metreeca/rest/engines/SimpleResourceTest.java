@@ -15,9 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.flavors;
+package com.metreeca.rest.engines;
 
-import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
@@ -48,6 +47,7 @@ final class SimpleResourceTest {
 	private Model dataset() {
 		return small();
 	}
+
 
 	private void exec(final Consumer<RepositoryConnection> task) {
 		new Tray()
@@ -87,7 +87,7 @@ final class SimpleResourceTest {
 
 				assertThat(new SimpleResource(connection).relate(item("employees/9999")))
 						.as("empty description")
-						.isEmpty();
+						.isNotPresent();
 
 			});
 		}
@@ -96,14 +96,13 @@ final class SimpleResourceTest {
 
 	@Nested final class Create {
 
-		@Test void testCreate() {
-			exec(connection -> assertThatThrownBy(() ->
-					new SimpleResource(connection).create(item("employees/1370"), set())
-			).isInstanceOf(UnsupportedOperationException.class));
+		@Test void testUnsupported() {
+			exec(connection -> assertThatThrownBy(() -> new SimpleResource(connection).create(
+					item("employees/1370"), item("employees/9999"), set()
+			)).isInstanceOf(UnsupportedOperationException.class));
 		}
 
 	}
-
 
 	@Nested final class Update {
 
@@ -118,11 +117,13 @@ final class SimpleResourceTest {
 						+":seniority 5 ."
 				);
 
-				final Focus focus=new SimpleResource(connection).update(item("employees/1370"), update);
 
-				assertThat(focus.assess(Issue.Level.Warning))
-						.as("success reported")
-						.isFalse();
+				assertThat(new SimpleResource(connection).update(item("employees/1370"), update))
+						.isPresent()
+						.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Warning))
+								.as("success reported")
+								.isFalse()
+						);
 
 				assertThat(graph())
 
@@ -136,21 +137,35 @@ final class SimpleResourceTest {
 			});
 		}
 
-
 		@Test void testExceedingData() {
-
 			exec(connection -> {
+
 				final Model update=decode("</employees/1370>"
 						+" :forename 'Tino' ;"
 						+" :surname 'Faussone' ;"
 						+" :office <offices/1> . <offices/1> :value 'exceeding' ."
 				);
 
-				final Focus focus=new SimpleResource(connection).update(item("employees/1370"), update);
+				assertThat(new SimpleResource(connection).update(item("employees/1370"), update))
+						.isPresent()
+						.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Error))
+								.as("failure reported")
+								.isTrue()
+						);
 
-				assertThat(focus.assess(Issue.Level.Error))
-						.as("failure reported")
-						.isTrue();
+				assertThat(graph())
+						.as("graph unchanged")
+						.isIsomorphicTo(small());
+
+			});
+		}
+
+		@Test void testUnknown() {
+			exec(connection -> {
+
+				assertThat(new SimpleResource(connection).update(item("employees/9999"), set()))
+						.as("not found ")
+						.isNotPresent();
 
 				assertThat(graph())
 						.as("graph unchanged")
@@ -168,7 +183,7 @@ final class SimpleResourceTest {
 
 				assertThat(new SimpleResource(connection).delete(item("employees/1370")))
 						.as("success reported")
-						.isTrue();
+						.isPresent();
 
 				assertThat(graph("construct where { <employees/1370> ?p ?o }"))
 						.as("cell deleted")
@@ -190,7 +205,7 @@ final class SimpleResourceTest {
 
 				assertThat(new SimpleResource(connection).delete(item("employees/9999")))
 						.as("failure reported")
-						.isFalse();
+						.isNotPresent();
 
 				assertThat(graph())
 						.as("graph unchanged")

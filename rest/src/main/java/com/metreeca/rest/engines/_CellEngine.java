@@ -15,11 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.flavors;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Issue.Level;
+import com.metreeca.rest.Engine;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.metreeca.form.Issue.issue;
+import static com.metreeca.rest.engines.Descriptions.description;
 
 import static java.util.stream.Collectors.toList;
 
@@ -39,22 +41,22 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class _CellEngine extends SimpleEntity {
+public final class _CellEngine implements Engine {
 
-	@Override public Optional<Collection<Statement>> relate(final IRI entity) throws UnsupportedOperationException {
+	@Override public Optional<Collection<Statement>> relate(final IRI resource) throws UnsupportedOperationException {
 		return null;
 	}
 
-	@Override public Focus create(final IRI entity, final Collection<Statement> model) throws UnsupportedOperationException {
+	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) throws UnsupportedOperationException {
 		return null;
 	}
 
-	@Override public Focus update(final IRI entity, final Collection<Statement> model) throws UnsupportedOperationException {
+	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) throws UnsupportedOperationException {
 		return null;
 	}
 
-	@Override public boolean delete(final IRI entity) throws UnsupportedOperationException {
-		return false;
+	@Override public Optional<IRI> delete(final IRI resource) throws UnsupportedOperationException {
+		return Optional.empty();
 	}
 
 

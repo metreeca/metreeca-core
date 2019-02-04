@@ -15,10 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.flavors;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
-import com.metreeca.rest.Flavor;
+import com.metreeca.rest.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -33,7 +33,7 @@ import java.util.Optional;
  *
  * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded container descriptions.</p>
  */
-public final class SimpleContainer implements Flavor {
+public final class SimpleContainer implements Engine {
 
 	private final RepositoryConnection connection;
 
@@ -56,25 +56,25 @@ public final class SimpleContainer implements Flavor {
 	}
 
 
-	@Override public Optional<Collection<Statement>> relate(final IRI entity) {
+	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	@Override public Focus create(final IRI entity, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
 	/**
 	 * {@inheritDoc} {Unsupported}
 	 */
-	@Override public Focus update(final IRI entity, final Collection<Statement> model) {
+	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("simple container updating not supported");
 	}
 
 	/**
 	 * {@inheritDoc} {Unsupported}
 	 */
-	@Override public boolean delete(final IRI entity) {
+	@Override public Optional<IRI> delete(final IRI resource) {
 		throw new UnsupportedOperationException("simple container deletion not supported");
 	}
 

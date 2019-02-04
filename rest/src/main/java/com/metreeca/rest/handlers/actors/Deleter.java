@@ -21,7 +21,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.flavors.*;
+import com.metreeca.rest.engines.*;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Splitter;
 import com.metreeca.rest.wrappers.Throttler;
@@ -96,7 +96,7 @@ public final class Deleter extends Delegator {
 
 			final boolean shaped=!pass(shape);
 
-			final Flavor flavor=request.container()
+			final Engine engine=request.container()
 					? shaped ? new ShapedContainer(connection, shape) : new SimpleContainer(connection)
 					: shaped ? new ShapedResource(connection, shape) : new SimpleResource(connection);
 
@@ -104,7 +104,7 @@ public final class Deleter extends Delegator {
 
 			try {
 
-				return flavor.delete(item)
+				return engine.delete(item).isPresent()
 						? response.status(Response.NoContent)
 						: response.status(Response.NotFound);
 

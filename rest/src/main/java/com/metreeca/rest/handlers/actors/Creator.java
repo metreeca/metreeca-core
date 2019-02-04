@@ -22,11 +22,10 @@ import com.metreeca.form.Focus;
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.flavors._CellEngine;
-import com.metreeca.rest.flavors._SPARQLEngine;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
+import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Splitter;
@@ -200,9 +199,11 @@ public final class Creator extends Delegator {
 						final Shape shape=request.shape();
 						final Collection<Statement> rewritten=trace.debug(this, rewrite(source, target, model));
 
-						final Focus focus=!request.shaped()
-								? new _CellEngine(connection).create(target, rewritten)
-								: new _SPARQLEngine(connection).create(target, shape, rewritten);
+						final Focus focus=null; // !!!
+
+						//final Focus focus=!request.shaped()
+						//		? new _CellEngine(connection).create(target, null, rewritten)
+						//		: new _SPARQLEngine(connection).create(target, shape, rewritten);
 
 						if ( focus.assess(Level.Error) ) { // cell/shape violations
 

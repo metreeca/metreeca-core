@@ -15,10 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.flavors;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
+import com.metreeca.rest.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -29,6 +30,7 @@ import java.util.Optional;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
+import static com.metreeca.rest.engines.Descriptions.description;
 
 import static java.util.stream.Collectors.toList;
 
@@ -38,7 +40,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded resource descriptions.</p>
  */
-public final class SimpleResource extends SimpleEntity {
+public final class SimpleResource implements Engine {
 
 	private final RepositoryConnection connection;
 
@@ -60,19 +62,19 @@ public final class SimpleResource extends SimpleEntity {
 	}
 
 
-	@Override public Optional<Collection<Statement>> relate(final IRI entity) {
+	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
 
-		if ( entity == null ) {
+		if ( resource == null ) {
 			throw new NullPointerException("null item");
 		}
 
-		return Optional.of(description(entity, true, connection)).filter(Collection::isEmpty);
+		return Optional.of(description(resource, true, connection)).filter(Collection::isEmpty);
 	}
 
 	/**
 	 * {@inheritDoc} {Unsupported}
 	 */
-	@Override public Focus create(final IRI entity, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("simple connected resource creation not supported");
 	}
 
@@ -80,9 +82,9 @@ public final class SimpleResource extends SimpleEntity {
 	 * @return {@inheritDoc}; includes {@linkplain Issue.Level#Error errors} if {@code model} contains statements
 	 * outside the symmetric concise bounded description of {@code entity}
 	 */
-	@Override public Focus update(final IRI entity, final Collection<Statement> model) {
+	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
 
-		if ( entity == null ) {
+		if ( resource == null ) {
 			throw new NullPointerException("null item");
 		}
 
@@ -90,7 +92,7 @@ public final class SimpleResource extends SimpleEntity {
 			throw new NullPointerException("null model");
 		}
 
-		final Collection<Statement> envelope=description(entity, false, model);
+		final Collection<Statement> envelope=description(resource, false, model);
 
 		final Focus focus=focus(model.stream()
 				.filter(statement -> !envelope.contains(statement))
@@ -100,30 +102,32 @@ public final class SimpleResource extends SimpleEntity {
 
 		if ( !focus.assess(Issue.Level.Error) ) {
 
-			connection.remove(description(entity, false, connection));
+			connection.remove(description(resource, false, connection));
 			connection.add(model);
 
 		}
 
-		return focus;
+		return Optional.of(focus);
 	}
 
-	@Override public boolean delete(final IRI entity) {
+	@Override public Optional<IRI> delete(final IRI resource) {
 
-		if ( entity == null ) {
+		if ( resource == null ) {
 			throw new NullPointerException("null item");
 		}
 
-		if ( !connection.hasStatement(entity, null, null, true)
-				&& !connection.hasStatement(null, null, entity, true) ) {
 
-			return false;
+		final Collection<Statement> description=description(resource, false, connection);
+
+		if ( description.isEmpty() ) {
+
+			return Optional.empty();
 
 		} else {
 
-			connection.remove(description(entity, false, connection));
+			connection.remove(description);
 
-			return true;
+			return Optional.of(resource);
 
 		}
 

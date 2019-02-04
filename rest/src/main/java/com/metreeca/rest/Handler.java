@@ -28,7 +28,7 @@ import java.util.function.Predicate;
  * <p>Exposes and manages the state of a linked data resource, generating {@linkplain Response responses} in reaction
  * to {@linkplain Request requests}.</p>
  *
- * <p>Implementations must be thread-safe.</p>
+ * <p><strong>Warning</strong> / Implementations must be thread-safe.</p>
  */
 @FunctionalInterface public interface Handler {
 

@@ -16,7 +16,7 @@
  */
 
 /**
- * Basic description managers.
+ * Basic description engines.
  */
 
-package com.metreeca.rest.flavors;
+package com.metreeca.rest.engines;
