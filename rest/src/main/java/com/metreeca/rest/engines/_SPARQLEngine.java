@@ -84,7 +84,7 @@ public final class _SPARQLEngine {
 			throw new NullPointerException("null query");
 		}
 
-		return new SPARQLReader(connection).process(query);
+		return new SPARQLRetriever(connection).process(query);
 	}
 
 	public Collection<Statement> browse(final Query query, final IRI focus) { // !!! review/remove
@@ -115,7 +115,7 @@ public final class _SPARQLEngine {
 			throw new NullPointerException("null shape");
 		}
 
-		return new SPARQLReader(connection)
+		return new SPARQLRetriever(connection)
 				.process(new Edges(and(all(focus), shape)))
 				.entrySet()
 				.stream()
@@ -143,7 +143,7 @@ public final class _SPARQLEngine {
 		// upload statements to repository and validate against shape
 		// disable shape-driven validation if not transactional // !!! just downgrade
 
-		final Focus report=new SPARQLWriter(connection).process(transactional ? shape : and(), model, focus);
+		final Focus report=new SPARQLValidator(connection).process(transactional ? shape : and(), focus);
 
 		// validate shape envelope // !!! validate even if not transactional
 

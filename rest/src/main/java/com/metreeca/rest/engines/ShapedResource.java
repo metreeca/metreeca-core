@@ -17,25 +17,42 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.rest.Engine;
 
+import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 
+import static com.metreeca.form.Focus.focus;
+import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.things.Lists.concat;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.Sets.set;
+
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 
 public final class ShapedResource implements Engine {
 
 	private final RepositoryConnection connection;
-	private final Shape shape;
+
+	private final Shape relate;
+	private final Shape update;
+	private final Shape delete;
 
 
 	public ShapedResource(final RepositoryConnection connection, final Shape shape) {
@@ -49,10 +66,15 @@ public final class ShapedResource implements Engine {
 		}
 
 		this.connection=connection;
-		this.shape=shape;
+
+		this.relate=redact(shape, Form.relate);
+		this.update=redact(shape, Form.update);
+		this.delete=redact(shape, Form.delete);
+
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
 
@@ -60,21 +82,38 @@ public final class ShapedResource implements Engine {
 			throw new NullPointerException("null entity");
 		}
 
-		return new SPARQLReader(connection)
-				.process(new Edges(and(all(resource), shape)))
-				.entrySet()
-				.stream()
-				.findFirst()
-				.map(Map.Entry::getValue);
+		return retrieve(resource, relate);
 
 	}
 
+	/**
+	 * {@inheritDoc} {Unsupported}
+	 */
 	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		throw new UnsupportedOperationException("shaped related resource creation not supported");
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return retrieve(resource, update).map(current -> { // identify updatable description
+
+			connection.remove(current);
+			connection.add(model);
+
+			// !!! before altering the db (snapshot isolation)
+			// !!! make sure the validator use update state in 'model' rather than current state in 'current'
+
+			return validate(resource, model);
+
+		});
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {
@@ -85,11 +124,68 @@ public final class ShapedResource implements Engine {
 			throw new NullPointerException("null entity");
 		}
 
-		final Optional<Collection<Statement>> model=relate(resource); // identify deletable cell
+		return retrieve(resource, delete).map(current -> { // identify deletable description
 
-		model.ifPresent(statements -> connection.remove(statements));
+			connection.remove(current);
 
-		return model.map(statements -> resource);
+			return resource;
+
+		});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Shape redact(final Shape shape, final IRI task) {
+		return shape.map(new Redactor(map(
+				entry(Form.task, set(task)),
+				entry(Form.view, set(Form.detail)),
+				entry(Form.role, set(Form.any))
+		))).map(new Optimizer());
+	}
+
+
+	private Optional<Collection<Statement>> retrieve(final IRI resource, final Shape task) {
+		return new SPARQLRetriever(connection)
+				.process(new Edges(and(all(resource), task)))
+				.entrySet()
+				.stream()
+				.findFirst()
+				.map(Map.Entry::getValue);
+	}
+
+	private Focus validate(final IRI resource, final Collection<Statement> model) {
+
+		// validate against shape (disable if not transactional) // !!! just downgrade
+
+		final boolean unsafe=connection.getIsolationLevel().equals(IsolationLevels.NONE);
+
+		final Focus focus=new SPARQLValidator(connection).process(unsafe ? and() : update, resource);
+
+		// validate shape envelope
+
+		final Collection<Statement> envelope=focus.outline().collect(toSet());
+
+		final Collection<Statement> outliers=unsafe ? emptySet() : model.stream()
+				.filter(statement -> !envelope.contains(statement))
+				.collect(toList());
+
+		if ( outliers.isEmpty() && !focus.assess(Issue.Level.Error) ) {
+
+			return focus;
+
+		} else {
+
+			connection.rollback(); // revert graph changes
+
+			// extend validation report with statements outside shape envelope
+
+			return outliers.isEmpty() ? focus : focus(concat(focus.getIssues(), outliers.stream()
+					.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier))
+					.collect(toList())
+			), focus.getFrames());
+
+		}
 	}
 
 }

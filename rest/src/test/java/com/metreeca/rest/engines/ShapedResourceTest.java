@@ -24,7 +24,6 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Nested;
@@ -43,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-final class SimpleResourceTest {
+final class ShapedResourceTest {
 
 	private void exec(final Consumer<RepositoryConnection> task) {
 		new Tray()
@@ -58,7 +57,7 @@ final class SimpleResourceTest {
 	}
 
 	private Engine engine(final RepositoryConnection connection) {
-		return new SimpleResource(connection);
+		return new ShapedResource(connection, Employee);
 	}
 
 
@@ -78,8 +77,7 @@ final class SimpleResourceTest {
 								.hasStatement(hernandez, term("code"), literal("1370"))
 								.hasStatement(hernandez, term("supervisor"), bondur)
 
-								.as("labelled connected resource description")
-								.hasStatement(bondur, RDF.TYPE, term("Employee"))
+								.as("connected resource description")
 								.hasStatement(bondur, RDFS.LABEL, literal("Gerard Bondur"))
 								.doesNotHaveStatement(bondur, term("code"), null)
 						);
@@ -118,7 +116,6 @@ final class SimpleResourceTest {
 						+":seniority 5 ."
 				);
 
-
 				assertThat(engine(connection).update(item("employees/1370"), update))
 						.isPresent()
 						.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Warning))
@@ -144,7 +141,7 @@ final class SimpleResourceTest {
 				final Model update=decode("</employees/1370>"
 						+" :forename 'Tino' ;"
 						+" :surname 'Faussone' ;"
-						+" :office <offices/1> . <offices/1> :value 'exceeding' ."
+						+" :code '9999' ." // write-once
 				);
 
 				assertThat(engine(connection).update(item("employees/1370"), update))
@@ -188,10 +185,6 @@ final class SimpleResourceTest {
 
 				assertThat(graph("construct where { <employees/1370> ?p ?o }"))
 						.as("cell deleted")
-						.isEmpty();
-
-				assertThat(graph("construct where { ?s ?p <employees/1370> }"))
-						.as("inbound links removed")
 						.isEmpty();
 
 				assertThat(graph("construct where { <employees/1102> rdfs:label ?o }"))

@@ -64,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.Collectors.toSet;
 
 
-final class SPARQLReaderTest {
+final class SPARQLRetrieverTest {
 
 	private final Supplier<RepositoryConnection> sandbox=ValuesTest.sandbox(ValuesTest.large());
 
@@ -484,7 +484,7 @@ final class SPARQLReaderTest {
 
 	private Map<Resource, Collection<Statement>> process(final Query query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
-			return new SPARQLReader(connection).process(query);
+			return new SPARQLRetriever(connection).process(query);
 		}
 	}
 

@@ -68,14 +68,14 @@ public final class SimpleResource implements Engine {
 			throw new NullPointerException("null item");
 		}
 
-		return Optional.of(description(resource, true, connection)).filter(Collection::isEmpty);
+		return Optional.of(description(resource, true, connection)).filter(statements -> !statements.isEmpty());
 	}
 
 	/**
 	 * {@inheritDoc} {Unsupported}
 	 */
 	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("simple connected resource creation not supported");
+		throw new UnsupportedOperationException("simple related resource creation not supported");
 	}
 
 	/**
@@ -94,20 +94,28 @@ public final class SimpleResource implements Engine {
 
 		final Collection<Statement> envelope=description(resource, false, model);
 
-		final Focus focus=focus(model.stream()
-				.filter(statement -> !envelope.contains(statement))
-				.map(outlier -> issue(Issue.Level.Error, "statement outside cell envelope "+outlier))
-				.collect(toList())
-		);
+		if ( envelope.isEmpty() ) {
 
-		if ( !focus.assess(Issue.Level.Error) ) {
+			return Optional.empty();
 
-			connection.remove(description(resource, false, connection));
-			connection.add(model);
+		} else {
+
+			final Focus focus=focus(model.stream()
+					.filter(statement -> !envelope.contains(statement))
+					.map(outlier -> issue(Issue.Level.Error, "statement outside cell envelope "+outlier))
+					.collect(toList())
+			);
+
+			if ( !focus.assess(Issue.Level.Error) ) {
+
+				connection.remove(description(resource, false, connection));
+				connection.add(model);
+
+			}
+
+			return Optional.of(focus);
 
 		}
-
-		return Optional.of(focus);
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {

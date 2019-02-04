@@ -90,6 +90,8 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
+	public static final Shape Textual=and(required(), datatype(XMLSchema.STRING));
+
 	public static final Shape Employee=role(Manager, Salesman).then(
 
 			clazz(term("Employee")), // implies rdf:type :Employee
@@ -97,7 +99,7 @@ public final class ValuesTest {
 			verify().then(
 					server().then(
 							field(RDF.TYPE, and(required(), datatype(IRIType))),
-							field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
+							field(RDFS.LABEL, Textual),
 							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
 					),
 					and(
@@ -111,8 +113,14 @@ public final class ValuesTest {
 							field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
 									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
 
-							field(term("supervisor"), and(optional(), datatype(IRIType), clazz(term("Employee")))),
-							field(term("subordinate"), and(optional(), datatype(IRIType), clazz(term("Employee"))))
+							field(term("supervisor"), and(
+									optional(), datatype(IRIType), clazz(term("Employee")),
+									relate().then(field(RDFS.LABEL, Textual))
+							)),
+							field(term("subordinate"), and(
+									optional(), datatype(IRIType), clazz(term("Employee")),
+									relate().then(field(RDFS.LABEL, Textual))
+							))
 
 					))
 
@@ -124,8 +132,8 @@ public final class ValuesTest {
 					field(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 					field(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 			),
-			field(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
-			field(RDFS.COMMENT, and(required(), datatype(XMLSchema.STRING))),
+			field(RDFS.LABEL, Textual),
+			field(RDFS.COMMENT, Textual),
 			field(LDP.CONTAINS, and(multiple(), Employee))
 	);
 

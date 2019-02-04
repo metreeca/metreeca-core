@@ -51,9 +51,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-final class SPARQLWriter {
+final class SPARQLValidator {
 
-	private static final Logger logger=Logger.getLogger(SPARQLWriter.class.getName()); // !!! migrate logging to Trace?
+	private static final Logger logger=Logger.getLogger(SPARQLValidator.class.getName()); // !!! migrate logging to Trace?
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ final class SPARQLWriter {
 	private final RepositoryConnection connection;
 
 
-	public SPARQLWriter(final RepositoryConnection connection) {
+	public SPARQLValidator(final RepositoryConnection connection) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");
@@ -73,21 +73,15 @@ final class SPARQLWriter {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Focus process(final Shape shape, final Iterable<Statement> model, final Value... focus) {
+	public Focus process(final Shape shape, final Value... focus) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
 		}
-
-		connection.add(model);
 
 		return shape
 				.map(new Redactor(Form.mode, Form.verify)) // remove internal filtering shapes

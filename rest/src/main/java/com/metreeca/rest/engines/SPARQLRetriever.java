@@ -50,11 +50,11 @@ import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUti
 import static java.util.Collections.singletonMap;
 
 
-final class SPARQLReader {
+final class SPARQLRetriever {
 
 	// !!! log compilation/execution times
 
-	private static final Logger logger=Logger.getLogger(SPARQLReader.class.getName()); // !!! migrate logging to Graph?
+	private static final Logger logger=Logger.getLogger(SPARQLRetriever.class.getName()); // !!! migrate logging to Graph?
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ final class SPARQLReader {
 	private final RepositoryConnection connection;
 
 
-	public SPARQLReader(final RepositoryConnection connection) {
+	public SPARQLRetriever(final RepositoryConnection connection) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");

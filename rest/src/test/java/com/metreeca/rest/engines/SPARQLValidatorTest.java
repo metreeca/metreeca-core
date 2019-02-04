@@ -52,7 +52,7 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 
 
-final class SPARQLWriterTest {
+final class SPARQLValidatorTest {
 
 	private static final IRI x=ValuesTest.item("x");
 	private static final IRI y=ValuesTest.item("y");
@@ -466,7 +466,8 @@ final class SPARQLWriterTest {
 
 	private Focus process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
 		try (final RepositoryConnection connection=sandbox.get()) {
-			return new SPARQLWriter(connection).process(shape, statements, focus);
+			connection.add(statements);
+			return new SPARQLValidator(connection).process(shape, focus);
 		}
 	}
 
