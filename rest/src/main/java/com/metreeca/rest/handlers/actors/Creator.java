@@ -22,8 +22,8 @@ import com.metreeca.form.Focus;
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.drivers.CellEngine;
-import com.metreeca.rest.drivers.SPARQLEngine;
+import com.metreeca.rest.flavors._CellEngine;
+import com.metreeca.rest.flavors._SPARQLEngine;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
@@ -200,9 +200,9 @@ public final class Creator extends Delegator {
 						final Shape shape=request.shape();
 						final Collection<Statement> rewritten=trace.debug(this, rewrite(source, target, model));
 
-						final Focus focus=!request.driven()
-								? new CellEngine(connection).create(target, rewritten)
-								: new SPARQLEngine(connection).create(target, shape, rewritten);
+						final Focus focus=!request.shaped()
+								? new _CellEngine(connection).create(target, rewritten)
+								: new _SPARQLEngine(connection).create(target, shape, rewritten);
 
 						if ( focus.assess(Level.Error) ) { // cell/shape violations
 
@@ -281,7 +281,7 @@ public final class Creator extends Delegator {
 			// !!! 409 Conflict https://tools.ietf.org/html/rfc7231#section-6.5.8 for clashing slug?
 
 			final String stem=request.stem();
-			final Collection<Statement> edges=new SPARQLEngine(connection)
+			final Collection<Statement> edges=new _SPARQLEngine(connection)
 					.browse(matcher)
 					.values()
 					.stream()

@@ -34,7 +34,7 @@ import static com.metreeca.rest.formats.TextFormat.text;
  * Shape-based content driver.
  *
  * <p>Drives the lifecycle of linked data resources managed by the wrapped handler associating them to a {@linkplain
- * #shape(Shape) shape} model:
+ * #Driver(Shape) shape} model:
  *
  * <ul>
  *
@@ -44,7 +44,7 @@ import static com.metreeca.rest.formats.TextFormat.text;
  * through a "{@code Link: <resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy}" header;</li>
  *
  * <li>handles GET requests for the advertised shape model resource ({@code <resource?specs>}) with a response
- * containing a textual description of the {@link #shape(Shape) shape} model {@linkplain Redactor redacted} taking into
+ * containing a textual description of the {@link #Driver(Shape) shape} model {@linkplain Redactor redacted} taking into
  * account the target resource task and the {@linkplain Request#roles() roles} of the current request {@linkplain
  * Request#user() user}.</li>
  *

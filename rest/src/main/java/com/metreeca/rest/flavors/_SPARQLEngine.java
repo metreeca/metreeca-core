@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.drivers;
+package com.metreeca.rest.flavors;
 
 import com.metreeca.form.*;
 import com.metreeca.form.queries.Edges;
@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.toSet;
 /**
  * Shape-driven SPARQL query/update engine.
  */
-public final class SPARQLEngine {
+public final class _SPARQLEngine {
 
 	public static boolean transactional(final RepositoryConnection connection) {
 		return !connection.getIsolationLevel().equals(IsolationLevels.NONE);
@@ -57,7 +57,7 @@ public final class SPARQLEngine {
 	private final RepositoryConnection connection;
 
 
-	public SPARQLEngine(final RepositoryConnection connection) {
+	public _SPARQLEngine(final RepositoryConnection connection) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");

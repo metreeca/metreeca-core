@@ -20,8 +20,8 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.drivers.CellEngine;
-import com.metreeca.rest.drivers.SPARQLEngine;
+import com.metreeca.rest.flavors._CellEngine;
+import com.metreeca.rest.flavors._SPARQLEngine;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
@@ -110,8 +110,8 @@ public final class Relator extends Delegator {
 		delegate(
 
 				handler(Request::container,
-						handler(Request::driven, new ShapedContainer(), new SimpleContainer()),
-						handler(Request::driven, new ShapedResource(), new SimpleResource())
+						handler(Request::shaped, new ShapedContainer(), new SimpleContainer()),
+						handler(Request::shaped, new ShapedResource(), new SimpleResource())
 				)
 
 						.with(wrapper(Request::container,
@@ -149,7 +149,7 @@ public final class Relator extends Delegator {
 			return consumer -> graph.query(connection -> {
 
 				final IRI focus=request.item();
-				final Collection<Statement> model=new CellEngine(connection).relate(focus);
+				final Collection<Statement> model=new _CellEngine(connection).relate(focus);
 
 				request.reply(response -> model.isEmpty()
 
@@ -175,7 +175,7 @@ public final class Relator extends Delegator {
 
 			return request.query(and(shape, all(focus))).fold(query -> request.reply(response -> graph.query(connection -> {
 
-				final Collection<Statement> model=new SPARQLEngine(connection)
+				final Collection<Statement> model=new _SPARQLEngine(connection)
 						.browse(query)
 						.values()
 						.stream()

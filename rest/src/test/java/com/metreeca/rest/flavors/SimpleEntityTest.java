@@ -15,11 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.drivers;
+package com.metreeca.rest.flavors;
 
+import com.metreeca.form.Focus;
 import com.metreeca.form.things.ValuesTest;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -34,8 +34,10 @@ import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.item;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
-final class StructuresTest {
+
+final class SimpleEntityTest {
 
 	private static final IRI focus=item("focus");
 
@@ -86,24 +88,24 @@ final class StructuresTest {
 
 	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromModel() {
 
-			final Model cell=Structures.description(focus, false, model);
+			final Model cell=new TestEntity().description(focus, false, model);
 
-			Assertions.assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
-			Assertions.assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
+			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
+			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
 
 	}
 
 	@Test void testRetrieveLabelledSymmetricConciseBoundedDescriptionFromModel() {
 
-		final Model cell=Structures.description(focus, true, model);
+		final Model cell=new TestEntity().description(focus, true, model);
 
-		Assertions.assertThat(cell.subjects())
+		assertThat(cell.subjects())
 				.containsOnly(focus, _dblank, _iblank, direct, inverse);
 
-		Assertions.assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
+		assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
 				.containsOnly(focus, _dblank, _iblank, direct);
 
-		Assertions.assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
+		assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
 
 				statement(direct, RDFS.LABEL, dlabel),
 				statement(direct, RDFS.COMMENT, dcomment),
@@ -120,10 +122,10 @@ final class StructuresTest {
 
 		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
 
-			final Model cell=Structures.description(focus, false, connection);
+			final Model cell=new TestEntity().description(focus, false, connection);
 
-			Assertions.assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
-			Assertions.assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
+			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
+			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
 
 		}
 
@@ -133,15 +135,15 @@ final class StructuresTest {
 
 		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
 
-			final Model cell=Structures.description(focus, true, connection);
+			final Model cell=new TestEntity().description(focus, true, connection);
 
-			Assertions.assertThat(cell.subjects())
+			assertThat(cell.subjects())
 					.containsOnly(focus, _dblank, _iblank, direct, inverse);
 
-			Assertions.assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
+			assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
 					.containsOnly(focus, _dblank, _iblank, direct);
 
-			Assertions.assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
+			assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
 
 					statement(direct, RDFS.LABEL, dlabel),
 					statement(direct, RDFS.COMMENT, dcomment),
@@ -150,6 +152,29 @@ final class StructuresTest {
 					statement(inverse, RDFS.COMMENT, icomment)
 
 			);
+		}
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class TestEntity extends SimpleEntity {
+
+		@Override public Collection<Statement> relate(final IRI entity) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override public Focus create(final IRI entity, final Collection<Statement> model) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override public Focus update(final IRI entity, final Collection<Statement> model) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override public boolean delete(final IRI entity) {
+			throw new UnsupportedOperationException();
 		}
 
 	}

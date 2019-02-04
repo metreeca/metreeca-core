@@ -15,21 +15,18 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.drivers;
+package com.metreeca.rest.flavors;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Issue.Level;
 
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.rest.drivers.Structures.description;
 
 import static java.util.stream.Collectors.toList;
 
@@ -41,12 +38,31 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class CellEngine {
+public final class _CellEngine extends SimpleEntity {
+
+	@Override public Collection<Statement> relate(final IRI entity) throws UnsupportedOperationException {
+		return null;
+	}
+
+	@Override public Focus create(final IRI entity, final Collection<Statement> model) throws UnsupportedOperationException {
+		return null;
+	}
+
+	@Override public Focus update(final IRI entity, final Collection<Statement> model) throws UnsupportedOperationException {
+		return null;
+	}
+
+	@Override public boolean delete(final IRI entity) throws UnsupportedOperationException {
+		return false;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final RepositoryConnection connection;
 
 
-	public CellEngine(final RepositoryConnection connection) {
+	public _CellEngine(final RepositoryConnection connection) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");

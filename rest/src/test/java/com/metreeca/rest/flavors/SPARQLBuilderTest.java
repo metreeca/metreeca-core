@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.drivers;
+package com.metreeca.rest.flavors;
 
 import org.junit.jupiter.api.Test;
 

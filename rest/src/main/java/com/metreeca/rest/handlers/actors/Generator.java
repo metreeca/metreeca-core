@@ -199,7 +199,7 @@ public final class Generator extends Delegator {
 			return request.reply(response -> model.isEmpty() ? response.status(Response.NotFound) : response
 
 					.status(Response.OK)
-					.map(r -> request.driven() ? r.shape(request.shape()) : r)
+					.map(r -> request.shaped() ? r.shape(request.shape()) : r)
 					.body(rdf(), model)
 
 			);

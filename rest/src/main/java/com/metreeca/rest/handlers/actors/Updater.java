@@ -19,8 +19,8 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.*;
-import com.metreeca.rest.drivers.CellEngine;
-import com.metreeca.rest.drivers.SPARQLEngine;
+import com.metreeca.rest.flavors._CellEngine;
+import com.metreeca.rest.flavors._SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
@@ -125,8 +125,8 @@ public final class Updater extends Delegator {
 				final Collection<Statement> update=trace.debug(this, model);
 
 				final Focus report=pass(shape)
-						? new CellEngine(connection).update(focus, update)
-						: new SPARQLEngine(connection).update(focus, shape, update);
+						? new _CellEngine(connection).update(focus, update)
+						: new _SPARQLEngine(connection).update(focus, shape, update);
 
 				if ( report.assess(Issue.Level.Error) ) { // shape violations
 

@@ -15,11 +15,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.drivers;
+package com.metreeca.rest.flavors;
+
+import com.metreeca.rest.Flavor;
 
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -31,29 +34,27 @@ import static java.util.Collections.singleton;
 
 
 /**
- * RDF structure utilities.
+ * Abstract concise bounded description manager.
  *
- * <p>Provides utility methods for retrieving RDF structures like lists and descriptions from RDF models, repositories
- * and other statement sources.</p>
+ * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded descriptions.</p>
  *
- * @see <a href="https://www.w3.org/TR/rdf-schema/#ch_collectionvocab/">RDF Schema 1.1 - § 5.2 RDF Collections</a>
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-final class Structures {
+public abstract class SimpleEntity implements Flavor {
 
 	/**
 	 * Retrieves a symmetric concise bounded description from a statement source.
 	 *
 	 * @param focus    the resource whose symmetric concise bounded description is to be retrieved
-	 * @param labelled if {@code true}, the retrieved description will be extended with {@code rdfs:label/comment}
-	 *                 annotations for all referenced IRIs
+	 * @param labelled if {@code true}, the retrieved description will be extended with {@code rdf:type} and {@code
+	 *                 rdfs:label/comment} annotations for all referenced IRIs
 	 * @param model    the statement source the description is to be retrieved from
 	 *
 	 * @return the symmetric concise bounded description of {@code focus} retrieved from {@code model}
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code model} is null
 	 */
-	public static Model description(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
+	protected Model description(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -76,15 +77,15 @@ final class Structures {
 	 * Retrieves the symmetric concise bounded description of a resource from a repository.
 	 *
 	 * @param focus      the resource whose symmetric concise bounded description is to be retrieved
-	 * @param labelled   if {@code true}, the retrieved description will be extended with {@code rdfs:label/comment}
-	 *                   annotations for all referenced IRIs
+	 * @param labelled   if {@code true}, the retrieved description will be extended with {@code rdf:type} and {@code
+	 *                   rdfs:label/comment} annotations for all referenced IRIs
 	 * @param connection the connection to the repository the description is to be retrieved from
 	 *
 	 * @return the symmetric concise bounded description of {@code focus} retrieved from {@code connection}
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code connection} is null
 	 */
-	public static Model description(final Resource focus, final boolean labelled, final RepositoryConnection connection) {
+	protected Model description(final Resource focus, final boolean labelled, final RepositoryConnection connection) {
 
 		// !!! optimize for SPARQL
 
@@ -126,6 +127,7 @@ final class Structures {
 
 				} else if ( labelled && value instanceof IRI ) {
 
+					source.match((Resource)value, RDF.TYPE, null).forEach(description::add);
 					source.match((Resource)value, RDFS.LABEL, null).forEach(description::add);
 					source.match((Resource)value, RDFS.COMMENT, null).forEach(description::add);
 
@@ -137,10 +139,6 @@ final class Structures {
 		return description;
 
 	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Structures() {} // utility
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

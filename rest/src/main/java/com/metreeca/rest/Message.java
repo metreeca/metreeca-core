@@ -148,10 +148,10 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Tests if this message is shape-driven.
 	 *
-	 * @return {@code true} if the {@linkplain #shape() shape}  associated to this message is not a {@linkplain
+	 * @return {@code true} if the {@linkplain #shape() shape} associated to this message is not a {@linkplain
 	 * Shape#pass() wildcard}; {@code false} otherwise
 	 */
-	public boolean driven() {
+	public boolean shaped() {
 		return !pass(shape);
 	}
 

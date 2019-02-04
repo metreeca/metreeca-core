@@ -20,9 +20,8 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.drivers.CellEngine;
-import com.metreeca.rest.drivers.SPARQLEngine;
 import com.metreeca.rest.*;
+import com.metreeca.rest.flavors.*;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Splitter;
 import com.metreeca.rest.wrappers.Throttler;
@@ -30,8 +29,9 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.rest.Handler.handler;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.rest.wrappers.Splitter.resource;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -71,48 +71,53 @@ public final class Deleter extends Delegator {
 
 
 	public Deleter() {
-		delegate(handler(Request::container, container(), resource())
-				.with(wrapper(Request::container, wrapper(), new Splitter(Splitter.resource())))
-				.with(new Throttler(Form.delete, Form.detail))
+		delegate(deleter()
+				.with(splitter())
+				.with(throttler())
 		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Handler resource() {
+	private Wrapper splitter() {
+		return wrapper(Request::container, wrapper(), new Splitter(resource()));
+	}
+
+	private Throttler throttler() {
+		return new Throttler(Form.delete, Form.detail);
+	}
+
+	private Handler deleter() {
 		return request -> request.reply(response -> graph.update(connection -> {
 
-			final IRI focus=request.item();
+			final IRI item=request.item();
 			final Shape shape=request.shape();
 
-			if ( !connection.hasStatement(focus, null, null, true)
-					&& !connection.hasStatement(null, null, focus, true) ) {
+			final boolean shaped=!pass(shape);
 
-				// !!! 410 Gone if the resource is known to have existed (how to test?)
+			final Flavor flavor=request.container()
+					? shaped ? new ShapedContainer(connection, shape) : new SimpleContainer(connection)
+					: shaped ? new ShapedResource(connection, shape) : new SimpleResource(connection);
 
-				return response.status(Response.NotFound);
+			// !!! 410 Gone if the resource is known to have existed (how to test?)
 
-			} else {
+			try {
 
-				if ( !request.driven() ) {
-					new CellEngine(connection).delete(focus);
-				} else {
-					new SPARQLEngine(connection).delete(focus, shape);
-				}
+				return flavor.delete(item)
+						? response.status(Response.NoContent)
+						: response.status(Response.NotFound);
 
-				return response.status(Response.NoContent);
+			} catch ( final UnsupportedOperationException e ) {
+
+				return response.map(new Failure()
+						.status(Response.MethodNotAllowed)
+						.cause(e.getMessage())
+				);
 
 			}
 
 		}));
-	}
-
-	private Handler container() {
-		return request -> request.reply(new Failure()
-				.status(Response.MethodNotAllowed)
-				.cause("LDP container deletion not supported")
-		);
 	}
 
 }

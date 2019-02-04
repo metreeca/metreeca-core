@@ -21,7 +21,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.drivers.SPARQLEngine;
+import com.metreeca.rest.flavors._SPARQLEngine;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
@@ -98,7 +98,7 @@ public final class _Browser extends Delegator {
 
 
 	public _Browser() {
-		delegate(Handler.handler(request -> !request.driven(), direct(), driven())
+		delegate(Handler.handler(request -> !request.shaped(), direct(), driven())
 
 						.with(new Throttler(Form.relate, Form.digest))
 
@@ -171,7 +171,7 @@ public final class _Browser extends Delegator {
 
 			} else {
 
-				new SPARQLEngine(connection).browse(edges).forEach((focus, statements) -> {
+				new _SPARQLEngine(connection).browse(edges).forEach((focus, statements) -> {
 					model.add(statement(item, LDP.CONTAINS, focus));
 					model.addAll(statements);
 				});
@@ -192,7 +192,7 @@ public final class _Browser extends Delegator {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
 					.shape(StatsShape)
-					.body(rdf(), new SPARQLEngine(connection).browse(stats, response.item()));
+					.body(rdf(), new _SPARQLEngine(connection).browse(stats, response.item()));
 
 		});
 	}
@@ -201,7 +201,7 @@ public final class _Browser extends Delegator {
 		return graph.query(connection -> {
 			return response.status(Response.OK)
 					.shape(ItemsShape)
-					.body(rdf(), new SPARQLEngine(connection).browse(items, response.item()));
+					.body(rdf(), new _SPARQLEngine(connection).browse(items, response.item()));
 
 		});
 	}

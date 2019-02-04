@@ -16,9 +16,7 @@
  */
 
 /**
- * LDP drivers.
- *
- * <p>Provides default implementations for CRUD operations on LDP resources and containers.</p>
+ * Basic description managers.
  */
 
-package com.metreeca.rest.drivers;
+package com.metreeca.rest.flavors;
