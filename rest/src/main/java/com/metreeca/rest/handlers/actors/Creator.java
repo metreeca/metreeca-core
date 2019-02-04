@@ -96,7 +96,7 @@ import static java.util.UUID.randomUUID;
  *
  * <li>the resource to be created is assigned a unique IRI based on the stem of the request {@linkplain Request#item()
  * focus item} and a name provided by either the default {@linkplain #uuid() UUID-based} or a {@linkplain
- * #slug(BiFunction) custom-provided} slug generator;</li>
+ * #Creator(BiFunction) custom-provided} slug generator;</li>
  *
  * <li>the request RDF body is rewritten to the assigned IRI and stored into the graph database;</li>
  *

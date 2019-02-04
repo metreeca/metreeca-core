@@ -26,11 +26,8 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.function.Consumer;
 
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
@@ -45,10 +42,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class SimpleResourceTest {
 
-	private void exec(final Consumer<RepositoryConnection> task) {
+	private void exec(final Runnable task) {
 		new Tray()
 				.exec(graph(dataset()))
-				.exec(() -> tool(Graph.Factory).update(task))
+				.exec(task)
 				.clear();
 	}
 
@@ -57,20 +54,20 @@ final class SimpleResourceTest {
 		return small();
 	}
 
-	private Engine engine(final RepositoryConnection connection) {
-		return new SimpleResource(connection);
+	private Engine engine() {
+		return new SimpleResource(tool(Graph.Factory));
 	}
 
 
 	@Nested final class Relate {
 
 		@Test void testRelate() {
-			exec(connection -> {
+			exec(() -> {
 
 				final IRI hernandez=item("employees/1370");
 				final IRI bondur=item("employees/1102");
 
-				assertThat(engine(connection).relate(hernandez))
+				assertThat(engine().relate(hernandez))
 						.isPresent()
 						.hasValueSatisfying(description -> assertThat(description)
 
@@ -88,7 +85,7 @@ final class SimpleResourceTest {
 		}
 
 		@Test void testUnknown() {
-			exec(connection -> assertThat(engine(connection).relate(item("employees/9999")))
+			exec(() -> assertThat(engine().relate(item("employees/9999")))
 					.as("empty description")
 					.isNotPresent());
 		}
@@ -98,7 +95,7 @@ final class SimpleResourceTest {
 	@Nested final class Create {
 
 		@Test void testUnsupported() {
-			exec(connection -> assertThatThrownBy(() -> engine(connection).create(
+			exec(() -> assertThatThrownBy(() -> engine().create(
 					item("employees/1370"), item("employees/9999"), set()
 			)).isInstanceOf(UnsupportedOperationException.class));
 		}
@@ -108,7 +105,7 @@ final class SimpleResourceTest {
 	@Nested final class Update {
 
 		@Test void testUpdate() {
-			exec(connection -> {
+			exec(() -> {
 
 				final Model update=decode("</employees/1370>"
 						+":forename 'Tino';"
@@ -119,7 +116,7 @@ final class SimpleResourceTest {
 				);
 
 
-				assertThat(engine(connection).update(item("employees/1370"), update))
+				assertThat(engine().update(item("employees/1370"), update))
 						.isPresent()
 						.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Warning))
 								.as("success reported")
@@ -139,7 +136,7 @@ final class SimpleResourceTest {
 		}
 
 		@Test void testExceedingData() {
-			exec(connection -> {
+			exec(() -> {
 
 				final Model update=decode("</employees/1370>"
 						+" :forename 'Tino' ;"
@@ -147,7 +144,7 @@ final class SimpleResourceTest {
 						+" :office <offices/1> . <offices/1> :value 'exceeding' ."
 				);
 
-				assertThat(engine(connection).update(item("employees/1370"), update))
+				assertThat(engine().update(item("employees/1370"), update))
 						.isPresent()
 						.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Error))
 								.as("failure reported")
@@ -162,9 +159,9 @@ final class SimpleResourceTest {
 		}
 
 		@Test void testUnknown() {
-			exec(connection -> {
+			exec(() -> {
 
-				assertThat(engine(connection).update(item("employees/9999"), set()))
+				assertThat(engine().update(item("employees/9999"), set()))
 						.as("not found ")
 						.isNotPresent();
 
@@ -180,9 +177,9 @@ final class SimpleResourceTest {
 	@Nested final class Delete {
 
 		@Test void testDelete() {
-			exec(connection -> {
+			exec(() -> {
 
-				assertThat(engine(connection).delete(item("employees/1370")))
+				assertThat(engine().delete(item("employees/1370")))
 						.as("success reported")
 						.isPresent();
 
@@ -202,9 +199,9 @@ final class SimpleResourceTest {
 		}
 
 		@Test void testUnknown() {
-			exec(connection -> {
+			exec(() -> {
 
-				assertThat(engine(connection).delete(item("employees/9999")))
+				assertThat(engine().delete(item("employees/9999")))
 						.as("failure reported")
 						.isNotPresent();
 

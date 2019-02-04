@@ -19,40 +19,39 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.rest.Engine;
+import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Optional;
 
 
 /**
- * Concise bounded container description manager.
+ * Concise bounded description container engine.
  *
  * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded container descriptions.</p>
  */
-public final class SimpleContainer implements Engine {
+ final class SimpleContainer implements Engine {
 
-	private final RepositoryConnection connection;
 
+	private Graph graph;
 
 	/**
-	 * Creates a concise bounded container description manager
+	 * Creates a concise bounded description container engine.
 	 *
-	 * @param connection a connection to the repository where container description are stored.
+	 * @param graph a connection to the repository where container description are stored
 	 *
 	 * @throws NullPointerException if {@code connection} is null
 	 */
+	public SimpleContainer(final Graph graph) {
 
-	public SimpleContainer(final RepositoryConnection connection) {
-
-		if ( connection == null ) {
+		if ( graph == null ) {
 			throw new NullPointerException("null connection");
 		}
 
-		this.connection=connection;
+		this.graph=graph;
 	}
 
 

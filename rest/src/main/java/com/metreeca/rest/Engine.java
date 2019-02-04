@@ -27,9 +27,12 @@ import java.util.Optional;
 
 
 /**
- * Resource engine.
+ * Resource engine {thread-safe}.
  *
  * <p>Manages CRUD operations on linked data resources.</p>
+ *
+ * <p><strong>Warning</strong> / Implementations must be thread-safe.</p>
+
  */
 public interface Engine {
 

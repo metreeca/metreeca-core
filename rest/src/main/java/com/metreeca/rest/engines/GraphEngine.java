@@ -28,44 +28,78 @@ import org.eclipse.rdf4j.model.Statement;
 import java.util.Collection;
 import java.util.Optional;
 
-/**
- * Shape-driven container engine.
- *
- * <p>Manages CRUD lifecycle operations on container resource descriptions defined by a shape.</p>
- */
-final class ShapedContainer implements Engine {
+import static com.metreeca.form.Shape.pass;
 
-	/**
-	 * Creates a shape-driven container engine.
-	 *
-	 * @param graph a connection to the repository where container resource description are stored
-	 * @param shape the shape defining resource descriptions
-	 *
-	 * @throws NullPointerException if either {@code connection} or {@code shape} is null
-	 */
-	public ShapedContainer(final Graph graph, final Shape shape) {}
 
+public final class GraphEngine implements Engine {
+
+	private final Engine delegate;
+
+
+	public GraphEngine(final Graph graph, final Shape shape) {
+
+		if ( graph == null ) {
+			throw new NullPointerException("null graph");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		// !!! container vs resource
+
+		delegate=pass(shape) ? new SimpleResource(graph) : new ShapedResource(graph, shape);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		return delegate.relate(resource);
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( slug == null ) {
+			throw new NullPointerException("null slug");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return delegate.create(resource, slug, model);
 	}
 
-	/**
-	 * {@inheritDoc} {Unsupported}
-	 */
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("shaped container updating not supported");
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return delegate.update(resource, model);
 	}
 
-	/**
-	 * {@inheritDoc} {Unsupported}
-	 */
 	@Override public Optional<IRI> delete(final IRI resource) {
-		throw new UnsupportedOperationException("shaped container deletion not supported");
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		return delegate.delete(resource);
 	}
 
 }

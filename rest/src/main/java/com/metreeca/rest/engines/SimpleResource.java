@@ -20,6 +20,7 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
+import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -37,29 +38,29 @@ import static java.util.stream.Collectors.toList;
 
 
 /**
- * Concise bounded resource description manager.
+ * Concise bounded description resource engine.
  *
  * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded resource descriptions.</p>
  */
-public final class SimpleResource implements Engine {
+ final class SimpleResource implements Engine {
 
-	private final RepositoryConnection connection;
+	private final Graph graph;
 
 
 	/**
-	 * Creates a concise bounded resource description manager
+	 * Creates a concise bounded description engine.
 	 *
-	 * @param connection a connection to the repository where resource description are stored.
+	 * @param graph a connection to the repository where resource description are stored
 	 *
 	 * @throws NullPointerException if {@code connection} is null
 	 */
-	public SimpleResource(final RepositoryConnection connection) {
+	public SimpleResource(final Graph graph) {
 
-		if ( connection == null ) {
+		if ( graph == null ) {
 			throw new NullPointerException("null connection");
 		}
 
-		this.connection=connection;
+		this.graph=graph;
 	}
 
 
@@ -69,7 +70,7 @@ public final class SimpleResource implements Engine {
 			throw new NullPointerException("null item");
 		}
 
-		return retrieve(resource, true);
+		return graph.query(connection -> { return retrieve(connection, resource, true); });
 	}
 
 	/**
@@ -93,20 +94,25 @@ public final class SimpleResource implements Engine {
 			throw new NullPointerException("null model");
 		}
 
-		return retrieve(resource, false).map(current -> {
+		return graph.update(connection -> {
 
-			final Focus focus=validate(resource, model);
+			return retrieve(connection, resource, false).map(current -> {
 
-			if ( !focus.assess(Issue.Level.Error) ) {
+				final Focus focus=validate(resource, model);
 
-				connection.remove(current);
-				connection.add(model);
+				if ( !focus.assess(Issue.Level.Error) ) {
 
-			}
+					connection.remove(current);
+					connection.add(model);
 
-			return focus;
+				}
+
+				return focus;
+
+			});
 
 		});
+
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {
@@ -115,19 +121,26 @@ public final class SimpleResource implements Engine {
 			throw new NullPointerException("null item");
 		}
 
-		return retrieve(resource, false).map(current -> {
+		return graph.update(connection -> {
 
-			connection.remove(current);
+			return retrieve(connection, resource, false).map(current -> {
 
-			return resource;
+				connection.remove(current);
+
+				return resource;
+
+			});
 
 		});
+
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Optional<Collection<Statement>> retrieve(final Resource resource, final boolean labelled) {
+	private Optional<Collection<Statement>> retrieve(
+			final RepositoryConnection connection, final Resource resource, final boolean labelled
+	) {
 		return Optional.of(description(resource, labelled, connection)).filter(statements -> !statements.isEmpty());
 	}
 

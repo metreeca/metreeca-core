@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.joining;
 
 
 /**
- * Shape value validation report.
+ * Value shape validation report.
  */
 public final class Frame {
 

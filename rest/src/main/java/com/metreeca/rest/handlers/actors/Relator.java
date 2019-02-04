@@ -26,8 +26,6 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines.ShapedResource;
-import com.metreeca.rest.engines.SimpleResource;
 import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
@@ -195,9 +193,9 @@ public final class Relator extends Delegator {
 
 			} else {
 
-				final Engine engine=shaped
-						? new ShapedResource(connection, shape)
-						: new SimpleResource(connection);
+				//final Engine engine=shaped
+				//		? new ShapedResource(connection, shape)
+				//		: new SimpleResource(connection);
 
 
 				// !!!

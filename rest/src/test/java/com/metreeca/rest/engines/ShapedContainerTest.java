@@ -15,8 +15,46 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Basic resource engines.
- */
-
 package com.metreeca.rest.engines;
+
+import com.metreeca.rest.Engine;
+import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.Graph;
+
+import org.eclipse.rdf4j.model.Model;
+import org.junit.jupiter.api.Nested;
+
+import static com.metreeca.form.things.ValuesTest.Employee;
+import static com.metreeca.form.things.ValuesTest.small;
+import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.tray.Tray.tool;
+
+
+final class ShapedContainerTest {
+
+	private void exec(final Runnable task) {
+		new Tray()
+				.exec(graph(dataset()))
+				.exec(task)
+				.clear();
+	}
+
+
+	private Model dataset() {
+		return small();
+	}
+
+	private Engine engine() {
+		return new ShapedContainer(tool(Graph.Factory), Employee);
+	}
+
+
+	@Nested final class Relate {
+
+	}
+
+	@Nested final class Create {
+
+	}
+
+}

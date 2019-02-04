@@ -111,12 +111,12 @@ public interface Shape {
 	public static Guard delete() { return task(Form.delete); }
 
 
-	/**
+	/*
 	 * Marks shapes as server-defined read-only.
 	 */
 	public static Guard server() { return task(Form.relate, Form.delete); }
 
-	/**
+	/*
 	 * Marks shapes as client-defined write-once.
 	 */
 	public static Guard client() { return task(Form.create, Form.relate, Form.delete); }

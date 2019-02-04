@@ -21,7 +21,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines.*;
+import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Splitter;
 import com.metreeca.rest.wrappers.Throttler;
@@ -29,7 +29,6 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.form.Shape.pass;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.wrappers.Splitter.resource;
 import static com.metreeca.tray.Tray.tool;
@@ -94,17 +93,16 @@ public final class Deleter extends Delegator {
 			final IRI item=request.item();
 			final Shape shape=request.shape();
 
-			final boolean shaped=!pass(shape);
-
-			final Engine engine=request.container()
-					? shaped ? new ShapedContainer(connection, shape) : new SimpleContainer(connection)
-					: shaped ? new ShapedResource(connection, shape) : new SimpleResource(connection);
+			// !!! container
+			//  final Engine engine=request.container()
+			//		? shaped ? new ShapedContainer(graph, shape) : new SimpleContainer(graph)
+			//		: shaped ? new ShapedResource(graph, shape) : new SimpleResource(graph);
 
 			// !!! 410 Gone if the resource is known to have existed (how to test?)
 
 			try {
 
-				return engine.delete(item).isPresent()
+				return new GraphEngine(graph, shape).delete(item).isPresent() // !!! cache engine
 						? response.status(Response.NoContent)
 						: response.status(Response.NotFound);
 

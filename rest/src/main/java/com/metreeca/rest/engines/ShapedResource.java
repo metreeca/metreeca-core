@@ -22,6 +22,7 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.rest.Engine;
+import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
@@ -46,18 +47,31 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-public final class ShapedResource implements Engine {
+/**
+ * Shape-driven resource engine.
+ *
+ * <p>Manages CRUD lifecycle operations on resource descriptions defined by a shape.</p>
+ */
+final class ShapedResource implements Engine {
 
-	private final RepositoryConnection connection;
+	private final Graph graph;
 
 	private final Shape relate;
 	private final Shape update;
 	private final Shape delete;
 
 
-	public ShapedResource(final RepositoryConnection connection, final Shape shape) {
+	/**
+	 * Creates a shape-driven resource engine.
+	 *
+	 * @param graph a connection to the repository where resource description are stored
+	 * @param shape the shape defining resource descriptions
+	 *
+	 * @throws NullPointerException if either {@code connection} or {@code shape} is null
+	 */
+	public ShapedResource(final Graph graph, final Shape shape) {
 
-		if ( connection == null ) {
+		if ( graph == null ) {
 			throw new NullPointerException("null connection");
 		}
 
@@ -65,7 +79,7 @@ public final class ShapedResource implements Engine {
 			throw new NullPointerException("null shape");
 		}
 
-		this.connection=connection;
+		this.graph=graph;
 
 		this.relate=redact(shape, Form.relate);
 		this.update=redact(shape, Form.update);
@@ -82,7 +96,7 @@ public final class ShapedResource implements Engine {
 			throw new NullPointerException("null entity");
 		}
 
-		return retrieve(resource, relate);
+		return graph.query(connection -> { return retrieve(connection, resource, relate); });
 
 	}
 
@@ -103,21 +117,25 @@ public final class ShapedResource implements Engine {
 			throw new NullPointerException("null model");
 		}
 
-		return retrieve(resource, update).map(current -> { // identify updatable description
+		return graph.update(connection -> {
 
-			connection.remove(current);
-			connection.add(model);
+			return retrieve(connection, resource, update).map(current -> { // identify updatable description
 
-			// !!! validate before altering the db (snapshot isolation)
-			// !!! make sure the validator use update state in 'model' rather than current state in 'current'
+				connection.remove(current);
+				connection.add(model);
 
-			final Focus focus=validate(resource, model);
+				// !!! validate before altering the db (snapshot isolation)
+				// !!! make sure the validator use update state in 'model' rather than current state in 'current'
 
-			if ( focus.assess(Issue.Level.Error) ) {
-				connection.rollback(); // revert graph changes
-			}
+				final Focus focus=validate(connection, resource, model);
 
-			return focus;
+				if ( focus.assess(Issue.Level.Error) ) {
+					connection.rollback(); // revert graph changes
+				}
+
+				return focus;
+
+			});
 
 		});
 	}
@@ -130,11 +148,15 @@ public final class ShapedResource implements Engine {
 			throw new NullPointerException("null entity");
 		}
 
-		return retrieve(resource, delete).map(current -> { // identify deletable description
+		return graph.update(connection -> {
 
-			connection.remove(current);
+			return retrieve(connection, resource, delete).map(current -> { // identify deletable description
 
-			return resource;
+				connection.remove(current);
+
+				return resource;
+
+			});
 
 		});
 	}
@@ -151,7 +173,7 @@ public final class ShapedResource implements Engine {
 	}
 
 
-	private Optional<Collection<Statement>> retrieve(final IRI resource, final Shape task) {
+	private Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape task) {
 		return new SPARQLRetriever(connection)
 				.process(new Edges(and(all(resource), task)))
 				.entrySet()
@@ -160,7 +182,7 @@ public final class ShapedResource implements Engine {
 				.map(Map.Entry::getValue);
 	}
 
-	private Focus validate(final IRI resource, final Collection<Statement> model) {
+	private Focus validate(final RepositoryConnection connection, final IRI resource, final Collection<Statement> model) {
 
 		// validate against shape (disable if not transactional) // !!! just downgrade
 
