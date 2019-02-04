@@ -22,6 +22,7 @@ import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -68,7 +69,7 @@ public final class SimpleResource implements Engine {
 			throw new NullPointerException("null item");
 		}
 
-		return Optional.of(description(resource, true, connection)).filter(statements -> !statements.isEmpty());
+		return retrieve(resource, true);
 	}
 
 	/**
@@ -92,30 +93,20 @@ public final class SimpleResource implements Engine {
 			throw new NullPointerException("null model");
 		}
 
-		final Collection<Statement> envelope=description(resource, false, model);
+		return retrieve(resource, false).map(current -> {
 
-		if ( envelope.isEmpty() ) {
-
-			return Optional.empty();
-
-		} else {
-
-			final Focus focus=focus(model.stream()
-					.filter(statement -> !envelope.contains(statement))
-					.map(outlier -> issue(Issue.Level.Error, "statement outside cell envelope "+outlier))
-					.collect(toList())
-			);
+			final Focus focus=validate(resource, model);
 
 			if ( !focus.assess(Issue.Level.Error) ) {
 
-				connection.remove(description(resource, false, connection));
+				connection.remove(current);
 				connection.add(model);
 
 			}
 
-			return Optional.of(focus);
+			return focus;
 
-		}
+		});
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {
@@ -124,21 +115,31 @@ public final class SimpleResource implements Engine {
 			throw new NullPointerException("null item");
 		}
 
+		return retrieve(resource, false).map(current -> {
 
-		final Collection<Statement> description=description(resource, false, connection);
+			connection.remove(current);
 
-		if ( description.isEmpty() ) {
+			return resource;
 
-			return Optional.empty();
+		});
+	}
 
-		} else {
 
-			connection.remove(description);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			return Optional.of(resource);
+	private Optional<Collection<Statement>> retrieve(final Resource resource, final boolean labelled) {
+		return Optional.of(description(resource, labelled, connection)).filter(statements -> !statements.isEmpty());
+	}
 
-		}
+	private Focus validate(final Resource resource, final Collection<Statement> model) {
 
+		final Collection<Statement> envelope=description(resource, false, model);
+
+		return focus(model.stream()
+				.filter(statement -> !envelope.contains(statement))
+				.map(outlier -> issue(Issue.Level.Error, "statement outside cell envelope "+outlier))
+				.collect(toList())
+		);
 	}
 
 }

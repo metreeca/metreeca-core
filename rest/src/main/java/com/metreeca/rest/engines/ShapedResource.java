@@ -108,10 +108,16 @@ public final class ShapedResource implements Engine {
 			connection.remove(current);
 			connection.add(model);
 
-			// !!! before altering the db (snapshot isolation)
+			// !!! validate before altering the db (snapshot isolation)
 			// !!! make sure the validator use update state in 'model' rather than current state in 'current'
 
-			return validate(resource, model);
+			final Focus focus=validate(resource, model);
+
+			if ( focus.assess(Issue.Level.Error) ) {
+				connection.rollback(); // revert graph changes
+			}
+
+			return focus;
 
 		});
 	}
@@ -170,22 +176,13 @@ public final class ShapedResource implements Engine {
 				.filter(statement -> !envelope.contains(statement))
 				.collect(toList());
 
-		if ( outliers.isEmpty() && !focus.assess(Issue.Level.Error) ) {
+		// extend validation report with statements outside shape envelope
 
-			return focus;
+		return outliers.isEmpty() ? focus : focus(concat(focus.getIssues(), outliers.stream()
+				.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier))
+				.collect(toList())
+		), focus.getFrames());
 
-		} else {
-
-			connection.rollback(); // revert graph changes
-
-			// extend validation report with statements outside shape envelope
-
-			return outliers.isEmpty() ? focus : focus(concat(focus.getIssues(), outliers.stream()
-					.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier))
-					.collect(toList())
-			), focus.getFrames());
-
-		}
 	}
 
 }
