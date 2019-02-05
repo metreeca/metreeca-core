@@ -31,6 +31,7 @@ import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Meta.alias;
+import static com.metreeca.form.shapes.Meta.label;
 import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.When.when;
@@ -45,8 +46,18 @@ final class OptimizerTest {
 	private static final Shape z=maxCount(10);
 
 
+	@Test void testOptimizeMeta() {
+
+		assertThat(optimize(and(label("label"), label("label"))))
+				.as("collapse duplicated metadata")
+				.isEqualTo(label("label"));
+
+	}
+
 	@Test void testRetainAliases() { // required by formatters
-		assertThat(optimize(alias("alias"))).as("alias").isEqualTo(alias("alias"));
+		assertThat(optimize(alias("alias")))
+				.as("alias")
+				.isEqualTo(alias("alias"));
 	}
 
 
@@ -67,25 +78,51 @@ final class OptimizerTest {
 
 	@Test void testOptimizeType() {
 
-		assertThat(optimize(and(datatype(Values.IRIType), datatype(Values.ResourceType)))).as("conjunction / superclass").isEqualTo(datatype(Values.IRIType));
-		assertThat(optimize(and(datatype(Values.LiteralType), datatype(XMLSchema.STRING)))).as("conjunction / literal").isEqualTo(datatype(XMLSchema.STRING));
-		assertThat(optimize(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING)))).as("conjunction / unrelated").isEqualTo(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING)));
+		assertThat(optimize(and(datatype(Values.IRIType), datatype(Values.ResourceType))))
+				.as("conjunction / superclass")
+				.isEqualTo(datatype(Values.IRIType));
 
-		assertThat(optimize(or(datatype(Values.IRIType), datatype(Values.ResourceType)))).as("disjunction / superclass").isEqualTo(datatype(Values.ResourceType));
-		assertThat(optimize(or(datatype(Values.LiteralType), datatype(RDF.NIL)))).as("disjunction / literal").isEqualTo(datatype(Values.LiteralType));
-		assertThat(optimize(or(datatype(Values.ResourceType), datatype(RDF.NIL)))).as("disjunction / unrelated").isEqualTo(or(datatype(Values.ResourceType), datatype(RDF.NIL)));
+		assertThat(optimize(and(datatype(Values.LiteralType), datatype(XMLSchema.STRING))))
+				.as("conjunction / literal")
+				.isEqualTo(datatype(XMLSchema.STRING));
+
+		assertThat(optimize(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING))))
+				.as("conjunction / unrelated")
+				.isEqualTo(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING)));
+
+		assertThat(optimize(or(datatype(Values.IRIType), datatype(Values.ResourceType))))
+				.as("disjunction / superclass")
+				.isEqualTo(datatype(Values.ResourceType));
+
+		assertThat(optimize(or(datatype(Values.LiteralType), datatype(RDF.NIL))))
+				.as("disjunction / literal")
+				.isEqualTo(datatype(Values.LiteralType));
+
+		assertThat(optimize(or(datatype(Values.ResourceType), datatype(RDF.NIL))))
+				.as("disjunction / unrelated")
+				.isEqualTo(or(datatype(Values.ResourceType), datatype(RDF.NIL)));
 
 	}
 
 
 	@Test void testOptimizeTFields() {
 
-		assertThat(optimize(field(RDF.VALUE, and(x)))).as("optimize nested shape").isEqualTo(field(RDF.VALUE, x));
-		assertThat(optimize(field(RDF.VALUE, or()))).as("remove dead fields").isEqualTo(and());
+		assertThat(optimize(field(RDF.VALUE, and(x))))
+				.as("optimize nested shape")
+				.isEqualTo(field(RDF.VALUE, x));
 
-		assertThat(optimize(and(alias("alias"), field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3))))).as("merge conjunctive fields").isEqualTo(and(alias("alias"), field(RDF.VALUE, and(minCount(1), maxCount(3)))));
+		assertThat(optimize(field(RDF.VALUE, or())))
+				.as("remove dead fields")
+				.isEqualTo(and());
 
-		assertThat(optimize(or(alias("alias"), field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3))))).as("merge disjunctive fields").isEqualTo(or(alias("alias"), field(RDF.VALUE, or(minCount(1), maxCount(3)))));
+
+		assertThat(optimize(and(alias("alias"), field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3)))))
+				.as("merge conjunctive fields")
+				.isEqualTo(and(alias("alias"), field(RDF.VALUE, and(minCount(1), maxCount(3)))));
+
+		assertThat(optimize(or(alias("alias"), field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3)))))
+				.as("merge disjunctive fields")
+				.isEqualTo(or(alias("alias"), field(RDF.VALUE, or(minCount(1), maxCount(3)))));
 
 	}
 

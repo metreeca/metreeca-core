@@ -28,9 +28,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.iri;
 
@@ -62,21 +62,25 @@ public final class Optimizer extends Traverser<Shape> {
 
 	@Override public Shape probe(final And and) {
 
-		final Collection<Shape> shapes=new Merger() {
+		final class AndMerger extends Merger {
+
+			@Override protected IRI datatype(final IRI x, final IRI y) { return derives(x, y) ? y : derives(y, x) ? x : null; }
 
 			@Override protected int minCount(final int x, final int y) { return max(x, y); }
 
 			@Override protected int maxCount(final int x, final int y) { return min(x, y); }
 
-			@Override protected IRI type(final IRI x, final IRI y) { return derives(x, y) ? y : derives(y, x) ? x : null; }
+		}
 
-		}.merge(flatten(and.getShapes(), And::and, new Inspector<Stream<Shape>>() {
+		final class AndInspector extends Inspector<Stream<Shape>> {
 
 			@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
 			@Override public Stream<Shape> probe(final And and) { return and.getShapes().stream(); }
 
-		}));
+		}
+
+		final Collection<Shape> shapes=new AndMerger().merge(flatten(and.getShapes(), And::and, new AndInspector()));
 
 		return shapes.contains(or()) ? or() // always fail
 				: shapes.size() == 1 ? shapes.iterator().next()
@@ -85,15 +89,17 @@ public final class Optimizer extends Traverser<Shape> {
 
 	@Override public Shape probe(final Or or) {
 
-		final Collection<Shape> shapes=new Merger() {
+		final class OrMerger extends Merger {
+
+			@Override protected IRI datatype(final IRI x, final IRI y) { return derives(x, y) ? x : derives(y, x) ? y : null; }
 
 			@Override protected int minCount(final int x, final int y) { return min(x, y); }
 
 			@Override protected int maxCount(final int x, final int y) { return max(x, y); }
 
-			@Override protected IRI type(final IRI x, final IRI y) { return derives(x, y) ? x : derives(y, x) ? y : null; }
+		}
 
-		}.merge(flatten(or.getShapes(), Or::or, new Inspector<Stream<Shape>>() {
+		final class OrInspector extends Inspector<Stream<Shape>> {
 
 			@Override public Stream<Shape> probe(final Shape shape) {
 				return Stream.of(shape);
@@ -103,7 +109,9 @@ public final class Optimizer extends Traverser<Shape> {
 				return or.getShapes().stream();
 			}
 
-		}));
+		}
+
+		final Collection<Shape> shapes=new OrMerger().merge(flatten(or.getShapes(), Or::or, new OrInspector()));
 
 		return shapes.contains(and()) ? and() // always pass
 				: shapes.size() == 1 ? shapes.iterator().next()
@@ -125,10 +133,10 @@ public final class Optimizer extends Traverser<Shape> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static boolean derives(final IRI x, final IRI y) {
-		return x.equals(Values.ValueType)
-				|| x.equals(Values.ResourceType) && resource(y)
-				|| x.equals(Values.LiteralType) && literal(y);
+	private static boolean derives(final IRI upper, final IRI lower) {
+		return upper.equals(Values.ValueType)
+				|| upper.equals(Values.ResourceType) && resource(lower)
+				|| upper.equals(Values.LiteralType) && literal(lower);
 	}
 
 	private static boolean resource(final IRI type) {
@@ -141,7 +149,8 @@ public final class Optimizer extends Traverser<Shape> {
 
 
 	private Set<Shape> flatten(final Collection<Shape> collection,
-			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter) {
+			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter
+	) {
 
 		final Shape.Probe<Map.Entry<IRI, Shape>> splitter=new Inspector<Map.Entry<IRI, Shape>>() {
 
@@ -183,10 +192,10 @@ public final class Optimizer extends Traverser<Shape> {
 
 	private abstract static class Merger extends Inspector<Merger> {
 
+		private IRI datatype;
+
 		private int minCount=-1;
 		private int maxCount=-1;
-
-		private IRI type;
 
 
 		private final Collection<Shape> shapes=new ArrayList<>();
@@ -201,39 +210,21 @@ public final class Optimizer extends Traverser<Shape> {
 		}
 
 
-		@Override public Merger probe(final MinCount minCount) {
-
-			final int limit=minCount.getLimit();
-
-			this.minCount=this.minCount < 0 ? limit : minCount(this.minCount, limit);
-
-			return this;
-		}
-
-		@Override public Merger probe(final MaxCount maxCount) {
-
-			final int limit=maxCount.getLimit();
-
-			this.maxCount=this.maxCount < 0 ? limit : maxCount(this.maxCount, limit);
-
-			return this;
-		}
-
 		@Override public Merger probe(final Datatype datatype) { // !!! refactor
 
 			final IRI iri=datatype.getIRI();
 
-			if ( this.type == null ) {
+			if ( this.datatype == null ) {
 
-				this.type=iri;
+				this.datatype=iri;
 
 			} else {
 
-				final IRI merged=type(this.type, iri);
+				final IRI merged=datatype(this.datatype, iri);
 
 				if ( merged != null ) {
 
-					this.type=merged;
+					this.datatype=merged;
 
 				} else {
 					shapes.add(datatype);
@@ -244,23 +235,41 @@ public final class Optimizer extends Traverser<Shape> {
 
 		}
 
+		@Override public Merger probe(final MinCount minCount) {
 
+			final int limit=minCount.getLimit();
+
+			this.minCount=(this.minCount < 0) ? limit : minCount(this.minCount, limit);
+
+			return this;
+		}
+
+		@Override public Merger probe(final MaxCount maxCount) {
+
+			final int limit=maxCount.getLimit();
+
+			this.maxCount=(this.maxCount < 0) ? limit : maxCount(this.maxCount, limit);
+
+			return this;
+		}
+
+
+
+		protected abstract IRI datatype(final IRI x, final IRI y);
 
 		protected abstract int minCount(final int x, final int y);
 
 		protected abstract int maxCount(final int x, final int y);
-
-		protected abstract IRI type(final IRI x, final IRI y);
 
 
 		protected Collection<Shape> merge(final Iterable<Shape> shapes) {
 
 			shapes.forEach(shape -> shape.map(this));
 
+			if ( datatype != null ) { this.shapes.add(Datatype.datatype(datatype)); }
+
 			if ( minCount >= 0 ) { this.shapes.add(MinCount.minCount(minCount)); }
 			if ( maxCount >= 0 ) { this.shapes.add(MaxCount.maxCount(maxCount)); }
-
-			if ( type != null ) { this.shapes.add(Datatype.datatype(type)); }
 
 			return this.shapes;
 		}
