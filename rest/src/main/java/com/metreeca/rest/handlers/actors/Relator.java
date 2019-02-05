@@ -26,6 +26,7 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
+import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
@@ -174,12 +175,12 @@ public final class Relator extends Actor {
 
 									@Override public Response probe(final Stats stats) {
 										return r.shape(StatsShape)
-												.body(rdf(), rewrite(Form.meta, item, model));
+												.body(rdf(), rewrite(GraphEngine.meta, item, model));
 									}
 
 									@Override public Response probe(final Items items) {
 										return r.shape(ItemsShape)
-												.body(rdf(), rewrite(Form.meta, item, model));
+												.body(rdf(), rewrite(GraphEngine.meta, item, model));
 									}
 
 								}));

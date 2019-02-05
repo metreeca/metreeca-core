@@ -98,7 +98,7 @@ public final class _SPARQLEngine {
 		}
 
 		return browse(query).values().stream()
-				.flatMap(statements -> statements.stream().map(statement -> rewrite(Form.meta, focus, statement)))
+				.flatMap(statements -> statements.stream().map(statement -> rewrite(GraphEngine.meta, focus, statement)))
 				.collect(toList());
 	}
 

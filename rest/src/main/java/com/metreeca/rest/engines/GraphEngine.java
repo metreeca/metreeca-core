@@ -18,6 +18,7 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
@@ -30,9 +31,13 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.things.Values.iri;
 
 
 public final class GraphEngine implements Engine {
+
+	public static final IRI meta=iri(Form.Namespace, "meta"); // !!! remove
+
 
 	private final Engine resource;
 	private final Engine container;

@@ -87,20 +87,6 @@ public final class Form {
 	public static final IRI Group=iri(Namespace, "group"); // !!! define standard representations hints
 
 
-	//// Query Results /////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI meta=iri(Namespace, "meta"); // default subject for introspective query results
-	public static final IRI path=iri(Namespace, "path");
-
-	public static final IRI stats=iri(Namespace, "stats");
-	public static final IRI items=iri(Namespace, "items");
-
-	public static final IRI max=iri(Namespace, "max");
-	public static final IRI min=iri(Namespace, "min");
-	public static final IRI count=iri(Namespace, "count");
-	public static final IRI value=iri(Namespace, "value");
-
-
 	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI role=iri(Namespace, "role");
@@ -136,6 +122,17 @@ public final class Form {
 	 * Wildcard axis value.
 	 */
 	public static final IRI any=iri(Namespace, "any");
+
+
+	//// Query Results Properties //////////////////////////////////////////////////////////////////////////////////////
+
+	public static final IRI stats=iri(Namespace, "stats");
+	public static final IRI items=iri(Namespace, "items");
+
+	public static final IRI max=iri(Namespace, "max");
+	public static final IRI min=iri(Namespace, "min");
+	public static final IRI count=iri(Namespace, "count");
+	public static final IRI value=iri(Namespace, "value");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -17,17 +17,20 @@
 
 package com.metreeca.form.queries;
 
-import com.metreeca.form.*;
-import com.metreeca.form.shapes.Field;
+import com.metreeca.form.Form;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.MaxCount.maxCount;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -35,13 +38,13 @@ import static java.util.Collections.unmodifiableList;
 public final class Stats implements Query {
 
 	public static final Shape StatsShape=and(
-			field(Form.count, maxCount(1)),
+			field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
 			field(Form.min, maxCount(1)),
 			field(Form.max, maxCount(1)),
 			field(Form.stats, and(
-					Field.field(Form.count, maxCount(1)),
-					Field.field(Form.min, maxCount(1)),
-					Field.field(Form.max, maxCount(1))
+					field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
+					field(Form.min, maxCount(1)),
+					field(Form.max, maxCount(1))
 			))
 	);
 

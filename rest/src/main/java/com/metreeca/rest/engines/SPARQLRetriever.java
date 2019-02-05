@@ -236,7 +236,7 @@ final class SPARQLRetriever {
 				final Value min=bindings.getValue("min");
 				final Value max=bindings.getValue("max");
 
-				if ( type != null ) { model.add(Form.meta, Form.stats, type); }
+				if ( type != null ) { model.add(GraphEngine.meta, Form.stats, type); }
 				if ( type != null && count != null ) { model.add(type, Form.count, count); }
 				if ( type != null && min != null ) { model.add(type, Form.min, min); }
 				if ( type != null && max != null ) { model.add(type, Form.max, max); }
@@ -249,7 +249,7 @@ final class SPARQLRetriever {
 
 		});
 
-		model.add(Form.meta, Form.count, literal(BigInteger.valueOf(counts.stream()
+		model.add(GraphEngine.meta, Form.count, literal(BigInteger.valueOf(counts.stream()
 				.filter(Objects::nonNull)
 				.mapToLong(Literal::longValue)
 				.sum())));
@@ -257,14 +257,14 @@ final class SPARQLRetriever {
 		mins.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.LT) ? x : y)
-				.ifPresent(min -> model.add(Form.meta, Form.min, min));
+				.ifPresent(min -> model.add(GraphEngine.meta, Form.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
-				.ifPresent(max -> model.add(Form.meta, Form.max, max));
+				.ifPresent(max -> model.add(GraphEngine.meta, Form.max, max));
 
-		return singletonMap(Form.meta, model);
+		return singletonMap(GraphEngine.meta, model);
 	}
 
 	private Map<Resource, Collection<Statement>> items(final Items items) {
@@ -320,7 +320,7 @@ final class SPARQLRetriever {
 
 				final BNode item=bnode();
 
-				if ( item != null ) { model.add(Form.meta, Form.items, item); }
+				if ( item != null ) { model.add(GraphEngine.meta, Form.items, item); }
 				if ( item != null && value != null ) { model.add(item, Form.value, value); }
 				if ( item != null && count != null ) { model.add(item, Form.count, count); }
 
@@ -333,7 +333,7 @@ final class SPARQLRetriever {
 			}
 		});
 
-		return singletonMap(Form.meta, model);
+		return singletonMap(GraphEngine.meta, model);
 	}
 
 
