@@ -159,13 +159,15 @@ public final class Throttler implements Wrapper {
 					.map(new ResourceTraverser())
 					.map(new Optimizer());
 
-			final Shape metadata=and(fields(container) // convert container LDP properties to resource annotations
+			final Shape metadata=and(fields(container) // convert container LDP properties to metadata annotations
 					.entrySet().stream()
 					.filter(entry -> ContainerMetadata.contains(entry.getKey()))
 					.map(entry -> entry(entry.getKey(), all(entry.getValue()).orElseGet(Sets::set)))
 					.filter(entry -> entry.getValue().size() == 1)
 					.map(entry -> meta(entry.getKey(), entry.getValue().iterator().next()))
 					.collect(toList()));
+
+			// container metadata is added both to container and to resource shape to drive engines
 
 			return merger.apply(and(metadata, container), and(metadata, resource)).map(new Optimizer());
 

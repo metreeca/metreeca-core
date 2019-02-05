@@ -24,10 +24,13 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
@@ -55,8 +58,8 @@ final class SimpleResourceTest {
 		return small();
 	}
 
-	private Engine engine() {
-		return new SimpleResource(tool(Graph.Factory), map());
+	@SafeVarargs private final Engine engine(final Map.Entry<IRI, Value>... metadata) {
+		return new SimpleResource(tool(Graph.Factory), map(metadata));
 	}
 
 

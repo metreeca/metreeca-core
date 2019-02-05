@@ -32,6 +32,7 @@ import java.util.Optional;
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.rest.engines.Descriptions.description;
+import static com.metreeca.rest.engines.Flock.flock;
 
 import static java.util.stream.Collectors.toList;
 
@@ -44,10 +45,12 @@ import static java.util.stream.Collectors.toList;
  final class SimpleResource implements Engine {
 
 	private final Graph graph;
+	private final Flock flock;
 
 
 	SimpleResource(final Graph graph, final Map<IRI, Value> metadata) {
 		this.graph=graph;
+		this.flock=flock(metadata).orElseGet(Flock.None::new);
 	}
 
 
@@ -90,7 +93,7 @@ import static java.util.stream.Collectors.toList;
 
 			return retrieve(connection, resource, false).map(current -> {
 
-				connection.remove(current);
+				flock.remove(connection, resource, current).remove(current);
 
 				return resource;
 

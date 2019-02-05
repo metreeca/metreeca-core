@@ -56,6 +56,26 @@ interface Flock {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	final class None implements Flock {
+
+		@Override public RepositoryConnection insert(final RepositoryConnection connection,
+				final IRI container, final IRI resource, final Collection<Statement> model
+		) {
+
+			return connection;
+
+		}
+
+		@Override public RepositoryConnection remove(final RepositoryConnection connection,
+				final IRI resource, final Collection<Statement> model
+		) {
+
+			return connection;
+
+		}
+
+	}
+
 	final class Basic implements Flock {
 
 		@Override public RepositoryConnection insert(final RepositoryConnection connection,
