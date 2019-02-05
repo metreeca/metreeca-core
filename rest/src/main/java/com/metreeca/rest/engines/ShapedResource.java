@@ -37,10 +37,12 @@ import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.rest.engines.Flock.flock;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -55,6 +57,7 @@ import static java.util.stream.Collectors.toSet;
 final class ShapedResource implements Engine {
 
 	private final Graph graph;
+	private final Flock flock;
 
 	private final Shape relate;
 	private final Shape update;
@@ -64,6 +67,7 @@ final class ShapedResource implements Engine {
 	ShapedResource(final Graph graph, final Shape shape) {
 
 		this.graph=graph;
+		this.flock=flock(metas(shape)).orElseGet(Flock.None::new);
 
 		this.relate=redact(shape, Form.relate);
 		this.update=redact(shape, Form.update);
@@ -115,7 +119,7 @@ final class ShapedResource implements Engine {
 
 			return retrieve(connection, resource, delete).map(current -> { // identify deletable description
 
-				connection.remove(current);
+				flock.remove(connection, resource, current).remove(current);
 
 				return resource;
 

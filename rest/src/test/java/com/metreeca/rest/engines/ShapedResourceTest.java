@@ -24,10 +24,15 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
@@ -41,10 +46,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class ShapedResourceTest {
 
-	private void exec(final Runnable task) {
+	private void exec(final Runnable... tasks) {
 		new Tray()
 				.exec(graph(dataset()))
-				.exec(task)
+				.exec(tasks)
 				.clear();
 	}
 
@@ -61,7 +66,7 @@ final class ShapedResourceTest {
 	@Nested final class Relate {
 
 		@Test void testRelate() {
-			exec(() ->  {
+			exec(() -> {
 
 				final IRI hernandez=item("employees/1370");
 				final IRI bondur=item("employees/1102");
@@ -83,7 +88,7 @@ final class ShapedResourceTest {
 		}
 
 		@Test void testUnknown() {
-			exec(() ->  assertThat(engine().relate(item("employees/9999")))
+			exec(() -> assertThat(engine().relate(item("employees/9999")))
 					.as("empty description")
 					.isNotPresent());
 		}
@@ -93,7 +98,7 @@ final class ShapedResourceTest {
 	@Nested final class Create {
 
 		@Test void testUnsupported() {
-			exec(() ->  assertThatThrownBy(() -> engine().create(
+			exec(() -> assertThatThrownBy(() -> engine().create(
 					item("employees/1370"), item("employees/9999"), set()
 			)).isInstanceOf(UnsupportedOperationException.class));
 		}
@@ -103,7 +108,7 @@ final class ShapedResourceTest {
 	@Nested final class Update {
 
 		@Test void testUpdate() {
-			exec(() ->  {
+			exec(() -> {
 
 				final Model update=decode("</employees/1370>"
 						+":forename 'Tino';"
@@ -133,7 +138,7 @@ final class ShapedResourceTest {
 		}
 
 		@Test void testExceedingData() {
-			exec(() ->  {
+			exec(() -> {
 
 				final Model update=decode("</employees/1370>"
 						+" :forename 'Tino' ;"
@@ -156,7 +161,7 @@ final class ShapedResourceTest {
 		}
 
 		@Test void testUnknown() {
-			exec(() ->  {
+			exec(() -> {
 
 				assertThat(engine().update(item("employees/9999"), set()))
 						.as("not found ")
@@ -174,7 +179,7 @@ final class ShapedResourceTest {
 	@Nested final class Delete {
 
 		@Test void testDelete() {
-			exec(() ->  {
+			exec(() -> {
 
 				assertThat(engine().delete(item("employees/1370")))
 						.as("success reported")
@@ -192,7 +197,7 @@ final class ShapedResourceTest {
 		}
 
 		@Test void testUnknown() {
-			exec(() ->  {
+			exec(() -> {
 
 				assertThat(engine().delete(item("employees/9999")))
 						.as("failure reported")
@@ -203,6 +208,58 @@ final class ShapedResourceTest {
 						.isIsomorphicTo(dataset());
 
 			});
+		}
+
+		@Test void testDeleteFromBasicContainer() {
+			new Tray()
+
+					.exec(graph(decode("<> ldp:contains <resource>. <resource> rdf:value rdf:nil.")))
+
+					.exec(() -> {
+
+						final Engine engine=new ShapedResource(tool(Graph.Factory), and(
+								meta(RDF.TYPE, LDP.BASIC_CONTAINER),
+								field(RDF.VALUE)
+						));
+
+						assertThat(engine.delete(item("resource")))
+								.as("success reported")
+								.isPresent();
+
+						assertThat(graph())
+								.as("membership triples removed")
+								.isEmpty();
+
+					})
+
+					.clear();
+		}
+
+		@Test void testDeleteFromDirectContainer() {
+			new Tray()
+
+					.exec(graph(decode("<resource> a rdfs:Resource; rdf:value rdf:nil.")))
+
+					.exec(() -> {
+
+						final Engine engine=new ShapedResource(tool(Graph.Factory), and(
+								meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
+								meta(LDP.MEMBERSHIP_RESOURCE, RDFS.RESOURCE),
+								meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
+								field(RDF.VALUE)
+						));
+
+						assertThat(engine.delete(item("resource")))
+								.as("success reported")
+								.isPresent();
+
+						assertThat(graph())
+								.as("membership triples removed")
+								.isEmpty();
+
+					})
+
+					.clear();
 		}
 
 	}
