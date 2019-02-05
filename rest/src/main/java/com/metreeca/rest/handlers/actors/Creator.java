@@ -28,7 +28,6 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
-import com.metreeca.rest.wrappers.Splitter;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -158,8 +157,7 @@ public final class Creator extends Delegator {
 			this.slug=slug;
 
 			delegate(handler(Request::container, container(), resource())
-					.with(new Splitter(Splitter.resource()))
-					.with(new Throttler(Form.create, Form.detail))
+					.with(new Throttler(Form.create, Form.detail, Throttler.resource()))
 			);
 
 		}

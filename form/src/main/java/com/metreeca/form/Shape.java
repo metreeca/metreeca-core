@@ -21,6 +21,8 @@ import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.Value;
 
+import java.util.function.Function;
+
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Guard.guard;
@@ -135,6 +137,15 @@ public interface Shape {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public <V> V map(final Probe<V> probe);
+
+	public default <V> V  map(final Function<Shape, V> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return mapper.apply(this);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

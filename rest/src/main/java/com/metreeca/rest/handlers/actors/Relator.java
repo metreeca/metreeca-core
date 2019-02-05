@@ -29,8 +29,6 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
-import com.metreeca.rest.wrappers.Splitter;
-import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -43,9 +41,7 @@ import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.things.Values.rewrite;
-import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.wrappers.Splitter.resource;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -112,10 +108,10 @@ public final class Relator extends Delegator {
 
 				relator()
 
-						.with(wrapper(Request::container,
-								new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
-								new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
-						))
+						//.with(wrapper(Request::container,
+						//		new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
+						//		new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
+						//))
 
 						.with(handler -> request -> handler.handle(request).map(response ->
 								response.header("+Vary", "Accept")

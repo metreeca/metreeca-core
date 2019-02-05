@@ -20,7 +20,6 @@ package com.metreeca.form.shapes;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Traverser;
-import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -30,6 +29,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Values.format;
 import static com.metreeca.form.things.Values.literal;
 
 import static java.util.Collections.emptyMap;
@@ -141,7 +141,7 @@ public final class Meta implements Shape {
 	}
 
 	@Override public String toString() {
-		return Values.format(iri)+"="+Values.format(value);
+		return "meta("+format(iri)+"="+format(value)+")";
 	}
 
 

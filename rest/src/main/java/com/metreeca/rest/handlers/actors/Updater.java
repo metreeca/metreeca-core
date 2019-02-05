@@ -22,7 +22,6 @@ import com.metreeca.form.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
-import com.metreeca.rest.wrappers.Splitter;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -35,7 +34,6 @@ import java.util.Collection;
 import javax.json.JsonValue;
 
 import static com.metreeca.rest.Handler.handler;
-import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
@@ -96,7 +94,7 @@ public final class Updater extends Delegator {
 
 	public Updater() {
 		delegate(handler(Request::container, this::container, this::resource)
-				.with(wrapper(Request::container, new Splitter(Splitter.container()), new Splitter(Splitter.resource())))
+				//.with(wrapper(Request::container, new Splitter(Splitter.container()), new Splitter(Splitter.resource())))
 				.with(new Throttler(Form.update, Form.detail))
 		);
 	}

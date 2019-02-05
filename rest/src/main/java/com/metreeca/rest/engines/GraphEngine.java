@@ -33,7 +33,8 @@ import static com.metreeca.form.Shape.pass;
 
 public final class GraphEngine implements Engine {
 
-	private final Engine delegate;
+	private final Engine resource;
+	private final Engine container;
 
 
 	public GraphEngine(final Graph graph, final Shape shape) {
@@ -46,9 +47,10 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null shape");
 		}
 
-		// !!! container vs resource
+		final boolean simple=pass(shape);
 
-		delegate=pass(shape) ? new SimpleResource(graph) : new ShapedResource(graph, shape);
+		this.resource=simple ? new SimpleResource(graph) : new ShapedResource(graph, shape);
+		this.container=simple ? new SimpleContainer(graph) : new ShapedContainer(graph, shape);
 	}
 
 
@@ -60,7 +62,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null resource");
 		}
 
-		return delegate.relate(resource);
+		return delegate(resource).relate(resource);
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
@@ -77,7 +79,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null model");
 		}
 
-		return delegate.create(resource, slug, model);
+		return delegate(resource).create(resource, slug, model);
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
@@ -90,7 +92,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null model");
 		}
 
-		return delegate.update(resource, model);
+		return delegate(resource).update(resource, model);
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {
@@ -99,7 +101,14 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null resource");
 		}
 
-		return delegate.delete(resource);
+		return delegate(resource).delete(resource);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Engine delegate(final IRI iri) {
+		return iri.getLocalName().endsWith("/")? container : resource;
 	}
 
 }

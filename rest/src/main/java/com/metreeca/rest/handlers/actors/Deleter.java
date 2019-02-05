@@ -23,14 +23,14 @@ import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.handlers.Delegator;
-import com.metreeca.rest.wrappers.Splitter;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.wrappers.Splitter.resource;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -68,10 +68,12 @@ public final class Deleter extends Delegator {
 
 	private final Graph graph=tool(Graph.Factory);
 
+	private final Map<Shape, Engine> engines=new IdentityHashMap<>();
+
 
 	public Deleter() {
 		delegate(deleter()
-				.with(splitter())
+				// !!! .with(splitter())
 				.with(throttler())
 		);
 	}
@@ -79,9 +81,9 @@ public final class Deleter extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Wrapper splitter() {
-		return wrapper(Request::container, wrapper(), new Splitter(resource()));
-	}
+	//private Wrapper splitter() {
+	//	return wrapper(Request::container, wrapper(), new Splitter(resource()));
+	//}
 
 	private Throttler throttler() {
 		return new Throttler(Form.delete, Form.detail);
@@ -102,7 +104,7 @@ public final class Deleter extends Delegator {
 
 			try {
 
-				return new GraphEngine(graph, shape).delete(item).isPresent() // !!! cache engine
+				return engine(shape).delete(item).isPresent()
 						? response.status(Response.NoContent)
 						: response.status(Response.NotFound);
 
@@ -116,6 +118,13 @@ public final class Deleter extends Delegator {
 			}
 
 		}));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Engine engine(final Shape shape) {
+		return engines.computeIfAbsent(shape, _shape -> new GraphEngine(graph, _shape));
 	}
 
 }

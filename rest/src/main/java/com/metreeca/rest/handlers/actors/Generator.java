@@ -24,8 +24,6 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
-import com.metreeca.rest.wrappers.Splitter;
-import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Statement;
@@ -39,9 +37,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.metreeca.form.things.Values.time;
-import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.wrappers.Splitter.resource;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Collections.emptySet;
@@ -174,10 +170,10 @@ public final class Generator extends Delegator {
 
 		delegate(generator()
 
-				.with(wrapper(Request::container,
-						new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
-						new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
-				))
+				//.with(wrapper(Request::container,
+				//		new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
+				//		new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
+				//))
 
 				.with(handler -> request -> handler.handle(request).map(response ->
 						response.header("+Vary", "Accept")

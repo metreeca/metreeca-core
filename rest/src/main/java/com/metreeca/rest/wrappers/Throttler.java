@@ -21,19 +21,31 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.*;
+import com.metreeca.form.shapes.*;
+import com.metreeca.form.things.Sets;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.shapes.All.all;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.shapes.Meta.meta;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
@@ -59,8 +71,8 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>redacts the request shape according to the provided {@linkplain #Throttler(Value, Value) task/view
- * parameters} and the request user roles ({@code mode} redaction is left to final shape consumers);</li>
+ * <li>redacts the request shape according to the provided {@linkplain #Throttler(Value, Value, UnaryOperator)
+ * task/view/area parameters} and the request user roles; {@code mode} redaction is left to final shape consumers;</li>
  *
  * <li>enforces shape-based access control according to the redacted request shape;</li>
  *
@@ -96,8 +108,78 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Throttler implements Wrapper {
 
+	private static final Set<IRI> ContainerMetadata=set(
+			RDF.TYPE,
+			LDP.MEMBERSHIP_RESOURCE,
+			LDP.HAS_MEMBER_RELATION,
+			LDP.IS_MEMBER_OF_RELATION,
+			LDP.INSERTED_CONTENT_RELATION
+	);
+
+
+	public static UnaryOperator<Shape> entity() {
+		return merge((container, resource)
+				-> empty(resource) ? container
+				: empty(container) ? resource
+				: and(container, field(LDP.CONTAINS, resource))
+		);
+	}
+
+	/**
+	 * Creates a container splitter operator.
+	 *
+	 * @return a splitting operator returning a shape pruned of {@linkplain LDP#CONTAINS ldp:contains} fields, if one is
+	 * actually included, or an empty shape, otherwise
+	 */
+	public static UnaryOperator<Shape> container() {
+		return merge((container, resource) -> empty(resource) ? pass() : container);
+	}
+
+	/**
+	 * Creates a resource splitter operator.
+	 *
+	 * @return a splitting operator returning a shape limited to the shapes associated to {@linkplain LDP#CONTAINS
+	 * ldp:contains} fields, if one is actually included, or the source shape, otherwise
+	 */
+	public static UnaryOperator<Shape> resource() {
+		return merge((container, resource) -> empty(resource) ? container : resource);
+	}
+
+	private static UnaryOperator<Shape> merge(final BinaryOperator<Shape> merger) {
+		return shape -> {
+
+			final Shape container=shape
+					.map(new ContainerTraverser())
+					.map(new Optimizer());
+
+			final Shape resource=shape
+					.map(new ResourceTraverser())
+					.map(new Optimizer());
+
+			final Shape metadata=and(fields(container) // convert container LDP properties to resource annotations
+					.entrySet().stream()
+					.filter(entry -> ContainerMetadata.contains(entry.getKey()))
+					.map(entry -> entry(entry.getKey(), all(entry.getValue()).orElseGet(Sets::set)))
+					.filter(entry -> entry.getValue().size() == 1)
+					.map(entry -> meta(entry.getKey(), entry.getValue().iterator().next()))
+					.collect(toList()));
+
+			return merger.apply(
+					empty(container) || empty(metadata) ? container : and(metadata, container),
+					empty(resource) || empty(metadata) ? resource : and(metadata, resource)
+			).map(new Optimizer());
+
+		};
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	private final Value task;
 	private final Value view;
+
+	private final UnaryOperator<Shape> area;
 
 	private final Map<Shape, Map<Map<IRI, Set<? extends Value>>, Shape>> cache=new IdentityHashMap<>();
 
@@ -111,6 +193,19 @@ public final class Throttler implements Wrapper {
 	 * @throws NullPointerException if either {@code task} or {@code view} is null
 	 */
 	public Throttler(final Value task, final Value view) {
+		this(task, view, entity());
+	}
+
+	/**
+	 * Creates a throttler
+	 *
+	 * @param task a IRI identifying the {@linkplain Form#task task} to be performed by the wrapped handler
+	 * @param view a IRI identifying the {@linkplain Form#view view} level for the wrapped handler
+	 * @param area an operator extracting a specific area of interest from the shape associated with incoming requests
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public Throttler(final Value task, final Value view, final UnaryOperator<Shape> area) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -120,8 +215,13 @@ public final class Throttler implements Wrapper {
 			throw new NullPointerException("null view");
 		}
 
+		if ( area == null ) {
+			throw new NullPointerException("null area");
+		}
+
 		this.task=task;
 		this.view=view;
+		this.area=area;
 	}
 
 
@@ -204,6 +304,7 @@ public final class Throttler implements Wrapper {
 		return cache
 				.computeIfAbsent(shape, _shape -> new HashMap<>())
 				.computeIfAbsent(variables(clean, mode, roles), variables -> shape
+						.map(area)
 						.map(new Redactor(variables))
 						.map(clean ? new Cleaner() : new Inspector<Shape>() {
 							@Override public Shape probe(final Shape shape) { return shape; }
@@ -214,12 +315,12 @@ public final class Throttler implements Wrapper {
 
 	private Map<IRI, Set<? extends Value>> variables(final boolean clean, final IRI mode, final Set<Value> roles) {
 		return mode == null ? map(
-				entry(RDF.VALUE, set(literal(clean))),
+				entry(RDF.NIL, set(literal(clean))),
 				entry(Form.task, set(task)),
 				entry(Form.view, set(view)),
 				entry(Form.role, roles)
 		) : map(
-				entry(RDF.VALUE, set(literal(clean))),
+				entry(RDF.NIL, set(literal(clean))),
 				entry(Form.task, set(task)),
 				entry(Form.view, set(view)),
 				entry(Form.mode, set(mode)),
@@ -339,8 +440,71 @@ public final class Throttler implements Wrapper {
 			throw new NullPointerException("null model");
 		}
 
-		return empty(shape)? new LinkedHashModel()
+		return empty(shape) ? new LinkedHashModel()
 				: shape.map(new Extractor(model, singleton(focus))).collect(toCollection(LinkedHashModel::new));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class ContainerTraverser extends Traverser<Shape> {
+
+		@Override public Shape probe(final Shape shape) {
+			return shape;
+		}
+
+
+		@Override public Shape probe(final Field field) {
+			return field.getIRI().equals(LDP.CONTAINS) ? and() : field;
+		}
+
+
+		@Override public Shape probe(final And and) {
+			return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
+		}
+
+		@Override public Shape probe(final Or or) {
+			return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
+		}
+
+		@Override public Shape probe(final When when) {
+			return when(
+					when.getTest(),
+					when.getPass().map(this),
+					when.getFail().map(this)
+			);
+		}
+
+	}
+
+	private static class ResourceTraverser extends Traverser<Shape> {
+
+		@Override public Shape probe(final Shape shape) {
+			return and();
+		}
+
+
+		@Override public Shape probe(final Field field) {
+			return field.getIRI().equals(LDP.CONTAINS) ? field.getShape() : and();
+		}
+
+
+		@Override public Shape probe(final And and) {
+			return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
+		}
+
+		@Override public Shape probe(final Or or) {
+			return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
+		}
+
+		@Override public Shape probe(final When when) {
+			return when(
+					when.getTest(),
+					when.getPass().map(this),
+					when.getFail().map(this)
+			);
+		}
+
 	}
 
 }
