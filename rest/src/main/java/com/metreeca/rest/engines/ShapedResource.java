@@ -108,8 +108,10 @@ final class ShapedResource implements Engine {
 		});
 	}
 
-	@Override public Optional<IRI> delete(final IRI resource) {// !!! merge retrieve/remove operations into a single SPARQL update txn
+	@Override public Optional<IRI> delete(final IRI resource) {
 		return graph.update(connection -> {
+
+			// !!! merge retrieve/remove operations into a single SPARQL update txn
 
 			return retrieve(connection, resource, delete).map(current -> { // identify deletable description
 

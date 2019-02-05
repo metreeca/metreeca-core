@@ -23,8 +23,6 @@ import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Collection;
 import java.util.Map;
@@ -33,6 +31,7 @@ import java.util.Optional;
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.rest.engines.Descriptions.description;
+import static com.metreeca.rest.engines.Flock.flock;
 
 import static java.util.stream.Collectors.toList;
 
@@ -45,48 +44,12 @@ import static java.util.stream.Collectors.toList;
 final class SimpleContainer implements Engine {
 
 	private final Graph graph;
-
-	private final IRI relation;
-	private final boolean inverse;
-
-	private final IRI subject;
-	private final Value object;
+	private final Flock flock;
 
 
 	SimpleContainer(final Graph graph, final Map<IRI, Value> metadata) {
-
 		this.graph=graph;
-
-		final Value type=metadata.get(RDF.TYPE);
-		final Value target=metadata.get(LDP.MEMBERSHIP_RESOURCE);
-
-		final Value direct=metadata.get(LDP.HAS_MEMBER_RELATION);
-		final Value inverse=metadata.get(LDP.IS_MEMBER_OF_RELATION);
-
-		if ( direct instanceof IRI ) {
-
-			this.relation=(IRI)direct;
-			this.inverse=false;
-
-			this.subject=(target instanceof IRI) ? (IRI)target : LDP.CONTAINER;
-			this.object=null;
-
-		} else if ( inverse instanceof IRI ) {
-
-			this.relation=(IRI)inverse;
-			this.inverse=true;
-			this.subject=null;
-			this.object=(target != null) ? target : LDP.CONTAINER;
-
-		} else {
-
-			this.inverse=false;
-			this.relation=LDP.CONTAINS;
-			this.subject=LDP.CONTAINER;
-			this.object=null;
-
-		}
-
+		this.flock=flock(metadata).orElseGet(Flock.Basic::new);
 	}
 
 
@@ -100,14 +63,7 @@ final class SimpleContainer implements Engine {
 			final Focus focus=validate(related, model);
 
 			if ( !focus.assess(Issue.Level.Error) ) {
-
-				if ( inverse ) {
-					connection.add(related, relation, object.equals(LDP.CONTAINER)? resource : object);
-				} else {
-					connection.add(subject.equals(LDP.CONTAINER)? resource : subject, relation, related);
-				}
-
-				connection.add(model);
+				flock.insert(connection, resource, related, model).add(model);
 			}
 
 			return Optional.of(focus);
