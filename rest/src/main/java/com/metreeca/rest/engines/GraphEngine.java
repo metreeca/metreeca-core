@@ -20,8 +20,6 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Cleaner;
-import com.metreeca.form.probes.Optimizer;
 import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
@@ -32,9 +30,11 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.Collection;
 import java.util.Optional;
 
-import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.Shape.constant;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.things.Values.iri;
+
+import static java.lang.Boolean.TRUE;
 
 
 public final class GraphEngine implements Engine {
@@ -56,7 +56,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null shape");
 		}
 
-		final boolean simple=pass(shape.map(new Cleaner()).map(new Optimizer())); // ignore metadata
+		final boolean simple=TRUE.equals(constant(shape)); // ignore metadata
 
 		this.resource=simple ? new SimpleResource(graph, metas(shape)) : new ShapedResource(graph, shape);
 		this.container=simple ? new SimpleContainer(graph, metas(shape)) : new ShapedContainer(graph, shape);

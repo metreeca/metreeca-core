@@ -35,7 +35,7 @@ import java.util.*;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.Shape.constant;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
@@ -89,7 +89,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 							.service(RDFParserRegistry.getInstance(), TURTLE, type)
 							.getParser();
 
-					parser.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+					parser.set(JSONCodec.Shape, constant(shape) == null ? shape : null); // !!! handle empty shape directly in JSONParser
 					parser.set(JSONCodec.Focus, focus);
 
 					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
@@ -190,7 +190,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 						final RDFWriter writer=factory.getWriter(output);
 
-						writer.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+						writer.set(JSONCodec.Shape, constant(shape) == null ? shape : null); // !!! handle empty shape directly in JSONParser
 						writer.set(JSONCodec.Focus, message.item());
 
 						Rio.write(rdf, writer);

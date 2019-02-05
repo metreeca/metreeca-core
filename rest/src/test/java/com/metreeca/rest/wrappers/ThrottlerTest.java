@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.Shape.relate;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;

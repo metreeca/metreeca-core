@@ -17,6 +17,7 @@
 
 package com.metreeca.form;
 
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.Value;
@@ -29,7 +30,9 @@ import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
-import static com.metreeca.form.shapes.Or.or;
+
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 
 /**
@@ -37,45 +40,73 @@ import static com.metreeca.form.shapes.Or.or;
  */
 public interface Shape {
 
-	public static final Shape Pass=and();
-	public static final Shape Fail=or();
-
-
-	public static Shape pass() {
-		return Pass;
-	}
-
-	public static boolean pass(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return Pass.equals(shape);
-	}
-
-
-	public static Shape fail() {
-		return Fail;
-	}
-
-	public static boolean fail(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return Fail.equals(shape);
-	}
-
-
 	public static boolean empty(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		return pass(shape) || fail(shape);
+		return And.pass().equals(shape);
+	}
+
+	/**
+	 * Tests if a shape is a constant.
+	 *
+	 * @param shape the shape to be tested
+	 *
+	 * @return {@code true}, if {@code shape} is an {@linkplain And#pass() empty conjunction}; {@code false}, if {@code
+	 * shape} is an {@linkplain Or#fail() empty disjunction}; {@code null}, otherwise; {@linkplain Meta metadata}
+	 * annotation are ignored in the evaluation process
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public static Boolean constant(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		final class Evaluator extends Traverser<Boolean> {
+
+			@Override public Boolean probe(final Meta meta) {
+				return true;
+			}
+
+
+			@Override public Boolean probe(final Field field) {
+				return null;
+			}
+
+			@Override public Boolean probe(final And and) {
+				return and.getShapes().stream()
+						.filter(shape -> !(shape instanceof Meta))
+						.map(shape -> shape.map(this))
+						.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
+			}
+
+			@Override public Boolean probe(final Or or) {
+				return or.getShapes().stream()
+						.filter(shape -> !(shape instanceof Meta))
+						.map(shape -> shape.map(this))
+						.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
+			}
+
+			@Override public Boolean probe(final When when) {
+
+				final Boolean test=when.getTest().map(this);
+				final Boolean pass=when.getPass().map(this);
+				final Boolean fail=when.getFail().map(this);
+
+				return TRUE.equals(test) ? pass
+						: FALSE.equals(test) ? fail
+						: TRUE.equals(pass) && TRUE.equals(fail) ? TRUE
+						: FALSE.equals(pass) && FALSE.equals(fail) ? FALSE
+						: null;
+			}
+
+		}
+
+		return shape.map(new Evaluator());
 	}
 
 
@@ -138,7 +169,7 @@ public interface Shape {
 
 	public <V> V map(final Probe<V> probe);
 
-	public default <V> V  map(final Function<Shape, V> mapper) {
+	public default <V> V map(final Function<Shape, V> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");

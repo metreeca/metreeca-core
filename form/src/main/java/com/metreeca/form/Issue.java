@@ -22,7 +22,7 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.Collection;
 import java.util.Locale;
 
-import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.things.Sets.set;
 
 
@@ -129,7 +129,7 @@ public final class Issue {
 	}
 
 	@Override public String toString() {
-		return level.toString().toLowerCase(Locale.ROOT)+" : "+message+(pass(shape)? "" : " : "+shape);
+		return level.toString().toLowerCase(Locale.ROOT)+" : "+message+(shape.equals(pass()) ? "" : " : "+shape);
 	}
 
 }

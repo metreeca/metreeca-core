@@ -34,10 +34,10 @@ import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 
-import static com.metreeca.form.Shape.empty;
-import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.Shape.constant;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
@@ -52,6 +52,7 @@ import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
@@ -120,8 +121,8 @@ public final class Throttler implements Wrapper {
 	 */
 	public static UnaryOperator<Shape> entity() {
 		return merge((container, resource)
-				-> empty(resource) ? container
-				: empty(container) ? resource
+				-> TRUE.equals(constant(resource)) ? container
+				: TRUE.equals(constant(container)) ? resource
 				: and(container, field(LDP.CONTAINS, resource))
 		);
 	}
@@ -133,7 +134,7 @@ public final class Throttler implements Wrapper {
 	 * actually included, or an empty shape, otherwise
 	 */
 	public static UnaryOperator<Shape> container() {
-		return merge((container, resource) -> empty(resource) ? pass() : container);
+		return merge((container, resource) -> TRUE.equals(constant(resource)) ? pass() : container);
 	}
 
 	/**
@@ -143,7 +144,7 @@ public final class Throttler implements Wrapper {
 	 * ldp:contains} fields, if one is actually included, or the source shape, otherwise
 	 */
 	public static UnaryOperator<Shape> resource() {
-		return merge((container, resource) -> empty(resource) ? container : resource);
+		return merge((container, resource) -> TRUE.equals(constant(resource)) ? container : resource);
 	}
 
 
@@ -166,10 +167,7 @@ public final class Throttler implements Wrapper {
 					.map(entry -> meta(entry.getKey(), entry.getValue().iterator().next()))
 					.collect(toList()));
 
-			return merger.apply(
-					empty(container) || empty(metadata) ? container : and(metadata, container),
-					empty(resource) || empty(metadata) ? resource : and(metadata, resource)
-			).map(new Optimizer());
+			return merger.apply(and(metadata, container), and(metadata, resource)).map(new Optimizer());
 
 		};
 	}
@@ -243,7 +241,7 @@ public final class Throttler implements Wrapper {
 			final Shape shape=request.shape();
 			final Set<Value> roles=request.roles();
 
-			if ( pass(shape) ) {
+			if ( TRUE.equals(constant(shape)) ) {
 
 				return handler.handle(request);
 
@@ -255,20 +253,11 @@ public final class Throttler implements Wrapper {
 				final Shape authorized=shape(shape, true, Form.verify, roles);
 				final Shape redacted=shape(shape, false, null, roles);
 
-				if ( empty(general) ) {
-
-					return forbidden(request);
-
-				} else if ( empty(authorized) ) {
-
-					return refused(request);
-
-				} else {
-
-					return handler.handle(request.shape(redacted)
-							.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
-					);
-				}
+				return constant(general) != null ? forbidden(request)
+						: constant(authorized) != null ? refused(request)
+						: handler.handle(request.shape(redacted)
+						.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
+				);
 
 			}
 
@@ -281,7 +270,7 @@ public final class Throttler implements Wrapper {
 			final IRI focus=request.item();
 			final Shape shape=response.shape();
 
-			if ( pass(shape) ) {
+			if ( TRUE.equals(constant(shape)) ) {
 
 				return response
 						.pipe(rdf(), rdf -> Value(network(focus, rdf)));
@@ -333,12 +322,10 @@ public final class Throttler implements Wrapper {
 
 	private <V extends Collection<Statement>> V expand(final IRI focus, final Shape shape, final V model) {
 
-		if ( !empty(shape) ) {
-			model.addAll(shape // add implied statements
-					.map(new Outliner(focus)) // shape already redacted for verify mode
-					.collect(toList())
-			);
-		}
+		model.addAll(shape // add implied statements
+				.map(new Outliner(focus)) // shape already redacted for verify mode
+				.collect(toList())
+		);
 
 		return model;
 	}
@@ -422,8 +409,7 @@ public final class Throttler implements Wrapper {
 			throw new NullPointerException("null model");
 		}
 
-		return empty(shape) ? new LinkedHashModel()
-				: shape.map(new Extractor(model, singleton(focus))).collect(toCollection(LinkedHashModel::new));
+		return shape.map(new Extractor(model, singleton(focus))).collect(toCollection(LinkedHashModel::new));
 	}
 
 

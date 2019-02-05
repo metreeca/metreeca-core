@@ -39,7 +39,6 @@ import org.eclipse.rdf4j.model.Statement;
 import java.util.Collection;
 import java.util.Collections;
 
-import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.things.Values.rewrite;
@@ -130,8 +129,6 @@ public final class Relator extends Actor {
 
 			final IRI item=request.item();
 			final Shape shape=request.shape();
-
-			final boolean shaped=!pass(shape);
 
 			if ( request.container() ) {
 

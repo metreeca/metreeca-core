@@ -21,12 +21,11 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.rest.*;
+import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Delegator;
-import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -40,7 +39,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.form.Shape.optional;
-import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.Shape.verify;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
@@ -99,23 +97,23 @@ public final class _Relator extends Delegator {
 
 
 	public _Relator() {
-		delegate(Handler.handler(request -> !!pass(request.shape()), direct(), driven())
-
-						.with(new Throttler(Form.relate, Form.digest))
-
-				//.with(response -> response.headers("+Link",
-				//
-				//		link(LDP.CONTAINER, "type"),
-				//		link(LDP.BASIC_CONTAINER, "type")
-				//
-				//))
-				//
-				//.with(response -> response.success() ?
-				//
-				//		response.headers("Vary", "Accept", "Prefer") : response
-				//
-				//)
-		);
+		//delegate(Handler.handler(request -> !!Shape.empty(request.shape()), direct(), driven())
+		//
+		//				.with(new Throttler(Form.relate, Form.digest))
+		//
+		//		.with(response -> response.headers("+Link",
+		//
+		//				link(LDP.CONTAINER, "type"),
+		//				link(LDP.BASIC_CONTAINER, "type")
+		//
+		//		))
+		//
+		//		.with(response -> response.success() ?
+		//
+		//				response.headers("Vary", "Accept", "Prefer") : response
+		//
+		//		)
+		//);
 	}
 
 

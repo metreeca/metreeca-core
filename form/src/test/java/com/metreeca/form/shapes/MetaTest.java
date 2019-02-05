@@ -23,7 +23,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.*;
 import static com.metreeca.form.shapes.When.when;
