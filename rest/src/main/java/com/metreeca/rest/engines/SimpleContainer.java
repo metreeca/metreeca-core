@@ -18,14 +18,23 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
+import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+
+import static com.metreeca.form.Focus.focus;
+import static com.metreeca.form.Issue.issue;
+import static com.metreeca.rest.engines.Descriptions.description;
+
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -33,25 +42,51 @@ import java.util.Optional;
  *
  * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded container descriptions.</p>
  */
- final class SimpleContainer implements Engine {
+final class SimpleContainer implements Engine {
+
+	private final Graph graph;
+
+	private final IRI relation;
+	private final boolean inverse;
+
+	private final IRI subject;
+	private final Value object;
 
 
-	private Graph graph;
-
-	/**
-	 * Creates a concise bounded description container engine.
-	 *
-	 * @param graph a connection to the repository where container description are stored
-	 *
-	 * @throws NullPointerException if {@code connection} is null
-	 */
-	public SimpleContainer(final Graph graph) {
-
-		if ( graph == null ) {
-			throw new NullPointerException("null connection");
-		}
+	SimpleContainer(final Graph graph, final Map<IRI, Value> metadata) {
 
 		this.graph=graph;
+
+		final Value type=metadata.get(RDF.TYPE);
+		final Value target=metadata.get(LDP.MEMBERSHIP_RESOURCE);
+
+		final Value direct=metadata.get(LDP.HAS_MEMBER_RELATION);
+		final Value inverse=metadata.get(LDP.IS_MEMBER_OF_RELATION);
+
+		if ( direct instanceof IRI ) {
+
+			this.relation=(IRI)direct;
+			this.inverse=false;
+
+			this.subject=(target instanceof IRI) ? (IRI)target : LDP.CONTAINER;
+			this.object=null;
+
+		} else if ( inverse instanceof IRI ) {
+
+			this.relation=(IRI)inverse;
+			this.inverse=true;
+			this.subject=null;
+			this.object=(target != null) ? target : LDP.CONTAINER;
+
+		} else {
+
+			this.inverse=false;
+			this.relation=LDP.CONTAINS;
+			this.subject=LDP.CONTAINER;
+			this.object=null;
+
+		}
+
 	}
 
 
@@ -59,22 +94,47 @@ import java.util.Optional;
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
+		return graph.update(connection -> {
+
+			final Focus focus=validate(related, model);
+
+			if ( !focus.assess(Issue.Level.Error) ) {
+
+				if ( inverse ) {
+					connection.add(related, relation, object.equals(LDP.CONTAINER)? resource : object);
+				} else {
+					connection.add(subject.equals(LDP.CONTAINER)? resource : subject, relation, related);
+				}
+
+				connection.add(model);
+			}
+
+			return Optional.of(focus);
+
+		});
 	}
 
-	/**
-	 * {@inheritDoc} {Unsupported}
-	 */
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("simple container updating not supported");
 	}
 
-	/**
-	 * {@inheritDoc} {Unsupported}
-	 */
 	@Override public Optional<IRI> delete(final IRI resource) {
 		throw new UnsupportedOperationException("simple container deletion not supported");
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Focus validate(final Resource resource, final Collection<Statement> model) {
+
+		final Collection<Statement> envelope=description(resource, false, model);
+
+		return focus(model.stream()
+				.filter(statement -> !envelope.contains(statement))
+				.map(outlier -> issue(Issue.Level.Error, "statement outside description envelope "+outlier))
+				.collect(toList())
+		);
 	}
 
 }

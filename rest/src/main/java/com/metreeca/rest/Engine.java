@@ -32,7 +32,6 @@ import java.util.Optional;
  * <p>Manages CRUD operations on linked data resources.</p>
  *
  * <p><strong>Warning</strong> / Implementations must be thread-safe.</p>
-
  */
 public interface Engine {
 
@@ -46,14 +45,15 @@ public interface Engine {
 	 * @throws NullPointerException          if {@code resource} is null
 	 * @throws UnsupportedOperationException if resource retrieval is not supported by this engine
 	 */
-	public Optional<Collection<Statement>> relate(final IRI resource) throws UnsupportedOperationException;
+	public Optional<Collection<Statement>> relate(final IRI resource);
 
 	/**
 	 * Creates a related resource.
 	 *
 	 * @param resource the IRI identifying the owning resource for the related resource to be created
-	 * @param slug     the IRI to be assigned to the new related resource
-	 * @param model    the description for the new related resource owned by {@code resource}
+	 * @param related  the IRI to be assigned to the new related resource
+	 * @param model    the description for the new related resource owned by {@code resource}; must describe the related
+	 *                 resource using {@code related} as subject
 	 *
 	 * @return an optional validation report for the operation; empty if a description for {@code resource} was not
 	 * found
@@ -61,7 +61,7 @@ public interface Engine {
 	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
 	 * @throws UnsupportedOperationException if resource creation is not supported by this engine
 	 */
-	public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) throws UnsupportedOperationException;
+	public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model);
 
 	/**
 	 * Updates a resource.
@@ -76,7 +76,7 @@ public interface Engine {
 	 *                                       contains null values
 	 * @throws UnsupportedOperationException if resource updating is not supported by this engine
 	 */
-	public Optional<Focus> update(final IRI resource, final Collection<Statement> model) throws UnsupportedOperationException;
+	public Optional<Focus> update(final IRI resource, final Collection<Statement> model);
 
 	/**
 	 * Deletes a resource.
@@ -89,6 +89,6 @@ public interface Engine {
 	 * @throws NullPointerException          if {@code resource} is {@code null}
 	 * @throws UnsupportedOperationException if resource deletion is not supported by this engine
 	 */
-	public Optional<IRI> delete(final IRI resource) throws UnsupportedOperationException;
+	public Optional<IRI> delete(final IRI resource);
 
 }

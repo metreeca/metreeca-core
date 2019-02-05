@@ -61,23 +61,7 @@ final class ShapedResource implements Engine {
 	private final Shape delete;
 
 
-	/**
-	 * Creates a shape-driven resource engine.
-	 *
-	 * @param graph a connection to the repository where resource description are stored
-	 * @param shape the shape defining resource descriptions
-	 *
-	 * @throws NullPointerException if either {@code connection} or {@code shape} is null
-	 */
-	public ShapedResource(final Graph graph, final Shape shape) {
-
-		if ( graph == null ) {
-			throw new NullPointerException("null connection");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
+	ShapedResource(final Graph graph, final Shape shape) {
 
 		this.graph=graph;
 
@@ -91,32 +75,14 @@ final class ShapedResource implements Engine {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null entity");
-		}
-
 		return graph.query(connection -> { return retrieve(connection, resource, relate); });
-
 	}
 
-	/**
-	 * {@inheritDoc} {Unsupported}
-	 */
-	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("shaped related resource creation not supported");
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
 		return graph.update(connection -> {
 
 			return retrieve(connection, resource, update).map(current -> { // identify updatable description
@@ -142,14 +108,7 @@ final class ShapedResource implements Engine {
 		});
 	}
 
-	@Override public Optional<IRI> delete(final IRI resource) {
-
-		// !!! merge retrieve/remove operations into a single SPARQL update txn
-
-		if ( resource == null ) {
-			throw new NullPointerException("null entity");
-		}
-
+	@Override public Optional<IRI> delete(final IRI resource) {// !!! merge retrieve/remove operations into a single SPARQL update txn
 		return graph.update(connection -> {
 
 			return retrieve(connection, resource, delete).map(current -> { // identify deletable description

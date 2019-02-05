@@ -29,6 +29,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
@@ -55,7 +56,7 @@ final class SimpleResourceTest {
 	}
 
 	private Engine engine() {
-		return new SimpleResource(tool(Graph.Factory));
+		return new SimpleResource(tool(Graph.Factory), map());
 	}
 
 

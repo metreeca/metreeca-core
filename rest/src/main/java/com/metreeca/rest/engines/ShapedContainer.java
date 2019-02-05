@@ -35,35 +35,21 @@ import java.util.Optional;
  */
 final class ShapedContainer implements Engine {
 
-	/**
-	 * Creates a shape-driven container engine.
-	 *
-	 * @param graph a connection to the repository where container resource description are stored
-	 * @param shape the shape defining resource descriptions
-	 *
-	 * @throws NullPointerException if either {@code connection} or {@code shape} is null
-	 */
-	public ShapedContainer(final Graph graph, final Shape shape) {}
+	ShapedContainer(final Graph graph, final Shape shape) {}
 
 
 	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
-	/**
-	 * {@inheritDoc} {Unsupported}
-	 */
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("shaped container updating not supported");
 	}
 
-	/**
-	 * {@inheritDoc} {Unsupported}
-	 */
 	@Override public Optional<IRI> delete(final IRI resource) {
 		throw new UnsupportedOperationException("shaped container deletion not supported");
 	}

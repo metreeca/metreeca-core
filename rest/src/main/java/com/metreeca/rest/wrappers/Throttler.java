@@ -18,7 +18,6 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Issue;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.*;
 import com.metreeca.form.shapes.*;
@@ -35,8 +34,6 @@ import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 
-import static com.metreeca.form.Focus.focus;
-import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.Shape.empty;
 import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.shapes.All.all;
@@ -52,7 +49,6 @@ import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
@@ -334,26 +330,6 @@ public final class Throttler implements Wrapper {
 		);
 	}
 
-
-	private Result<Collection<Statement>, Failure> verify(
-			final Collection<Statement> model, final Collection<Statement> envelope
-	) {
-
-		if ( model.isEmpty() ) { return Value(model); } else {
-
-			final List<Issue> outliers=model.stream()
-					.filter(statement -> !envelope.contains(statement))
-					.map(outlier -> issue(Issue.Level.Error, "statement outside allowed envelope "+outlier))
-					.collect(toList());
-
-			return outliers.isEmpty() ? Value(model) : Error(new Failure()
-					.status(Response.UnprocessableEntity)
-					.error(Failure.DataInvalid)
-					.trace(focus(outliers))
-			);
-
-		}
-	}
 
 	private <V extends Collection<Statement>> V expand(final IRI focus, final Shape shape, final V model) {
 

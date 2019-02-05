@@ -22,12 +22,11 @@ import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.metreeca.form.Focus.focus;
@@ -47,53 +46,20 @@ import static java.util.stream.Collectors.toList;
 	private final Graph graph;
 
 
-	/**
-	 * Creates a concise bounded description engine.
-	 *
-	 * @param graph a connection to the repository where resource description are stored
-	 *
-	 * @throws NullPointerException if {@code connection} is null
-	 */
-	public SimpleResource(final Graph graph) {
-
-		if ( graph == null ) {
-			throw new NullPointerException("null connection");
-		}
-
+	SimpleResource(final Graph graph, final Map<IRI, Value> metadata) {
 		this.graph=graph;
 	}
 
 
 	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null item");
-		}
-
 		return graph.query(connection -> { return retrieve(connection, resource, true); });
 	}
 
-	/**
-	 * {@inheritDoc} {Unsupported}
-	 */
-	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("simple related resource creation not supported");
 	}
 
-	/**
-	 * @return {@inheritDoc}; includes {@linkplain Issue.Level#Error errors} if {@code model} contains statements
-	 * outside the symmetric concise bounded description of {@code entity}
-	 */
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null item");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
 		return graph.update(connection -> {
 
 			return retrieve(connection, resource, false).map(current -> {
@@ -112,7 +78,6 @@ import static java.util.stream.Collectors.toList;
 			});
 
 		});
-
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {
@@ -150,7 +115,7 @@ import static java.util.stream.Collectors.toList;
 
 		return focus(model.stream()
 				.filter(statement -> !envelope.contains(statement))
-				.map(outlier -> issue(Issue.Level.Error, "statement outside cell envelope "+outlier))
+				.map(outlier -> issue(Issue.Level.Error, "statement outside description envelope "+outlier))
 				.collect(toList())
 		);
 	}

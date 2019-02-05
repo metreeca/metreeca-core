@@ -20,6 +20,8 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Cleaner;
+import com.metreeca.form.probes.Optimizer;
 import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
@@ -31,6 +33,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.metreeca.form.Shape.pass;
+import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.things.Values.iri;
 
 
@@ -53,10 +56,10 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null shape");
 		}
 
-		final boolean simple=pass(shape);
+		final boolean simple=pass(shape.map(new Cleaner()).map(new Optimizer())); // ignore metadata
 
-		this.resource=simple ? new SimpleResource(graph) : new ShapedResource(graph, shape);
-		this.container=simple ? new SimpleContainer(graph) : new ShapedContainer(graph, shape);
+		this.resource=simple ? new SimpleResource(graph, metas(shape)) : new ShapedResource(graph, shape);
+		this.container=simple ? new SimpleContainer(graph, metas(shape)) : new ShapedContainer(graph, shape);
 	}
 
 
@@ -71,13 +74,13 @@ public final class GraphEngine implements Engine {
 		return delegate(resource).relate(resource);
 	}
 
-	@Override public Optional<Focus> create(final IRI resource, final IRI slug, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");
 		}
 
-		if ( slug == null ) {
+		if ( related == null ) {
 			throw new NullPointerException("null slug");
 		}
 
@@ -85,7 +88,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null model");
 		}
 
-		return delegate(resource).create(resource, slug, model);
+		return delegate(resource).create(resource, related, model);
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {

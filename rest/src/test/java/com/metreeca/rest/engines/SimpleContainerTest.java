@@ -17,16 +17,30 @@
 
 package com.metreeca.rest.engines;
 
+import com.metreeca.form.Focus;
+import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.things.ValuesTest.small;
+import java.util.Optional;
+
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.tray.Tray.tool;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 final class SimpleContainerTest {
 
@@ -42,12 +56,13 @@ final class SimpleContainerTest {
 		return small();
 	}
 
-	private Engine engine() {
-		return new SimpleContainer(tool(Graph.Factory));
-	}
-
 
 	@Nested final class Basic {
+
+		private Engine engine() {
+			return new SimpleContainer(tool(Graph.Factory), map());
+		}
+
 
 		@Nested final class Relate {
 
@@ -55,6 +70,54 @@ final class SimpleContainerTest {
 
 		@Nested final class Create {
 
+			private final IRI container=item("/employees-basic/");
+			private final IRI resource=item("/employees-basic/123");
+
+
+			@Test void testCreate() {
+				exec(() -> {
+
+					final Optional<Focus> report=engine().create(container, resource, decode(
+							"<> :code '123' .", resource.toString()
+					));
+
+					assertThat(report)
+							.isPresent()
+							.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Error))
+									.as("success reported")
+									.isFalse()
+							);
+
+					assertThat(graph())
+							.as("graph updated")
+							.hasSubset(decode(""
+									+"<employees-basic/> ldp:contains <employees-basic/123>."
+									+"<employees-basic/123> :code '123' ."
+							));
+
+				});
+			}
+
+			@Test void testExceedingData() {
+				exec(() -> {
+
+					final Optional<Focus> report=engine().create(container, resource, decode(
+							"<> :code '123'; rdf:value rdf:first. rdf:first rdf:value rdf:rest.", resource.toString()
+					));
+
+					assertThat(report)
+							.isPresent()
+							.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Error))
+									.as("failure reported")
+									.isTrue()
+							);
+
+					assertThat(graph())
+							.as("graph unaltered")
+							.isIsomorphicTo(dataset());
+
+				});
+			}
 
 		}
 
@@ -62,11 +125,68 @@ final class SimpleContainerTest {
 
 	@Nested final class Direct {
 
+		private Engine engine() {
+			return new SimpleContainer(tool(Graph.Factory), map(
+					entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
+					entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
+					entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
+			));
+		}
+
+
 		@Nested final class Relate {
 
 		}
 
 		@Nested final class Create {
+
+			private final IRI container=item("/employees/");
+			private final IRI resource=item("/employees/123");
+
+
+			@Test void testCreate() {
+				exec(() -> {
+
+					final Optional<Focus> report=engine().create(container, resource, decode(
+							"<> :code '123'.", resource.toString()
+					));
+
+					assertThat(report)
+							.isPresent()
+							.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Error))
+									.as("success reported")
+									.isFalse()
+							);
+
+					assertThat(graph())
+							.as("graph updated")
+							.hasSubset(decode(
+									"<employees/123> a :Employee; :code '123'."
+							));
+
+				});
+			}
+
+			@Test void testExceedingData() {
+				exec(() -> {
+
+					final Optional<Focus> report=engine().create(container, resource, decode(
+							"<> :code '123'; rdf:value rdf:first. rdf:first rdf:value rdf:rest.", resource.toString()
+					));
+
+					assertThat(report)
+							.isPresent()
+							.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Error))
+									.as("failure reported")
+									.isTrue()
+							);
+
+					assertThat(graph())
+							.as("graph unaltered")
+							.isIsomorphicTo(dataset());
+
+				});
+			}
 
 		}
 
