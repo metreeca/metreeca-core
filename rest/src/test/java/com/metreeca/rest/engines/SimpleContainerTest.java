@@ -34,6 +34,7 @@ import java.util.Optional;
 
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
@@ -96,6 +97,23 @@ final class SimpleContainerTest {
 							));
 
 				});
+			}
+
+			@Test void testCreateInDirectContainer() {
+				new Tray().exec(() -> {
+
+					final Engine engine=new SimpleContainer(tool(Graph.Factory), map(
+							entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
+							entry(LDP.HAS_MEMBER_RELATION, RDF.VALUE)
+					));
+
+					engine.create(item("container"), item("resource"), set());
+
+					assertThat(graph())
+							.as("membership triples inserted")
+							.isIsomorphicTo(decode("<container> rdf:value <resource>."));
+
+				}).clear();
 			}
 
 			@Test void testExceedingData() {
@@ -165,6 +183,22 @@ final class SimpleContainerTest {
 							));
 
 				});
+			}
+
+			@Test void testCreateInBasicContainer() {
+				new Tray().exec(() -> {
+
+					final Engine engine=new SimpleContainer(tool(Graph.Factory), map(
+							entry(RDF.TYPE, LDP.BASIC_CONTAINER)
+					));
+
+					engine.create(item("container"), item("resource"), set());
+
+					assertThat(graph())
+							.as("membership triples inserted")
+							.isIsomorphicTo(decode("<container> ldp:contains <resource>."));
+
+				}).clear();
 			}
 
 			@Test void testExceedingData() {
