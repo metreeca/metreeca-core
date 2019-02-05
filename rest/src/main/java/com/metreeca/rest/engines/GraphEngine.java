@@ -24,6 +24,7 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -107,8 +108,8 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Engine delegate(final IRI iri) {
-		return iri.getLocalName().endsWith("/")? container : resource;
+	private Engine delegate(final Value target) {
+		return target.stringValue().endsWith("/")? container : resource;
 	}
 
 }

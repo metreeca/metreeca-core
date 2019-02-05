@@ -40,6 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.form.Shape.optional;
+import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.Shape.verify;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
@@ -86,7 +87,7 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/TR/ldp/#ldpbc">Linked Data Platform 1.0 - §5.3 Basic</a>
  */
-public final class _Browser extends Delegator {
+public final class _Relator extends Delegator {
 
 	private static final Pattern RepresentationPattern=Pattern
 			.compile("\\s*return\\s*=\\s*representation\\s*;\\s*include\\s*=\\s*\"(?<representation>[^\"]*)\"\\s*");
@@ -97,8 +98,8 @@ public final class _Browser extends Delegator {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	public _Browser() {
-		delegate(Handler.handler(request -> !request.shaped(), direct(), driven())
+	public _Relator() {
+		delegate(Handler.handler(request -> !!pass(request.shape()), direct(), driven())
 
 						.with(new Throttler(Form.relate, Form.digest))
 

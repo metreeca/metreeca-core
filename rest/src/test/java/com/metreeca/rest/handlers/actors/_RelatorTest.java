@@ -40,7 +40,7 @@ import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static javax.json.Json.createObjectBuilder;
 
 
-@Disabled final class _BrowserTest {
+@Disabled final class _RelatorTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
@@ -67,7 +67,7 @@ import static javax.json.Json.createObjectBuilder;
 	//// Direct ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDirectBrowse() {
-		exec(() -> new _Browser()
+		exec(() -> new _Relator()
 
 				.handle(direct())
 
@@ -82,7 +82,7 @@ import static javax.json.Json.createObjectBuilder;
 	//// Driven ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDrivenBrowse() {
-		exec(() -> new _Browser()
+		exec(() -> new _Relator()
 
 				.handle(driven())
 
@@ -101,7 +101,7 @@ import static javax.json.Json.createObjectBuilder;
 	}
 
 	@Test void testDrivenBrowseLimited() {
-		exec(() -> new _Browser()
+		exec(() -> new _Relator()
 
 				.handle(driven().roles(Salesman))
 
@@ -122,7 +122,7 @@ import static javax.json.Json.createObjectBuilder;
 	}
 
 	@Test void testDrivenBrowseFiltered() {
-		exec(() -> new _Browser()
+		exec(() -> new _Relator()
 
 				.handle(driven()
 						.roles(Salesman)
@@ -152,7 +152,7 @@ import static javax.json.Json.createObjectBuilder;
 
 
 	@Test void testDrivePreferEmptyContainer() {
-		exec(() -> new _Browser()
+		exec(() -> new _Relator()
 
 				.handle(driven().header("Prefer", String.format(
 						"return=representation; include=\"%s\"", LDP.PREFER_EMPTY_CONTAINER
@@ -174,7 +174,7 @@ import static javax.json.Json.createObjectBuilder;
 
 
 	@Test void testDrivenUnauthorized() {
-		exec(() -> new _Browser()
+		exec(() -> new _Relator()
 
 				.handle(driven().roles(Form.none))
 
@@ -186,7 +186,7 @@ import static javax.json.Json.createObjectBuilder;
 	}
 
 	@Test void testDrivenForbidden() {
-		exec(() -> new _Browser()
+		exec(() -> new _Relator()
 
 				.handle(driven().user(RDF.NIL).roles(Form.none))
 
@@ -198,7 +198,7 @@ import static javax.json.Json.createObjectBuilder;
 	}
 
 	@Test void testDrivenRestricted() {
-		exec(() -> new _Browser()
+		exec(() -> new _Relator()
 
 				.handle(driven()
 						.user(RDF.NIL)

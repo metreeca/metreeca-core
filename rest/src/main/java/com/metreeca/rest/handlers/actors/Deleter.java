@@ -19,19 +19,13 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines.GraphEngine;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-
-import java.util.IdentityHashMap;
-import java.util.Map;
-
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.rest.wrappers.Throttler.entity;
+import static com.metreeca.rest.wrappers.Throttler.resource;
 
 
 /**
@@ -64,67 +58,31 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Deleter extends Delegator {
-
-	private final Graph graph=tool(Graph.Factory);
-
-	private final Map<Shape, Engine> engines=new IdentityHashMap<>();
-
+public final class Deleter extends Actor {
 
 	public Deleter() {
-		delegate(deleter()
-				// !!! .with(splitter())
-				.with(throttler())
+		delegate(deleter().with(throttler()));
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Wrapper throttler() {
+		return wrapper(Request::container,
+				new Throttler(Form.delete, Form.detail, entity()),
+				new Throttler(Form.delete, Form.detail, resource())
 		);
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//private Wrapper splitter() {
-	//	return wrapper(Request::container, wrapper(), new Splitter(resource()));
-	//}
-
-	private Throttler throttler() {
-		return new Throttler(Form.delete, Form.detail);
-	}
-
 	private Handler deleter() {
-		return request -> request.reply(response -> graph.update(connection -> {
+		return request -> request.reply(response -> engine(request.shape())
 
-			final IRI item=request.item();
-			final Shape shape=request.shape();
+				.delete(request.item())
 
-			// !!! container
-			//  final Engine engine=request.container()
-			//		? shaped ? new ShapedContainer(graph, shape) : new SimpleContainer(graph)
-			//		: shaped ? new ShapedResource(graph, shape) : new SimpleResource(graph);
+				.map(iri -> response.status(Response.NoContent))
 
-			// !!! 410 Gone if the resource is known to have existed (how to test?)
+				.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known (how to test?)
 
-			try {
-
-				return engine(shape).delete(item).isPresent()
-						? response.status(Response.NoContent)
-						: response.status(Response.NotFound);
-
-			} catch ( final UnsupportedOperationException e ) {
-
-				return response.map(new Failure()
-						.status(Response.MethodNotAllowed)
-						.cause(e.getMessage())
-				);
-
-			}
-
-		}));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Engine engine(final Shape shape) {
-		return engines.computeIfAbsent(shape, _shape -> new GraphEngine(graph, _shape));
+		);
 	}
 
 }

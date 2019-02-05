@@ -117,6 +117,11 @@ public final class Throttler implements Wrapper {
 	);
 
 
+	/**
+	 * Creates an identity shape operator.
+	 *
+	 * @return a shape operator returning its input shape
+	 */
 	public static UnaryOperator<Shape> entity() {
 		return merge((container, resource)
 				-> empty(resource) ? container
@@ -126,9 +131,9 @@ public final class Throttler implements Wrapper {
 	}
 
 	/**
-	 * Creates a container splitter operator.
+	 * Creates a container shape operator.
 	 *
-	 * @return a splitting operator returning a shape pruned of {@linkplain LDP#CONTAINS ldp:contains} fields, if one is
+	 * @return a shape operator returning a shape pruned of {@linkplain LDP#CONTAINS ldp:contains} fields, if one is
 	 * actually included, or an empty shape, otherwise
 	 */
 	public static UnaryOperator<Shape> container() {
@@ -136,14 +141,15 @@ public final class Throttler implements Wrapper {
 	}
 
 	/**
-	 * Creates a resource splitter operator.
+	 * Creates a resource shape operator.
 	 *
-	 * @return a splitting operator returning a shape limited to the shapes associated to {@linkplain LDP#CONTAINS
+	 * @return a shape operator returning a shape limited to the shapes associated to {@linkplain LDP#CONTAINS
 	 * ldp:contains} fields, if one is actually included, or the source shape, otherwise
 	 */
 	public static UnaryOperator<Shape> resource() {
 		return merge((container, resource) -> empty(resource) ? container : resource);
 	}
+
 
 	private static UnaryOperator<Shape> merge(final BinaryOperator<Shape> merger) {
 		return shape -> {

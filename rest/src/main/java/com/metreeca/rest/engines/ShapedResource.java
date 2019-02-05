@@ -130,7 +130,9 @@ final class ShapedResource implements Engine {
 				final Focus focus=validate(connection, resource, model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
-					connection.rollback(); // revert graph changes
+					connection.rollback();
+				} else {
+					connection.commit();
 				}
 
 				return focus;
