@@ -22,6 +22,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;

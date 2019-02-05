@@ -28,7 +28,8 @@ import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -41,7 +42,10 @@ import static com.metreeca.form.Shape.pass;
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.things.Values.rewrite;
+import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.wrappers.Throttler.entity;
+import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -95,28 +99,28 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Relator extends Delegator {
-
-	// !!! activate response trimming only if a custom wrapper/handler is inserted in the pipeline
-
+public final class Relator extends Actor {
 
 	private final Graph graph=tool(Graph.Factory);
 
 
 	public Relator() {
-		delegate(
+		delegate(relator().with(annotator()).with(throttler()));
+	}
 
-				relator()
 
-						//.with(wrapper(Request::container,
-						//		new Splitter(shape -> shape).wrap(new Throttler(Form.relate, Form.digest)),
-						//		new Splitter(resource()).wrap(new Throttler(Form.relate, Form.detail))
-						//))
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-						.with(handler -> request -> handler.handle(request).map(response ->
-								response.header("+Vary", "Accept")
-						))
+	private Wrapper annotator() {
+		return handler -> request -> handler.handle(request).map(response ->
+				response.headers("+Vary", "Accept", "Prefer")
+		);
+	}
 
+	private Wrapper throttler() {
+		return wrapper(Request::container,
+				new Throttler(Form.relate, Form.digest, entity()),
+				new Throttler(Form.relate, Form.detail, resource())
 		);
 	}
 

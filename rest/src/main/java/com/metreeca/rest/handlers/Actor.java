@@ -15,12 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.engines.GraphEngine;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.tray.rdf.Graph;
 
 import java.util.IdentityHashMap;
@@ -29,6 +28,16 @@ import java.util.Map;
 import static com.metreeca.tray.Tray.tool;
 
 
+/**
+ * Linked data action handler.
+ *
+ * <p>Handles actions on linked data resources; the base class:</p>
+ *
+ * <ul>
+ * <li>creates and caches shape-driven resource {@linkplain #engine(Shape) engines};</li>
+ * <li>handles {@link UnsupportedOperationException} thrown by engines.</li>
+ * </ul>
+ */
 public abstract class Actor extends Delegator {
 
 	private final Graph graph=tool(Graph.Factory);
@@ -36,12 +45,33 @@ public abstract class Actor extends Delegator {
 	private final Map<Shape, Engine> engines=new IdentityHashMap<>();
 
 
+	/**
+	 * Creates a shape-driven resource engine.
+	 *
+	 * @param shape the shape driving the engin to be created
+	 *
+	 * @return a resource engine driven by {@code shape}; the returned value is cached for future use
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
 	protected Engine engine(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
 		return engines.computeIfAbsent(shape, _shape -> new GraphEngine(graph, _shape));
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public Responder handle(final Request request) {
+
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
+
 		return consumer -> {
 			try {
 

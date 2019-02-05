@@ -27,7 +27,7 @@ import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
 import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -112,7 +112,7 @@ import static java.util.UUID.randomUUID;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Creator extends Delegator {
+public final class Creator extends Actor {
 
 	/*
 	 * Shared lock for serializing slug operations (concurrent graph txns may produce conflicting results).
@@ -128,7 +128,7 @@ public final class Creator extends Delegator {
 	private final Object lock=tool(LockFactory);
 
 
-	private BiFunction<Request, Model, String> slug=uuid();
+	private final BiFunction<Request, Model, String> slug;
 
 
 	/**
@@ -152,19 +152,21 @@ public final class Creator extends Delegator {
 			throw new NullPointerException("null slug");
 		}
 
-		synchronized ( lock ) {
+		this.slug=slug;
 
-			this.slug=slug;
-
-			delegate(handler(Request::container, container(), resource())
-					.with(new Throttler(Form.create, Form.detail, Throttler.resource()))
-			);
-
-		}
+		delegate(creator().with(throttler()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Wrapper throttler() {
+		return new Throttler(Form.create, Form.detail, Throttler.resource());
+	}
+
+	private Handler creator() {
+		return handler(Request::container, container(), resource());
+	}
 
 	private Handler resource() {
 		return request -> request.reply(new Failure()
@@ -272,7 +274,9 @@ public final class Creator extends Delegator {
 				entry(Form.role, set(Form.any))
 		))).map(new Optimizer());
 
-		return (request, model) -> tool(Graph.Factory).query(connection -> {
+		return (request, model) -> tool(Graph.Factory).query(connection -> { // !!! tool() breaks at runtime
+
+			// !!! don't reuse identifiers
 
 			// !!! custom iri stem/pattern
 			// !!! client naming hints (http://www.w3.org/TR/ldp/ §5.2.3.10 -> https://tools.ietf.org/html/rfc5023#section-9.7)
