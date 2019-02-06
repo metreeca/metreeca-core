@@ -19,6 +19,7 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
+import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -42,15 +43,20 @@ final class SimpleContainer extends GraphEntity {
 	private final Graph graph;
 	private final Flock flock;
 
+	private final Engine delegate;
+
 
 	SimpleContainer(final Graph graph, final Map<IRI, Value> metadata) {
+
 		this.graph=graph;
 		this.flock=flock(metadata).orElseGet(Flock.Basic::new);
+
+		this.delegate=new SimpleResource(graph, metadata);
 	}
 
 
 	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return delegate.relate(resource);
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {

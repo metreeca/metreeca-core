@@ -18,6 +18,7 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
+import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -44,6 +45,8 @@ final class ShapedContainer extends GraphEntity {
 	private final Shape relate;
 	private final Shape create;
 
+	private final Engine delegate;
+
 
 	ShapedContainer(final Graph graph, final Shape shape) {
 
@@ -54,11 +57,13 @@ final class ShapedContainer extends GraphEntity {
 
 		this.relate=redact(resource, Form.relate, Form.digest);
 		this.create=redact(resource, Form.create, Form.detail);
+
+		this.delegate=new ShapedResource(graph, shape);
 	}
 
 
 	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return delegate.relate(resource);
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
