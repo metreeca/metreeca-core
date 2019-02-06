@@ -121,7 +121,7 @@ public final class Updater extends Actor {
 
 						)
 
-						.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known (how to test?)
+						.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
 
 				),
 

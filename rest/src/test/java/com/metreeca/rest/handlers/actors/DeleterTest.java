@@ -106,8 +106,6 @@ final class DeleterTest {
 		}
 	}
 
-
-
 	@Nested final class Shaped {
 
 		@Test void testDelete() {

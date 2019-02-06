@@ -50,6 +50,7 @@ public abstract class Result<V, E> {
 		}
 
 		return new Result<V, E>() {
+
 			@Override public <R> R fold(final Function<V, R> success, final Function<E, R> failure) {
 
 				if ( success == null ) {
@@ -62,6 +63,11 @@ public abstract class Result<V, E> {
 
 				return requireNonNull(success.apply(value), "null success mapper return value");
 			}
+
+			@Override public String toString() {
+				return String.format("Value(%s)", value);
+			}
+
 		};
 	}
 
@@ -81,6 +87,7 @@ public abstract class Result<V, E> {
 		}
 
 		return new Result<V, E>() {
+
 			@Override public <R> R fold(final Function<V, R> success, final Function<E, R> failure) {
 
 				if ( success == null ) {
@@ -93,6 +100,11 @@ public abstract class Result<V, E> {
 
 				return requireNonNull(failure.apply(error), "null failure mapper return value");
 			}
+
+			@Override public String toString() {
+				return String.format("Error(%s)", error);
+			}
+
 		};
 	}
 
@@ -102,6 +114,8 @@ public abstract class Result<V, E> {
 
 	private Result() {} // ADT
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the operation returned value.

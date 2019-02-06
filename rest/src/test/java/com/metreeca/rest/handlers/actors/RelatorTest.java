@@ -19,13 +19,14 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.ValuesTest;
+import com.metreeca.form.truths.JSONAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -33,17 +34,19 @@ import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.things.ValuesTest.construct;
-import static com.metreeca.form.things.ValuesTest.small;
-import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
 
+import static javax.json.Json.createObjectBuilder;
 
-@Disabled final class RelatorTest {
+
+final class RelatorTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
@@ -180,6 +183,180 @@ import static com.metreeca.tray.Tray.tool;
 
 						.accept(response -> assertThat(response).hasStatus(Response.NotFound))
 
+				);
+			}
+
+		}
+
+	}
+
+	@Nested final class Container {
+
+		private Request simple() {
+			return new Request()
+					.roles(Manager)
+					.method(Request.GET)
+					.base(Base)
+					.path("/employees/");
+		}
+
+
+		@Nested final class Simple {
+
+			@Test void testBrowse() {
+				exec(() -> new Relator()
+
+						.handle(simple())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json())
+						)
+				);
+			}
+
+		}
+
+		@Nested final class Shaped {
+
+			private Request shaped() {
+				return simple().shape(Employee);
+			}
+
+
+			@Test void testBrowse() {
+				exec(() -> new Relator()
+
+						.handle(shaped())
+
+						.accept(response -> assertThat(response)
+
+								.hasStatus(Response.OK)
+
+								.hasShape()
+
+								.hasBody(rdf(), rdf -> assertThat(rdf)
+										.hasStatement(response.item(), LDP.CONTAINS, null)
+										.hasSubset(graph("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
+								)
+						)
+				);
+			}
+
+			@Test void testBrowseLimited() {
+				exec(() -> new Relator()
+
+						.handle(shaped().roles(Salesman))
+
+						.accept(response -> assertThat(response)
+
+								.hasStatus(Response.OK)
+
+								.hasShape()
+
+								.hasBody(rdf(), rdf -> assertThat(rdf)
+										.hasSubset(graph("construct where { ?e a :Employee; rdfs:label ?label }"))
+
+										.as("properties restricted to manager role not included")
+										.doesNotHaveStatement(null, term("seniority"), null)
+								)
+						)
+				);
+			}
+
+			@Test void testBrowseFiltered() {
+				exec(() -> new Relator()
+
+						.handle(shaped()
+								.roles(Salesman)
+								.query(createObjectBuilder()
+										.add("filter", createObjectBuilder().add("title", "Sales Rep"))
+										.build().toString()))
+
+						.accept(response -> assertThat(response)
+
+								.hasStatus(Response.OK)
+
+								.hasShape()
+
+								.hasBody(rdf(), rdf -> assertThat(rdf)
+
+										.hasSubset(graph(""
+												+"construct { ?e a :Employee; :title ?t }\n"
+												+"where { ?e a :Employee; :title ?t, 'Sales Rep' }"
+										))
+
+										.as("only resources matching filter included")
+										.doesNotHaveStatement(null, term("title"), literal("President"))
+								)
+						)
+				);
+			}
+
+
+			@Test void testDrivePreferEmptyContainer() {
+				exec(() -> new Relator()
+
+						.handle(shaped().header("Prefer", String.format(
+								"return=representation; include=\"%s\"", LDP.PREFER_EMPTY_CONTAINER
+						)))
+
+						.accept(response -> assertThat(response)
+
+								.hasStatus(Response.OK)
+								.hasHeader("Preference-Applied", response.request().header("Prefer").orElse(""))
+
+								.hasShape()
+
+								.hasBody(rdf(), rdf -> assertThat(rdf)
+										.doesNotHaveStatement(null, LDP.CONTAINS, null)
+								)
+						)
+				);
+			}
+
+
+			@Test void testUnauthorized() {
+				exec(() -> new Relator()
+
+						.handle(shaped().roles(Form.none))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.Unauthorized)
+								.doesNotHaveBody()
+						)
+				);
+			}
+
+			@Test void testForbidden() {
+				exec(() -> new Relator()
+
+						.handle(shaped().user(RDF.NIL).roles(Form.none))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.Forbidden)
+								.doesNotHaveBody()
+						)
+				);
+			}
+
+			@Test void testRestricted() {
+				exec(() -> new Relator()
+
+						.handle(shaped()
+								.user(RDF.NIL)
+								.roles(Salesman)
+								.query(createObjectBuilder()
+										.add("items", "seniority")
+										.build().toString())
+						)
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.UnprocessableEntity)
+								.hasBody(json(), json -> JSONAssert.assertThat(json)
+										.hasField("error")
+								)
+						)
 				);
 			}
 

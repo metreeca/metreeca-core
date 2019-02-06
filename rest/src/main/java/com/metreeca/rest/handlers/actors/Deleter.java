@@ -81,7 +81,7 @@ public final class Deleter extends Actor {
 
 				.map(iri -> response.status(Response.NoContent))
 
-				.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known (how to test?)
+				.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
 
 		);
 	}

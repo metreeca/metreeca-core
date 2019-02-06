@@ -20,11 +20,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
-import com.metreeca.form.queries.Items;
-import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
@@ -34,13 +30,18 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.metreeca.form.queries.Items.ItemsShape;
 import static com.metreeca.form.queries.Stats.StatsShape;
-import static com.metreeca.form.things.Values.rewrite;
+import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.wrappers.Throttler.entity;
@@ -98,6 +99,44 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
+
+
+/**
+ * Basic container browser.
+ *
+ * <p>Handles retrieval requests on linked data basic container.</p>
+ *
+ * <dl>
+ *
+ * <dt>Response shape-driven {@link RDFFormat} body</dt>
+ *
+ * <dd>If the request includes {@linkplain Message#shape() shape}, the response includes the {@linkplain RDFFormat RDF
+ * description} of the request {@linkplain Request#item() focus item}, {@linkplain LDP#CONTAINS containing} the RDF
+ * descriptions of the virtual container items matched by the redacted linked data {@linkplain Shape shape}.</dd>
+ *
+ * <dd>If the request contains a {@code Prefer} header requesting the {@link LDP#PREFER_EMPTY_CONTAINER}
+ * representation, virtual item descriptions are omitted.</dd>
+ *
+ * <dd>If the request contains a filtering {@linkplain Request#query(Shape) query}, only matching virtual container
+ * item descriptionss are included.</dd>
+ *
+ * <dt>Response shapeless {@link RDFFormat} body</dt>
+ *
+ * <dd><strong>Warning</strong> / Shapeless container retrieval is not yet supported and is reported with a {@linkplain
+ * Response#NotImplemented} HTTP status code.</dd>
+ *
+ * </dl>
+ *
+ * <p>If the request includes a shape, the response includes the derived shape actually used in the container retrieval
+ * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
+ * Form#verify} mode and {@link Form#digest} view.</p>
+ *
+ * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
+ * database.</p>
+ *
+ * @see <a href="https://www.w3.org/TR/ldp/#ldpbc">Linked Data Platform 1.0 - §5.3 Basic</a>
+ */
+
 public final class Relator extends Actor {
 
 	private final Graph graph=tool(Graph.Factory);
@@ -124,84 +163,148 @@ public final class Relator extends Actor {
 	}
 
 	private Handler relator() {
-		return request -> request.reply(response -> graph.query(connection -> {
+		return request -> request.reply(response -> {
 
-			final IRI item=request.item();
-			final Shape shape=request.shape();
+			return engine(request.shape())
 
-			if ( request.container() ) {
+					.relate(request.item())
 
-				return request.query(shape).fold(
+					.map(model -> response
+							.status(Response.OK)
+							.shape(request.shape())
+							.body(rdf(), model)
+					)
 
-						query -> {
+					.orElseGet(() -> response.
+							status(Response.NotFound) // !!! 410 Gone if previously known
+					);
 
-							final Collection<Statement> model=new _SPARQLEngine(connection)
-									.browse(query)
-									.values()
-									.stream()
-									.findFirst()
-									.orElseGet(Collections::emptySet);
+			//request.query(request.shape()).fold(
+			//
+			//		value -> value.map(query -> query.map(new Query.Probe<Response>() {
+			//
+			//			@Override public Response probe(final Edges edges) {
+			//				throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			//			}
+			//
+			//			@Override public Response probe(final Stats stats) {
+			//				throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			//			}
+			//
+			//			@Override public Response probe(final Items items) {
+			//				throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			//			}
+			//
+			//		})).orElseGet(() -> {
+			//
+			//
+			//		}),
+			//
+			//		response::map
+			//
+			//)
 
-							if ( model.isEmpty() ) {
+		});
+	}
 
-								// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
-								// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
-								// !!! optimize using a single query if working on a remote repository
 
-								final boolean contains=connection.hasStatement(item, null, null, true)
-										|| connection.hasStatement(null, null, item, true);
+	//// !!! ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-								final Response response1=contains // !!! always 404 under strict security
-										? response.status(Response.Forbidden) // resource known but empty envelope for user
-										: response.status(Response.NotFound);
-								return response1;
+	private static final Pattern RepresentationPattern=Pattern
+			.compile("\\s*return\\s*=\\s*representation\\s*;\\s*include\\s*=\\s*\"(?<representation>[^\"]*)\"\\s*");
 
-							} else {
 
-								return response.status(Response.OK).map(r -> query.map(new Query.Probe<Response>() { // !!! factor
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-									@Override public Response probe(final Edges edges) {
-										return r
-												.shape(shape // !!! cache returned shape
-														.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
-														.map(new Optimizer())
-												)
-												.body(rdf(), model);
-									}
+	private Response edges(final Edges edges, final Response response) {
+		return graph.query(connection -> {
 
-									@Override public Response probe(final Stats stats) {
-										return r.shape(StatsShape)
-												.body(rdf(), rewrite(_SPARQLEngine.meta, item, model));
-									}
+			final Request request=response.request();
+			final IRI item=response.item();
 
-									@Override public Response probe(final Items items) {
-										return r.shape(ItemsShape)
-												.body(rdf(), rewrite(_SPARQLEngine.meta, item, model));
-									}
+			final Collection<Statement> model=new ArrayList<>();
 
-								}));
+			model.add(statement(item, RDF.TYPE, LDP.BASIC_CONTAINER));
 
-							}
+			if ( include(request, LDP.PREFER_EMPTY_CONTAINER) ) {
 
-						},
-
-						response::map
-				);
+				response.header("Preference-Applied", String.format(
+						"return=representation; include=\"%s\"", LDP.PREFER_EMPTY_CONTAINER
+				));
 
 			} else {
 
-				//final Engine engine=shaped
-				//		? new ShapedResource(connection, shape)
-				//		: new SimpleResource(connection);
-
-
-				// !!!
-
-				return response;
+				new _SPARQLEngine(connection).browse(edges).forEach((focus, statements) -> {
+					model.add(statement(item, LDP.CONTAINS, focus));
+					model.addAll(statements);
+				});
 
 			}
 
-		}));
+
+			//return r
+			//		.shape(shape // !!! cache returned shape
+			//				.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
+			//				.map(new Optimizer())
+			//		)
+			//		.body(rdf(), model);
+
+			return response.status(Response.OK)
+					.body(rdf(), model);
+		});
+	}
+
+	private Response stats(final Query stats, final Response response) {
+
+		//return r.shape(StatsShape)
+		//		.body(rdf(), rewrite(_SPARQLEngine.meta, item, model));
+
+		return graph.query(connection -> {
+			return response.status(Response.OK)
+					.shape(StatsShape)
+					.body(rdf(), new _SPARQLEngine(connection).browse(stats, response.item()));
+
+		});
+	}
+
+	private Response items(final Query items, final Response response) {
+
+		//return r.shape(ItemsShape)
+		//		.body(rdf(), rewrite(_SPARQLEngine.meta, item, model));
+
+		return graph.query(connection -> {
+			return response.status(Response.OK)
+					.shape(ItemsShape)
+					.body(rdf(), new _SPARQLEngine(connection).browse(items, response.item()));
+
+		});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private boolean include(final Request request, final Value include) {
+
+		// !!! handle multiple uris in include parameter
+		// !!! handle omit parameter (with multiple uris)
+		// !!! handle other representation values in https://www.w3.org/TR/ldp/#prefer-parameters
+
+		final String representation=request
+				.headers("Prefer")
+				.stream()
+				.map(value -> {
+
+					final Matcher matcher=RepresentationPattern.matcher(value);
+
+					return matcher.matches() ? matcher.group("representation") : "";
+
+				})
+				.filter(value -> !value.isEmpty())
+				.findFirst()
+				.orElse("");
+
+		return representation.equals(include.stringValue());
+
 	}
 
 }

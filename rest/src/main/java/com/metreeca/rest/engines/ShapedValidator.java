@@ -51,9 +51,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-final class GraphValidator {
+final class ShapedValidator {
 
-	private static final Logger logger=Logger.getLogger(GraphValidator.class.getName()); // !!! migrate logging to Trace?
+	private static final Logger logger=Logger.getLogger(ShapedValidator.class.getName()); // !!! migrate logging to Trace?
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ final class GraphValidator {
 	private final RepositoryConnection connection;
 
 
-	public GraphValidator(final RepositoryConnection connection) {
+	public ShapedValidator(final RepositoryConnection connection) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");

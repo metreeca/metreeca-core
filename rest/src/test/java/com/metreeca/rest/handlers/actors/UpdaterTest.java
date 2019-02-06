@@ -310,7 +310,7 @@ final class UpdaterTest {
 					.handle(request())
 
 					.accept(response -> assertThat(response)
-							.hasStatus(Response.MethodNotAllowed)
+							.hasStatus(Response.NotImplemented)
 							.hasBody(json(), json -> assertThat(json)
 									.hasField("cause")
 							)

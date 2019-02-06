@@ -56,7 +56,7 @@ abstract class GraphEntity implements Engine {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Simple ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Optional<Collection<Statement>> retrieve(
 			final RepositoryConnection connection, final Resource resource, final boolean labelled
@@ -76,7 +76,7 @@ abstract class GraphEntity implements Engine {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shaped ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Shape redact(final Shape shape, final IRI task, final IRI view) {
 		return shape.map(new Redactor(map(
@@ -87,9 +87,9 @@ abstract class GraphEntity implements Engine {
 	}
 
 
-	Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape task) {
-		return new GraphRetriever(connection)
-				.process(new Edges(and(all(resource), task)))
+	Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
+		return new ShapedRetriever(connection)
+				.process(new Edges(and(all(resource), shape)))
 				.entrySet()
 				.stream()
 				.findFirst()
@@ -104,7 +104,7 @@ abstract class GraphEntity implements Engine {
 
 		final boolean unsafe=!connection.getIsolationLevel().isCompatibleWith(IsolationLevels.SNAPSHOT);
 
-		final Focus focus=new GraphValidator(connection).process(unsafe ? and() : shape, resource);
+		final Focus focus=new ShapedValidator(connection).process(unsafe ? and() : shape, resource);
 
 		// validate shape envelope
 

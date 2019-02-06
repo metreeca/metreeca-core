@@ -80,7 +80,7 @@ public abstract class Actor extends Delegator {
 			} catch ( final UnsupportedOperationException e ) {
 
 				request.reply(response -> response.map(new Failure()
-						.status(Response.MethodNotAllowed)
+						.status(Response.NotImplemented)
 						.cause(e.getMessage())
 				)).accept(consumer);
 

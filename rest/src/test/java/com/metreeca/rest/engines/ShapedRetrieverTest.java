@@ -64,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.Collectors.toSet;
 
 
-final class GraphRetrieverTest {
+final class ShapedRetrieverTest {
 
 	private final Supplier<RepositoryConnection> sandbox=ValuesTest.sandbox(ValuesTest.large());
 
@@ -484,7 +484,7 @@ final class GraphRetrieverTest {
 
 	private Map<Resource, Collection<Statement>> process(final Query query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
-			return new GraphRetriever(connection).process(query);
+			return new ShapedRetriever(connection).process(query);
 		}
 	}
 

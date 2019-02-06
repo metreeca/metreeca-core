@@ -179,9 +179,9 @@ public final class Request extends Message<Request> {
 	 *
 	 * @param shape the base shape for the query
 	 *
-	 * @return a value result providing access to the combined query merging constraints from {@code shape} and the
-	 * request {@linkplain #query() query} string, as returned by the {@linkplain QueryParser query parser}; an error
-	 * result providing access to the processing failure, otherwise
+	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
+	 * {@linkplain #query() query} string, if successfully parsed by the {@linkplain QueryParser query parser}; an error
+	 * providing access to the parsing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */

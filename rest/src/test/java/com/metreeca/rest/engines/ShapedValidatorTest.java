@@ -52,7 +52,7 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphValidatorTest {
+final class ShapedValidatorTest {
 
 	private static final IRI x=ValuesTest.item("x");
 	private static final IRI y=ValuesTest.item("y");
@@ -467,7 +467,7 @@ final class GraphValidatorTest {
 	private Focus process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
 		try (final RepositoryConnection connection=sandbox.get()) {
 			connection.add(statements);
-			return new GraphValidator(connection).process(shape, focus);
+			return new ShapedValidator(connection).process(shape, focus);
 		}
 	}
 

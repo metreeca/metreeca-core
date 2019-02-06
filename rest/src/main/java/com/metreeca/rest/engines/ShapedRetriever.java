@@ -50,11 +50,11 @@ import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUti
 import static java.util.Collections.singletonMap;
 
 
-final class GraphRetriever {
+final class ShapedRetriever {
 
 	// !!! log compilation/execution times
 
-	private static final Logger logger=Logger.getLogger(GraphRetriever.class.getName()); // !!! migrate logging to Graph?
+	private static final Logger logger=Logger.getLogger(ShapedRetriever.class.getName()); // !!! migrate logging to Graph?
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ final class GraphRetriever {
 	private final RepositoryConnection connection;
 
 
-	public GraphRetriever(final RepositoryConnection connection) {
+	public ShapedRetriever(final RepositoryConnection connection) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");
