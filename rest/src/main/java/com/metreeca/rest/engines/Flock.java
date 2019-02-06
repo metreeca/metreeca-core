@@ -32,7 +32,7 @@ import java.util.Optional;
  *
  * <p>Manages containment/membership triples for LDP containers.</p>
  */
-interface Flock {
+interface Flock { // !!! decouple from Repository
 
 	public static Optional<Flock> flock(final Map<IRI, Value> metadata) {
 

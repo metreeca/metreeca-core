@@ -27,6 +27,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.metreeca.form.Shape.constant;
@@ -35,6 +36,11 @@ import static com.metreeca.form.shapes.Meta.metas;
 import static java.lang.Boolean.TRUE;
 
 
+/**
+ * Graph-based engine.
+ *
+ * <p>Manages CRUD operations on linked data resources stored in a {@linkplain Graph graph}.</p>
+ */
 public final class GraphEngine implements Engine {
 
 	private final Engine resource;
@@ -53,8 +59,10 @@ public final class GraphEngine implements Engine {
 
 		final boolean simple=TRUE.equals(constant(shape)); // ignore metadata
 
-		this.resource=simple ? new SimpleResource(graph, metas(shape)) : new ShapedResource(graph, shape);
-		this.container=simple ? new SimpleContainer(graph, metas(shape)) : new ShapedContainer(graph, shape);
+		final Map<IRI, Value> metadata=metas(shape);
+
+		this.resource=simple ? new GraphResource.Simple(graph, metadata) : new GraphResource.ShapedResource(graph, shape);
+		this.container=simple ? new SimpleContainer(graph, metadata) : new ShapedContainer(graph, shape);
 	}
 
 
@@ -112,7 +120,7 @@ public final class GraphEngine implements Engine {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Engine delegate(final Value target) {
-		return target.stringValue().endsWith("/")? container : resource;
+		return target.stringValue().endsWith("/") ? container : resource;
 	}
 
 }
