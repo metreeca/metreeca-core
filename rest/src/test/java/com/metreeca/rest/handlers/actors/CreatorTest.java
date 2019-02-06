@@ -24,17 +24,23 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
+import java.util.Collection;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
@@ -45,6 +51,7 @@ import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.handlers.actors.Creator.auto;
 
 
 final class CreatorTest {
@@ -400,6 +407,32 @@ final class CreatorTest {
 			});
 		}
 
+	}
+
+	@Nested final class Slugs {
+
+		@Nested final class Auto {
+
+			@Test void testGenerateAutoIncrementingIds() {
+				exec(() -> {
+
+					final BiFunction<Request, Collection<Statement>, String> auto=auto();
+
+					final Request request=simple();
+
+					final String one=auto.apply(request, set());
+					final String two=auto.apply(request, set());
+
+					Assertions.assertThat(one).isNotEqualTo(two);
+
+					assertThat(graph())
+							.doesNotHaveStatement(iri(request.stem(), one), null, null)
+							.doesNotHaveStatement(iri(request.stem(), two), null, null);
+
+				});
+			}
+
+		}
 	}
 
 }

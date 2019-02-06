@@ -20,11 +20,7 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
-import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
@@ -32,23 +28,23 @@ import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.function.BiFunction;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.rewrite;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
+
+import static org.eclipse.rdf4j.repository.util.Connections.getStatement;
 
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
@@ -112,71 +108,27 @@ import static java.util.UUID.randomUUID;
 public final class Creator extends Actor {
 
 	/**
-	 * Generates a random UUID-based slug.
+	 * Creates a random UUID-based slug generator.
 	 *
-	 * @return a random UUID-based slug
+	 * @return a slug generator returning a new random UUID for each call
 	 */
 	public static BiFunction<Request, Collection<Statement>, String> uuid() {
 		return (request, model) -> randomUUID().toString();
 	}
 
 	/**
-	 * Generates a sequential auto-incrementing slug.
+	 * Creates a sequential auto-incrementing slug generator.
 	 *
-	 * <p><strong>Warning</strong> / Missing native SPARQL support for auto-incrementing ids, auto-incrementing slug
-	 * calls are serialized in the system {@linkplain Graph#Factory graph} database using an internal lock object: this
-	 * strategy may fail for distributed containers or concurrent updates on teh SPARQL endpoint not managed by the
-	 * framework.</p>
+	 * <p><strong>Warning</strong> / SPARQL doesn't natively support auto-incrementing ids: auto-incrementing slug
+	 * calls are partly serialized in the system {@linkplain Graph#Factory graph} database using an internal lock
+	 * object; this strategy may fail for distributed containers or external concurrent updates on the SPARQL endpoint,
+	 * causing requests to fail with an {@link Response#InternalServerError} or {@link Response#Conflict} status
+	 * code.</p>
 	 *
-	 * @param shape a shape matching all the items in the auto-increment collection
-	 *
-	 * @return an auto-incrementing numeric slug uniquely identifying a new resource in the collection matched by {@code
-	 * shape}
-	 *
-	 * @throws NullPointerException if {@code shape} is null
+	 * @return a slug generator returning an auto-incrementing numeric id unique to the focus item of the request
 	 */
-	public static BiFunction<Request, Collection<Statement>, String> auto(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		final Shape matcher=shape.map(new Redactor(map(
-				entry(Form.task, set(Form.relate)),
-				entry(Form.view, set(Form.digest)),
-				entry(Form.role, set(Form.any))
-		))).map(new Optimizer());
-
-		return (request, model) -> tool(Graph.Factory).query(connection -> { // !!! tool() breaks at runtime
-
-			// !!! don't reuse identifiers
-
-			// !!! custom iri stem/pattern
-			// !!! client naming hints (http://www.w3.org/TR/ldp/ §5.2.3.10 -> https://tools.ietf.org/html/rfc5023#section-9.7)
-			// !!! normalize slug (https://tools.ietf.org/html/rfc5023#section-9.7)
-			// !!! 409 Conflict https://tools.ietf.org/html/rfc7231#section-6.5.8 for clashing slug?
-
-			final String stem=request.stem();
-			final Collection<Statement> edges=new _SPARQLEngine(connection)
-					.browse(matcher)
-					.values()
-					.stream()
-					.findFirst()
-					.orElseGet(Collections::emptySet);
-
-			long count=edges.size();
-			IRI iri;
-
-			do {
-
-				iri=iri(stem, String.valueOf(++count));
-
-			} while ( connection.hasStatement(iri, null, null, true)
-					|| connection.hasStatement(null, null, iri, true) );
-
-			return String.valueOf(count);
-
-		});
+	public static BiFunction<Request, Collection<Statement>, String> auto() {
+		return new AutoGenerator();
 	}
 
 
@@ -283,6 +235,56 @@ public final class Creator extends Actor {
 				request::reply
 
 		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class AutoGenerator implements BiFunction<Request, Collection<Statement>, String> {
+
+		private static final IRI AutoCounter=iri("app://rest.metreeca.com/terms#", "auto");
+
+
+		private final Graph graph=tool(Graph.Factory);
+
+
+		@Override public String apply(final Request request, final Collection<Statement> model) {
+			return graph.update(connection -> {
+
+				// !!! custom name pattern
+				// !!! client naming hints (http://www.w3.org/TR/ldp/ §5.2.3.10 -> https://tools.ietf.org/html/rfc5023#section-9.7)
+				// !!! normalize slug (https://tools.ietf.org/html/rfc5023#section-9.7)
+
+				final IRI stem=iri(request.stem());
+
+				long id=getStatement(connection, stem, AutoCounter, null)
+						.map(Statement::getObject)
+						.filter(value -> value instanceof Literal)
+						.map(value -> {
+							try {
+								return ((Literal)value).longValue();
+							} catch ( final NumberFormatException e ) {
+								return 0L;
+							}
+						})
+						.orElse(0L);
+
+				IRI iri;
+
+				do {
+
+					iri=iri(stem.stringValue(), String.valueOf(++id));
+
+				} while ( connection.hasStatement(iri, null, null, true)
+						|| connection.hasStatement(null, null, iri, true) );
+
+				connection.remove(stem, AutoCounter, null);
+				connection.add(stem, AutoCounter, literal(id));
+
+				return String.valueOf(id);
+
+			});
+		}
 	}
 
 }
