@@ -27,8 +27,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
 
@@ -93,46 +91,6 @@ public final class Guard implements Shape {
 
 	public Set<Value> getValues() {
 		return unmodifiableSet(values);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Applies this guard.
-	 *
-	 * @param shapes the shapes this guard is to be applied to
-	 *
-	 * @return this guard, if {@code shapes} is empty; a {@linkplain When#when(Shape, Shape) conditional} shape applying
-	 * this guard to {@code shapes}, otherwise
-	 *
-	 * @throws NullPointerException if {@code shapes} is null or contains null items
-	 */
-	public Shape then(final Shape... shapes) {
-		return then(asList(shapes));
-	}
-
-	/**
-	 * Applies this guard.
-	 *
-	 * @param shapes the shapes this guard is to be applied to
-	 *
-	 * @return this guard, if {@code shapes} is empty; a {@linkplain When#when(Shape, Shape) conditional} shape applying
-	 * this guard to {@code shapes}, otherwise
-	 *
-	 * @throws NullPointerException if {@code shapes} is null or contains null items
-	 */
-	public Shape then(final Collection<Shape> shapes) {
-
-		if ( shapes == null ) {
-			throw new NullPointerException("null shapes");
-		}
-
-		if ( shapes.contains(null) ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return shapes.isEmpty() ? this : when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}
 
 

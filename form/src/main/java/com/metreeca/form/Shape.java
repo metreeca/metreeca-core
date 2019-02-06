@@ -22,6 +22,7 @@ import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.Value;
 
+import java.util.Collection;
 import java.util.function.Function;
 
 import static com.metreeca.form.shapes.All.all;
@@ -30,9 +31,11 @@ import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
+import static com.metreeca.form.shapes.When.when;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.util.Arrays.asList;
 
 
 /**
@@ -176,6 +179,46 @@ public interface Shape {
 		}
 
 		return mapper.apply(this);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Use this shape as a test condition.
+	 *
+	 * @param shapes the shapes this shape is to be applied as a test condition
+	 *
+	 * @return this shape, if {@code shapes} is empty; a {@linkplain When#when(Shape, Shape) conditional} shape applying
+	 * this shape as test condition to {@code shapes}, otherwise
+	 *
+	 * @throws NullPointerException if {@code shapes} is null or contains null items
+	 */
+	public default Shape then(final Shape... shapes) {
+		return then(asList(shapes));
+	}
+
+	/**
+	 * Use this shape as a test condition.
+	 *
+	 * @param shapes the shapes this shape is to be applied as a test condition
+	 *
+	 * @return this shape, if {@code shapes} is empty; a {@linkplain When#when(Shape, Shape) conditional} shape applying
+	 * this shape as test condition to {@code shapes}, otherwise
+	 *
+	 * @throws NullPointerException if {@code shapes} is null or contains null items
+	 */
+	public default Shape then(final Collection<Shape> shapes) {
+
+		if ( shapes == null ) {
+			throw new NullPointerException("null shapes");
+		}
+
+		if ( shapes.contains(null) ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shapes.isEmpty() ? this : when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}
 
 
