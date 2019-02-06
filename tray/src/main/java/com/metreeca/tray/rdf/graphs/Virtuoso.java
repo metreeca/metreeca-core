@@ -113,10 +113,10 @@ public final class Virtuoso extends Graph {
 	}
 
 	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SERIALIZABLE})
+	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT})
 	 */
 	@Override protected IsolationLevel isolation() {
-		return IsolationLevels.SERIALIZABLE;
+		return IsolationLevels.SNAPSHOT;
 	}
 
 }
