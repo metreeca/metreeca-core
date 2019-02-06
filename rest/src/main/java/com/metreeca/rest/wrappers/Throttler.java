@@ -33,6 +33,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import static com.metreeca.form.Shape.constant;
 import static com.metreeca.form.shapes.All.all;
@@ -41,6 +42,7 @@ import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
+import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Maps.entry;
@@ -122,7 +124,6 @@ public final class Throttler implements Wrapper {
 	public static UnaryOperator<Shape> entity() {
 		return merge((container, resource)
 				-> TRUE.equals(constant(resource)) ? container
-				: TRUE.equals(constant(container)) ? resource
 				: and(container, field(LDP.CONTAINS, resource))
 		);
 	}
@@ -159,13 +160,18 @@ public final class Throttler implements Wrapper {
 					.map(new ResourceTraverser())
 					.map(new Optimizer());
 
-			final Shape metadata=and(fields(container) // convert container LDP properties to metadata annotations
+			final Stream<Meta> metas=metas(container) // extact existing metadata annotations
+					.entrySet().stream()
+					.map(entry -> meta(entry.getKey(), entry.getValue()));
+
+			final Stream<Meta> fields=fields(container) // convert container LDP properties to metadata annotations
 					.entrySet().stream()
 					.filter(entry -> ContainerMetadata.contains(entry.getKey()))
 					.map(entry -> entry(entry.getKey(), all(entry.getValue()).orElseGet(Sets::set)))
 					.filter(entry -> entry.getValue().size() == 1)
-					.map(entry -> meta(entry.getKey(), entry.getValue().iterator().next()))
-					.collect(toList()));
+					.map(entry -> meta(entry.getKey(), entry.getValue().iterator().next()));
+
+			final Shape metadata=and(Stream.concat(metas, fields).collect(toList()));
 
 			// container metadata is added both to container and to resource shape to drive engines
 

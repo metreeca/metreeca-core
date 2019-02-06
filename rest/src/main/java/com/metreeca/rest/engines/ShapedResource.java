@@ -18,35 +18,16 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
-import com.metreeca.form.queries.Edges;
-import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 
-import static com.metreeca.form.Focus.focus;
-import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.metas;
-import static com.metreeca.form.things.Lists.concat;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.engines.Flock.flock;
-
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -54,7 +35,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Manages CRUD lifecycle operations on resource descriptions defined by a shape.</p>
  */
-final class ShapedResource implements Engine {
+final class ShapedResource extends GraphEntity {
 
 	private final Graph graph;
 	private final Flock flock;
@@ -69,9 +50,9 @@ final class ShapedResource implements Engine {
 		this.graph=graph;
 		this.flock=flock(metas(shape)).orElseGet(Flock.None::new);
 
-		this.relate=redact(shape, Form.relate);
-		this.update=redact(shape, Form.update);
-		this.delete=redact(shape, Form.delete);
+		this.relate=redact(shape, Form.relate, Form.detail);
+		this.update=redact(shape, Form.update, Form.detail);
+		this.delete=redact(shape, Form.delete, Form.detail);
 
 	}
 
@@ -95,9 +76,8 @@ final class ShapedResource implements Engine {
 				connection.add(model);
 
 				// !!! validate before altering the db (snapshot isolation)
-				// !!! make sure the validator use update state in 'model' rather than current state in 'current'
 
-				final Focus focus=validate(connection, resource, model);
+				final Focus focus=validate(connection, resource, update, model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
 					connection.rollback();
@@ -126,52 +106,6 @@ final class ShapedResource implements Engine {
 			});
 
 		});
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Shape redact(final Shape shape, final IRI task) {
-		return shape.map(new Redactor(map(
-				entry(Form.task, set(task)),
-				entry(Form.view, set(Form.detail)),
-				entry(Form.role, set(Form.any))
-		))).map(new Optimizer());
-	}
-
-
-	private Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape task) {
-		return new SPARQLRetriever(connection)
-				.process(new Edges(and(all(resource), task)))
-				.entrySet()
-				.stream()
-				.findFirst()
-				.map(Map.Entry::getValue);
-	}
-
-	private Focus validate(final RepositoryConnection connection, final IRI resource, final Collection<Statement> model) {
-
-		// validate against shape (disable if not transactional) // !!! just downgrade
-
-		final boolean unsafe=connection.getIsolationLevel().equals(IsolationLevels.NONE);
-
-		final Focus focus=new SPARQLValidator(connection).process(unsafe ? and() : update, resource);
-
-		// validate shape envelope
-
-		final Collection<Statement> envelope=focus.outline().collect(toSet());
-
-		final Collection<Statement> outliers=unsafe ? emptySet() : model.stream()
-				.filter(statement -> !envelope.contains(statement))
-				.collect(toList());
-
-		// extend validation report with statements outside shape envelope
-
-		return outliers.isEmpty() ? focus : focus(concat(focus.getIssues(), outliers.stream()
-				.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier))
-				.collect(toList())
-		), focus.getFrames());
-
 	}
 
 }

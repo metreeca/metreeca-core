@@ -64,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.Collectors.toSet;
 
 
-final class SPARQLRetrieverTest {
+final class GraphRetrieverTest {
 
 	private final Supplier<RepositoryConnection> sandbox=ValuesTest.sandbox(ValuesTest.large());
 
@@ -147,7 +147,7 @@ final class SPARQLRetrieverTest {
 
 		final Map<Resource, Collection<Statement>> matches=stats(field(RDF.TYPE, all(RDF.NIL)));
 
-		assertThat(set(GraphEngine.meta)).as("meta focus").isEqualTo(matches.keySet());
+		assertThat(set(_SPARQLEngine.meta)).as("meta focus").isEqualTo(matches.keySet());
 
 		assertThat(model(matches))
 				.isIsomorphicTo(model("prefix spec: <"+Form.Namespace+"> construct { spec:meta spec:count 0 } where {}"));
@@ -216,7 +216,7 @@ final class SPARQLRetrieverTest {
 
 		final Map<Resource, Collection<Statement>> matches=items(field(RDF.TYPE, all(RDF.NIL)));
 
-		assertThat(set(GraphEngine.meta)).isEqualTo(matches.keySet());
+		assertThat(set(_SPARQLEngine.meta)).isEqualTo(matches.keySet());
 
 		assertThat(model(matches))
 				.isIsomorphicTo(model("construct {} where {}"));
@@ -484,7 +484,7 @@ final class SPARQLRetrieverTest {
 
 	private Map<Resource, Collection<Statement>> process(final Query query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
-			return new SPARQLRetriever(connection).process(query);
+			return new GraphRetriever(connection).process(query);
 		}
 	}
 

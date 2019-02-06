@@ -17,9 +17,7 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Shape;
-import com.metreeca.rest.Engine;
+import com.metreeca.form.*;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -28,14 +26,35 @@ import org.eclipse.rdf4j.model.Statement;
 import java.util.Collection;
 import java.util.Optional;
 
+import static com.metreeca.form.shapes.Meta.metas;
+import static com.metreeca.rest.engines.Flock.flock;
+import static com.metreeca.rest.wrappers.Throttler.resource;
+
+
 /**
  * Shape-driven container engine.
  *
  * <p>Manages CRUD lifecycle operations on container resource descriptions defined by a shape.</p>
  */
-final class ShapedContainer implements Engine {
+final class ShapedContainer extends GraphEntity {
 
-	ShapedContainer(final Graph graph, final Shape shape) {}
+	private final Graph graph;
+	private final Flock flock;
+
+	private final Shape relate;
+	private final Shape create;
+
+
+	ShapedContainer(final Graph graph, final Shape shape) {
+
+		final Shape resource=resource().apply(shape);
+
+		this.graph=graph;
+		this.flock=flock(metas(resource)).orElseGet(Flock.None::new);
+
+		this.relate=redact(resource, Form.relate, Form.digest);
+		this.create=redact(resource, Form.create, Form.detail);
+	}
 
 
 	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
@@ -43,7 +62,30 @@ final class ShapedContainer implements Engine {
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return graph.update(connection -> {
+
+			if ( lookup(connection, related) ) {
+
+				return Optional.empty();
+
+			} else {
+
+				flock.insert(connection, resource, related, model).add(model);
+
+				// !!! validate before altering the db (snapshot isolation)
+
+				final Focus focus=validate(connection, related, create, model);
+
+				if ( focus.assess(Issue.Level.Error) ) {
+					connection.rollback();
+				} else {
+					connection.commit();
+				}
+
+				return Optional.of(focus);
+			}
+
+		});
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {

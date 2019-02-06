@@ -19,7 +19,6 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
-import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
@@ -42,7 +41,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded resource descriptions.</p>
  */
- final class SimpleResource implements Engine {
+ final class SimpleResource extends GraphEntity {
 
 	private final Graph graph;
 	private final Flock flock;

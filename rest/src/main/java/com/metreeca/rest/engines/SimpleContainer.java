@@ -19,7 +19,6 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
-import com.metreeca.rest.Engine;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
@@ -41,7 +40,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded container descriptions.</p>
  */
-final class SimpleContainer implements Engine {
+final class SimpleContainer extends GraphEntity {
 
 	private final Graph graph;
 	private final Flock flock;
@@ -60,13 +59,21 @@ final class SimpleContainer implements Engine {
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
-			final Focus focus=validate(related, model);
+			if ( lookup(connection, related) ) {
 
-			if ( !focus.assess(Issue.Level.Error) ) {
-				flock.insert(connection, resource, related, model).add(model);
+				return Optional.empty();
+
+			} else {
+
+				final Focus focus=validate(related, model);
+
+				if ( !focus.assess(Issue.Level.Error) ) {
+					flock.insert(connection, resource, related, model).add(model);
+				}
+
+				return Optional.of(focus);
+
 			}
-
-			return Optional.of(focus);
 
 		});
 	}

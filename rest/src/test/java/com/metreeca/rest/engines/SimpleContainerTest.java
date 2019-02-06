@@ -34,7 +34,6 @@ import java.util.Optional;
 
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
@@ -72,14 +71,14 @@ final class SimpleContainerTest {
 		@Nested final class Create {
 
 			private final IRI container=item("/employees-basic/");
-			private final IRI resource=item("/employees-basic/123");
+			private final IRI resource=item("/employees-basic/9999");
 
 
 			@Test void testCreate() {
 				exec(() -> {
 
 					final Optional<Focus> report=engine().create(container, resource, decode(
-							"<> :code '123' .", resource.toString()
+							"<> :code '9999' .", resource.toString()
 					));
 
 					assertThat(report)
@@ -92,35 +91,36 @@ final class SimpleContainerTest {
 					assertThat(graph())
 							.as("graph updated")
 							.hasSubset(decode(""
-									+"<employees-basic/> ldp:contains <employees-basic/123>."
-									+"<employees-basic/123> :code '123' ."
+									+"<employees-basic/> ldp:contains <employees-basic/9999>."
+									+"<employees-basic/9999> :code '9999' ."
 							));
 
 				});
 			}
 
-			@Test void testCreateInDirectContainer() {
-				new Tray().exec(() -> {
+			@Test void testConflict() {
+				exec(() -> {
 
-					final Engine engine=new SimpleContainer(tool(Graph.Factory), map(
-							entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-							entry(LDP.HAS_MEMBER_RELATION, RDF.VALUE)
+					final Optional<Focus> report=engine().create(container, item("employees/1370"), decode(
+							"<> :code '1370'.", resource.toString()
 					));
 
-					engine.create(item("container"), item("resource"), set());
+					assertThat(report)
+							.as("conflict detected")
+							.isNotPresent();
 
 					assertThat(graph())
-							.as("membership triples inserted")
-							.isIsomorphicTo(decode("<container> rdf:value <resource>."));
+							.as("graph unaltered")
+							.isIsomorphicTo(dataset());
 
-				}).clear();
+				});
 			}
 
 			@Test void testExceedingData() {
 				exec(() -> {
 
 					final Optional<Focus> report=engine().create(container, resource, decode(
-							"<> :code '123'; rdf:value rdf:first. rdf:first rdf:value rdf:rest.", resource.toString()
+							"<> :code '9999'; rdf:value rdf:first. rdf:first rdf:value rdf:rest.", resource.toString()
 					));
 
 					assertThat(report)
@@ -159,14 +159,14 @@ final class SimpleContainerTest {
 		@Nested final class Create {
 
 			private final IRI container=item("/employees/");
-			private final IRI resource=item("/employees/123");
+			private final IRI resource=item("/employees/9999");
 
 
 			@Test void testCreate() {
 				exec(() -> {
 
 					final Optional<Focus> report=engine().create(container, resource, decode(
-							"<> :code '123'.", resource.toString()
+							"<> :code '9999'.", resource.toString()
 					));
 
 					assertThat(report)
@@ -179,33 +179,35 @@ final class SimpleContainerTest {
 					assertThat(graph())
 							.as("graph updated")
 							.hasSubset(decode(
-									"<employees/123> a :Employee; :code '123'."
+									"<employees/9999> a :Employee; :code '9999'."
 							));
 
 				});
 			}
 
-			@Test void testCreateInBasicContainer() {
-				new Tray().exec(() -> {
+			@Test void testConflict() {
+				exec(() -> {
 
-					final Engine engine=new SimpleContainer(tool(Graph.Factory), map(
-							entry(RDF.TYPE, LDP.BASIC_CONTAINER)
+					final Optional<Focus> report=engine().create(container, item("employees/1370"), decode(
+							"<> :code '1370'.", resource.toString()
 					));
 
-					engine.create(item("container"), item("resource"), set());
+					assertThat(report)
+							.as("conflict detected")
+							.isNotPresent();
 
 					assertThat(graph())
-							.as("membership triples inserted")
-							.isIsomorphicTo(decode("<container> ldp:contains <resource>."));
+							.as("graph unaltered")
+							.isIsomorphicTo(dataset());
 
-				}).clear();
+				});
 			}
 
 			@Test void testExceedingData() {
 				exec(() -> {
 
 					final Optional<Focus> report=engine().create(container, resource, decode(
-							"<> :code '123'; rdf:value rdf:first. rdf:first rdf:value rdf:rest.", resource.toString()
+							"<> :code '9999'; rdf:value rdf:first. rdf:first rdf:value rdf:rest.", resource.toString()
 					));
 
 					assertThat(report)
@@ -227,4 +229,3 @@ final class SimpleContainerTest {
 	}
 
 }
-

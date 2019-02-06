@@ -37,9 +37,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.Shape.relate;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
@@ -408,6 +408,14 @@ final class ThrottlerTest {
 						.isEqualTo(Employee.map(new Optimizer()));
 			}
 
+			@Test void testPreserveExistingAnnotations() {
+
+				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
+
+				assertThat(resource().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
+
+			}
+
 		}
 
 		@Nested final class Container {
@@ -438,6 +446,14 @@ final class ThrottlerTest {
 				assertThat(container().apply(Employee))
 						.as("no container shape found")
 						.isEqualTo(pass());
+
+			}
+
+			@Test void testPreserveExistingAnnotations() {
+
+				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER), field(LDP.CONTAINS));
+
+				assertThat(container().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
 			}
 

@@ -55,8 +55,8 @@ public interface Engine {
 	 * @param model    the description for the new related resource owned by {@code resource}; must describe the related
 	 *                 resource using {@code related} as subject
 	 *
-	 * @return an optional validation report for the operation; empty if a description for {@code resource} was not
-	 * found
+	 * @return an optional validation report for the operation; empty a description for {@code resource} is already
+	 * present
 	 *
 	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
 	 * @throws UnsupportedOperationException if resource creation is not supported by this engine

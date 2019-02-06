@@ -35,6 +35,7 @@ import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
+import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.rewrite;
 
 import static java.util.Collections.emptySet;
@@ -46,6 +47,9 @@ import static java.util.stream.Collectors.toSet;
  * Shape-driven SPARQL query/update engine.
  */
 public final class _SPARQLEngine {
+
+	public static final IRI meta=iri(Form.Namespace, "meta"); // !!! remove
+
 
 	public static boolean transactional(final RepositoryConnection connection) {
 		return !connection.getIsolationLevel().equals(IsolationLevels.NONE);
@@ -84,7 +88,7 @@ public final class _SPARQLEngine {
 			throw new NullPointerException("null query");
 		}
 
-		return new SPARQLRetriever(connection).process(query);
+		return new GraphRetriever(connection).process(query);
 	}
 
 	public Collection<Statement> browse(final Query query, final IRI focus) { // !!! review/remove
@@ -98,7 +102,7 @@ public final class _SPARQLEngine {
 		}
 
 		return browse(query).values().stream()
-				.flatMap(statements -> statements.stream().map(statement -> rewrite(GraphEngine.meta, focus, statement)))
+				.flatMap(statements -> statements.stream().map(statement -> rewrite(_SPARQLEngine.meta, focus, statement)))
 				.collect(toList());
 	}
 
@@ -115,7 +119,7 @@ public final class _SPARQLEngine {
 			throw new NullPointerException("null shape");
 		}
 
-		return new SPARQLRetriever(connection)
+		return new GraphRetriever(connection)
 				.process(new Edges(and(all(focus), shape)))
 				.entrySet()
 				.stream()
@@ -143,7 +147,7 @@ public final class _SPARQLEngine {
 		// upload statements to repository and validate against shape
 		// disable shape-driven validation if not transactional // !!! just downgrade
 
-		final Focus report=new SPARQLValidator(connection).process(transactional ? shape : and(), focus);
+		final Focus report=new GraphValidator(connection).process(transactional ? shape : and(), focus);
 
 		// validate shape envelope // !!! validate even if not transactional
 

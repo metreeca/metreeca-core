@@ -22,7 +22,6 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Lists;
-import com.metreeca.form.things.Sets;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -41,6 +40,7 @@ import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.Sets.complement;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.*;
@@ -51,9 +51,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-final class SPARQLValidator {
+final class GraphValidator {
 
-	private static final Logger logger=Logger.getLogger(SPARQLValidator.class.getName()); // !!! migrate logging to Trace?
+	private static final Logger logger=Logger.getLogger(GraphValidator.class.getName()); // !!! migrate logging to Trace?
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ final class SPARQLValidator {
 	private final RepositoryConnection connection;
 
 
-	public SPARQLValidator(final RepositoryConnection connection) {
+	public GraphValidator(final RepositoryConnection connection) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");
@@ -349,7 +349,7 @@ final class SPARQLValidator {
 
 				// create an empty frame for each unreferenced value to support statement outlining
 
-				final List<Frame> placeholders=Sets.complement(focus, referenced).stream()
+				final List<Frame> placeholders=complement(focus, referenced).stream()
 						.map(Frame::frame)
 						.collect(toList());
 
