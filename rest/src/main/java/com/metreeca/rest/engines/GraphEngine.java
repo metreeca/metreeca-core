@@ -61,7 +61,7 @@ public final class GraphEngine implements Engine {
 
 		final Map<IRI, Value> metadata=metas(shape);
 
-		this.resource=simple ? new GraphResource.Simple(graph, metadata) : new GraphResource.ShapedResource(graph, shape);
+		this.resource=simple ? new SimpleResource(graph, metadata) : new ShapedResource(graph, shape);
 		this.container=simple ? new SimpleContainer(graph, metadata) : new ShapedContainer(graph, shape);
 	}
 

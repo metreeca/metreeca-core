@@ -41,16 +41,45 @@ import java.util.logging.Logger;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.indent;
-import static com.metreeca.form.things.Values.bnode;
-import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.Values.*;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 
 
 final class ShapedRetriever {
+
+	public static final IRI meta=iri(Form.Namespace, "meta"); // !!! remove
+
+
+	public Map<Resource, Collection<Statement>> browse(final Query query) {
+
+		if ( query == null ) {
+			throw new NullPointerException("null query");
+		}
+
+		return new ShapedRetriever(connection).process(query);
+	}
+
+	public Collection<Statement> browse(final Query query, final IRI focus) { // !!! review/remove
+
+		if ( query == null ) {
+			throw new NullPointerException("null query");
+		}
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		return browse(query).values().stream()
+				.flatMap(statements -> statements.stream().map(statement -> rewrite(ShapedRetriever.meta, focus, statement)))
+				.collect(toList());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// !!! log compilation/execution times
 
@@ -236,7 +265,7 @@ final class ShapedRetriever {
 				final Value min=bindings.getValue("min");
 				final Value max=bindings.getValue("max");
 
-				if ( type != null ) { model.add(_SPARQLEngine.meta, Form.stats, type); }
+				if ( type != null ) { model.add(meta, Form.stats, type); }
 				if ( type != null && count != null ) { model.add(type, Form.count, count); }
 				if ( type != null && min != null ) { model.add(type, Form.min, min); }
 				if ( type != null && max != null ) { model.add(type, Form.max, max); }
@@ -249,7 +278,7 @@ final class ShapedRetriever {
 
 		});
 
-		model.add(_SPARQLEngine.meta, Form.count, literal(BigInteger.valueOf(counts.stream()
+		model.add(meta, Form.count, literal(BigInteger.valueOf(counts.stream()
 				.filter(Objects::nonNull)
 				.mapToLong(Literal::longValue)
 				.sum())));
@@ -257,14 +286,14 @@ final class ShapedRetriever {
 		mins.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.LT) ? x : y)
-				.ifPresent(min -> model.add(_SPARQLEngine.meta, Form.min, min));
+				.ifPresent(min -> model.add(meta, Form.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
-				.ifPresent(max -> model.add(_SPARQLEngine.meta, Form.max, max));
+				.ifPresent(max -> model.add(meta, Form.max, max));
 
-		return singletonMap(_SPARQLEngine.meta, model);
+		return singletonMap(meta, model);
 	}
 
 	private Map<Resource, Collection<Statement>> items(final Items items) {
@@ -320,7 +349,7 @@ final class ShapedRetriever {
 
 				final BNode item=bnode();
 
-				if ( item != null ) { model.add(_SPARQLEngine.meta, Form.items, item); }
+				if ( item != null ) { model.add(meta, Form.items, item); }
 				if ( item != null && value != null ) { model.add(item, Form.value, value); }
 				if ( item != null && count != null ) { model.add(item, Form.count, count); }
 
@@ -333,7 +362,7 @@ final class ShapedRetriever {
 			}
 		});
 
-		return singletonMap(_SPARQLEngine.meta, model);
+		return singletonMap(meta, model);
 	}
 
 

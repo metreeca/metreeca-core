@@ -147,7 +147,7 @@ final class ShapedRetrieverTest {
 
 		final Map<Resource, Collection<Statement>> matches=stats(field(RDF.TYPE, all(RDF.NIL)));
 
-		assertThat(set(_SPARQLEngine.meta)).as("meta focus").isEqualTo(matches.keySet());
+		assertThat(set(ShapedRetriever.meta)).as("meta focus").isEqualTo(matches.keySet());
 
 		assertThat(model(matches))
 				.isIsomorphicTo(model("prefix spec: <"+Form.Namespace+"> construct { spec:meta spec:count 0 } where {}"));
@@ -216,7 +216,7 @@ final class ShapedRetrieverTest {
 
 		final Map<Resource, Collection<Statement>> matches=items(field(RDF.TYPE, all(RDF.NIL)));
 
-		assertThat(set(_SPARQLEngine.meta)).isEqualTo(matches.keySet());
+		assertThat(set(ShapedRetriever.meta)).isEqualTo(matches.keySet());
 
 		assertThat(model(matches))
 				.isIsomorphicTo(model("construct {} where {}"));

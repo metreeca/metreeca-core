@@ -22,7 +22,6 @@ import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines._SPARQLEngine;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
@@ -39,8 +38,6 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.form.queries.Items.ItemsShape;
-import static com.metreeca.form.queries.Stats.StatsShape;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
@@ -234,10 +231,10 @@ public final class Relator extends Actor {
 
 			} else {
 
-				new _SPARQLEngine(connection).browse(edges).forEach((focus, statements) -> {
-					model.add(statement(item, LDP.CONTAINS, focus));
-					model.addAll(statements);
-				});
+				//new _SPARQLEngine(connection).browse(edges).forEach((focus, statements) -> {
+				//	model.add(statement(item, LDP.CONTAINS, focus));
+				//	model.addAll(statements);
+				//});
 
 			}
 
@@ -259,12 +256,14 @@ public final class Relator extends Actor {
 		//return r.shape(StatsShape)
 		//		.body(rdf(), rewrite(_SPARQLEngine.meta, item, model));
 
-		return graph.query(connection -> {
-			return response.status(Response.OK)
-					.shape(StatsShape)
-					.body(rdf(), new _SPARQLEngine(connection).browse(stats, response.item()));
+		//return graph.query(connection -> {
+		//	return response.status(Response.OK)
+		//			.shape(StatsShape)
+		//			.body(rdf(), new _SPARQLEngine(connection).browse(stats, response.item()));
+		//
+		//});
 
-		});
+		return response;
 	}
 
 	private Response items(final Query items, final Response response) {
@@ -272,12 +271,14 @@ public final class Relator extends Actor {
 		//return r.shape(ItemsShape)
 		//		.body(rdf(), rewrite(_SPARQLEngine.meta, item, model));
 
-		return graph.query(connection -> {
-			return response.status(Response.OK)
-					.shape(ItemsShape)
-					.body(rdf(), new _SPARQLEngine(connection).browse(items, response.item()));
+		//return graph.query(connection -> {
+		//	return response.status(Response.OK)
+		//			.shape(ItemsShape)
+		//			.body(rdf(), new _SPARQLEngine(connection).browse(items, response.item()));
+		//
+		//});
 
-		});
+		return response;
 	}
 
 
