@@ -25,9 +25,9 @@ import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
-@Disabled final class CreatorTest {
+final class CreatorTest {
 
 	private void exec(final Runnable task) {
 		new Tray().exec(task).clear();
@@ -68,12 +68,6 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 						+" :seniority 1 ."
 				));
 	}
-
-	private Request shaped() {
-		return simple()
-				.shape(Employee);
-	}
-
 
 	private Function<Request, Request> body(final String rdf) {
 		return request -> request.body(input(), () -> Codecs.input(new StringReader(rdf)));
@@ -192,10 +186,37 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 					}));
 		}
 
+		@Test void testConflictingSlug() {
+			exec(() -> {
+
+				final Creator creator=new Creator((request, model) -> "slug");
+
+				creator.handle(simple()).accept(response -> {});
+
+				final Model snapshot=graph();
+
+				creator.handle(simple()).accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.InternalServerError);
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isIsomorphicTo(snapshot);
+
+				});
+
+			});
+		}
+
 	}
 
-
 	@Nested final class Shaped {
+
+		private Request shaped() {
+			return simple().shape(Employee);
+		}
+
 
 		@Test void testCreate() {
 			exec(() -> new Creator()
@@ -223,12 +244,6 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 										statement(location, RDF.TYPE, term("Employee")),
 										statement(location, term("forename"), literal("Tino")),
 										statement(location, term("surname"), literal("Faussone"))
-								);
-
-						assertThat(graph())
-								.as("basic container connected to resource description")
-								.hasSubset(
-										statement(response.request().item(), LDP.CONTAINS, location)
 								);
 
 					}));
@@ -360,6 +375,29 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 								.isEmpty();
 
 					}));
+		}
+
+		@Test void testConflictingSlug() {
+			exec(() -> {
+
+				final Creator creator=new Creator((request, model) -> "slug");
+
+				creator.handle(shaped()).accept(response -> {});
+
+				final Model snapshot=graph();
+
+				creator.handle(shaped()).accept(response -> {
+
+					assertThat(response)
+							.hasStatus(Response.InternalServerError);
+
+					assertThat(graph())
+							.as("graph unchanged")
+							.isIsomorphicTo(snapshot);
+
+				});
+
+			});
 		}
 
 	}

@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers.actors;
 
 
-import com.metreeca.form.Focus;
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Shape;
@@ -33,15 +32,12 @@ import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 import javax.json.JsonValue;
 
@@ -50,10 +46,11 @@ import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.rewrite;
-import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
 
+import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 
 
@@ -114,136 +111,12 @@ import static java.util.UUID.randomUUID;
  */
 public final class Creator extends Actor {
 
-	/*
-	 * Shared lock for serializing slug operations (concurrent graph txns may produce conflicting results).
-	 */
-	private static final Supplier<Object> LockFactory=Object::new; // !!! ;( breaks in distributed containers
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final Graph graph=tool(Graph.Factory);
-	private final Trace trace=tool(Trace.Factory);
-
-	private final Object lock=tool(LockFactory);
-
-
-	private final BiFunction<Request, Model, String> slug;
-
-
-	/**
-	 * Creates a resource creator with a {@linkplain #uuid() UUID} slug generator.
-	 */
-	public Creator() {
-		this(uuid());
-	}
-
-	/**
-	 * Creates a resource creator.
-	 *
-	 * @param slug a function mapping from the creation request and its RDF payload to the name to be assigned to the
-	 *             newly created resource; must return a non-null and non-empty value
-	 *
-	 * @throws NullPointerException if {@code slug} is null
-	 */
-	public Creator(final BiFunction<Request, Model, String> slug) {
-
-		if ( slug == null ) {
-			throw new NullPointerException("null slug");
-		}
-
-		this.slug=slug;
-
-		delegate(creator().with(throttler()));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Wrapper throttler() {
-		return new Throttler(Form.create, Form.detail, Throttler.resource());
-	}
-
-	private Handler creator() {
-		return handler(Request::container, container(), resource());
-	}
-
-	private Handler resource() {
-		return request -> request.reply(new Failure()
-				.status(Response.MethodNotAllowed)
-				.cause("LDP resource creation not supported")
-		);
-	}
-
-	private Handler container() {
-		return request -> request.body(rdf()).fold(
-
-				model -> request.reply(response -> graph.update(connection -> {
-
-					synchronized ( lock ) { // attempt to serialize slug handling from multiple txns
-
-
-						final String slug=this.slug.apply(request, new LinkedHashModel(model));
-
-						if ( slug == null ) {
-							throw new NullPointerException("null slug");
-						}
-
-						if ( slug.isEmpty() ) {
-							throw new IllegalArgumentException("empty slug");
-						}
-
-						final IRI source=request.item();
-						final IRI target=iri(request.stem(), slug);
-
-						final Shape shape=request.shape();
-						final Collection<Statement> rewritten=trace.debug(this, rewrite(source, target, model));
-
-						final Focus focus=null; // !!!
-
-						//final Focus focus=!request.shaped()
-						//		? new _CellEngine(connection).create(target, null, rewritten)
-						//		: new _SPARQLEngine(connection).create(target, shape, rewritten);
-
-						if ( focus.assess(Level.Error) ) { // cell/shape violations
-
-							connection.rollback();
-
-							return response.map(new Failure()
-									.status(Response.UnprocessableEntity)
-									.error(Failure.DataInvalid)
-									.trace(focus)
-							);
-
-						} else { // valid data
-
-							connection.add(source, LDP.CONTAINS, target); // insert resource into container
-
-							connection.commit();
-
-							return response
-									.status(Response.Created)
-									.header("Location", target.stringValue());
-
-						}
-					}
-
-				})),
-
-				request::reply
-
-		);
-	}
-
-
-	//// Slug Functions ////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * Generates a random UUID-based slug.
 	 *
 	 * @return a random UUID-based slug
 	 */
-	public static BiFunction<Request, Model, String> uuid() {
+	public static BiFunction<Request, Collection<Statement>, String> uuid() {
 		return (request, model) -> randomUUID().toString();
 	}
 
@@ -262,7 +135,7 @@ public final class Creator extends Actor {
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public static BiFunction<Request, Model, String> auto(final Shape shape) {
+	public static BiFunction<Request, Collection<Statement>, String> auto(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -304,6 +177,112 @@ public final class Creator extends Actor {
 			return String.valueOf(count);
 
 		});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Trace trace=tool(Trace.Factory);
+
+	/*
+	 * Shared lock for taming serialization issues with slug operations (concurrent graph txns may produce conflicts).
+	 */
+	private final Object lock=new Object();
+
+
+	private final BiFunction<Request, Collection<Statement>, String> slug;
+
+
+	/**
+	 * Creates a resource creator with a {@linkplain #uuid() UUID} slug generator.
+	 */
+	public Creator() {
+		this(uuid());
+	}
+
+	/**
+	 * Creates a resource creator.
+	 *
+	 * @param slug a function mapping from the creation request and its RDF payload to the name to be assigned to the
+	 *             newly created resource; must return a non-null and non-empty value
+	 *
+	 * @throws NullPointerException if {@code slug} is null
+	 */
+	public Creator(final BiFunction<Request, Collection<Statement>, String> slug) {
+
+		if ( slug == null ) {
+			throw new NullPointerException("null slug");
+		}
+
+		this.slug=slug;
+
+		delegate(creator().with(throttler()));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Wrapper throttler() {
+		return new Throttler(Form.create, Form.detail, resource());
+	}
+
+	private Handler creator() {
+		return request -> request.body(rdf()).fold(
+
+				model -> {
+					synchronized ( lock ) { // attempt to serialize slug operations from multiple txns
+
+						final String name=slug.apply(request, model);
+
+						if ( name == null ) {
+							throw new NullPointerException("null resource name");
+						}
+
+						if ( name.isEmpty() ) {
+							throw new IllegalArgumentException("empty resource name");
+						}
+
+						final IRI source=request.item();
+						final IRI target=iri(request.stem(), name);
+
+						return request.reply(response -> engine(request.shape())
+
+								// !!! recognize txns failures due to conflicting slugs and report as 409 Conflict
+
+								.create(source, target, trace.debug(this, rewrite(source, target, model)))
+
+								.map(focus -> focus.assess(Level.Error) // shape violations
+
+										? response.map(new Failure()
+										.status(Response.UnprocessableEntity)
+										.error(Failure.DataInvalid)
+										.trace(focus))
+
+										: response
+										.status(Response.Created)
+										.header("Location", target.stringValue())
+
+								)
+
+								.orElseGet(() -> {
+
+									trace.error(this, format("conflicting slug {%s}", target));
+
+									return response.map(new Failure()
+											.status(Response.InternalServerError)
+											.cause("see server logs for details")
+									);
+
+								})
+
+						);
+
+					}
+				},
+
+				request::reply
+
+		);
 	}
 
 }

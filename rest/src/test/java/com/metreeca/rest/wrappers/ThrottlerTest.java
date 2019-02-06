@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 
 import static com.metreeca.form.Shape.relate;
+import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.shapes.Field.field;
@@ -451,7 +452,7 @@ final class ThrottlerTest {
 
 			@Test void testPreserveExistingAnnotations() {
 
-				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER), field(LDP.CONTAINS));
+				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER), field(LDP.CONTAINS, required()));
 
 				assertThat(container().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 

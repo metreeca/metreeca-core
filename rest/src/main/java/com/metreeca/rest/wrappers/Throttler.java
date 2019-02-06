@@ -453,7 +453,7 @@ public final class Throttler implements Wrapper {
 
 	}
 
-	private static class ResourceTraverser extends Traverser<Shape> {
+	private static final class ResourceTraverser extends Traverser<Shape> {
 
 		@Override public Shape probe(final Shape shape) {
 			return and();
