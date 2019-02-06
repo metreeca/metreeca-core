@@ -21,19 +21,15 @@ import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.metreeca.form.Focus.focus;
-import static com.metreeca.form.Issue.issue;
-import static com.metreeca.rest.engines.Descriptions.description;
 import static com.metreeca.rest.engines.Flock.flock;
-
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -100,26 +96,6 @@ import static java.util.stream.Collectors.toList;
 
 		});
 
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Optional<Collection<Statement>> retrieve(
-			final RepositoryConnection connection, final Resource resource, final boolean labelled
-	) {
-		return Optional.of(description(resource, labelled, connection)).filter(statements -> !statements.isEmpty());
-	}
-
-	private Focus validate(final Resource resource, final Collection<Statement> model) {
-
-		final Collection<Statement> envelope=description(resource, false, model);
-
-		return focus(model.stream()
-				.filter(statement -> !envelope.contains(statement))
-				.map(outlier -> issue(Issue.Level.Error, "statement outside description envelope "+outlier))
-				.collect(toList())
-		);
 	}
 
 }

@@ -46,11 +46,11 @@ interface Flock {
 
 
 	public RepositoryConnection insert(final RepositoryConnection connection,
-			final IRI container, final IRI resource, final Collection<Statement> model
+			final Resource container, final Resource resource, final Collection<Statement> model
 	);
 
 	public RepositoryConnection remove(final RepositoryConnection connection,
-			final IRI resource, final Collection<Statement> model
+			final Resource resource, final Collection<Statement> model
 	);
 
 
@@ -59,7 +59,7 @@ interface Flock {
 	final class None implements Flock {
 
 		@Override public RepositoryConnection insert(final RepositoryConnection connection,
-				final IRI container, final IRI resource, final Collection<Statement> model
+				final Resource container, final Resource resource, final Collection<Statement> model
 		) {
 
 			return connection;
@@ -67,7 +67,7 @@ interface Flock {
 		}
 
 		@Override public RepositoryConnection remove(final RepositoryConnection connection,
-				final IRI resource, final Collection<Statement> model
+				final Resource resource, final Collection<Statement> model
 		) {
 
 			return connection;
@@ -79,7 +79,7 @@ interface Flock {
 	final class Basic implements Flock {
 
 		@Override public RepositoryConnection insert(final RepositoryConnection connection,
-				final IRI container, final IRI resource, final Collection<Statement> model
+				final Resource container, final Resource resource, final Collection<Statement> model
 		) {
 
 			connection.add(container, LDP.CONTAINS, resource);
@@ -89,7 +89,7 @@ interface Flock {
 		}
 
 		@Override public RepositoryConnection remove(final RepositoryConnection connection,
-				final IRI resource, final Collection<Statement> model
+				final Resource resource, final Collection<Statement> model
 		) {
 
 			connection.remove((Resource)null, LDP.CONTAINS, resource);
@@ -129,7 +129,7 @@ interface Flock {
 
 			} else {
 
-				this.relation= LDP.CONTAINS;
+				this.relation=LDP.MEMBER;
 				this.subject=(target == null) ? LDP.CONTAINER : (target instanceof Resource) ? (Resource)target : null;
 				this.object=null;
 
@@ -139,7 +139,7 @@ interface Flock {
 
 
 		@Override public RepositoryConnection insert(final RepositoryConnection connection,
-				final IRI container, final IRI resource, final Collection<Statement> model
+				final Resource container, final Resource resource, final Collection<Statement> model
 		) {
 
 			if ( relation != null && subject != null ) {
@@ -154,7 +154,7 @@ interface Flock {
 		}
 
 		@Override public RepositoryConnection remove(final RepositoryConnection connection,
-				final IRI resource, final Collection<Statement> model
+				final Resource resource, final Collection<Statement> model
 		) {
 
 			if ( relation != null && subject != null ) {

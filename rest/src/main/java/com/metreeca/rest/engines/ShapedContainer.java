@@ -64,11 +64,7 @@ final class ShapedContainer extends GraphEntity {
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
-			if ( lookup(connection, related) ) {
-
-				return Optional.empty();
-
-			} else {
+			return reserve(connection, related).map(reserved -> {
 
 				flock.insert(connection, resource, related, model).add(model);
 
@@ -82,8 +78,9 @@ final class ShapedContainer extends GraphEntity {
 					connection.commit();
 				}
 
-				return Optional.of(focus);
-			}
+				return focus;
+
+			});
 
 		});
 	}

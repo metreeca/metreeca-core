@@ -242,7 +242,7 @@ public final class Creator extends Actor {
 
 	private static final class AutoGenerator implements BiFunction<Request, Collection<Statement>, String> {
 
-		private static final IRI AutoCounter=iri("app://rest.metreeca.com/terms#", "auto");
+		private static final IRI Auto=iri("app://rest.metreeca.com/terms#", "auto");
 
 
 		private final Graph graph=tool(Graph.Factory);
@@ -257,7 +257,7 @@ public final class Creator extends Actor {
 
 				final IRI stem=iri(request.stem());
 
-				long id=getStatement(connection, stem, AutoCounter, null)
+				long id=getStatement(connection, stem, Auto, null)
 						.map(Statement::getObject)
 						.filter(value -> value instanceof Literal)
 						.map(value -> {
@@ -278,8 +278,8 @@ public final class Creator extends Actor {
 				} while ( connection.hasStatement(iri, null, null, true)
 						|| connection.hasStatement(null, null, iri, true) );
 
-				connection.remove(stem, AutoCounter, null);
-				connection.add(stem, AutoCounter, literal(id));
+				connection.remove(stem, Auto, null);
+				connection.add(stem, Auto, literal(id));
 
 				return String.valueOf(id);
 

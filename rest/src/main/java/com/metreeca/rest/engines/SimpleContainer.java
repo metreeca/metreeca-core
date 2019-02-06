@@ -21,18 +21,15 @@ import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.metreeca.form.Focus.focus;
-import static com.metreeca.form.Issue.issue;
-import static com.metreeca.rest.engines.Descriptions.description;
 import static com.metreeca.rest.engines.Flock.flock;
-
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -59,21 +56,17 @@ final class SimpleContainer extends GraphEntity {
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
-			if ( lookup(connection, related) ) {
-
-				return Optional.empty();
-
-			} else {
+			return reserve(connection, related).map(reserved -> {
 
 				final Focus focus=validate(related, model);
 
 				if ( !focus.assess(Issue.Level.Error) ) {
-					flock.insert(connection, resource, related, model).add(model);
+					flock.insert(connection, resource, reserved, model).add(model);
 				}
 
-				return Optional.of(focus);
+				return focus;
 
-			}
+			});
 
 		});
 	}
@@ -84,20 +77,6 @@ final class SimpleContainer extends GraphEntity {
 
 	@Override public Optional<IRI> delete(final IRI resource) {
 		throw new UnsupportedOperationException("simple container deletion not supported");
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Focus validate(final Resource resource, final Collection<Statement> model) {
-
-		final Collection<Statement> envelope=description(resource, false, model);
-
-		return focus(model.stream()
-				.filter(statement -> !envelope.contains(statement))
-				.map(outlier -> issue(Issue.Level.Error, "statement outside description envelope "+outlier))
-				.collect(toList())
-		);
 	}
 
 }

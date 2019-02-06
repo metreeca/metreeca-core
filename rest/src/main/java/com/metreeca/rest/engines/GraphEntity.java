@@ -41,6 +41,7 @@ import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.rest.engines.Descriptions.description;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -49,7 +50,35 @@ import static java.util.stream.Collectors.toSet;
 
 abstract class GraphEntity implements Engine {
 
-	protected Shape redact(final Shape shape, final IRI task, final IRI view) {
+	Optional<Resource> reserve(final RepositoryConnection connection, final Resource resource) {
+		return Optional.ofNullable(connection.hasStatement(resource, null, null, true)
+				|| connection.hasStatement(null, null, resource, true) ? null : resource);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Optional<Collection<Statement>> retrieve(
+			final RepositoryConnection connection, final Resource resource, final boolean labelled
+	) {
+		return Optional.of(description(resource, labelled, connection)).filter(statements -> !statements.isEmpty());
+	}
+
+	Focus validate(final Resource resource, final Collection<Statement> model) {
+
+		final Collection<Statement> envelope=description(resource, false, model);
+
+		return focus(model.stream()
+				.filter(statement -> !envelope.contains(statement))
+				.map(outlier -> issue(Issue.Level.Error, "statement outside description envelope "+outlier))
+				.collect(toList())
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Shape redact(final Shape shape, final IRI task, final IRI view) {
 		return shape.map(new Redactor(map(
 				entry(Form.task, set(task)),
 				entry(Form.view, set(view)),
@@ -58,12 +87,7 @@ abstract class GraphEntity implements Engine {
 	}
 
 
-	protected boolean lookup(final RepositoryConnection connection, final Resource resource) {
-		return connection.hasStatement(resource, null, null, true)
-				|| connection.hasStatement(null, null, resource, true);
-	}
-
-	protected Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape task) {
+	Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape task) {
 		return new GraphRetriever(connection)
 				.process(new Edges(and(all(resource), task)))
 				.entrySet()
@@ -72,7 +96,7 @@ abstract class GraphEntity implements Engine {
 				.map(Map.Entry::getValue);
 	}
 
-	protected Focus validate(final RepositoryConnection connection, final IRI resource, final Shape shape, final Collection<Statement> model) {
+	Focus validate(final RepositoryConnection connection, final IRI resource, final Shape shape, final Collection<Statement> model) {
 
 		// !!! make sure the validator use updated resource state in 'model' rather than current state in the store
 
