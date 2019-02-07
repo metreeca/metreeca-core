@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
@@ -70,7 +71,7 @@ public interface Engine {
 			throw new NullPointerException("null resource");
 		}
 
-		return relate(resource, shape -> Value(new Edges(shape)), (shape, model) -> model).value().orElseGet(Sets::set);
+		return relate(resource, shape -> Value(edges(shape)), (shape, model) -> model).value().orElseGet(Sets::set);
 	}
 
 	public <V, E> Result<V, E> relate(final IRI resource,
@@ -95,7 +96,7 @@ public interface Engine {
 			throw new NullPointerException("null resource");
 		}
 
-		return browse(resource, shape -> Value(new Edges(shape)), (shape, model) -> model).value().orElseGet(Sets::set);
+		return browse(resource, shape -> Value(edges(shape)), (shape, model) -> model).value().orElseGet(Sets::set);
 	}
 
 	public default  <V, E> Result<V, E> browse(final IRI resource,

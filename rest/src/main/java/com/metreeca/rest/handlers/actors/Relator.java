@@ -19,7 +19,6 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.queries.Edges;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
@@ -33,6 +32,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.rest.Response.NotFound;
@@ -208,7 +208,7 @@ public final class Relator extends Actor {
 
 								return engine
 
-										.relate(item, shape -> Value(new Edges(shape)), (cshape, cmodel) -> response
+										.relate(item, shape -> Value(edges(shape)), (cshape, cmodel) -> response
 												.status(OK)
 												.shape(and(cshape, field(LDP.CONTAINS, rshape)))
 												.body(rdf(), union(cmodel, rmodel))

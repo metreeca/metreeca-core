@@ -464,15 +464,15 @@ final class ShapedRetrieverTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Map<Resource, Collection<Statement>> edges(final Shape shape, final Order... orders) {
-		return process(new Edges(shape, list(orders), 0, 0));
+		return process(Edges.edges(shape, list(orders), 0, 0));
 	}
 
 	private Map<Resource, Collection<Statement>> stats(final Shape shape, final IRI... path) {
-		return process(new Stats(shape, list(path)));
+		return process(Stats.stats(shape, list(path)));
 	}
 
 	private Map<Resource, Collection<Statement>> items(final Shape shape, final IRI... path) {
-		return process(new Items(shape, list(path)));
+		return process(Items.items(shape, list(path)));
 	}
 
 

@@ -20,7 +20,6 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
-import com.metreeca.form.queries.Edges;
 import com.metreeca.rest.Engine;
 
 import org.eclipse.rdf4j.IsolationLevels;
@@ -35,6 +34,7 @@ import java.util.Optional;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
+import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
@@ -89,7 +89,7 @@ abstract class GraphEntity implements Engine {
 
 	Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
 		return new ShapedRetriever(connection)
-				.process(new Edges(and(all(resource), shape)))
+				.process(edges(and(all(resource), shape)))
 				.entrySet()
 				.stream()
 				.findFirst()

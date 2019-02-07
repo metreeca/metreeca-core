@@ -53,6 +53,11 @@ public final class Items implements Query {
 	);
 
 
+	public static Items items(final Shape shape, final List<IRI> path) {
+		return new Items(shape, path);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
@@ -60,7 +65,7 @@ public final class Items implements Query {
 	private final List<IRI> path;
 
 
-	public Items(final Shape shape, final List<IRI> path) {
+	private Items(final Shape shape, final List<IRI> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

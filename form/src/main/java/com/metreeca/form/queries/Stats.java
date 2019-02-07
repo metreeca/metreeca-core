@@ -51,6 +51,11 @@ public final class Stats implements Query {
 	);
 
 
+	public static Stats stats(final Shape shape, final List<IRI> path) {
+		return new Stats(shape, path);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
@@ -58,7 +63,7 @@ public final class Stats implements Query {
 	private final List<IRI> path;
 
 
-	public Stats(final Shape shape, final List<IRI> path) {
+	private Stats(final Shape shape, final List<IRI> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

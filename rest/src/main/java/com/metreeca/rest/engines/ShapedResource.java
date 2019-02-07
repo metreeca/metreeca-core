@@ -18,7 +18,6 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
-import com.metreeca.form.queries.Edges;
 import com.metreeca.form.things.Sets;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
@@ -31,6 +30,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
@@ -77,7 +77,7 @@ final class ShapedResource extends GraphEntity {
 
 				query -> {
 
-					if ( query.equals(new Edges(relate))) {
+					if ( query.equals(edges(relate))) {
 
 						return Value(mapper.apply(relate, relate(resource)));
 

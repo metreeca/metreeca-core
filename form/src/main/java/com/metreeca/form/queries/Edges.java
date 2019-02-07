@@ -33,6 +33,17 @@ import static java.util.Collections.unmodifiableList;
 
 public final class Edges implements Query {
 
+	public static Edges edges(final Shape shape) {
+		return new Edges(shape, emptyList(), 0, 0);
+	}
+
+	public static Edges edges(final Shape shape, final List<Order> orders, final int offset, final int limit) {
+		return new Edges(shape, orders, offset, limit);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Shape shape;
 
 	private final List<Order> orders;
@@ -41,11 +52,7 @@ public final class Edges implements Query {
 	private final int limit;
 
 
-	public Edges(final Shape shape) {
-		this(shape, emptyList(), 0, 0);
-	}
-
-	public Edges(final Shape shape, final List<Order> orders, final int offset, final int limit) {
+	private Edges(final Shape shape, final List<Order> orders, final int offset, final int limit) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
