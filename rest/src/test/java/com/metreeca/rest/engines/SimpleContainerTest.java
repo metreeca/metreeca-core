@@ -167,7 +167,7 @@ final class SimpleContainerTest {
 
 		private Engine engine() {
 			return new SimpleContainer(tool(Graph.Factory), map(
-					entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
+					entry(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
 					entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 					entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 			));

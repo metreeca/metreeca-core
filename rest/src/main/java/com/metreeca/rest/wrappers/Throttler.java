@@ -169,7 +169,10 @@ public final class Throttler implements Wrapper {
 					.filter(entry -> ContainerMetadata.contains(entry.getKey()))
 					.map(entry -> entry(entry.getKey(), all(entry.getValue()).orElseGet(Sets::set)))
 					.filter(entry -> entry.getValue().size() == 1)
-					.map(entry -> meta(entry.getKey(), entry.getValue().iterator().next()));
+					.map(entry -> meta(
+							entry.getKey().equals(RDF.TYPE)? LDP.CONTAINER : entry.getKey(),
+							entry.getValue().iterator().next()
+					));
 
 			final Shape metadata=and(Stream.concat(metas, fields).collect(toList()));
 

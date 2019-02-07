@@ -215,7 +215,7 @@ final class ShapedResourceTest {
 					.exec(() -> {
 
 						final Engine engine=new ShapedResource(tool(Graph.Factory), and(
-								meta(RDF.TYPE, LDP.BASIC_CONTAINER),
+								meta(LDP.CONTAINER, LDP.BASIC_CONTAINER),
 								field(RDF.VALUE)
 						));
 
@@ -240,7 +240,7 @@ final class ShapedResourceTest {
 					.exec(() -> {
 
 						final Engine engine=new ShapedResource(tool(Graph.Factory), and(
-								meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
+								meta(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
 								meta(LDP.MEMBERSHIP_RESOURCE, RDFS.RESOURCE),
 								meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 								field(RDF.VALUE)

@@ -20,6 +20,8 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.Engine;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
@@ -34,15 +36,22 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.Shape.required;
+import static com.metreeca.form.queries.Edges.edges;
+import static com.metreeca.form.queries.Stats.stats;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Pattern.pattern;
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,44 +73,98 @@ final class ShapedContainerTest {
 
 	private Shape shape() {
 		return and(
-				field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d{4}")))
+				field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d{4}"))),
+				filter().then(field(RDF.TYPE, term("Employee"))) // should not appear in output shapes
 		);
 	}
 
 
 	@Nested final class Basic {
 
+		private final IRI container=item("/employees-basic/");
+
+
+		private Shape shape() {
+			return and(
+					meta(LDP.CONTAINER, LDP.BASIC_CONTAINER),
+					field(LDP.CONTAINS, ShapedContainerTest.this.shape())
+			);
+		}
+
 		private Engine engine() {
-			return new ShapedContainer(tool(Graph.Factory), and(
-					meta(RDF.TYPE, LDP.BASIC_CONTAINER),
-					field(LDP.CONTAINS, shape())
-			));
+			return new ShapedContainer(tool(Graph.Factory), shape());
 		}
 
 
 		@Nested final class Browse {
 
-			// !!! insert anchor point
-			// !!! delegate anchor point rewriting to flock
-			// !!! switch final shape according to query type
 			// !!! redact / cache final shape
 			//		.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
 			//		.map(new Optimizer())
 
 
-			@Test void test() {
-				exec(() -> {
+			@Test void testBrowse() {
+				exec(() -> assertThat(engine().browse(container))
 
-					engine();
+						.as("item descriptions linked to container")
+						.hasSubset(decode("<employees-basic/> ldp:contains <employees/1370>, <employees/1166>."))
 
-				});
+						.as("item descriptions included")
+						.hasSubset(decode("<employees/1370> :code '1370'; <employees/1166> :code '1166'."))
+
+						.as("out of shape properties excluded")
+						.doesNotHaveSubset(decode("<employees/1370> a :Employee. <employees/1166> a :Employee"))
+				);
+			}
+
+			@Test void testBrowseFiltered() {
+				exec(() -> assertThat(engine().browse(container,
+
+						shape -> Value(edges(and(shape, filter().then(
+								field(term("title"), in(literal("President"))))
+						))),
+
+						(shape, model) -> {
+
+							assertThat(shape).isEqualTo(shape().map(new Optimizer()));
+
+							assertThat(model).isIsomorphicTo(decode(""
+									+"<employees/> ldp:contains <employees/1002>. "
+									+"<employees/1002> :code '1002'."
+							));
+
+							return model;
+
+						}
+
+						).value()).isPresent()
+				);
+			}
+
+			@Test void testBrowseFilteredStats() {
+				exec(() -> assertThat(engine().browse(container,
+
+						shape -> Value(stats(shape, list(term("title")))),
+
+						(shape, model) -> {
+
+							assertThat(shape).isEqualTo(Stats.Shape);
+
+							assertThat(model); // !!!
+
+							return model;
+
+						}
+
+						).value()).isPresent()
+				);
 			}
 
 		}
 
+
 		@Nested final class Create {
 
-			private final IRI container=item("/employees-basic/");
 			private final IRI resource=item("/employees-basic/9999");
 
 
@@ -198,7 +261,7 @@ final class ShapedContainerTest {
 
 		private Engine engine() {
 			return new ShapedContainer(tool(Graph.Factory), and(
-					meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
+					meta(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
 					meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 					meta(LDP.MEMBERSHIP_RESOURCE, term("Employee")),
 					field(LDP.CONTAINS, shape())

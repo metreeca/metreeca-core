@@ -147,6 +147,44 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 	}
 
 
+	public ModelAssert doesNotHaveSubset(final Statement... model) {
+		return doesNotHaveSubset(model == null ? null : Arrays.asList(model));
+	}
+
+	public ModelAssert doesNotHaveSubset(final Collection<Statement> model) {
+		return doesNotHaveSubset(model == null ? null : new LinkedHashModel(model));
+	}
+
+	/**
+	 * Asserts that the expected statement collection is a subset of the actual one.
+	 *
+	 * @param model the expected model
+	 */
+	public ModelAssert doesNotHaveSubset(final Model model) {
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		isNotNull();
+
+		if ( Models.isSubset(model, actual) ) {
+
+			final Collection<Statement> expected=new TreeModel(model);
+			final Collection<Statement> present=new TreeModel(expected);
+
+			present.retainAll(actual);
+
+			failWithMessage(
+					"expected model not to have subset <\n%s\n> but <\n%s\n> was present",
+					indent(format(expected)), indent(format(present))
+			);
+		}
+
+		return this;
+	}
+
+
 	/**
 	 * Asserts that the actual statement collection contains a statement matching a given pattern.
 	 */

@@ -17,15 +17,20 @@
 
 package com.metreeca.rest.engines;
 
+import com.metreeca.form.Shape;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.things.Values.inverse;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
@@ -39,7 +44,7 @@ interface Flock { // !!! decouple from Repository
 
 	public static Optional<Flock> flock(final Map<IRI, Value> metadata) {
 
-		final Value type=metadata.get(RDF.TYPE);
+		final Value type=metadata.get(LDP.CONTAINER);
 
 		return LDP.BASIC_CONTAINER.equals(type) ? Optional.of(new Basic())
 				: LDP.DIRECT_CONTAINER.equals(type) ? Optional.of(new Direct(metadata))
@@ -47,6 +52,10 @@ interface Flock { // !!! decouple from Repository
 
 	}
 
+
+	public Shape anchor(final IRI resource);
+
+	public Stream<Resource> items(final RepositoryConnection connection, final Resource container); // !!! remove after merging simple/shaped entities
 
 	public RepositoryConnection insert(final RepositoryConnection connection,
 			final Resource container, final Resource resource, final Collection<Statement> model
@@ -57,12 +66,18 @@ interface Flock { // !!! decouple from Repository
 	);
 
 
-	public Stream<Resource> items(final RepositoryConnection connection, final Resource container); // !!! remove after merging simple/shaped entities
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	final class None implements Flock {
+
+		@Override public Shape anchor(final IRI resource) {
+			return and();
+		}
+
+		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
+			return Stream.empty();
+		}
+
 
 		@Override public RepositoryConnection insert(final RepositoryConnection connection,
 				final Resource container, final Resource resource, final Collection<Statement> model
@@ -80,13 +95,20 @@ interface Flock { // !!! decouple from Repository
 
 		}
 
-		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
-			return Stream.empty();
-		}
-
 	}
 
 	final class Basic implements Flock {
+
+		@Override public Shape anchor(final IRI resource) {
+			return field(inverse(LDP.CONTAINS), resource);
+		}
+
+		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
+			return stream(connection.getStatements(container, LDP.CONTAINS, null, true))
+					.map(Statement::getObject)
+					.filter(value -> value instanceof Resource)
+					.map(value -> (Resource)value);
+		}
 
 		@Override public RepositoryConnection insert(final RepositoryConnection connection,
 				final Resource container, final Resource resource, final Collection<Statement> model
@@ -106,13 +128,6 @@ interface Flock { // !!! decouple from Repository
 
 			return connection;
 
-		}
-
-		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
-			return stream(connection.getStatements(container, LDP.CONTAINS, null, true))
-					.map(Statement::getObject)
-					.filter(value -> value instanceof Resource)
-					.map(value -> (Resource)value);
 		}
 
 	}
@@ -154,6 +169,27 @@ interface Flock { // !!! decouple from Repository
 
 		}
 
+		@Override public Shape anchor(final IRI resource) {
+			return relation != null && subject != null ? field(inverse(relation), subject)
+					: relation != null && object != null ? field(relation, object)
+					: and();
+		}
+
+		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
+			return relation != null && subject != null ?
+
+					stream(connection.getStatements(subject(container), relation, null, true))
+							.map(Statement::getObject)
+							.filter(value -> value instanceof Resource)
+							.map(value -> (Resource)value)
+
+					: relation != null && object != null ?
+
+					stream(connection.getStatements(null, relation, object(container), true))
+							.map(Statement::getSubject)
+
+					: Stream.empty();
+		}
 
 		@Override public RepositoryConnection insert(final RepositoryConnection connection,
 				final Resource container, final Resource resource, final Collection<Statement> model
@@ -183,22 +219,6 @@ interface Flock { // !!! decouple from Repository
 			}
 
 			return connection;
-		}
-
-		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
-			return relation != null && subject != null ?
-
-					stream(connection.getStatements(subject(container), relation, null, true))
-							.map(Statement::getObject)
-							.filter(value -> value instanceof Resource)
-							.map(value -> (Resource)value)
-
-					: relation != null && object != null ?
-
-					stream(connection.getStatements(null, relation, object(container), true))
-							.map(Statement::getSubject)
-
-					: Stream.empty();
 		}
 
 

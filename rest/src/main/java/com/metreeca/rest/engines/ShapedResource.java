@@ -81,7 +81,6 @@ final class ShapedResource extends GraphEntity {
 
 						return Value(mapper.apply(relate, relate(resource)));
 
-
 					} else {
 
 						throw new UnsupportedOperationException("shaped resource filtered retrieval not supported");

@@ -206,7 +206,7 @@ final class RelatorTest {
 			@Test void testBrowse() {
 				exec(() -> new Relator()
 
-						.handle(simple().query("{}"))
+						.handle(simple().query("{ \"filter\": { \">\": 10 } }"))
 
 						.accept(response -> assertThat(response)
 								.hasStatus(Response.NotImplemented)
@@ -220,7 +220,7 @@ final class RelatorTest {
 		@Nested final class Shaped {
 
 			private Request shaped() {
-				return simple().shape(Employee);
+				return simple().shape(Employees);
 			}
 
 

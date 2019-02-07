@@ -18,19 +18,30 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
+import com.metreeca.form.queries.Edges;
+import com.metreeca.form.queries.Items;
+import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.Engine;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.metreeca.form.Shape.filter;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.metas;
+import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
 import static com.metreeca.rest.wrappers.Throttler.container;
 import static com.metreeca.rest.wrappers.Throttler.resource;
@@ -47,6 +58,7 @@ final class ShapedContainer extends GraphEntity {
 	private final Flock flock;
 
 	private final Shape relate;
+	private final Shape browse;
 	private final Shape create;
 
 	private final Engine delegate;
@@ -60,7 +72,10 @@ final class ShapedContainer extends GraphEntity {
 		this.graph=graph;
 		this.flock=flock(metas(resource)).orElseGet(Flock.None::new);
 
-		this.relate=redact(resource, Form.relate, Form.digest);
+		final Shape browse=redact(resource, Form.relate, Form.digest);
+
+		this.relate=and(redact(container, Form.relate, Form.detail), field(LDP.CONTAINS, browse));
+		this.browse=browse;
 		this.create=redact(resource, Form.create, Form.detail);
 
 		this.delegate=new ShapedResource(graph, container);
@@ -82,13 +97,41 @@ final class ShapedContainer extends GraphEntity {
 	@Override public <V, E> Result<V, E> browse(final IRI resource,
 			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		return parser.apply(and(browse, filter().then(flock.anchor(resource)))).fold(
+
+				query -> graph.query(connection -> {
+
+					return query.map(new Query.Probe<Result<V, E>>() {
+
+						@Override public Result<V, E> probe(final Edges edges) {
+							final Map<Resource, Collection<Statement>> process=new ShapedRetriever(connection).process(query);
+							return Value(mapper.apply(relate, set()));
+
+						}
+
+						@Override public Result<V, E> probe(final Stats stats) {
+							throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+						}
+
+						@Override public Result<V, E> probe(final Items items) {
+							throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+						}
+
+					});
+
+				}),
+
+				Result::Error
+		);
+
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI related,
+			final Collection<Statement> model) {
 		return graph.update(connection -> {
 
 			return reserve(connection, related).map(reserved -> {
