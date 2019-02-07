@@ -44,13 +44,18 @@ public final class Datatype implements Shape {
 	/**
 	 * Creates a type value constraint.
 	 *
-	 * Beyond literal datatypes, the datatype {@code iri} may be one of the following extend values:
+	 * <p>Beyond literal datatypes, the following extend values are supported:</p>
 	 *
-	 * - {@link Values#BNodeType} for blank nodes; - {@link Values#IRIType} for IRI references; - {@link
-	 * Values#ResourceType} for blank nodes or IRI references; - {@link Values#LiteralType} or {@link RDFS#LITERAL} for
-	 * any literal.
+	 * <ul>
+	 *     <li>{@link Values#BNodeType} for blank nodes;</li>
+	 *     <li>{@link Values#IRIType} for IRI references;</li>
+	 *     <li>{@link Values#ResourceType} for blank nodes or IRI references;</li>
+	 *     <li>{@link Values#LiteralType} or {@link RDFS#LITERAL} for any literal.</li>
+	 * </ul>
 	 *
 	 * @param iri the expected extended datatype
+	 *
+	 * @throws NullPointerException if {@code iri} is null
 	 */
 	public static Datatype datatype(final IRI iri) {
 

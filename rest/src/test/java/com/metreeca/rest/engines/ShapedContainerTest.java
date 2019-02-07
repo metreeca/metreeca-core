@@ -31,6 +31,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -119,7 +120,7 @@ final class ShapedContainerTest {
 				);
 			}
 
-			@Test void testBrowseEdges() {
+			@Disabled @Test void testBrowseEdges() {
 				exec(() -> assertThat(engine().browse(container,
 
 						shape -> Value(edges(and(shape, filter().then(

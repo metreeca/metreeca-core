@@ -27,9 +27,7 @@ import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
@@ -39,7 +37,7 @@ import javax.json.JsonValue;
 
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.Values.rewrite;
+import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
@@ -48,6 +46,7 @@ import static org.eclipse.rdf4j.repository.util.Connections.getStatement;
 
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -235,6 +234,26 @@ public final class Creator extends Actor {
 				request::reply
 
 		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Collection<Statement> rewrite(final IRI source, final IRI target, final Collection<Statement> model) {
+		return model.stream().map(statement -> rewrite(source, target, statement)).collect(toList());
+	}
+
+	private Statement rewrite(final IRI source, final IRI target, final Statement statement) {
+		return statement(
+				rewrite(source, target, statement.getSubject()),
+				rewrite(source, target, statement.getPredicate()),
+				rewrite(source, target, statement.getObject()),
+				rewrite(source, target, statement.getContext())
+		);
+	}
+
+	private <T extends Value> T rewrite(final T source, final T target, final T value) {
+		return source.equals(value) ? target : value;
 	}
 
 

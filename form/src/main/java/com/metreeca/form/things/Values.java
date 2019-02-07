@@ -22,7 +22,6 @@ import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.model.vocabulary.SESAME;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
@@ -43,7 +42,6 @@ import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
 
@@ -89,21 +87,23 @@ public final class Values {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	/**
 	 * Internal namespace for local references and predicates (<code>{@value}</code>).
 	 */
 	public static final String Internal="app://local/";
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final IRI ValueType=iri(SESAME.NAMESPACE, "value"); // abstract datatype IRI for values
-	public static final IRI ResourceType=iri(SESAME.NAMESPACE, "resource"); // abstract datatype IRI for resources
-	public static final IRI LiteralType=iri(SESAME.NAMESPACE, "literal"); // abstract datatype IRI for literals
+	public static final IRI ValueType=iri(Internal, "value"); // abstract datatype IRI for values
+	public static final IRI ResourceType=iri(Internal, "resource"); // abstract datatype IRI for resources
+	public static final IRI LiteralType=iri(Internal, "literal"); // abstract datatype IRI for literals
 
-	public static final IRI BNodeType=iri(SESAME.NAMESPACE, "bnode"); // datatype IRI for blank nodes
-	public static final IRI IRIType=iri(SESAME.NAMESPACE, "iri"); // datatype IRI for IRI references
+	public static final IRI BNodeType=iri(Internal, "bnode"); // datatype IRI for blank nodes
+	public static final IRI IRIType=iri(Internal, "iri"); // datatype IRI for IRI references
+
+
+	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final Literal True=literal(true);
 	public static final Literal False=literal(false);
@@ -650,26 +650,6 @@ public final class Values {
 		builder.append('\'');
 
 		return builder.toString();
-	}
-
-
-	//// Rewriters /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Collection<Statement> rewrite(final IRI source, final IRI target, final Collection<Statement> model) {
-		return model.stream().map(statement -> rewrite(source, target, statement)).collect(toList());
-	}
-
-	public static Statement rewrite(final IRI source, final IRI target, final Statement statement) {
-		return statement(
-				rewrite(source, target, statement.getSubject()),
-				rewrite(source, target, statement.getPredicate()),
-				rewrite(source, target, statement.getObject()),
-				rewrite(source, target, statement.getContext())
-		);
-	}
-
-	public static <T extends Value> T rewrite(final T source, final T target, final T value) {
-		return source.equals(value) ? target : value;
 	}
 
 
