@@ -20,6 +20,7 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Cleaner;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.Engine;
@@ -117,7 +118,7 @@ final class ShapedContainerTest {
 				);
 			}
 
-			@Test void testBrowseFiltered() {
+			@Test void testBrowseEdges() {
 				exec(() -> assertThat(engine().browse(container,
 
 						shape -> Value(edges(and(shape, filter().then(
@@ -126,7 +127,9 @@ final class ShapedContainerTest {
 
 						(shape, model) -> {
 
-							assertThat(shape).isEqualTo(shape().map(new Optimizer()));
+							assertThat(shape.map(new Cleaner()).map(new Optimizer()))
+									.as("container+resource shape ignoring metadata")
+									.isEqualTo(shape().map(new Cleaner()).map(new Optimizer()));
 
 							assertThat(model).isIsomorphicTo(decode(""
 									+"<employees/> ldp:contains <employees/1002>. "
@@ -141,7 +144,7 @@ final class ShapedContainerTest {
 				);
 			}
 
-			@Test void testBrowseFilteredStats() {
+			@Test void testBrowseStats() {
 				exec(() -> assertThat(engine().browse(container,
 
 						shape -> Value(stats(shape, list(term("title")))),

@@ -29,13 +29,10 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
@@ -50,19 +47,20 @@ import static java.util.stream.Collectors.toSet;
 
 abstract class GraphEntity implements Engine {
 
+	Shape redact(final Shape shape, final IRI task, final IRI view) {
+		return shape.map(new Redactor(map(
+				entry(Form.task, set(task)),
+				entry(Form.view, set(view)),
+				entry(Form.role, set(Form.any))
+		))).map(new Optimizer());
+	}
+
+
 	Optional<Resource> reserve(final RepositoryConnection connection, final Resource resource) {
 		return Optional.ofNullable(connection.hasStatement(resource, null, null, true)
 				|| connection.hasStatement(null, null, resource, true) ? null : resource);
 	}
 
-
-	//// Simple ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Optional<Collection<Statement>> retrieve(
-			final RepositoryConnection connection, final Resource resource, final boolean labelled
-	) {
-		return Optional.of(description(resource, labelled, connection)).filter(statements -> !statements.isEmpty());
-	}
 
 	Focus validate(final Resource resource, final Collection<Statement> model) {
 
@@ -73,27 +71,6 @@ abstract class GraphEntity implements Engine {
 				.map(outlier -> issue(Issue.Level.Error, "statement outside description envelope "+outlier))
 				.collect(toList())
 		);
-	}
-
-
-	//// Shaped ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Shape redact(final Shape shape, final IRI task, final IRI view) {
-		return shape.map(new Redactor(map(
-				entry(Form.task, set(task)),
-				entry(Form.view, set(view)),
-				entry(Form.role, set(Form.any))
-		))).map(new Optimizer());
-	}
-
-
-	Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
-		return new ShapedRetriever(connection)
-				.process(edges(and(all(resource), shape)))
-				.entrySet()
-				.stream()
-				.findFirst()
-				.map(Map.Entry::getValue);
 	}
 
 	Focus validate(final RepositoryConnection connection, final IRI resource, final Shape shape, final Collection<Statement> model) {

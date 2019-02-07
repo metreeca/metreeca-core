@@ -46,40 +46,9 @@ import static com.metreeca.form.things.Values.*;
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
 import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toList;
 
 
 final class ShapedRetriever {
-
-	public static final IRI meta=iri(Form.Namespace, "meta"); // !!! remove
-
-
-	public Map<Resource, Collection<Statement>> browse(final Query query) {
-
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
-
-		return new ShapedRetriever(connection).process(query);
-	}
-
-	public Collection<Statement> browse(final Query query, final IRI focus) { // !!! review/remove
-
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		return browse(query).values().stream()
-				.flatMap(statements -> statements.stream().map(statement -> rewrite(ShapedRetriever.meta, focus, statement)))
-				.collect(toList());
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// !!! log compilation/execution times
 
@@ -103,7 +72,7 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Map<Resource, Collection<Statement>> process(final Query query) {
+	public Map<Resource, Collection<Statement>> process(final IRI target, final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
@@ -111,11 +80,11 @@ final class ShapedRetriever {
 
 		return query.map(new Query.Probe<Map<Resource, Collection<Statement>>>() {
 
-			@Override public Map<Resource, Collection<Statement>> probe(final Edges edges) { return edges(edges); }
+			@Override public Map<Resource, Collection<Statement>> probe(final Edges edges) { return edges(target, edges); }
 
-			@Override public Map<Resource, Collection<Statement>> probe(final Stats stats) { return stats(stats); }
+			@Override public Map<Resource, Collection<Statement>> probe(final Stats stats) { return stats(target, stats); }
 
-			@Override public Map<Resource, Collection<Statement>> probe(final Items items) { return items(items); }
+			@Override public Map<Resource, Collection<Statement>> probe(final Items items) { return items(target, items); }
 
 		});
 	}
@@ -123,7 +92,7 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map<Resource, Collection<Statement>> edges(final Edges edges) {
+	private Map<Resource, Collection<Statement>> edges(final IRI target, final Edges edges) {
 
 		final Shape shape=edges.getShape();
 		final List<Order> orders=edges.getOrders();
@@ -176,7 +145,7 @@ final class ShapedRetriever {
 				if ( match != null ) {
 					matches.compute(match, (value, statements) -> {
 
-						final Collection<Statement> computed=(statements != null) ? statements : new LinkedHashSet();
+						final Collection<Statement> computed=(statements != null) ? statements : new LinkedHashSet<>();
 
 						template.forEach(statement -> {
 
@@ -204,7 +173,7 @@ final class ShapedRetriever {
 		return matches;
 	}
 
-	private Map<Resource, Collection<Statement>> stats(final Stats stats) {
+	private Map<Resource, Collection<Statement>> stats(final IRI target, final Stats stats) {
 
 		final Shape shape=stats.getShape();
 		final List<IRI> path=stats.getPath();
@@ -265,7 +234,7 @@ final class ShapedRetriever {
 				final Value min=bindings.getValue("min");
 				final Value max=bindings.getValue("max");
 
-				if ( type != null ) { model.add(meta, Form.stats, type); }
+				if ( type != null ) { model.add(target, Form.stats, type); }
 				if ( type != null && count != null ) { model.add(type, Form.count, count); }
 				if ( type != null && min != null ) { model.add(type, Form.min, min); }
 				if ( type != null && max != null ) { model.add(type, Form.max, max); }
@@ -278,7 +247,7 @@ final class ShapedRetriever {
 
 		});
 
-		model.add(meta, Form.count, literal(BigInteger.valueOf(counts.stream()
+		model.add(target, Form.count, literal(BigInteger.valueOf(counts.stream()
 				.filter(Objects::nonNull)
 				.mapToLong(Literal::longValue)
 				.sum())));
@@ -286,17 +255,17 @@ final class ShapedRetriever {
 		mins.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.LT) ? x : y)
-				.ifPresent(min -> model.add(meta, Form.min, min));
+				.ifPresent(min -> model.add(target, Form.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
-				.ifPresent(max -> model.add(meta, Form.max, max));
+				.ifPresent(max -> model.add(target, Form.max, max));
 
-		return singletonMap(meta, model);
+		return singletonMap(target, model);
 	}
 
-	private Map<Resource, Collection<Statement>> items(final Items items) {
+	private Map<Resource, Collection<Statement>> items(final IRI target, final Items items) {
 
 		final Shape shape=items.getShape();
 		final List<IRI> path=items.getPath();
@@ -321,7 +290,13 @@ final class ShapedRetriever {
 
 						prefixes(),
 
-						"select (", target, " as ?value) (sample(?l) as ?label) (count(distinct ", source, ") as ?count) {\f",
+						"select"
+								+ " (", target, " as ?value)"
+								+ " (sample(?l) as ?label)"
+								+ " (sample(?n) as ?notes)"
+								+ " (count(distinct ", source, ") as ?count)" ,
+
+						" {\f",
 
 						roots(selector), "\f",
 						filters(selector), "\f",
@@ -331,6 +306,7 @@ final class ShapedRetriever {
 						path.isEmpty() ? null : list(source, path(path), target), '\f',
 
 						"optional { ", target, " rdfs:label ?l }\f", // !!! language
+						"optional { ", target, " rdfs:comment ?n }\f", // !!! language
 
 						"} group by ", target, " having ( ?count > 0 ) order by desc(?count) ?value\n"
 
@@ -346,23 +322,23 @@ final class ShapedRetriever {
 				final Value value=bindings.getValue("value");
 				final Value count=bindings.getValue("count");
 				final Value label=bindings.getValue("label");
+				final Value notes=bindings.getValue("notes");
 
 				final BNode item=bnode();
 
-				if ( item != null ) { model.add(meta, Form.items, item); }
+				if ( item != null ) { model.add(target, Form.items, item); }
 				if ( item != null && value != null ) { model.add(item, Form.value, value); }
 				if ( item != null && count != null ) { model.add(item, Form.count, count); }
 
-				// !!! manage multiple labels
+				// !!! manage multiple languages
 
-				if ( label != null ) {
-					model.add((Resource)value, RDFS.LABEL, label);
-				}
+				if ( label != null ) { model.add((Resource)value, RDFS.LABEL, label); }
+				if ( notes != null ) { model.add((Resource)value, RDFS.COMMENT, notes); }
 
 			}
 		});
 
-		return singletonMap(meta, model);
+		return singletonMap(target, model);
 	}
 
 

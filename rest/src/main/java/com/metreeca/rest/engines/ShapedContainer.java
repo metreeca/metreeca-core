@@ -26,12 +26,10 @@ import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -105,7 +103,10 @@ final class ShapedContainer extends GraphEntity {
 					return query.map(new Query.Probe<Result<V, E>>() {
 
 						@Override public Result<V, E> probe(final Edges edges) {
-							final Map<Resource, Collection<Statement>> process=new ShapedRetriever(connection).process(query);
+
+							//final Map<Resource, Collection<Statement>> process=new ShapedRetriever(connection)
+							//		.process(resource, query);
+
 							return Value(mapper.apply(relate, set()));
 
 						}

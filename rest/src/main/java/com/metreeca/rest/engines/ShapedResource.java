@@ -24,13 +24,17 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.metreeca.form.queries.Edges.edges;
+import static com.metreeca.form.shapes.All.all;
+import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
@@ -139,6 +143,18 @@ final class ShapedResource extends GraphEntity {
 			});
 
 		});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
+		return new ShapedRetriever(connection)
+				.process(resource, edges(and(all(resource), shape)))
+				.entrySet()
+				.stream()
+				.findFirst()
+				.map(Map.Entry::getValue);
 	}
 
 }

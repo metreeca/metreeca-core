@@ -22,9 +22,8 @@ import com.metreeca.form.things.Sets;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Map;
@@ -35,6 +34,7 @@ import java.util.function.Function;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.engines.Descriptions.description;
 import static com.metreeca.rest.engines.Flock.flock;
 
 
@@ -132,6 +132,15 @@ final class SimpleResource extends GraphEntity {
 
 		});
 
+	}
+
+
+	//// !!! ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Optional<Collection<Statement>> retrieve(
+			final RepositoryConnection connection, final Resource resource, final boolean labelled
+	) {
+		return Optional.of(description(resource, labelled, connection)).filter(statements -> !statements.isEmpty());
 	}
 
 }

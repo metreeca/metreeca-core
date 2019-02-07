@@ -17,6 +17,7 @@
 
 package com.metreeca.form.things;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.*;
@@ -146,6 +147,7 @@ public final class ValuesTest {
 		put("xsd", XMLSchema.NAMESPACE);
 		put("ldp", LDP.NAMESPACE);
 		put("skos", SKOS.NAMESPACE);
+		put("form", Form.Namespace);
 	}};
 
 	private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
