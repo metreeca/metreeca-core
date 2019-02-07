@@ -17,9 +17,9 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Issue;
+import com.metreeca.form.*;
 import com.metreeca.rest.Engine;
+import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,6 +29,8 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static com.metreeca.rest.engines.Flock.flock;
 
@@ -55,9 +57,30 @@ final class SimpleContainer extends GraphEntity {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public Collection<Statement> relate(final IRI resource) {
 		return delegate.relate(resource);
 	}
+
+	@Override public <V, E> Result<V, E> relate(final IRI resource,
+			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+		return delegate.relate(resource, parser, mapper);
+	}
+
+	@Override public Collection<Statement> browse(final IRI resource) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
+
+	@Override public <V, E> Result<V, E> browse(final IRI resource,
+			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+		throw new UnsupportedOperationException("simple container filtered browsing not supported");
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		return graph.update(connection -> {

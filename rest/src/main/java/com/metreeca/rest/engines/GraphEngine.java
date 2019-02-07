@@ -18,8 +18,10 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
+import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.Engine;
+import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,6 +31,8 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static com.metreeca.form.Shape.constant;
 import static com.metreeca.form.shapes.Meta.metas;
@@ -75,6 +79,53 @@ public final class GraphEngine implements Engine {
 		}
 
 		return delegate(resource).relate(resource);
+	}
+
+	@Override public <V, E> Result<V, E> relate(final IRI resource,
+			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( parser == null ) {
+			throw new NullPointerException("null parser");
+		}
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return delegate(resource).relate(resource, parser, mapper);
+	}
+
+	@Override public Collection<Statement> browse(final IRI resource) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		return delegate(resource).browse(resource);
+	}
+
+	@Override public <V, E> Result<V, E> browse(final IRI resource,
+			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( parser == null ) {
+			throw new NullPointerException("null parser");
+		}
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return delegate(resource).browse(resource, parser, mapper);
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {

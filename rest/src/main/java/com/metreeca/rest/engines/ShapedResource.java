@@ -18,7 +18,9 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
+import com.metreeca.form.queries.Edges;
 import com.metreeca.form.things.Sets;
+import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -26,8 +28,11 @@ import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static com.metreeca.form.shapes.Meta.metas;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
 
 
@@ -63,6 +68,34 @@ final class ShapedResource extends GraphEntity {
 	@Override public Collection<Statement> relate(final IRI resource) {
 		return graph.query(connection -> { return retrieve(connection, resource, relate).orElseGet(Sets::set); });
 	}
+
+	@Override public <V, E> Result<V, E> relate(final IRI resource,
+			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+
+		return parser.apply(relate).fold(
+
+				query -> {
+
+					if ( query.equals(new Edges(relate))) {
+
+						return Value(mapper.apply(relate, relate(resource)));
+
+
+					} else {
+
+						throw new UnsupportedOperationException("shaped resource filtered retrieval not supported");
+
+					}
+				},
+
+				Result::Error
+		);
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("shaped related resource creation not supported");

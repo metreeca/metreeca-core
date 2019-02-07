@@ -17,9 +17,10 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Issue;
+import com.metreeca.form.*;
+import com.metreeca.form.queries.Edges;
 import com.metreeca.form.things.Sets;
+import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,7 +30,11 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
 
 
@@ -38,7 +43,7 @@ import static com.metreeca.rest.engines.Flock.flock;
  *
  * <p>Manages CRUD lifecycle operations on (labelled) symmetric concise bounded resource descriptions.</p>
  */
- final class SimpleResource extends GraphEntity {
+final class SimpleResource extends GraphEntity {
 
 	private final Graph graph;
 	private final Flock flock;
@@ -50,9 +55,39 @@ import static com.metreeca.rest.engines.Flock.flock;
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public Collection<Statement> relate(final IRI resource) {
 		return graph.query(connection -> { return retrieve(connection, resource, true).orElseGet(Sets::set); });
 	}
+
+	@Override public <V, E> Result<V, E> relate(final IRI resource,
+			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+
+		return parser.apply(and()).fold(
+
+				query -> {
+
+					if ( query.equals(new Edges(and()))) {
+
+						return Value(mapper.apply(and(), relate(resource)));
+
+
+					} else {
+
+						throw new UnsupportedOperationException("simple resource filtered retrieval not supported");
+
+					}
+				},
+
+				Result::Error
+		);
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		throw new UnsupportedOperationException("simple related resource creation not supported");

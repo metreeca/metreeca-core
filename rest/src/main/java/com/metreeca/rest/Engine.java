@@ -17,9 +17,11 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
+import com.metreeca.form.queries.Edges;
+import com.metreeca.form.queries.Items;
+import com.metreeca.form.queries.Stats;
+import com.metreeca.form.things.Sets;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -28,6 +30,12 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.rest.Result.Value;
 
 
 /**
@@ -39,6 +47,13 @@ import java.util.function.Function;
  */
 public interface Engine {
 
+	// !!! insert anchor point
+	// !!! delegate anchor point rewriting to flock
+	// !!! switch final shape according to query type
+	// !!! redact / cache final shape
+	//		.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
+	//		.map(new Optimizer())
+
 	/**
 	 * Retrieves a resource.
 	 *
@@ -49,7 +64,79 @@ public interface Engine {
 	 * @throws NullPointerException          if {@code resource} is null
 	 * @throws UnsupportedOperationException if resource retrieval is not supported by this engine
 	 */
-	public Collection<Statement> relate(final IRI resource);
+	public default Collection<Statement> relate(final IRI resource) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		return relate(resource, shape -> Value(new Edges(shape)), (shape, model) -> model).value().orElseGet(Sets::set);
+	}
+
+	public <V, E> Result<V, E> relate(final IRI resource,
+			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+	);
+
+	/**
+	 * Browse a resource.
+	 *
+	 * @param resource the IRI identifying the resource whose description is to be retrieved
+	 *
+	 * @return the description of the items contained in {@code resource}; empty if a description for {@code resource}
+	 * was not found or if {@code resource} doesn't contain any items; includes {@code ldp:contains} statements linking
+	 * {@code resource} to the contained items
+	 *
+	 * @throws NullPointerException          if {@code resource} is null
+	 * @throws UnsupportedOperationException if resource retrieval is not supported by this engine
+	 */
+	public default Collection<Statement> browse(final IRI resource) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		return browse(resource, shape -> Value(new Edges(shape)), (shape, model) -> model).value().orElseGet(Sets::set);
+	}
+
+	public default  <V, E> Result<V, E> browse(final IRI resource,
+			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( parser == null ) {
+			throw new NullPointerException("null parser");
+		}
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return parser.apply(and()).fold(
+
+				query -> Value(query.map(new Query.Probe<V>() {
+
+					@Override public V probe(final Edges edges) {
+						return mapper.apply(and(), set());
+					}
+
+					@Override public V probe(final Stats stats) {
+						return mapper.apply(Stats.Shape, set(statement(resource, Form.count, literal(0))));
+					}
+
+					@Override public V probe(final Items items) {
+						return mapper.apply(Items.Shape, set());
+					}
+
+				})),
+
+				Result::Error
+		);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Creates a related resource.
@@ -94,29 +181,5 @@ public interface Engine {
 	 * @throws UnsupportedOperationException if resource deletion is not supported by this engine
 	 */
 	public Optional<IRI> delete(final IRI resource);
-
-
-	// !!! insert anchor point
-	// !!! delegate anchor point rewriting to flock
-	// !!! switch final shape according to query type
-	// !!! redact / cache final shape
-	//		.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
-	//		.map(new Optimizer())
-
-	public default <V, E> Result<V, E> relate(
-			final IRI resource,
-			final Function<Shape, Result<Query, E>> parser,
-			final BiFunction<Shape, Collection<Statement>, V> mapper
-	) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
-
-	public default <V, E> Result<V, E> browse(
-			final IRI resource,
-			final Function<Shape, Result<Query, E>> parser,
-			final BiFunction<Shape, Collection<Statement>, V> mapper
-	) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
 
 }
