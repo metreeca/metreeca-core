@@ -46,6 +46,7 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.MaxLength.maxLength;
+import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.things.Values.*;
@@ -128,14 +129,16 @@ public final class ValuesTest {
 	);
 
 	public static final Shape Employees=role(Manager, Salesman).then(
-			verify().then(
-					field(RDF.TYPE, LDP.DIRECT_CONTAINER),
-					field(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-					field(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
+			and(
+					meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
+					meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
+					meta(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 			),
-			field(RDFS.LABEL, Textual),
-			field(RDFS.COMMENT, Textual),
-			field(LDP.CONTAINS, and(multiple(), Employee))
+			verify().then(
+					field(RDFS.LABEL, Textual),
+					field(RDFS.COMMENT, Textual),
+					field(LDP.CONTAINS, and(multiple(), Employee))
+			)
 	);
 
 

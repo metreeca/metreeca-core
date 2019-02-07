@@ -17,11 +17,10 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Issue;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.probes.Cleaner;
 import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.Engine;
 import com.metreeca.tray.Tray;
@@ -41,6 +40,7 @@ import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.Shape.verify;
 import static com.metreeca.form.queries.Edges.edges;
+import static com.metreeca.form.queries.Items.items;
 import static com.metreeca.form.queries.Stats.stats;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
@@ -152,9 +152,39 @@ final class ShapedContainerTest {
 
 						(shape, model) -> {
 
-							assertThat(shape).isEqualTo(Stats.Shape);
+							assertThat(shape)
+									.as("query-specific shape")
+									.isEqualTo(Stats.Shape);
 
-							assertThat(model); // !!!
+							assertThat(model)
+									.as("query-specific payload")
+									.hasStatement(container, Form.count, null)
+									.hasStatement(container, Form.stats, XMLSchema.STRING)
+									.hasStatement(XMLSchema.STRING, Form.count, null);
+
+							return model;
+
+						}
+
+						).value()).isPresent()
+				);
+			}
+
+			@Test void testBrowseItems() {
+				exec(() -> assertThat(engine().browse(container,
+
+						shape -> Value(items(shape, list(term("title")))),
+
+						(shape, model) -> {
+
+							assertThat(shape)
+									.as("query-specific shape")
+									.isEqualTo(Items.Shape);
+
+							assertThat(model)
+									.as("query-specific payload")
+									.hasStatement(container, Form.items, null)
+									.hasStatement(null, Form.value, literal("President"));
 
 							return model;
 

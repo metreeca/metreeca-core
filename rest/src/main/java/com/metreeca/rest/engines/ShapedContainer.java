@@ -96,23 +96,20 @@ final class ShapedContainer extends GraphEntity {
 
 				query -> graph.query(connection -> {
 
+					final Collection<Statement> model=new ShapedRetriever(connection).retrieve(resource, query);
+
 					return query.map(new Query.Probe<Result<V, E>>() {
 
 						@Override public Result<V, E> probe(final Edges edges) {
-
-							return Value(mapper.apply(
-									field(LDP.CONTAINS, browse),
-									new ShapedRetriever(connection).retrieve(resource, query)
-							));
-
+							return Value(mapper.apply(field(LDP.CONTAINS, browse), model));
 						}
 
 						@Override public Result<V, E> probe(final Stats stats) {
-							throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+							return Value(mapper.apply(Stats.Shape, model));
 						}
 
 						@Override public Result<V, E> probe(final Items items) {
-							throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+							return Value(mapper.apply(Items.Shape, model));
 						}
 
 					});
