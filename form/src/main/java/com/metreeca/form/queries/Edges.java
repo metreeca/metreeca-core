@@ -24,6 +24,9 @@ import com.metreeca.form.Shape;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.metreeca.form.things.Strings.indent;
+
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 
@@ -95,6 +98,32 @@ public final class Edges implements Query {
 		}
 
 		return probe.probe(this);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof Edges
+				&& shape.equals(((Edges)object).shape)
+				&& orders.equals(((Edges)object).orders)
+				&& offset == ((Edges)object).offset
+				&& limit == ((Edges)object).limit;
+	}
+
+	@Override public int hashCode() {
+		return shape.hashCode()
+				^orders.hashCode()
+				^Integer.hashCode(offset)
+				^Integer.hashCode(limit);
+	}
+
+	@Override public String toString() {
+		return format(
+				"edges {\n\tshape: %s\n\torder: %s\n\toffset: %d\n\tlimit: %d\n}",
+				indent(shape, true), orders, offset, limit
+		);
 	}
 
 }

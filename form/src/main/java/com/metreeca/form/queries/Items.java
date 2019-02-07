@@ -33,7 +33,9 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.things.Strings.indent;
 
+import static java.lang.String.format;
 import static java.util.Collections.unmodifiableList;
 
 
@@ -97,6 +99,27 @@ public final class Items implements Query {
 		}
 
 		return probe.probe(this);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof Items
+				&& shape.equals(((Items)object).shape)
+				&& path.equals(((Items)object).path);
+	}
+
+	@Override public int hashCode() {
+		return shape.hashCode()^path.hashCode();
+	}
+
+
+	@Override public String toString() {
+		return format(
+				"items {\n\tshape: %s\n\tpath: %s\n}",
+				indent(shape, true), path
+		);
 	}
 
 }
