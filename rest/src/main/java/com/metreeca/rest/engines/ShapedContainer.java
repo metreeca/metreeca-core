@@ -55,7 +55,6 @@ final class ShapedContainer extends GraphEntity {
 	private final Graph graph;
 	private final Flock flock;
 
-	private final Shape relate;
 	private final Shape browse;
 	private final Shape create;
 
@@ -70,10 +69,7 @@ final class ShapedContainer extends GraphEntity {
 		this.graph=graph;
 		this.flock=flock(metas(resource)).orElseGet(Flock.None::new);
 
-		final Shape browse=redact(resource, Form.relate, Form.digest);
-
-		this.relate=and(redact(container, Form.relate, Form.detail), field(LDP.CONTAINS, browse));
-		this.browse=browse;
+		this.browse=redact(resource, Form.relate, Form.digest);
 		this.create=redact(resource, Form.create, Form.detail);
 
 		this.delegate=new ShapedResource(graph, container);
@@ -104,7 +100,10 @@ final class ShapedContainer extends GraphEntity {
 
 						@Override public Result<V, E> probe(final Edges edges) {
 
-							return Value(mapper.apply(relate, new ShapedRetriever(connection).retrieve(resource, query)));
+							return Value(mapper.apply(
+									field(LDP.CONTAINS, browse),
+									new ShapedRetriever(connection).retrieve(resource, query)
+							));
 
 						}
 

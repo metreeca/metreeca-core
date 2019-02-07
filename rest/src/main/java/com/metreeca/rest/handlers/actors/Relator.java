@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.Result.Value;
@@ -211,7 +210,7 @@ public final class Relator extends Actor {
 
 										.relate(item, shape -> Value(edges(shape)), (cshape, cmodel) -> response
 												.status(OK)
-												.shape(and(cshape, field(LDP.CONTAINS, rshape)))
+												.shape(and(cshape, rshape))
 												.body(rdf(), Stream
 														.concat(cmodel.stream(), rmodel.stream())
 														.collect(toList())
