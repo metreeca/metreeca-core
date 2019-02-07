@@ -73,7 +73,7 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Collection<Statement> process(final IRI resource, final Query query) {
+	public Collection<Statement> retrieve(final IRI resource, final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");

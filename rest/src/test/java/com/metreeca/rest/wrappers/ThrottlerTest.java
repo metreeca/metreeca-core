@@ -19,6 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Cleaner;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.ValuesTest;
@@ -332,10 +333,19 @@ final class ThrottlerTest {
 						.satisfies(shape -> assertThat(metas(shape))
 								.as("annotated with container properties")
 								.containsOnly(
-										entry(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
+										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
 										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 								)
+						)
+
+						.satisfies(shape -> assertThat(shape
+										.map(new Redactor(Form.role, Form.none))
+										.map(new Cleaner())
+										.map(new Optimizer())
+								)
+										.as("role-based authorization preserved")
+										.isEqualTo(pass())
 						);
 			}
 
@@ -350,7 +360,7 @@ final class ThrottlerTest {
 						.satisfies(shape -> assertThat(metas(shape))
 								.as("annotated with container properties")
 								.containsOnly(
-										entry(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
+										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
 										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 								)
@@ -378,7 +388,7 @@ final class ThrottlerTest {
 						.satisfies(shape -> assertThat(metas(shape))
 								.as("annotated with container properties")
 								.containsOnly(
-										entry(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
+										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
 										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 								)
@@ -396,7 +406,7 @@ final class ThrottlerTest {
 						.satisfies(shape -> assertThat(metas(shape))
 								.as("annotated with container properties")
 								.containsOnly(
-										entry(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
+										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
 										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 								)
@@ -411,9 +421,9 @@ final class ThrottlerTest {
 
 			@Test void testPreserveExistingAnnotations() {
 
-				final Shape shape=and(meta(LDP.CONTAINER, LDP.BASIC_CONTAINER));
+				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
-				assertThat(resource().apply(shape)).isEqualTo(meta(LDP.CONTAINER, LDP.BASIC_CONTAINER));
+				assertThat(resource().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
 			}
 
@@ -436,7 +446,7 @@ final class ThrottlerTest {
 						.satisfies(shape -> assertThat(metas(shape))
 								.as("annotated with container properties")
 								.containsOnly(
-										entry(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
+										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
 										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 								)
@@ -452,9 +462,9 @@ final class ThrottlerTest {
 
 			@Test void testPreserveExistingAnnotations() {
 
-				final Shape shape=and(meta(LDP.CONTAINER, LDP.BASIC_CONTAINER), field(LDP.CONTAINS, required()));
+				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER), field(LDP.CONTAINS, required()));
 
-				assertThat(container().apply(shape)).isEqualTo(meta(LDP.CONTAINER, LDP.BASIC_CONTAINER));
+				assertThat(container().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
 			}
 

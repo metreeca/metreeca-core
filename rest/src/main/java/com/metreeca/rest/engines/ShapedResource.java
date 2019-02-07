@@ -22,6 +22,7 @@ import com.metreeca.form.things.Sets;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
+import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -86,7 +87,7 @@ final class ShapedResource extends GraphEntity {
 
 					} else {
 
-						throw new UnsupportedOperationException("shaped resource filtered retrieval not supported");
+						throw new NotImplementedException("shaped resource filtered retrieval not supported");
 
 					}
 				},
@@ -100,7 +101,7 @@ final class ShapedResource extends GraphEntity {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("shaped related resource creation not supported");
+		throw new NotImplementedException("shaped related resource creation not supported");
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
@@ -149,7 +150,7 @@ final class ShapedResource extends GraphEntity {
 
 	private Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
 		return Optional.of(new ShapedRetriever(connection))
-				.map(retriever -> retriever.process(resource, edges(and(all(resource), shape))))
+				.map(retriever -> retriever.retrieve(resource, edges(and(all(resource), shape))))
 				.filter(model -> !model.isEmpty());
 	}
 

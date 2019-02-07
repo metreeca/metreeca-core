@@ -39,6 +39,7 @@ import java.util.Optional;
 
 import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.Shape.required;
+import static com.metreeca.form.Shape.verify;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.queries.Stats.stats;
 import static com.metreeca.form.shapes.And.and;
@@ -74,7 +75,7 @@ final class ShapedContainerTest {
 
 	private Shape shape() {
 		return and(
-				field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d{4}"))),
+				verify().then(field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d{4}")))),
 				filter().then(field(RDF.TYPE, term("Employee"))) // should not appear in output shapes
 		);
 	}
@@ -87,7 +88,7 @@ final class ShapedContainerTest {
 
 		private Shape shape() {
 			return and(
-					meta(LDP.CONTAINER, LDP.BASIC_CONTAINER),
+					meta(RDF.TYPE, LDP.BASIC_CONTAINER),
 					field(LDP.CONTAINS, ShapedContainerTest.this.shape())
 			);
 		}
@@ -111,10 +112,10 @@ final class ShapedContainerTest {
 						.hasSubset(decode("<employees-basic/> ldp:contains <employees/1370>, <employees/1166>."))
 
 						.as("item descriptions included")
-						.hasSubset(decode("<employees/1370> :code '1370'; <employees/1166> :code '1166'."))
+						.hasSubset(decode("<employees/1370> :code '1370'. <employees/1166> :code '1166'."))
 
 						.as("out of shape properties excluded")
-						.doesNotHaveSubset(decode("<employees/1370> a :Employee. <employees/1166> a :Employee"))
+						.doesNotHaveSubset(decode("<employees/1370> a :Employee. <employees/1166> a :Employee."))
 				);
 			}
 
@@ -132,7 +133,7 @@ final class ShapedContainerTest {
 									.isEqualTo(shape().map(new Cleaner()).map(new Optimizer()));
 
 							assertThat(model).isIsomorphicTo(decode(""
-									+"<employees/> ldp:contains <employees/1002>. "
+									+"<employees-basic/> ldp:contains <employees/1002>. "
 									+"<employees/1002> :code '1002'."
 							));
 
@@ -264,7 +265,7 @@ final class ShapedContainerTest {
 
 		private Engine engine() {
 			return new ShapedContainer(tool(Graph.Factory), and(
-					meta(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
+					meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
 					meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 					meta(LDP.MEMBERSHIP_RESOURCE, term("Employee")),
 					field(LDP.CONTAINS, shape())

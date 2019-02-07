@@ -21,6 +21,7 @@ import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
@@ -44,7 +45,7 @@ interface Flock { // !!! decouple from Repository
 
 	public static Optional<Flock> flock(final Map<IRI, Value> metadata) {
 
-		final Value type=metadata.get(LDP.CONTAINER);
+		final Value type=metadata.get(RDF.TYPE);
 
 		return LDP.BASIC_CONTAINER.equals(type) ? Optional.of(new Basic())
 				: LDP.DIRECT_CONTAINER.equals(type) ? Optional.of(new Direct(metadata))

@@ -157,6 +157,11 @@ public interface Shape {
 	 */
 	public static Guard client() { return task(Form.create, Form.relate, Form.delete); }
 
+	/*
+	 * Marks shapes as internal use only.
+	 */
+	public static Guard hidden() { return task(); }
+
 
 	public static Guard digest() { return view(Form.digest); }
 

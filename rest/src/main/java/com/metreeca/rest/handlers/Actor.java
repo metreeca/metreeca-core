@@ -77,7 +77,7 @@ public abstract class Actor extends Delegator {
 
 				super.handle(request).accept(consumer);
 
-			} catch ( final UnsupportedOperationException e ) {
+			} catch ( final NotImplementedException e ) {
 
 				request.reply(response -> response.map(new Failure()
 						.status(Response.NotImplemented)
@@ -86,6 +86,23 @@ public abstract class Actor extends Delegator {
 
 			}
 		};
+	}
+
+
+	public static final class NotImplementedException extends RuntimeException {
+
+		private static final long serialVersionUID=-5919197536228324934L;
+
+		public NotImplementedException(final String message) {
+
+			super(message);
+
+			if ( message == null ) {
+				throw new NullPointerException("null message");
+			}
+
+		}
+
 	}
 
 }

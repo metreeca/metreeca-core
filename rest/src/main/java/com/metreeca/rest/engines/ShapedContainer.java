@@ -25,6 +25,7 @@ import com.metreeca.rest.Engine;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
+import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -38,7 +39,6 @@ import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.metas;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
 import static com.metreeca.rest.wrappers.Throttler.container;
@@ -104,10 +104,7 @@ final class ShapedContainer extends GraphEntity {
 
 						@Override public Result<V, E> probe(final Edges edges) {
 
-							//final Map<Resource, Collection<Statement>> process=new ShapedRetriever(connection)
-							//		.process(resource, query);
-
-							return Value(mapper.apply(relate, set()));
+							return Value(mapper.apply(relate, new ShapedRetriever(connection).retrieve(resource, query)));
 
 						}
 
@@ -157,11 +154,11 @@ final class ShapedContainer extends GraphEntity {
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
-		throw new UnsupportedOperationException("shaped container updating not supported");
+		throw new NotImplementedException("shaped container updating not supported");
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {
-		throw new UnsupportedOperationException("shaped container deletion not supported");
+		throw new NotImplementedException("shaped container deletion not supported");
 	}
 
 }

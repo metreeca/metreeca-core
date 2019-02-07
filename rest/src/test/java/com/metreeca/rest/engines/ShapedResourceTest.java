@@ -19,6 +19,7 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
@@ -97,7 +98,7 @@ final class ShapedResourceTest {
 		@Test void testUnsupported() {
 			exec(() -> assertThatThrownBy(() -> engine().create(
 					item("employees/1370"), item("employees/9999"), set()
-			)).isInstanceOf(UnsupportedOperationException.class));
+			)).isInstanceOf(Actor.NotImplementedException.class));
 		}
 
 	}
@@ -215,7 +216,7 @@ final class ShapedResourceTest {
 					.exec(() -> {
 
 						final Engine engine=new ShapedResource(tool(Graph.Factory), and(
-								meta(LDP.CONTAINER, LDP.BASIC_CONTAINER),
+								meta(RDF.TYPE, LDP.BASIC_CONTAINER),
 								field(RDF.VALUE)
 						));
 
@@ -240,7 +241,7 @@ final class ShapedResourceTest {
 					.exec(() -> {
 
 						final Engine engine=new ShapedResource(tool(Graph.Factory), and(
-								meta(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
+								meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
 								meta(LDP.MEMBERSHIP_RESOURCE, RDFS.RESOURCE),
 								meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 								field(RDF.VALUE)

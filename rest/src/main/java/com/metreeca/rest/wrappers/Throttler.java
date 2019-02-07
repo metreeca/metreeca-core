@@ -39,7 +39,6 @@ import static com.metreeca.form.Shape.constant;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.And.pass;
-import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
@@ -122,10 +121,7 @@ public final class Throttler implements Wrapper {
 	 * @return a shape operator returning its input shape
 	 */
 	public static UnaryOperator<Shape> entity() {
-		return merge((container, resource)
-				-> TRUE.equals(constant(resource)) ? container
-				: and(container, field(LDP.CONTAINS, resource))
-		);
+		return shape -> and(metadata(shape), shape).map(new Optimizer());
 	}
 
 	/**
@@ -160,27 +156,30 @@ public final class Throttler implements Wrapper {
 					.map(new ResourceTraverser())
 					.map(new Optimizer());
 
-			final Stream<Meta> metas=metas(container) // extact existing metadata annotations
-					.entrySet().stream()
-					.map(entry -> meta(entry.getKey(), entry.getValue()));
-
-			final Stream<Meta> fields=fields(container) // convert container LDP properties to metadata annotations
-					.entrySet().stream()
-					.filter(entry -> ContainerMetadata.contains(entry.getKey()))
-					.map(entry -> entry(entry.getKey(), all(entry.getValue()).orElseGet(Sets::set)))
-					.filter(entry -> entry.getValue().size() == 1)
-					.map(entry -> meta(
-							entry.getKey().equals(RDF.TYPE)? LDP.CONTAINER : entry.getKey(),
-							entry.getValue().iterator().next()
-					));
-
-			final Shape metadata=and(Stream.concat(metas, fields).collect(toList()));
+			final Shape metadata=metadata(container);
 
 			// container metadata is added both to container and to resource shape to drive engines
 
 			return merger.apply(and(metadata, container), and(metadata, resource)).map(new Optimizer());
 
 		};
+	}
+
+
+	private static Shape metadata(final Shape shape) {
+
+		final Stream<Meta> metas=metas(shape) // extract existing metadata annotations
+				.entrySet().stream()
+				.map(entry -> meta(entry.getKey(), entry.getValue()));
+
+		final Stream<Meta> fields=fields(shape) // convert container LDP properties to metadata annotations
+				.entrySet().stream()
+				.filter(entry -> ContainerMetadata.contains(entry.getKey()))
+				.map(entry -> entry(entry.getKey(), all(entry.getValue()).orElseGet(Sets::set)))
+				.filter(entry -> entry.getValue().size() == 1)
+				.map(entry -> meta(entry.getKey(), entry.getValue().iterator().next()));
+
+		return and(Stream.concat(metas, fields).collect(toList()));
 	}
 
 

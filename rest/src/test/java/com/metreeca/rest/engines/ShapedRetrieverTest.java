@@ -519,7 +519,7 @@ final class ShapedRetrieverTest {
 
 	private Collection<Statement> process(final Query query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
-			return new ShapedRetriever(connection).process(Form.root, query);
+			return new ShapedRetriever(connection).retrieve(Form.root, query);
 		}
 	}
 

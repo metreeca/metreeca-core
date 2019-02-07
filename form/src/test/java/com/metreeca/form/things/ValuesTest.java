@@ -128,7 +128,7 @@ public final class ValuesTest {
 	);
 
 	public static final Shape Employees=role(Manager, Salesman).then(
-			server().then(
+			verify().then(
 					field(RDF.TYPE, LDP.DIRECT_CONTAINER),
 					field(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 					field(LDP.MEMBERSHIP_RESOURCE, term("Employee"))

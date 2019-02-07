@@ -20,6 +20,7 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
@@ -86,7 +87,7 @@ final class SimpleContainerTest {
 			@Test void testBrowseFiltered() {
 				exec(() -> assertThatThrownBy(() -> engine()
 						.browse(container, shape -> Value(stats(shape, list())), (shape, model) -> model)
-				).isInstanceOf(UnsupportedOperationException.class));
+				).isInstanceOf(Actor.NotImplementedException.class));
 			}
 
 		}
@@ -167,7 +168,7 @@ final class SimpleContainerTest {
 
 		private Engine engine() {
 			return new SimpleContainer(tool(Graph.Factory), map(
-					entry(LDP.CONTAINER, LDP.DIRECT_CONTAINER),
+					entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
 					entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 					entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 			));

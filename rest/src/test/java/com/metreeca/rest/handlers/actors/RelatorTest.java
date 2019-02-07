@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.things.ValuesTest;
 import com.metreeca.form.truths.JSONAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -61,7 +60,7 @@ final class RelatorTest {
 		private Request resource() {
 			return new Request()
 					.method(Request.GET)
-					.base(ValuesTest.Base)
+					.base(Base)
 					.path("/employees/1370");
 		}
 
@@ -102,8 +101,8 @@ final class RelatorTest {
 
 			private Request resource() {
 				return Resource.this.resource()
-						.roles(ValuesTest.Manager)
-						.shape(ValuesTest.Employee);
+						.roles(Manager)
+						.shape(Employee);
 			}
 
 
@@ -133,7 +132,7 @@ final class RelatorTest {
 			@Test void testRelatePartial() {
 				exec(() -> new Relator()
 
-						.handle(resource().roles(ValuesTest.Salesman))
+						.handle(resource().roles(Salesman))
 
 						.accept(response -> tool(Graph.Factory).query(connection -> {
 

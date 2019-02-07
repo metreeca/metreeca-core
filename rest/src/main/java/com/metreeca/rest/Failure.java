@@ -98,7 +98,7 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error type.
 	 *
-	 * @param error a machine readable tag for the error condition defined by this failure
+	 * @param error a machine readable tag for the error condition defined by this failure; ignored if empty
 	 *
 	 * @return this failure
 	 *
@@ -110,7 +110,9 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null error");
 		}
 
-		this.error=error;
+		if ( !error.isEmpty() ) {
+			this.error=error;
+		}
 
 		return this;
 	}
@@ -118,7 +120,7 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error cause description.
 	 *
-	 * @param cause a human readable description of the error condition defined by this failure
+	 * @param cause a human readable description of the error condition defined by this failure; ignored if empty
 	 *
 	 * @return this failure
 	 *
@@ -130,7 +132,9 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null cause");
 		}
 
-		this.label=cause;
+		if ( !cause.isEmpty() ) {
+			this.label=cause;
+		}
 
 		return this;
 	}

@@ -28,9 +28,9 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
-import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
@@ -44,6 +44,7 @@ import static com.metreeca.rest.wrappers.Throttler.entity;
 import static com.metreeca.rest.wrappers.Throttler.resource;
 
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -211,7 +212,10 @@ public final class Relator extends Actor {
 										.relate(item, shape -> Value(edges(shape)), (cshape, cmodel) -> response
 												.status(OK)
 												.shape(and(cshape, field(LDP.CONTAINS, rshape)))
-												.body(rdf(), union(cmodel, rmodel))
+												.body(rdf(), Stream
+														.concat(cmodel.stream(), rmodel.stream())
+														.collect(toList())
+												)
 										)
 
 										.fold(identity(), unexpected -> response);
@@ -264,14 +268,6 @@ public final class Relator extends Actor {
 
 		return representation.equals(include.stringValue());
 
-	}
-
-
-	private <V> Collection<V> union(final Collection<V> x, final Collection<V> y) {
-
-		x.addAll(y);
-
-		return x;
 	}
 
 }
