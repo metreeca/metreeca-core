@@ -27,6 +27,7 @@ import com.metreeca.form.queries.Stats;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -41,11 +42,11 @@ import java.util.logging.Logger;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.indent;
-import static com.metreeca.form.things.Values.*;
+import static com.metreeca.form.things.Values.bnode;
+import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.Values.statement;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
-
-import static java.util.Collections.singletonMap;
 
 
 final class ShapedRetriever {
@@ -72,19 +73,19 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Map<Resource, Collection<Statement>> process(final IRI target, final Query query) {
+	public Collection<Statement> process(final IRI resource, final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
 		}
 
-		return query.map(new Query.Probe<Map<Resource, Collection<Statement>>>() {
+		return query.map(new Query.Probe<Collection<Statement>>() {
 
-			@Override public Map<Resource, Collection<Statement>> probe(final Edges edges) { return edges(target, edges); }
+			@Override public Collection<Statement> probe(final Edges edges) { return edges(resource, edges); }
 
-			@Override public Map<Resource, Collection<Statement>> probe(final Stats stats) { return stats(target, stats); }
+			@Override public Collection<Statement> probe(final Stats stats) { return stats(resource, stats); }
 
-			@Override public Map<Resource, Collection<Statement>> probe(final Items items) { return items(target, items); }
+			@Override public Collection<Statement> probe(final Items items) { return items(resource, items); }
 
 		});
 	}
@@ -92,7 +93,7 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map<Resource, Collection<Statement>> edges(final IRI target, final Edges edges) {
+	private Collection<Statement> edges(final IRI resource, final Edges edges) {
 
 		final Shape shape=edges.getShape();
 		final List<Order> orders=edges.getOrders();
@@ -102,7 +103,7 @@ final class ShapedRetriever {
 		final Object root=0; // root identifier // !!! review
 
 		final Collection<Statement> template=new ArrayList<>();
-		final Map<Resource, Collection<Statement>> matches=new LinkedHashMap<>();
+		final Collection<Statement> model=new LinkedHashSet<>();
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
@@ -140,40 +141,38 @@ final class ShapedRetriever {
 
 			@Override public void handleSolution(final BindingSet bindings) {
 
-				final Resource match=(Resource)bindings.getValue(root.toString());
+				final Value match=bindings.getValue(root.toString());
 
 				if ( match != null ) {
-					matches.compute(match, (value, statements) -> {
 
-						final Collection<Statement> computed=(statements != null) ? statements : new LinkedHashSet<>();
+					if ( !match.equals(resource) ) {
+						model.add(statement(resource, LDP.CONTAINS, match));
+					}
 
-						template.forEach(statement -> {
+					template.forEach(statement -> {
 
-							final Resource subject=statement.getSubject();
-							final Value object=statement.getObject();
+						final Resource subject=statement.getSubject();
+						final Value object=statement.getObject();
 
-							final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
-							final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
+						final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
+						final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
 
-							if ( source instanceof Resource && target != null ) {
-								computed.add(statement((Resource)source, statement.getPredicate(), target));
-							}
-
-						});
-
-						return computed;
+						if ( source instanceof Resource && target != null ) {
+							model.add(statement((Resource)source, statement.getPredicate(), target));
+						}
 
 					});
+
 				}
 
 			}
 
 		});
 
-		return matches;
+		return model;
 	}
 
-	private Map<Resource, Collection<Statement>> stats(final IRI target, final Stats stats) {
+	private Collection<Statement> stats(final IRI resource, final Stats stats) {
 
 		final Shape shape=stats.getShape();
 		final List<IRI> path=stats.getPath();
@@ -234,7 +233,7 @@ final class ShapedRetriever {
 				final Value min=bindings.getValue("min");
 				final Value max=bindings.getValue("max");
 
-				if ( type != null ) { model.add(target, Form.stats, type); }
+				if ( type != null ) { model.add(resource, Form.stats, type); }
 				if ( type != null && count != null ) { model.add(type, Form.count, count); }
 				if ( type != null && min != null ) { model.add(type, Form.min, min); }
 				if ( type != null && max != null ) { model.add(type, Form.max, max); }
@@ -247,7 +246,7 @@ final class ShapedRetriever {
 
 		});
 
-		model.add(target, Form.count, literal(BigInteger.valueOf(counts.stream()
+		model.add(resource, Form.count, literal(BigInteger.valueOf(counts.stream()
 				.filter(Objects::nonNull)
 				.mapToLong(Literal::longValue)
 				.sum())));
@@ -255,17 +254,17 @@ final class ShapedRetriever {
 		mins.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.LT) ? x : y)
-				.ifPresent(min -> model.add(target, Form.min, min));
+				.ifPresent(min -> model.add(resource, Form.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
-				.ifPresent(max -> model.add(target, Form.max, max));
+				.ifPresent(max -> model.add(resource, Form.max, max));
 
-		return singletonMap(target, model);
+		return model;
 	}
 
-	private Map<Resource, Collection<Statement>> items(final IRI target, final Items items) {
+	private Collection<Statement> items(final IRI resource, final Items items) {
 
 		final Shape shape=items.getShape();
 		final List<IRI> path=items.getPath();
@@ -291,10 +290,10 @@ final class ShapedRetriever {
 						prefixes(),
 
 						"select"
-								+ " (", target, " as ?value)"
-								+ " (sample(?l) as ?label)"
-								+ " (sample(?n) as ?notes)"
-								+ " (count(distinct ", source, ") as ?count)" ,
+								+" (", target, " as ?value)"
+								+" (sample(?l) as ?label)"
+								+" (sample(?n) as ?notes)"
+								+" (count(distinct ", source, ") as ?count)",
 
 						" {\f",
 
@@ -326,7 +325,7 @@ final class ShapedRetriever {
 
 				final BNode item=bnode();
 
-				if ( item != null ) { model.add(target, Form.items, item); }
+				if ( item != null ) { model.add(resource, Form.items, item); }
 				if ( item != null && value != null ) { model.add(item, Form.value, value); }
 				if ( item != null && count != null ) { model.add(item, Form.count, count); }
 
@@ -338,7 +337,7 @@ final class ShapedRetriever {
 			}
 		});
 
-		return singletonMap(target, model);
+		return model;
 	}
 
 

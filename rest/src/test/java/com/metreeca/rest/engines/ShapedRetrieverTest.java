@@ -21,12 +21,11 @@ import com.metreeca.form.*;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Values;
-import com.metreeca.form.things.ValuesTest;
+import com.metreeca.form.shapes.MaxLength;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -34,8 +33,6 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.metreeca.form.Order.decreasing;
@@ -49,28 +46,21 @@ import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Like.like;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
+import static com.metreeca.form.shapes.MinExclusive.minExclusive;
+import static com.metreeca.form.shapes.MinInclusive.minInclusive;
+import static com.metreeca.form.shapes.MinLength.minLength;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.things.Lists.concat;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.ValuesTest.construct;
-import static com.metreeca.form.things.ValuesTest.item;
-import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static java.util.stream.Collectors.toSet;
 
 
 final class ShapedRetrieverTest {
 
-	private static final IRI meta=iri(Form.Namespace, "meta");
-
-
-	private final Supplier<RepositoryConnection> sandbox=ValuesTest.sandbox(ValuesTest.large());
+	private final Supplier<RepositoryConnection> sandbox=sandbox(large());
 
 
 	//// Edges /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,54 +83,52 @@ final class ShapedRetrieverTest {
 
 	@Test void testEdgesEmptyProjection() {
 
-		final Map<Resource, Collection<Statement>> matches=edges(clazz(term("Product")));
+		final Collection<Statement> matches=edges(clazz(term("Product")));
 
-		assertThat(matches.keySet())
+		assertThat(matches)
 				.as("matching focus")
-				.isEqualTo(focus(
-
-				"select * where { ?product a :Product }"
-
-		));
-
-		assertThat(model(matches))
-				.as("empty model")
-				.isEmpty();
+				.isIsomorphicTo(model("construct { form:root ldp:contains ?product } where { ?product a :Product }"));
 
 	}
 
 	@Test void testEdgesMatching() {
 
-		final Map<Resource, Collection<Statement>> matches=edges(field(RDF.TYPE, all(term("Product"))));
+		final Collection<Statement> matches=edges(field(RDF.TYPE, all(term("Product"))));
 
-		assertThat(matches.keySet())
+		assertThat(matches)
 				.as("matching focus")
-				.isEqualTo(focus("select * where { ?product a :Product }"));
-
-		assertThat(model(matches))
-				.as("matching model")
-				.isIsomorphicTo(model("construct where { ?product a :Product }"));
+				.isIsomorphicTo(model("construct { form:root ldp:contains ?product. ?product a :Product } where { ?product a :Product }"));
 
 	}
 
 	@Test void testEdgesSorting() {
 
-		final String query="construct { ?product a :Product }"
+		final String query="construct { form:root ldp:contains ?product }"
 				+" where { ?product a :Product; rdfs:label ?label; :line ?line }";
 
-		final Shape shape=field(RDF.TYPE, all(term("Product")));
+		final Shape shape=filter().then(field(RDF.TYPE, all(term("Product"))));
 
 		// convert to lists to assert ordering
 
-		Assertions.assertThat(list(model(query+" order by ?product"))).as("default (on value)").isEqualTo(list(model(edges(shape))));
+		Assertions.assertThat(list(model(query+" order by ?product")))
+				.as("default (on value)")
+				.isEqualTo(list(edges(shape)));
 
-		Assertions.assertThat(list(model(query+" order by ?label"))).as("custom increasing").isEqualTo(list(model(edges(shape, increasing(RDFS.LABEL)))));
+		Assertions.assertThat(list(model(query+" order by ?label")))
+				.as("custom increasing")
+				.isEqualTo(list(edges(shape, increasing(RDFS.LABEL))));
 
-		Assertions.assertThat(list(model(query+" order by desc(?label)"))).as("custom decreasing").isEqualTo(list(model(edges(shape, decreasing(RDFS.LABEL)))));
+		Assertions.assertThat(list(model(query+" order by desc(?label)")))
+				.as("custom decreasing")
+				.isEqualTo(list(edges(shape, decreasing(RDFS.LABEL))));
 
-		Assertions.assertThat(list(model(query+" order by ?line ?label"))).as("custom combined").isEqualTo(list(model(edges(shape, increasing(term("line")), increasing(RDFS.LABEL)))));
+		Assertions.assertThat(list(model(query+" order by ?line ?label")))
+				.as("custom combined")
+				.isEqualTo(list(edges(shape, increasing(term("line")), increasing(RDFS.LABEL))));
 
-		Assertions.assertThat(list(model(query+" order by desc(?product)"))).as("custom on root").isEqualTo(list(model(edges(shape, decreasing()))));
+		Assertions.assertThat(list(model(query+" order by desc(?product)")))
+				.as("custom on root")
+				.isEqualTo(list(edges(shape, decreasing())));
 
 	}
 
@@ -149,24 +137,22 @@ final class ShapedRetrieverTest {
 
 	@Test void testStatsEmptyResultSet() {
 
-		final Map<Resource, Collection<Statement>> matches=stats(field(RDF.TYPE, all(RDF.NIL)));
+		final Collection<Statement> matches=stats(field(RDF.TYPE, all(RDF.NIL)));
 
-		assertThat(set(meta)).as("meta focus").isEqualTo(matches.keySet());
-
-		assertThat(model(matches))
-				.isIsomorphicTo(model("construct { form:meta form:count 0 } where {}"));
+		assertThat(matches)
+				.isIsomorphicTo(decode("form:root form:count 0 ."));
 	}
 
 	@Test void testStatsEmptyProjection() {
 
-		final Map<Resource, Collection<Statement>> matches=stats(clazz(term("Product")));
+		final Collection<Statement> matches=stats(clazz(term("Product")));
 
-		assertThat(model(matches))
+		assertThat(matches)
 				.isIsomorphicTo(model(""
 						+"\n"
 						+"construct { \n"
 						+"\n"
-						+"\tform:meta \n"
+						+"\tform:root \n"
 						+"\t\tform:count ?count; form:min ?min; form:max ?max;\n"
 						+"\t\tform:stats rdfs:Resource.\n"
 						+"\t\n"
@@ -187,14 +173,14 @@ final class ShapedRetrieverTest {
 
 	@Test void testStatsRootConstraints() {
 
-		final Map<Resource, Collection<Statement>> matches=stats(all(item("employees/1370")), term("account"));
+		final Collection<Statement> matches=stats(all(item("employees/1370")), term("account"));
 
-		assertThat(model(matches))
+		assertThat(matches)
 				.isIsomorphicTo(model(""
 						+"\n"
 						+"construct { \n"
 						+"\n"
-						+"\tform:meta \n"
+						+"\tform:root \n"
 						+"\t\tform:count ?count; form:min ?min; form:max ?max;\n"
 						+"\t\tform:stats rdfs:Resource.\n"
 						+"\t\n"
@@ -218,22 +204,20 @@ final class ShapedRetrieverTest {
 
 	@Test void testItemsEmptyResultSet() {
 
-		final Map<Resource, Collection<Statement>> matches=items(field(RDF.TYPE, all(RDF.NIL)));
+		final Collection<Statement> matches=items(field(RDF.TYPE, all(RDF.NIL)));
 
-		assertThat(matches.keySet()).isEqualTo(set(meta));
-
-		assertThat(model(matches))
-				.isIsomorphicTo(model("construct {} where {}"));
+		assertThat(matches)
+				.isEmpty();
 	}
 
 	@Test void testItemsEmptyProjection() {
 
-		final Map<Resource, Collection<Statement>> matches=items(clazz(term("Product")));
+		final Collection<Statement> matches=items(clazz(term("Product")));
 
-		assertThat(model(matches))
+		assertThat(matches)
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
-						+"\tform:meta form:items [\n"
+						+"\tform:root form:items [\n"
 						+"\t\tform:value ?product;\n"
 						+"\t\tform:count 1\n"
 						+"\t].\n"
@@ -252,14 +236,14 @@ final class ShapedRetrieverTest {
 
 	@Test void testItemsRootConstraints() {
 
-		final Map<Resource, Collection<Statement>> matches=items(all(item("employees/1370")), term("account"));
+		final Collection<Statement> matches=items(all(item("employees/1370")), term("account"));
 
-		assertThat(model(matches))
+		assertThat(matches)
 				.isIsomorphicTo(model(""
 						+"\n"
 						+"construct { \n"
 						+"\n"
-						+"\tform:meta form:items [\n"
+						+"\tform:root form:items [\n"
 						+"\t\tform:value ?account;\n"
 						+"\t\tform:count 1\n"
 						+"\t].\n"
@@ -280,37 +264,56 @@ final class ShapedRetrieverTest {
 	//// Constraints ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testClassConstraint() {
-		assertThat(model(edges(and(
+		assertThat(edges(and(
 				clazz(term("Product")),
 				field(RDF.TYPE)
-		))))
-				.isIsomorphicTo(model("construct where { ?product a :Product }"));
+		)))
+				.isIsomorphicTo(model("construct { form:root ldp:contains ?product. ?product a :Product } where { ?product a :Product }"));
 	}
 
 	@Test void testDirectUniversalConstraint() {
-		assertThat(model(edges(field(
+		assertThat(edges(field(
 				term("product"),
 				all(item("products/S10_2016"), item("products/S24_2022"))
-		))))
-				.isIsomorphicTo(model("construct { ?root :product ?product } where {\n"
+		)))
+				.isIsomorphicTo(model("construct { \n"
+						+"\n"
+						+"\tform:root ldp:contains ?root.\n"
+						+"\t?root :product ?product.\n"
+						+"\t\n"
+						+"} where {\n"
+						+"\n"
 						+"\t?root :product ?product, <products/S10_2016>, <products/S24_2022>\n"
+						+"\t\n"
 						+"}"));
 	}
 
 	@Test void testInverseUniversalConstraint() {
-		assertThat(model(edges(field(inverse(term("customer")), all(item("products/S10_2016"), item("products/S24_2022"))))))
-				.isIsomorphicTo(model("construct { ?product :customer ?customer } where {\n"
+		assertThat(edges(field(inverse(term("customer")), all(item("products/S10_2016"), item("products/S24_2022")))))
+				.isIsomorphicTo(model("construct {\n"
+						+"\n"
+						+"\tform:root ldp:contains ?customer.\n"
+						+"\t?product :customer ?customer.\n"
+						+"\n"
+						+"} where {\n"
+						+"\n"
 						+"\t?customer ^:customer ?product, <products/S10_2016>, <products/S24_2022>.\n"
+						+"\t\n"
 						+"}"
 				));
 	}
 
 	@Test void testRootUniversalConstraint() {
-		assertThat(model(edges(and(
+		assertThat(edges(and(
 				all(item("products/S18_2248"), item("products/S24_3969")),
 				field(RDF.TYPE)
-		))))
-				.isIsomorphicTo(model("construct { ?product a ?type } where {\n"
+		)))
+				.isIsomorphicTo(model("construct {\n"
+						+"\n"
+						+"\tform:root ldp:contains ?product.\n"
+						+"\t?product a ?type\n"
+						+"\t\n"
+						+"} where {\n"
 						+"\n"
 						+"\tvalues ?product { <products/S18_2248> <products/S24_3969> }\n"
 						+"\t\n"
@@ -320,31 +323,55 @@ final class ShapedRetrieverTest {
 	}
 
 	@Test void testSingletonUniversalConstraint() {
-		assertThat(model(edges(field(term("product"), all(item("products/S10_2016"))))))
-				.isIsomorphicTo(model("construct { ?customer :product ?product } where {\n"
+		assertThat(edges(field(term("product"), all(item("products/S10_2016")))))
+				.isIsomorphicTo(model("construct {\n"
+						+"\n"
+						+"\tform:root ldp:contains ?customer.\n"
+						+"\t?customer :product ?product.\n"
+						+"\t\n"
+						+"} where {\n"
+						+"\n"
 						+"\t?customer :product ?product, <products/S10_2016>\n"
+						+"\n"
 						+"}"));
 	}
 
 	@Test void testExistentialConstraint() {
-		assertThat(model(edges(field(term("product"), any(item("products/S18_2248"), item("products/S24_3969"))))))
-				.isIsomorphicTo(model("construct { ?item :product ?product } where {\n"
+		assertThat(edges(field(term("product"), any(item("products/S18_2248"), item("products/S24_3969")))))
+				.isIsomorphicTo(model("construct {\n"
+						+"\n"
+						+"\tform:root ldp:contains ?item.\n"
+						+"\t?item :product ?product.\n"
+						+"\n"
+						+"} where {\n"
+						+"\n"
 						+"\t?item :product ?product, ?value filter (?value in (<products/S18_2248>, <products/S24_3969>))\n"
+						+"\t\n"
 						+"}"));
 	}
 
 	@Test void testSingletonExistentialConstraint() {
-		assertThat(model(edges(and(
+		assertThat(edges(and(
 				any(item("products/S18_2248")),
 				field(RDFS.LABEL)
-		))))
-				.isIsomorphicTo(model("construct where { <products/S18_2248> rdfs:label ?label }"));
+		)))
+				.isIsomorphicTo(model("construct {\n"
+						+"\n"
+						+"\tform:root ldp:contains <products/S18_2248>.\n"
+						+"\t<products/S18_2248> rdfs:label ?label.\n"
+						+"\t\n"
+						+"} where {\n"
+						+"\n"
+						+"\t<products/S18_2248> rdfs:label ?label\n"
+						+"\t\n"
+						+"}"));
 	}
 
 	@Test void testMinExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
-		assertThat(model(edges(field(term("sell"), MinExclusive.minExclusive(Values.literal(BigDecimal.valueOf(100.17)))))))
+		assertThat(edges(field(term("sell"), minExclusive(literal(BigDecimal.valueOf(100.17))))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
+						+"\tform:root ldp:contains ?product.\n"
 						+"\t?product :sell ?sell.\n"
 						+"\t \n"
 						+"} where { \n"
@@ -355,9 +382,10 @@ final class ShapedRetrieverTest {
 	}
 
 	@Test void testMaxExclusiveConstraint() { // 100.17 is the exact sell price of 'The Titanic'
-		assertThat(model(edges(field(term("sell"), maxExclusive(Values.literal(BigDecimal.valueOf(100.17)))))))
+		assertThat(edges(field(term("sell"), maxExclusive(literal(BigDecimal.valueOf(100.17))))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
+						+"\tform:root ldp:contains ?product.\n"
 						+"\t?product :sell ?sell.\n"
 						+"\t \n"
 						+"} where { \n"
@@ -368,9 +396,10 @@ final class ShapedRetrieverTest {
 	}
 
 	@Test void testMinInclusiveConstraint() {
-		assertThat(model(edges(field(term("sell"), MinInclusive.minInclusive(Values.literal(BigDecimal.valueOf(100)))))))
+		assertThat(edges(field(term("sell"), minInclusive(literal(BigDecimal.valueOf(100))))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
+						+"\tform:root ldp:contains ?product.\n"
 						+"\t?product :sell ?sell.\n"
 						+"\t \n"
 						+"} where { \n"
@@ -381,9 +410,10 @@ final class ShapedRetrieverTest {
 	}
 
 	@Test void testMaxInclusiveConstraint() {
-		assertThat(model(edges(field(term("sell"), maxInclusive(Values.literal(BigDecimal.valueOf(100)))))))
+		assertThat(edges(field(term("sell"), maxInclusive(literal(BigDecimal.valueOf(100))))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
+						+"\tform:root ldp:contains ?product.\n"
 						+"\t?product :sell ?sell.\n"
 						+"\t \n"
 						+"} where { \n"
@@ -394,9 +424,10 @@ final class ShapedRetrieverTest {
 	}
 
 	@Test void testPattern() {
-		assertThat(model(edges(field(RDFS.LABEL, pattern("\\bferrari\\b", "i")))))
+		assertThat(edges(field(RDFS.LABEL, pattern("\\bferrari\\b", "i"))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
+						+"\tform:root ldp:contains ?item.\n"
 						+"\t?item rdfs:label ?label\n"
 						+"\t \n"
 						+"} where { \n"
@@ -407,9 +438,10 @@ final class ShapedRetrieverTest {
 	}
 
 	@Test void testLike() {
-		assertThat(model(edges(field(RDFS.LABEL, like("alf ro")))))
+		assertThat(edges(field(RDFS.LABEL, like("alf ro"))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
+						+"\tform:root ldp:contains ?item.\n"
 						+"\t?item rdfs:label ?label\n"
 						+"\t \n"
 						+"} where { \n"
@@ -420,9 +452,10 @@ final class ShapedRetrieverTest {
 	}
 
 	@Test void testMinLength() {
-		assertThat(model(edges(field(term("sell"), MinLength.minLength(5)))))
+		assertThat(edges(field(term("sell"), minLength(5))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
+						+"\tform:root ldp:contains ?item.\n"
 						+"\t?item birt:sell ?sell\n"
 						+"\t \n"
 						+"} where { \n"
@@ -433,9 +466,10 @@ final class ShapedRetrieverTest {
 	}
 
 	@Test void testMaxLength() {
-		assertThat(model(edges(field(term("sell"), MaxLength.maxLength(5)))))
+		assertThat(edges(field(term("sell"), MaxLength.maxLength(5))))
 				.isIsomorphicTo(model("construct { \n"
 						+"\n"
+						+"\tform:root ldp:contains ?item.\n"
 						+"\t?item birt:sell ?sell\n"
 						+"\t \n"
 						+"} where { \n"
@@ -449,12 +483,13 @@ final class ShapedRetrieverTest {
 	//// Layout ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testUseIndependentPatternsAndFilters() {
-		assertThat(model(edges(and(
+		assertThat(edges(and(
 				field(term("employee")),
-				When.when(filter(), field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
-		))))
+				when(filter(), field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
+		)))
 				.isIsomorphicTo(model("construct {\n"
 						+"\n"
+						+"\tform:root ldp:contains ?office.\n"
 						+"\t?office :employee ?employee\n"
 						+"\t\n"
 						+"} where {\n"
@@ -467,41 +502,28 @@ final class ShapedRetrieverTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map<Resource, Collection<Statement>> edges(final Shape shape, final Order... orders) {
+	private Collection<Statement> edges(final Shape shape, final Order... orders) {
 		return process(Edges.edges(shape, list(orders), 0, 0));
 	}
 
-	private Map<Resource, Collection<Statement>> stats(final Shape shape, final IRI... path) {
+	private Collection<Statement> stats(final Shape shape, final IRI... path) {
 		return process(Stats.stats(shape, list(path)));
 	}
 
-	private Map<Resource, Collection<Statement>> items(final Shape shape, final IRI... path) {
+	private Collection<Statement> items(final Shape shape, final IRI... path) {
 		return process(Items.items(shape, list(path)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> model(final Map<Resource, Collection<Statement>> matches) {
-		return matches.values().stream().reduce(list(), (x, y) -> concat(x, y));
-	}
-
-	private Map<Resource, Collection<Statement>> process(final Query query) {
+	private Collection<Statement> process(final Query query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
-			return new ShapedRetriever(connection).process(meta, query);
+			return new ShapedRetriever(connection).process(Form.root, query);
 		}
 	}
 
-	private Set<Value> focus(final String query) {
-		try (final RepositoryConnection connection=sandbox.get()) {
-			return ValuesTest.select(connection, query)
-					.stream()
-					.flatMap(tuple -> tuple.values().stream())
-					.collect(toSet());
-		}
-	}
-
-	private Collection<Statement> model(final String query) {
+	public Collection<Statement> model(final String query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
 			return construct(connection, query);
 		}

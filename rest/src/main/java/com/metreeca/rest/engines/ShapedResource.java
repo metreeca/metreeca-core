@@ -27,7 +27,6 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -149,12 +148,9 @@ final class ShapedResource extends GraphEntity {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
-		return new ShapedRetriever(connection)
-				.process(resource, edges(and(all(resource), shape)))
-				.entrySet()
-				.stream()
-				.findFirst()
-				.map(Map.Entry::getValue);
+		return Optional.of(new ShapedRetriever(connection))
+				.map(retriever -> retriever.process(resource, edges(and(all(resource), shape))))
+				.filter(model -> !model.isEmpty());
 	}
 
 }
