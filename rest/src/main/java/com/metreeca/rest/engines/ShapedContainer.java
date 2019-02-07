@@ -74,13 +74,13 @@ final class ShapedContainer extends GraphEntity {
 	}
 
 	@Override public <V, E> Result<V, E> relate(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 		return delegate.relate(resource, parser, mapper);
 	}
 
 	@Override public <V, E> Result<V, E> browse(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}

@@ -70,7 +70,7 @@ final class ShapedResource extends GraphEntity {
 	}
 
 	@Override public <V, E> Result<V, E> relate(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
 		return parser.apply(relate).fold(

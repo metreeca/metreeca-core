@@ -82,7 +82,7 @@ public final class GraphEngine implements Engine {
 	}
 
 	@Override public <V, E> Result<V, E> relate(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
 		if ( resource == null ) {
@@ -110,7 +110,7 @@ public final class GraphEngine implements Engine {
 	}
 
 	@Override public <V, E> Result<V, E> browse(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
 		if ( resource == null ) {

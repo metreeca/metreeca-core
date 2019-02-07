@@ -32,14 +32,18 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.metreeca.form.queries.Stats.stats;
+import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 final class SimpleContainerTest {
@@ -59,18 +63,36 @@ final class SimpleContainerTest {
 
 	@Nested final class Basic {
 
+		private final IRI container=item("/employees-basic/");
+
+
 		private Engine engine() {
 			return new SimpleContainer(tool(Graph.Factory), map());
 		}
 
 
-		@Nested final class Relate {
+		@Nested final class Browse {
+
+			@Test void testBrowse() {
+				exec(() -> assertThat(engine().browse(container))
+
+						.as("item descriptions linked to container")
+						.hasSubset(decode("<employees-basic/> ldp:contains <employees/1370>."))
+
+						.as("item descriptions included")
+						.hasSubset(decode("<employees/1370> :code '1370'.")));
+			}
+
+			@Test void testBrowseFiltered() {
+				exec(() -> assertThatThrownBy(() -> engine()
+						.browse(container, shape -> Value(stats(shape, list())), (shape, model) -> model)
+				).isInstanceOf(UnsupportedOperationException.class));
+			}
 
 		}
 
 		@Nested final class Create {
 
-			private final IRI container=item("/employees-basic/");
 			private final IRI resource=item("/employees-basic/9999");
 
 

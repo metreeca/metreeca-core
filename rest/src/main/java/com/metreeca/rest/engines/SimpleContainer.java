@@ -25,14 +25,23 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static com.metreeca.form.queries.Edges.edges;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.engines.Descriptions.description;
 import static com.metreeca.rest.engines.Flock.flock;
+
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -64,19 +73,46 @@ final class SimpleContainer extends GraphEntity {
 	}
 
 	@Override public <V, E> Result<V, E> relate(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser,
+			final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 		return delegate.relate(resource, parser, mapper);
 	}
 
-	@Override public Collection<Statement> browse(final IRI resource) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
-
 	@Override public <V, E> Result<V, E> browse(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser,
+			final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
-		throw new UnsupportedOperationException("simple container filtered browsing not supported");
+
+		return parser.apply(and()).fold(
+
+				query -> {
+
+					if ( query.equals(edges(and())) ) {
+
+						return graph.query(connection -> {
+
+							return Value(mapper.apply(and(), flock
+									.items(connection, resource)
+									.flatMap(item -> Stream.concat(
+											Stream.of(statement(resource, LDP.CONTAINS, item)),
+											description(item, true, connection).stream()
+									))
+									.collect(toList())
+							));
+
+						});
+
+					} else {
+
+						throw new UnsupportedOperationException("simple container filtered browsing not supported");
+
+					}
+				},
+
+				Result::Error
+		);
+
 	}
 
 

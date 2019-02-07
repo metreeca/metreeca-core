@@ -79,7 +79,23 @@ final class ShapedContainerTest {
 		}
 
 
-		@Nested final class Relate {
+		@Nested final class Browse {
+
+			// !!! insert anchor point
+			// !!! delegate anchor point rewriting to flock
+			// !!! switch final shape according to query type
+			// !!! redact / cache final shape
+			//		.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
+			//		.map(new Optimizer())
+
+
+			@Test void test() {
+				exec(() -> {
+
+					engine();
+
+				});
+			}
 
 		}
 

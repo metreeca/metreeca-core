@@ -25,6 +25,9 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 
 /**
@@ -54,6 +57,9 @@ interface Flock { // !!! decouple from Repository
 	);
 
 
+	public Stream<Resource> items(final RepositoryConnection connection, final Resource container); // !!! remove after merging simple/shaped entities
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	final class None implements Flock {
@@ -72,6 +78,10 @@ interface Flock { // !!! decouple from Repository
 
 			return connection;
 
+		}
+
+		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
+			return Stream.empty();
 		}
 
 	}
@@ -96,6 +106,13 @@ interface Flock { // !!! decouple from Repository
 
 			return connection;
 
+		}
+
+		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
+			return stream(connection.getStatements(container, LDP.CONTAINS, null, true))
+					.map(Statement::getObject)
+					.filter(value -> value instanceof Resource)
+					.map(value -> (Resource)value);
 		}
 
 	}
@@ -143,11 +160,11 @@ interface Flock { // !!! decouple from Repository
 		) {
 
 			if ( relation != null && subject != null ) {
-				connection.add(subject.equals(LDP.CONTAINER) ? container : subject, relation, resource);
+				connection.add(subject(container), relation, resource);
 			}
 
 			if ( relation != null && object != null ) {
-				connection.add(resource, relation, object.equals(LDP.CONTAINER) ? container : object);
+				connection.add(resource, relation, object(container));
 			}
 
 			return connection;
@@ -166,6 +183,31 @@ interface Flock { // !!! decouple from Repository
 			}
 
 			return connection;
+		}
+
+		@Override public Stream<Resource> items(final RepositoryConnection connection, final Resource container) {
+			return relation != null && subject != null ?
+
+					stream(connection.getStatements(subject(container), relation, null, true))
+							.map(Statement::getObject)
+							.filter(value -> value instanceof Resource)
+							.map(value -> (Resource)value)
+
+					: relation != null && object != null ?
+
+					stream(connection.getStatements(null, relation, object(container), true))
+							.map(Statement::getSubject)
+
+					: Stream.empty();
+		}
+
+
+		private Resource subject(final Resource container) {
+			return subject.equals(LDP.CONTAINER) ? container : subject;
+		}
+
+		private Value object(final Value container) {
+			return object.equals(LDP.CONTAINER) ? container : object;
 		}
 
 	}

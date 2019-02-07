@@ -48,13 +48,6 @@ import static com.metreeca.rest.Result.Value;
  */
 public interface Engine {
 
-	// !!! insert anchor point
-	// !!! delegate anchor point rewriting to flock
-	// !!! switch final shape according to query type
-	// !!! redact / cache final shape
-	//		.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
-	//		.map(new Optimizer())
-
 	/**
 	 * Retrieves a resource.
 	 *
@@ -75,7 +68,8 @@ public interface Engine {
 	}
 
 	public <V, E> Result<V, E> relate(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser,
+			final BiFunction<Shape, Collection<Statement>, V> mapper
 	);
 
 	/**
@@ -100,7 +94,8 @@ public interface Engine {
 	}
 
 	public default  <V, E> Result<V, E> browse(final IRI resource,
-			final Function<Shape, Result<Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
+			final Function<Shape, Result<? extends Query, E>> parser,
+			final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
 		if ( resource == null ) {
@@ -136,6 +131,7 @@ public interface Engine {
 				Result::Error
 		);
 	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
