@@ -206,7 +206,7 @@ final class RelatorTest {
 			@Test void testBrowse() {
 				exec(() -> new Relator()
 
-						.handle(simple())
+						.handle(simple().query("{}"))
 
 						.accept(response -> assertThat(response)
 								.hasStatus(Response.NotImplemented)
@@ -298,7 +298,7 @@ final class RelatorTest {
 				exec(() -> new Relator()
 
 						.handle(shaped().header("Prefer", String.format(
-								"return=representation; include=\"%s\"", LDP.PREFER_EMPTY_CONTAINER
+								"return=representation; include=\"%s\"", LDP.PREFER_MINIMAL_CONTAINER
 						)))
 
 						.accept(response -> assertThat(response)

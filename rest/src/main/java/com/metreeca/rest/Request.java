@@ -21,7 +21,6 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.QueryParser;
-import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -32,6 +31,7 @@ import java.util.function.Function;
 
 import javax.json.JsonException;
 
+import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
@@ -175,7 +175,7 @@ public final class Request extends Message<Request> {
 
 
 	/**
-	 * Retrieves the shape query of this request.
+	 * Retrieves the shape-based query of this request.
 	 *
 	 * @param shape the base shape for the query
 	 *
@@ -193,7 +193,7 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return Value(new QueryParser(shape).parse(Codecs.decode(query())));
+			return Value(new QueryParser(shape).parse(decode(query())));
 
 		} catch ( final JsonException e ) {
 

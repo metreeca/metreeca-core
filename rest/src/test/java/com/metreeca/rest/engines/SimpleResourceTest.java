@@ -72,18 +72,15 @@ final class SimpleResourceTest {
 				final IRI bondur=item("employees/1102");
 
 				assertThat(engine().relate(hernandez))
-						.isPresent()
-						.hasValueSatisfying(description -> assertThat(description)
 
-								.as("resource description")
-								.hasStatement(hernandez, term("code"), literal("1370"))
-								.hasStatement(hernandez, term("supervisor"), bondur)
+						.as("resource description")
+						.hasStatement(hernandez, term("code"), literal("1370"))
+						.hasStatement(hernandez, term("supervisor"), bondur)
 
-								.as("labelled connected resource description")
-								.hasStatement(bondur, RDF.TYPE, term("Employee"))
-								.hasStatement(bondur, RDFS.LABEL, literal("Gerard Bondur"))
-								.doesNotHaveStatement(bondur, term("code"), null)
-						);
+						.as("labelled connected resource description")
+						.hasStatement(bondur, RDF.TYPE, term("Employee"))
+						.hasStatement(bondur, RDFS.LABEL, literal("Gerard Bondur"))
+						.doesNotHaveStatement(bondur, term("code"), null);
 
 			});
 		}
@@ -91,7 +88,7 @@ final class SimpleResourceTest {
 		@Test void testUnknown() {
 			exec(() -> assertThat(engine().relate(item("employees/9999")))
 					.as("empty description")
-					.isNotPresent());
+					.isEmpty());
 		}
 
 	}

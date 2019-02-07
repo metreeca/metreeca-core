@@ -18,6 +18,7 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
+import com.metreeca.form.things.Sets;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -59,8 +60,8 @@ final class ShapedResource extends GraphEntity {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
-		return graph.query(connection -> { return retrieve(connection, resource, relate); });
+	@Override public Collection<Statement> relate(final IRI resource) {
+		return graph.query(connection -> { return retrieve(connection, resource, relate).orElseGet(Sets::set); });
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {

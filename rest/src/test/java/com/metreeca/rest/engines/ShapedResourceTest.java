@@ -72,8 +72,6 @@ final class ShapedResourceTest {
 				final IRI bondur=item("employees/1102");
 
 				assertThat(engine().relate(hernandez))
-						.isPresent()
-						.hasValueSatisfying(description -> assertThat(description)
 
 								.as("resource description")
 								.hasStatement(hernandez, term("code"), literal("1370"))
@@ -81,8 +79,7 @@ final class ShapedResourceTest {
 
 								.as("connected resource description")
 								.hasStatement(bondur, RDFS.LABEL, literal("Gerard Bondur"))
-								.doesNotHaveStatement(bondur, term("code"), null)
-						);
+								.doesNotHaveStatement(bondur, term("code"), null);
 
 			});
 		}
@@ -90,7 +87,7 @@ final class ShapedResourceTest {
 		@Test void testUnknown() {
 			exec(() -> assertThat(engine().relate(item("employees/9999")))
 					.as("empty description")
-					.isNotPresent());
+					.isEmpty());
 		}
 
 	}

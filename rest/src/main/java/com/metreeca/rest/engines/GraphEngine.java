@@ -68,7 +68,7 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
+	@Override public Collection<Statement> relate(final IRI resource) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");

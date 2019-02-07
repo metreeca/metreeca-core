@@ -19,6 +19,7 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
+import com.metreeca.form.things.Sets;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -49,8 +50,8 @@ import static com.metreeca.rest.engines.Flock.flock;
 	}
 
 
-	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
-		return graph.query(connection -> { return retrieve(connection, resource, true); });
+	@Override public Collection<Statement> relate(final IRI resource) {
+		return graph.query(connection -> { return retrieve(connection, resource, true).orElseGet(Sets::set); });
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {

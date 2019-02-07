@@ -39,7 +39,7 @@ import static java.util.Collections.unmodifiableList;
 
 public final class Items implements Query {
 
-	public static final Shape ItemsShape=and(
+	public static final Shape Shape=and(
 			field(Form.items, and(
 					datatype(Values.BNodeType),
 					field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),

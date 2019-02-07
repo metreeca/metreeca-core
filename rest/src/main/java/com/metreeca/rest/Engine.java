@@ -18,12 +18,16 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.Focus;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 
 /**
@@ -40,12 +44,12 @@ public interface Engine {
 	 *
 	 * @param resource the IRI identifying the resource whose description is to be retrieved
 	 *
-	 * @return the optional description of {@code resource}; empty if a description for {@code resource} was not found
+	 * @return the description of {@code resource}; empty if a description for {@code resource} was not found
 	 *
 	 * @throws NullPointerException          if {@code resource} is null
 	 * @throws UnsupportedOperationException if resource retrieval is not supported by this engine
 	 */
-	public Optional<Collection<Statement>> relate(final IRI resource);
+	public Collection<Statement> relate(final IRI resource);
 
 	/**
 	 * Creates a related resource.
@@ -90,5 +94,29 @@ public interface Engine {
 	 * @throws UnsupportedOperationException if resource deletion is not supported by this engine
 	 */
 	public Optional<IRI> delete(final IRI resource);
+
+
+	// !!! insert anchor point
+	// !!! delegate anchor point rewriting to flock
+	// !!! switch final shape according to query type
+	// !!! redact / cache final shape
+	//		.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
+	//		.map(new Optimizer())
+
+	public default <V, E> Result<V, E> relate(
+			final IRI resource,
+			final Function<Shape, Result<Query, E>> parser,
+			final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
+
+	public default <V, E> Result<V, E> browse(
+			final IRI resource,
+			final Function<Shape, Result<Query, E>> parser,
+			final BiFunction<Shape, Collection<Statement>, V> mapper
+	) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
 
 }

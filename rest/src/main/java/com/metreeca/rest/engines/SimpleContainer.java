@@ -55,7 +55,7 @@ final class SimpleContainer extends GraphEntity {
 	}
 
 
-	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
+	@Override public Collection<Statement> relate(final IRI resource) {
 		return delegate.relate(resource);
 	}
 

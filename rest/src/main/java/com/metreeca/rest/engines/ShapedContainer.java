@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.rest.engines.Flock.flock;
+import static com.metreeca.rest.wrappers.Throttler.container;
 import static com.metreeca.rest.wrappers.Throttler.resource;
 
 
@@ -50,6 +51,7 @@ final class ShapedContainer extends GraphEntity {
 
 	ShapedContainer(final Graph graph, final Shape shape) {
 
+		final Shape container=container().apply(shape);
 		final Shape resource=resource().apply(shape);
 
 		this.graph=graph;
@@ -58,11 +60,11 @@ final class ShapedContainer extends GraphEntity {
 		this.relate=redact(resource, Form.relate, Form.digest);
 		this.create=redact(resource, Form.create, Form.detail);
 
-		this.delegate=new ShapedResource(graph, shape);
+		this.delegate=new ShapedResource(graph, container);
 	}
 
 
-	@Override public Optional<Collection<Statement>> relate(final IRI resource) {
+	@Override public Collection<Statement> relate(final IRI resource) {
 		return delegate.relate(resource);
 	}
 

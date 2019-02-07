@@ -37,7 +37,7 @@ import static java.util.Collections.unmodifiableList;
 
 public final class Stats implements Query {
 
-	public static final Shape StatsShape=and(
+	public static final Shape Shape=and(
 			field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
 			field(Form.min, maxCount(1)),
 			field(Form.max, maxCount(1)),
