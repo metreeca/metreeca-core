@@ -138,8 +138,8 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 			missing.removeAll(actual);
 
 			failWithMessage(
-					"expected model to have subset <\n%s\n> but <\n%s\n> was missing",
-					indent(format(expected)), indent(format(missing))
+					"expected model <\n%s\n> to have subset <\n%s\n> but <\n%s\n> was missing",
+					indent(format(new TreeModel(actual))), indent(format(expected)), indent(format(missing))
 			);
 		}
 
