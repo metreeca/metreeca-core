@@ -31,7 +31,6 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -43,10 +42,10 @@ import static com.metreeca.form.Shape.verify;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.queries.Items.items;
 import static com.metreeca.form.queries.Stats.stats;
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.things.Lists.list;
@@ -120,11 +119,11 @@ final class ShapedContainerTest {
 				);
 			}
 
-			@Disabled @Test void testBrowseEdges() {
+			@Test void testBrowseEdges() {
 				exec(() -> assertThat(engine().browse(container,
 
 						shape -> Value(edges(and(shape, filter().then(
-								field(term("title"), in(literal("President"))))
+								field(term("title"), all(literal("President"))))
 						))),
 
 						(shape, model) -> {

@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Lists.list;
@@ -131,7 +132,7 @@ abstract class SPARQL { // ! refactor
 
 
 	protected Object roots(final Shape shape) { // root universal constraints
-		return All.all(shape)
+		return all(shape)
 				.map(values -> list("\fvalues ", term(shape), " {\n",
 						items(values.stream().map(this::term).collect(toList()), "\n"),
 						"\n}\f"))
@@ -172,7 +173,7 @@ abstract class SPARQL { // ! refactor
 		return items(path.stream().map(this::step).collect(toList()), '/');
 	}
 
-	private Object step(final IRI step  ) {
+	private Object step(final IRI step) {
 		return direct(step) ? term(step) : list("^", term(inverse(step)));
 	}
 
@@ -256,7 +257,6 @@ abstract class SPARQL { // ! refactor
 			);
 		}
 
-
 	}
 
 	private final class FilterProbe implements Shape.Probe<Object> {
@@ -270,7 +270,7 @@ abstract class SPARQL { // ! refactor
 
 
 		@Override public Object probe(final Meta meta) {
-			return null;
+			return "";
 		}
 
 		@Override public Object probe(final Guard guard) {
@@ -279,7 +279,7 @@ abstract class SPARQL { // ! refactor
 
 
 		@Override public Object probe(final Datatype datatype) {
-			return null;
+			throw new UnsupportedOperationException("datatype constraint");
 		}
 
 		@Override public Object probe(final Clazz clazz) {
@@ -320,16 +320,16 @@ abstract class SPARQL { // ! refactor
 		}
 
 		@Override public Object probe(final MinCount minCount) {
-			return null;
+			throw new UnsupportedOperationException("minimum focus size constraint");
 		}
 
 		@Override public Object probe(final MaxCount maxCount) {
-			return null;
+			throw new UnsupportedOperationException("maximum focus size constraint");
 		}
 
 
 		@Override public Object probe(final In in) {
-			return null;
+			throw new UnsupportedOperationException("focus range constraint");
 		}
 
 		@Override public Object probe(final All all) {
@@ -346,7 +346,6 @@ abstract class SPARQL { // ! refactor
 		}
 
 
-
 		@Override public Object probe(final Field field) {
 
 			final IRI iri=field.getIRI();
@@ -358,7 +357,7 @@ abstract class SPARQL { // ! refactor
 							? null // ($) only if actually referenced by filters
 							: edge(term(source), iri, term(shape)),
 
-					All.all(shape) // target universal constraints
+					all(shape) // target universal constraints
 							.map(values -> values.stream().map(value -> edge(term(source), iri, term(value))))
 							.orElse(null),
 
@@ -372,11 +371,11 @@ abstract class SPARQL { // ! refactor
 		}
 
 		@Override public Object probe(final Or or) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			throw new UnsupportedOperationException("disjunction pattern"); // !!! tbi
 		}
 
 		@Override public Object probe(final When when) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			throw new UnsupportedOperationException("conditional pattern"); // !!! tbi
 		}
 
 	}
@@ -410,7 +409,7 @@ abstract class SPARQL { // ! refactor
 
 			// !!! (€) optional unless universal constraints are present
 
-			return list("\f", All.all(shape).isPresent() ? pattern : list("\foptional {\f", pattern, "\f}"), "\f");
+			return list("\f", all(shape).isPresent() ? pattern : list("\foptional {\f", pattern, "\f}"), "\f");
 		}
 
 

@@ -146,7 +146,9 @@ final class ShapedValidator {
 
 		@Override public Focus probe(final Meta meta) { return focus(); }
 
-		@Override public Focus probe(final Guard guard) { return focus(); }
+		@Override public Focus probe(final Guard guard) {
+			throw new UnsupportedOperationException("partially redacted shape");
+		}
 
 
 		@Override public Focus probe(final Datatype datatype) {
@@ -204,6 +206,7 @@ final class ShapedValidator {
 			}
 		}
 
+
 		@Override public Focus probe(final MinExclusive minExclusive) {
 			return focus(set(), focus.stream()
 					.filter(value -> !(compare(value, minExclusive.getValue()) > 0))
@@ -231,6 +234,7 @@ final class ShapedValidator {
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid value", maxInclusive))))
 					.collect(toList()));
 		}
+
 
 		@Override public Focus probe(final Pattern pattern) {
 
@@ -296,6 +300,7 @@ final class ShapedValidator {
 					)
 			}));
 		}
+
 
 		@Override public Focus probe(final In in) {
 

@@ -17,7 +17,9 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Form;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.MaxLength;
 
 import org.assertj.core.api.Assertions;
@@ -103,9 +105,7 @@ final class ShapedRetrieverTest {
 
 		@Test void testEmptyProjection() {
 
-			final Collection<Statement> matches=query(edges(clazz(term("Product"))));
-
-			assertThat(matches)
+			assertThat(query(edges(clazz(term("Product")))))
 					.as("matching focus")
 					.isIsomorphicTo(query("construct { form:root ldp:contains ?product } where { ?product a :Product }"));
 
@@ -430,28 +430,28 @@ final class ShapedRetrieverTest {
 
 	@Nested final class SetConstraints {
 
-		// !!! min/maxCount
-
+		// !!! in/min/maxCount
 
 		@Test void testAllDirect() {
-			assertThat(query(edges(field(
-					term("product"),
+			assertThat(query(edges(field(term("product"),
 					all(item("products/S10_2016"), item("products/S24_2022"))
 			))))
 					.isIsomorphicTo(query("construct { \n"
 							+"\n"
-							+"\tform:root ldp:contains ?root.\n"
-							+"\t?root :product ?product.\n"
+							+"\tform:root ldp:contains ?item.\n"
+							+"\t?item :product ?product.\n"
 							+"\t\n"
 							+"} where {\n"
 							+"\n"
-							+"\t?root :product ?product, <products/S10_2016>, <products/S24_2022>\n"
+							+"\t?item :product ?product, <products/S10_2016>, <products/S24_2022>\n"
 							+"\t\n"
 							+"}"));
 		}
 
 		@Test void testAllInverse() {
-			assertThat(query(edges(field(inverse(term("customer")), all(item("products/S10_2016"), item("products/S24_2022"))))))
+			assertThat(query(edges(field(inverse(term("customer")),
+					all(item("products/S10_2016"), item("products/S24_2022"))
+			))))
 					.isIsomorphicTo(query("construct {\n"
 							+"\n"
 							+"\tform:root ldp:contains ?customer.\n"
@@ -500,7 +500,9 @@ final class ShapedRetrieverTest {
 
 
 		@Test void testAny() {
-			assertThat(query(edges(field(term("product"), any(item("products/S18_2248"), item("products/S24_3969"))))))
+			assertThat(query(edges(field(term("product"),
+					any(item("products/S18_2248"), item("products/S24_3969")))
+			)))
 					.isIsomorphicTo(query("construct {\n"
 							+"\n"
 							+"\tform:root ldp:contains ?item.\n"
@@ -557,6 +559,5 @@ final class ShapedRetrieverTest {
 						+"\n"
 						+"}"));
 	}
-
 
 }
