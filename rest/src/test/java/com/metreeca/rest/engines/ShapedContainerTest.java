@@ -142,8 +142,7 @@ final class ShapedContainerTest {
 
 						}
 
-						).value()).isPresent()
-				);
+				).value()).isPresent());
 			}
 
 			@Test void testBrowseStats() {

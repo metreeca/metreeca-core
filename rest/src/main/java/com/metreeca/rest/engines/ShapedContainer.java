@@ -58,9 +58,10 @@ final class ShapedContainer extends GraphEntity {
 	private final Graph graph;
 	private final Flock flock;
 
-	private final Shape filter;
-	private final Field browse;
+	private final Shape browse;
 	private final Shape create;
+
+	private final Field verify;
 
 	private final Engine delegate;
 
@@ -73,9 +74,10 @@ final class ShapedContainer extends GraphEntity {
 		this.graph=graph;
 		this.flock=flock(metas(resource)).orElseGet(Flock.None::new);
 
-		this.filter=redact(resource, Form.relate, Form.digest);
-		this.browse=field(LDP.CONTAINS, filter.map(new Redactor(Form.mode, Form.verify)).map(new Optimizer()));
+		this.browse=redact(resource, Form.relate, Form.digest);
 		this.create=redact(resource, Form.create, Form.detail);
+
+		this.verify=field(LDP.CONTAINS, browse.map(new Redactor(Form.mode, Form.verify)).map(new Optimizer()));
 
 		this.delegate=new ShapedResource(graph, container);
 	}
@@ -97,7 +99,7 @@ final class ShapedContainer extends GraphEntity {
 			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
-		return parser.apply(and(filter, filter().then(flock.anchor(resource)))).fold(
+		return parser.apply(and(browse, filter().then(flock.anchor(resource)))).fold(
 
 				query -> graph.query(connection -> {
 
@@ -106,7 +108,7 @@ final class ShapedContainer extends GraphEntity {
 					return query.map(new Query.Probe<Result<V, E>>() {
 
 						@Override public Result<V, E> probe(final Edges edges) {
-							return Value(mapper.apply(browse, model));
+							return Value(mapper.apply(verify, model));
 						}
 
 						@Override public Result<V, E> probe(final Stats stats) {

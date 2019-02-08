@@ -18,11 +18,13 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Sets;
 import com.metreeca.rest.Result;
+import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import com.metreeca.tray.rdf.Graph;
 
-import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -54,6 +56,7 @@ final class ShapedResource extends GraphEntity {
 	private final Shape update;
 	private final Shape delete;
 
+	private final Shape verify;
 
 	ShapedResource(final Graph graph, final Shape shape) {
 
@@ -63,6 +66,8 @@ final class ShapedResource extends GraphEntity {
 		this.relate=redact(shape, Form.relate, Form.detail);
 		this.update=redact(shape, Form.update, Form.detail);
 		this.delete=redact(shape, Form.delete, Form.detail);
+
+		this.verify=relate.map(new Redactor(Form.mode, Form.verify)).map(new Optimizer());
 
 	}
 
@@ -83,7 +88,7 @@ final class ShapedResource extends GraphEntity {
 
 					if ( query.equals(edges(relate))) {
 
-						return Value(mapper.apply(relate, relate(resource)));
+						return Value(mapper.apply(verify, relate(resource)));
 
 					} else {
 

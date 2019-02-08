@@ -17,7 +17,11 @@
 
 package com.metreeca.rest.engines;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
+import com.metreeca.form.probes.Cleaner;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.Engine;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.Tray;
@@ -31,6 +35,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.meta;
@@ -39,6 +44,8 @@ import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,15 +79,29 @@ final class ShapedResourceTest {
 				final IRI hernandez=item("employees/1370");
 				final IRI bondur=item("employees/1102");
 
-				assertThat(engine().relate(hernandez))
+				assertThat(engine().relate(hernandez, shape -> Value(edges(shape)), (shape, model) -> {
 
-								.as("resource description")
-								.hasStatement(hernandez, term("code"), literal("1370"))
-								.hasStatement(hernandez, term("supervisor"), bondur)
+					assertThat(shape.map(new Cleaner()).map(new Optimizer()))
+							.as("resource shape in verify mode (ignoring metadata)")
+							.isEqualTo(resource().apply(shape)
+									.map(new Cleaner())
+									.map(new Redactor(Form.mode, Form.verify))
+									.map(new Optimizer())
+							);
 
-								.as("connected resource description")
-								.hasStatement(bondur, RDFS.LABEL, literal("Gerard Bondur"))
-								.doesNotHaveStatement(bondur, term("code"), null);
+					assertThat(model)
+
+							.as("resource description")
+							.hasStatement(hernandez, term("code"), literal("1370"))
+							.hasStatement(hernandez, term("supervisor"), bondur)
+
+							.as("connected resource description")
+							.hasStatement(bondur, RDFS.LABEL, literal("Gerard Bondur"))
+							.doesNotHaveStatement(bondur, term("code"), null);
+
+					return model;
+
+				}).value()).isPresent();
 
 			});
 		}
