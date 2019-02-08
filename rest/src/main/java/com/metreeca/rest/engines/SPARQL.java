@@ -274,7 +274,7 @@ abstract class SPARQL { // ! refactor
 		}
 
 		@Override public Object probe(final Guard guard) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			throw new UnsupportedOperationException("partially redacted shape");
 		}
 
 

@@ -36,6 +36,7 @@ import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.things.Strings.indent;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 
@@ -52,6 +53,10 @@ public final class Items implements Query {
 			))
 	);
 
+
+	public static Items items(final Shape shape, final IRI... path) {
+		return new Items(shape, asList(path));
+	}
 
 	public static Items items(final Shape shape, final List<IRI> path) {
 		return new Items(shape, path);

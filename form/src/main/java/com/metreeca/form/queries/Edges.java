@@ -27,6 +27,7 @@ import java.util.List;
 import static com.metreeca.form.things.Strings.indent;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 
@@ -35,6 +36,10 @@ public final class Edges implements Query {
 
 	public static Edges edges(final Shape shape) {
 		return new Edges(shape, emptyList(), 0, 0);
+	}
+
+	public static Edges edges(final Shape shape, final Order... orders) {
+		return new Edges(shape, asList(orders), 0, 0);
 	}
 
 	public static Edges edges(final Shape shape, final List<Order> orders, final int offset, final int limit) {
