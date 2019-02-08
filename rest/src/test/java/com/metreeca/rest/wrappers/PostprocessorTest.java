@@ -70,7 +70,7 @@ final class PostprocessorTest {
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
-								.as("items retrieved")
+								.as("filters executed")
 								.hasSubset(asList(
 										statement(response.item(), RDF.VALUE, RDF.FIRST),
 										statement(response.item(), RDF.VALUE, RDF.REST)
@@ -80,31 +80,25 @@ final class PostprocessorTest {
 		);
 	}
 
-	@Test void testIgnoreMissingResponseRDFPayload() {
-		exec(() -> echo()
+	@Test void testIgnoreUnsuccessfulResponses() {
+		exec(() -> echo(response -> response.status(Response.NotFound))
 
-				.with(new Postprocessor(post(RDF.FIRST)))
+				.with(new Postprocessor(post(RDF.NIL)))
 
-				.handle(new Request()) // no RDF payload
+				.handle(new Request())
 
-				.accept(response -> {
-
-					assertThat(response)
-							.as("no filtering")
-							.doesNotHaveBody(rdf());
-
-					assertThat(graph())
-							.as("repository unchanged")
-							.isEmpty();
-
-				})
+				.accept(response -> assertThat(response)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.as("filters not executed")
+								.isEmpty()
+						)
+				)
 		);
+
 	}
 
 
-	// !!! execute only on successful responses
-
-	@Test void testExecuteUpdateScript() {
+	@Test void testSupportSPARQLUpdateScripts() {
 		exec(() -> echo()
 
 				.with(new Postprocessor(

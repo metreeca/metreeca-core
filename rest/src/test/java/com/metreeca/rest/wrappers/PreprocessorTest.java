@@ -29,12 +29,13 @@ import org.junit.jupiter.api.Test;
 import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.ValuesTest.sparql;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.wrappers.Connector.query;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 
 
 final class PreprocessorTest {
@@ -58,11 +59,11 @@ final class PreprocessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessRequestRDFPayload() {
-		exec(() -> new Preprocessor(pre(RDF.FIRST), pre(RDF.REST)) // multiple filters to test piping
+		exec(() -> echo()
 
-				.wrap(echo())
+				.with(new Preprocessor(pre(RDF.FIRST), pre(RDF.REST))) // multiple filters to test piping
 
-				.handle(new Request().body(rdf(), emptyList())) // empty body to activate pre-processing
+				.handle(new Request())
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
@@ -76,14 +77,24 @@ final class PreprocessorTest {
 		);
 	}
 
-	@Test void testIgnoreMissingRequestRDFPayload() {
-		exec(() -> new Preprocessor(pre(RDF.FIRST))
+	@Test void testSupportSPARQLGraphQueries() {
+		exec(() -> echo()
 
-				.wrap(echo())
+				.with(new Preprocessor(query(sparql(
+						"construct { <> rdf:value rdf:first, rdf:rest } where {}"
+				))))
 
-				.handle(new Request()) // no RDF payload
+				.handle(new Request())
 
-				.accept(response -> assertThat(response).hasBody(rdf())));
+				.accept(response -> assertThat(response)
+						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
+								.as("items retrieved")
+								.hasSubset(asList(
+										statement(response.item(), RDF.VALUE, RDF.FIRST),
+										statement(response.item(), RDF.VALUE, RDF.REST)
+								))
+						)
+				)
+		);
 	}
-
 }

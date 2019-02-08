@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Value;
@@ -54,9 +55,13 @@ public final class Postprocessor implements Wrapper {
 	 * outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
 	 * @param filters the response RDF postprocessing filters to be inserted; each filter takes as argument a successful
-	 *                outgoing response and its {@linkplain RDFFormat RDF} payload and must return a non null RDF model
+	 *                outgoing response and its {@linkplain RDFFormat RDF} payload and must return a non-null RDF model;
+	 *                filters based on SPARQL Query/Update scripts may be created using {@link Connector} factory
+	 *                methods
 	 *
 	 * @throws NullPointerException if {@code filters} is null or contains null values
+	 * @see Connector#query(String, BiConsumer[])
+	 * @see Connector#update(String, BiConsumer[])
 	 */
 	@SafeVarargs public Postprocessor(final BiFunction<Response, Model, Model>... filters) {
 		this(asList(filters));
@@ -70,9 +75,13 @@ public final class Postprocessor implements Wrapper {
 	 * present, or ignored, otherwise.</p>
 	 *
 	 * @param filters the response RDF postprocessing filters to be inserted; each filter takes as argument a successful
-	 *                outgoing response and its {@linkplain RDFFormat RDF} payload and must return a non null RDF model
+	 *                outgoing response and its {@linkplain RDFFormat RDF} payload and must return a non-null RDF model;
+	 *                filters based on SPARQL Query/Update scripts may be created using {@link Connector} factory
+	 *                methods
 	 *
 	 * @throws NullPointerException if {@code filters} is null or contains null values
+	 * @see Connector#query(String, BiConsumer[])
+	 * @see Connector#update(String, BiConsumer[])
 	 */
 	public Postprocessor(final Collection<BiFunction<Response, Model, Model>> filters) {
 
