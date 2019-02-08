@@ -302,16 +302,18 @@ public final class Throttler implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape shape(final Shape shape, final boolean clean, final IRI mode, final Set<Value> roles) {
-		return cache
-				.computeIfAbsent(shape, _shape -> new HashMap<>())
-				.computeIfAbsent(variables(clean, mode, roles), variables -> shape
-						.map(area)
-						.map(new Redactor(variables))
-						.map(clean ? new Cleaner() : new Inspector<Shape>() {
-							@Override public Shape probe(final Shape shape) { return shape; }
-						})
-						.map(new Optimizer())
-				);
+		synchronized ( cache ) {
+			return cache
+					.computeIfAbsent(shape, _shape -> new HashMap<>())
+					.computeIfAbsent(variables(clean, mode, roles), variables -> shape
+							.map(area)
+							.map(new Redactor(variables))
+							.map(clean ? new Cleaner() : new Inspector<Shape>() {
+								@Override public Shape probe(final Shape shape) { return shape; }
+							})
+							.map(new Optimizer())
+					);
+		}
 	}
 
 	private Map<IRI, Set<? extends Value>> variables(final boolean clean, final IRI mode, final Set<Value> roles) {

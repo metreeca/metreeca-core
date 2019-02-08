@@ -60,7 +60,9 @@ public abstract class Actor extends Delegator {
 			throw new NullPointerException("null shape");
 		}
 
-		return engines.computeIfAbsent(shape, _shape -> new GraphEngine(graph, _shape));
+		synchronized ( engines ) {
+			return engines.computeIfAbsent(shape, _shape -> new GraphEngine(graph, _shape));
+		}
 	}
 
 
