@@ -20,6 +20,7 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Cleaner;
 import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.Engine;
@@ -54,6 +55,7 @@ import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -100,11 +102,6 @@ final class ShapedContainerTest {
 
 		@Nested final class Browse {
 
-			// !!! redact / cache final shape
-			//		.map(new Redactor(Form.mode, Form.verify)) // hide filtering constraints
-			//		.map(new Optimizer())
-
-
 			@Test void testBrowse() {
 				exec(() -> assertThat(engine().browse(container))
 
@@ -129,8 +126,12 @@ final class ShapedContainerTest {
 						(shape, model) -> {
 
 							assertThat(shape.map(new Cleaner()).map(new Optimizer()))
-									.as("container+resource shape ignoring metadata")
-									.isEqualTo(shape().map(new Cleaner()).map(new Optimizer()));
+									.as("ldp:contains+resource shape in verify mode (ignoring metadata)")
+									.isEqualTo(field(LDP.CONTAINS, resource().apply(shape()))
+											.map(new Cleaner())
+											.map(new Redactor(Form.mode, Form.verify))
+											.map(new Optimizer())
+									);
 
 							assertThat(model).isIsomorphicTo(decode(""
 									+"<employees-basic/> ldp:contains <employees/1002>. "

@@ -18,14 +18,17 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
+import com.metreeca.form.shapes.Field;
 import com.metreeca.rest.Engine;
 import com.metreeca.rest.Result;
+import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import com.metreeca.tray.rdf.Graph;
 
-import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -55,7 +58,8 @@ final class ShapedContainer extends GraphEntity {
 	private final Graph graph;
 	private final Flock flock;
 
-	private final Shape browse;
+	private final Shape filter;
+	private final Field browse;
 	private final Shape create;
 
 	private final Engine delegate;
@@ -69,7 +73,8 @@ final class ShapedContainer extends GraphEntity {
 		this.graph=graph;
 		this.flock=flock(metas(resource)).orElseGet(Flock.None::new);
 
-		this.browse=redact(resource, Form.relate, Form.digest);
+		this.filter=redact(resource, Form.relate, Form.digest);
+		this.browse=field(LDP.CONTAINS, filter.map(new Redactor(Form.mode, Form.verify)).map(new Optimizer()));
 		this.create=redact(resource, Form.create, Form.detail);
 
 		this.delegate=new ShapedResource(graph, container);
@@ -92,7 +97,7 @@ final class ShapedContainer extends GraphEntity {
 			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
-		return parser.apply(and(browse, filter().then(flock.anchor(resource)))).fold(
+		return parser.apply(and(filter, filter().then(flock.anchor(resource)))).fold(
 
 				query -> graph.query(connection -> {
 
@@ -101,7 +106,7 @@ final class ShapedContainer extends GraphEntity {
 					return query.map(new Query.Probe<Result<V, E>>() {
 
 						@Override public Result<V, E> probe(final Edges edges) {
-							return Value(mapper.apply(field(LDP.CONTAINS, browse), model));
+							return Value(mapper.apply(browse, model));
 						}
 
 						@Override public Result<V, E> probe(final Stats stats) {
