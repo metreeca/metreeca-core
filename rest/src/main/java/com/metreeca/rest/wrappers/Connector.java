@@ -86,7 +86,7 @@ public final class Connector implements Wrapper {
 		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.update(connection -> {
 
 			configure(
-					message, connection.prepareGraphQuery(SPARQL, query, base(message)), customizers
+					message, connection.prepareGraphQuery(SPARQL, query, message.request().base()), customizers
 			).evaluate(
 					new StatementCollector(model)
 			);
@@ -133,7 +133,7 @@ public final class Connector implements Wrapper {
 
 		return update.isEmpty() ? (message, model) -> model : (message, model) -> graph.update(connection -> {
 
-			configure(message, connection.prepareUpdate(SPARQL, update, base(message)), customizers).execute();
+			configure(message, connection.prepareUpdate(SPARQL, update, message.request().base()), customizers).execute();
 
 			return model;
 
@@ -286,14 +286,6 @@ public final class Connector implements Wrapper {
 		}
 
 		return operation;
-	}
-
-
-	private static String base(final Message<?> message) {
-		return message.as(Request.class).map(Request::base)
-				.orElseGet(() -> message.as(Response.class).map(response -> response.request().base())
-						.orElse("")
-				);
 	}
 
 

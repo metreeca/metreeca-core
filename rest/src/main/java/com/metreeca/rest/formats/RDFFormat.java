@@ -36,7 +36,6 @@ import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
 import static com.metreeca.form.Shape.constant;
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -166,9 +165,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
 
-		final Optional<Response> response=message.as(Response.class);
-
-		final List<String> types=Formats.types(response.map(r -> r.request().headers("Accept")).orElse(list()));
+		final List<String> types=Formats.types(message.request().request().headers("Accept"));
 
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
 		final RDFWriterFactory factory=Formats.service(registry, TURTLE, types);
