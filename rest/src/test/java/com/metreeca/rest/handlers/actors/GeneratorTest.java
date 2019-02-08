@@ -23,16 +23,20 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.BiFunction;
+
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.wrappers.Connector.query;
 
 
 final class GeneratorTest {
@@ -45,8 +49,8 @@ final class GeneratorTest {
 	}
 
 
-	private String virtual() {
-		return sparql(""
+	private BiFunction<Request, Model, Model> virtual() {
+		return query(sparql(""
 				+"construct {\n"
 				+"\n"
 				+"\t$this a :Employee ;\n"
@@ -60,7 +64,7 @@ final class GeneratorTest {
 				+"\t\t:seniority '1'^^xsd:integer .\n"
 				+"\n"
 				+"} where {}"
-		);
+		));
 	}
 
 
@@ -146,7 +150,7 @@ final class GeneratorTest {
 	}
 
 	@Test void testDrivenUnknownOnEmptyModel() {
-		exec(() -> new Generator(request -> set())
+		exec(() -> new Generator((request, model)  -> new LinkedHashModel())
 
 				.handle(driven())
 
