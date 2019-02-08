@@ -61,7 +61,7 @@ final class ShapedContainer extends GraphEntity {
 	private final Shape browse;
 	private final Shape create;
 
-	private final Field verify;
+	private final Field convey;
 
 	private final Engine delegate;
 
@@ -77,7 +77,7 @@ final class ShapedContainer extends GraphEntity {
 		this.browse=redact(resource, Form.relate, Form.digest);
 		this.create=redact(resource, Form.create, Form.detail);
 
-		this.verify=field(LDP.CONTAINS, browse.map(new Redactor(Form.mode, Form.verify)).map(new Optimizer()));
+		this.convey=field(LDP.CONTAINS, browse.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer()));
 
 		this.delegate=new ShapedResource(graph, container);
 	}
@@ -108,7 +108,7 @@ final class ShapedContainer extends GraphEntity {
 					return query.map(new Query.Probe<Result<V, E>>() {
 
 						@Override public Result<V, E> probe(final Edges edges) {
-							return Value(mapper.apply(verify, model));
+							return Value(mapper.apply(convey, model));
 						}
 
 						@Override public Result<V, E> probe(final Stats stats) {

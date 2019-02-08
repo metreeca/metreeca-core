@@ -157,6 +157,6 @@ Parametric shapes for the [mode](../javadocs/com/metreeca/form/Form.html#mode) a
 
 | mode                                     | shorthand                                | usage pattern                            |
 | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| [verify](../javadocs/com/metreeca/form/Form.html#verify) | [verify](../javadocs/com/metreeca/form/Shape.html#verify-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | nested constraints are to be used only for validating incoming data and not for selecting existing resources to be processed |
+| [convey](../javadocs/com/metreeca/form/Form.html#convey) | [convey](../javadocs/com/metreeca/form/Shape.html#convey-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | nested constraints are to be used only for composing outgoing data and validating incoming data and not for selecting existing resources to be processed |
 | [filter](../javadocs/com/metreeca/form/Form.html#filter) | [filter](../javadocs/com/metreeca/form/Shape.html#filter-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | nested constraints are to be used only for selecting existing resources to be processed and not for validating incoming data |
 

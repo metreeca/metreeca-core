@@ -63,7 +63,7 @@ import static java.util.Collections.emptySet;
  *
  * <p>If the request includes a shape, the response includes the derived shape actually used in the resource retrieval
  * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#verify} mode and {@link Form#detail} view.</p>
+ * Form#convey} mode and {@link Form#detail} view.</p>
  */
 public final class Generator extends Delegator {
 

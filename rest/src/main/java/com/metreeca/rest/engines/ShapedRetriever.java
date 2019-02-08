@@ -111,7 +111,7 @@ final class ShapedRetriever {
 
 			@Override public Object code() {
 
-				final Shape pattern=shape.map(new Redactor(Form.mode, Form.verify)).map(new Optimizer());
+				final Shape pattern=shape.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer());
 				final Shape selector=shape.map(new Redactor(Form.mode, Form.filter)).map(new Pruner()).map(new Optimizer());
 
 				link(pattern, root);

@@ -60,7 +60,7 @@ import static java.util.stream.Collectors.toList;
  * <ul>
  *
  * <li>the shape is redacted taking into account request user {@linkplain Request#roles() roles}, {@link Form#create}
- * task, {@link Form#verify} mode and {@link Form#detail} view;</li>
+ * task, {@link Form#convey} mode and {@link Form#detail} view;</li>
  *
  * <li>the request {@link RDFFormat RDF body} is expected to contain an RDF description of the resource to be created
  * matched by the redacted shape; statements outside this envelope are reported with a {@linkplain

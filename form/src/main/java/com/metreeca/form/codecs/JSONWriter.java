@@ -106,7 +106,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 			final Shape driver=(shape == null) ? null : shape
 
-					.map(new Redactor(Form.mode, Form.verify)) // remove internal filtering shapes
+					.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 					.map(new Optimizer())
 					.map(new Inferencer()) // infer implicit constraints to drive json shorthands
 					.map(new Optimizer());

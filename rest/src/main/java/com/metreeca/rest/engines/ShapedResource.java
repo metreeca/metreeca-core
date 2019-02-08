@@ -56,7 +56,7 @@ final class ShapedResource extends GraphEntity {
 	private final Shape update;
 	private final Shape delete;
 
-	private final Shape verify;
+	private final Shape convey;
 
 	ShapedResource(final Graph graph, final Shape shape) {
 
@@ -67,7 +67,7 @@ final class ShapedResource extends GraphEntity {
 		this.update=redact(shape, Form.update, Form.detail);
 		this.delete=redact(shape, Form.delete, Form.detail);
 
-		this.verify=relate.map(new Redactor(Form.mode, Form.verify)).map(new Optimizer());
+		this.convey=relate.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer());
 
 	}
 
@@ -88,7 +88,7 @@ final class ShapedResource extends GraphEntity {
 
 					if ( query.equals(edges(relate))) {
 
-						return Value(mapper.apply(verify, relate(resource)));
+						return Value(mapper.apply(convey, relate(resource)));
 
 					} else {
 

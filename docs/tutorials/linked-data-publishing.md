@@ -356,44 +356,44 @@ We'll now refine the initial barebone model, exposing more properties and detail
 new Driver().shape(and(
 
         field(RDF.TYPE, only(BIRT.Product)),
-        field(RDFS.LABEL, verify(required(),
+        field(RDFS.LABEL, convey(required(),
                 datatype(XMLSchema.STRING), maxLength(50))),
-        field(RDFS.COMMENT, verify(required(),
+        field(RDFS.COMMENT, convey(required(),
                 datatype(XMLSchema.STRING), maxLength(500))),
 
         group(
 
-            server(field(BIRT.code, verify(required()))),
+            server(field(BIRT.code, convey(required()))),
 
             field(BIRT.line, and(
 
-                verify(required(),clazz(BIRT.ProductLine)),
+                convey(required(),clazz(BIRT.ProductLine)),
 
-                relate(field(RDFS.LABEL, verify(required())))
+                relate(field(RDFS.LABEL, convey(required())))
 
             )),
 
-            field(BIRT.scale, verify(required(),
+            field(BIRT.scale, convey(required(),
                 datatype(XMLSchema.STRING),
                 placeholder("1:N"),
                 pattern("1:[1-9][0-9]{1,2}"))),
 
-            field(BIRT.vendor, verify(required(),
+            field(BIRT.vendor, convey(required(),
                 datatype(XMLSchema.STRING), maxLength(50)))),
 
         group(
 
-            server(field(BIRT.stock, verify(required(),
+            server(field(BIRT.stock, convey(required(),
                 datatype(XMLSchema.INTEGER),
                 minInclusive(literal(integer(0))),
                 maxExclusive(literal(integer(10000)))))),
 
-            field(BIRT.sell, verify(alias("price"), required(),
+            field(BIRT.sell, convey(alias("price"), required(),
                 datatype(XMLSchema.DECIMAL),
                 minExclusive(literal(decimal(0))),
                 maxExclusive(literal(decimal(1000))))),
 
-            role(singleton(BIRT.staff), field(BIRT.buy, verify(required(),
+            role(singleton(BIRT.staff), field(BIRT.buy, convey(required(),
                 datatype(XMLSchema.DECIMAL),
                 minInclusive(literal(decimal(0))),
                 maxInclusive(literal(decimal(1000))))))
@@ -438,9 +438,9 @@ The constraints in the extended model are leveraged by the engine in a number of
 
 ## Parameterizing Models
 
-The `verify` and `server` blocks in the extended model also introduce the central concept of [parametric](../references/spec-language.md#parameters) model.
+The `convey` and `server` blocks in the extended model also introduce the central concept of [parametric](../references/spec-language.md#parameters) model.
 
-The `verify` block states that nested constraints are to be used only for validating incoming data and not for selecting existing resources to be exposed as container items. Constraints like `field(rdf:type)`, defined outside the `verify` block, will be used both for selecting relevant resources and validating incoming data.
+The `convey` block states that nested constraints are to be used only for composing outgoing data and validating incoming data and not for selecting existing resources to be exposed as container items. Constraints like `field(rdf:type)`, defined outside the `convey` block, will be used both for selecting relevant resources and validating incoming data.
 
 The `server` block states that nested properties are server-managed and will be considered only when retrieving or deleting resources, but won't be accepted as valid content on resource creation and updating.
 
@@ -451,7 +451,7 @@ In the most general form, models may be parameterized on for different [axes](..
 Parametric models support the definition of fine-grained access control rules and role-dependent read/write resource views.
 
 ```java
-role(singleton(BIRT.staff), field(BIRT.buy, verify(required(),
+role(singleton(BIRT.staff), field(BIRT.buy, convey(required(),
         datatype(XMLSchema.DECIMAL),
         minInclusive(literal(decimal(0))),
         maxInclusive(literal(decimal(1000)))

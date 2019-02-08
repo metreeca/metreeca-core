@@ -84,7 +84,7 @@ final class ShapedValidator {
 		}
 
 		return shape
-				.map(new Redactor(Form.mode, Form.verify)) // remove internal filtering shapes
+				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 				.map(new Optimizer())
 				.map(new FocusProbe(new LinkedHashSet<>(asList(focus))));
 	}

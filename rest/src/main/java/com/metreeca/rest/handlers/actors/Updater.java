@@ -55,7 +55,7 @@ import static com.metreeca.tray.Tray.tool;
  * <ul>
  *
  * <li>the resource shape is extracted and redacted taking into account request user {@linkplain Request#roles()
- * roles}, {@link Form#update} task, {@link Form#verify} mode and {@link Form#detail} view</li>
+ * roles}, {@link Form#update} task, {@link Form#convey} mode and {@link Form#detail} view</li>
  *
  * <li>the request {@link RDFFormat RDF body} is expected to contain an RDF description of the resource to be updated
  * matched by the redacted resource shape; statements outside this envelope are reported with a {@linkplain

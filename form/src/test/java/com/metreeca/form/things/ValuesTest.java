@@ -98,7 +98,7 @@ public final class ValuesTest {
 
 			clazz(term("Employee")), // implies rdf:type :Employee
 
-			verify().then(
+			convey().then(
 					server().then(
 							field(RDF.TYPE, and(required(), datatype(IRIType))),
 							field(RDFS.LABEL, Textual),
@@ -129,12 +129,12 @@ public final class ValuesTest {
 	);
 
 	public static final Shape Employees=role(Manager, Salesman).then(
-			and(
+			hidden().then(
 					meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
 					meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 					meta(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
 			),
-			verify().then(
+			convey().then(
 					field(RDFS.LABEL, Textual),
 					field(RDFS.COMMENT, Textual),
 					field(LDP.CONTAINS, and(multiple(), Employee))

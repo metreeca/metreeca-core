@@ -115,7 +115,7 @@ public final class Form {
 	public static final IRI digest=iri(Namespace, "digest");
 	public static final IRI detail=iri(Namespace, "detail");
 
-	public static final IRI verify=iri(Namespace, "verify");
+	public static final IRI convey=iri(Namespace, "convey");
 	public static final IRI filter=iri(Namespace, "filter");
 
 	/**

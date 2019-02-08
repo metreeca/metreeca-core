@@ -259,8 +259,8 @@ public final class Throttler implements Wrapper {
 
 				// remove annotations and filtering-only constraints for authorization checks
 
-				final Shape general=shape(shape, true, Form.verify, set(Form.any));
-				final Shape authorized=shape(shape, true, Form.verify, roles);
+				final Shape general=shape(shape, true, Form.convey, set(Form.any));
+				final Shape authorized=shape(shape, true, Form.convey, roles);
 				final Shape redacted=shape(shape, false, null, roles);
 
 				return constant(general) != null ? forbidden(request)
@@ -287,7 +287,7 @@ public final class Throttler implements Wrapper {
 
 			} else {
 
-				final Shape redacted=shape(shape, false, Form.verify, request.roles());
+				final Shape redacted=shape(shape, false, Form.convey, request.roles());
 
 				return response.shape(redacted)
 						.pipe(rdf(), rdf -> Value(envelope(focus, redacted, rdf)))
@@ -335,7 +335,7 @@ public final class Throttler implements Wrapper {
 	private <V extends Collection<Statement>> V expand(final IRI focus, final Shape shape, final V model) {
 
 		model.addAll(shape // add implied statements
-				.map(new Outliner(focus)) // shape already redacted for verify mode
+				.map(new Outliner(focus)) // shape already redacted for convey mode
 				.collect(toList())
 		);
 

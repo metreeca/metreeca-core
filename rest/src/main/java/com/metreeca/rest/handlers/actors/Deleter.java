@@ -40,7 +40,7 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
  * <ul>
  *
  * <li>the shape is redacted taking into account request user {@linkplain Request#roles() roles}, {@link Form#delete}
- * task, {@link Form#verify} mode and {@link Form#detail} view.</li>
+ * task, {@link Form#convey} mode and {@link Form#detail} view.</li>
  *
  * <li>the existing RDF description of the target resource matched by the redacted shape is deleted.</li>
  *

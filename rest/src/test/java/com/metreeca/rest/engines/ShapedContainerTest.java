@@ -39,7 +39,7 @@ import java.util.Optional;
 
 import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.Shape.verify;
+import static com.metreeca.form.Shape.convey;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.queries.Items.items;
 import static com.metreeca.form.queries.Stats.stats;
@@ -77,7 +77,7 @@ final class ShapedContainerTest {
 
 	private Shape shape() {
 		return and(
-				verify().then(field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d{4}")))),
+				convey().then(field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d{4}")))),
 				filter().then(field(RDF.TYPE, term("Employee"))) // should not appear in output shapes
 		);
 	}
@@ -126,10 +126,10 @@ final class ShapedContainerTest {
 						(shape, model) -> {
 
 							assertThat(shape.map(new Cleaner()).map(new Optimizer()))
-									.as("ldp:contains+resource shape in verify mode (ignoring metadata)")
+									.as("ldp:contains+resource shape in convey mode (ignoring metadata)")
 									.isEqualTo(field(LDP.CONTAINS, resource().apply(shape()))
 											.map(new Cleaner())
-											.map(new Redactor(Form.mode, Form.verify))
+											.map(new Redactor(Form.mode, Form.convey))
 											.map(new Optimizer())
 									);
 

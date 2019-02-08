@@ -82,10 +82,10 @@ final class ShapedResourceTest {
 				assertThat(engine().relate(hernandez, shape -> Value(edges(shape)), (shape, model) -> {
 
 					assertThat(shape.map(new Cleaner()).map(new Optimizer()))
-							.as("resource shape in verify mode (ignoring metadata)")
+							.as("resource shape in convey mode (ignoring metadata)")
 							.isEqualTo(resource().apply(shape)
 									.map(new Cleaner())
-									.map(new Redactor(Form.mode, Form.verify))
+									.map(new Redactor(Form.mode, Form.convey))
 									.map(new Optimizer())
 							);
 

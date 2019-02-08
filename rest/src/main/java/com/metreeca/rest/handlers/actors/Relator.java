@@ -74,7 +74,7 @@ import static java.util.stream.Collectors.toList;
  * <ul>
  *
  * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
- * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail} view and {@link Form#verify}
+ * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail} view and {@link Form#convey}
  * mode.</li>
  *
  * <li>the response {@link RDFFormat RDF body} contains the RDF description of the request focus, as matched by the
@@ -125,7 +125,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>If the request includes a shape, the response includes the derived shape actually used in the container retrieval
  * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#verify} mode and {@link Form#digest} view.</p>
+ * Form#convey} mode and {@link Form#digest} view.</p>
  *
  * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
  * database.</p>

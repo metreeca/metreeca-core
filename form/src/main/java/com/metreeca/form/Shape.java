@@ -168,7 +168,7 @@ public interface Shape {
 	public static Guard detail() { return view(Form.detail); }
 
 
-	public static Guard verify() { return mode(Form.verify); }
+	public static Guard convey() { return mode(Form.convey); }
 
 	public static Guard filter() { return mode(Form.filter); }
 
