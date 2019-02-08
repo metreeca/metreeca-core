@@ -86,6 +86,15 @@ public final class Request extends Message<Request> {
 		return iri(base+path.substring(1));
 	}
 
+	/**
+	 * Retrieves the originating request for this request.
+	 *
+	 * @return this request
+	 */
+	@Override public Request request() {
+		return this;
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

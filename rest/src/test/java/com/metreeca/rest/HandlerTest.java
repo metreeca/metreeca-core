@@ -21,16 +21,20 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
 
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.TextFormat.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static java.util.Arrays.stream;
+import static java.util.function.Function.identity;
+
 
 public final class HandlerTest {
 
-	public static Handler echo() {
+	@SafeVarargs public static Handler echo(final Function<Response, Response>... tasks) {
 		return request -> request.reply(response -> response
 
 				.status(Response.OK)
@@ -39,6 +43,8 @@ public final class HandlerTest {
 				.headers(request.headers())
 
 				.map(r -> request.body(rdf()).fold(v -> r.body(rdf(), v), r::map))
+
+				.map(stream(tasks).reduce(identity(), Function::andThen))
 
 		);
 	}

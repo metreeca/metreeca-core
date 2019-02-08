@@ -22,12 +22,9 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.Wrapper;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +32,6 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -48,41 +44,14 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Postprocessor implements Wrapper {
 
-	public static BiFunction<Response, Model, Model> construct(final String construct) {
-
-		if ( construct == null ) {
-			throw new NullPointerException("null construct");
-		}
-
-		return construct.isEmpty()? (response, model) -> model : new BiFunction<Response, Model, Model>() {
-
-			private final Graph graph=tool(Graph.Factory);
-
-			@Override public Model apply(final Response response, final Model model) {
-				return graph.query(connection -> {
-
-					connection.prepareGraphQuery(QueryLanguage.SPARQL, construct, response.request().base()
-
-					).evaluate(new StatementCollector(model));
-
-					return model;
-
-				});
-			}
-		};
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private final Collection<BiFunction<Response, Model, Model>> filters;
 
 
 	/**
 	 * Creates an RDF preprocessor.
 	 *
-	 * <p>Filters are chained in the specified order and executed on {@linkplain Response#success() successful} outgoing
-	 * responses and their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
+	 * <p>Filters are chained in the specified order and executed on {@linkplain Response#success() successful}
+	 * outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
 	 * @param filters the response RDF postprocessing filters to be inserted; each filter takes as argument a successful
 	 *                outgoing response and its {@linkplain RDFFormat RDF} payload and must return a non null RDF model
@@ -92,7 +61,6 @@ public final class Postprocessor implements Wrapper {
 	@SafeVarargs public Postprocessor(final BiFunction<Response, Model, Model>... filters) {
 		this(asList(filters));
 	}
-
 
 	/**
 	 * Inserts a response RDF postprocessing filters.

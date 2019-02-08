@@ -100,6 +100,13 @@ public abstract class Message<T extends Message<T>> {
 	 */
 	public abstract IRI item();
 
+	/**
+	 * Retrieves the originating request for this message.
+	 *
+	 * @return the originating request for this message
+	 */
+	public abstract Request request();
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

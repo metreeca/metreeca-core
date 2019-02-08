@@ -29,13 +29,16 @@ import org.junit.jupiter.api.Test;
 import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.ValuesTest.Base;
+import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.wrappers.Connector.update;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 
 
 final class PostprocessorTest {
@@ -59,11 +62,11 @@ final class PostprocessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessResponseRDFPayload() {
-		exec(() -> new Postprocessor(post(RDF.FIRST), post(RDF.REST)) // multiple filters to test piping
+		exec(() -> echo()
 
-				.wrap(echo())
+				.with(new Postprocessor(post(RDF.FIRST), post(RDF.REST))) // multiple filters to test piping
 
-				.handle(new Request().body(rdf(), emptyList())) // empty body to activate post-processing
+				.handle(new Request())
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
@@ -78,13 +81,54 @@ final class PostprocessorTest {
 	}
 
 	@Test void testIgnoreMissingResponseRDFPayload() {
-		exec(() -> new Postprocessor(post(RDF.FIRST))
+		exec(() -> echo()
 
-				.wrap(echo())
+				.with(new Postprocessor(post(RDF.FIRST)))
 
 				.handle(new Request()) // no RDF payload
 
-				.accept(response -> assertThat(response).hasBody(rdf()))
+				.accept(response -> {
+
+					assertThat(response)
+							.as("no filtering")
+							.doesNotHaveBody(rdf());
+
+					assertThat(graph())
+							.as("repository unchanged")
+							.isEmpty();
+
+				})
+		);
+	}
+
+
+	// !!! execute only on successful responses
+
+	@Test void testExecuteUpdateScript() {
+		exec(() -> echo()
+
+				.with(new Postprocessor(
+						update("insert { ?this rdf:value rdf:first } where {}"),
+						update("insert { ?this rdf:value rdf:rest } where {}")
+				))
+
+				.handle(new Request()
+						.method(Request.POST)
+						.base(Base)
+						.path("/test"))
+
+				.accept(response -> {
+
+					assertThat(response)
+							.as("retrieve body to activate postprocessing")
+							.hasBody(rdf());
+
+					assertThat(graph())
+							.as("repository updated")
+							.isIsomorphicTo(decode("<test> rdf:value rdf:first, rdf:rest."));
+
+				})
+
 		);
 	}
 

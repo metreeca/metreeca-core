@@ -92,15 +92,12 @@ public final class Response extends Message<Response> {
 				.orElseGet(() -> request().item());
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * Retrieves the originating request for this response.
 	 *
 	 * @return the originating request for this response
 	 */
-	public Request request() {
+	@Override public Request request() {
 		return request;
 	}
 

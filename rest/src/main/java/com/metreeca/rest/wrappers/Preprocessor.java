@@ -53,6 +53,9 @@ public final class Preprocessor implements Wrapper {
 	 * <p>Filters are chained in the specified order and executed on incoming requests and their {@linkplain RDFFormat
 	 * RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
+	 * <p>Use {@link Connector#construct(String)} and {@link Connector#update(String)} to create filters based on SPARQL
+	 * Query/Update scripts.</p>
+	 *
 	 * @param filters the request RDF preprocessing filters to be inserted; ech filter takes as argument an incoming
 	 *                request and its {@linkplain RDFFormat RDF} payload and must return a non null RDF model
 	 *
