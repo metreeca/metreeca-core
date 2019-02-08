@@ -42,7 +42,7 @@ import static java.util.stream.Collectors.toSet;
 public final class Datatype implements Shape {
 
 	/**
-	 * Creates a type value constraint.
+	 * Creates a datatype constraint.
 	 *
 	 * <p>Beyond literal datatypes, the following extend values are supported:</p>
 	 *
@@ -54,6 +54,8 @@ public final class Datatype implements Shape {
 	 * </ul>
 	 *
 	 * @param iri the expected extended datatype
+	 *
+	 * @return a new datatype constraint for the provided {@code iri}
 	 *
 	 * @throws NullPointerException if {@code iri} is null
 	 */

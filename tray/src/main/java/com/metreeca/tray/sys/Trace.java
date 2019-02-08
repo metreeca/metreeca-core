@@ -217,7 +217,8 @@ public abstract class Trace {
 	 * Adds a debug trace entry.
 	 *
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries
-	 * @param model the RDF model to be included in the trace entry
+	 * @param model the RDF model to be included in the trace entry; ignored if null
+	 * @param <V> the type of the statement source
 	 *
 	 * @return the provided {@code model}
 	 */

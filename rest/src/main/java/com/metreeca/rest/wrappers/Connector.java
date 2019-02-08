@@ -54,6 +54,7 @@ public final class Connector implements Wrapper {
 	 * @param query       the SPARQL graph query (describe/construct) to be executed by the new filter on target
 	 *                    messages; empty scripts are ignored
 	 * @param customizers optional custom configuration setters for the SPARQL query operation
+	 * @param <M> the type of the target message for the new filter
 	 *
 	 * @return a message filter executing the SPARQL graph {@code query} on target messages with {@linkplain
 	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom configurations; returns the
@@ -102,6 +103,7 @@ public final class Connector implements Wrapper {
 	 * @param update      the SPARQL update script to be executed by the new housekeeping filter on target messages;
 	 *                    empty scripts are ignored
 	 * @param customizers optional custom configuration setters for the SPARQL update operation
+	 * @param <M> the type of the target message for the new filter
 	 *
 	 * @return a housekeeping filter executing the SPARQL {@code update} script on target messages with {@linkplain
 	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom configurations; returns the
