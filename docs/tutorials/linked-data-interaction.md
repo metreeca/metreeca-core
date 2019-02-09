@@ -179,10 +179,9 @@ To retrieve the RDF description of a published collections, as specified by the 
 HTTP/1.1 200 
 Vary: Accept
 Vary: Prefer
-Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
-Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
 Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
 Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
+Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
 Link: <http://localhost:8080/products/?specs>;
 		rel=http://www.w3.org/ns/ldp#constrainedBy
 Content-Type: application/json;charset=UTF-8
@@ -222,10 +221,9 @@ By default, container descriptions include a digest description of each containe
 HTTP/1.1 200 
 Vary: Accept
 Vary: Prefer
-Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
-Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
 Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
 Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
+Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
 Link: <http://localhost:8080/products/?specs>;
 		rel=http://www.w3.org/ns/ldp#constrainedBy
 Preference-Applied: return=representation;

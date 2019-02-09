@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.rest.Message.link;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.Result.Value;
@@ -147,8 +148,13 @@ public final class Relator extends Actor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper annotator() {
-		return handler -> request -> handler.handle(request).map(response ->
-				response.headers("+Vary", "Accept", "Prefer")
+		return handler -> request -> handler.handle(request).map(response -> response
+				.headers("+Vary", "Accept", "Prefer")
+				.headers("+Link",
+						link(LDP.RESOURCE, "type"),
+						link(LDP.RDF_SOURCE, "type"),
+						request.container() ? link(LDP.CONTAINER, "type") : ""
+				)
 		);
 	}
 
@@ -178,7 +184,7 @@ public final class Relator extends Actor {
 
 						.relate(item, request::query, (shape, model) -> response
 
-								.status(resource && total && model.isEmpty() ? NotFound : OK )
+								.status(resource && total && model.isEmpty() ? NotFound : OK)
 
 								.header("+Preference-Applied",
 										minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
@@ -242,7 +248,7 @@ public final class Relator extends Actor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String include(final IRI include) {
-		return "return=representation; include=\"" +include+ "\"";
+		return "return=representation; include=\""+include+"\"";
 	}
 
 	private boolean include(final Request request, final IRI include) {
