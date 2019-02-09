@@ -305,9 +305,9 @@ public final class JSONParser extends AbstractRDFParser {
 
 	private Stream<Value> parse(final String string, final String base, final IRI type) {
 		return Stream.of(type == null ? createLiteral(string, null, null)
-				: type.equals(Values.ResourceType) ? createResource(base, string)
-				: type.equals(Values.IRIType) ? createIRI(base, string)
-				: type.equals(Values.BNodeType) ? createNode(string.startsWith("_:") ? string.substring(2) : string)
+				: type.equals(Form.ResourceType) ? createResource(base, string)
+				: type.equals(Form.IRIType) ? createIRI(base, string)
+				: type.equals(Form.BNodeType) ? createNode(string.startsWith("_:") ? string.substring(2) : string)
 				: createLiteral(string, null, type));
 	}
 
@@ -329,7 +329,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 	private Optional<Resource> blank(final Shape shape) {
 		return datatype(shape)
-				.filter(type -> type.equals(Values.BNodeType))
+				.filter(type -> type.equals(Form.BNodeType))
 				.map(type -> createNode());
 	}
 

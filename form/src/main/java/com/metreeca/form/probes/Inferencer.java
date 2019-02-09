@@ -53,7 +53,7 @@ public final class Inferencer extends Inspector<Shape> {
 
 
 	@Override public Shape probe(final Meta meta) {
-		return meta.getIRI().equals(Form.Hint) ? and(meta, datatype(Values.ResourceType)) : meta;
+		return meta.getIRI().equals(Form.Hint) ? and(meta, datatype(Form.ResourceType)) : meta;
 	}
 
 
@@ -64,7 +64,7 @@ public final class Inferencer extends Inspector<Shape> {
 	}
 
 	@Override public Shape probe(final Clazz clazz) {
-		return and(clazz, datatype(Values.ResourceType));
+		return and(clazz, datatype(Form.ResourceType));
 	}
 
 
@@ -93,9 +93,9 @@ public final class Inferencer extends Inspector<Shape> {
 		final IRI iri=field.getIRI();
 		final Shape shape=field.getShape().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(Values.ResourceType))), datatype(Values.ResourceType))
-				: direct(iri) ? and(field(iri, shape), datatype(Values.ResourceType))
-				: field(iri, and(shape, datatype(Values.ResourceType)));
+		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(Form.ResourceType))), datatype(Form.ResourceType))
+				: direct(iri) ? and(field(iri, shape), datatype(Form.ResourceType))
+				: field(iri, and(shape, datatype(Form.ResourceType)));
 	}
 
 

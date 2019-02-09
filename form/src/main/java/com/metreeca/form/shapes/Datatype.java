@@ -17,6 +17,7 @@
 
 package com.metreeca.form.shapes;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inspector;
 import com.metreeca.form.things.Values;
@@ -37,7 +38,7 @@ import static java.util.stream.Collectors.toSet;
  * <p>States that each term in the focus set has a given extended RDF datatype.</p>
  *
  * <p>For validation purposes IRI references and blank nodes are considered to be respectively of {@link
- * Values#IRIType} and {@link Values#BNodeType} datatype.</p>
+ * Form#IRIType} and {@link Form#BNodeType} datatype.</p>
  */
 public final class Datatype implements Shape {
 
@@ -47,10 +48,10 @@ public final class Datatype implements Shape {
 	 * <p>Beyond literal datatypes, the following extend values are supported:</p>
 	 *
 	 * <ul>
-	 *     <li>{@link Values#BNodeType} for blank nodes;</li>
-	 *     <li>{@link Values#IRIType} for IRI references;</li>
-	 *     <li>{@link Values#ResourceType} for blank nodes or IRI references;</li>
-	 *     <li>{@link Values#LiteralType} or {@link RDFS#LITERAL} for any literal.</li>
+	 *     <li>{@link Form#BNodeType} for blank nodes;</li>
+	 *     <li>{@link Form#IRIType} for IRI references;</li>
+	 *     <li>{@link Form#ResourceType} for blank nodes or IRI references;</li>
+	 *     <li>{@link Form#LiteralType} or {@link RDFS#LITERAL} for any literal.</li>
 	 * </ul>
 	 *
 	 * @param iri the expected extended datatype

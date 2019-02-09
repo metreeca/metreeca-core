@@ -100,7 +100,7 @@ public final class ValuesTest {
 
 			convey().then(
 					server().then(
-							field(RDF.TYPE, and(required(), datatype(IRIType))),
+							field(RDF.TYPE, and(required(), datatype(Form.IRIType))),
 							field(RDFS.LABEL, Textual),
 							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
 					),
@@ -116,11 +116,11 @@ public final class ValuesTest {
 									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
 
 							field(term("supervisor"), and(
-									optional(), datatype(IRIType), clazz(term("Employee")),
+									optional(), datatype(Form.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							)),
 							field(term("subordinate"), and(
-									optional(), datatype(IRIType), clazz(term("Employee")),
+									optional(), datatype(Form.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							))
 

@@ -20,7 +20,6 @@ package com.metreeca.form.queries;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -44,7 +43,7 @@ public final class Items implements Query {
 
 	public static final Shape Shape=and(
 			field(Form.items, and(
-					datatype(Values.BNodeType),
+					datatype(Form.BNodeType),
 					field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
 					field(Form.value, and(maxCount(1),
 							field(RDFS.LABEL, and(maxCount(1), datatype(XMLSchema.STRING))),

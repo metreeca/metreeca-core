@@ -17,9 +17,9 @@
 
 package com.metreeca.form.probes;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -134,17 +134,17 @@ public final class Optimizer extends Traverser<Shape> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static boolean derives(final IRI upper, final IRI lower) {
-		return upper.equals(Values.ValueType)
-				|| upper.equals(Values.ResourceType) && resource(lower)
-				|| upper.equals(Values.LiteralType) && literal(lower);
+		return upper.equals(Form.ValueType)
+				|| upper.equals(Form.ResourceType) && resource(lower)
+				|| upper.equals(Form.LiteralType) && literal(lower);
 	}
 
 	private static boolean resource(final IRI type) {
-		return type.equals(Values.ResourceType) || type.equals(Values.BNodeType) || type.equals(Values.IRIType);
+		return type.equals(Form.ResourceType) || type.equals(Form.BNodeType) || type.equals(Form.IRIType);
 	}
 
 	private static boolean literal(final IRI type) {
-		return type.equals(Values.LiteralType) || !type.equals(Values.ValueType) && !resource(type);
+		return type.equals(Form.LiteralType) || !type.equals(Form.ValueType) && !resource(type);
 	}
 
 

@@ -17,10 +17,10 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.Codecs;
-import com.metreeca.form.things.Values;
 import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
@@ -236,7 +236,7 @@ final class RewriterTest {
 
 	@Test void testJSONRewriting() {
 
-		final Shape TestShape=field(internal("p"), and(required(), datatype(Values.IRIType)));
+		final Shape TestShape=field(internal("p"), and(required(), datatype(Form.IRIType)));
 
 		new Tray()
 

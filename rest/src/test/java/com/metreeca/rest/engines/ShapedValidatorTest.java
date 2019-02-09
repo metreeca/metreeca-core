@@ -300,17 +300,17 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateDataype() {
 
-		assertThat(validate(datatype(Values.BNodeType))).as("pass / empty").isTrue();
-		assertThat(validate(datatype(Values.BNodeType), Values.bnode())).as("pass / blank").isTrue();
-		assertThat(validate(datatype(Values.IRIType), ValuesTest.term("iri"))).as("pass / iri").isTrue();
+		assertThat(validate(datatype(Form.BNodeType))).as("pass / empty").isTrue();
+		assertThat(validate(datatype(Form.BNodeType), Values.bnode())).as("pass / blank").isTrue();
+		assertThat(validate(datatype(Form.IRIType), ValuesTest.term("iri"))).as("pass / iri").isTrue();
 		assertThat(validate(datatype(XMLSchema.STRING), literal("text"))).as("pass / plain literal").isTrue();
 		assertThat(validate(datatype(RDF.LANGSTRING), literal("text", "en"))).as("pass / tagged literal").isTrue();
 		assertThat(validate(datatype(XMLSchema.BOOLEAN), literal(true))).as("pass / typed literal").isTrue();
 
-		assertThat(validate(datatype(Values.IRIType), Values.bnode())).as("fail").isFalse();
+		assertThat(validate(datatype(Form.IRIType), Values.bnode())).as("fail").isFalse();
 
-		assertThat(validate(datatype(Values.ResourceType), Values.bnode())).as("pass / generic resource").isTrue();
-		assertThat(validate(datatype(Values.ResourceType), literal(true))).as("fail / generic resource").isFalse();
+		assertThat(validate(datatype(Form.ResourceType), Values.bnode())).as("pass / generic resource").isTrue();
+		assertThat(validate(datatype(Form.ResourceType), literal(true))).as("fail / generic resource").isFalse();
 
 		assertThat(validate(datatype(RDFS.LITERAL), literal(true))).as("pass / generic literal").isTrue();
 		assertThat(validate(datatype(RDFS.LITERAL), Values.bnode())).as("fail / generic literal").isFalse();

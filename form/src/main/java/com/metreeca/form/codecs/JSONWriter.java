@@ -22,7 +22,6 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
-import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -156,7 +155,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 		final Optional<IRI> datatype=datatype(shape);
 		final Map<IRI, Shape> fields=fields(shape);
 
-		if ( datatype.filter(iri -> iri.equals(Values.IRIType)).isPresent() && fields.isEmpty() ) {
+		if ( datatype.filter(iri -> iri.equals(Form.IRIType)).isPresent() && fields.isEmpty() ) {
 
 			return id; // inline proved leaf IRI
 
@@ -216,7 +215,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 				}
 
 				datatype // drop id field if proved to be a blank node without back-references
-						.filter(type -> type.equals(Values.BNodeType) && references.isEmpty())
+						.filter(type -> type.equals(Form.BNodeType) && references.isEmpty())
 						.ifPresent(type -> object.remove("this"));
 
 			}

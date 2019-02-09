@@ -17,10 +17,10 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Field;
 import com.metreeca.form.shapes.Or;
-import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.Resource;
@@ -322,7 +322,7 @@ final class JSONWriterTest extends JSONCodecTest {
 				json(
 						decode("_:focus rdf:value rdf:nil."),
 						bnode("focus"),
-						Field.field(RDF.VALUE, and(datatype(Values.IRIType), maxCount(1)))
+						Field.field(RDF.VALUE, and(datatype(Form.IRIType), maxCount(1)))
 				));
 	}
 
@@ -341,7 +341,7 @@ final class JSONWriterTest extends JSONCodecTest {
 		assertThat((Object)json(object(field("value", array(object()))))).as("unreferenced proved blank").isEqualTo(json(
 				decode("_:x rdf:value _:y ."),
 				bnode("x"),
-				and(datatype(Values.BNodeType), Field.field(RDF.VALUE, datatype(Values.BNodeType)))
+				and(datatype(Form.BNodeType), Field.field(RDF.VALUE, datatype(Form.BNodeType)))
 		));
 
 		assertThat((Object)json(object(
@@ -349,7 +349,7 @@ final class JSONWriterTest extends JSONCodecTest {
 				field("value", array(object(field("this", "_:x"))))))).as("back-referenced proved blank").isEqualTo(json(
 				decode("_:x rdf:value _:x ."),
 				bnode("x"),
-				and(datatype(Values.BNodeType), Field.field(RDF.VALUE, datatype(Values.BNodeType)))
+				and(datatype(Form.BNodeType), Field.field(RDF.VALUE, datatype(Form.BNodeType)))
 		));
 
 	}

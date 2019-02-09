@@ -17,9 +17,9 @@
 
 package com.metreeca.form.probes;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Field;
-import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -78,29 +78,29 @@ final class OptimizerTest {
 
 	@Test void testOptimizeType() {
 
-		assertThat(optimize(and(datatype(Values.IRIType), datatype(Values.ResourceType))))
+		assertThat(optimize(and(datatype(Form.IRIType), datatype(Form.ResourceType))))
 				.as("conjunction / superclass")
-				.isEqualTo(datatype(Values.IRIType));
+				.isEqualTo(datatype(Form.IRIType));
 
-		assertThat(optimize(and(datatype(Values.LiteralType), datatype(XMLSchema.STRING))))
+		assertThat(optimize(and(datatype(Form.LiteralType), datatype(XMLSchema.STRING))))
 				.as("conjunction / literal")
 				.isEqualTo(datatype(XMLSchema.STRING));
 
-		assertThat(optimize(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING))))
+		assertThat(optimize(and(datatype(Form.ResourceType), datatype(XMLSchema.STRING))))
 				.as("conjunction / unrelated")
-				.isEqualTo(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING)));
+				.isEqualTo(and(datatype(Form.ResourceType), datatype(XMLSchema.STRING)));
 
-		assertThat(optimize(or(datatype(Values.IRIType), datatype(Values.ResourceType))))
+		assertThat(optimize(or(datatype(Form.IRIType), datatype(Form.ResourceType))))
 				.as("disjunction / superclass")
-				.isEqualTo(datatype(Values.ResourceType));
+				.isEqualTo(datatype(Form.ResourceType));
 
-		assertThat(optimize(or(datatype(Values.LiteralType), datatype(RDF.NIL))))
+		assertThat(optimize(or(datatype(Form.LiteralType), datatype(RDF.NIL))))
 				.as("disjunction / literal")
-				.isEqualTo(datatype(Values.LiteralType));
+				.isEqualTo(datatype(Form.LiteralType));
 
-		assertThat(optimize(or(datatype(Values.ResourceType), datatype(RDF.NIL))))
+		assertThat(optimize(or(datatype(Form.ResourceType), datatype(RDF.NIL))))
 				.as("disjunction / unrelated")
-				.isEqualTo(or(datatype(Values.ResourceType), datatype(RDF.NIL)));
+				.isEqualTo(or(datatype(Form.ResourceType), datatype(RDF.NIL)));
 
 	}
 

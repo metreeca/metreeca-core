@@ -17,6 +17,7 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.All;
 import com.metreeca.form.shapes.Field;
@@ -92,7 +93,7 @@ final class JSONParserTest extends JSONCodecTest {
 				.as("preserve bnode id")
 				.isTrue();
 
-		assertThat(rdf(blanks("_:x"), null, Field.field(RDF.VALUE, datatype(Values.BNodeType))).stream()
+		assertThat(rdf(blanks("_:x"), null, Field.field(RDF.VALUE, datatype(Form.BNodeType))).stream()
 				.allMatch(statement -> statement.getObject().equals(bnode("x"))))
 				.as("preserve bnode id / shorthand")
 				.isTrue();
@@ -285,7 +286,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("this", "x"), field(value, "http://example.com/y")),
 				null,
-				Field.field(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Form.IRIType))
 		))
 				.as("base relative subject")
 				.isEqualTo(decode("<x> rdf:value <y> ."));
@@ -293,7 +294,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("this", "/x"), field(value, "http://example.com/y")),
 				null,
-				Field.field(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Form.IRIType))
 		))
 				.as("root-relative subject")
 				.isEqualTo(decode("<x> rdf:value <y>."));
@@ -301,7 +302,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("this", "http://example.com/x"), field(value, "y")),
 				null,
-				Field.field(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Form.IRIType))
 		))
 				.as("base relative object")
 				.isEqualTo(decode("<x> rdf:value <y> ."));
@@ -309,7 +310,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("this", "http://example.com/x"), field(value, "/z")),
 				null,
-				Field.field(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Form.IRIType))
 		))
 				.as("root-relative object")
 				.isEqualTo(decode("<x> rdf:value <http://example.com/z>."));
@@ -358,7 +359,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				object(field("value", object())),
 				null,
-				and(datatype(Values.BNodeType), Field.field(RDF.VALUE, datatype(Values.BNodeType)))
+				and(datatype(Form.BNodeType), Field.field(RDF.VALUE, datatype(Form.BNodeType)))
 		))
 				.as("proved blanks")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -378,7 +379,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blanks("_:x"),
 				null,
-				Field.field(RDF.VALUE, datatype(Values.BNodeType))
+				Field.field(RDF.VALUE, datatype(Form.BNodeType))
 		))
 				.as("proved blank")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -388,7 +389,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blanks("http://example.com/x"),
 				null,
-				Field.field(RDF.VALUE, datatype(Values.IRIType))
+				Field.field(RDF.VALUE, datatype(Form.IRIType))
 		))
 				.as("proved named")
 				.isEqualTo(decode("[] rdf:value <x> ."));
@@ -398,7 +399,7 @@ final class JSONParserTest extends JSONCodecTest {
 		assertThat(rdf(
 				blanks("_:x", "http://example.com/x"),
 				null,
-				Field.field(RDF.VALUE, datatype(Values.ResourceType))
+				Field.field(RDF.VALUE, datatype(Form.ResourceType))
 		))
 				.as("proved resources")
 				.isEqualTo(decode("[] rdf:value [], <x> ."));
