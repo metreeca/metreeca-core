@@ -18,7 +18,7 @@ Models are [programmaticaly](../tutorials/linked-data-publishing.md) built using
 
 <p class="warning">The details of the specification language are still in flux, especially when it comes to SHACL interoperability.</p>
 
-<p class="warning">Some of the described features aren't (yet;-) supported by the framework.</p>
+<p class="warning">Some of the described features aren't (yet ;-) supported by the framework.</p>
 
 # Shapes
 
@@ -28,11 +28,11 @@ Linked data [shapes](../javadocs/com/metreeca/form/Shape.html) define the expect
 
 Linked data selection tasks identify the set of subjects in an RDF graph whose RDF descriptions are consistent with a possibly composite shape. Selection results are reported either as an RDF graph or a structured report according to the choosen [query](#queries) type.
 
-Linked data validation tasks verify that the RDF description of an initial focus set is consistent with the constraints specified by a possibly composite shape. During the process, derived focus sets connected by [structural constraints](#structural-constraints) may be recursively validated. Validation results are reported as structured [focus validation report](../javadocs/com/metreeca/form/Focus.html).
+Linked data validation tasks verify that the RDF description of an initial focus set is consistent with the constraints specified by a possibly composite shape. During the process, derived focus sets connected by [structural constraints](#structural-constraints) may be recursively validated. Validation results are reported as a structured [focus validation report](../javadocs/com/metreeca/form/Focus.html).
 
 ## Annotations
 
-Non-validating shapes documenting presentation-driving metadata, to be used for purposes such as form building or predictable printing of RDF files.
+Non-validating shapes documenting shape metadata, to be used for purposes such as shape redaction, form building or predictable encoding of RDF files.
 
 | shape                                                        | value                                                        |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -51,13 +51,13 @@ Common metadada annotations are directly available as shorthand shapes.
 | [hint](../javadocs/com/metreeca/form/shapes/shapes/Meta#hint)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | the IRI of a resource hinting at possible values for the enclosing shape (e.g. an LDP container) |
 | [group](../javadocs/com/metreeca/form/shapes/Meta.html#group)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | a client-specific group visualization mode for the enclosing shape |
 
-# Term Constraints
+## Term Constraints
 
 Primitive shapes specifying constraints to be individually met by each RDF term in the focus set.
 
 | shape                                                        | constraint                                                   |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [datatype](../javadocs/com/metreeca/form/shapes/Datatype.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | each term in the focus set has a given extended RDF datatype IRI; IRI references and blank nodes are considered to be respectively of `http://www.openrdf.org/schema/sesame#iri` ([Values.IRI](../javadocs/com/metreeca/form/things/Values.html#IRIType)) and `http://www.openrdf.org/schema/sesame#bnode` ([Values.BNode](../javadocs/com/metreeca/form/things/Values.html#BNodeType)) datatype |
+| [datatype](../javadocs/com/metreeca/form/shapes/Datatype.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | each term in the focus set has a given extended RDF datatype IRI; IRI references and blank nodes are considered to be respectively of `app://form.metreeca.com/terms#iri` ([Values.IRI](../javadocs/com/metreeca/form/things/Values.html#IRIType)) and `app://form.metreeca.com/terms##bnode` ([Values.BNode](../javadocs/com/metreeca/form/things/Values.html#BNodeType)) datatype |
 | [class](../javadocs/com/metreeca/form/shapes/Clazz.html)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | each term in the focus set is an instance of a given RDF class or one of its superclasses |
 | [minExclusive](../javadocs/com/metreeca/form/shapes/MinExclusive.html)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | each term in the focus set is strictly greater than a given minum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
 | [maxExclusive](../javadocs/com/metreeca/form/shapes/MaxExclusive.html)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | each term in the focus set is strictly less than a given maximum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
@@ -110,7 +110,7 @@ Composite shapes specifying logical combinations of shapes.
 | [or](../javadocs/com/metreeca/form/shapes/Or.html)([shape](../javadocs/com/metreeca/form/Shape.html), …) | the focus set is consistent with at least one shape in a given target set |
 | [when](../javadocs/com/metreeca/form/shapes/When.html)([test](../javadocs/com/metreeca/form/Shape.html),[pass](../javadocs/com/metreeca/form/Shape.html) [, [fail](../javadocs/com/metreeca/form/Shape.html)]) | the focus set is consistent either with a *pass* shape, if consistent also with a *test* shape, or with a *fail* shape, otherwise; if omitted, the `fail` shape defaults to `and()`, that is it's always meet |
 
-<p class="warning">Test shapes for conditional constraints are currently limited to parametric <code>guards</code>.</p>
+<p class="warning">Test shapes for conditional constraints are currently limited to combinations of parametric <code>guards</code> and logical operators.</p>
 
 # Parameters
 
@@ -120,43 +120,54 @@ Parametric axes may be specified for arbitrary custom variables, but the system 
 
 Common combinations of parametric shapes on these axes are directly available as shorthand shapes.
 
+Guards may be applied to groups of shapes either explicitely assembly a `when` shape, like:
+
+```
+when(<guard>, and(<shape>, …))
+```
+
+or using the shorthand [then]() method, like:
+
+```
+<guard>.then(<shape>, …)
+```
+
 ## Role Axis
 
-Parametric shapes for the [role](../javadocs/com/metreeca/form/Form.html#role) axis [selectively enable](../javadocs/com/metreeca/form/Shape.html#role-java.util.Set-) nested shapes according to the roles of the (possibly authenticated) user performing HTTP/S operations on target linked data resources.
+Parametric guards for the [role](../javadocs/com/metreeca/form/Form.html#role) axis [selectively enable](../javadocs/com/metreeca/form/Shape.html#role-java.util.Set-) target shapes according to the roles of the (possibly authenticated) user performing HTTP/S operations on target linked data resources.
 
-| roles | shorthand | usage context |
-|-------|-------|-------------|
-| [value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …|[role](../javadocs/com/metreeca/form/Shape.html#role-java.util.Set-com.metreeca.form.Shape...-)(set([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …), [shape](../javadocs/com/metreeca/form/Shape.html), …)| nested constraints are to be considered only if the sets of [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the user performing a request contains at least one of the given role values |
+| shorthand | usage context |
+|-------|-------------|
+|[role](../javadocs/com/metreeca/form/Shape.html#role-java.util.Set-com.metreeca.form.Shape...-)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …)| target shapes are to be considered only if the sets of [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the user performing a request contains at least one of the given role values |
 
 
 ## Task Axis
 
-Parametric shapes for the [task](../javadocs/com/metreeca/form/Form.html#task) axis [selectively enable](../javadocs/com/metreeca/form/Shape.html#task-org.eclipse.rdf4j.model.Value-) nested shapes according to the method of the HTTP/S operations performed on target linked data resources.
+Parametric guards for the [task](../javadocs/com/metreeca/form/Form.html#task) axis [selectively enable](../javadocs/com/metreeca/form/Shape.html#task-org.eclipse.rdf4j.model.Value-) target shapes according to the method of the HTTP/S operations performed on target linked data resources.
 
-| task                                                     | shorthand                                                    | HTTP/S method   |   usage context                                                        |
-| -------------------------------------------------------- | ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
-| [create](../javadocs/com/metreeca/form/Form.html#create) | [create](../javadocs/com/metreeca/form/Shape.html#create-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | POST            | resource creation                                            |
-| [relate](../javadocs/com/metreeca/form/Form.html#relate) | [relate](../javadocs/com/metreeca/form/Shape.html#relate-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | GET             | resource retrieval                                           |
-| [update](../javadocs/com/metreeca/form/Form.html#update) | [update](../javadocs/com/metreeca/form/Shape.html#update-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | PUT             | resource updating                                            |
-| [delete](../javadocs/com/metreeca/form/Form.html#delete) | [delete](../javadocs/com/metreeca/form/Shape.html#delete-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | DELETE          | resouce deletion                                             |
-| [client](../javadocs/com/metreeca/form/Form.html#client) | [client](../javadocs/com/metreeca/form/Shape.html#server-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
-| [server](../javadocs/com/metreeca/form/Form.html#server) | [server](../javadocs/com/metreeca/form/Shape.html#server-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
+| shorthand                                                    | HTTP/S method   | usage context                                                |
+| ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
+| [create](../javadocs/com/metreeca/form/Shape.html#create-com.metreeca.form.Shape...-)() | POST            | resource creation                                            |
+| [relate](../javadocs/com/metreeca/form/Shape.html#relate-com.metreeca.form.Shape...-)() | GET             | resource retrieval                                           |
+| [update](../javadocs/com/metreeca/form/Shape.html#update-com.metreeca.form.Shape...-)([) | PUT             | resource updating                                            |
+| [delete](../javadocs/com/metreeca/form/Shape.html#delete-com.metreeca.form.Shape...-)() | DELETE          | resouce deletion                                             |
+| [client](../javadocs/com/metreeca/form/Shape.html#server-com.metreeca.form.Shape...-)() | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
+| [server](../javadocs/com/metreeca/form/Shape.html#server-com.metreeca.form.Shape...-)() | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
 
 ## View Axis
 
-Parametric shapes for the [view](../javadocs/com/metreeca/form/Form.html#view) axis [selectively enable](../javadocs/com/metreeca/form/Shape.html#view-org.eclipse.rdf4j.model.Value-) nested shapes according to the usage context.
+Parametric guards for the [view](../javadocs/com/metreeca/form/Form.html#view) axis [selectively enable](../javadocs/com/metreeca/form/Shape.html#view-org.eclipse.rdf4j.model.Value-) target shapes according to the usage context.
 
-| view                                     | shorthand                                | usage context                            |
-| ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| [digest](../javadocs/com/metreeca/form/Form.html#digest) | [digest](../javadocs/com/metreeca/form/Shape.html#digest-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | short resource description, e.g. inside search result sets |
-| [detail](../javadocs/com/metreeca/form/Form.html#detail) | [detail](../javadocs/com/metreeca/form/Shape.html#detail-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | full resource description                |
+| shorthand                                                    | usage context                                              |
+| ------------------------------------------------------------ | ---------------------------------------------------------- |
+| [digest](../javadocs/com/metreeca/form/Shape.html#digest-com.metreeca.form.Shape...-)() | short resource description, e.g. inside search result sets |
+| [detail](../javadocs/com/metreeca/form/Shape.html#detail-com.metreeca.form.Shape...-)() | full resource description                                  |
 
 ## Mode Axis
 
-Parametric shapes for the [mode](../javadocs/com/metreeca/form/Form.html#mode) axis [selectively enable](../javadocs/com/metreeca/form/Shape.html#mode-org.eclipse.rdf4j.model.Value-) nested shapes according to the usage pattern.
+Parametric guards for the [mode](../javadocs/com/metreeca/form/Form.html#mode) axis [selectively enable](../javadocs/com/metreeca/form/Shape.html#mode-org.eclipse.rdf4j.model.Value-) target shapes according to the usage pattern.
 
-| mode                                     | shorthand                                | usage pattern                            |
-| ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| [convey](../javadocs/com/metreeca/form/Form.html#convey) | [convey](../javadocs/com/metreeca/form/Shape.html#convey-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | nested constraints are to be used only for composing outgoing data and validating incoming data and not for selecting existing resources to be processed |
-| [filter](../javadocs/com/metreeca/form/Form.html#filter) | [filter](../javadocs/com/metreeca/form/Shape.html#filter-com.metreeca.form.Shape...-)([shape](../javadocs/com/metreeca/form/Shape.html), …) | nested constraints are to be used only for selecting existing resources to be processed and not for validating incoming data |
-
+| shorthand                                                    | usage pattern                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [convey](../javadocs/com/metreeca/form/Shape.html#convey-com.metreeca.form.Shape...-)() | target shapes are to be used only for composing outgoing data and validating incoming data and not for selecting existing resources to be processed |
+| [filter](../javadocs/com/metreeca/form/Shape.html#filter-com.metreeca.form.Shape...-)() | target shapes are to be used only for selecting existing resources to be processed and not for validating incoming data |
