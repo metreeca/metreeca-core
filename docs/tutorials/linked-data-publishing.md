@@ -64,7 +64,7 @@ import javax.servlet.annotation.WebListener;
 }
 ```
 
-The stub configures the application to handle any resource using a barebone [handler](../javadocs/?com/metreeca/rest/Handler.html) always replying to incoming [requests](../javadocs/?com/metreeca/rest/Request.html) with a [response](../javadocs/?com/metreeca/rest/Response.html) including a `200` HTTP status code. The standard [Server](../javadocs/?com/metreeca/rest/wrappers/Server.html) wrapper provides default pre/post-processing services and shared error handling..
+The stub configures the application to handle any resource using a barebone [handler](../javadocs/?com/metreeca/rest/Handler.html) always replying to incoming [requests](../javadocs/?com/metreeca/rest/Request.html) with a [response](../javadocs/?com/metreeca/rest/Response.html) including a `200` HTTP status code. The standard [Server](../javadocs/?com/metreeca/rest/wrappers/Server.html) wrapper provides default pre/postprocessing services and shared error handling..
 
 Compile and deploy the web app to your favorite servlet container and try your first request:
 
@@ -528,12 +528,12 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-# Pre/Post-Processing
+# Pre/Postprocessing
 
 We'll now complete the product catalog, adding:
 
 - a slug generator for assigning meaningful names to new resources;
-- post-processing scripts for updating server-managed properties and perform other housekeeping tasks when resources are created or modified.
+- postprocessing scripts for updating server-managed properties and perform other housekeeping tasks when resources are created or modified.
 
 ```java
 new Router()
@@ -611,11 +611,11 @@ insert { $this birt:code $name } where {};
 insert { $this birt:stock 0 } where {};
 ```
 
-The *ProductsCreate.ql* SPARQL Update post-processing script updates server-managed `birt:code` and `birt:stock` properties after a new product is added to the catalog.
+The *ProductsCreate.ql* SPARQL Update postprocessing script updates server-managed `birt:code` and `birt:stock` properties after a new product is added to the catalog.
 
-SPARQL Update post-processing scripts are executed after the state-mutating HTTP request is successfully completed, with some [pre-defined bindings](../javadocs/com/metreeca/rest/wrappers/Controller#configure) like the `$this` variable holding the IRI of the targe resource either as derived from the HTTP request or as defined by the `Location` HTTP header after a POST request.
+SPARQL Update postprocessing scripts are executed after the state-mutating HTTP request is successfully completed, with some [pre-defined bindings](../javadocs/com/metreeca/rest/wrappers/Connector.html#configure-M-O-java.util.function.BiConsumer...-) like the `$this` variable holding the IRI of the targe resource either as derived from the HTTP request or as defined by the `Location` HTTP header after a POST request.
 
-Request and response RDF payloads may also be [pre](../javadocs/com/metreeca/rest/wrappers/Processor.html) and [post](../javadocs/com/metreeca/rest/wrappers/Processor.html)-processed using custom filtering functions.
+Request and response RDF payloads may also be [pre](../javadocs/com/metreeca/rest/wrappers/Preprocessor.html) and [post](../javadocs/com/metreeca/rest/wrappers/Postprocessor.html)-processed using custom filtering functions.
 
 # Next Steps
 

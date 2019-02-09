@@ -271,12 +271,12 @@
 									<packages>com.metreeca.rest*</packages>
 								</group>
 								<group>
-									<title>Tooling Framework</title>
-									<packages>com.metreeca.tray*</packages>
-								</group>
-								<group>
 									<title>Shapes Framework</title>
 									<packages>com.metreeca.form*</packages>
+								</group>
+								<group>
+									<title>Tooling Framework</title>
+									<packages>com.metreeca.tray*</packages>
 								</group>
 							</groups>
 

@@ -43,12 +43,12 @@ Common metadada annotations are directly available as shorthand shapes.
 
 | shorthand shape                                              | value                                                        |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [alias](../javadocs/com/metreeca/form/Meta.html#alias)("alias") | an alternate property name for reporting values for the enclosing shape (e.g. in the [context](idiomatic-json.md#term-properties) of JSON-based RDF serialization results) |
+| [alias](../javadocs/com/metreeca/form/shapes/Meta.html#alias)("alias") | an alternate property name for reporting values for the enclosing shape (e.g. in the [context](idiomatic-json.md#term-properties) of JSON-based RDF serialization results) |
 | [label](../javadocs/com/metreeca/form/shapes/Meta.html#label)("label") | a human-readable textual label  for the enclosing shape      |
 | [notes](../javadocs/com/metreeca/form/shapes/Meta.html#notes)("notes") | a human-readable textual description of the enclosing shape  |
 | [placeholder](../javadocs/com/metreeca/form/shapes/Meta.html#placeholder)("placeholder") | a human-readable textual placeholder for the values of the enclosing shape |
 | [default](../javadocs/com/metreeca/form/shapes/Meta.html#default)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | the default for the expected values of the enclosing shape   |
-| [hint](../javadocs/com/metreeca/form/shapes/shapes/Meta#hint)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | the IRI of a resource hinting at possible values for the enclosing shape (e.g. an LDP container) |
+| [hint](../javadocs/com/metreeca/form/shapes/Meta.html#hint)([IRI](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html)) | the IRI of a resource hinting at possible values for the enclosing shape (e.g. an LDP container) |
 | [group](../javadocs/com/metreeca/form/shapes/Meta.html#group)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html)) | a client-specific group visualization mode for the enclosing shape |
 
 ## Term Constraints

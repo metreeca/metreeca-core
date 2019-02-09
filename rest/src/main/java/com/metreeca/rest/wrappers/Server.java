@@ -40,7 +40,7 @@ import static java.util.Collections.unmodifiableMap;
 /**
  * Linked data server.
  *
- * <p>Provides default resource pre/post-processing and error handling; mainly intended as the outermost wrapper
+ * <p>Provides default resource pre/postprocessing and error handling; mainly intended as the outermost wrapper
  * returned by gateway loaders.</p>
  */
 public final class Server implements Wrapper {
