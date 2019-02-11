@@ -35,18 +35,21 @@ import java.util.regex.Pattern;
  *
  * <ul>
  *
+ * <li>the root path ({@code /}) matches only the root resource ({@code /});</li>
+ *
+ * <li>paths with a trailing slash ({@code /<resource>/}) match any resource path sharing the same prefix, ignoring
+ * trailing slashes ({@code /<resource>}, {@code /<resource>/}, {@code /<resource>/<item>/…});</li>
+ *
+ * <li>paths with a trailing wildcard ({@code /<resource>/*}) match any immediately nested resource path sharing the
+ * same prefix, ignoring trailing slashes ({@code /<resource>/<item>}, {@code /<resource>/<item>/}, but not {@code
+ * /<resource>/<item>/…});</li>
+ *
  * <li>paths with no trailing slash or wildcard ({@code /<resource>}) match resource path exactly, ignoring trailing
  * slashes ({@code /<resource>}, {@code /<resource>/});</li>
  *
- * <li>paths with a trailing slash ({@code /<resource>/}) match any resource path sharing the same prefix, ignoring
- * trailing slashes ({@code /<resource>}, {@code /<resource>/}, {@code /<resource>/<item>});</li>
- *
- * <li>paths with a trailing wildcard ({@code /<resource>/*}) match any resource path sharing the same prefix
- * ({@code /<resource>/<item>});</li>
- *
  * </ul>
  *
- * <p>Lexicographically longer and preceding paths take precedence over shorter and following ones.</p>
+ * <p>Lexicographically longer/preceding paths take precedence over shorter/following ones.</p>
  *
  * <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  * opportunity to handle the request.</p>
@@ -99,7 +102,7 @@ public final class Router implements Handler {
 
 		final Function<Request, Optional<Responder>> route=path.equals("/") ? route("", "/", handler) // root
 				: path.endsWith("/") ? route(path.substring(0, path.length()-1), "(/.*)?", handler) // prefix
-				: path.endsWith("/*") ? route(path.substring(0, path.length()-2), "/.+", handler) // subtree
+				: path.endsWith("/*") ? route(path.substring(0, path.length()-2), "/[^/]+/?", handler) // children
 				: route(path, "/?", handler); // exact
 
 		if ( routes.putIfAbsent(sorter, route) != null ) {
