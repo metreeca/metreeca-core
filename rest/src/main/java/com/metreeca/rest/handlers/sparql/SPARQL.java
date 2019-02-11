@@ -20,8 +20,8 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.handlers.Worker;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.ValueFactory;

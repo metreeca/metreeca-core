@@ -22,6 +22,8 @@ import com.metreeca.rest.*;
 
 import java.io.*;
 
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
@@ -57,15 +59,21 @@ public final class TextFormat implements Format<String> {
 	 * otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
-		return message.body(reader()).value(source -> {
-			try (final Reader reader=source.get()) {
+		return message.body(reader()).fold(
 
-				return Codecs.text(reader);
+				source -> {
+					try (final Reader reader=source.get()) {
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+						return Value(Codecs.text(reader));
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				},
+
+				error -> error.equals(Format.Missing) ? Value("") : Error(error)
+
+		);
 	}
 
 	/**

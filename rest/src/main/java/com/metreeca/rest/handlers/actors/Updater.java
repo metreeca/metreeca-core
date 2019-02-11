@@ -18,138 +18,116 @@
 package com.metreeca.rest.handlers.actors;
 
 
-import com.metreeca.form.*;
-import com.metreeca.form.probes.Outliner;
-import com.metreeca.form.sparql.SPARQLEngine;
+import com.metreeca.form.Form;
+import com.metreeca.form.Issue;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
-
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
-
-import java.util.Collection;
-import java.util.function.BiFunction;
+import com.metreeca.tray.sys.Trace;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.Shape.mode;
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.wrappers.Throttler.container;
+import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * Resource updater.
+ * LDP resource updater.
  *
- * <p>Handles updating requests on linked data resources.</p>
+ * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item() focus
+ * item}.</p>
  *
- * <dl>
+ * <p>If the request target is a {@linkplain Request#container() container}:</p>
  *
- * <dt>Request shape-driven {@link RDFFormat} body</dt>
+ * <ul>
  *
- * <dd>The RDF content to be assigned to the updated resource.</dd>
+ * <li>the request is reported with a {@linkplain Response#NotImplemented} status code.</li>
  *
- * <dd>If the request includes  a {@linkplain Message#shape() shape}, it is redacted taking into account the request user
- * {@linkplain Request#roles() roles}, {@link Form#update} task, {@link Form#verify} mode and {@link Form#digest} view
- * and used to validate the request RDF body; validation errors are reported with a {@linkplain
- * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</dd>
+ * </ul>
  *
- * <dd>On successful body validation, the RDF description of the resource as matched by the redacted shape is replaced
- * with the updated one.</dd>
+ * <p>Otherwise, if the request includes an expected {@linkplain Request#shape() resource shape}:</p>
  *
- * <dt>Request shapeless {@link RDFFormat} body</dt>
+ * <ul>
  *
- * <dd><strong>Warning</strong> / Shapeless resource updating is not yet supported and is reported with a {@linkplain
- * Response#NotImplemented} HTTP status code.</dd>
+ * <li>the resource shape is extracted and redacted taking into account request user {@linkplain Request#roles()
+ * roles}, {@link Form#update} task, {@link Form#convey} mode and {@link Form#detail} view</li>
  *
- * </dl>
+ * <li>the request {@link RDFFormat RDF body} is expected to contain an RDF description of the resource to be updated
+ * matched by the redacted resource shape; statements outside this envelope are reported with a {@linkplain
+ * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</li>
  *
- * <p>Regardless of the operating mode, resource description content is stored into the system {@linkplain
- * Graph#Factory graph} database.</p>
+ * <li>on successful body validation, the existing RDF description of the target resource matched by the redacted shape
+ * is replaced with the request RDF body.</li>
+ *
+ * </ul>
+ *
+ * <p>Otherwise:</p>
+ *
+ * <ul>
+ *
+ * <li>the request {@link RDFFormat RDF body} is expected to contain a symmetric concise bounded description of the
+ * resource to be updated; statements outside this envelope are reported with a {@linkplain
+ * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element;</li>
+ *
+ * <li>on successful body validation, the existing symmetric concise bounded description of the target resource is
+ * replaced with the request RDF body.</li>
+ *
+ * </ul>
+ *
+ * <p>Regardless of the operating mode, RDF data is updated in the system {@linkplain Graph#Factory graph}
+ * database.</p>
+ *
+ * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Updater extends Actor<Updater> {
+public final class Updater extends Actor {
 
-	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	public Updater() {
-		delegate(action(Form.update, Form.detail).wrap((Request request) -> request.body(rdf())
-
-				.value(model -> { // add implied statements
-
-					model.addAll(request.shape()
-							.accept(mode(Form.verify))
-							.accept(new Outliner(request.item()))
-					);
-
-					return model;
-
-				})
-
-				.fold(
-						model -> wild(request.shape()) ? direct(request, model) : driven(request, model),
-						request::reply
-				)));
+		delegate(updater().with(throttler()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Updater pre(final BiFunction<Request, Model, Model> filter) { return super.pre(filter); }
-
-	@Override public Updater sync(final String script) { return super.sync(script); }
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Responder direct(final Request request, final Collection<Statement> model) {
-		return request.reply(response -> response.map(new Failure()
-				.status(Response.NotImplemented)
-				.cause("shapeless resource creation not supported"))
+	private Wrapper throttler() {
+		return wrapper(Request::container,
+				new Throttler(Form.update, Form.detail, container()),
+				new Throttler(Form.update, Form.detail, resource())
 		);
 	}
 
-	private Responder driven(final Request request, final Collection<Statement> model) {
-		return request.reply(response -> graph.update(connection -> {
+	private Handler updater() {
+		return request -> request.body(rdf()).fold(
 
-			final IRI focus=request.item();
+				model -> request.reply(response -> engine(request.shape())
 
-			if ( !connection.hasStatement(focus, null, null, true)
-					&& !connection.hasStatement(null, null, focus, true) ) {
+						.update(request.item(), trace.debug(this, model))
 
-				// !!! 410 Gone if the resource is known to have existed (how to test?)
+						.map(focus -> focus.assess(Issue.Level.Error) // shape violations
 
-				return response.status(Response.NotFound);
+								? response.map(new Failure()
+								.status(Response.UnprocessableEntity)
+								.error(Failure.DataInvalid)
+								.trace(focus))
 
-			} else {
+								: response.status(Response.NoContent)
 
-				final Report report=new SPARQLEngine(connection).update(focus, request.shape(), trace(model));
+						)
 
-				if ( report.assess(Issue.Level.Error) ) { // shape violations
+						.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
 
-					connection.rollback();
+				),
 
-					// !!! rewrite report value references to original target iri
-					// !!! rewrite references to external base IRI
-					// !!! factor with Creator
+				request::reply
 
-					return response.map(new Failure()
-							.status(Response.UnprocessableEntity)
-							.error("data-invalid")
-							.trace(report(report)));
-
-				} else { // valid data
-
-					connection.commit();
-
-					return response.status(Response.NoContent);
-
-				}
-			}
-		}));
+		);
 	}
 
 }

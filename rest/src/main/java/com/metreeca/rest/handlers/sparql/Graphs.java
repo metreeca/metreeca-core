@@ -22,8 +22,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.handlers.Worker;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -44,7 +44,7 @@ import java.util.List;
 
 import static com.metreeca.form.Shape.only;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Handler.refused;
@@ -70,8 +70,8 @@ import static java.lang.String.format;
  */
 public final class Graphs extends Delegator {
 
-	private static final Shape GraphsShape=trait(RDF.VALUE, and(
-			trait(RDF.TYPE, only(VOID.DATASET))
+	private static final Shape GraphsShape=field(RDF.VALUE, and(
+			field(RDF.TYPE, only(VOID.DATASET))
 	));
 
 

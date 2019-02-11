@@ -17,9 +17,10 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.Codecs;
-import com.metreeca.form.things.Values;
 import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
@@ -38,8 +39,9 @@ import javax.json.Json;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Codecs.encode;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
@@ -63,13 +65,6 @@ final class RewriterTest {
 	private static final String External="app://external/";
 	private static final String Internal="app://internal/";
 
-	private static final Shape TestShape=trait(internal("p"), and(required(), datatype(Values.IRIType)));
-
-
-	private static void exec(final Runnable... tasks) {
-		new Tray().exec(tasks).clear();
-	}
-
 
 	private static IRI external(final String name) {
 		return iri(External, name);
@@ -92,13 +87,13 @@ final class RewriterTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testRejectRelativeBase() {
-		assertThrows(IllegalArgumentException.class, () -> new Rewriter().base("/example.org/"));
+		assertThrows(IllegalArgumentException.class, () -> new Rewriter("/example.org/"));
 	}
 
 	@Test void testHeadRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					assertThat(request.user()).as("rewritten user").isEqualTo(internal("user"));
 					assertThat(request.roles()).as("rewritten roles").containsExactly(internal("role"));
@@ -149,7 +144,7 @@ final class RewriterTest {
 	@Test void testHeadEncodedRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					assertThat(request.query())
 							.as("rewritten encoded query")
@@ -169,10 +164,48 @@ final class RewriterTest {
 				.accept(response -> {});
 	}
 
+	@Test void testShapeRewriting() {
+		new Tray()
+
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
+
+					assertThat(request.shape()).isEqualTo(and(
+							Field.field(internal("p")),
+							Field.field(inverse(internal("p")))
+					));
+
+					return request.reply(response -> response
+							.status(Response.OK)
+							.shape(request.shape()));
+
+				}))
+
+				.handle(new Request()
+
+						.base(External)
+
+						.shape(and(
+								Field.field(external("p")),
+								Field.field(inverse(external("p")))
+						))
+
+				)
+
+				.accept(response -> {
+
+					assertThat(response.shape()).isEqualTo(and(
+							Field.field(external("p")),
+							Field.field(inverse(external("p")))
+					));
+
+				});
+
+	}
+
 	@Test void testRDFRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					request.body(rdf()).use(
 							model -> ModelAssert.assertThat(internal("s", "p", "o"))
@@ -195,7 +228,9 @@ final class RewriterTest {
 				.accept(response -> {
 
 					response.body(rdf()).use(
-							model -> assertThat(singleton(external("s", "p", "o"))).as("response rdf rewritten").isIsomorphicTo(model),
+							model -> assertThat(singleton(external("s", "p", "o")))
+									.as("response rdf rewritten")
+									.isIsomorphicTo(model),
 							error -> fail("missing RDF payload")
 					);
 
@@ -203,13 +238,16 @@ final class RewriterTest {
 	}
 
 	@Test void testJSONRewriting() {
+
+		final Shape TestShape=field(internal("p"), and(required(), datatype(Form.IRIType)));
+
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					assertThat(request).hasBodyThat(rdf())
+					assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 							.as("request json rewritten")
-							.isIsomorphicTo(singleton(internal("s", "p", "o")));
+							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
 					return request.reply(response -> response.
 							status(Response.OK)

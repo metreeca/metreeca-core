@@ -31,6 +31,12 @@ import static com.metreeca.rest.Result.Error;
 public interface Format<V> {
 
 	/**
+	 * The default failure reporting missing message bodies.
+	 */
+	public static final Failure Missing=new Failure().status(Response.UnsupportedMediaType);
+
+
+	/**
 	 * Retrieves a structured body from a message.
 	 *
 	 * <p>Processing failure should be reported using the following HTTP status codes:</p>
@@ -56,7 +62,7 @@ public interface Format<V> {
 			throw new NullPointerException("null message");
 		}
 
-		return Error(new Failure().status(Response.UnsupportedMediaType));
+		return Error(Missing);
 	}
 
 	/**

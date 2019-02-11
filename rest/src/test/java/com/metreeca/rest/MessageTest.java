@@ -135,9 +135,14 @@ final class MessageTest {
 
 	private static final class TestMessage extends Message<TestMessage> {
 
+		private final Request request=new Request();
+
+
 		@Override public IRI item() {
 				return RDF.NIL;
 		}
+
+		@Override public Request request() { return request; }
 
 	}
 

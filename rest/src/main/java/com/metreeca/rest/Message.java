@@ -18,6 +18,7 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.And;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -26,7 +27,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.Value;
@@ -55,9 +56,33 @@ public abstract class Message<T extends Message<T>> {
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 
 
+	/**
+	 * Creates a {@code Link} header value.
+	 *
+	 * @param resource the target resource to be linked through the header
+	 * @param relation the relation with the target {@code resource}
+	 *
+	 * @return the header value linking the target {@code resource} with the given {@code relation}
+	 *
+	 * @throws NullPointerException if either {@code resource} or {@code relation} is null
+	 */
+	public static String link(final IRI resource, final String relation) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( relation == null ) {
+			throw new NullPointerException("null relation");
+		}
+
+		return String.format("<%s>; rel=\"%s\"", resource, relation);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape=wild();
+	private Shape shape=pass();
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
@@ -75,29 +100,15 @@ public abstract class Message<T extends Message<T>> {
 	 */
 	public abstract IRI item();
 
+	/**
+	 * Retrieves the originating request for this message.
+	 *
+	 * @return the originating request for this message
+	 */
+	public abstract Request request();
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Casts this message to a specific message type.
-	 *
-	 * @param clazz the target message class
-	 * @param <C>   the target message type
-	 *
-	 * @return an optional containing this message cast to the target type, if the this message is an instance of {@code
-	 * clazz}; an empty optional, otherwise
-	 *
-	 * @throws NullPointerException if {@code clazz} is null
-	 */
-	public <C extends Message<?>> Optional<C> as(final Class<C> clazz) {
-
-		if ( clazz == null ) {
-			throw new NullPointerException("null clazz");
-		}
-
-		return clazz.isInstance(this) ? Optional.of(clazz.cast(this)) : Optional.empty();
-	}
-
 
 	/**
 	 * Maps this message.
@@ -328,7 +339,8 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the linked data shape.
 	 *
-	 * @return the linked data shape associated to this message
+	 * @return the linked data shape associated to this message; defaults to the {@linkplain And#pass() wildcard}
+	 * shape
 	 */
 	public Shape shape() {
 		return shape;

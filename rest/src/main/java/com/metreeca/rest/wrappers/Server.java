@@ -40,7 +40,7 @@ import static java.util.Collections.unmodifiableMap;
 /**
  * Linked data server.
  *
- * <p>Provides default resource pre/post-processing and error handling; mainly intended as the outermost wrapper
+ * <p>Provides default resource pre/postprocessing and error handling; mainly intended as the outermost wrapper
  * returned by gateway loaders.</p>
  */
 public final class Server implements Wrapper {
@@ -62,10 +62,10 @@ public final class Server implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return request -> {
+		return request -> consumer -> {
 			try {
 
-				return consumer -> request
+				request
 
 						.map(this::query)
 						.map(this::form)
@@ -81,11 +81,16 @@ public final class Server implements Wrapper {
 
 				trace.error(this, format("%s %s > internal error", request.method(), request.item()), e);
 
-				return request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("exception-untrapped")
-						.cause("unable to process request: see server logs for details")
-						.cause(e));
+				request
+
+						.reply(new Failure()
+								.status(Response.InternalServerError)
+								.error("exception-untrapped")
+								.cause("unable to process request: see server logs for details")
+								.cause(e)
+						)
+
+						.accept(consumer);
 
 			}
 		};
@@ -121,7 +126,7 @@ public final class Server implements Wrapper {
 		final Throwable cause=response.cause().orElse(null);
 
 		trace.entry(status < 400 ? Trace.Level.Info : status < 500 ? Trace.Level.Warning : Trace.Level.Error,
-				this, format("%s %s > %d", method, item, status), cause);
+				this, () -> format("%s %s > %d", method, item, status), cause);
 
 		return response;
 	}

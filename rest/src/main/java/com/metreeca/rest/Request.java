@@ -21,7 +21,6 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.QueryParser;
-import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -32,6 +31,7 @@ import java.util.function.Function;
 
 import javax.json.JsonException;
 
+import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
@@ -86,6 +86,15 @@ public final class Request extends Message<Request> {
 		return iri(base+path.substring(1));
 	}
 
+	/**
+	 * Retrieves the originating request for this request.
+	 *
+	 * @return this request
+	 */
+	@Override public Request request() {
+		return this;
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -118,6 +127,18 @@ public final class Request extends Message<Request> {
 	 */
 	public boolean safe() {
 		return Safe.contains(method);
+	}
+
+	/**
+	 * Checks if this request targets a container.
+	 *
+	 * @return {@code true} if the {@link #path()} of this request includes a trailing slash; {@code false} otherwise
+	 *
+	 * @see <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
+	 * Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
+	 */
+	public boolean container() {
+		return path.endsWith("/");
 	}
 
 
@@ -163,13 +184,13 @@ public final class Request extends Message<Request> {
 
 
 	/**
-	 * Retrieves the shape query of this request.
+	 * Retrieves the shape-based query of this request.
 	 *
 	 * @param shape the base shape for the query
 	 *
-	 * @return a value result providing access to the combined query merging constraints from {@code shape} and the
-	 * request {@linkplain #query() query} string, as returned by the {@linkplain QueryParser query parser}; an error
-	 * result providing access to the processing failure, otherwise
+	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
+	 * {@linkplain #query() query} string, if successfully parsed by the {@linkplain QueryParser query parser}; an error
+	 * providing access to the parsing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -181,7 +202,7 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return Value(new QueryParser(shape).parse(Codecs.decode(query())));
+			return Value(new QueryParser(shape).parse(decode(query())));
 
 		} catch ( final JsonException e ) {
 

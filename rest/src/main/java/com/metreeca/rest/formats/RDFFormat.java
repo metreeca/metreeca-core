@@ -35,7 +35,7 @@ import java.util.*;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.Shape.constant;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -75,78 +75,86 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 * status, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(input()).fold(supplier -> {
+		return message.body(input()).fold(
 
-			final IRI focus=message.item();
-			final Shape shape=message.shape();
+				supplier -> {
 
-			final String type=message.header("Content-Type").orElse("");
+					final IRI focus=message.item();
+					final Shape shape=message.shape();
 
-			final RDFParser parser=Formats
-					.service(RDFParserRegistry.getInstance(), TURTLE, type)
-					.getParser();
+					final String type=message.header("Content-Type").orElse("");
 
-			parser.set(JSONCodec.Shape, Shape.wild(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
-			parser.set(JSONCodec.Focus, focus);
+					final RDFParser parser=Formats
+							.service(RDFParserRegistry.getInstance(), TURTLE, type)
+							.getParser();
 
-			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
-			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
+					parser.set(JSONCodec.Shape, constant(shape) == null ? shape : null); // !!! handle empty shape directly in JSONParser
+					parser.set(JSONCodec.Focus, focus);
 
-			parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
-			parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
+					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
+					parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
 
-			final ParseErrorCollector errorCollector=new ParseErrorCollector();
+					parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
+					parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
 
-			parser.setParseErrorListener(errorCollector);
+					final ParseErrorCollector errorCollector=new ParseErrorCollector();
 
-			final Collection<Statement> model=new ArrayList<>();
+					parser.setParseErrorListener(errorCollector);
 
-			parser.setRDFHandler(new AbstractRDFHandler() {
-				@Override public void handleStatement(final Statement statement) { model.add(statement); }
-			});
+					final Collection<Statement> model=new LinkedHashSet<>();  // order-preserving and writable
 
-			try (final InputStream input=supplier.get()) {
+					parser.setRDFHandler(new AbstractRDFHandler() {
+						@Override public void handleStatement(final Statement statement) { model.add(statement); }
+					});
 
-				parser.parse(input, focus.stringValue()); // resolve relative IRIs wrt the focus
+					try (final InputStream input=supplier.get()) {
 
-			} catch ( final RDFParseException e ) {
+						parser.parse(input, focus.stringValue()); // resolve relative IRIs wrt the focus
 
-				if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
-					errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
-				}
+					} catch ( final RDFParseException e ) {
 
-			} catch ( final IOException e ) {
+						if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
+							errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
+						}
 
-				throw new UncheckedIOException(e);
+					} catch ( final IOException e ) {
 
-			}
+						throw new UncheckedIOException(e);
 
-			final List<String> fatals=errorCollector.getFatalErrors();
-			final List<String> errors=errorCollector.getErrors();
-			final List<String> warnings=errorCollector.getWarnings();
+					}
 
-			if ( fatals.isEmpty() ) { // return model
+					final List<String> fatals=errorCollector.getFatalErrors();
+					final List<String> errors=errorCollector.getErrors();
+					final List<String> warnings=errorCollector.getWarnings();
 
-				return Value(model);
+					if ( fatals.isEmpty() ) { // return model
 
-			} else { // report errors // !!! log warnings/error/fatals?
+						return Value(model);
 
-				final JsonObjectBuilder trace=Json.createObjectBuilder()
+					} else { // report errors // !!! log warnings/error/fatals?
 
-						.add("format", parser.getRDFFormat().getDefaultMIMEType());
+						final JsonObjectBuilder trace=Json.createObjectBuilder()
 
-				if ( !fatals.isEmpty() ) { trace.add("fatals", Json.createArrayBuilder(fatals)); }
-				if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
-				if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
+								.add("format", parser.getRDFFormat().getDefaultMIMEType());
 
-				return Error(new Failure()
-						.status(Response.BadRequest)
-						.error(Failure.BodyMalformed)
-						.trace(trace.build()));
+						if ( !fatals.isEmpty() ) { trace.add("fatals", Json.createArrayBuilder(fatals)); }
+						if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
+						if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
 
-			}
+						return Error(new Failure()
+								.status(Response.BadRequest)
+								.error(Failure.BodyMalformed)
+								.trace(trace.build()));
 
-		}, Result::Error);
+					}
+
+				},
+
+				error -> error.equals(Format.Missing)
+						? Value(new LinkedHashSet<>()) // order-preserving and writable
+						: Error(error)
+
+		);
 	}
 
 	/**
@@ -157,9 +165,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
 
-		final Optional<Response> response=message.as(Response.class);
-
-		final List<String> types=Formats.types(response.map(r -> r.request().headers("Accept")).orElse(list()));
+		final List<String> types=Formats.types(message.request().request().headers("Accept"));
 
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
 		final RDFWriterFactory factory=Formats.service(registry, TURTLE, types);
@@ -181,7 +187,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 						final RDFWriter writer=factory.getWriter(output);
 
-						writer.set(JSONCodec.Shape, Shape.wild(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+						writer.set(JSONCodec.Shape, constant(shape) == null ? shape : null); // !!! handle empty shape directly in JSONParser
 						writer.set(JSONCodec.Focus, message.item());
 
 						Rio.write(rdf, writer);

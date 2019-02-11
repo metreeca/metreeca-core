@@ -17,14 +17,20 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.*;
 import com.metreeca.rest.formats.JSONFormat;
 
-import java.util.Optional;
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.*;
 import java.util.function.Function;
 
 import javax.json.*;
 
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.things.Values.format;
+
+import static java.util.stream.Collectors.groupingBy;
 
 
 /**
@@ -47,9 +53,14 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 public final class Failure implements Function<Response, Response> {
 
 	/**
-	 * The machine readable error tag for failures due to malformed data in message body.
+	 * The machine readable error tag for failures due to malformed message body.
 	 */
 	public static final String BodyMalformed="body-malformed";
+
+	/**
+	 * The machine readable error tag for failures due to invalid data.
+	 */
+	public static final String DataInvalid="data-invalid";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +98,7 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error type.
 	 *
-	 * @param error a machine readable tag for the error condition defined by this failure
+	 * @param error a machine readable tag for the error condition defined by this failure; ignored if empty
 	 *
 	 * @return this failure
 	 *
@@ -99,7 +110,9 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null error");
 		}
 
-		this.error=error;
+		if ( !error.isEmpty() ) {
+			this.error=error;
+		}
 
 		return this;
 	}
@@ -107,7 +120,7 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error cause description.
 	 *
-	 * @param cause a human readable description of the error condition defined by this failure
+	 * @param cause a human readable description of the error condition defined by this failure; ignored if empty
 	 *
 	 * @return this failure
 	 *
@@ -119,7 +132,9 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null cause");
 		}
 
-		this.label=cause;
+		if ( !cause.isEmpty() ) {
+			this.label=cause;
+		}
 
 		return this;
 	}
@@ -164,6 +179,28 @@ public final class Failure implements Function<Response, Response> {
 		return this;
 	}
 
+	/**
+	 * Configures the error trace.
+	 *
+	 * @param focus a shape focus validation report describing the error condition defined by this failure
+	 *
+	 * @return this failure
+	 *
+	 * @throws NullPointerException if {@code report} is null
+	 */
+	public Failure trace(final Focus focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus report");
+		}
+
+		// !!! rewrite report value references to original target iri
+		// !!! rewrite references to external base IRI
+		// !!! support other formats with content negotiation
+
+		return trace(json(focus));
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -185,7 +222,7 @@ public final class Failure implements Function<Response, Response> {
 		return response
 				.status(status)
 				.cause(cause)
-				.body(json(), ticket());
+				.body(JSONFormat.json(), ticket());
 	}
 
 
@@ -217,6 +254,78 @@ public final class Failure implements Function<Response, Response> {
 		}
 
 		return builder.build();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private JsonObject json(final Focus focus) {
+
+		final JsonObjectBuilder json=json(focus.getIssues());
+
+		focus.getFrames().forEach(frame -> {
+
+			final String value=format(frame.getValue());
+			final JsonObject fields=json(frame);
+
+			if ( !fields.isEmpty() ) {
+				json.add(value, fields);
+			}
+
+		});
+
+		return json.build();
+	}
+
+
+	private JsonObject json(final Frame frame) {
+
+		final JsonObjectBuilder json=json(frame.getIssues());
+
+		for (final Map.Entry<IRI, Focus> field : frame.getFields().entrySet()) {
+
+			final String property=format(field.getKey());
+			final JsonObject value=json(field.getValue());
+
+			if ( !value.isEmpty() ) {
+				json.add(property, value);
+			}
+
+		}
+
+		return json.build();
+	}
+
+
+	private JsonObjectBuilder json(final Collection<Issue> issues) {
+
+		final JsonObjectBuilder json=Json.createObjectBuilder();
+
+		final Map<Issue.Level, List<Issue>> levels=issues.stream().collect(groupingBy(Issue::getLevel));
+
+		Optional.ofNullable(levels.get(Issue.Level.Error)).ifPresent(errors ->
+				json.add("errors", json(errors, this::json))
+		);
+
+		Optional.ofNullable(levels.get(Issue.Level.Warning)).ifPresent(warnings ->
+				json.add("warnings", json(warnings, this::json))
+		);
+
+		return json;
+	}
+
+	private JsonString json(final Issue issue) {
+		return Json.createValue(issue.getMessage()+(issue.getShape().equals(pass()) ? "" : " : "+issue.getShape()));
+	}
+
+
+	private <V> JsonArray json(final Iterable<V> errors, final Function<V, JsonValue> reporter) {
+
+		final JsonArrayBuilder json=Json.createArrayBuilder();
+
+		errors.forEach(item -> json.add(reporter.apply(item)));
+
+		return json.build();
 	}
 
 }

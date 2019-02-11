@@ -18,10 +18,17 @@
 package com.metreeca.tray.sys;
 
 
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
+
 import java.io.*;
 import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.logging.*;
+import java.util.regex.Pattern;
+
+import static com.metreeca.form.things.Strings.indent;
 
 
 /**
@@ -87,33 +94,15 @@ public abstract class Trace {
 
 		}
 
-		return new Trace() {
-			@Override public void entry(final Level level,
-					final Object source, final String message, final Throwable cause) {
+		return new SystemTrace();
 
-				final String logger=(source == null) ? ""
-						: source instanceof String ? source.toString()
-						: source instanceof Class ? ((Class<?>)source).getName()
-						: source.getClass().getName();
-
-				final LogRecord record=new LogRecord(level.level(), message);
-
-				record.setLoggerName(logger);
-				record.setSourceClassName(logger);
-				record.setSourceMethodName("class"); // !!! support
-				record.setThrown(cause);
-
-				Logger.getLogger(logger).log(record);
-
-			}
-		};
 	};
 
 
 	/**
 	 * Clips the textual representation of an object
 	 *
-	 * @param object the object whose thextal representation is to be clipped
+	 * @param object the object whose textual representation is to be clipped
 	 *
 	 * @return the  textual representation of {@code object} clipped to a maximum length limit, or {@code null} if
 	 * {@code object} is null
@@ -169,7 +158,7 @@ public abstract class Trace {
 	 * @param message the message for the trace entry
 	 */
 	public void error(final Object source, final String message) {
-		entry(Level.Error, source, message, null);
+		entry(Level.Error, source, () -> message, null);
 	}
 
 	/**
@@ -180,7 +169,7 @@ public abstract class Trace {
 	 * @param cause   the throwable that caused the traced exceptional condition
 	 */
 	public final void error(final Object source, final String message, final Throwable cause) {
-		entry(Level.Error, source, message, cause);
+		entry(Level.Error, source, () -> message, cause);
 	}
 
 	/**
@@ -190,7 +179,7 @@ public abstract class Trace {
 	 * @param message the message for the trace entry
 	 */
 	public final void warning(final Object source, final String message) {
-		entry(Level.Warning, source, message, null);
+		entry(Level.Warning, source, () -> message, null);
 	}
 
 	/**
@@ -201,7 +190,7 @@ public abstract class Trace {
 	 * @param cause   the throwable that caused the traced exceptional condition
 	 */
 	public final void warning(final Object source, final String message, final Throwable cause) {
-		entry(Level.Warning, source, message, cause);
+		entry(Level.Warning, source, () -> message, cause);
 	}
 
 	/**
@@ -211,7 +200,7 @@ public abstract class Trace {
 	 * @param message the message for the trace entry
 	 */
 	public final void info(final Object source, final String message) {
-		entry(Level.Info, source, message, null);
+		entry(Level.Info, source, () -> message, null);
 	}
 
 	/**
@@ -221,7 +210,37 @@ public abstract class Trace {
 	 * @param message the message for the trace entry
 	 */
 	public final void debug(final Object source, final String message) {
-		entry(Level.Debug, source, message, null);
+		entry(Level.Debug, source, () -> message, null);
+	}
+
+	/**
+	 * Adds a debug trace entry.
+	 *
+	 * @param source  the source object for the trace entry or {@code null} for global trace entries
+	 * @param model the RDF model to be included in the trace entry; ignored if null
+	 * @param <V> the type of the statement source
+	 *
+	 * @return the provided {@code model}
+	 */
+	public <V extends Iterable<Statement>> V debug(final Object source, final V model) {
+
+		if ( model != null ) {
+			entry(Level.Debug, source, () -> {
+
+				try (final StringWriter writer=new StringWriter()) {
+
+					Rio.write(model, new TurtleWriter(writer));
+
+					return "processing model\n"+indent(writer, true);
+
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+
+			}, null);
+		}
+
+		return model;
 	}
 
 
@@ -231,15 +250,19 @@ public abstract class Trace {
 	 * @param level   the logging level for the trace entry
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries; may be a
 	 *                human-readable string label
-	 * @param message the message for the trace entry
+	 * @param message the message supplier for the trace entry
 	 * @param cause   the throwable that caused the traced exceptional condition or {@code null} if immaterial
 	 */
-	public abstract void entry(final Level level, final Object source, final String message, final Throwable cause);
+	public abstract void entry(final Level level,
+			final Object source, final Supplier<String> message, final Throwable cause);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final class ConsoleFormatter extends Formatter {
+
+		private static final Pattern EOLPattern=Pattern.compile("\n");
+
 
 		@Override public String format(final LogRecord record) {
 
@@ -266,8 +289,8 @@ public abstract class Trace {
 			return name == null ? "<global>" : name.substring(name.lastIndexOf('.')+1);
 		}
 
-		private String message(final String message) {
-			return message == null ? "" : message.replaceAll("\n", "\n    ");
+		private String message(final CharSequence message) {
+			return message == null ? "" : EOLPattern.matcher(message).replaceAll("\n    ");
 		}
 
 		private String trace(final Throwable cause) {
@@ -289,6 +312,28 @@ public abstract class Trace {
 			}
 		}
 
+	}
+
+	private static final class SystemTrace extends Trace {
+
+		@Override public void entry(final Level level,
+				final Object source, final Supplier<String> message, final Throwable cause) {
+
+			final String logger=(source == null) ? ""
+					: source instanceof String ? source.toString()
+					: source instanceof Class ? ((Class<?>)source).getName()
+					: source.getClass().getName();
+
+			final LogRecord record=new LogRecord(level.level(), message.get());
+
+			record.setLoggerName(logger);
+			record.setSourceClassName(logger);
+			record.setSourceMethodName("class"); // !!! support
+			record.setThrown(cause);
+
+			Logger.getLogger(logger).log(record);
+
+		}
 	}
 
 }

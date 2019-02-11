@@ -17,11 +17,13 @@
 
 package com.metreeca.form.things;
 
+import com.metreeca.form.Form;
+
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.model.vocabulary.SESAME;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
@@ -42,10 +44,12 @@ import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
 
+/**
+ * RDF utilities.
+ */
 public final class Values {
 
 	/**
@@ -59,33 +63,39 @@ public final class Values {
 	private static final Comparator<Value> comparator=new ValueComparator();
 
 
-	public static int compare(final Value x, final Value y) {
-		return comparator.compare(x, y);
-	}
-
-
 	private static DecimalFormat exponential() { // ;( DecimalFormat is not thread-safe
 		return new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private static final class Inverse extends SimpleIRI {
 
+		private static final long serialVersionUID=7576383707001017160L;
+
+
+		private Inverse(final String value) { super(value); }
+
+
+		@Override public boolean equals(final Object object) { return object instanceof Inverse && super.equals(object); }
+
+		@Override public int hashCode() { return -super.hashCode(); }
+
+		@Override public String toString() {
+			return "^"+super.toString();
+		}
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Internal namespace for local references and predicates (<code>{@value}</code>).
 	 */
-	public static final String Internal="app://local/";
+	public static final String Internal="app://local/terms#";
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final IRI ValueType=iri(SESAME.NAMESPACE, "value"); // abstract datatype IRI for values
-	public static final IRI ResoureType=iri(SESAME.NAMESPACE, "resource"); // abstract datatype IRI for resources
-	public static final IRI LiteralType=iri(SESAME.NAMESPACE, "literal"); // abstract datatype IRI for literals
-
-	public static final IRI BNodeType=iri(SESAME.NAMESPACE, "bnode"); // datatype IRI for blank nodes
-	public static final IRI IRIType=iri(SESAME.NAMESPACE, "iri"); // datatype IRI for IRI references
+	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final Literal True=literal(true);
 	public static final Literal False=literal(false);
@@ -95,9 +105,33 @@ public final class Values {
 
 	public static boolean is(final Value value, final IRI type) {
 		return value != null && type(value).equals(type)
-				|| value instanceof Resource && ResoureType.equals(type) // abstract resource datatype
-				|| value instanceof Literal && LiteralType.equals(type) // abstract literal datatype
+				|| value instanceof Resource && Form.ResourceType.equals(type) // abstract resource datatype
+				|| value instanceof Literal && Form.LiteralType.equals(type) // abstract literal datatype
 				|| value instanceof Literal && RDFS.LITERAL.equals(type); // abstract resource datatype using rdfs: IRI
+	}
+
+	/**
+	 * Checks predicate direction.
+	 *
+	 * @param iri the IRI identifying the predicate
+	 *
+	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
+	 * #inverse(IRI)} predicate
+	 *
+	 * @throws NullPointerException if {@code iri } is null
+	 */
+	public static boolean direct(final IRI iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		return !(iri instanceof Inverse);
+	}
+
+
+	public static int compare(final Value x, final Value y) {
+		return comparator.compare(x, y);
 	}
 
 
@@ -107,8 +141,8 @@ public final class Values {
 
 	public static IRI type(final Value value) {
 		return value == null ? null
-				: value instanceof BNode ? BNodeType
-				: value instanceof IRI ? IRIType
+				: value instanceof BNode ? Form.BNodeType
+				: value instanceof IRI ? Form.IRIType
 				: value instanceof Literal ? ((Literal)value).getDatatype()
 				: null; // unexpected
 	}
@@ -214,6 +248,26 @@ public final class Values {
 		}
 
 		return iri(Internal, name);
+	}
+
+
+	/**
+	 * Inverts the direction of a predicate.
+	 *
+	 * @param iri the IRI identifying the predicate
+	 *
+	 * @return a inverse predicate IRI identified by the textual value of {@code iri}, if {@code iri} is an {@linkplain
+	 * #direct(IRI) predicate}; a direct predicate IRI identified by the textual value of {@code iri}, otherwise
+	 *
+	 * @throws NullPointerException if {@code iri} is null
+	 */
+	public static IRI inverse(final IRI iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		return iri instanceof Inverse ? factory.createIRI(iri.stringValue()) : new Inverse(iri.stringValue());
 	}
 
 
@@ -488,6 +542,7 @@ public final class Values {
 	public static String format(final IRI iri, final Map<String, String> namespaces) {
 		if ( iri == null ) { return null; } else {
 
+			final String role=direct(iri) ? "" : "^";
 			final String text=iri.stringValue();
 
 			if ( namespaces != null ) {
@@ -509,13 +564,13 @@ public final class Values {
 						final String name=text.substring(namespace.length());
 
 						if ( name.isEmpty() ) { // !!! || namespaces.name(name)
-							return prefix+':'+name;
+							return role+prefix+':'+name;
 						}
 					}
 				}
 			}
 
-			return '<'+text+'>'; // !!! relativize wrt to base
+			return role+'<'+text+'>'; // !!! relativize wrt to base
 		}
 	}
 
@@ -587,26 +642,6 @@ public final class Values {
 		builder.append('\'');
 
 		return builder.toString();
-	}
-
-
-	//// Rewriters //////////////////////////////////////////////////////////////////////////////////// !!! permute args
-
-	public static Collection<Statement> rewrite(final Collection<Statement> model, final IRI source, final IRI target) {
-		return model.stream().map(statement -> rewrite(statement, source, target)).collect(toList());
-	}
-
-	public static Statement rewrite(final Statement statement, final IRI source, final IRI target) {
-		return statement(
-				rewrite(statement.getSubject(), source, target),
-				rewrite(statement.getPredicate(), source, target),
-				rewrite(statement.getObject(), source, target),
-				rewrite(statement.getContext(), source, target)
-		);
-	}
-
-	public static <T extends Value> T rewrite(final T value, final T source, final T target) {
-		return source.equals(value) ? target : value;
 	}
 
 

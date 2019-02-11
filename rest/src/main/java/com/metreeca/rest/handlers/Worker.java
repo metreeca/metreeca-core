@@ -124,7 +124,7 @@ public final class Worker implements Handler {
 		}
 
 		if ( method.equals(Request.GET) ) {
-			mappings.putIfAbsent(Request.HEAD, request -> head(request));
+			mappings.putIfAbsent(Request.HEAD, this::head);
 		}
 
 		mappings.put(method, handler);

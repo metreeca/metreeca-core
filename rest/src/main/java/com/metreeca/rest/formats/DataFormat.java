@@ -22,6 +22,8 @@ import com.metreeca.rest.*;
 
 import java.io.*;
 
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -30,6 +32,8 @@ import static com.metreeca.rest.formats.OutputFormat.output;
  * Binary body format.
  */
 public final class DataFormat implements Format<byte[]> {
+
+	private static final byte[] empty=new byte[0];
 
 	private static final DataFormat Instance=new DataFormat();
 
@@ -57,15 +61,21 @@ public final class DataFormat implements Format<byte[]> {
 	 * otherwise
 	 */
 	@Override public Result<byte[], Failure> get(final Message<?> message) {
-		return message.body(input()).value(source -> {
-			try (final InputStream input=source.get()) {
+		return message.body(input()).fold(
 
-				return Codecs.data(input);
+				source -> {
+					try (final InputStream input=source.get()) {
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+						return Value(Codecs.data(input));
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				},
+
+				error -> error.equals(Format.Missing) ?  Value(empty) : Error(error)
+
+		);
 	}
 
 	/**

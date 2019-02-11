@@ -114,9 +114,9 @@ public abstract class Gateway implements ServletContextListener {
 
 					.set(Storage.Factory, () -> storage(context))
 					.set(Loader.Factory, () -> loader(context))
-					.set(Upload, () -> upload(context))))
+					.set(Upload, () -> upload(context))
 
-			).addMappingForUrlPatterns(null, false, pattern);
+			))).addMappingForUrlPatterns(null, false, pattern);
 
 		} catch ( final Throwable t ) {
 
@@ -420,7 +420,7 @@ public abstract class Gateway implements ServletContextListener {
 					}
 				}));
 
-				if ( response.status() > 0 && !http.isCommitted()) { // flush if not already committed by bodies
+				if ( response.status() > 0 && !http.isCommitted() ) { // flush if not already committed by bodies
 					try {
 						http.flushBuffer();
 					} catch ( final IOException e ) {

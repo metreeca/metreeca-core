@@ -17,17 +17,37 @@
 
 package com.metreeca.form.queries;
 
+import com.metreeca.form.Order;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.metreeca.form.things.Strings.indent;
+
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 
 
 public final class Edges implements Query {
+
+	public static Edges edges(final Shape shape) {
+		return new Edges(shape, emptyList(), 0, 0);
+	}
+
+	public static Edges edges(final Shape shape, final Order... orders) {
+		return new Edges(shape, asList(orders), 0, 0);
+	}
+
+	public static Edges edges(final Shape shape, final List<Order> orders, final int offset, final int limit) {
+		return new Edges(shape, orders, offset, limit);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
 
@@ -37,11 +57,7 @@ public final class Edges implements Query {
 	private final int limit;
 
 
-	public Edges(final Shape shape) {
-		this(shape, emptyList(), 0, 0);
-	}
-
-	public Edges(final Shape shape, final List<Order> orders, final int offset, final int limit) {
+	private Edges(final Shape shape, final List<Order> orders, final int offset, final int limit) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -87,13 +103,39 @@ public final class Edges implements Query {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof Edges
+				&& shape.equals(((Edges)object).shape)
+				&& orders.equals(((Edges)object).orders)
+				&& offset == ((Edges)object).offset
+				&& limit == ((Edges)object).limit;
+	}
+
+	@Override public int hashCode() {
+		return shape.hashCode()
+				^orders.hashCode()
+				^Integer.hashCode(offset)
+				^Integer.hashCode(limit);
+	}
+
+	@Override public String toString() {
+		return format(
+				"edges {\n\tshape: %s\n\torder: %s\n\toffset: %d\n\tlimit: %d\n}",
+				indent(shape, true), orders, offset, limit
+		);
 	}
 
 }
