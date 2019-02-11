@@ -48,7 +48,7 @@ public abstract class Actor extends Delegator {
 	/**
 	 * Creates a shape-driven resource engine.
 	 *
-	 * @param shape the shape driving the engin to be created
+	 * @param shape the shape driving the engine to be created
 	 *
 	 * @return a resource engine driven by {@code shape}; the returned value is cached for future use
 	 *

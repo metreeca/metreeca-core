@@ -18,7 +18,53 @@
 /**
  * LDP action handlers.
  *
- * <p>Provides default handlers for CRUD actions on LDP resources and containers.</p>
+ * <p>Provides default handlers for CRUD actions on LDP <a href="https://www.w3.org/TR/ldp/#ldpr">resources</a> and <a
+ * href="https://www.w3.org/TR/ldp/#ldpc">containers</a>.</p>
+ *
+ * <p>Request operating on containers select the operating profile according to the {@code rdf:type} property of the
+ * target, as inferred either from {@linkplain com.metreeca.form.shapes.Meta metadata} annotations or {@linkplain
+ * com.metreeca.form.shapes.Field field} constraints in the {@linkplain com.metreeca.rest.Request#shape() shape}
+ * associated with the request, defaulting to the <em>Basic</em> profile if no metadata is available:</p>
+ *
+ *
+ * <table summary="container profiles">
+ *
+ * <tr>
+ * <th>{@code rdf:type}</th>
+ * <th>container profile</th>
+ * <th>container properties</th>
+ * </tr>
+ *
+ * <tr>
+ * <td>{@code ldp:BasicContainer}</td>
+ * <td><a href="https://www.w3.org/TR/ldp/#ldpbc">Basic</a></td>
+ * <td>–</td>
+ * </tr>
+ *
+ * <tr>
+ * <td>{@code ldp:DirectContainer}</td>
+ * <td><a href="https://www.w3.org/TR/ldp/#ldpdc">Direct</a></td>
+ * <td><ul>
+ * <li>{@code ldp:hasMemberRelation}</li>
+ * <li>{@code ldp:isMemberOfRelation}</li>
+ * <li>{@code ldp:membershipResource}</li>
+ * </ul></td>
+ * </tr>
+ *
+ * <tr>
+ * <td>{@code ldp:IndirectContainer}</td>
+ * <td><a href="https://www.w3.org/TR/ldp/#ldpic">Indirect</a> </td>
+ * <td><ul>
+ * <li><em>Direct properties</em></li>
+ * <li>{@code ldp:insertedContentRelation}</li>
+ * </ul></td>
+ * </tr>
+ *
+ * </table>
+ *
+ * <p><strong>Warning</strong> / Only Basic/Direct profiles are currently supported.</p>
+ *
+ * @see <a href="https://www.w3.org/TR/ldp/">Linked Data Platform 1.0</a>
  */
 
 package com.metreeca.rest.handlers.actors;

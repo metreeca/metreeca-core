@@ -37,10 +37,10 @@ import static com.metreeca.tray.Tray.tool;
 
 
 /**
- * Stored resource updater.
+ * LDP resource updater.
  *
- * <p>Handles updating requests on the stored linked data resource identified by the request {@linkplain Request#item()
- * focus item}.</p>
+ * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item() focus
+ * item}.</p>
  *
  * <p>If the request target is a {@linkplain Request#container() container}:</p>
  *
@@ -50,7 +50,7 @@ import static com.metreeca.tray.Tray.tool;
  *
  * </ul>
  *
- * <p>Otherwise, if the request includes an expected {@linkplain Message#shape() resource shape}:</p>
+ * <p>Otherwise, if the request includes an expected {@linkplain Request#shape() resource shape}:</p>
  *
  * <ul>
  *
@@ -62,7 +62,7 @@ import static com.metreeca.tray.Tray.tool;
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</li>
  *
  * <li>on successful body validation, the existing RDF description of the target resource matched by the redacted shape
- * is replaced with the updated one.</li>
+ * is replaced with the request RDF body.</li>
  *
  * </ul>
  *
@@ -75,7 +75,7 @@ import static com.metreeca.tray.Tray.tool;
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element;</li>
  *
  * <li>on successful body validation, the existing symmetric concise bounded description of the target resource is
- * replaced with the updated one.</li>
+ * replaced with the request RDF body.</li>
  *
  * </ul>
  *

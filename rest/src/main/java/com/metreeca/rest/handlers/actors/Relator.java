@@ -54,11 +54,24 @@ import static java.util.stream.Collectors.toList;
  * item}.</p>
  *
  * <p>If the focus item is a {@linkplain Request#container() container} and the request includes an expected
- * {@linkplain Message#shape() resource shape}:</p>
+ * {@linkplain Request#shape() shape}:</p>
  *
  * <ul>
  *
- * <li>!!!</li>
+ * <li>the response includes the derived shape actually used in the {@linkplain Engine#browse(IRI) browsing} process,
+ * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#convey}
+ * mode and {@link Form#digest} view;</li>
+ *
+ * <li>the response {@linkplain RDFFormat RDF body} includes the RDF description of the container as matched by the
+ * {@linkplain Throttler#container() container section} of redacted shape, linked using the {@code ldp:contains}
+ * property to the RDF description of the container items matched by the {@linkplain Throttler#resource() resource
+ * section} of redacted shape;</li>
+ *
+ * <li>contained items are selected as required by the LDP container profile {@linkplain
+ * com.metreeca.rest.handlers.actors identified} by {@code rdf:type} and LDP properties in the request shape;</li>
+ *
+ * <li>if the request contains a filtering {@linkplain Request#query(Shape) query}, only matching container item
+ * descriptions are included.</li>
  *
  * </ul>
  *
@@ -66,17 +79,34 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>!!!</li>
+ * <li>the response {@linkplain RDFFormat RDF body} includes the symmetric concise bounded description of the
+ * container, linked using the {@code ldp:contains} property to the symmetric concise bounded description of the
+ * container items, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced
+ * IRIs;</li>
+ *
+ * <li>contained items are selected handling the target resource as an LDP Basic Container, that is on the basis of the
+ * {@code ldp:contains} property.</li>
  *
  * </ul>
  *
- * <p>Otherwise, if the request includes an expected {@linkplain Message#shape() resource shape}:</p>
+ * <p><strong>Warning</strong> / Filtered browsing isn't yet supported on shape-less container.</p>
+ *
+ * <p>In both cases:</p>
  *
  * <ul>
  *
- * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
- * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail} view and {@link Form#convey}
- * mode.</li>
+ * <li>if the request contains a {@code Prefer} header requesting the {@code ldp:preferMinimalContainer}
+ * representation, item descriptions are omitted.</li>
+ *
+ * </ul>
+ *
+ * <p>Otherwise, if the request includes an expected {@linkplain Request#shape() shape}:</p>
+ *
+ * <ul>
+ *
+ * <li>the response includes the derived shape actually used in the {@linkplain Engine#relate(IRI) retrieval} process,
+ * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail}
+ * view and {@link Form#convey} mode;</li>
  *
  * <li>the response {@link RDFFormat RDF body} contains the RDF description of the request focus, as matched by the
  * redacted request shape.</li>
@@ -88,7 +118,7 @@ import static java.util.stream.Collectors.toList;
  * <ul>
  *
  * <li>the response {@link RDFFormat RDF body} contains the symmetric concise bounded description of the request focus
- * item, extended with {@code rdfs:label/comment} annotations for all referenced IRIs.</li>
+ * item, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced IRIs;</li>
  *
  * </ul>
  *
@@ -96,41 +126,6 @@ import static java.util.stream.Collectors.toList;
  * database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
- *
- * ---
- *
- * Basic container browser.
- *
- * <p>Handles retrieval requests on linked data basic container.</p>
- *
- * <dl>
- *
- * <dt>Response shape-driven {@link RDFFormat} body</dt>
- *
- * <dd>If the request includes {@linkplain Message#shape() shape}, the response includes the {@linkplain RDFFormat RDF
- * description} of the request {@linkplain Request#item() focus item}, {@linkplain LDP#CONTAINS containing} the RDF
- * descriptions of the virtual container items matched by the redacted linked data {@linkplain Shape shape}.</dd>
- *
- * <dd>If the request contains a {@code Prefer} header requesting the {@link LDP#PREFER_EMPTY_CONTAINER}
- * representation, virtual item descriptions are omitted.</dd>
- *
- * <dd>If the request contains a filtering {@linkplain Request#query(Shape) query}, only matching virtual container
- * item descriptionss are included.</dd>
- *
- * <dt>Response shapeless {@link RDFFormat} body</dt>
- *
- * <dd><strong>Warning</strong> / Shapeless container retrieval is not yet supported and is reported with a {@linkplain
- * Response#NotImplemented} HTTP status code.</dd>
- *
- * </dl>
- *
- * <p>If the request includes a shape, the response includes the derived shape actually used in the container retrieval
- * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#convey} mode and {@link Form#digest} view.</p>
- *
- * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
- * database.</p>
- * @see <a href="https://www.w3.org/TR/ldp/#ldpbc">Linked Data Platform 1.0 - §5.3 Basic</a>
  */
 public final class Relator extends Actor {
 

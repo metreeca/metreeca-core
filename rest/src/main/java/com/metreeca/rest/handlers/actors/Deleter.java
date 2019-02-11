@@ -30,12 +30,19 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
 
 
 /**
- * Stored resource deleter.
+ * LDP resource deleter.
  *
- * <p>Handles deletion requests on the stored linked data resource identified by the request {@linkplain Request#item()
- * focus item}.</p>
+ * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item() focus item}.</p>
  *
- * <p>If the request includes an expected {@linkplain Message#shape() resource shape}:</p>
+ * <p>If the request target is a {@linkplain Request#container() container}:</p>
+ *
+ * <ul>
+ *
+ * <li>the request is reported with a {@linkplain Response#NotImplemented} status code.</li>
+ *
+ * </ul>
+*
+ * <p>If the request includes an expected {@linkplain Request#shape() resource shape}:</p>
  *
  * <ul>
  *
