@@ -21,7 +21,6 @@ import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Lists;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -31,18 +30,16 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.things.Lists.concat;
+import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.complement;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.*;
 
 import static java.util.Arrays.asList;
@@ -53,15 +50,10 @@ import static java.util.stream.Collectors.toSet;
 
 final class ShapedValidator {
 
-	private static final Logger logger=Logger.getLogger(ShapedValidator.class.getName()); // !!! migrate logging to Trace?
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private final RepositoryConnection connection;
 
 
-	public ShapedValidator(final RepositoryConnection connection) {
+	ShapedValidator(final RepositoryConnection connection) {
 
 		if ( connection == null ) {
 			throw new NullPointerException("null connection");
@@ -73,7 +65,7 @@ final class ShapedValidator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Focus process(final Shape shape, final Value... focus) {
+	Focus process(final Shape shape, final Value... focus) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -87,20 +79,6 @@ final class ShapedValidator {
 				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 				.map(new Optimizer())
 				.map(new FocusProbe(new LinkedHashSet<>(asList(focus))));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private String compile(final SPARQL sparql) {
-
-		final String query=sparql.compile();
-
-		if ( logger.isLoggable(Level.FINE) ) {
-			logger.fine("evaluating SPARQL query "+indent(query, true)+(query.endsWith("\n") ? "" : "\n"));
-		}
-
-		return query;
 	}
 
 
@@ -131,6 +109,9 @@ final class ShapedValidator {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	/**
 	 * Validate constraints on a focus value set.
 	 */
@@ -155,7 +136,8 @@ final class ShapedValidator {
 			return focus(set(), focus.stream()
 					.filter(value -> !is(value, datatype.getIRI()))
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid datatype", datatype))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final Clazz clazz) {
@@ -163,10 +145,10 @@ final class ShapedValidator {
 
 				final Collection<Frame> frames=new ArrayList<>();
 
-				connection.prepareTupleQuery(compile(new SPARQL() {
+				connection.prepareTupleQuery(new SPARQL() {
 
 					@Override public Object code() {
-						return Lists.list(
+						return list(
 
 								"# clazz constraint\f",
 
@@ -185,7 +167,7 @@ final class ShapedValidator {
 						);
 					}
 
-				})).evaluate(new AbstractTupleQueryResultHandler() {
+				}.compile()).evaluate(new AbstractTupleQueryResultHandler() {
 					@Override public void handleSolution(final BindingSet bindings) {
 
 						frames.add(frame(
@@ -211,28 +193,32 @@ final class ShapedValidator {
 			return focus(set(), focus.stream()
 					.filter(value -> !(compare(value, minExclusive.getValue()) > 0))
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid value", minExclusive))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final MaxExclusive maxExclusive) {
 			return focus(set(), focus.stream()
 					.filter(value -> !(compare(value, maxExclusive.getValue()) < 0))
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid value", maxExclusive))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final MinInclusive minInclusive) {
 			return focus(set(), focus.stream()
 					.filter(value -> !(compare(value, minInclusive.getValue()) >= 0))
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid value", minInclusive))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final MaxInclusive maxInclusive) {
 			return focus(set(), focus.stream()
 					.filter(value -> !(compare(value, maxInclusive.getValue()) <= 0))
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid value", maxInclusive))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 
@@ -249,7 +235,8 @@ final class ShapedValidator {
 			return focus(set(), focus.stream()
 					.filter(value -> !compiled.matcher(text(value)).matches())
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid lexical value", pattern))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final Like like) {
@@ -259,9 +246,12 @@ final class ShapedValidator {
 			return focus(set(), focus.stream()
 					.filter(value -> !java.util.regex.Pattern
 							.compile(expression)
-							.asPredicate().test(text(value)))
+							.asPredicate()
+							.test(text(value))
+					)
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid lexical value", like))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final MaxLength maxLength) {
@@ -271,7 +261,8 @@ final class ShapedValidator {
 			return focus(set(), focus.stream()
 					.filter(value -> !(text(value).length() <= limit))
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid lexical value", maxLength))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final MinLength minLength) {
@@ -281,24 +272,21 @@ final class ShapedValidator {
 			return focus(set(), focus.stream()
 					.filter(value -> !(text(value).length() >= limit))
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid lexical value", minLength))))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 
 		@Override public Focus probe(final MinCount minCount) {
-			return focus.size() >= minCount.getLimit() ? focus() : focus(set(new Issue[] {
-					issue(
-							Issue.Level.Error, "invalid item count", minCount
-					)
-			}));
+			return focus.size() >= minCount.getLimit() ? focus() : focus(set(
+					issue(Issue.Level.Error, "invalid item count", minCount)
+			));
 		}
 
 		@Override public Focus probe(final MaxCount maxCount) {
-			return focus.size() <= maxCount.getLimit() ? focus() : focus(set(new Issue[] {
-					issue(
-							Issue.Level.Error, "invalid item count", maxCount
-					)
-			}));
+			return focus.size() <= maxCount.getLimit() ? focus() : focus(set(
+					issue(Issue.Level.Error, "invalid item count", maxCount)
+			));
 		}
 
 
@@ -309,14 +297,16 @@ final class ShapedValidator {
 			return focus(focus.stream()
 					.filter(value -> !values.contains(value))
 					.map(value -> issue(Issue.Level.Error, "out of range value {"+value+"}", in))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final All all) {
 			return focus(all.getValues().stream()
 					.filter(value -> !focus.contains(value))
 					.map(value -> issue(Issue.Level.Error, "missing required value {"+value+"}", all))
-					.collect(toList()));
+					.collect(toList())
+			);
 		}
 
 		@Override public Focus probe(final Any any) {
@@ -324,7 +314,7 @@ final class ShapedValidator {
 					.filter(focus::contains)
 					.findAny()
 					.map(values -> focus())
-					.orElseGet(() -> focus(set(new Issue[] {issue(Issue.Level.Error, "missing alternative value", any)})));
+					.orElseGet(() -> focus(set(issue(Issue.Level.Error, "missing alternative value", any))));
 		}
 
 

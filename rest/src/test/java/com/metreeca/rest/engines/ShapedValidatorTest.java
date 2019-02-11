@@ -18,8 +18,6 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.form.truths.ModelAssert;
 
@@ -32,19 +30,27 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
 
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.Like.like;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
-import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.shapes.MaxLength.maxLength;
+import static com.metreeca.form.shapes.MinCount.minCount;
+import static com.metreeca.form.shapes.MinExclusive.minExclusive;
+import static com.metreeca.form.shapes.MinInclusive.minInclusive;
+import static com.metreeca.form.shapes.MinLength.minLength;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Pattern.pattern;
+import static com.metreeca.form.things.Values.*;
 import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.things.ValuesTest.term;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -251,7 +257,7 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateMinCount() {
 
-		final Shape shape=MinCount.minCount(2);
+		final Shape shape=minCount(2);
 
 		assertThat(validate(shape, x, y, z)).as("pass").isTrue();
 		assertThat(validate(shape, x)).as("fail").isFalse();
@@ -269,7 +275,7 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateIn() {
 
-		final Shape shape=In.in(x, y);
+		final Shape shape=in(x, y);
 
 		assertThat(validate(shape, x, y)).as("pass").isTrue();
 		assertThat(validate(shape, x, z)).as("fail").isFalse();
@@ -279,7 +285,7 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateAll() {
 
-		final Shape shape=All.all(x, y);
+		final Shape shape=all(x, y);
 
 		assertThat(validate(shape, x, y, z)).as("pass").isTrue();
 		assertThat(validate(shape, x)).as("fail").isFalse();
@@ -298,22 +304,22 @@ final class ShapedValidatorTest {
 	}
 
 
-	@Test void testValidateDataype() {
+	@Test void testValidateDatatype() {
 
 		assertThat(validate(datatype(Form.BNodeType))).as("pass / empty").isTrue();
-		assertThat(validate(datatype(Form.BNodeType), Values.bnode())).as("pass / blank").isTrue();
-		assertThat(validate(datatype(Form.IRIType), ValuesTest.term("iri"))).as("pass / iri").isTrue();
+		assertThat(validate(datatype(Form.BNodeType), bnode())).as("pass / blank").isTrue();
+		assertThat(validate(datatype(Form.IRIType), term("iri"))).as("pass / iri").isTrue();
 		assertThat(validate(datatype(XMLSchema.STRING), literal("text"))).as("pass / plain literal").isTrue();
 		assertThat(validate(datatype(RDF.LANGSTRING), literal("text", "en"))).as("pass / tagged literal").isTrue();
 		assertThat(validate(datatype(XMLSchema.BOOLEAN), literal(true))).as("pass / typed literal").isTrue();
 
-		assertThat(validate(datatype(Form.IRIType), Values.bnode())).as("fail").isFalse();
+		assertThat(validate(datatype(Form.IRIType), bnode())).as("fail").isFalse();
 
-		assertThat(validate(datatype(Form.ResourceType), Values.bnode())).as("pass / generic resource").isTrue();
+		assertThat(validate(datatype(Form.ResourceType), bnode())).as("pass / generic resource").isTrue();
 		assertThat(validate(datatype(Form.ResourceType), literal(true))).as("fail / generic resource").isFalse();
 
 		assertThat(validate(datatype(RDFS.LITERAL), literal(true))).as("pass / generic literal").isTrue();
-		assertThat(validate(datatype(RDFS.LITERAL), Values.bnode())).as("fail / generic literal").isFalse();
+		assertThat(validate(datatype(RDFS.LITERAL), bnode())).as("fail / generic literal").isFalse();
 
 	}
 
@@ -330,7 +336,7 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateMinExclusive() {
 
-		final Shape shape=MinExclusive.minExclusive(literal(1));
+		final Shape shape=minExclusive(literal(1));
 
 		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
 		assertThat(validate(shape, literal(1))).as("integer / fail / equal").isFalse();
@@ -350,7 +356,7 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateMinInclusive() {
 
-		final Shape shape=MinInclusive.minInclusive(literal(1));
+		final Shape shape=minInclusive(literal(1));
 
 		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
 		assertThat(validate(shape, literal(1))).as("integer / pass / equal").isTrue();
@@ -371,7 +377,7 @@ final class ShapedValidatorTest {
 
 	@Test void testValidatePattern() {
 
-		final Shape shape=Pattern.pattern(".*\\.org");
+		final Shape shape=pattern(".*\\.org");
 
 		assertThat(validate(shape, iri("http://exampe.org"))).as("iri / pass").isTrue();
 		assertThat(validate(shape, iri("http://exampe.com"))).as("iri / fail").isFalse();
@@ -395,7 +401,7 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateMinLength() {
 
-		final Shape shape=MinLength.minLength(3);
+		final Shape shape=minLength(3);
 
 		assertThat(validate(shape, literal(100))).as("number / pass").isTrue();
 		assertThat(validate(shape, literal(99))).as("number / fail").isFalse();
@@ -407,7 +413,7 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateMaxLength() {
 
-		final Shape shape=MaxLength.maxLength(2);
+		final Shape shape=maxLength(2);
 
 		assertThat(validate(shape, literal(99))).as("number / pass").isTrue();
 		assertThat(validate(shape, literal(100))).as("number / fail").isFalse();
@@ -429,24 +435,12 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateDisjunction() {
 
-		final Shape shape=Or.or(All.all(literal(1), literal(2)), All.all(literal(1), literal(3)));
+		final Shape shape=or(all(literal(1), literal(2)), all(literal(1), literal(3)));
 
 		assertThat(validate(shape, literal(3), literal(2), literal(1))).as("pass").isTrue();
 		assertThat(validate(shape, literal(3), literal(2))).as("fail").isFalse();
 
 	}
-
-	//@Test void testValidateCondition() {
-	//
-	//	final Shape shape=when(any(literal(1)), any(literal(2)), any(literal(3)));
-	//
-	//	assertThat(validate(shape, literal(1), literal(2))).as("true / pass").isTrue();
-	//	assertThat(validate(shape, literal(1), literal(3))).as("true / fail").isFalse();
-	//
-	//	assertThat(validate(shape, literal(3))).as("false / pass").isTrue();
-	//	assertThat(validate(shape, literal(2))).as("false / fail").isFalse();
-	//
-	//}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
