@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -67,14 +67,11 @@ public final class RDF4JNative extends Graph {
 	}
 
 	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT}; {@link IsolationLevels#SERIALIZABLE} would cause severe
-	 * memory leaks)
-	 *
-	 * @see <a href="https://github.com/eclipse/rdf4j/issues/1031">https://github.com/eclipse/rdf4j/issues/1031</a>
+	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT}
 	 */
 	@Override protected IsolationLevel isolation() {
 
-		// !!! ;(rdf4j) SERIALIZABLE prevents transaction committments and leaks memory like a sieve…
+		// !!! ;(rdf4j) SERIALIZABLE prevents transaction commitments and leaks memory like a sieve…
 		// !!! see https://github.com/eclipse/rdf4j/issues/1031
 
 		return IsolationLevels.SNAPSHOT;

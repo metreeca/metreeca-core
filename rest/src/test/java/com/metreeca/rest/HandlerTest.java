@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -21,13 +21,49 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
 
+import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.TextFormat.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static java.util.Arrays.stream;
+import static java.util.function.Function.identity;
 
-final class HandlerTest {
+
+public final class HandlerTest {
+
+	@SafeVarargs public static Handler echo(final Function<Response, Response>... tasks) {
+		return request -> request.reply(response -> response
+
+				.status(Response.OK)
+
+				.shape(request.shape())
+				.headers(request.headers())
+
+				.map(r -> request.body(rdf()).fold(v -> r.body(rdf(), v), r::map))
+
+				.map(stream(tasks).reduce(identity(), Function::andThen))
+
+		);
+	}
+
+
+	@Test void testPreserverChainedWrapperOrder() {
+		echo()
+
+				.with(handler -> request -> handler.handle(request.header("+Chain", "1")))
+				.with(handler -> request -> handler.handle(request.header("+Chain", "2")))
+				.with(handler -> request -> handler.handle(request.header("+Chain", "3")))
+
+				.handle(new Request())
+
+				.accept(response -> assertThat(response.headers("Chain"))
+						.containsExactly("1", "2", "3")
+				);
+	}
+
 
 	@Test void testResultStreaming() {
 
@@ -37,14 +73,14 @@ final class HandlerTest {
 
 			transaction.add("begin");
 
-			request.reply(response -> response.body(text()).set("inside")).accept(consumer);
+			request.reply(response -> response.body(text(), "inside")).accept(consumer);
 
 			transaction.add("commit");
 
 		};
 
 		handler.handle(new Request()).accept(response -> {
-			transaction.add(response.body(text()).get().orElse(""));
+			transaction.add(response.body(text()).value().orElse(""));
 		});
 
 		assertThat(transaction).containsExactly("begin", "inside", "commit");

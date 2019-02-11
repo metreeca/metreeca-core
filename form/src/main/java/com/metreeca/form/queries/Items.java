@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -20,42 +20,56 @@ package com.metreeca.form.queries;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Values;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.things.Strings.indent;
 
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 
 public final class Items implements Query {
 
-	public static final Shape ItemsShape=and(
-			trait(Form.items, and(
-					datatype(Values.BNodeType),
-					trait(Step.step(Form.count), maxCount(1)),
-					trait(Step.step(Form.value), and(
-							maxCount(1),
-							trait(Step.step(RDFS.LABEL), maxCount(1))
+	public static final Shape Shape=and(
+			field(Form.items, and(
+					datatype(Form.BNodeType),
+					field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
+					field(Form.value, and(maxCount(1),
+							field(RDFS.LABEL, and(maxCount(1), datatype(XMLSchema.STRING))),
+							field(RDFS.COMMENT, and(maxCount(1), datatype(XMLSchema.STRING)))
 					))
 			))
 	);
 
 
+	public static Items items(final Shape shape, final IRI... path) {
+		return new Items(shape, asList(path));
+	}
+
+	public static Items items(final Shape shape, final List<IRI> path) {
+		return new Items(shape, path);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Shape shape;
 
-	private final List<Step> path;
+	private final List<IRI> path;
 
 
-	public Items(final Shape shape, final List<Step> path) {
+	private Items(final Shape shape, final List<IRI> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -74,22 +88,47 @@ public final class Items implements Query {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Shape getShape() {
 		return shape;
 	}
 
-	public List<Step> getPath() {
+	public List<IRI> getPath() {
 		return unmodifiableList(path);
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof Items
+				&& shape.equals(((Items)object).shape)
+				&& path.equals(((Items)object).path);
+	}
+
+	@Override public int hashCode() {
+		return shape.hashCode()^path.hashCode();
+	}
+
+
+	@Override public String toString() {
+		return format(
+				"items {\n\tshape: %s\n\tpath: %s\n}",
+				indent(shape, true), path
+		);
 	}
 
 }

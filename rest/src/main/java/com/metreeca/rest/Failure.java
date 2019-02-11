@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -17,20 +17,26 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.form.*;
 import com.metreeca.rest.formats.JSONFormat;
 
-import java.util.Optional;
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.*;
 import java.util.function.Function;
 
 import javax.json.*;
 
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.things.Values.format;
+
+import static java.util.stream.Collectors.groupingBy;
 
 
 /**
  * HTTP processing failure.
  *
- * <p>Reports an error condition in an HTTP request processing operation that can be {@linkplain #apply(Response)
+ * <p>Reports an error condition in an HTTP request processing operation; can be {@linkplain #apply(Response)
  * transferred} to the {@linkplain JSONFormat JSON} body of an HTTP response like:</p>
  *
  * <pre>{@code
@@ -43,16 +49,18 @@ import static com.metreeca.rest.formats.JSONFormat.json;
  *     "trace": <trace>     # a optional structured JSON error report
  * }
  * }</pre>
- *
- * @param <V> the type of the result value expected from the failed operation
  */
-@SuppressWarnings("unchecked")
-public final class Failure<V> implements Result<V>, Function<Response, Response> {
+public final class Failure implements Function<Response, Response> {
 
 	/**
-	 * The machine readable error tag for failures due to malformed data in message body.
+	 * The machine readable error tag for failures due to malformed message body.
 	 */
 	public static final String BodyMalformed="body-malformed";
+
+	/**
+	 * The machine readable error tag for failures due to invalid data.
+	 */
+	public static final String DataInvalid="data-invalid";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,18 +71,6 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	private String label; // human readable cause label
 	private Throwable cause; // machine readable cause
 	private JsonValue trace;
-
-
-	/**
-	 * Casts this failure to a different expected result value.
-	 *
-	 * @param <R> the type of the expected target result value
-	 *
-	 * @return this failure cast to the expected result type
-	 */
-	public <R> Failure<R> as() {
-		return (Failure<R>)this;
-	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +84,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	 *
 	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
 	 */
-	public Failure<V> status(final int status) {
+	public Failure status(final int status) {
 
 		if ( status < 100 || status > 599 ) {
 			throw new IllegalArgumentException("illegal status code ["+status+"]");
@@ -102,19 +98,21 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	/**
 	 * Configures the error type.
 	 *
-	 * @param error a machine readable tag for the error condition defined by this failure
+	 * @param error a machine readable tag for the error condition defined by this failure; ignored if empty
 	 *
 	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code error} is null
 	 */
-	public Failure<V> error(final String error) {
+	public Failure error(final String error) {
 
 		if ( error == null ) {
 			throw new NullPointerException("null error");
 		}
 
-		this.error=error;
+		if ( !error.isEmpty() ) {
+			this.error=error;
+		}
 
 		return this;
 	}
@@ -122,19 +120,21 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	/**
 	 * Configures the error cause description.
 	 *
-	 * @param cause a human readable description of the error condition defined by this failure
+	 * @param cause a human readable description of the error condition defined by this failure; ignored if empty
 	 *
 	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
-	public Failure<V> cause(final String cause) {
+	public Failure cause(final String cause) {
 
 		if ( cause == null ) {
 			throw new NullPointerException("null cause");
 		}
 
-		this.label=cause;
+		if ( !cause.isEmpty() ) {
+			this.label=cause;
+		}
 
 		return this;
 	}
@@ -148,7 +148,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
-	public Failure<V> cause(final Throwable cause) {
+	public Failure cause(final Throwable cause) {
 
 		if ( cause == null ) {
 			throw new NullPointerException("null cause");
@@ -168,7 +168,7 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 	 *
 	 * @throws NullPointerException if {@code trace} is null
 	 */
-	public Failure<V> trace(final JsonValue trace) {
+	public Failure trace(final JsonValue trace) {
 
 		if ( trace == null ) {
 			throw new NullPointerException("null trace");
@@ -179,22 +179,30 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 		return this;
 	}
 
+	/**
+	 * Configures the error trace.
+	 *
+	 * @param focus a shape focus validation report describing the error condition defined by this failure
+	 *
+	 * @return this failure
+	 *
+	 * @throws NullPointerException if {@code report} is null
+	 */
+	public Failure trace(final Focus focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus report");
+		}
+
+		// !!! rewrite report value references to original target iri
+		// !!! rewrite references to external base IRI
+		// !!! support other formats with content negotiation
+
+		return trace(json(focus));
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	@Override public <R> R map(final Function<V, R> success, final Function<Failure<V>, R> failure) {
-
-		if ( success == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		if ( failure == null ) {
-			throw new NullPointerException("null error");
-		}
-
-		return failure.apply(this);
-	}
 
 	/**
 	 * Transfers the description of the error condition to an HTTP response.
@@ -214,10 +222,9 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 		return response
 				.status(status)
 				.cause(cause)
-				.body(json())
-				.set(ticket());
-
+				.body(JSONFormat.json(), ticket());
 	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -247,6 +254,78 @@ public final class Failure<V> implements Result<V>, Function<Response, Response>
 		}
 
 		return builder.build();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private JsonObject json(final Focus focus) {
+
+		final JsonObjectBuilder json=json(focus.getIssues());
+
+		focus.getFrames().forEach(frame -> {
+
+			final String value=format(frame.getValue());
+			final JsonObject fields=json(frame);
+
+			if ( !fields.isEmpty() ) {
+				json.add(value, fields);
+			}
+
+		});
+
+		return json.build();
+	}
+
+
+	private JsonObject json(final Frame frame) {
+
+		final JsonObjectBuilder json=json(frame.getIssues());
+
+		for (final Map.Entry<IRI, Focus> field : frame.getFields().entrySet()) {
+
+			final String property=format(field.getKey());
+			final JsonObject value=json(field.getValue());
+
+			if ( !value.isEmpty() ) {
+				json.add(property, value);
+			}
+
+		}
+
+		return json.build();
+	}
+
+
+	private JsonObjectBuilder json(final Collection<Issue> issues) {
+
+		final JsonObjectBuilder json=Json.createObjectBuilder();
+
+		final Map<Issue.Level, List<Issue>> levels=issues.stream().collect(groupingBy(Issue::getLevel));
+
+		Optional.ofNullable(levels.get(Issue.Level.Error)).ifPresent(errors ->
+				json.add("errors", json(errors, this::json))
+		);
+
+		Optional.ofNullable(levels.get(Issue.Level.Warning)).ifPresent(warnings ->
+				json.add("warnings", json(warnings, this::json))
+		);
+
+		return json;
+	}
+
+	private JsonString json(final Issue issue) {
+		return Json.createValue(issue.getMessage()+(issue.getShape().equals(pass()) ? "" : " : "+issue.getShape()));
+	}
+
+
+	private <V> JsonArray json(final Iterable<V> errors, final Function<V, JsonValue> reporter) {
+
+		final JsonArrayBuilder json=Json.createArrayBuilder();
+
+		errors.forEach(item -> json.add(reporter.apply(item)));
+
+		return json.build();
 	}
 
 }

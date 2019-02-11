@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -18,12 +18,12 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.things.Codecs;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 
 import java.io.*;
 
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
@@ -58,16 +58,22 @@ public final class TextFormat implements Format<String> {
 	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
 	 * otherwise
 	 */
-	@Override public Result<String> get(final Message<?> message) {
-		return message.body(reader()).map(source -> {
-			try (final Reader reader=source.get()) {
+	@Override public Result<String, Failure> get(final Message<?> message) {
+		return message.body(reader()).fold(
 
-				return Codecs.text(reader);
+				source -> {
+					try (final Reader reader=source.get()) {
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+						return Value(Codecs.text(reader));
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				},
+
+				error -> error.equals(Format.Missing) ? Value("") : Error(error)
+
+		);
 	}
 
 	/**
@@ -75,7 +81,7 @@ public final class TextFormat implements Format<String> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(writer()).flatPipe(consumer -> message.body(text()).map(bytes -> target -> {
+		return message.pipe(writer(), consumer -> message.body(text()).value(bytes -> target -> {
 			try (final Writer output=target.get()) {
 
 				output.write(bytes);

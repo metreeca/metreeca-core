@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -114,9 +114,9 @@ public abstract class Gateway implements ServletContextListener {
 
 					.set(Storage.Factory, () -> storage(context))
 					.set(Loader.Factory, () -> loader(context))
-					.set(Upload, () -> upload(context))))
+					.set(Upload, () -> upload(context))
 
-			).addMappingForUrlPatterns(null, false, pattern);
+			))).addMappingForUrlPatterns(null, false, pattern);
 
 		} catch ( final Throwable t ) {
 
@@ -291,7 +291,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				return request
 
-						.body(input()).set(() -> {
+						.body(input(), () -> {
 							try {
 								return http.getInputStream();
 							} catch ( final IOException e ) {
@@ -299,7 +299,7 @@ public abstract class Gateway implements ServletContextListener {
 							}
 						})
 
-						.body(reader()).set(() -> {
+						.body(reader(), () -> {
 							try {
 								return http.getReader();
 							} catch ( final IOException e ) {
@@ -404,7 +404,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				response.headers().forEach((name, values) -> values.forEach(value -> http.addHeader(name, value)));
 
-				response.body(output()).get().ifPresent(consumer -> consumer.accept(() -> {
+				response.body(output()).value().ifPresent(consumer -> consumer.accept(() -> {
 					try {
 						return http.getOutputStream();
 					} catch ( final IOException e ) {
@@ -412,7 +412,7 @@ public abstract class Gateway implements ServletContextListener {
 					}
 				}));
 
-				response.body(writer()).get().ifPresent(consumer -> consumer.accept(() -> {
+				response.body(writer()).value().ifPresent(consumer -> consumer.accept(() -> {
 					try {
 						return http.getWriter();
 					} catch ( final IOException e ) {
@@ -420,7 +420,7 @@ public abstract class Gateway implements ServletContextListener {
 					}
 				}));
 
-				if ( response.status() > 0 && !http.isCommitted()) { // flush if not already committed by bodies
+				if ( response.status() > 0 && !http.isCommitted() ) { // flush if not already committed by bodies
 					try {
 						http.flushBuffer();
 					} catch ( final IOException e ) {

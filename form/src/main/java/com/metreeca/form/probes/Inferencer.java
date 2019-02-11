@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -17,9 +17,8 @@
 
 package com.metreeca.form.probes;
 
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Step;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,8 +28,14 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.Set;
 
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.MinCount.minCount;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.literal;
 
 import static java.util.stream.Collectors.toList;
@@ -42,80 +47,72 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Recursively expands shapes with additional implied constraints.</p>
  */
-public final class Inferencer extends Shape.Probe<Shape> {
+public final class Inferencer extends Inspector<Shape> {
 
-	@Override protected Shape fallback(final Shape shape) { return shape; }
+	@Override public Shape probe(final Shape shape) { return shape; }
 
 
-	@Override public Shape visit(final Hint hint) {
-		return And.and(hint, Datatype.datatype(Values.ResoureType));
-	}
-
-	@Override public Shape visit(final Group group) {
-		return Group.group(group.getShape().accept(this));
+	@Override public Shape probe(final Meta meta) {
+		return meta.getIRI().equals(Form.Hint) ? and(meta, datatype(Form.ResourceType)) : meta;
 	}
 
 
-	@Override public Shape visit(final All all) {
-		return And.and(all, MinCount.minCount(all.getValues().size()));
+	@Override public Shape probe(final Datatype datatype) {
+		return datatype.getIRI().equals(XMLSchema.BOOLEAN) ? and(datatype,
+				In.in(literal(false), literal(true)), maxCount(1)
+		) : datatype;
 	}
 
-	@Override public Shape visit(final Any any) {
-		return And.and(any, MinCount.minCount(1));
+	@Override public Shape probe(final Clazz clazz) {
+		return and(clazz, datatype(Form.ResourceType));
 	}
 
-	@Override public Shape visit(final In in) {
+
+	@Override public Shape probe(final All all) {
+		return and(all, minCount(all.getValues().size()));
+	}
+
+	@Override public Shape probe(final Any any) {
+		return and(any, minCount(1));
+	}
+
+	@Override public Shape probe(final In in) {
 
 		final Set<Value> values=in.getValues();
 		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
-		final Shape type=types.size() == 1 ? Datatype.datatype(types.iterator().next()) : And.and();
+		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();
 
-		return And.and(in, count, type);
+		return and(in, count, type);
 	}
 
 
-	@Override public Shape visit(final Datatype datatype) {
-		return datatype.getIRI().equals(XMLSchema.BOOLEAN) ? And.and(datatype,
-				In.in(literal(false), literal(true)), maxCount(1)
-		) : datatype;
+	@Override public Shape probe(final Field field) {
+
+		final IRI iri=field.getIRI();
+		final Shape shape=field.getShape().map(this);
+
+		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(Form.ResourceType))), datatype(Form.ResourceType))
+				: direct(iri) ? and(field(iri, shape), datatype(Form.ResourceType))
+				: field(iri, and(shape, datatype(Form.ResourceType)));
 	}
 
-	@Override public Shape visit(final Clazz clazz) {
-		return And.and(clazz, Datatype.datatype(Values.ResoureType));
+
+	@Override public Shape probe(final And and) {
+		return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
-
-	@Override public Shape visit(final Trait trait) {
-
-		final Step step=trait.getStep();
-		final Shape shape=trait.getShape().accept(this);
-
-		return step.getIRI().equals(RDF.TYPE) ? And.and(trait(step, And.and(shape, Datatype.datatype(Values.ResoureType))), Datatype.datatype(Values.ResoureType))
-				: step.isInverse() ? trait(step, And.and(shape, Datatype.datatype(Values.ResoureType)))
-				: And.and(trait(step, shape), Datatype.datatype(Values.ResoureType));
+	@Override public Shape probe(final Or or) {
+		return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
-	@Override public Shape visit(final Virtual virtual) {
-
-		return virtual;
-
-		// !!! currently unable to implement as trait inference returns Shape whereas virtual constructor expects Trait
-
-		// !!! return Virtual.virtual(virtual.getTrait().accept((Shape.Probe<Shape>)this), virtual.getShift());
-	}
-
-	@Override public Shape visit(final And and) {
-		return And.and(and.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
-	}
-
-	@Override public Shape visit(final Or or) {
-		return Or.or(or.getShapes().stream().map(s -> s.accept(this)).collect(toList()));
-	}
-
-	@Override public Shape visit(final Test test) {
-		return Test.test(test.getTest().accept(this), test.getPass().accept(this), test.getFail().accept(this));
+	@Override public Shape probe(final When when) {
+		return when(
+				when.getTest().map(this),
+				when.getPass().map(this),
+				when.getFail().map(this)
+		);
 	}
 
 }

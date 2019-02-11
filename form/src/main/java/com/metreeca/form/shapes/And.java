@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -40,21 +40,27 @@ public final class And implements Shape {
 	private static final And empty=new And(set());
 
 
+	public static Shape pass() { return empty;}
+
+
 	public static And and() { return empty; }
 
-	public static And and(final Shape... shapes) {
-		return and(list(shapes));
+	@SafeVarargs public static  <S extends Shape> And and(final S... shapes) {
+		return new And(list(shapes));
 	}
 
-	public static And and(final Collection<Shape> shapes) {
+	public static  <S extends Shape> And and(final Collection<S> shapes) {
 		return new And(shapes);
 	}
 
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Collection<Shape> shapes;
 
 
-	public And(final Collection<Shape> shapes) {
+	private And(final Collection<?extends Shape> shapes) {
 
 		if ( shapes == null ) {
 			throw new NullPointerException("null shapes");
@@ -68,18 +74,22 @@ public final class And implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Collection<Shape> getShapes() {
 		return Collections.unmodifiableCollection(shapes);
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 

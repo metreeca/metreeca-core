@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -95,10 +95,10 @@ public final class RDF4JRemote extends Graph {
 	}
 
 	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SERIALIZABLE})
+	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT})
 	 */
 	@Override protected IsolationLevel isolation() {
-		return IsolationLevels.SERIALIZABLE;
+		return IsolationLevels.SNAPSHOT;
 	}
 
 }

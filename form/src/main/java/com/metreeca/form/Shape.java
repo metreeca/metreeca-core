@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -17,29 +17,24 @@
 
 package com.metreeca.form;
 
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.function.Function;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MinCount.minCount;
-import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
 import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
 
 
@@ -48,31 +43,73 @@ import static java.util.Arrays.asList;
  */
 public interface Shape {
 
-	public static Shape wild() {
-		return and(); // !!! replace with wildcard?
-	}
-
-	public static boolean wild(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return wild().equals(shape);
-	}
-
-
-	public static Shape empty() {
-		return or();
-	}
-
 	public static boolean empty(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		return empty().equals(shape);
+		return And.pass().equals(shape);
+	}
+
+	/**
+	 * Tests if a shape is a constant.
+	 *
+	 * @param shape the shape to be tested
+	 *
+	 * @return {@code true}, if {@code shape} is an {@linkplain And#pass() empty conjunction}; {@code false}, if {@code
+	 * shape} is an {@linkplain Or#fail() empty disjunction}; {@code null}, otherwise; {@linkplain Meta metadata}
+	 * annotation are ignored in the evaluation process
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public static Boolean constant(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		final class Evaluator extends Traverser<Boolean> {
+
+			@Override public Boolean probe(final Meta meta) {
+				return true;
+			}
+
+
+			@Override public Boolean probe(final Field field) {
+				return null;
+			}
+
+			@Override public Boolean probe(final And and) {
+				return and.getShapes().stream()
+						.filter(shape -> !(shape instanceof Meta))
+						.map(shape -> shape.map(this))
+						.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
+			}
+
+			@Override public Boolean probe(final Or or) {
+				return or.getShapes().stream()
+						.filter(shape -> !(shape instanceof Meta))
+						.map(shape -> shape.map(this))
+						.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
+			}
+
+			@Override public Boolean probe(final When when) {
+
+				final Boolean test=when.getTest().map(this);
+				final Boolean pass=when.getPass().map(this);
+				final Boolean fail=when.getFail().map(this);
+
+				return TRUE.equals(test) ? pass
+						: FALSE.equals(test) ? fail
+						: TRUE.equals(pass) && TRUE.equals(fail) ? TRUE
+						: FALSE.equals(pass) && FALSE.equals(fail) ? FALSE
+						: null;
+			}
+
+		}
+
+		return shape.map(new Evaluator());
 	}
 
 
@@ -87,231 +124,177 @@ public interface Shape {
 	public static Shape multiple() { return and(); }
 
 
-	public static Shape only(final Value... values) {
-		return only(asList(values));
-	}
-
-	public static Shape only(final Collection<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		if ( values.contains(null) ) {
-			throw new NullPointerException("null value");
-		}
-
-		if ( values.isEmpty() ) {
-			throw new IllegalArgumentException("empty values");
-		}
-
-		return and(all(values), in(values));
-	}
+	public static Shape only(final Value... values) { return and(all(values), in(values)); }
 
 
-	//// Parametric Shapes /////////////////////////////////////////////////////////////////////////////////////////////
+	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Shape role(final Set<? extends Value> roles, final Shape... shapes) {
-		return shape(Form.role, roles, asList(shapes));
-	}
+	public static Guard role(final Value... roles) { return guard(Form.role, roles); }
 
-	public static Shape role(final Set<? extends Value> roles, final Collection<Shape> shapes) {
-		return shape(Form.role, roles, shapes);
-	}
+	public static Guard task(final Value... tasks) { return guard(Form.task, tasks); }
 
+	public static Guard view(final Value... views) { return guard(Form.view, views); }
 
-	public static Shape create(final Shape... shapes) { return create(asList(shapes));}
-
-	public static Shape create(final Collection<Shape> shapes) { return shape(Form.task, set(Form.create), shapes); }
-
-	public static Shape relate(final Shape... shapes) { return relate(asList(shapes));}
-
-	public static Shape relate(final Collection<Shape> shapes) { return shape(Form.task, set(Form.relate), shapes); }
-
-	public static Shape update(final Shape... shapes) {return update(asList(shapes));}
-
-	public static Shape update(final Collection<Shape> shapes) { return shape(Form.task, set(Form.update), shapes); }
-
-	public static Shape delete(final Shape... shapes) {return delete(asList(shapes));}
-
-	public static Shape delete(final Collection<Shape> shapes) { return shape(Form.task, set(Form.delete), shapes); }
+	public static Guard mode(final Value... modes) { return guard(Form.mode, modes); }
 
 
-	/**
+	public static Guard create() { return task(Form.create); }
+
+	public static Guard relate() { return task(Form.relate); }
+
+	public static Guard update() { return task(Form.update); }
+
+	public static Guard delete() { return task(Form.delete); }
+
+
+	/*
 	 * Marks shapes as server-defined read-only.
 	 */
-	public static Shape server(final Shape... shapes) { return server(asList(shapes)); }
+	public static Guard server() { return task(Form.relate, Form.delete); }
 
-	/**
-	 * Marks shapes as server-defined read-only.
-	 */
-	public static Shape server(final Collection<Shape> shapes) {
-		return shape(Form.task, set(Form.relate, Form.delete), shapes);
-	}
-
-	/**
+	/*
 	 * Marks shapes as client-defined write-once.
 	 */
-	public static Shape client(final Shape... shapes) { return client(asList(shapes)); }
+	public static Guard client() { return task(Form.create, Form.relate, Form.delete); }
 
-	/**
-	 * Marks shapes as client-defined write-once.
+	/*
+	 * Marks shapes as internal use only.
 	 */
-	public static Shape client(final Collection<Shape> shapes) {
-		return shape(Form.task, set(Form.create, Form.relate, Form.delete), shapes);
-	}
+	public static Guard hidden() { return task(); }
 
 
-	public static Shape digest(final Shape... shapes) { return digest(asList(shapes)); }
+	public static Guard digest() { return view(Form.digest); }
 
-	public static Shape digest(final Collection<Shape> shapes) { return shape(Form.view, set(Form.digest), shapes); }
-
-	public static Shape detail(final Shape... shapes) {return detail(asList(shapes));}
-
-	public static Shape detail(final Collection<Shape> shapes) { return shape(Form.view, set(Form.detail), shapes); }
+	public static Guard detail() { return view(Form.detail); }
 
 
-	public static Shape verify(final Shape... shapes) { return verify(asList(shapes)); }
+	public static Guard convey() { return mode(Form.convey); }
 
-	public static Shape verify(final Collection<Shape> shapes) { return shape(Form.mode, set(Form.verify), shapes); }
-
-	public static Shape filter(final Shape... shapes) { return filter(asList(shapes)); }
-
-	public static Shape filter(final Collection<Shape> shapes) { return shape(Form.mode, set(Form.filter), shapes); }
+	public static Guard filter() { return mode(Form.filter); }
 
 
-	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Shape... shapes) {
-		return shape(variable, values, asList(shapes));
-	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Shape shape(final IRI variable, final Collection<? extends Value> values, final Collection<Shape> shapes) {
-		return shapes.isEmpty() ? when(variable, values)
-				: test(when(variable, values), shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
-	}
+	public <V> V map(final Probe<V> probe);
 
+	public default <V> V map(final Function<Shape, V> mapper) {
 
-	//// Parametric Probes /////////////////////////////////////////////////////////////////////////////////////////////
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
 
-	public static Probe<Shape> role(final Value... roles) {
-		return probe(Form.role, new HashSet<>(asList(roles)));
-	}
-
-	public static Probe<Shape> role(final Set<? extends Value> roles) {
-		return probe(Form.role, roles);
-	}
-
-	public static Probe<Shape> task(final Value task) {
-		return probe(Form.task, set(task));
-	}
-
-	public static Probe<Shape> view(final Value view) {
-		return probe(Form.view, set(view));
-	}
-
-	public static Probe<Shape> mode(final Value mode) {
-		return probe(Form.mode, set(mode));
-	}
-
-
-	public static Probe<Shape> probe(final IRI variable, final Set<? extends Value> values) {
-		return new Probe<Shape>() {
-			@Override protected Shape fallback(final Shape shape) {
-				return shape
-						.accept(new Redactor(map(entry(variable, values))))
-						.accept(new Optimizer());
-			}
-		};
+		return mapper.apply(this);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public <V> V accept(final Probe<V> probe);
+	/**
+	 * Use this shape as a test condition.
+	 *
+	 * @param shapes the shapes this shape is to be applied as a test condition
+	 *
+	 * @return this shape, if {@code shapes} is empty; a {@linkplain When#when(Shape, Shape) conditional} shape applying
+	 * this shape as test condition to {@code shapes}, otherwise
+	 *
+	 * @throws NullPointerException if {@code shapes} is null or contains null items
+	 */
+	public default Shape then(final Shape... shapes) {
+		return then(asList(shapes));
+	}
+
+	/**
+	 * Use this shape as a test condition.
+	 *
+	 * @param shapes the shapes this shape is to be applied as a test condition
+	 *
+	 * @return this shape, if {@code shapes} is empty; a {@linkplain When#when(Shape, Shape) conditional} shape applying
+	 * this shape as test condition to {@code shapes}, otherwise
+	 *
+	 * @throws NullPointerException if {@code shapes} is null or contains null items
+	 */
+	public default Shape then(final Collection<Shape> shapes) {
+
+		if ( shapes == null ) {
+			throw new NullPointerException("null shapes");
+		}
+
+		if ( shapes.contains(null) ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shapes.isEmpty() ? this : when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public abstract static class Probe<V> {
+	/**
+	 * Shape probe.
+	 *
+	 * <p>Generates a result by probing shapes.</p>
+	 *
+	 * @param <V> the type of the generated result value
+	 */
+	public static interface Probe<V> {
+
+		//// Annotations ///////////////////////////////////////////////////////////////////////////////////////////////
+
+		public V probe(final Meta meta);
+
+		public V probe(final Guard guard);
+
 
 		//// Term Constraints //////////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final Datatype datatype) { return fallback(datatype); }
+		public V probe(final Datatype datatype);
 
-		public V visit(final Clazz clazz) { return fallback(clazz); }
-
-
-		public V visit(final MinExclusive minExclusive) { return fallback(minExclusive); }
-
-		public V visit(final MaxExclusive maxExclusive) { return fallback(maxExclusive); }
-
-		public V visit(final MinInclusive minInclusive) { return fallback(minInclusive); }
-
-		public V visit(final MaxInclusive maxInclusive) { return fallback(maxInclusive); }
+		public V probe(final Clazz clazz);
 
 
-		public V visit(final MinLength minLength) { return fallback(minLength); }
+		public V probe(final MinExclusive minExclusive);
 
-		public V visit(final MaxLength maxLength) { return fallback(maxLength); }
+		public V probe(final MaxExclusive maxExclusive);
 
-		public V visit(final Pattern pattern) { return fallback(pattern); }
+		public V probe(final MinInclusive minInclusive);
 
-		public V visit(final Like like) { return fallback(like); }
+		public V probe(final MaxInclusive maxInclusive);
 
 
-		public V visit(final Custom custom) { return fallback(custom); }
+		public V probe(final MinLength minLength);
+
+		public V probe(final MaxLength maxLength);
+
+		public V probe(final Pattern pattern);
+
+		public V probe(final Like like);
 
 
 		//// Set Constraints ///////////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final MinCount minCount) { return fallback(minCount); }
+		public V probe(final MinCount minCount);
 
-		public V visit(final MaxCount maxCount) { return fallback(maxCount); }
+		public V probe(final MaxCount maxCount);
 
-		public V visit(final In in) { return fallback(in); }
+		public V probe(final In in);
 
-		public V visit(final All all) { return fallback(all); }
+		public V probe(final All all);
 
-		public V visit(final Any any) { return fallback(any); }
+		public V probe(final Any any);
 
 
 		//// Structural Constraints ////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final Trait trait) { return fallback(trait); }
-
-		public V visit(final Virtual virtual) { return fallback(virtual); }
+		public V probe(final Field field);
 
 
 		//// Logical Constraints ///////////////////////////////////////////////////////////////////////////////////////
 
-		public V visit(final And and) { return fallback(and); }
+		public V probe(final And and);
 
-		public V visit(final Or or) { return fallback(or); }
+		public V probe(final Or or);
 
-		public V visit(final Test test) { return fallback(test); }
-
-		public V visit(final When when) { return fallback(when); }
-
-
-		//// Annotations ///////////////////////////////////////////////////////////////////////////////////////////////
-
-		public V visit(final Alias alias) { return fallback(alias); }
-
-		public V visit(final Label label) { return fallback(label); }
-
-		public V visit(final Notes notes) { return fallback(notes); }
-
-		public V visit(final Placeholder placeholder) { return fallback(placeholder); }
-
-		public V visit(final Default dflt) { return fallback(dflt); }
-
-		public V visit(final Hint hint) { return fallback(hint); }
-
-		public V visit(final Group group) { return fallback(group); }
-
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		protected V fallback(final Shape shape) { return null; }
+		public V probe(final When when);
 
 	}
 

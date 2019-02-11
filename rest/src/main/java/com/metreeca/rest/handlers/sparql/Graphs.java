@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -22,8 +22,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.handlers.Worker;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -44,7 +44,7 @@ import java.util.List;
 
 import static com.metreeca.form.Shape.only;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Handler.refused;
@@ -70,8 +70,8 @@ import static java.lang.String.format;
  */
 public final class Graphs extends Delegator {
 
-	private static final Shape GraphsShape=trait(RDF.VALUE, and(
-			trait(RDF.TYPE, only(VOID.DATASET))
+	private static final Shape GraphsShape=field(RDF.VALUE, and(
+			field(RDF.TYPE, only(VOID.DATASET))
 	));
 
 
@@ -124,7 +124,7 @@ public final class Graphs extends Delegator {
 
 			if ( target == null && !catalog ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
 						.cause("missing target graph parameter")
@@ -154,7 +154,7 @@ public final class Graphs extends Delegator {
 
 				request.reply(response -> response.status(Response.OK)
 						.shape(GraphsShape)
-						.body(rdf()).set(model)
+						.body(rdf(), model)
 				).accept(consumer);
 
 			} else {
@@ -174,7 +174,7 @@ public final class Graphs extends Delegator {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(output()).set(_target -> {
+							.body(output(), _target -> {
 								try (final OutputStream output=_target.get()) {
 									connection.export(factory.getWriter(output), context);
 								} catch ( final IOException e ) {
@@ -198,7 +198,7 @@ public final class Graphs extends Delegator {
 
 			if ( target == null ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
 						.cause("missing target graph parameter")
@@ -221,7 +221,7 @@ public final class Graphs extends Delegator {
 				);
 
 				graph.update(connection -> {
-					try (final InputStream input=request.body(input()).get() // binary format >> no rewriting
+					try (final InputStream input=request.body(input()).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
 
@@ -238,7 +238,7 @@ public final class Graphs extends Delegator {
 
 						trace.warning(this, "unable to read RDF payload", e);
 
-						request.reply(new Failure<>()
+						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
 								.cause("I/O while reading RDF payload: see server logs for more detail")
@@ -249,7 +249,7 @@ public final class Graphs extends Delegator {
 
 						trace.warning(this, "malformed RDF payload", e);
 
-						request.reply(new Failure<>()
+						request.reply(new Failure()
 								.status(Response.BadRequest)
 								.error("payload-malformed")
 								.cause("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
@@ -260,7 +260,7 @@ public final class Graphs extends Delegator {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure<>()
+						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
 								.cause("unable to update graph: see server logs for more detail")
@@ -284,7 +284,7 @@ public final class Graphs extends Delegator {
 
 			if ( target == null ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
 						.cause("missing target graph parameter")
@@ -313,7 +313,7 @@ public final class Graphs extends Delegator {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure<>()
+						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
 								.cause("unable to delete graph: see server logs for more detail")
@@ -339,7 +339,7 @@ public final class Graphs extends Delegator {
 
 			if ( target == null ) {
 
-				request.reply(new Failure<>()
+				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
 						.cause("missing target graph parameter")
@@ -361,7 +361,7 @@ public final class Graphs extends Delegator {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
 				graph.update(connection -> {
-					try (final InputStream input=request.body(input()).get() // binary format >> no rewriting
+					try (final InputStream input=request.body(input()).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
 
@@ -377,7 +377,7 @@ public final class Graphs extends Delegator {
 
 						trace.warning(this, "unable to read RDF payload", e);
 
-						request.reply(new Failure<>()
+						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
 								.cause("I/O while reading RDF payload: see server logs for more detail")
@@ -388,7 +388,7 @@ public final class Graphs extends Delegator {
 
 						trace.warning(this, "malformed RDF payload", e);
 
-						request.reply(new Failure<>()
+						request.reply(new Failure()
 								.status(Response.BadRequest)
 								.error("payload-malformed")
 								.cause("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
@@ -399,7 +399,7 @@ public final class Graphs extends Delegator {
 
 						trace.warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure<>()
+						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
 								.cause("unable to update graph: see server logs for more detail")

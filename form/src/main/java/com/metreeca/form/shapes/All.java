@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -18,6 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Inspector;
 import com.metreeca.form.things.Sets;
 
 import org.eclipse.rdf4j.model.Value;
@@ -48,14 +49,16 @@ public final class All implements Shape {
 
 
 	public static Optional<Set<Value>> all(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.accept(new UniversalProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AllProbe()));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Set<Value> values;
 
 
-	public All(final Collection<Value> values) {
+	private All(final Collection<Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -73,18 +76,22 @@ public final class All implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Set<Value> getValues() {
 		return Collections.unmodifiableSet(values);
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
@@ -107,19 +114,15 @@ public final class All implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class UniversalProbe extends Probe<Set<Value>> {
+	private static final class AllProbe extends Inspector<Set<Value>> {
 
-		@Override public Set<Value> visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
-		@Override public Set<Value> visit(final All all) {
+		@Override public Set<Value> probe(final All all) {
 			return all.getValues();
 		}
 
-		@Override public Set<Value> visit(final And and) {
+		@Override public Set<Value> probe(final And and) {
 			return and.getShapes().stream()
-					.map(shape -> shape.accept(this))
+					.map(shape -> shape.map(this))
 					.reduce(null, (x, y) -> x == null ? y : y == null ? x : Sets.union(x, y));
 		}
 

@@ -64,7 +64,7 @@ import javax.servlet.annotation.WebListener;
 }
 ```
 
-The stub configures the application to handle any resource using a barebone [handler](../javadocs/?com/metreeca/rest/Handler.html) always replying to incoming [requests](../javadocs/?com/metreeca/rest/Request.html) with a [response](../javadocs/?com/metreeca/rest/Response.html) including a `200` HTTP status code. The standard [Server](../javadocs/?com/metreeca/rest/wrappers/Server.html) wrapper provides default pre/post-processing services and shared error handling..
+The stub configures the application to handle any resource using a barebone [handler](../javadocs/?com/metreeca/rest/Handler.html) always replying to incoming [requests](../javadocs/?com/metreeca/rest/Request.html) with a [response](../javadocs/?com/metreeca/rest/Response.html) including a `200` HTTP status code. The standard [Server](../javadocs/?com/metreeca/rest/wrappers/Server.html) wrapper provides default pre/postprocessing services and shared error handling..
 
 Compile and deploy the web app to your favorite servlet container and try your first request:
 
@@ -140,7 +140,7 @@ public Demo() {
 
 			.get(() -> new Server()
                  
-                    .wrap(new Rewriter().base(BIRT.Base))
+					.wrap(new Rewriter(BIRT.Base))
 
 					.wrap((Request request) -> request.reply(response ->
 							response.status(Response.OK))
@@ -168,7 +168,7 @@ Requests are dispatched to their final handlers through a hierarchy of wrappers 
 
 				.path("/products/", new Router()
 						.path("/", new Worker()
-								.get(new Browser())
+								.get(new Relator())
 								.post(new Creator())
 						)
 						.path("/*", new Worker()
@@ -223,20 +223,21 @@ If the index doesn't contain a matching handler, no action is performed giving t
 
 ## Actors
 
-[Actors](../javadocs/?com/metreeca/rest/handlers/actors/package-summary.html) provide a default implementaton for CRUD actions on LDP resources and Basic containers identified by the request [focus item](../javadocs/com/metreeca/rest/Request.html#item--).
+[Actors](../javadocs/?com/metreeca/rest/handlers/actors/package-summary.html) provide default implementations for CRUD actions on LDP resources and containers identified by the request [focus item](../javadocs/com/metreeca/rest/Request.html#item--).
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Browser](../javadocs/?com/metreeca/rest/handlers/actors/Browser.html)⃰ | container browsing / retrieves the detailed RDF description of the target item and (optionally) the compact RDF description of the contained resources; supports extended [faceted search](linked-data-interaction#faceted-search), sorting and pagination |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | resource retrieval / retrieves the detailed RDF description of the target item |
-| [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html)⃰ | resource creation / uploads the detailed RDF description of the target item |
-| [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html)⃰ | resource updating / updates the detailed RDF description of the target item |
-| [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleter.html)⃰ | resource deletion / deletes the detailed RDF description of the target item |
-| [Builder](../javadocs/?com/metreeca/rest/handlers/actors/Builder.html) | virtual resource retrieval / retrieves the detailed RDF description of the virtual target item |
+| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](linked-data-interaction#faceted-search), sorting and pagination |
+| [Generator](../javadocs/?com/metreeca/rest/handlers/actors/Generator.html) | virtual container/resource retrieval / retrieves the detailed RDF description of the target virtual item and (optionally) the digest RDF description of the contained resources |
+| [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
+| [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html) | resource updating / updates the detailed RDF description of the target item |
+| [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
 
-Unless a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the [symmetric concise bounded description](https://www.w3.org/Submission/CBD/) of the target item(s).
+<p class="warning">Only LDP Basic and Direct Containers are currently supported</p>
 
-<p class="warning">⃰ Model-less operations aren't yet fully supported by all action handlers.</p>
+If a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the graph neighbourhood of the target target item(s)  identified by the model after redaction according to the request user roles and to actor-specific task,  mode and view parameters.
+
+If no shape model is associated to the request, CRUD operations are performed on the (labelled) [symmetric concise bounded description](https://www.w3.org/Submission/CBD/) of the target item(s).
 
 ## Delegators
 
@@ -261,7 +262,7 @@ public final class Products extends Delegator {
 		delegate(new Router()
 
 				.path("/", new Worker()
-						.get(new Browser())
+						.get(new Relator())
 						.post(new Creator())
 				)
 
@@ -291,16 +292,16 @@ Let's start by defining a barebone model stating that all resources of class `Pr
 public final class Products extends Delegator {
 
 	public Products() {
-		delegate(new Driver().shape(and(
+		delegate(new Driver(and(
 
-				trait(RDF.TYPE),
-				trait(RDFS.LABEL),
-				trait(RDFS.COMMENT)
+				field(RDF.TYPE),
+				field(RDFS.LABEL),
+				field(RDFS.COMMENT)
 
 		)).wrap(new Router()
 
 				.path("/", new Worker()
-						.get(new Browser())
+						.get(new Relator())
 						.post(new Creator()))
 
 				.path("/*", new Worker()
@@ -309,6 +310,7 @@ public final class Products extends Delegator {
 						.delete(new Deleter()))
 		));
 	}
+    
 }
 ```
 
@@ -347,57 +349,83 @@ Content-Type: application/json;charset=UTF-8
 We'll now refine the initial barebone model, exposing more properties and detailing properties roles and constraints.
 
 ```java
-new Driver().shape(and(
+new Driver(and(
 
-        trait(RDF.TYPE, only(BIRT.Product)),
-        trait(RDFS.LABEL, verify(required(),
-                datatype(XMLSchema.STRING), maxLength(50))),
-        trait(RDFS.COMMENT, verify(required(),
-                datatype(XMLSchema.STRING), maxLength(500))),
+		hidden().then(
+				meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
+				meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
+				meta(LDP.MEMBERSHIP_RESOURCE, BIRT.Product)
+		),
 
-        group(
+		field(LDP.CONTAINS, convey().then(
 
-            server(trait(BIRT.code, verify(required()))),
+            	field(RDF.TYPE, and(required(), all(BIRT.Product))),
 
-            trait(BIRT.line, and(
+				field(RDFS.LABEL, and(required(), 
+                		datatype(XMLSchema.STRING),
+                        maxLength(50))),
+            
+				field(RDFS.COMMENT, and(required(),
+                		datatype(XMLSchema.STRING),
+                       	maxLength(500))),
 
-                verify(required(),clazz(BIRT.ProductLine)),
+				and(
 
-                relate(trait(RDFS.LABEL, verify(required())))
+						server().then(field(BIRT.code, and(required()))),
 
-            )),
+						field(BIRT.line, and(required(), clazz(BIRT.ProductLine),
 
-            trait(BIRT.scale, verify(required(),
-                datatype(XMLSchema.STRING),
-                placeholder("1:N"),
-                pattern("1:[1-9][0-9]{1,2}"))),
+								relate().then(field(RDFS.LABEL, required()))
 
-            trait(BIRT.vendor, verify(required(),
-                datatype(XMLSchema.STRING), maxLength(50)))),
+						)),
 
-        group(
+						field(BIRT.scale, and(required(),
+								datatype(XMLSchema.STRING),
+								placeholder("1:N"),
+								pattern("1:[1-9][0-9]{1,2}")
+						)),
 
-            server(trait(BIRT.stock, verify(required(),
-                datatype(XMLSchema.INTEGER),
-                minInclusive(literal(integer(0))),
-                maxExclusive(literal(integer(10000)))))),
+						field(BIRT.vendor, and(required(),
+                        		datatype(XMLSchema.STRING), maxLength(50)))
 
-            trait(BIRT.sell, verify(alias("price"), required(),
-                datatype(XMLSchema.DECIMAL),
-                minExclusive(literal(decimal(0))),
-                maxExclusive(literal(decimal(1000))))),
+				),
 
-            role(singleton(BIRT.staff), trait(BIRT.buy, verify(required(),
-                datatype(XMLSchema.DECIMAL),
-                minInclusive(literal(decimal(0))),
-                maxInclusive(literal(decimal(1000))))))
+				and(
 
-        )
+						server().then(field(BIRT.stock, and(required(),
+								datatype(XMLSchema.INTEGER),
+								minInclusive(literal(integer(0))),
+								maxExclusive(literal(integer(10000)))
+						))),
 
-))
+						field(BIRT.sell, and(alias("price"), required(),
+								datatype(XMLSchema.DECIMAL),
+								minExclusive(literal(decimal(0))),
+								maxExclusive(literal(decimal(1000)))
+						)),
+
+						role(BIRT.staff).then(field(BIRT.buy, and(required(),
+								datatype(XMLSchema.DECIMAL),
+								minInclusive(literal(decimal(0))),
+								maxInclusive(literal(decimal(1000)))
+						)))
+
+				)
+
+		))
+
+)
 ```
 
-The extended model makes use of a number of additional blocks to precisely define the expected shape of the RDF description of the associated resource, for instance including `required` and `datatype` and `pattern` constraints to state that `rdfs:label`, `rdfs:comment`, `birt:code`, `birt:scale` and `birt:vendor` values are expected:
+The initial section states that this model describes resources living inside an LDP Basic Container defined by the following LDP properties (that is, a container whose member are the instances of class `birt:Product`):
+
+```turtle
+<products/> a ldp:BasicContainer;
+	ldp:isMemberOfRelation rdf:type;
+	ldp:membershipResource birt:Product.
+```
+
+The extended resource model makes use of a number of additional blocks to precisely define the expected shape of the RDF description of the member resources, for instance including `required` and `datatype` and `pattern` constraints to state that `rdfs:label`, `rdfs:comment`, `birt:code`, `birt:scale` and `birt:vendor` values are expected:
 
 - to occur exactly once for each resource;
 - to be RDF literals of `xsd:string` datatype;
@@ -432,11 +460,11 @@ The constraints in the extended model are leveraged by the engine in a number of
 
 ## Parameterizing Models
 
-The `verify` and `server` blocks in the extended model also introduce the central concept of [parametric](../references/spec-language.md#parameters) model.
+The `convey` and `server` guards in the extended model also introduce the central concept of [parametric](../references/spec-language.md#parameters) model.
 
-The `verify` block states that nested constraints are to be used only for validating incoming data and not for selecting existing resources to be exposed as container items. Constraints like `trait(rdf:type)`, defined outside the `verify` block, will be used both for selecting relevant resources and validating incoming data.
+The `convey` guard states that nested constraints are to be used only for extracting outgoing data and validating incoming data and not for selecting existing resources to be exposed as container items. Constraints defined outside the `convey` block, will be used for both operations.
 
-The `server` block states that nested properties are server-managed and will be considered only when retrieving or deleting resources, but won't be accepted as valid content on resource creation and updating.
+The `server` guard states that guarded properties are server-managed and will be considered only when retrieving or deleting resources, but won't be accepted as valid content on resource creation and updating.
 
 In the most general form, models may be parameterized on for different [axes](../references/spec-language.md#parameters). Constraints specified outside parametric sections are unconditionally enabled.
 
@@ -445,14 +473,14 @@ In the most general form, models may be parameterized on for different [axes](..
 Parametric models support the definition of fine-grained access control rules and role-dependent read/write resource views.
 
 ```java
-role(singleton(BIRT.staff), trait(BIRT.buy, verify(required(),
-        datatype(XMLSchema.DECIMAL),
-        minInclusive(literal(decimal(0))),
-        maxInclusive(literal(decimal(1000)))
+role(BIRT.staff).then(field(BIRT.buy, and(required(),
+		datatype(XMLSchema.DECIMAL),
+		minInclusive(literal(decimal(0))),
+		maxInclusive(literal(decimal(1000)))
 )))
 ```
 
-This `role` block states that the `birt:buy` price will be visible only if the request is performed by a user in the `birt:staff` role, usually as verified by authtentication/authorization wrappers, like in the following naive sample:
+This `role` guard states that the `birt:buy` price will be visible only if the request is performed by a user in the `birt:staff` role, usually as verified by authtentication/authorization wrappers, like in the following naive sample:
 
 ```java
 private static boolean authorized(final Request request) {
@@ -463,7 +491,7 @@ private static boolean authorized(final Request request) {
 ```java
 () -> new Server()
 
-    .wrap(new Rewriter().base(BIRT.Base))
+    .wrap(new Rewriter(BIRT.Base))
 
     .wrap((Wrapper)handler -> request ->
           authorized(request) ? handler.handle(request.roles(BIRT.staff))
@@ -500,62 +528,67 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-# Pre/Post-Processing
+# Pre/Postprocessing
 
 We'll now complete the product catalog, adding:
 
-- a pre-processing slug generator for assigning meaningful names to new resources;
-- post-processing scripts for updating server-managed properties and perform other housekeeping tasks when resources are created or modified.
+- a slug generator for assigning meaningful names to new resources;
+- postprocessing scripts for updating server-managed properties and perform other housekeeping tasks when resources are created or modified.
 
 ```java
 new Router()
 
-    .path("/", new Worker()
-        .get(new Browser())
-        .post(new Creator()
-            .slug(new ScaleSlug())
-            .sync(text(Products.class, "ProductsCreate.ql"))))
+	.path("/", new Worker()
+			.get(new Relator())
+			.post(new Creator(new ScaleSlug())
+				.with(new Postprocessor(Connector.update(Codecs.text(
+                    Products.class, "ProductsCreate.ql"
+                ))))
+			)
+	)
 
-    .path("/*", new Worker()
-        .get(new Relator())
-        .put(new Updater())
-        .delete(new Deleter()
-            .sync(text(Products.class, "ProductsDelete.ql"))))
+	.path("/*", new Worker()
+			.get(new Relator())
+			.put(new Updater())
+			.delete(new Deleter())
+	)
 ```
 
 ```java
-private static final class ScaleSlug implements BiFunction<Request, Model, String> {
+private static final class ScaleSlug
+    implements BiFunction<Request, Collection<Statement>, String>
+{
 
-    private final Graph graph=tool(Graph.Factory);
+	private final Graph graph=tool(Graph.Factory);
 
 
-    @Override public String apply(final Request request, final Model model) {
-        return graph.query(connection -> {
+	@Override public String apply(final Request request, final Collection<Statement> model) {
+		return graph.query(connection -> {
 
-            final Value scale=model.filter(null, BIRT.scale, null)
-                    .objects().stream().findFirst()
-                    .orElse(literal("1:1"));
+			final Value scale=new LinkedHashModel(model).filter(null, BIRT.scale, null)
+					.objects().stream().findFirst()
+					.orElse(literal("1:1"));
 
-            int serial=0;
+			int serial=0;
 
-            try (final RepositoryResult<Statement> matches=connection.getStatements(
-                    null, BIRT.scale, scale
-            )) {
-                for (; matches.hasNext(); matches.next()) { ++serial; }
-            }
+			try (final RepositoryResult<Statement> matches=connection.getStatements(
+					null, BIRT.scale, scale
+			)) {
+				for (; matches.hasNext(); matches.next()) { ++serial; }
+			}
 
-            String code="";
+			String code="";
 
-            do {
-                code=String.format("S%s_%d", scale.stringValue().substring(2), serial);
-            } while ( connection.hasStatement(
-                    null, BIRT.code, literal(code), true
-            ) );
+			do {
+				code=String.format("S%s_%d", scale.stringValue().substring(2), serial);
+			} while ( connection.hasStatement(
+					null, BIRT.code, literal(code), true
+			) );
 
-            return code;
+			return code;
 
-        });
-    }
+		});
+	}
 
 }
 ```
@@ -578,11 +611,11 @@ insert { $this birt:code $name } where {};
 insert { $this birt:stock 0 } where {};
 ```
 
-The *ProductsCreate.ql* SPARQL Update post-processing script updates server-managed `birt:code` and `birt:stock` properties after a new product is added to the catalog.
+The *ProductsCreate.ql* SPARQL Update postprocessing script updates server-managed `birt:code` and `birt:stock` properties after a new product is added to the catalog.
 
-SPARQL Update post-processing scripts are executed after the state-mutating HTTP request is successfully completed, with some [pre-defined bindings](../javadocs/com/metreeca/rest/wrappers/Processor.html#sync-java.lang.String-) like the `$this` variable holding the IRI of the targe resource either as derived from the HTTP request or as defined by the `Location` HTTP header after a POST request.
+SPARQL Update postprocessing scripts are executed after the state-mutating HTTP request is successfully completed, with some [pre-defined bindings](../javadocs/com/metreeca/rest/wrappers/Connector.html#configure-M-O-java.util.function.BiConsumer...-) like the `$this` variable holding the IRI of the targe resource either as derived from the HTTP request or as defined by the `Location` HTTP header after a POST request.
 
-Request and response RDF payloads may also be [pre](../javadocs/com/metreeca/rest/wrappers/Processor.html#pre-java.util.function.BiFunction-) and [post](../javadocs/com/metreeca/rest/wrappers/Processor.html#post-java.util.function.BiFunction-)-processed using custom filtering functions.
+Request and response RDF payloads may also be [pre](../javadocs/com/metreeca/rest/wrappers/Preprocessor.html) and [post](../javadocs/com/metreeca/rest/wrappers/Postprocessor.html)-processed using custom filtering functions.
 
 # Next Steps
 

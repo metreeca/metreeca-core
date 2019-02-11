@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -37,11 +37,13 @@ public final class Pattern implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final String text;
 	private final String flags;
 
 
-	public Pattern(final String text, final String flags) {
+	private Pattern(final String text, final String flags) {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");
@@ -62,6 +64,8 @@ public final class Pattern implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public String getText() {
 		return text;
 	}
@@ -71,13 +75,15 @@ public final class Pattern implements Shape {
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 

@@ -1,25 +1,26 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
- *  Metreeca is free software: you can redistribute it and/or modify it under the terms
- *  of the GNU Affero General Public License as published by the Free Software Foundation,
- *  either version 3 of the License, or(at your option) any later version.
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
  *
- *  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *  See the GNU Affero General Public License for more details.
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License along with Metreeca.
- *  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.Codecs;
-import com.metreeca.form.things.Values;
 import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
@@ -38,8 +39,9 @@ import javax.json.Json;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Trait.trait;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Codecs.encode;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
@@ -59,13 +61,6 @@ final class RewriterTest {
 
 	private static final String External="app://external/";
 	private static final String Internal="app://internal/";
-
-	private static final Shape TestShape=trait(internal("p"), and(required(), datatype(Values.IRIType)));
-
-
-	private static void exec(final Runnable... tasks) {
-		new Tray().exec(tasks).clear();
-	}
 
 
 	private static IRI external(final String name) {
@@ -89,13 +84,13 @@ final class RewriterTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testRejectRelativeBase() {
-		assertThrows(IllegalArgumentException.class, () -> new Rewriter().base("/example.org/"));
+		assertThrows(IllegalArgumentException.class, () -> new Rewriter("/example.org/"));
 	}
 
 	@Test void testHeadRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					assertThat(request.user()).as("rewritten user").isEqualTo(internal("user"));
 					assertThat(request.roles()).as("rewritten roles").containsExactly(internal("role"));
@@ -146,7 +141,7 @@ final class RewriterTest {
 	@Test void testHeadEncodedRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					assertThat(request.query())
 							.as("rewritten encoded query")
@@ -166,10 +161,48 @@ final class RewriterTest {
 				.accept(response -> {});
 	}
 
+	@Test void testShapeRewriting() {
+		new Tray()
+
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
+
+					assertThat(request.shape()).isEqualTo(and(
+							Field.field(internal("p")),
+							Field.field(inverse(internal("p")))
+					));
+
+					return request.reply(response -> response
+							.status(Response.OK)
+							.shape(request.shape()));
+
+				}))
+
+				.handle(new Request()
+
+						.base(External)
+
+						.shape(and(
+								Field.field(external("p")),
+								Field.field(inverse(external("p")))
+						))
+
+				)
+
+				.accept(response -> {
+
+					assertThat(response.shape()).isEqualTo(and(
+							Field.field(external("p")),
+							Field.field(inverse(external("p")))
+					));
+
+				});
+
+	}
+
 	@Test void testRDFRewriting() {
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					request.body(rdf()).use(
 							model -> ModelAssert.assertThat(internal("s", "p", "o"))
@@ -179,7 +212,7 @@ final class RewriterTest {
 					);
 
 					return request.reply(response -> response.status(Response.OK)
-							.body(rdf()).set(singleton(internal("s", "p", "o"))));
+							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
 
 				.handle(new Request()
@@ -187,12 +220,14 @@ final class RewriterTest {
 						.base(External)
 						.path("/s")
 
-						.body(rdf()).set(singleton(external("s", "p", "o"))))
+						.body(rdf(), singleton(external("s", "p", "o"))))
 
 				.accept(response -> {
 
 					response.body(rdf()).use(
-							model -> assertThat(singleton(external("s", "p", "o"))).as("response rdf rewritten").isIsomorphicTo(model),
+							model -> assertThat(singleton(external("s", "p", "o")))
+									.as("response rdf rewritten")
+									.isIsomorphicTo(model),
 							error -> fail("missing RDF payload")
 					);
 
@@ -200,18 +235,21 @@ final class RewriterTest {
 	}
 
 	@Test void testJSONRewriting() {
+
+		final Shape TestShape=field(internal("p"), and(required(), datatype(Form.IRIType)));
+
 		new Tray()
 
-				.get(() -> new Rewriter().base(Internal).wrap((Handler)request -> {
+				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					assertThat(request).hasBodyThat(rdf())
+					assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 							.as("request json rewritten")
-							.isIsomorphicTo(singleton(internal("s", "p", "o")));
+							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
 					return request.reply(response -> response.
 							status(Response.OK)
 							.shape(TestShape)
-							.body(rdf()).set(singleton(internal("s", "p", "o"))));
+							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
 
 				.handle(new Request()
@@ -224,7 +262,7 @@ final class RewriterTest {
 
 						.shape(TestShape)
 
-						.body(input()).set(() -> new ByteArrayInputStream(
+						.body(input(), () -> new ByteArrayInputStream(
 								Json.createObjectBuilder()
 										.add("p", "o")
 										.build()

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -36,14 +36,14 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.util.Set;
 
-import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.things.Sets.union;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.encode;
 import static com.metreeca.form.things.ValuesTest.export;
-import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
@@ -142,7 +142,7 @@ final class GraphsTest {
 	}
 
 	private Request put(final Request request) {
-		return request.method(Request.PUT).body(input()).set(() ->
+		return request.method(Request.PUT).body(input(), () ->
 				new ByteArrayInputStream(encode(Rest).getBytes(Codecs.UTF8))
 		);
 	}
@@ -152,7 +152,7 @@ final class GraphsTest {
 	}
 
 	private Request post(final Request request) {
-		return request.method(Request.POST).body(input()).set(() ->
+		return request.method(Request.POST).body(input(), () ->
 				new ByteArrayInputStream(encode(Rest).getBytes(Codecs.UTF8))
 		);
 	}
@@ -187,12 +187,11 @@ final class GraphsTest {
 
 				.handle(authenticated(catalog(request())))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(catalog());
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(catalog())
+						)));
 	}
 
 	@Test void testGETCatalogPublicAnonymous() {
@@ -200,12 +199,11 @@ final class GraphsTest {
 
 				.handle(anonymous(catalog(request())))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(catalog());
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(catalog())
+						)));
 	}
 
 	@Test void testGETCatalogPublicAuthorized() {
@@ -213,12 +211,11 @@ final class GraphsTest {
 
 				.handle(authenticated(catalog(request())))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(catalog());
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(catalog())
+						)));
 	}
 
 
@@ -242,12 +239,10 @@ final class GraphsTest {
 
 				.handle(authenticated(dflt(get(request()))))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(First);
-
-				}));
+				.accept(response -> assertThat(response).hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(First)
+						)));
 	}
 
 	@Test void testGETDefaultPublicAnonymous() {
@@ -255,12 +250,11 @@ final class GraphsTest {
 
 				.handle(anonymous(dflt(get(request()))))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(First);
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(First)
+						)));
 	}
 
 	@Test void testGETDefaultPublicAuthenticated() {
@@ -268,13 +262,13 @@ final class GraphsTest {
 
 				.handle(authenticated(dflt(get(request()))))
 
-				.accept(response -> {
-
-					assertThat(response)
-							.hasStatus(Response.OK)
-							.hasBodyThat(rdf()).isIsomorphicTo(First);
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(First)
+						)
+				)
+		);
 	}
 
 
@@ -283,12 +277,9 @@ final class GraphsTest {
 
 				.handle(anonymous(named(get(request()))))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.Unauthorized);
-					assertThat(response).hasBodyThat(rdf()).isEmpty();
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.Unauthorized)
+						.doesNotHaveBody()));
 	}
 
 	@Test void testGETNamedPrivateAuthenticated() {
@@ -296,12 +287,11 @@ final class GraphsTest {
 
 				.handle(authenticated(named(get(request()))))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(Rest);
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(Rest)
+						)));
 	}
 
 	@Test void testGETNamedPublicAnonymous() {
@@ -309,12 +299,11 @@ final class GraphsTest {
 
 				.handle(anonymous(named(get(request()))))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(Rest);
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(Rest)
+						)));
 	}
 
 	@Test void testGETNamedPublicAuthenticated() {
@@ -322,12 +311,11 @@ final class GraphsTest {
 
 				.handle(authenticated(named(get(request()))))
 
-				.accept(response -> {
-
-					assertThat(response).hasStatus(Response.OK);
-					assertThat(response).hasBodyThat(rdf()).isIsomorphicTo(Rest);
-
-				}));
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+						.hasBody(rdf(), rdf -> assertThat(rdf)
+								.isIsomorphicTo(Rest)
+						)));
 	}
 
 

@@ -1,3 +1,20 @@
+/*
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca.
+ *
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
@@ -23,7 +40,7 @@ import static java.util.Collections.unmodifiableMap;
 /**
  * Linked data server.
  *
- * <p>Provides default resource pre/post-processing and error handling; mainly intended as the outermost wrapper
+ * <p>Provides default resource pre/postprocessing and error handling; mainly intended as the outermost wrapper
  * returned by gateway loaders.</p>
  */
 public final class Server implements Wrapper {
@@ -45,10 +62,10 @@ public final class Server implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return request -> {
+		return request -> consumer -> {
 			try {
 
-				return consumer -> request
+				request
 
 						.map(this::query)
 						.map(this::form)
@@ -64,11 +81,16 @@ public final class Server implements Wrapper {
 
 				trace.error(this, format("%s %s > internal error", request.method(), request.item()), e);
 
-				return request.reply(new Failure<>()
-						.status(Response.InternalServerError)
-						.error("exception-untrapped")
-						.cause("unable to process request: see server logs for details")
-						.cause(e));
+				request
+
+						.reply(new Failure()
+								.status(Response.InternalServerError)
+								.error("exception-untrapped")
+								.cause("unable to process request: see server logs for details")
+								.cause(e)
+						)
+
+						.accept(consumer);
 
 			}
 		};
@@ -87,7 +109,7 @@ public final class Server implements Wrapper {
 		return request.parameters().isEmpty()
 				&& request.method().equals(POST)
 				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
-				? request.parameters(parse(request.body(text()).get().orElse("")))
+				? request.parameters(parse(request.body(text()).value().orElse("")))
 				: request;
 	}
 
@@ -104,7 +126,7 @@ public final class Server implements Wrapper {
 		final Throwable cause=response.cause().orElse(null);
 
 		trace.entry(status < 400 ? Trace.Level.Info : status < 500 ? Trace.Level.Warning : Trace.Level.Error,
-				this, format("%s %s > %d", method, item, status), cause);
+				this, () -> format("%s %s > %d", method, item, status), cause);
 
 		return response;
 	}

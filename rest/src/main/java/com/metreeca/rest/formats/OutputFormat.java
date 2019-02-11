@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -17,15 +17,13 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.Result.Value;
 
 
 /**
@@ -62,8 +60,8 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 	/**
 	 * @return a result providing access to a consumer taking no action on the supplied output stream provider
 	 */
-	@Override public Result<Consumer<Supplier<OutputStream>>> get(final Message<?> message) {
-		return value(target -> {});
+	@Override public Result<Consumer<Supplier<OutputStream>>, Failure> get(final Message<?> message) {
+		return Value(target -> {});
 	}
 
 	/**

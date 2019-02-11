@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -18,12 +18,12 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.form.things.Codecs;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 
 import java.io.*;
 
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -32,6 +32,8 @@ import static com.metreeca.rest.formats.OutputFormat.output;
  * Binary body format.
  */
 public final class DataFormat implements Format<byte[]> {
+
+	private static final byte[] empty=new byte[0];
 
 	private static final DataFormat Instance=new DataFormat();
 
@@ -58,16 +60,22 @@ public final class DataFormat implements Format<byte[]> {
 	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing error,
 	 * otherwise
 	 */
-	@Override public Result<byte[]> get(final Message<?> message) {
-		return message.body(input()).map(source -> {
-			try (final InputStream input=source.get()) {
+	@Override public Result<byte[], Failure> get(final Message<?> message) {
+		return message.body(input()).fold(
 
-				return Codecs.data(input);
+				source -> {
+					try (final InputStream input=source.get()) {
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+						return Value(Codecs.data(input));
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				},
+
+				error -> error.equals(Format.Missing) ?  Value(empty) : Error(error)
+
+		);
 	}
 
 	/**
@@ -75,7 +83,7 @@ public final class DataFormat implements Format<byte[]> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(output()).flatPipe(consumer -> message.body(data()).map(bytes -> target -> {
+		return message.pipe(output(), consumer -> message.body(data()).value(bytes -> target -> {
 			try (final OutputStream output=target.get()) {
 
 				output.write(bytes);

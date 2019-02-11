@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -24,16 +24,15 @@ import com.metreeca.form.shapes.*;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Group.group;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
-import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.Sets.set;
 
 import static java.util.Collections.disjoint;
 import static java.util.stream.Collectors.toList;
@@ -42,12 +41,16 @@ import static java.util.stream.Collectors.toList;
 /**
  * Shape redactor.
  *
- * <p>Recursively evaluates and replace {@linkplain When conditional} shapes from a shape.</p>
+ * <p>Recursively evaluates {@linkplain Guard parametric} constraints in a shape.</p>
  */
-public final class Redactor extends Shape.Probe<Shape> {
+public final class Redactor extends Traverser<Shape> {
 
 	private final Map<IRI, Set<? extends Value>> variables;
 
+
+	public Redactor(final IRI axis, final Value... values) {
+		this(map(entry(axis, set(values))));
+	}
 
 	public Redactor(final Map<IRI, Set<? extends Value>> variables) {
 
@@ -67,50 +70,41 @@ public final class Redactor extends Shape.Probe<Shape> {
 	}
 
 
+	@Override public Shape probe(final Shape shape) { return shape; }
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override protected Shape fallback(final Shape shape) {
-		return shape;
-	}
+	@Override public Shape probe(final Guard guard) {
 
+		final Set<? extends Value> actual=variables.get(guard.getAxis());
+		final Set<? extends Value> accepted=guard.getValues();
 
-	@Override public Shape visit(final Group group) {
-		return group(group.getShape().accept(this));
-	}
-
-	@Override public Shape visit(final Trait trait) {
-		return trait(trait.getStep(), trait.getShape().accept(this));
-	}
-
-	@Override public Shape visit(final Virtual virtual) {
-		return virtual((Trait)virtual.getTrait().accept(this), virtual.getShift());
-	}
-
-
-	@Override public Shape visit(final And and) {
-		return and(and.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
-	}
-
-	@Override public Shape visit(final Or or) {
-		return or(or.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
-	}
-
-	@Override public Shape visit(final Test test) {
-		return test(
-				test.getTest().accept(this),
-				test.getPass().accept(this),
-				test.getFail().accept(this)
-		);
-	}
-
-	@Override public Shape visit(final When when) {
-
-		final Set<? extends Value> actual=variables.get(when.getIRI());
-		final Set<? extends Value> accepted=when.getValues();
-
-		return actual == null ? when // ignore undefined variables
-				: !disjoint(accepted, actual) || actual.contains(Form.any) ? and()
+		return actual == null ? guard // ignore undefined variables
+				: actual.contains(Form.any) || !disjoint(accepted, actual) ? and()
 				: or();
+	}
+
+
+	@Override public Shape probe(final Field field) {
+		return field(field.getIRI(), field.getShape().map(this));
+	}
+
+
+	@Override public Shape probe(final And and) {
+		return and(and.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
+	}
+
+	@Override public Shape probe(final Or or) {
+		return or(or.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
+	}
+
+	@Override public Shape probe(final When when) {
+		return when(
+				when.getTest().map(this),
+				when.getPass().map(this),
+				when.getFail().map(this)
+		);
 	}
 
 }

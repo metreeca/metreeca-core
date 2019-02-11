@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -18,11 +18,7 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.Shift;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.shifts.Count;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.shifts.Table;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
@@ -38,28 +34,21 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
-import static com.metreeca.form.shapes.Custom.custom;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Default.dflt;
-import static com.metreeca.form.shapes.Group.group;
-import static com.metreeca.form.shapes.Hint.hint;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
+import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
-import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
-import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
 import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.shifts.Count.count;
-import static com.metreeca.form.shifts.Step.step;
-import static com.metreeca.form.shifts.Table.table;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.Values.*;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
 import static java.util.stream.Collectors.toList;
@@ -67,9 +56,10 @@ import static java.util.stream.Collectors.toMap;
 
 
 /**
- * IRI rewriting wrapper.
+ * IRI rewriter.
  *
- * <p>Rewrites IRIs in requests and responses to/from an internal canonical IRI {@linkplain #base(String) base}.</p>
+ * <p>Rewrites IRIs in requests and responses to/from an internal canonical IRI {@linkplain #Rewriter(String)
+ * base}.</p>
  *
  * <p>The following message components are inspected for rewritable IRIs:</p>
  *
@@ -86,27 +76,23 @@ import static java.util.stream.Collectors.toMap;
  *
  * <p><strong>Warning</strong> / This wrapper is intended to ensure data portability between development and production
  * environment and may cause severe performance degradation for large payloads: setting the canonical {@linkplain
- * #base(String) base} to the expected public server base effectively disables rewriting in production.</p>
+ * #Rewriter(String) base} to the expected public server base effectively disables rewriting in production.</p>
  */
 public final class Rewriter implements Wrapper {
 
-	private String base;
+	private final String base;
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Configures the canonical IRI base.
+	 * Creates a IRI rewriter.
 	 *
 	 * @param base the canonical internal IRI base mapped to/from this rewriter; empty for no rewriting
-	 *
-	 * @return this rewriter
 	 *
 	 * @throws NullPointerException     if {@code base} is null
 	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or ends with a {@linkplain
 	 *                                  Character#isUnicodeIdentifierPart(char) Unicode identifier character}
 	 */
-	public Rewriter base(final String base) {
+	public Rewriter(final String base) {
 
 		if ( base == null ) {
 			throw new NullPointerException("null base");
@@ -121,8 +107,6 @@ public final class Rewriter implements Wrapper {
 		}
 
 		this.base=base;
-
-		return this;
 	}
 
 
@@ -159,7 +143,7 @@ public final class Rewriter implements Wrapper {
 
 				.base(engine.rewrite(request.base()))
 
-				.map(r -> {    // re-encode rewritten query only if it was actually encoded
+				.map(r -> { // re-encode rewritten query only if it was actually encoded
 
 					final String encoded=r.query();
 					final String decoded=decode(encoded);
@@ -173,7 +157,7 @@ public final class Rewriter implements Wrapper {
 
 				.shape(engine.rewrite(request.shape()))
 
-				.body(rdf()).pipe(model -> engine.rewrite(model, engine::rewrite));
+				.pipe(rdf(), model -> Value(engine.rewrite(model, engine::rewrite)));
 	}
 
 	private Response rewrite(final Response response, final Engine engine) {
@@ -187,7 +171,7 @@ public final class Rewriter implements Wrapper {
 
 				.shape(engine.rewrite(response.shape()))
 
-				.body(rdf()).pipe(model -> engine.rewrite(model, engine::rewrite));
+				.pipe(rdf(), model -> Value(engine.rewrite(model, engine::rewrite)));
 	}
 
 
@@ -199,7 +183,6 @@ public final class Rewriter implements Wrapper {
 		private final String target;
 
 		private final ShapeEngine shapes;
-		private final ShiftEngine shifts;
 
 
 		private Engine(final String source, final String target) {
@@ -208,16 +191,11 @@ public final class Rewriter implements Wrapper {
 			this.target=target;
 
 			this.shapes=new ShapeEngine();
-			this.shifts=new ShiftEngine();
 		}
 
 
 		private Shape rewrite(final Shape shape) {
-			return shape.accept(shapes);
-		}
-
-		private Shift rewrite(final Shift shift) {
-			return shift.accept(shifts);
+			return shape.map(shapes);
 		}
 
 
@@ -250,7 +228,9 @@ public final class Rewriter implements Wrapper {
 		}
 
 		private IRI rewrite(final IRI iri) {
-			return iri == null ? null : iri(rewrite(iri.toString()));
+			return iri == null ? null
+					: direct(iri) ? iri(rewrite(iri.stringValue()))
+					: inverse(iri(rewrite(iri.stringValue())));
 		}
 
 		private String rewrite(final CharSequence string) {
@@ -258,111 +238,84 @@ public final class Rewriter implements Wrapper {
 		}
 
 
-		//// !!! as interfaces /////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		private final class ShapeEngine extends Shape.Probe<Shape> {
+		private final class ShapeEngine implements Shape.Probe<Shape> {
 
-			@Override public Datatype visit(final Datatype datatype) {
+			@Override public Meta probe(final Meta meta) {
+				return meta(rewrite(meta.getIRI()), rewrite(meta.getValue()));
+			}
+
+			@Override public Guard probe(final Guard guard) {
+				return guard(rewrite(guard.getAxis()), rewrite(guard.getValues(), Engine.this::rewrite));
+			}
+
+
+			@Override public Datatype probe(final Datatype datatype) {
 				return datatype(rewrite(datatype.getIRI()));
 			}
 
-			@Override public Clazz visit(final Clazz clazz) {
+			@Override public Clazz probe(final Clazz clazz) {
 				return clazz(rewrite(clazz.getIRI()));
 			}
 
-			@Override public MinExclusive visit(final MinExclusive minExclusive) {
+			@Override public MinExclusive probe(final MinExclusive minExclusive) {
 				return minExclusive(rewrite(minExclusive.getValue()));
 			}
 
-			@Override public MaxExclusive visit(final MaxExclusive maxExclusive) {
+			@Override public MaxExclusive probe(final MaxExclusive maxExclusive) {
 				return maxExclusive(rewrite(maxExclusive.getValue()));
 			}
 
-			@Override public MinInclusive visit(final MinInclusive minInclusive) {
+			@Override public MinInclusive probe(final MinInclusive minInclusive) {
 				return minInclusive(rewrite(minInclusive.getValue()));
 			}
 
-			@Override public MaxInclusive visit(final MaxInclusive maxInclusive) {
+			@Override public MaxInclusive probe(final MaxInclusive maxInclusive) {
 				return maxInclusive(rewrite(maxInclusive.getValue()));
 			}
 
-			@Override public Custom visit(final Custom custom) {
-				return custom(custom.getLevel(), custom.getMessage(), rewrite(custom.getQuery()));
-			}
+			@Override public Shape probe(final MinLength minLength) { return minLength; }
 
-			@Override public In visit(final In in) {
+			@Override public Shape probe(final MaxLength maxLength) { return maxLength; }
+
+			@Override public Shape probe(final com.metreeca.form.shapes.Pattern pattern) { return pattern; }
+
+			@Override public Shape probe(final Like like) { return like; }
+
+
+			@Override public Shape probe(final MinCount minCount) { return minCount; }
+
+			@Override public Shape probe(final MaxCount maxCount) { return maxCount; }
+
+			@Override public In probe(final In in) {
 				return in(rewrite(in.getValues(), Engine.this::rewrite));
 			}
 
-			@Override public All visit(final All all) {
+			@Override public All probe(final All all) {
 				return all(rewrite(all.getValues(), Engine.this::rewrite));
 			}
 
-			@Override public Any visit(final Any any) {
+			@Override public Any probe(final Any any) {
 				return any(rewrite(any.getValues(), Engine.this::rewrite));
 			}
 
-			@Override public Trait visit(final Trait trait) {
-				return trait(shifts.visit(trait.getStep()), rewrite(trait.getShape()));
+
+			@Override public Field probe(final Field field) {
+				return field(rewrite(field.getIRI()), rewrite(field.getShape()));
 			}
 
-			@Override public Virtual visit(final Virtual virtual) {
-				return virtual(shapes.visit(virtual.getTrait()), rewrite(virtual.getShift()));
+
+			@Override public And probe(final And and) {
+				return and(and.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
 			}
 
-			@Override public And visit(final And and) {
-				return and(and.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
+			@Override public Or probe(final Or or) {
+				return or(or.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
 			}
 
-			@Override public Or visit(final Or or) {
-				return or(or.getShapes().stream().map(shape -> shape.accept(this)).collect(toList()));
-			}
-
-			@Override public Test visit(final Test test) {
-				return test(rewrite(test.getTest()), rewrite(test.getPass()), rewrite(test.getFail()));
-			}
-
-			@Override public When visit(final When when) {
-				return when(rewrite(when.getIRI()), rewrite(when.getValues(), Engine.this::rewrite));
-			}
-
-			@Override public Default visit(final Default dflt) {
-				return dflt(rewrite(dflt.getValue()));
-			}
-
-			@Override public Hint visit(final Hint hint) {
-				return hint(rewrite(hint.getIRI()));
-			}
-
-			@Override public Group visit(final Group group) {
-				return group(rewrite(group.getShape()));
-			}
-
-			@Override protected Shape fallback(final Shape shape) {
-				return shape;
-			}
-
-		}
-
-		private final class ShiftEngine extends Shift.Probe<Shift> {
-
-			@Override public Step visit(final Step step) {
-				return step(rewrite(step.getIRI()), step.isInverse());
-			}
-
-			@Override public Count visit(final Count count) {
-				return count(count.getShift().accept(this));
-			}
-
-			@Override public Table visit(final Table table) {
-				return table(table.getFields().entrySet().stream().collect(toMap(
-						entry -> shapes.visit(entry.getKey()),
-						entry -> rewrite(entry.getValue())
-				)));
-			}
-
-			@Override protected Shift fallback(final Shift shift) {
-				return shift;
+			@Override public When probe(final When when) {
+				return when(rewrite(when.getTest()), rewrite(when.getPass()), rewrite(when.getFail()));
 			}
 
 		}

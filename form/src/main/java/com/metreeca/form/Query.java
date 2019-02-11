@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -20,13 +20,6 @@ package com.metreeca.form;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
-import com.metreeca.form.shifts.Step;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
 
 
 /**
@@ -34,90 +27,25 @@ import static java.util.Collections.unmodifiableList;
  */
 public interface Query {
 
-	public static Order increasing(final Step... steps) {
-		return new Order(asList(steps), false);
-	}
-
-	public static Order decreasing(final Step... steps) {
-		return new Order(asList(steps), true);
-	}
-
-
-	public <V> V accept(final Probe<V> probe);
+	public <V> V map(final Probe<V> probe);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final class Order {
+	/**
+	 * Query probe.
+	 *
+	 * <p>Generates a result by probing queries.</p>
+	 *
+	 * @param <V> the type of the generated result value
+	 */
+	public static interface Probe<V> {
 
-		private final List<Step> path;
-		private final boolean inverse;
+		public V probe(final Edges edges);
 
+		public V probe(final Stats stats);
 
-		public Order(final List<Step> path, final boolean inverse) {
-
-			if ( path == null ) {
-				throw new NullPointerException("null path");
-			}
-
-			if ( path.contains(null) ) {
-				throw new IllegalArgumentException("illegal path element");
-			}
-
-			this.path=new ArrayList<>(path);
-			this.inverse=inverse;
-		}
-
-
-		public List<Step> getPath() {
-			return unmodifiableList(path);
-		}
-
-		public boolean isInverse() {
-			return inverse;
-		}
-
-
-		@Override public boolean equals(final Object object) {
-			return this == object || object instanceof Order
-					&& path.equals(((Order)object).path)
-					&& inverse == ((Order)object).inverse;
-		}
-
-		@Override public int hashCode() {
-			return path.hashCode()^Boolean.hashCode(inverse);
-		}
-
-		@Override public String toString() {
-
-			final StringBuilder builder=new StringBuilder(20*path.size());
-
-			for (final Step step : path) {
-
-				if ( builder.length() > 0 ) {
-					builder.append('/');
-				}
-
-				builder.append(step.format());
-			}
-
-			return builder.insert(0, inverse ? "-" : "+").toString();
-		}
-
-	}
-
-	public abstract static class Probe<V> {
-
-		public V visit(final Edges edges) { return fallback(edges); }
-
-		public V visit(final Stats stats) { return fallback(stats); }
-
-		public V visit(final Items items) { return fallback(items); }
-
-
-		protected V fallback(final Query query) {
-			throw new UnsupportedOperationException("unsupported query type ["+query.getClass().getName()+"]");
-		}
+		public V probe(final Items items);
 
 	}
 

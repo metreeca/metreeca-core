@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -18,114 +18,78 @@
 package com.metreeca.form;
 
 
-import com.metreeca.form.shifts.Step;
+import com.metreeca.form.things.Values;
 
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.BinaryOperator;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
+import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
+import static com.metreeca.form.things.Values.statement;
 
 import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.*;
+import static java.util.Collections.unmodifiableSet;
+import static java.util.stream.Collectors.joining;
 
 
 /**
- * Value-property map.
- *
- * @param <T> the type of the mapped properties
+ * Value shape validation report.
  */
-public final class Frame<T> {
+public final class Frame {
 
-	@SafeVarargs public static <T> Frame<T> frame(final Value value, final Map.Entry<Step, T>... slots) {
-		return frame(value, map(slots));
+	public static Frame frame(final Value value) {
+		return new Frame(value, set(), map());
 	}
 
-	public static <T> Frame<T> frame(final Value value, final Map<Step, T> slots) {
-		return new Frame<>(value, slots);
+	public static Frame frame(final Value value, final Collection<Issue> issues) {
+		return new Frame(value, issues, map());
 	}
 
-	public static <T> Map.Entry<Step, T> slot(final Step step, final T value) {
-		return entry(step, value);
-	}
-
-
-	/**
-	 * Merges a collection of frames.
-	 *
-	 * @param frames    the frames to be merged
-	 * @param collector a collector transforming a stream of values into a merged value (usually a {@linkplain
-	 *                  Collectors#reducing} collector)
-	 * @param <T>       the  type  the frame properties
-	 *
-	 * @return a merged collection of frames where each frame value appears only once
-	 */
-	public static <T> Collection<Frame<T>> frames(final Collection<Frame<T>> frames, final Collector<T, ?, T> collector) {
-
-		if ( frames == null ) {
-			throw new NullPointerException("null frames");
-		}
-
-		if ( collector == null ) {
-			throw new NullPointerException("null collector");
-		}
-
-		// slot maps merge operator
-
-		final BinaryOperator<Map<Step, T>> operator=(x, y) -> Stream.of(x, y)
-				.flatMap(slot -> slot.entrySet().stream())
-				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
-						mapping(Map.Entry::getValue, collector)));
-
-		// group slot maps by frame value and merge
-
-		final Map<Value, Map<Step, T>> map=frames.stream().collect(
-				groupingBy(Frame::getValue, LinkedHashMap::new,
-						mapping(Frame::getSlots, reducing(map(), operator))));
-
-		// convert back to frames
-
-		return map.entrySet().stream()
-				.map(e -> frame(e.getKey(), e.getValue()))
-				.collect(toList());
+	public static Frame frame(final Value value, final Collection<Issue> issues, final Map<IRI, Focus> fields) {
+		return new Frame(value, issues, fields);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Value value;
-	private final Map<Step, T> slots;
+	private final Set<Issue> issues;
+	private final Map<IRI, Focus> fields;
 
 
-	public Frame(final Value value, final Map<Step, T> slots) {
+	private Frame(final Value value, final Collection<Issue> issues, final Map<IRI, Focus> fields) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
 		}
 
-		if ( slots == null ) {
-			throw new NullPointerException("null slots");
+		if ( issues == null ) {
+			throw new NullPointerException("null issues");
 		}
 
-		if ( slots.containsKey(null) ) {
-			throw new NullPointerException("null slot key");
+		if ( issues.contains(null) ) {
+			throw new NullPointerException("null issue");
 		}
 
-		if ( slots.containsValue(null) ) {
-			throw new NullPointerException("null slot value");
+		if ( fields == null ) {
+			throw new NullPointerException("null fields");
+		}
+
+		if ( fields.containsKey(null) ) {
+			throw new NullPointerException("null field IRI");
+		}
+
+		if ( fields.containsValue(null) ) {
+			throw new NullPointerException("null field focus report");
 		}
 
 		this.value=value;
-		this.slots=new LinkedHashMap<>(slots);
+		this.issues=new LinkedHashSet<>(issues);
+		this.fields=new LinkedHashMap<>(fields);
 	}
 
 
@@ -135,8 +99,72 @@ public final class Frame<T> {
 		return value;
 	}
 
-	public Map<Step, T> getSlots() {
-		return unmodifiableMap(slots);
+	public Set<Issue> getIssues() {
+		return unmodifiableSet(issues);
+	}
+
+	public Map<IRI, Focus> getFields() {
+		return unmodifiableMap(fields);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Tests if the overall severity of this report reaches an expected level.
+	 *
+	 * @param limit the expected severity level
+	 *
+	 * @return {@code true} if at least a issue or a field reaches the severity {@code limit}
+	 *
+	 * @throws NullPointerException if {@code limit} is null
+	 */
+	public boolean assess(final Issue.Level limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		return issues.stream().anyMatch(issue -> issue.assess(limit))
+				|| fields.values().stream().anyMatch(trace -> trace.assess(limit));
+	}
+
+	/**
+	 * Computes the statement outline of this report.
+	 *
+	 * @return a stream of statements recursively generated from fields in this report
+	 */
+	public Stream<Statement> outline() {
+		return fields.entrySet().stream().flatMap(field -> {
+
+			final IRI iri=field.getKey();
+			final boolean direct=Values.direct(iri);
+
+			final Focus focus=field.getValue();
+
+			final Stream<Value> targets=focus.getFrames().stream().map(frame -> frame.value);
+
+			return Stream.concat(
+
+					direct ? direct(iri, targets) : inverse(Values.inverse(iri), targets),
+
+					focus.outline()
+
+			);
+		});
+	}
+
+
+	private Stream<Statement> direct(final IRI iri, final Stream<Value> targets) {
+		return value instanceof Resource
+				? targets.map(target -> statement((Resource)value, iri, target))
+				: Stream.empty();
+	}
+
+	private Stream<Statement> inverse(final IRI iri, final Stream<Value> targets) {
+		return targets
+				.filter(target -> target instanceof Resource)
+				.map(target -> statement((Resource)target, iri, value));
 	}
 
 
@@ -144,23 +172,24 @@ public final class Frame<T> {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Frame
-				&& value.equals(((Frame<?>)object).value)
-				&& slots.equals(((Frame<?>)object).slots);
+				&& value.equals(((Frame)object).value)
+				&& issues.equals(((Frame)object).issues)
+				&& fields.equals(((Frame)object).fields);
 	}
 
 	@Override public int hashCode() {
-		return value.hashCode()^slots.hashCode();
+		return value.hashCode()^issues.hashCode()^fields.hashCode();
 	}
 
 	@Override public String toString() {
-		return format(value)+" {"+(slots.isEmpty() ? "" : indent(slots.entrySet().stream().map(e -> {
-
-			final String edge=e.getKey().toString();
-			final String value=e.getValue().toString();
-
-			return edge+" :\n\n"+indent(value);
-
-		}).collect(joining("\n\n", "\n\n", "\n\n"))))+"}";
+		return format(value)+" "+(issues.isEmpty() && fields.isEmpty() ? "{}" : "{\n"+indent((
+				issues.isEmpty() ? "" : issues.stream().map(Issue::toString)
+						.collect(joining("\n\n", "\n", "\n"))
+		)+(
+				fields.isEmpty() ? "" : fields.entrySet().stream()
+						.map(e -> format(e.getKey())+" :\n\n"+indent(e.getValue().toString()))
+						.collect(joining("\n\n", "\n", "\n"))
+		))+"\n}");
 	}
 
 }

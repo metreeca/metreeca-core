@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -21,8 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.shifts.Step;
-import com.metreeca.form.things.Values;
+import com.metreeca.form.probes.Redactor;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -40,14 +39,15 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static com.metreeca.form.Shape.mode;
-import static com.metreeca.form.shapes.Alias.aliases;
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.Trait.traits;
+import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.codecs.JSON.encode;
 import static com.metreeca.form.codecs.JSON.field;
 import static com.metreeca.form.codecs.JSON.object;
+import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.inverse;
 
 import static java.util.stream.Collectors.toList;
 
@@ -105,9 +105,10 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 			final Shape driver=(shape == null) ? null : shape
 
-					.accept(mode(Form.verify)) // remove internal filtering shapes
-					.accept(new Inferencer()) // infer implicit constraints to drive json shorthands
-					.accept(new Optimizer());
+					.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
+					.map(new Optimizer())
+					.map(new Inferencer()) // infer implicit constraints to drive json shorthands
+					.map(new Optimizer());
 
 			final Predicate<Resource> trail=resource -> false;
 
@@ -152,9 +153,9 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 		final String id=resource.stringValue();
 		final Optional<IRI> datatype=datatype(shape);
-		final Map<Step, Shape> traits=traits(shape);
+		final Map<IRI, Shape> fields=fields(shape);
 
-		if ( datatype.filter(iri -> iri.equals(Values.IRIType)).isPresent() && traits.isEmpty() ) {
+		if ( datatype.filter(iri -> iri.equals(Form.IRIType)).isPresent() && fields.isEmpty() ) {
 
 			return id; // inline proved leaf IRI
 
@@ -164,7 +165,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 			object.put("this", resource instanceof BNode ? "_:"+id : id);
 
-			if ( !trail.test(resource) ) { // not a back-reference to an enclosing copy of self -> include traits
+			if ( !trail.test(resource) ) { // not a back-reference to an enclosing copy of self -> include fields
 
 				final Collection<Resource> references=new ArrayList<>();
 
@@ -178,31 +179,30 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 				};
 
-				if ( shape == null ) { // write all direct traits
+				if ( shape == null ) { // write all direct fields
 
 					for (final IRI predicate : model.filter(resource, null, null).predicates()) {
 						object.put(predicate.stringValue(),
 								json(model.filter(resource, predicate, null).objects(), null, nestedTrail));
 					}
 
-				} else { // write direct/inverse traits as specified by the shape
+				} else { // write direct/inverse fields as specified by the shape
 
-					final Map<Step, String> aliases=aliases(shape, JSONCodec.Reserved);
+					final Map<IRI, String> aliases=aliases(shape, JSONCodec.Reserved);
 
-					for (final Map.Entry<Step, Shape> entry : traits.entrySet()) {
+					for (final Map.Entry<IRI, Shape> entry : fields.entrySet()) {
 
-						final Step step=entry.getKey();
+						final IRI predicate=entry.getKey();
+						final boolean direct=direct(predicate);
+
 						final Shape nestedShape=entry.getValue();
 
-						final IRI predicate=step.getIRI();
-						final boolean inverse=step.isInverse();
+						final String alias=Optional.ofNullable(aliases.get(entry.getKey()))
+								.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue());
 
-						final String alias=Optional.ofNullable(aliases.get(step))
-								.orElseGet(() -> (inverse ? "^" : "")+predicate.stringValue());
-
-						final Collection<? extends Value> values=inverse
-								? model.filter(null, predicate, resource).subjects()
-								: model.filter(resource, predicate, null).objects();
+						final Collection<? extends Value> values=direct
+								? model.filter(resource, predicate, null).objects()
+								: model.filter(null, inverse(predicate), resource).subjects();
 
 						if ( !values.isEmpty() ) { // omit null value and empty arrays
 
@@ -215,7 +215,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 				}
 
 				datatype // drop id field if proved to be a blank node without back-references
-						.filter(type -> type.equals(Values.BNodeType) && references.isEmpty())
+						.filter(type -> type.equals(Form.BNodeType) && references.isEmpty())
 						.ifPresent(type -> object.remove("this"));
 
 			}

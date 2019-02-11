@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -18,6 +18,7 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Traverser;
 
 import java.util.Optional;
 import java.util.function.BinaryOperator;
@@ -34,15 +35,18 @@ public final class MinCount implements Shape {
 		return new MinCount(limit);
 	}
 
+
 	public static Optional<Integer> minCount(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.accept(new MinCountProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MinCountProbe()));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final int limit;
 
 
-	public MinCount(final int limit) {
+	private MinCount(final int limit) {
 
 		if ( limit < 1 ) {
 			throw new IllegalArgumentException("illegal limit ["+limit+"]");
@@ -52,18 +56,22 @@ public final class MinCount implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public int getLimit() {
 		return limit;
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
@@ -83,7 +91,7 @@ public final class MinCount implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class MinCountProbe extends Probe<Integer> {
+	private static final class MinCountProbe extends Traverser<Integer> {
 
 		// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
 
@@ -91,30 +99,30 @@ public final class MinCount implements Shape {
 		private static final BinaryOperator<Integer> max=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) >= 0 ? x : y;
 
 
-		@Override public Integer visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
-		@Override public Integer visit(final MinCount minCount) {
+		@Override public Integer probe(final MinCount minCount) {
 			return minCount.getLimit();
 		}
 
-		@Override public Integer visit(final And and) {
+
+		@Override public Integer probe(final Field field) { return null; }
+
+
+		@Override public Integer probe(final And and) {
 			return and.getShapes().stream()
-					.map(shape -> shape.accept(this))
+					.map(shape -> shape.map(this))
 					.reduce(null, max);
 		}
 
-		@Override public Integer visit(final Or or) {
+		@Override public Integer probe(final Or or) {
 			return or.getShapes().stream()
-					.map(shape -> shape.accept(this))
+					.map(shape -> shape.map(this))
 					.reduce(null, min);
 		}
 
-		@Override public Integer visit(final Test test) {
+		@Override public Integer probe(final When when) {
 			return min.apply(
-					test.getPass().accept(this),
-					test.getFail().accept(this));
+					when.getPass().map(this),
+					when.getFail().map(this));
 		}
 
 	}

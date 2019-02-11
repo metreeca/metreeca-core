@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca.
  *
@@ -18,101 +18,142 @@
 package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Traverser;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Strings.indent;
-import static com.metreeca.form.things.Values.format;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.joining;
 
 
 /**
- * Parametric logical constraint.
+ * Conditional logical constraint.
  *
- * <p>States that the focus set meets this shape only if at least one of the values of an externally defined variable
- * is
- * included in a given set of target values.</p>
+ * <p>States that the focus set is consistent either with a {@linkplain #getPass() positive} shape, if consistent also
+ * with a {@linkplain #getTest() test} shape, or with a {@linkplain #getFail() negative} shape, otherwise.</p>
  *
- * @see com.metreeca.form.probes.Redactor
+ *
+ * <p><strong>Warning</strong> / Test shapes are currently limited to non-filtering constraints, that is to parametric
+ * {@linkplain Guard guards}, logical operators and annotations: full conditional shape matching will be evaluated for
+ * future releases.</p>
  */
 public final class When implements Shape {
 
-	public static When when(final IRI variable, final Value... values) {
-		return when(variable, asList(values));
+	public static When when(final Shape test, final Shape pass) {
+		return new When(test, pass, and());
 	}
 
-	public static When when(final IRI variable, final Collection<? extends Value> values) {
-		return new When(variable, values);
+	public static When when(final Shape test, final Shape pass, final Shape fail) {
+		return new When(test, pass, fail);
 	}
 
 
-	private final IRI iri;
-	private final Set<Value> values;
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Shape test;
+	private final Shape pass;
+	private final Shape fail;
 
 
-	public When(final IRI iri, final Collection<? extends Value> values) {
+	private When(final Shape test, final Shape pass, final Shape fail) {
 
-		if ( iri == null ) {
-			throw new NullPointerException("null variable IRI");
+		if ( test == null ) {
+			throw new NullPointerException("null test shape");
 		}
 
-		if ( values == null ) {
-			throw new NullPointerException("null values");
+		if ( pass == null ) {
+			throw new NullPointerException("null pass shape");
 		}
 
-		if ( values.isEmpty() ) {
-			throw new IllegalArgumentException("empty values");
+		if ( fail == null ) {
+			throw new NullPointerException("null fail shape");
 		}
 
-		if ( values.contains(null) ) {
-			throw new NullPointerException("null value");
+		if ( test.map(new FilteringProbe())) {
+			throw new UnsupportedOperationException("test shape are limited to non-filtering constraints");
 		}
 
-		this.iri=iri;
-		this.values=new HashSet<>(values);
+		this.test=test;
+		this.pass=pass;
+		this.fail=fail;
 	}
 
 
-	public IRI getIRI() {
-		return iri;
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Shape getTest() {
+		return test;
 	}
 
-	public Set<Value> getValues() {
-		return unmodifiableSet(values);
+	public Shape getPass() {
+		return pass;
+	}
+
+	public Shape getFail() {
+		return fail;
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof When
-				&& iri.equals(((When)object).iri)
-				&& values.equals(((When)object).values);
+				&& test.equals(((When)object).test)
+				&& pass.equals(((When)object).pass)
+				&& fail.equals(((When)object).fail);
 	}
 
 	@Override public int hashCode() {
-		return iri.hashCode()^values.hashCode();
+		return test.hashCode()^pass.hashCode()^fail.hashCode();
 	}
 
 	@Override public String toString() {
-		return "when("+format(iri)+",\n"
-				+values.stream().map(v -> indent(format(v))).collect(joining(",\n"))+"\n)";
+		return "when(\n"
+				+indent(test.toString())+",\n"
+				+indent(pass.toString())
+				+(fail.equals(and()) ? "" : ",\n"+indent(fail.toString()))
+				+"\n)";
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class FilteringProbe extends Traverser<Boolean> {
+
+		@Override public Boolean probe(final Shape shape) { return true; }
+
+
+		@Override public Boolean probe(final Meta meta) { return false; }
+
+		@Override public Boolean probe(final Guard guard) { return false; }
+
+
+		@Override public Boolean probe(final Field field) {
+			return field.getShape().map(this);
+		}
+
+		@Override public Boolean probe(final And and) {
+			return and.getShapes().stream().anyMatch(shape -> shape.map(this));
+		}
+
+		@Override public Boolean probe(final Or or) {
+			return or.getShapes().stream().anyMatch(shape -> shape.map(this));
+		}
+
+		@Override public Boolean probe(final When when) {
+			return when.getTest().map(this)
+					|| when.getPass().map(this)
+					|| when.getFail().map(this);
+		}
+
 	}
 
 }
