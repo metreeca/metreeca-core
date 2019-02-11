@@ -17,12 +17,15 @@
 
 package com.metreeca.form.shapes;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Inspector;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,21 +38,27 @@ import static java.util.stream.Collectors.toSet;
  * <p>States that each term in the focus set has a given extended RDF datatype.</p>
  *
  * <p>For validation purposes IRI references and blank nodes are considered to be respectively of {@link
- * Values#IRIType}
- * {@link Values#BNodeType} datatype</p>
+ * Form#IRIType} and {@link Form#BNodeType} datatype.</p>
  */
 public final class Datatype implements Shape {
 
 	/**
-	 * Creates a type value constraint.
+	 * Creates a datatype constraint.
 	 *
-	 * Beyond literal datatypes, the datatype {@code iri} may be one of the following extend values:
+	 * <p>Beyond literal datatypes, the following extend values are supported:</p>
 	 *
-	 * - {@link Values#BNodeType} for blank nodes; - {@link Values#IRIType} for IRI references; - {@link
-	 * Values#ResoureType} for blank nodes or IRI references; - {@link Values#LiteralType} or {@link RDFS#LITERAL} for
-	 * any literal.
+	 * <ul>
+	 *     <li>{@link Form#BNodeType} for blank nodes;</li>
+	 *     <li>{@link Form#IRIType} for IRI references;</li>
+	 *     <li>{@link Form#ResourceType} for blank nodes or IRI references;</li>
+	 *     <li>{@link Form#LiteralType} or {@link RDFS#LITERAL} for any literal.</li>
+	 * </ul>
 	 *
 	 * @param iri the expected extended datatype
+	 *
+	 * @return a new datatype constraint for the provided {@code iri}
+	 *
+	 * @throws NullPointerException if {@code iri} is null
 	 */
 	public static Datatype datatype(final IRI iri) {
 
@@ -61,7 +70,7 @@ public final class Datatype implements Shape {
 	}
 
 	public static Optional<IRI> datatype(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.accept(new DatatypeProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new DatatypeProbe()));
 	}
 
 
@@ -84,13 +93,13 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 
@@ -110,21 +119,17 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class DatatypeProbe extends Probe<IRI> {
+	private static final class DatatypeProbe extends Inspector<IRI> {
 
-		@Override public IRI visit(final Group group) {
-			return group.getShape().accept(this);
-		}
-
-		@Override public IRI visit(final Datatype datatype) {
+		@Override public IRI probe(final Datatype datatype) {
 			return datatype.getIRI();
 		}
 
-		@Override public IRI visit(final And and) {
+		@Override public IRI probe(final And and) {
 
 			final Set<IRI> iris=and.getShapes().stream()
-					.map(shape -> shape.accept(this))
-					.filter(iri -> iri != null)
+					.map(shape -> shape.map(this))
+					.filter(Objects::nonNull)
 					.collect(toSet());
 
 			return iris.size() == 1 ? iris.iterator().next() : null;

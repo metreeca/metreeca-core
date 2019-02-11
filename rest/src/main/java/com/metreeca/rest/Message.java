@@ -18,6 +18,7 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.shapes.And;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -26,10 +27,10 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.wild;
+import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
-import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.Result.Value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -44,6 +45,9 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
  *
+ * <p>Messages are associated with possibly multiple {@linkplain #body(Format) body} representations managed by message
+ * body {@linkplain Format formats}.</p>
+ *
  * @param <T> the self-bounded message type supporting fluent setters
  */
 @SuppressWarnings("unchecked")
@@ -52,14 +56,38 @@ public abstract class Message<T extends Message<T>> {
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 
 
+	/**
+	 * Creates a {@code Link} header value.
+	 *
+	 * @param resource the target resource to be linked through the header
+	 * @param relation the relation with the target {@code resource}
+	 *
+	 * @return the header value linking the target {@code resource} with the given {@code relation}
+	 *
+	 * @throws NullPointerException if either {@code resource} or {@code relation} is null
+	 */
+	public static String link(final IRI resource, final String relation) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( relation == null ) {
+			throw new NullPointerException("null relation");
+		}
+
+		return String.format("<%s>; rel=\"%s\"", resource, relation);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape=wild();
+	private Shape shape=pass();
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
 	private final Map<Format<?>, Object> cache=new HashMap<>();
-	private final Map<Format<?>, Function<Message<?>, Result<?>>> pipes=new HashMap<>();
+	private final Map<Format<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
 
 
 	private T self() { return (T)this; }
@@ -72,29 +100,15 @@ public abstract class Message<T extends Message<T>> {
 	 */
 	public abstract IRI item();
 
+	/**
+	 * Retrieves the originating request for this message.
+	 *
+	 * @return the originating request for this message
+	 */
+	public abstract Request request();
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Casts this message to a specific message type.
-	 *
-	 * @param clazz the target message class
-	 * @param <C>   the target message type
-	 *
-	 * @return an optional containing this message cast to the target type, if the this message is an instance of {@code
-	 * clazz}; an empty optional, otherwise
-	 *
-	 * @throws NullPointerException if {@code clazz} is null
-	 */
-	public <C extends Message<?>> Optional<C> as(final Class<C> clazz) {
-
-		if ( clazz == null ) {
-			throw new NullPointerException("null clazz");
-		}
-
-		return clazz.isInstance(this) ? Optional.of(clazz.cast(this)) : Optional.empty();
-	}
-
 
 	/**
 	 * Maps this message.
@@ -325,7 +339,8 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the linked data shape.
 	 *
-	 * @return the linked data shape associated to this message
+	 * @return the linked data shape associated to this message; defaults to the {@linkplain And#pass() wildcard}
+	 * shape
 	 */
 	public Shape shape() {
 		return shape;
@@ -353,22 +368,109 @@ public abstract class Message<T extends Message<T>> {
 
 
 	/**
-	 * Retrieves a structured body.
+	 * Retrieves a body representation.
 	 *
-	 * @param format the body format managing the required body representation
-	 * @param <V>    the type of the structured message body managed by the format
+	 * @param format the body format managing the body representation to be retrieved
+	 * @param <V>    the type of the body representation managed by {@code format}
 	 *
-	 * @return a structured message body for this message
+	 * @return a result providing access to the body representation managed by {@code format}, if one was successfully
+	 * retrieved from this message; a result providing access to the format processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code format} is null
 	 */
-	public <V> Body<V> body(final Format<V> format) {
+	public <V> Result<V, Failure> body(final Format<V> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
 		}
 
-		return new Body<>(format);
+		final V cached=(V)cache.get(format);
+
+		return cached != null ? Value(cached) : pipes.getOrDefault(format, format::get).apply(self()).value(
+
+				value -> {
+
+					cache.put(format, value);
+
+					return (V)value;
+
+				}
+
+		);
+
+	}
+
+	/**
+	 * Configures a body representation.
+	 *
+	 * <p>Future calls to {@link #body(Format)} with the same format will return the specified value, rather than the
+	 * value {@linkplain Format#get(Message) retrieved} from this message by format.</p>
+	 *
+	 * @param format the body format managing the body representation to be configured
+	 * @param value  the body representation to be associated with {@code format}
+	 * @param <V>    the type of the body representation managed by {@code format}
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException  if either {@code format} or {@code value} is null
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
+	 */
+	public <V> T body(final Format<V> format, final V value) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		if ( !cache.isEmpty() ) {
+			throw new IllegalStateException("message body already retrieved");
+		}
+
+		pipes.put(format, message -> Value(value));
+
+		return format.set(self());
+	}
+
+
+	/**
+	 * Process a body representation.
+	 *
+	 * <p>Future calls to {@link #body(Format)} with the same format will pipe the value either explicitly {@linkplain
+	 * #body(Format, Object) set} or {@linkplain Format#get(Message) retrieved} on demand by the format through a
+	 * result-returning processing function.</p>
+	 *
+	 * <p><strong>Warning</strong> / Processing is performed on demand, as final consumer eventually retrieves the
+	 * processed message body: if {@code mapper} relies on information retrieved from the message, its current state
+	 * must be memoized, before it's possibly altered by downstream wrappers.</p>
+	 *
+	 * @param format the body format managing the body representation to be processed
+	 * @param mapper the value processing function
+	 * @param <V>    the type of the body representation managed by {@code format}
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException  if either {@code format} or {@code mapper} is null
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
+	 */
+	public <V> T pipe(final Format<V> format, final Function<V, Result<V, Failure>> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		if ( !cache.isEmpty() ) {
+			throw new IllegalStateException("message body already retrieved");
+		}
+
+		pipes.compute(format, (_format, getter) -> message ->
+				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)format::get)
+						.apply(message).fold(value -> mapper.apply((V)value), Result::Error)
+		);
+
+		return self();
 	}
 
 
@@ -384,168 +486,6 @@ public abstract class Message<T extends Message<T>> {
 				.filter(value -> !value.isEmpty())
 				.distinct()
 				.collect(toList());
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * HTTP message body.
-	 *
-	 * <p>Provides a type-safe interface for structured message bodies managed by {@linkplain Format formats}.</p>
-	 *
-	 * <p>A body is associated to a message through a message body {@linkplain Format format}, responsible for
-	 * retrieving its structured value and configuring the message as a holder for structured values of the specific
-	 * format-managed type.</p>
-	 *
-	 * @param <V> the type of the data structure exposed by the message body
-	 */
-	public final class Body<V> implements Result<V> {
-
-		private final Format<V> format;
-
-
-		private Body(final Format<V> format) {
-			this.format=format;
-		}
-
-
-		/**
-		 * Configures the structured message body.
-		 *
-		 * <p>Future calls to {@link Message#body(Format)} with the same format associated to this message body will
-		 * return a message body holding the specified structured value, rather than the structured value {@linkplain
-		 * Format#get(Message) retrieved} by the format associated to this body.</p>
-		 *
-		 * <p>The message this body belongs to is {@linkplain Format#set(Message) configured} for holding the
-		 * structured value according to the format associated to this body.</p>
-		 *
-		 * @param value the structured value for this body
-		 *
-		 * @return the message this body belongs to
-		 *
-		 * @throws NullPointerException  if {@code value} is null
-		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
-		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
-		 */
-		public T set(final V value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			if ( !cache.isEmpty() ) {
-				throw new IllegalStateException("message body retrieved");
-			}
-
-			pipes.put(format, message -> value(value));
-
-			return format.set(self());
-		}
-
-
-		/**
-		 * Filters the structured value of this body.
-		 *
-		 * <p>Future calls to getter {@linkplain Result result} methods on this body will pipe the structured value
-		 * either explicitly {@linkplain #set(Object) set} or {@linkplain Format#get(Message) retrieved} on demand by
-		 * the format associated to this body through a filtering function.</p>
-		 *
-		 * <p><strong>Warning</strong> / Filtering is performed on demand, as final consumer eventually retrieves the
-		 * filtered message body: if {@code mapper} relies on information retrieved from the message, its current state
-		 * must be memoized, before it's possibly altered by downstream wrappers.</p>
-		 *
-		 * @param mapper the value filtering function
-		 *
-		 * @return the message this body belongs to
-		 *
-		 * @throws NullPointerException  if {@code mapper} is null
-		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
-		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
-		 */
-		public T pipe(final Function<V, V> mapper) {
-
-			if ( mapper == null ) {
-				throw new NullPointerException("null mapper");
-			}
-
-			if ( !cache.isEmpty() ) {
-				throw new IllegalStateException("message body already retrieved");
-			}
-
-			return flatPipe(v -> value(mapper.apply(v)));
-		}
-
-		/**
-		 * Filters the structured value of this body.
-		 *
-		 * <p>Future calls to getter {@linkplain Result result} methods on this body will pipe the structured value
-		 * either explicitly {@linkplain #set(Object) set} or {@linkplain Format#get(Message) retrieved} on demand by
-		 * the format associated to this body through a result-returning filtering function.</p>
-		 *
-		 * <p><strong>Warning</strong> / Filtering is performed on demand, as final consumer eventually retrieves the
-		 * filtered message body: if {@code mapper} relies on information retrieved from the message, its current state
-		 * must be memoized, before it's possibly altered by downstream wrappers.</p>
-		 *
-		 * @param mapper the value filtering function
-		 *
-		 * @return the message this body belongs to
-		 *
-		 * @throws NullPointerException  if {@code mapper} is null
-		 * @throws IllegalStateException if a body value was already retrieved from the message this body belongs to
-		 *                               using one the getter {@linkplain Result result} methods on one of its bodies
-		 */
-		public T flatPipe(final Function<V, Result<V>> mapper) {
-
-			if ( mapper == null ) {
-				throw new NullPointerException("null mapper");
-			}
-
-			if ( !cache.isEmpty() ) {
-				throw new IllegalStateException("message body already retrieved");
-			}
-
-			pipes.compute(format, (_format, getter) -> message ->
-					(getter != null ? getter : (Function<Message<?>, Result<?>>)format::get).apply(message)
-							.flatMap(value -> mapper.apply((V)value)));
-
-			return self();
-		}
-
-
-		/**
-		 * {@inheritDoc}
-		 *
-		 * <p>Successfully retrieved structured values handled to the {@code success} mapper are cached for future
-		 * reuse.</p>
-		 */
-		@Override public <R> R map(final Function<V, R> success, final Function<Failure<V>, R> failure) {
-
-			if ( success == null ) {
-				throw new NullPointerException("null success mapper");
-			}
-
-			if ( failure == null ) {
-				throw new NullPointerException("null failure mapper");
-			}
-
-			final V cached=(V)cache.get(format);
-
-			return cached != null ? success.apply(cached) : pipes.getOrDefault(format, format::get).apply(self()).map(
-
-					v -> {
-
-						cache.put(format, v);
-
-						return success.apply((V)v);
-
-					},
-
-					f -> failure.apply((Failure<V>)f)
-
-			);
-		}
-
 	}
 
 }

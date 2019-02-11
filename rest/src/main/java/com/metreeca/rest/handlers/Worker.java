@@ -124,7 +124,7 @@ public final class Worker implements Handler {
 		}
 
 		if ( method.equals(Request.GET) ) {
-			mappings.putIfAbsent(Request.HEAD, request -> head(request));
+			mappings.putIfAbsent(Request.HEAD, this::head);
 		}
 
 		mappings.put(method, handler);
@@ -146,8 +146,8 @@ public final class Worker implements Handler {
 
 	private Responder head(final Request request) {
 		return handle(request.method(Request.GET)).map(response -> response
-				.body(output()).set(target -> {})
-				.body(writer()).set(target -> {})
+				.body(output(), target -> {})
+				.body(writer(), target -> {})
 		);
 	}
 

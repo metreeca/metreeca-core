@@ -37,10 +37,12 @@ public final class MinExclusive implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Value value;
 
 
-	public MinExclusive(final Value value) {
+	private MinExclusive(final Value value) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
@@ -50,18 +52,22 @@ public final class MinExclusive implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Value getValue() {
 		return value;
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 

@@ -3,7 +3,7 @@ title:      REST Faceted API Search Reference
 excerpt:    REST faceted API search support and query serializations
 ---
 
-REST APIs publishing model-driven [LDP Basic Containers](https://www.w3.org/TR/ldp/#ldpc) support engine-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.
+REST APIs publishing model-driven [LDP Containers](https://www.w3.org/TR/ldp/#ldpc) support engine-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.
 
 <!-- document support for other query serializations -->
 

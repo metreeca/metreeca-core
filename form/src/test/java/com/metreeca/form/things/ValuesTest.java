@@ -31,6 +31,7 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.net.URL;
@@ -42,17 +43,15 @@ import static com.metreeca.form.Shape.*;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.MaxLength.maxLength;
+import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.shapes.Test.test;
-import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.things.Values.integer;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.form.things.Values.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.stream.Collectors.joining;
 
@@ -93,40 +92,55 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
-	public static final Shape Employee=test(
+	public static final Shape Textual=and(required(), datatype(XMLSchema.STRING));
 
-			or(
+	public static final Shape Employee=role(Manager, Salesman).then(
 
-					and(when(Form.role, Manager)),
-					and(when(Form.role, Salesman), when(Form.task, Form.create, Form.relate, Form.update))
-			),
+			clazz(term("Employee")), // implies rdf:type :Employee
 
-			and(
-					clazz(term("Employee")), // implies ?this a :Employee
-					verify(
-							server(
-									trait(RDF.TYPE, and(required(), datatype(Values.IRIType))),
-									trait(RDFS.LABEL, and(required(), datatype(XMLSchema.STRING))),
-									trait(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
-							),
-							and(
-									trait(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									trait(term("surname"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									trait(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-									trait(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
-							),
-							test(when(Form.role, Manager), and(
+			convey().then(
+					server().then(
+							field(RDF.TYPE, and(required(), datatype(Form.IRIType))),
+							field(RDFS.LABEL, Textual),
+							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
+					),
+					and(
+							field(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+							field(term("surname"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+							field(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
+							field(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
+					),
+					role(Manager).then(
 
-									trait(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
-											minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
+							field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
+									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
 
-									trait(term("supervisor"), and(optional(), datatype(Values.IRIType), clazz(term("User")))),
-									trait(term("subordinate"), and(optional(), datatype(Values.IRIType), clazz(term("User"))))
-
+							field(term("supervisor"), and(
+									optional(), datatype(Form.IRIType), clazz(term("Employee")),
+									relate().then(field(RDFS.LABEL, Textual))
+							)),
+							field(term("subordinate"), and(
+									optional(), datatype(Form.IRIType), clazz(term("Employee")),
+									relate().then(field(RDFS.LABEL, Textual))
 							))
-					)
+
+					))
+
+	);
+
+	public static final Shape Employees=role(Manager, Salesman).then(
+			hidden().then(
+					meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
+					meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
+					meta(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
+			),
+			convey().then(
+					field(RDFS.LABEL, Textual),
+					field(RDFS.COMMENT, Textual),
+					field(LDP.CONTAINS, and(multiple(), Employee))
 			)
 	);
+
 
 	private static final Map<String, String> Prefixes=new LinkedHashMap<String, String>() {{
 		put("", Namespace);
@@ -136,6 +150,7 @@ public final class ValuesTest {
 		put("xsd", XMLSchema.NAMESPACE);
 		put("ldp", LDP.NAMESPACE);
 		put("skos", SKOS.NAMESPACE);
+		put("form", Form.Namespace);
 	}};
 
 	private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
@@ -182,31 +197,6 @@ public final class ValuesTest {
 	}
 
 
-	public static Model dataset(final Class<?> master) {
-		return dataset(master, Base);
-	}
-
-	public static Model dataset(final Class<?> master, final String base) {
-
-		if ( master == null ) {
-			throw new NullPointerException("null master");
-		}
-
-		if ( base == null ) {
-			throw new NullPointerException("null base");
-		}
-
-		final String name=master.getSimpleName()+".ttl";
-		final URL url=master.getResource(name);
-
-		if ( url == null ) {
-			throw new MissingResourceException("dataset", master.getName(), name);
-		}
-
-		return dataset(url, base);
-	}
-
-
 	public static Model dataset(final URL resource) {
 		return dataset(resource, Base);
 	}
@@ -238,14 +228,14 @@ public final class ValuesTest {
 	}
 
 	public static Model decode(final String rdf, final String base) {
-		return decode(rdf, base, RDFFormat.TURTLE);
+		return decode(rdf, RDFFormat.TURTLE, base);
 	}
 
 	public static Model decode(final String rdf, final RDFFormat format) {
-		return decode(rdf, Base, format);
+		return decode(rdf, format, Base);
 	}
 
-	public static Model decode(final String rdf, final String base, final RDFFormat format) { // includes default base/prefixes
+	public static Model decode(final String rdf, final RDFFormat format, final String base) { // includes default base/prefixes
 
 		if ( rdf == null ) {
 			throw new NullPointerException("null rdf");
@@ -378,6 +368,18 @@ public final class ValuesTest {
 		}
 
 		return repository::getConnection;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testAnnotatedIRIs() {
+
+		assertThat(direct(RDF.NIL)).isTrue();
+		assertThat(direct(inverse(RDF.NIL))).isFalse();
+
+		assertThat(inverse(inverse(RDF.NIL))).as("symmetric").isEqualTo(RDF.NIL);
+
 	}
 
 

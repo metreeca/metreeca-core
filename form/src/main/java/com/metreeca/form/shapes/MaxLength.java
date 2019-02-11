@@ -33,10 +33,12 @@ public final class MaxLength implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final int limit;
 
 
-	public MaxLength(final int limit) {
+	private MaxLength(final int limit) {
 
 		if ( limit < 1 ) {
 			throw new IllegalArgumentException("illegal limit ["+limit+"]");
@@ -46,18 +48,22 @@ public final class MaxLength implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public int getLimit() {
 		return limit;
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 

@@ -21,10 +21,14 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.tray.Tray;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.TextFormat.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,107 +39,128 @@ import static java.util.Collections.singletonList;
 
 final class ServerTest {
 
-	//// Parameter Parsing /////////////////////////////////////////////////////////////////////////////////////////////
+	@Nested final class QueryParsing {
 
-	@Test void testPreprocessQueryParameters() {
-		new Tray().get(Server::new)
+		@Test void testPreprocessQueryParameters() {
+			new Tray().get(Server::new)
 
-				.wrap((Handler)request -> {
+					.wrap((Handler)request -> {
 
-					assertThat(request.parameters()).containsExactly(
-							entry("one", singletonList("1")),
-							entry("two", asList("2", "2"))
-					);
+						assertThat(request.parameters()).containsExactly(
+								entry("one", singletonList("1")),
+								entry("two", asList("2", "2"))
+						);
 
-					return request.reply(response -> response.status(OK));
+						return request.reply(response -> response.status(OK));
 
-				})
+					})
 
-				.handle(new Request()
-						.method(Request.GET)
-						.query("one=1&two=2&two=2"))
+					.handle(new Request()
+							.method(Request.GET)
+							.query("one=1&two=2&two=2"))
 
-				.accept(response -> assertThat(response.status()).isEqualTo(OK));
+					.accept(response -> assertThat(response.status()).isEqualTo(OK));
+		}
+
+		@Test void testPreprocessBodyParameters() {
+			new Tray().get(Server::new)
+
+					.wrap((Handler)request -> {
+
+						assertThat(request.parameters()).containsExactly(
+								entry("one", singletonList("1")),
+								entry("two", asList("2", "2"))
+						);
+
+						return request.reply(response -> response.status(OK));
+
+					})
+
+					.handle(new Request()
+							.method(Request.POST)
+							.header("Content-Type", "application/x-www-form-urlencoded")
+							.body(text(), "one=1&two=2&two=2"))
+
+					.accept(response -> assertThat(response.status()).isEqualTo(OK));
+		}
+
+		@Test void testPreprocessDontOverwriteExistingParameters() {
+			new Tray().get(Server::new)
+
+					.wrap((Handler)request -> {
+
+						assertThat(request.parameters()).containsExactly(
+								entry("existing", singletonList("true"))
+						);
+
+						return request.reply(response -> response.status(OK));
+
+					})
+
+					.handle(new Request()
+							.method(Request.GET)
+							.query("one=1&two=2&two=2")
+							.parameter("existing", "true"))
+
+					.accept(response -> assertThat(response.status()).isEqualTo(OK));
+		}
+
+		@Test void testPreprocessQueryOnlyOnGET() {
+			new Tray().get(Server::new)
+
+					.wrap((Handler)request -> {
+
+						assertThat(request.parameters()).isEmpty();
+
+						return request.reply(response -> response.status(OK));
+
+					})
+
+					.handle(new Request()
+							.method(Request.PUT)
+							.query("one=1&two=2&two=2"))
+
+					.accept(response -> assertThat(response.status()).isEqualTo(OK));
+		}
+
+		@Test void testPreprocessBodyOnlyOnPOST() {
+			new Tray().get(Server::new)
+
+					.wrap((Handler)request -> {
+
+						assertThat(request.parameters()).isEmpty();
+
+						return request.reply(response -> response.status(OK));
+
+					})
+
+					.handle(new Request()
+							.method(Request.PUT)
+							.header("Content-Type", "application/x-www-form-urlencoded")
+							.body(text(), "one=1&two=2&two=2"))
+
+					.accept(response -> assertThat(response.status()).isEqualTo(OK));
+		}
+
 	}
 
-	@Test void testPreprocessBodyParameters() {
-		new Tray().get(Server::new)
+	@Nested final class ErrorHandling {
 
-				.wrap((Handler)request -> {
+		@Test void testTrapStrayExceptions() {
+			new Tray().exec(() -> new Server()
 
-					assertThat(request.parameters()).containsExactly(
-							entry("one", singletonList("1")),
-							entry("two", asList("2", "2"))
-					);
+					.wrap((Request request) -> { throw new UnsupportedOperationException("stray"); })
 
-					return request.reply(response -> response.status(OK));
+					.handle(new Request())
 
-				})
+					.accept(response -> assertThat(response)
+							.hasStatus(InternalServerError)
+							.hasBody(json())
+					)
 
-				.handle(new Request()
-						.method(Request.POST)
-						.header("Content-Type", "application/x-www-form-urlencoded")
-						.body(text()).set("one=1&two=2&two=2"))
+			);
+		}
 
-				.accept(response -> assertThat(response.status()).isEqualTo(OK));
-	}
-
-	@Test void testPreprocessDontOverwriteExistingParameters() {
-		new Tray().get(Server::new)
-
-				.wrap((Handler)request -> {
-
-					assertThat(request.parameters()).containsExactly(
-							entry("existing", singletonList("true"))
-					);
-
-					return request.reply(response -> response.status(OK));
-
-				})
-
-				.handle(new Request()
-						.method(Request.GET)
-						.query("one=1&two=2&two=2")
-						.parameter("existing", "true"))
-
-				.accept(response -> assertThat(response.status()).isEqualTo(OK));
-	}
-
-	@Test void testPreprocessQueryOnlyOnGET() {
-		new Tray().get(Server::new)
-
-				.wrap((Handler)request -> {
-
-					assertThat(request.parameters()).isEmpty();
-
-					return request.reply(response -> response.status(OK));
-
-				})
-
-				.handle(new Request()
-						.method(Request.PUT)
-						.query("one=1&two=2&two=2"))
-
-				.accept(response -> assertThat(response.status()).isEqualTo(OK));
-	}
-
-	@Test void testPreprocessBodyOnlyOnPOST() {
-		new Tray().get(Server::new)
-
-				.wrap((Handler)request -> {
-
-					assertThat(request.parameters()).isEmpty();
-
-					return request.reply(response -> response.status(OK));
-
-				})
-
-				.handle(new Request()
-						.method(Request.PUT)
-						.header("Content-Type", "application/x-www-form-urlencoded")
-						.body(text()).set("one=1&two=2&two=2"))
-
-				.accept(response -> assertThat(response.status()).isEqualTo(OK));
 	}
 
 }

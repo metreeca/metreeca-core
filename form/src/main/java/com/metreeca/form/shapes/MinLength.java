@@ -34,10 +34,12 @@ public final class MinLength implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final int limit;
 
 
-	public MinLength(final int limit) {
+	private MinLength(final int limit) {
 
 		if ( limit < 1 ) {
 			throw new IllegalArgumentException("illegal limit ["+limit+"]");
@@ -47,18 +49,22 @@ public final class MinLength implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public int getLimit() {
 		return limit;
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 

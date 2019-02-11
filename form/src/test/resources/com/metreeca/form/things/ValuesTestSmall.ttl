@@ -1,6 +1,32 @@
 @prefix : <terms#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
+
+<employees-basic/> a ldp:BasicContainer; ldp:contains
+		<employees/1002>,
+		<employees/1056>,
+		<employees/1076>,
+		<employees/1088>,
+		<employees/1102>,
+		<employees/1143>,
+		<employees/1165>,
+		<employees/1166>,
+		<employees/1188>,
+		<employees/1216>,
+		<employees/1286>,
+		<employees/1323>,
+		<employees/1337>,
+		<employees/1370>,
+		<employees/1401>,
+		<employees/1501>,
+		<employees/1504>,
+		<employees/1611>,
+		<employees/1612>,
+		<employees/1619>,
+		<employees/1621>,
+		<employees/1625>,
+		<employees/1702>.
 
 <employees/1370> a :Employee ;
 	rdfs:label "Gerard Hernandez" ;

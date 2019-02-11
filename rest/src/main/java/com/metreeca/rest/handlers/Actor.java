@@ -17,395 +17,94 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.form.*;
-import com.metreeca.form.shifts.Step;
+import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.wrappers.Processor;
-import com.metreeca.tray.sys.Trace;
+import com.metreeca.rest.engines.GraphEngine;
+import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import javax.json.*;
-
-import static com.metreeca.form.Shape.*;
-import static com.metreeca.form.things.Sets.intersection;
-import static com.metreeca.form.things.Values.format;
-import static com.metreeca.rest.Handler.forbidden;
-import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.tray.Tray.tool;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.disjoint;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.groupingBy;
 
 
 /**
- * Resource actor.
+ * Linked data action handler.
  *
- * <p>Handles actions linked data resources.</p>
- *
- * <p>The abstract base:</p>
+ * <p>Handles actions on linked data resources; the base class:</p>
  *
  * <ul>
- *
- * <li>redact request and response {@linkplain Message#shape() shape} according to task/view parameters {@linkplain
- * #action(IRI, IRI) provided} by the concrete implementation;</li>
- *
- * <li>enforces role-based access control; access to the managed resource action is public, unless explicitly
- * {@linkplain #roles(Value...) limited} to specific user roles;</li>
- *
- * <li>adds default LDP {@code Link} response headers for RDF sources.</li>
- *
+ * <li>creates and caches shape-driven resource {@linkplain #engine(Shape) engines};</li>
+ * <li>handles {@link UnsupportedOperationException} thrown by engines.</li>
  * </ul>
- *
- * @param <T> the self-bounded message type supporting fluent setters
- *
- * @see <a href="https://www.w3.org/TR/ldp/#ldprs">Linked Data Platform 1.0 - §4.3 RDF Source</a>
  */
-public abstract class Actor<T extends Actor<T>> extends Delegator {
+public abstract class Actor extends Delegator {
 
-	private final Trace trace=tool(Trace.Factory);
+	private final Graph graph=tool(Graph.Factory);
+
+	private final Map<Shape, Engine> engines=new IdentityHashMap<>();
 
 
 	/**
-	 * Creates a {@code Link} header value.
+	 * Creates a shape-driven resource engine.
 	 *
-	 * @param resource the target resource to be linked through the header
-	 * @param relation the relation with the target {@code resource}
+	 * @param shape the shape driving the engine to be created
 	 *
-	 * @return the header value linking the target {@code resource} with the given {@code relation}
+	 * @return a resource engine driven by {@code shape}; the returned value is cached for future use
 	 *
-	 * @throws NullPointerException if either {@code resource} or {@code relation} is null
+	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public static String link(final IRI resource, final String relation) {
+	protected Engine engine(final Shape shape) {
 
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
 		}
 
-		if ( relation == null ) {
-			throw new NullPointerException("null relation");
+		synchronized ( engines ) {
+			return engines.computeIfAbsent(shape, _shape -> new GraphEngine(graph, _shape));
 		}
-
-		return String.format("<%s>; rel=\"%s\"", resource, relation);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Set<Value> roles=emptySet();
+	@Override public Responder handle(final Request request) {
 
-	private final Processor processor=new Processor();
-
-
-	@SuppressWarnings("unchecked") private T self() { return (T)this; }
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Configures the permitted roles.
-	 *
-	 * @param roles the user {@linkplain Request#roles(Value...) roles} enabled to perform the resource action managed
-	 *              by this actor; empty for public access
-	 *
-	 * @return this actor
-	 *
-	 * @throws NullPointerException if either {@code roles} is null or contains null values
-	 */
-	public T roles(final Value... roles) {
-		return roles(asList(roles));
-	}
-
-	/**
-	 * Configures the permitted roles.
-	 *
-	 * @param roles the user {@linkplain Request#roles(Value...) roles} enabled to perform the resource action managed
-	 *              by this actor; empty for public access
-	 *
-	 * @return this actor
-	 *
-	 * @throws NullPointerException if either {@code roles} is null or contains null values
-	 */
-	public T roles(final Collection<? extends Value> roles) {
-
-		if ( roles == null ) {
-			throw new NullPointerException("null roles");
+		if ( request == null ) {
+			throw new NullPointerException("null request");
 		}
 
-		if ( roles.contains(null) ) {
-			throw new NullPointerException("null role");
-		}
+		return consumer -> {
+			try {
 
-		this.roles=new HashSet<>(roles);
+				super.handle(request).accept(consumer);
 
-		return self();
-	}
+			} catch ( final NotImplementedException e ) {
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Inserts a request RDF pre-processing filter.
-	 *
-	 * @param filter the request RDF request pre-processing filter to be inserted; takes as argument an incoming request
-	 *               and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
-	 *
-	 * @return this actor
-	 *
-	 * @throws NullPointerException if {@code filter} is null
-	 * @see Processor#pre(BiFunction)
-	 */
-	protected T pre(final BiFunction<Request, Model, Model> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		processor.pre(filter);
-
-		return self();
-	}
-
-	/**
-	 * Inserts a response post-processing RDF filter.
-	 *
-	 * @param filter the response RDF post-processing filter to be inserted; takes as argument a successful outgoing
-	 *               response and its {@linkplain RDFFormat RDF} payload and must return a non null filtered RDF model
-	 *
-	 * @return this actor
-	 *
-	 * @throws NullPointerException if {@code filter} is null
-	 * @see Processor#post(BiFunction)
-	 */
-	protected T post(final BiFunction<Response, Model, Model> filter) {
-
-		if ( filter == null ) {
-			throw new NullPointerException("null filter");
-		}
-
-		processor.post(filter);
-
-		return self();
-	}
-
-	/**
-	 * Inserts a SPARQL Update housekeeping script.
-	 *
-	 * @param script the SPARQL Update housekeeping script to be executed by this processor on successful request
-	 *               processing; empty scripts are ignored
-	 *
-	 * @return this actor
-	 *
-	 * @throws NullPointerException if {@code script} is null
-	 * @see Processor#sync(String)
-	 */
-	protected T sync(final String script) {
-
-		if ( script == null ) {
-			throw new NullPointerException("null script");
-		}
-
-		processor.sync(script);
-
-		return self();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates a shape-driven action wrapper.
-	 *
-	 * <p>Redacts request and response {@linkplain Message#shape() shapes} according to {@code task} and {@code view}
-	 * parameters and the {@linkplain Request#roles() roles} of the user performing the request; response shape is also
-	 * redacted according to the {@link Shape#verify(Shape...)} mode; request {@code mode} redaction is left to final
-	 * shape consumers.</p>
-	 *
-	 * @param task a IRI identifying the {@linkplain Form#task task} to be performed by the wrapped handler
-	 * @param view a IRI identifying the {@linkplain Form#view view} level for the wrapped handler
-	 *
-	 * @return an handler for the specified shape driven action
-	 *
-	 * @throws NullPointerException if either {@code task} or {@code view} is null
-	 */
-	protected Wrapper action(final IRI task, final IRI view) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		if ( view == null ) {
-			throw new NullPointerException("null view");
-		}
-
-		return query().wrap(headers())
-
-				.wrap(pre(task, view)) // redact request shape before processor trimming
-				.wrap(processor)
-				.wrap(post(task, view)); // redact response shape before processor trimming
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Wrapper query() {
-		return handler -> request -> request.safe() || request.query().isEmpty()
-				? handler.handle(request)
-				: request.reply(new Failure<>().status(Response.BadRequest).cause("unexpected query parameters"));
-	}
-
-	private Wrapper headers() {
-		return handler -> request -> handler.handle(request).map(response -> response.headers("+Link",
-				link(LDP.RESOURCE, "type"),
-				link(LDP.RDF_SOURCE, "type")
-		));
-	}
-
-
-	private Wrapper pre(final IRI task, final IRI view) {
-		return handler -> request -> {
-
-			final Shape shape=request.shape();
-
-			if ( wild(shape) ) {
-
-				final boolean refused=!roles.isEmpty() && disjoint(roles, request.roles());
-
-				return refused ? refused(request)
-						: handler.handle(request);
-
-			} else {
-
-				final Shape redacted=shape
-						.accept(task(task))
-						.accept(view(view));
-
-				final Shape authorized=redacted.accept(
-						role(roles(request))
-				);
-
-				return wild(redacted) || empty(redacted) ? forbidden(request)
-						: wild(authorized) || empty(authorized) ? refused(request)
-						: handler.handle(request.shape(authorized));
+				request.reply(response -> response.map(new Failure()
+						.status(Response.NotImplemented)
+						.cause(e.getMessage())
+				)).accept(consumer);
 
 			}
-
 		};
 	}
 
-	private Wrapper post(final IRI task, final IRI view) {
-		return handler -> request -> handler.handle(request).map(response -> response.shape(response.shape()
-				.accept(task(task))
-				.accept(view(view))
-				.accept(mode(Form.verify))
-				.accept(role(roles(request)))
-		));
-	}
 
+	public static final class NotImplementedException extends RuntimeException {
 
-	private Set<Value> roles(final Request request) {
-		return roles.isEmpty() ? request.roles() : intersection(roles, request.roles());
-	}
+		private static final long serialVersionUID=-5919197536228324934L;
 
+		public NotImplementedException(final String message) {
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			super(message);
 
-	protected Collection<Statement> trace(final Collection<Statement> model) {
-
-		return model; // !!! enable once tracing with message suppliers is implemented
-
-		//try (final StringWriter writer=new StringWriter()) {
-		//
-		//	Rio.write(model, new TurtleWriter(writer));
-		//
-		//	trace.debug(this, "processing model\n"+indent(writer, true));
-		//
-		//	return model;
-		//
-		//} catch ( final IOException e ) {
-		//	throw new UncheckedIOException(e);
-		//}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	protected JsonObject report(final Report report) {
-
-		final Map<Issue.Level, List<Issue>> issues=report.getIssues().stream().collect(groupingBy(Issue::getLevel));
-
-		final JsonObjectBuilder json=Json.createObjectBuilder();
-
-		Optional.ofNullable(issues.get(Issue.Level.Error)).ifPresent(errors ->
-				json.add("errors", report(errors, this::report))
-		);
-
-		Optional.ofNullable(issues.get(Issue.Level.Warning)).ifPresent(warnings ->
-				json.add("warnings", report(warnings, this::report))
-		);
-
-		report.getFrames().forEach(frame -> {
-
-			final String property=format(frame.getValue());
-			final JsonObject value=report(frame);
-
-			if ( !value.isEmpty() ) {
-				json.add(property, value);
+			if ( message == null ) {
+				throw new NullPointerException("null message");
 			}
-		});
 
-		return json.build();
-	}
-
-
-	private JsonObject report(final Frame<Report> frame) {
-
-		final JsonObjectBuilder json=Json.createObjectBuilder();
-
-		for (final Map.Entry<Step, Report> slot : frame.getSlots().entrySet()) {
-
-			final String property=slot.getKey().format();
-			final JsonObject value=report(slot.getValue());
-
-			if ( !value.isEmpty() ) {
-				json.add(property, value);
-			}
 		}
 
-		return json.build();
-	}
-
-	private JsonObject report(final Issue issue) {
-
-		final JsonObjectBuilder json=Json.createObjectBuilder();
-
-		json.add("cause", issue.getMessage());
-		json.add("shape", issue.getShape().toString());
-
-		final Set<Value> values=issue.getValues();
-
-		if ( !values.isEmpty() ) {
-			json.add("values", report(values, v -> Json.createValue(format(v))));
-		}
-
-		return json.build();
-	}
-
-	private <V> JsonArray report(final Iterable<V> errors, final Function<V, JsonValue> reporter) {
-
-		final JsonArrayBuilder json=Json.createArrayBuilder();
-
-		errors.forEach(item -> json.add(reporter.apply(item)));
-
-		return json.build();
 	}
 
 }

@@ -17,15 +17,13 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 
 import java.io.Writer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.metreeca.rest.Result.value;
+import static com.metreeca.rest.Result.Value;
 
 
 /**
@@ -62,8 +60,8 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 	/**
 	 * @return a result providing access to a consumer taking no action on the supplied writer provider
 	 */
-	@Override public Result<Consumer<Supplier<Writer>>> get(final Message<?> message) {
-		return value(target -> {});
+	@Override public Result<Consumer<Supplier<Writer>>, Failure> get(final Message<?> message) {
+		return Value(target -> {});
 	}
 
 	/**

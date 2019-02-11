@@ -17,227 +17,257 @@
 
 package com.metreeca.rest.handlers.actors;
 
-
 import com.metreeca.form.Form;
-import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.form.queries.Edges;
-import com.metreeca.form.queries.Items;
-import com.metreeca.form.queries.Stats;
-import com.metreeca.form.sparql.SPARQLEngine;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.RDFFormat;
 import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.mode;
-import static com.metreeca.form.Shape.wild;
-import static com.metreeca.form.queries.Items.ItemsShape;
-import static com.metreeca.form.queries.Stats.StatsShape;
-import static com.metreeca.form.shapes.All.all;
+import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.things.Values.rewrite;
+import static com.metreeca.rest.Message.link;
+import static com.metreeca.rest.Response.NotFound;
+import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.rest.wrappers.Throttler.entity;
+import static com.metreeca.rest.wrappers.Throttler.resource;
 
-import static java.util.Collections.singleton;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 
 
 /**
- * Resource relator.
+ * LDP resource relator.
  *
- * <p>Handles retrieval requests on linked data resources.</p>
+ * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item() focus
+ * item}.</p>
  *
- * <dl>
+ * <p>If the focus item is a {@linkplain Request#container() container} and the request includes an expected
+ * {@linkplain Request#shape() shape}:</p>
  *
- * <dt>Response shape-driven {@link RDFFormat} body</dt>
+ * <ul>
  *
- * <dd>If the request includes  a {@linkplain Message#shape() shape}, the response includes the {@linkplain
- * RDFFormat RDF description} of the request {@linkplain Request#item() focus item}, as defined by the redacted linked
- * data {@linkplain Shape shape}.</dd>
+ * <li>the response includes the derived shape actually used in the {@linkplain Engine#browse(IRI) browsing} process,
+ * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#convey}
+ * mode and {@link Form#digest} view;</li>
  *
- * <dt>Response shapeless {@link RDFFormat} body</dt>
+ * <li>the response {@linkplain RDFFormat RDF body} includes the RDF description of the container as matched by the
+ * {@linkplain Throttler#container() container section} of redacted shape, linked using the {@code ldp:contains}
+ * property to the RDF description of the container items matched by the {@linkplain Throttler#resource() resource
+ * section} of redacted shape;</li>
  *
- * <dd>If the request does not include a {@linkplain Message#shape() shape}, the response includes the symmetric concise
- * bounded description of the request focus item, extended with {@code rdfs:label/comment} annotations for all
- * referenced IRIs.</dd>
+ * <li>contained items are selected as required by the LDP container profile {@linkplain
+ * com.metreeca.rest.handlers.actors identified} by {@code rdf:type} and LDP properties in the request shape;</li>
  *
- * </dl>
+ * <li>if the request contains a filtering {@linkplain Request#query(Shape) query}, only matching container item
+ * descriptions are included.</li>
  *
- * <p>If the request includes a shape, the response includes the derived shape actually used in the resource retrieval
- * process, redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link
- * Form#verify} mode and {@link Form#detail} view.</p>
+ * </ul>
+ *
+ * <p>Otherwise, if the focus item is a {@linkplain Request#container() container}:</p>
+ *
+ * <ul>
+ *
+ * <li>the response {@linkplain RDFFormat RDF body} includes the symmetric concise bounded description of the
+ * container, linked using the {@code ldp:contains} property to the symmetric concise bounded description of the
+ * container items, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced
+ * IRIs;</li>
+ *
+ * <li>contained items are selected handling the target resource as an LDP Basic Container, that is on the basis of the
+ * {@code ldp:contains} property.</li>
+ *
+ * </ul>
+ *
+ * <p><strong>Warning</strong> / Filtered browsing isn't yet supported on shape-less container.</p>
+ *
+ * <p>In both cases:</p>
+ *
+ * <ul>
+ *
+ * <li>if the request contains a {@code Prefer} header requesting the {@code ldp:preferMinimalContainer}
+ * representation, item descriptions are omitted.</li>
+ *
+ * </ul>
+ *
+ * <p>Otherwise, if the request includes an expected {@linkplain Request#shape() shape}:</p>
+ *
+ * <ul>
+ *
+ * <li>the response includes the derived shape actually used in the {@linkplain Engine#relate(IRI) retrieval} process,
+ * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail}
+ * view and {@link Form#convey} mode;</li>
+ *
+ * <li>the response {@link RDFFormat RDF body} contains the RDF description of the request focus, as matched by the
+ * redacted request shape.</li>
+ *
+ * </ul>
+ *
+ * <p>Otherwise:</p>
+ *
+ * <ul>
+ *
+ * <li>the response {@link RDFFormat RDF body} contains the symmetric concise bounded description of the request focus
+ * item, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced IRIs;</li>
+ *
+ * </ul>
  *
  * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
  * database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Relator extends Actor<Relator> {
+public final class Relator extends Actor {
 
-	private final Graph graph=tool(Graph.Factory);
+	private static final Pattern RepresentationPattern=Pattern
+			.compile("\\s*return\\s*=\\s*representation\\s*;\\s*include\\s*=\\s*\"(?<representation>[^\"]*)\"\\s*");
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Relator() {
-		delegate(action(Form.relate, Form.detail).wrap((Request request) -> (
-
-				wild(request.shape()) ? direct(request) : driven(request))
-
-				.map(response -> response.success() ?
-
-						response.headers("Vary", "Accept") : response
-
-				)));
+		delegate(relator().with(annotator()).with(throttler()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Relator post(final BiFunction<Response, Model, Model> filter) { return super.post(filter); }
+	private Wrapper annotator() {
+		return handler -> request -> handler.handle(request).map(response -> response
+				.headers("+Vary", "Accept", "Prefer")
+				.headers("+Link",
+						link(LDP.RESOURCE, "type"),
+						link(LDP.RDF_SOURCE, "type"),
+						request.container() ? link(LDP.CONTAINER, "type") : ""
+				)
+		);
+	}
 
+	private Wrapper throttler() {
+		return wrapper(Request::container,
+				new Throttler(Form.relate, Form.digest, entity()),
+				new Throttler(Form.relate, Form.detail, resource())
+		);
+	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private Handler relator() {
+		return request -> request.reply(response -> {
 
-	private Responder direct(final Request request) {
-		return consumer -> graph.query(connection -> {
+			final IRI item=request.item();
 
-			final IRI focus=request.item();
-			final Collection<Statement> model=cell(connection, focus);
+			final boolean resource=!request.container();
+			final boolean minimal=include(request, LDP.PREFER_MINIMAL_CONTAINER);
+			final boolean total=request.query().isEmpty();
 
-			request.reply(response -> model.isEmpty()
+			final Engine engine=engine(request.shape());
 
-					? response.status(Response.NotFound)
-					: response.status(Response.OK).body(rdf()).set(model)
+			if ( resource || minimal ) {
 
-			).accept(consumer);
+				// !!! 410 Gone if previously known
+
+				return engine
+
+						.relate(item, request::query, (shape, model) -> response
+
+								.status(resource && total && model.isEmpty() ? NotFound : OK)
+
+								.header("+Preference-Applied",
+										minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
+								)
+
+								.shape(shape)
+								.body(rdf(), model)
+
+						)
+
+						.fold(
+								identity(),
+								response::map
+						);
+
+			} else {
+
+				// containers are currently virtual and respond always with 200 OK even if not described in the graph
+
+				// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+
+				return engine
+
+						.browse(item, request::query, (rshape, rmodel) -> {
+
+							if ( total ) { // retrieve container description
+
+								return engine
+
+										.relate(item, shape -> Value(edges(shape)), (cshape, cmodel) -> response
+												.status(OK)
+												.shape(and(cshape, rshape))
+												.body(rdf(), Stream
+														.concat(cmodel.stream(), rmodel.stream())
+														.collect(toList())
+												)
+										)
+
+										.fold(identity(), unexpected -> response);
+
+							} else {
+
+								return response
+										.status(OK)
+										.shape(rshape)
+										.body(rdf(), rmodel);
+
+							}
+
+						}).fold(
+								identity(),
+								response::map
+						);
+
+			}
 
 		});
 	}
 
-	private Responder driven(final Request request) {
-
-		final Shape shape=request.shape();
-
-		final IRI focus=request.item();
-
-		return request.query(and(shape, all(focus))).map(query -> request.reply(response -> graph.query(connection -> {
-
-			final Collection<Statement> model=new SPARQLEngine(connection)
-					.browse(query)
-					.values()
-					.stream()
-					.findFirst()
-					.orElseGet(Collections::emptySet);
-
-			if ( model.isEmpty() ) {
-
-				// !!! identify and ignore housekeeping historical references (e.g. versioning/auditing)
-				// !!! support returning 410 Gone if the resource is known to have existed (as identified by housekeeping)
-				// !!! optimize using a single query if working on a remote repository
-
-				final boolean contains=connection.hasStatement(focus, null, null, true)
-						|| connection.hasStatement(null, null, focus, true);
-
-				return contains
-						? response.status(Response.Forbidden) // resource known but empty envelope for user
-						: response.status(Response.NotFound); // !!! 404 under strict security
-
-			} else {
-
-				return response.status(Response.OK).map(r -> query.accept(new Query.Probe<Response>() { // !!! factor
-
-					@Override public Response visit(final Edges edges) {
-						return r.shape(shape.accept(mode(Form.verify))) // hide filtering constraints
-								.body(rdf()).set(model);
-					}
-
-					@Override public Response visit(final Stats stats) {
-						return r.shape(StatsShape)
-								.body(rdf()).set(rewrite(model, Form.meta, focus));
-					}
-
-					@Override public Response visit(final Items items) {
-						return r.shape(ItemsShape)
-								.body(rdf()).set(rewrite(model, Form.meta, focus));
-					}
-
-				}));
-
-			}
-
-		})), request::reply);
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> cell(final RepositoryConnection connection, final IRI focus) { // !!! optimize for SPARQL
+	private String include(final IRI include) {
+		return "return=representation; include=\""+include+"\"";
+	}
 
-		final Collection<Statement> model=new LinkedHashModel();
+	private boolean include(final Request request, final IRI include) {
 
-		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
-		final Collection<Value> visited=new HashSet<>();
+		// !!! handle multiple uris in include parameter
+		// !!! handle omit parameter (with multiple uris)
+		// !!! handle other representation values in https://www.w3.org/TR/ldp/#prefer-parameters
 
-		while ( !pending.isEmpty() ) {
+		final String representation=request
+				.headers("Prefer")
+				.stream()
+				.map(value -> {
 
-			final Value value=pending.remove();
+					final Matcher matcher=RepresentationPattern.matcher(value);
 
-			if ( visited.add(value) ) {
-				if ( value.equals(focus) || value instanceof BNode ) {
+					return matcher.matches() ? matcher.group("representation") : "";
 
-					try (final RepositoryResult<Statement> statements=connection.getStatements(
-							(Resource)value, null, null, true
-					)) {
-						while ( statements.hasNext() ) {
+				})
+				.filter(value -> !value.isEmpty())
+				.findFirst()
+				.orElse("");
 
-							final Statement statement=statements.next();
+		return representation.equals(include.stringValue());
 
-							model.add(statement);
-							pending.add(statement.getObject());
-						}
-					}
-
-					try (final RepositoryResult<Statement> statements=connection.getStatements(
-							null, null, value, true
-					)) {
-						while ( statements.hasNext() ) {
-
-							final Statement statement=statements.next();
-
-							model.add(statement);
-							pending.add(statement.getSubject());
-						}
-					}
-
-				} else if ( value instanceof IRI ) {
-
-					try (final RepositoryResult<Statement> statements=connection.getStatements(
-							(Resource)value, RDFS.LABEL, null, true
-					)) {
-						while ( statements.hasNext() ) { model.add(statements.next()); }
-					}
-
-					try (final RepositoryResult<Statement> statements=connection.getStatements(
-							(Resource)value, RDFS.COMMENT, null, true
-					)) {
-						while ( statements.hasNext() ) { model.add(statements.next()); }
-					}
-
-				}
-			}
-
-		}
-
-		return model;
 	}
 
 }

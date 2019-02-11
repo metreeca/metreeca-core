@@ -19,17 +19,16 @@ package com.metreeca.form.probes;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.When;
-import com.metreeca.form.shifts.Step;
+import com.metreeca.form.shapes.Guard;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Guard.guard;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Test.test;
-import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shapes.Virtual.virtual;
+import static com.metreeca.form.shapes.Field.field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,39 +50,37 @@ final class RedactorTest {
 
 		final Shape shape=and();
 
-		assertThat((Object)shape).as("unconditional shape").isEqualTo(shape.accept(empty));
+		assertThat(shape.map(empty)).as("unconditional shape").isEqualTo(shape);
 
 	}
 
 	@Test void testIgnoreUndefinedConditions() {
 
-		final When when=When.when(RDF.VALUE, RDF.FIRST);
+		final Guard guard=guard(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)when).as("undefined variable").isEqualTo(when.accept(empty));
+		assertThat(guard.map(empty)).as("undefined variable").isEqualTo(guard);
 
 	}
 
 	@Test void testReplaceDefinedConditions() {
 
-		final When when=When.when(RDF.VALUE, RDF.FIRST);
+		final Guard guard=guard(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)and()).as("included value").isEqualTo(when.accept(first));
-		assertThat((Object)or()).as("excluded value").isEqualTo(when.accept(rest));
-		assertThat((Object)and()).as("wildcard value").isEqualTo(when.accept(any));
+		assertThat(guard.map(first)).as("included value").isEqualTo(and());
+		assertThat(guard.map(rest)).as("excluded value").isEqualTo(or());
+		assertThat(guard.map(any)).as("wildcard value").isEqualTo(and());
 
 	}
 
 	@Test void testRedactNestedShapes() {
 
-		final When nested=When.when(RDF.VALUE, RDF.FIRST);
+		final Guard nested=guard(RDF.VALUE, RDF.FIRST);
 
-		assertThat((Object)trait(RDF.VALUE, and())).as("trait").isEqualTo(trait(RDF.VALUE, nested).accept(first));
+		assertThat(field(RDF.VALUE, nested).map(first)).as("field").isEqualTo(field(RDF.VALUE, and()));
 
-		assertThat((Object)virtual(trait(RDF.VALUE, and()), Step.step(RDF.NIL))).as("virtual").isEqualTo(virtual(trait(RDF.VALUE, nested), Step.step(RDF.NIL)).accept(first));
-
-		assertThat((Object)and(and())).as("conjunction").isEqualTo(and(nested).accept(first));
-		assertThat((Object)or(and())).as("disjunction").isEqualTo(or(nested).accept(first));
-		assertThat((Object)test(and(), and(), and())).as("option").isEqualTo(test(and(), and(), nested).accept(first));
+		assertThat(and(nested).map(first)).as("conjunction").isEqualTo(and(and()));
+		assertThat(or(nested).map(first)).as("disjunction").isEqualTo(or(and()));
+		assertThat(when(and(), and(), nested).map(first)).as("option").isEqualTo(when(and(), and(), and()));
 
 	}
 

@@ -31,8 +31,8 @@
 	<artifactId>form</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca Shapes Engine</name>
-	<description>An extended SHACL engine for validating, retrieving and publishing linked data.</description>
+	<name>Metreeca Shapes Framework</name>
+	<description>An extended SHACL framework for validating, retrieving and publishing linked data.</description>
 
 	<dependencyManagement>
 		<dependencies>

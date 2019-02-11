@@ -19,6 +19,8 @@ package com.metreeca.form.shapes;
 
 import com.metreeca.form.Shape;
 
+import java.util.regex.Pattern;
+
 
 /**
  * Lexical full-text constraint.
@@ -30,15 +32,20 @@ import com.metreeca.form.Shape;
  */
 public final class Like implements Shape {
 
+	private static final Pattern WordsPattern =Pattern.compile("^|\\W+");
+
+
 	public static Like like(final String keywords) {
 		return new Like(keywords);
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final String text;
 
 
-	public Like(final String text) {
+	private Like(final String text) {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");
@@ -52,6 +59,8 @@ public final class Like implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public String getText() {
 		return text;
 	}
@@ -63,17 +72,19 @@ public final class Like implements Shape {
 	 * @return a regular expression matching strings matched by this like constraint
 	 */
 	public String toExpression() {
-		return "(?i:"+text.replaceAll("^|\\W+", ".*\\\\b")+")";
+		return "(?i:"+WordsPattern.matcher(text).replaceAll(".*\\\\b")+")";
 	}
 
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
 	}
 
 

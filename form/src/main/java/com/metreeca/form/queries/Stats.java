@@ -20,41 +20,55 @@ package com.metreeca.form.queries;
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shifts.Step;
+
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.Trait.trait;
-import static com.metreeca.form.shifts.Step.step;
+import static com.metreeca.form.things.Strings.indent;
 
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 
 public final class Stats implements Query {
 
-	public static final Shape StatsShape=and(
-			trait(Form.count, maxCount(1)),
-			trait(Form.min, maxCount(1)),
-			trait(Form.max, maxCount(1)),
-			trait(Form.stats, and(
-					trait(step(Form.count), maxCount(1)),
-					trait(step(Form.min), maxCount(1)),
-					trait(step(Form.max), maxCount(1))
+	public static final Shape Shape=and(
+			field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
+			field(Form.min, maxCount(1)),
+			field(Form.max, maxCount(1)),
+			field(Form.stats, and(
+					field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
+					field(Form.min, maxCount(1)),
+					field(Form.max, maxCount(1))
 			))
 	);
+
+
+	public static Stats stats(final Shape shape, final IRI... path) {
+		return new Stats(shape, asList(path));
+	}
+
+	public static Stats stats(final Shape shape, final List<IRI> path) {
+		return new Stats(shape, path);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
 
-	private final List<Step> path;
+	private final List<IRI> path;
 
 
-	public Stats(final Shape shape, final List<Step> path) {
+	private Stats(final Shape shape, final List<IRI> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -79,20 +93,41 @@ public final class Stats implements Query {
 		return shape;
 	}
 
-	public List<Step> getPath() {
+	public List<IRI> getPath() {
 		return unmodifiableList(path);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T accept(final Probe<T> probe) {
+	@Override public <T> T map(final Probe<T> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
 		}
 
-		return probe.visit(this);
+		return probe.probe(this);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof Stats
+				&& shape.equals(((Stats)object).shape)
+				&& path.equals(((Stats)object).path);
+	}
+
+	@Override public int hashCode() {
+		return shape.hashCode()^path.hashCode();
+	}
+
+
+	@Override public String toString() {
+		return format(
+				"stats {\n\tshape: %s\n\tpath: %s\n}",
+				indent(shape, true), path
+		);
 	}
 
 }

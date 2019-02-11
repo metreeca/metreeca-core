@@ -22,8 +22,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.shapes.Alias;
-import com.metreeca.form.shifts.Step;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -47,11 +46,12 @@ import java.util.stream.Stream;
 import javax.json.JsonException;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.form.Shape.mode;
+import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Trait.traits;
-import static com.metreeca.form.shifts.Step.step;
+import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.inverse;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
@@ -111,11 +111,12 @@ public final class JSONParser extends AbstractRDFParser {
 		final Resource focus=getParserConfig().get(JSONCodec.Focus);
 		final Shape shape=getParserConfig().get(JSONCodec.Shape);
 
-		final Shape driver=(shape == null) ? null : shape // infer implicit constraints to drive json shorthands
+		final Shape driver=(shape == null) ? null : shape
 
-				.accept(mode(Form.verify))
-				.accept(new Inferencer())
-				.accept(new Optimizer());
+				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
+				.map(new Optimizer())
+				.map(new Inferencer()) // infer implicit constraints to drive json shorthands
+				.map(new Optimizer());
 
 		if ( rdfHandler != null ) {
 			rdfHandler.startRDF();
@@ -182,19 +183,19 @@ public final class JSONParser extends AbstractRDFParser {
 
 				if ( !label.equals("this") ) {
 
-					final Step property=property(label, base, shape);
-					final Stream<Value> targets=parse(value, base, null, traits(shape).get(property));
+					final IRI property=property(label, base, shape);
+					final Stream<Value> targets=parse(value, base, null, fields(shape).get(property));
 
 					if ( rdfHandler != null ) {
 						targets.forEachOrdered(target -> {
 
-							if ( !property.isInverse() ) {
+							if ( direct(property) ) {
 
-								rdfHandler.handleStatement(createStatement(source, property.getIRI(), target));
+								rdfHandler.handleStatement(createStatement(source, property, target));
 
 							} else if ( target instanceof Resource ) {
 
-								rdfHandler.handleStatement(createStatement((Resource)target, property.getIRI(), source));
+								rdfHandler.handleStatement(createStatement((Resource)target, inverse(property), source));
 
 							} else {
 
@@ -304,9 +305,9 @@ public final class JSONParser extends AbstractRDFParser {
 
 	private Stream<Value> parse(final String string, final String base, final IRI type) {
 		return Stream.of(type == null ? createLiteral(string, null, null)
-				: type.equals(Values.ResoureType) ? createResource(base, string)
-				: type.equals(Values.IRIType) ? createIRI(base, string)
-				: type.equals(Values.BNodeType) ? createNode(string.startsWith("_:") ? string.substring(2) : string)
+				: type.equals(Form.ResourceType) ? createResource(base, string)
+				: type.equals(Form.IRIType) ? createIRI(base, string)
+				: type.equals(Form.BNodeType) ? createNode(string.startsWith("_:") ? string.substring(2) : string)
 				: createLiteral(string, null, type));
 	}
 
@@ -328,7 +329,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 	private Optional<Resource> blank(final Shape shape) {
 		return datatype(shape)
-				.filter(type -> type.equals(Values.BNodeType))
+				.filter(type -> type.equals(Form.BNodeType))
 				.map(type -> createNode());
 	}
 
@@ -341,7 +342,7 @@ public final class JSONParser extends AbstractRDFParser {
 	}
 
 
-	private Step property(final String label, final String base, final Shape shape) {
+	private IRI property(final String label, final String base, final Shape shape) {
 
 		final Matcher matcher=EdgePattern.matcher(label);
 
@@ -355,25 +356,29 @@ public final class JSONParser extends AbstractRDFParser {
 
 			if ( naked != null ) {
 
-				return step(createIRI(base, naked), inverse);
+				final IRI iri=createIRI(base, naked);
+
+				return inverse ? inverse(iri) : iri;
 
 			} else if ( bracketed != null ) {
 
-				return step(createIRI(base, bracketed), inverse);
+				final IRI iri=createIRI(base, bracketed);
+
+				return inverse ? inverse(iri) : iri;
 
 			} else if ( shape != null ) {
 
-				final Map<String, Step> aliases=Alias.aliases(shape, JSONCodec.Reserved)
+				final Map<String, IRI> aliases=aliases(shape, JSONCodec.Reserved)
 						.entrySet().stream()
 						.collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 
-				final Step step=aliases.get(alias);
+				final IRI iri=aliases.get(alias);
 
-				if ( step == null ) {
+				if ( iri == null ) {
 					error(format("undefined property alias [%s]", alias));
 				}
 
-				return step;
+				return iri;
 
 			} else {
 

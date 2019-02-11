@@ -59,12 +59,12 @@ final class BearerTest {
 
 				.handle(new Request()
 						.method(Request.GET)
-						.body(reader()).set(Codecs::reader))
+						.body(reader(), Codecs::reader))
 
 				.accept(response -> {
 
 					assertEquals(Response.OK, response.status());
-					assertFalse(response.body(text()).get().isPresent());
+					assertFalse(response.body(text()).value().isPresent());
 
 					assertFalse(response
 							.header("WWW-Authenticate")

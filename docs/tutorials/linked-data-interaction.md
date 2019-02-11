@@ -166,9 +166,9 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-## RDF Collections
+## RDF Containers
 
-RDF resource collections managed by the underlying graph storage are exposed by the Metreeca/Link REST API engine as [Linked Data Platform (LDP) Basic Containers](https://www.w3.org/TR/ldp/#ldpc).
+RDF resource collections managed by the underlying graph storage are exposed by the Metreeca/Link REST API engine as [Linked Data Platform (LDP) Containers](https://www.w3.org/TR/ldp/#ldpc).
 
 To retrieve the RDF description of a published collections, as specified by the associated data model, perform a `GET` operation on the URL identifying the collection.
 
@@ -179,10 +179,9 @@ To retrieve the RDF description of a published collections, as specified by the 
 HTTP/1.1 200 
 Vary: Accept
 Vary: Prefer
-Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
-Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
 Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
 Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
+Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
 Link: <http://localhost:8080/products/?specs>;
 		rel=http://www.w3.org/ns/ldp#constrainedBy
 Content-Type: application/json;charset=UTF-8
@@ -212,29 +211,27 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-By default, collection descriptions include a digest description of each collection item, but a concise description of the collection itself may be retrieved using the standard LDP `Prefer` HTTP request header.
+By default, container descriptions include a digest description of each container item, but a concise description of the container itself may be retrieved using the standard LDP `Prefer` HTTP request header.
 
 ```sh
 % curl --include --header 'Accept: application/json' \
-    --header 'Prefer: return=representation; include="http://www.w3.org/ns/ldp#PreferEmptyContainer"' \
+    --header 'Prefer: return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"' \
     "http://localhost:8080/products/"
     
 HTTP/1.1 200 
 Vary: Accept
 Vary: Prefer
-Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
-Link: <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"
 Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
 Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
+Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
 Link: <http://localhost:8080/products/?specs>;
 		rel=http://www.w3.org/ns/ldp#constrainedBy
 Preference-Applied: return=representation;
-		include="http://www.w3.org/ns/ldp#PreferEmptyContainer"
+		include="http://www.w3.org/ns/ldp#PreferMinimalContainer"
 Content-Type: application/json;charset=UTF-8
 
 {
     "this": "http://localhost:8080/products/",
-    "label": "Products"
 }
 ```
 
@@ -335,33 +332,24 @@ Content-Type: application/json;charset=UTF-8
 {
     "error": "data-invalid",
     "trace": {
-        "<http://localhost:8080/products/>": {
-            "<http://localhost:8080/terms#sell>": {
-                "errors": [
-                    {
-                        "cause": "invalid value",
-                        "shape": "maxExclusive(1000.0)",
-                        "values": [
-                            "9999.0"
-                        ]
-                    }
-                ]
+        "<https://demo.metreeca.com/products/S10_8>": {
+            "<https://demo.metreeca.com/terms#sell>": {
+                "9999.0": {
+                    "errors": [
+                        "invalid value : maxExclusive(1000.0)"
+                    ]
+                }
             },
-            "<http://localhost:8080/terms#buy>": {
-                "errors": [
-                    {
-                        "cause": "invalid value",
-                        "shape": "minInclusive(0.0)",
-                        "values": [
-                            "-101.0"
-                        ]
-                    }
-                ]
+            "<https://demo.metreeca.com/terms#buy>": {
+                "-101.0": {
+                    "errors": [
+                        "invalid value : minInclusive(0.0)"
+                    ]
+                }
             }
         }
     }
-}% 
-
+}
 ```
 
 Submitted data is automatically matched against the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Submiting, for instance, buy price data without valid authorization headers would return an error.
@@ -559,14 +547,16 @@ Content-Type: application/json
             "count": 6,
             "value": {
                 "this": "http://localhost:8080/product-lines/classic-cars",
-                "label": "Classic Cars"
+                "label": "Classic Cars",
+                "comment": "Unique, diecast airplane and helicopter replicas…"
             }
         },
         {
             "count": 1,
             "value": {
                 "this": "http://localhost:8080/product-lines/planes",
-                "label": "Planes"
+                "label": "Planes",
+                "comment": "Model trains are a rewarding hobby for enthusiasts of all ages…"
             }
         },
         
@@ -576,3 +566,4 @@ Content-Type: application/json
 }
 ```
 
+Labels and comments for the selected options are also retrieved to support facet visualization.
