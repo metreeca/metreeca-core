@@ -21,51 +21,40 @@ import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.shapes.*;
+import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.things.Lists.concat;
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.complement;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.*;
+import static com.metreeca.rest.engines.SPARQL.sparql;
+
+import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
 final class ShapedValidator {
 
-	private final RepositoryConnection connection;
-
-
-	ShapedValidator(final RepositoryConnection connection) {
-
-		if ( connection == null ) {
-			throw new NullPointerException("null connection");
-		}
-
-		this.connection=connection;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Focus process(final Shape shape, final Value... focus) {
+	Focus validate(final RepositoryConnection connection, final Shape shape, final Value... focus) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -78,34 +67,7 @@ final class ShapedValidator {
 		return shape
 				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 				.map(new Optimizer())
-				.map(new FocusProbe(new LinkedHashSet<>(asList(focus))));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Expands a source value into a focus value set following a path step.
-	 */
-	private Set<Value> shift(final Value source, final IRI iri) {
-
-		final Set<Value> values=new HashSet<>();
-
-		if ( !direct(iri) ) {
-
-			try (final RepositoryResult<Statement> statements=connection.getStatements(null, inverse(iri), source)) {
-				while ( statements.hasNext() ) { values.add(statements.next().getSubject()); }
-			}
-
-		} else if ( source instanceof Resource ) {
-
-			try (final RepositoryResult<Statement> statements=connection.getStatements((Resource)source, iri, null)) {
-				while ( statements.hasNext() ) { values.add(statements.next().getObject()); }
-			}
-
-		}
-
-		return values;
+				.map(new FocusProbe(connection, new LinkedHashSet<>(asList(focus))));
 	}
 
 
@@ -115,12 +77,14 @@ final class ShapedValidator {
 	/**
 	 * Validate constraints on a focus value set.
 	 */
-	private final class FocusProbe implements Shape.Probe<Focus> {
+	private static final class FocusProbe implements Shape.Probe<Focus> {
 
+		private final RepositoryConnection connection;
 		private final Collection<Value> focus;
 
 
-		private FocusProbe(final Collection<Value> focus) {
+		private FocusProbe(final RepositoryConnection connection, final Collection<Value> focus) {
+			this.connection=connection;
 			this.focus=focus;
 		}
 
@@ -145,29 +109,24 @@ final class ShapedValidator {
 
 				final Collection<Frame> frames=new ArrayList<>();
 
-				connection.prepareTupleQuery(new SPARQL() {
+				connection.prepareTupleQuery(sparql("# clazz constrain\n"
+								+"\n"
+								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+								+"\n"
+								+"select ?value where {\n"
+								+"\t\n"
+								+"\tvalues ?value {\n"
+								+"\t\t%s\n"
+								+"\t}\n"
+								+"\t\n"
+								+"\tfilter not exists { ?value a/rdfs:subClassOf* %s }\n"
+								+"\t\n"
+								+"}",
 
-					@Override public Object code() {
-						return list(
+						focus.stream().map(Values::format).collect(joining("\n")),
+						format(clazz.getIRI())
 
-								"# clazz constraint\f",
-
-								prefixes(),
-
-								"select ?value where {\f",
-
-								"values ?value {\n",
-								items(focus.stream().map(this::term), "\n"),
-								"\n}\f",
-
-								"filter not exists {\n?value a/rdfs:subClassOf* ", term(clazz.getIRI()), "\n}",
-
-								"\f}"
-
-						);
-					}
-
-				}.compile()).evaluate(new AbstractTupleQueryResultHandler() {
+				)).evaluate(new AbstractTupleQueryResultHandler() {
 					@Override public void handleSolution(final BindingSet bindings) {
 
 						frames.add(frame(
@@ -325,13 +284,22 @@ final class ShapedValidator {
 
 			return focus(set(), focus.stream().map(value -> { // for each focus value
 
-				// compute the new focus set expanding the field shift from the focus value
+				final Stream<Value> values // compute the new focus set
 
-				final Set<Value> focus=shift(value, iri);
+						=!direct(iri) ?
+						stream(connection.getStatements(null, inverse(iri), value)).map(Statement::getSubject)
+
+						: value instanceof Resource ?
+						stream(connection.getStatements((Resource)value, iri, null)).map(Statement::getObject)
+
+						: Stream.empty();
+
+
+				final Set<Value> focus=values.collect(toSet());
 
 				// validate the field shape on the new focus set
 
-				final Focus report=shape.map(new FocusProbe(focus));
+				final Focus report=shape.map(new FocusProbe(connection, focus));
 
 				// identifies the values in the new focus set referenced in report frames
 

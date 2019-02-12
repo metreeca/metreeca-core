@@ -107,7 +107,7 @@ final class ShapedRetriever {
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
-		connection.prepareTupleQuery(compile(new SPARQL() {
+		connection.prepareTupleQuery(compile(new _SPARQL() {
 
 			@Override public Object code() {
 
@@ -183,7 +183,7 @@ final class ShapedRetriever {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		connection.prepareTupleQuery(compile(new SPARQL() {
+		connection.prepareTupleQuery(compile(new _SPARQL() {
 
 			@Override public Object code() {
 
@@ -271,7 +271,7 @@ final class ShapedRetriever {
 
 		final Model model=new LinkedHashModel();
 
-		connection.prepareTupleQuery(compile(new SPARQL() {
+		connection.prepareTupleQuery(compile(new _SPARQL() {
 
 			@Override public Object code() {
 
@@ -343,7 +343,7 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String compile(final SPARQL sparql) {
+	private String compile(final _SPARQL sparql) {
 
 		final String query=sparql.compile();
 

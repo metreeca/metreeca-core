@@ -461,7 +461,8 @@ final class ShapedValidatorTest {
 	private Focus process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
 		try (final RepositoryConnection connection=sandbox.get()) {
 			connection.add(statements);
-			return new ShapedValidator(connection).process(shape, focus);
+			final ShapedValidator validator=new ShapedValidator();
+			return validator.validate(connection, shape, focus);
 		}
 	}
 

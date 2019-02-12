@@ -17,15 +17,19 @@
 
 package com.metreeca.rest.engines;
 
+import org.junit.jupiter.api.Test;
+
 import java.io.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
-public final class SPARQL {
 
-	public static String sparql(final String string, final Object... args) {
+final class WorkTest {
+
+	private String indent(final CharSequence text) {
 		try (final Writer writer=new StringWriter()) {
 
-			return Work.indent(writer).append(String.format(string, args)).toString();
+			return Work.indent(writer).append(text).toString();
 
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
@@ -35,6 +39,49 @@ public final class SPARQL {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private SPARQL() {} // utility
+	@Test void testIndentBraceBlocks() {
+
+		assertThat(indent("{\nuno\n}\ndue"))
+				.as("indented block")
+				.isEqualTo("{\n    uno\n}\ndue");
+
+		assertThat(indent("{ {\nuno\n} }\ndue"))
+				.as("inline block")
+				.isEqualTo("{ {\n    uno\n} }\ndue");
+
+	}
+
+
+	@Test void testIgnoreLeadingSpaces() {
+
+		assertThat(indent("  {\n\tuno\n  due\n }"))
+				.as("single")
+				.isEqualTo("{\n    uno\n    due\n}");
+
+	}
+
+	@Test void testCollapseSpaces() {
+
+		assertThat(indent(" text"))
+				.as("leading")
+				.isEqualTo("text");
+
+		assertThat(indent("uno  due"))
+				.as("inside")
+				.isEqualTo("uno due");
+
+	}
+
+	@Test void testCollapseNewlines() {
+
+		assertThat(indent("uno\ndue"))
+				.as("single")
+				.isEqualTo("uno\ndue");
+
+		assertThat(indent("uno\n\n\n\ndue"))
+				.as("multiple")
+				.isEqualTo("uno\n\ndue");
+
+	}
 
 }

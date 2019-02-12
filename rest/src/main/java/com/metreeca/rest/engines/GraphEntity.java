@@ -81,7 +81,8 @@ abstract class GraphEntity implements Engine {
 
 		final boolean unsafe=!connection.getIsolationLevel().isCompatibleWith(IsolationLevels.SNAPSHOT);
 
-		final Focus focus=new ShapedValidator(connection).process(unsafe ? and() : shape, resource);
+		final ShapedValidator validator=new ShapedValidator();
+		final Focus focus=validator.validate(connection, unsafe ? and() : shape, resource);
 
 		// validate shape envelope
 

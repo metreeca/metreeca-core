@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Arrays.asList;
 
 
-final class SPARQLBuilderTest {
+final class _SPARQLBuilderTest {
 
 	@Test void testIgnoreNullArguments() {
 
@@ -103,7 +103,7 @@ final class SPARQLBuilderTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String write(final Object object) {
-		return new SPARQLBuilder().text(object).text();
+		return new _SPARQLBuilder().text(object).text();
 	}
 
 }

@@ -26,7 +26,7 @@ import java.util.stream.Stream;
  *
  * <p>Converts structured objects into properly indented and spaced SPARQL source code.</p>
  */
-final class SPARQLBuilder {
+final class _SPARQLBuilder {
 
 	private int indent;
 
@@ -48,7 +48,7 @@ final class SPARQLBuilder {
 	}
 
 
-	public SPARQLBuilder text(final Object object) {
+	public _SPARQLBuilder text(final Object object) {
 		return object == null ? this
 				: object instanceof Object[] ? text((Object[])object)
 				: object instanceof Iterable ? text((Iterable<?>)object)
@@ -57,7 +57,7 @@ final class SPARQLBuilder {
 				: text(String.valueOf(object));
 	}
 
-	public SPARQLBuilder text(final Object... array) {
+	public _SPARQLBuilder text(final Object... array) {
 
 		if ( array != null ) {
 			for (final Object object : array) { text(object); }
@@ -66,7 +66,7 @@ final class SPARQLBuilder {
 		return this;
 	}
 
-	public SPARQLBuilder text(final Iterable<?> iterable) {
+	public _SPARQLBuilder text(final Iterable<?> iterable) {
 
 		if ( iterable != null ) {
 			for (final Object object : iterable) { text(object); }
@@ -75,7 +75,7 @@ final class SPARQLBuilder {
 		return this;
 	}
 
-	public SPARQLBuilder text(final Stream<?> stream) {
+	public _SPARQLBuilder text(final Stream<?> stream) {
 
 		if ( stream != null ) {
 			stream.forEach(this::text);
@@ -84,7 +84,7 @@ final class SPARQLBuilder {
 		return this;
 	}
 
-	public SPARQLBuilder text(final Supplier<?> supplier) {
+	public _SPARQLBuilder text(final Supplier<?> supplier) {
 
 		if ( supplier != null ) {
 			text(supplier.get());
@@ -93,7 +93,7 @@ final class SPARQLBuilder {
 		return this;
 	}
 
-	public SPARQLBuilder text(final CharSequence chars) {
+	public _SPARQLBuilder text(final CharSequence chars) {
 
 		if ( chars != null ) {
 			for (int i=0, length=chars.length(); i < length; ++i) { text(chars.charAt(i)); }
@@ -102,7 +102,7 @@ final class SPARQLBuilder {
 		return this;
 	}
 
-	public SPARQLBuilder text(final char c) {
+	public _SPARQLBuilder text(final char c) {
 
 		if ( c == '\t' ) {
 
