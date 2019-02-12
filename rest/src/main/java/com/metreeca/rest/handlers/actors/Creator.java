@@ -210,7 +210,7 @@ public final class Creator extends Actor {
 
 								// !!! recognize txns failures due to conflicting slugs and report as 409 Conflict
 
-								.create(source, target, trace.debug(this, rewrite(source, target, model)))
+								.create(source, target, trace.trace(this, rewrite(source, target, model)))
 
 								.map(focus -> focus.assess(Level.Error) // shape violations
 

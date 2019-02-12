@@ -45,7 +45,6 @@ import static com.metreeca.rest.engines.SPARQL.sparql;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -54,7 +53,11 @@ import static java.util.stream.Collectors.toSet;
 
 final class ShapedValidator {
 
-	Focus validate(final RepositoryConnection connection, final Shape shape, final Value... focus) {
+	Focus validate(final RepositoryConnection connection, final Value focus, final Shape shape) {
+		return validate(connection, set(focus), shape);
+	}
+
+	Focus validate(final RepositoryConnection connection, final Set<Value> focus, final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -67,7 +70,7 @@ final class ShapedValidator {
 		return shape
 				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 				.map(new Optimizer())
-				.map(new FocusProbe(connection, new LinkedHashSet<>(asList(focus))));
+				.map(new FocusProbe(connection, focus));
 	}
 
 

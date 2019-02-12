@@ -23,9 +23,7 @@ import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.Engine;
 
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
@@ -81,8 +79,7 @@ abstract class GraphEntity implements Engine {
 
 		final boolean unsafe=!connection.getIsolationLevel().isCompatibleWith(IsolationLevels.SNAPSHOT);
 
-		final ShapedValidator validator=new ShapedValidator();
-		final Focus focus=validator.validate(connection, unsafe ? and() : shape, resource);
+		final Focus focus=new ShapedValidator().validate(connection, resource, unsafe ? and() : shape);
 
 		// validate shape envelope
 

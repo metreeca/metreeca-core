@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashSet;
 import java.util.function.Supplier;
 
 import static com.metreeca.form.shapes.All.all;
@@ -54,6 +55,7 @@ import static com.metreeca.form.things.ValuesTest.term;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 
@@ -462,7 +464,7 @@ final class ShapedValidatorTest {
 		try (final RepositoryConnection connection=sandbox.get()) {
 			connection.add(statements);
 			final ShapedValidator validator=new ShapedValidator();
-			return validator.validate(connection, shape, focus);
+			return validator.validate(connection, new LinkedHashSet<>(asList(focus)), shape);
 		}
 	}
 

@@ -24,6 +24,7 @@ import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
+import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -37,43 +38,27 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
+
+import static java.lang.String.format;
 
 
 final class ShapedRetriever {
 
-	// !!! log compilation/execution times
-
-	private static final Logger logger=Logger.getLogger(ShapedRetriever.class.getName()); // !!! migrate logging to Graph?
+	private final Trace trace=tool(Trace.Factory);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final RepositoryConnection connection;
-
-
-	public ShapedRetriever(final RepositoryConnection connection) {
-
-		if ( connection == null ) {
-			throw new NullPointerException("null connection");
-		}
-
-		this.connection=connection;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public Collection<Statement> retrieve(final IRI resource, final Query query) {
+	Collection<Statement> retrieve(final RepositoryConnection connection, final Resource focus, final Query query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
@@ -81,11 +66,11 @@ final class ShapedRetriever {
 
 		return query.map(new Query.Probe<Collection<Statement>>() {
 
-			@Override public Collection<Statement> probe(final Edges edges) { return edges(resource, edges); }
+			@Override public Collection<Statement> probe(final Edges edges) { return edges(connection, focus, edges); }
 
-			@Override public Collection<Statement> probe(final Stats stats) { return stats(resource, stats); }
+			@Override public Collection<Statement> probe(final Stats stats) { return stats(connection, focus, stats); }
 
-			@Override public Collection<Statement> probe(final Items items) { return items(resource, items); }
+			@Override public Collection<Statement> probe(final Items items) { return items(connection, focus, items); }
 
 		});
 	}
@@ -93,7 +78,7 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> edges(final IRI resource, final Edges edges) {
+	private Collection<Statement> edges(final RepositoryConnection connection, final Resource focus, final Edges edges) {
 
 		final Shape shape=edges.getShape();
 		final List<Order> orders=edges.getOrders();
@@ -107,7 +92,7 @@ final class ShapedRetriever {
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
-		connection.prepareTupleQuery(compile(new _SPARQL() {
+		evaluate(() -> connection.prepareTupleQuery(compile(new _SPARQL() {
 
 			@Override public Object code() {
 
@@ -145,8 +130,8 @@ final class ShapedRetriever {
 
 				if ( match != null ) {
 
-					if ( !match.equals(resource) ) {
-						model.add(statement(resource, LDP.CONTAINS, match));
+					if ( !match.equals(focus) ) {
+						model.add(statement(focus, LDP.CONTAINS, match));
 					}
 
 					template.forEach(statement -> {
@@ -167,12 +152,12 @@ final class ShapedRetriever {
 
 			}
 
-		});
+		}));
 
 		return model;
 	}
 
-	private Collection<Statement> stats(final IRI resource, final Stats stats) {
+	private Collection<Statement> stats(final RepositoryConnection connection, final Resource focus, final Stats stats) {
 
 		final Shape shape=stats.getShape();
 		final List<IRI> path=stats.getPath();
@@ -183,7 +168,7 @@ final class ShapedRetriever {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		connection.prepareTupleQuery(compile(new _SPARQL() {
+		evaluate(() -> connection.prepareTupleQuery(compile(new _SPARQL() {
 
 			@Override public Object code() {
 
@@ -233,7 +218,7 @@ final class ShapedRetriever {
 				final Value min=bindings.getValue("min");
 				final Value max=bindings.getValue("max");
 
-				if ( type != null ) { model.add(resource, Form.stats, type); }
+				if ( type != null ) { model.add(focus, Form.stats, type); }
 				if ( type != null && count != null ) { model.add(type, Form.count, count); }
 				if ( type != null && min != null ) { model.add(type, Form.min, min); }
 				if ( type != null && max != null ) { model.add(type, Form.max, max); }
@@ -244,9 +229,9 @@ final class ShapedRetriever {
 
 			}
 
-		});
+		}));
 
-		model.add(resource, Form.count, literal(BigInteger.valueOf(counts.stream()
+		model.add(focus, Form.count, literal(BigInteger.valueOf(counts.stream()
 				.filter(Objects::nonNull)
 				.mapToLong(Literal::longValue)
 				.sum())));
@@ -254,24 +239,24 @@ final class ShapedRetriever {
 		mins.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.LT) ? x : y)
-				.ifPresent(min -> model.add(resource, Form.min, min));
+				.ifPresent(min -> model.add(focus, Form.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
-				.ifPresent(max -> model.add(resource, Form.max, max));
+				.ifPresent(max -> model.add(focus, Form.max, max));
 
 		return model;
 	}
 
-	private Collection<Statement> items(final IRI resource, final Items items) {
+	private Collection<Statement> items(final RepositoryConnection connection, final Resource focus, final Items items) {
 
 		final Shape shape=items.getShape();
 		final List<IRI> path=items.getPath();
 
 		final Model model=new LinkedHashModel();
 
-		connection.prepareTupleQuery(compile(new _SPARQL() {
+		evaluate(() -> connection.prepareTupleQuery(compile(new _SPARQL() {
 
 			@Override public Object code() {
 
@@ -325,7 +310,7 @@ final class ShapedRetriever {
 
 				final BNode item=bnode();
 
-				if ( item != null ) { model.add(resource, Form.items, item); }
+				if ( item != null ) { model.add(focus, Form.items, item); }
 				if ( item != null && value != null ) { model.add(item, Form.value, value); }
 				if ( item != null && count != null ) { model.add(item, Form.count, count); }
 
@@ -335,7 +320,7 @@ final class ShapedRetriever {
 				if ( notes != null ) { model.add((Resource)value, RDFS.COMMENT, notes); }
 
 			}
-		});
+		}));
 
 		return model;
 	}
@@ -345,13 +330,28 @@ final class ShapedRetriever {
 
 	private String compile(final _SPARQL sparql) {
 
+		final long start=System.currentTimeMillis();
+
 		final String query=sparql.compile();
 
-		if ( logger.isLoggable(Level.FINE) ) {
-			logger.fine("evaluating SPARQL query "+indent(query, true)+(query.endsWith("\n") ? "" : "\n"));
-		}
+		final long stop=System.currentTimeMillis();
+
+		trace.debug(this, () -> format("executing %s", indent(query, true)+(query.endsWith("\n") ? "" : "\n")));
+		trace.debug(this, () -> format("generated in %d ms", Math.max(1, stop-start)));
 
 		return query;
+	}
+
+	private void evaluate(final Runnable task) {
+
+		final long start=System.currentTimeMillis();
+
+		task.run();
+
+		final long stop=System.currentTimeMillis();
+
+		trace.debug(this, () -> format("evaluated in %d ms", Math.max(1, stop-start)));
+
 	}
 
 }

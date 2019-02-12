@@ -21,6 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.MaxLength;
+import com.metreeca.tray.Tray;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
@@ -68,11 +69,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ShapedRetrieverTest {
 
 	private final Supplier<RepositoryConnection> sandbox=sandbox(large());
+	private final ShapedRetriever retriever=new Tray().get(ShapedRetriever::new);
 
 
 	private Collection<Statement> query(final Query query) {
 		try (final RepositoryConnection connection=sandbox.get()) {
-			return new ShapedRetriever(connection).retrieve(Form.root, query);
+			return retriever.retrieve(connection, Form.root, query);
 		}
 	}
 

@@ -108,7 +108,7 @@ public final class Updater extends Actor {
 
 				model -> request.reply(response -> engine(request.shape())
 
-						.update(request.item(), trace.debug(this, model))
+						.update(request.item(), trace.trace(this, model))
 
 						.map(focus -> focus.assess(Issue.Level.Error) // shape violations
 

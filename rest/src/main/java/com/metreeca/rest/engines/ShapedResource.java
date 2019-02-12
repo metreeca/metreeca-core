@@ -154,8 +154,8 @@ final class ShapedResource extends GraphEntity {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
-		return Optional.of(new ShapedRetriever(connection))
-				.map(retriever -> retriever.retrieve(resource, edges(and(all(resource), shape))))
+		return Optional.of(new ShapedRetriever())
+				.map(retriever -> retriever.retrieve(connection, resource, edges(and(all(resource), shape))))
 				.filter(model -> !model.isEmpty());
 	}
 

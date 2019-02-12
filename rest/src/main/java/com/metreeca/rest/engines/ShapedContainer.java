@@ -103,7 +103,7 @@ final class ShapedContainer extends GraphEntity {
 
 				query -> graph.query(connection -> {
 
-					final Collection<Statement> model=new ShapedRetriever(connection).retrieve(resource, query);
+					final Collection<Statement> model=new ShapedRetriever().retrieve(connection, resource, query);
 
 					return query.map(new Query.Probe<Result<V, E>>() {
 
