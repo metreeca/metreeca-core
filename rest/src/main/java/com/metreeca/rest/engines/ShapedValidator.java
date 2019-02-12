@@ -41,7 +41,7 @@ import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.complement;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.*;
-import static com.metreeca.rest.engines.SPARQL.sparql;
+import static com.metreeca.form.things.Sources.source;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
@@ -112,17 +112,17 @@ final class ShapedValidator {
 
 				final Collection<Frame> frames=new ArrayList<>();
 
-				connection.prepareTupleQuery(sparql("# clazz constrain\n"
+				connection.prepareTupleQuery(source("# clazz constrain\n"
 								+"\n"
 								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 								+"\n"
 								+"select ?value where {\n"
 								+"\t\n"
 								+"\tvalues ?value {\n"
-								+"\t\t%s\n"
+								+"\t\t{values}\n"
 								+"\t}\n"
 								+"\t\n"
-								+"\tfilter not exists { ?value a/rdfs:subClassOf* %s }\n"
+								+"\tfilter not exists { ?value a/rdfs:subClassOf* {clazz} }\n"
 								+"\t\n"
 								+"}",
 
