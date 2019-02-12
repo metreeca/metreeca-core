@@ -18,12 +18,12 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Pruner;
-import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.probes.*;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
+import com.metreeca.form.shapes.*;
+import com.metreeca.form.things.Values;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
@@ -38,16 +38,27 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Strings.indent;
+import static com.metreeca.form.shapes.All.all;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.things.Sources.*;
 import static com.metreeca.form.things.Values.bnode;
+import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.format;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
+import static java.lang.Math.max;
 import static java.lang.String.format;
 
 
@@ -85,48 +96,57 @@ final class ShapedRetriever {
 		final int offset=edges.getOffset();
 		final int limit=edges.getLimit();
 
-		final Object root=0; // root identifier // !!! review
+		final Object root=new Object(); // root object
 
-		final Collection<Statement> template=new ArrayList<>();
 		final Collection<Statement> model=new LinkedHashSet<>();
+		final Collection<Statement> template=new ArrayList<>();
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
-		evaluate(() -> connection.prepareTupleQuery(compile(new _SPARQL() {
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> {
 
-			@Override public Object code() {
+			final Shape pattern=shape.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer());
+			final Shape selector=shape.map(new Redactor(Form.mode, Form.filter)).map(new Pruner()).map(new Optimizer());
 
-				final Shape pattern=shape.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer());
-				final Shape selector=shape.map(new Redactor(Form.mode, Form.filter)).map(new Pruner()).map(new Optimizer());
+			return source(nothing(id(root, pattern, selector)), template(
 
-				link(pattern, root);
-				link(selector, root);
+					"# edges query\n"
+							+"\n"
+							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+							+"\n"
+							+"select {variables} where {\n"
+							+"\n"
+							+"\t{filter}\n"
+							+"\n"
+							+"\t{pattern}\n"
+							+"\n"
+							+"\t{sorters}\n"
+							+"\n"
+							+"} order by {criteria}",
 
-				final List<String> variables=template(pattern, template);
+					(Snippet)(source, identifiers) -> pattern
+							.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s), template::add))
+							.distinct()
+							.sorted()
+							.map(v -> snippet(" ?", v))
+							.reduce((x, y) -> snippet(x, y))
+							.orElseGet(() -> var(root))
+							.accept(source, identifiers),
 
-				return list(
+					filter(selector, orders, offset, limit),
+					pattern(pattern),
 
-						"# edges query\f",
+					sorters(root, orders), // !!! (€) don't extract if already present in pattern
+					criteria(root, orders)
 
-						prefixes(),
-
-						"select ", variables.isEmpty() ? var(root) : projection(variables), " where {\f",
-
-						filter(selector, orders, offset, limit), "\f",
-						pattern(pattern), "\f",
-						sorters(var(root), orders), "\f", // !!! (€) don't extract if already present in pattern
-
-						"\f} order by ", criteria(var(root), orders)
-
-				);
-
-			}
-
+			));
 		})).evaluate(new AbstractTupleQueryResultHandler() {
+
+			private final String id=source(id(root));
 
 			@Override public void handleSolution(final BindingSet bindings) {
 
-				final Value match=bindings.getValue(root.toString());
+				final Value match=bindings.getValue(id);
 
 				if ( match != null ) {
 
@@ -168,46 +188,55 @@ final class ShapedRetriever {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(new _SPARQL() {
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> {
 
-			@Override public Object code() {
+			final Shape selector=shape
+					.map(new Redactor(Form.mode, Form.filter))
+					.map(new Pruner())
+					.map(new Optimizer());
 
-				final Shape selector=shape
-						.map(new Redactor(Form.mode, Form.filter))
-						.map(new Pruner())
-						.map(new Optimizer());
+			final Object source=var(selector);
+			final Object target=path.isEmpty() ? source : var();
 
-				final Object source=var(id(selector));
-				final Object target=path.isEmpty() ? source : var(id());
+			return source(template(
 
-				return list(
+					"# stats query\n"
+							+"\n"
+							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+							+"\n"
+							+"select ?type\t\n"
+							+"\n"
+							+"\t(count(distinct {target}) as ?count)\n"
+							+"\t(min({target}) as ?min)\n"
+							+"\t(max({target}) as ?max) \n"
+							+"\n"
+							+"\bwhere {\n"
+							+"\n"
+							+"\t{roots}\n"
+							+"\n"
+							+"\t{filters}\n"
+							+"\n"
+							+"\t{path}\n"
+							+"\n"
+							+"\tbind(if(isBlank({target}) || isIRI({target}), rdfs:Resource, datatype({target})) as ?type)\n"
+							+"\n"
+							+"} group by ?type order by desc(?count) ?type",
 
-						"# stats query\f",
 
-						prefixes(),
+					target, target, target, // !!! factor
 
-						"select ?type (count(distinct ", target, ") as ?count)"
-								+" (min(", target, ") as ?min) (max(", target, ") as ?max) {\f",
+					roots(selector),
+					filters(selector),
 
-						roots(selector), "\f",
-						filters(selector), "\f",
+					// !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-						// !!! use filter(selector, emptySet(), 0, 0) to support sampling
+					path.isEmpty() ? null : snippet(source, " ", path(path), " ", target, " ."),
 
-						path.isEmpty() ? null : list(source, path(path), target), '\f',
+					target, target, target // !!! factor
 
-						// !!! review datatype for blanks/iris
+					// !!! support ordering/slicing?
 
-						"bind(if(isBlank(", target, "), rdfs:Resource, if(isIRI(", target, "), rdfs:Resource,"
-								+" datatype(", target, "))) as ?type)\f",
-
-						"} group by ?type order by desc(?count) ?type\n"
-
-						// !!! support ordering/slicing?
-
-				);
-
-			}
+			));
 
 		})).evaluate(new AbstractTupleQueryResultHandler() {
 
@@ -256,49 +285,57 @@ final class ShapedRetriever {
 
 		final Model model=new LinkedHashModel();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(new _SPARQL() {
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> {
 
-			@Override public Object code() {
+			final Shape selector=shape
+					.map(new Redactor(Form.mode, Form.filter))
+					.map(new Pruner())
+					.map(new Optimizer());
 
-				final Shape selector=shape
-						.map(new Redactor(Form.mode, Form.filter))
-						.map(new Pruner())
-						.map(new Optimizer());
+			final Object source=var(selector);
+			final Object target=path.isEmpty() ? source : var();
 
-				final Object source=var(id(selector));
-				final Object target=path.isEmpty() ? source : var(id());
+			return source(template(
 
-				return list(
+					"# items query\n"
+							+"\n"
+							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+							+"\n"
+							+"select ({target} as ?value)\t\n"
+							+"\n"
+							+"\t(sample(?l) as ?label)\n"
+							+"\t(sample(?n) as ?notes)\n"
+							+"\t(count(distinct {source}) as ?count)\n"
+							+"\n"
+							+"\bwhere {\n"
+							+"\n"
+							+"\t{roots}\n"
+							+"\t\n"
+							+"\t{filters}\n"
+							+"\t\n"
+							+"\t{path}\n"
+							+"\t\n"
+							+"\toptional { {target} rdfs:label ?l }\n"
+							+"\toptional { {target} rdfs:comment ?n }\n"
+							+"\t\t\n"
+							+"} group by {target} having ( ?count > 0 ) order by desc(?count) ?value",
 
-						"# items query\f",
+					target, source,
 
-						prefixes(),
 
-						"select"
-								+" (", target, " as ?value)"
-								+" (sample(?l) as ?label)"
-								+" (sample(?n) as ?notes)"
-								+" (count(distinct ", source, ") as ?count)",
+					roots(selector),
+					filters(selector),
 
-						" {\f",
+					// !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-						roots(selector), "\f",
-						filters(selector), "\f",
+					path.isEmpty() ? null : snippet(source, " ", path(path), " ", target, " ."),
 
-						// !!! use filter(selector, emptySet(), 0, 0) to support sampling
+					target, target, target // !!! factor
 
-						path.isEmpty() ? null : list(source, path(path), target), '\f',
+					// !!! hadle label/comment language
+					// !!! support ordering/slicing?
 
-						"optional { ", target, " rdfs:label ?l }\f", // !!! language
-						"optional { ", target, " rdfs:comment ?n }\f", // !!! language
-
-						"} group by ", target, " having ( ?count > 0 ) order by desc(?count) ?value\n"
-
-						// !!! support ordering/slicing?
-
-				);
-
-			}
+			));
 
 		})).evaluate(new AbstractTupleQueryResultHandler() {
 			@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
@@ -328,16 +365,16 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String compile(final _SPARQL sparql) {
+	private String compile(final Supplier<String> generator) {
 
 		final long start=System.currentTimeMillis();
 
-		final String query=sparql.compile();
+		final String query=generator.get();
 
 		final long stop=System.currentTimeMillis();
 
-		trace.debug(this, () -> format("executing %s", indent(query, true)+(query.endsWith("\n") ? "" : "\n")));
-		trace.debug(this, () -> format("generated in %d ms", Math.max(1, stop-start)));
+		trace.debug(this, () -> format("executing %s", query.endsWith("\n") ? query : query+"\n"));
+		trace.debug(this, () -> format("generated in %d ms", max(1, stop-start)));
 
 		return query;
 	}
@@ -350,7 +387,342 @@ final class ShapedRetriever {
 
 		final long stop=System.currentTimeMillis();
 
-		trace.debug(this, () -> format("evaluated in %d ms", Math.max(1, stop-start)));
+		trace.debug(this, () -> format("evaluated in %d ms", max(1, stop-start)));
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static Snippet filter(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
+		return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : template(
+
+				"{ select {root} {\n"
+						+"\n"
+						+"\t{roots}\n"
+						+"\n"
+						+"\t{filters}\n"
+						+"\n"
+						+"\t{sorters}\n"
+						+"\n"
+						+"} {orders} {offset} {limit} }",
+
+				var(shape),
+
+				roots(shape),
+				filters(shape),
+
+				offset > 0 || limit > 0 ? sorters(shape, orders) : null,
+				offset > 0 || limit > 0 ? snippet(" order by ", criteria(shape, orders)) : null,
+
+				offset > 0 ? snippet(" offset ", offset) : null,
+				limit > 0 ? snippet(" limit ", limit) : null
+
+		);
+
+	}
+
+
+	private static Snippet pattern(final Shape shape) {
+		return shape.map(new PatternProbe(shape));
+	}
+
+	private static Snippet roots(final Shape shape) { // root universal constraints
+		return all(shape)
+				.map(values -> values(shape, values))
+				.orElse(null);
+	}
+
+	private static Snippet filters(final Shape shape) {
+		return shape.map(new FilterProbe(shape));
+	}
+
+	private static Snippet sorters(final Object root, final Collection<Order> orders) {
+		return snippet(orders.stream()
+				.filter(order -> !order.getPath().isEmpty()) // root already retrieved
+				.map(order -> template(
+						"optional { {root} {path} {order} }\n", var(root), path(order.getPath()), var(order))
+				)
+		);
+	}
+
+	private static Snippet criteria(final Object root, final Collection<Order> orders) {
+		return list(Stream.concat(
+
+				orders.stream().map(order -> template(
+						order.isInverse() ? "desc({criterion})" : "asc({criterion})",
+						var(order.getPath().isEmpty() ? root : order)
+				)),
+
+				orders.stream()
+						.map(Order::getPath)
+						.filter(List::isEmpty)
+						.findFirst()
+						.map(empty -> Stream.empty())
+						.orElseGet(() -> Stream.of(var(root)))  // root as last resort, unless already used
+
+		), " ");
+	}
+
+
+	private static Snippet edge(final Object source, final IRI iri, final Object target) {
+		return direct(iri)
+				? snippet(source, " ", format(iri), " ", target, " .")
+				: snippet(target, " ", format(inverse(iri)), " ", source, " .");
+	}
+
+
+	private static Snippet path(final Collection<IRI> path) {
+		return list(path.stream().map(Values::format), '/');
+	}
+
+
+	private static Snippet list(final Stream<?> items, final Object separator) {
+		return snippet(items.flatMap(item -> Stream.of(separator, item)).skip(1));
+	}
+
+	private static Snippet values(final Shape source, final Iterable<Value> values) {
+		return template("\n\nvalues {source} {\n{values}\n}\n\n",
+
+				var(source),
+				list(StreamSupport.stream(values.spliterator(), false).map(Values::format), "\n")
+
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class TemplateProbe extends Traverser<Stream<Integer>> {
+
+		private final Shape focus;
+
+		private final Function<Shape, Integer> identifier;
+		private final Consumer<Statement> template;
+
+
+		private TemplateProbe(
+				final Shape focus, final Function<Shape, Integer> identifier, final Consumer<Statement> template
+		) {
+
+			this.focus=focus;
+
+			this.identifier=identifier;
+			this.template=template;
+		}
+
+
+		@Override public Stream<Integer> probe(final Shape shape) { return Stream.empty(); }
+
+
+		@Override public Stream<Integer> probe(final Field field) {
+
+			final IRI iri=field.getIRI();
+			final Shape shape=field.getShape();
+
+			final Integer source=identifier.apply(focus);
+			final Integer target=identifier.apply(shape);
+
+			final Resource snode=bnode(source.toString());
+			final Resource tnode=bnode(target.toString());
+
+			template.accept(direct(iri) ? statement(snode, iri, tnode) : statement(tnode, inverse(iri), snode));
+
+			return Stream.concat(
+					Stream.of(source, target),
+					shape.map(new TemplateProbe(shape, identifier, template))
+			);
+
+		}
+
+
+		@Override public Stream<Integer> probe(final And and) {
+			return and.getShapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<Integer> probe(final Or or) {
+			return or.getShapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<Integer> probe(final When when) {
+			return Stream.concat(
+					when.getPass().map(this),
+					when.getFail().map(this)
+			);
+		}
+
+	}
+
+	private static final class FilterProbe implements Shape.Probe<Snippet> {
+
+		private final Shape source;
+
+
+		private FilterProbe(final Shape source) {
+			this.source=source;
+		}
+
+
+		@Override public Snippet probe(final Meta meta) {
+			return nothing();
+		}
+
+		@Override public Snippet probe(final Guard guard) {
+			throw new UnsupportedOperationException("partially redacted shape");
+		}
+
+
+		@Override public Snippet probe(final Datatype datatype) {
+			throw new UnsupportedOperationException("datatype constraint");
+		}
+
+		@Override public Snippet probe(final Clazz clazz) {
+			return snippet(var(source), " a/rdfs:subClassOf* ", format(clazz.getIRI()), " .");
+		}
+
+		@Override public Snippet probe(final MinExclusive minExclusive) {
+			return template("filter ( {source} > {value} )", var(source), format(minExclusive.getValue()));
+		}
+
+		@Override public Snippet probe(final MaxExclusive maxExclusive) {
+			return template("filter ( {source} < {value} )", var(source), format(maxExclusive.getValue()));
+		}
+
+		@Override public Snippet probe(final MinInclusive minInclusive) {
+			return template("filter ( {source} >= {value} )", var(source), format(minInclusive.getValue()));
+		}
+
+		@Override public Snippet probe(final MaxInclusive maxInclusive) {
+			return template("filter ( {source} <= {value} )", var(source), format(maxInclusive.getValue()));
+		}
+
+		@Override public Snippet probe(final Pattern pattern) {
+			return template("filter regex({source}, '{pattern}', '{flags}')",
+					var(source), pattern.getText().replace("\\", "\\\\"), pattern.getFlags()
+			);
+		}
+
+		@Override public Snippet probe(final Like like) {
+			return template("filter regex({source}, '{pattern}')",
+					var(source), like.toExpression().replace("\\", "\\\\")
+			);
+		}
+
+		@Override public Snippet probe(final MinLength minLength) {
+			return template("filter (strlen(str({source})) >= {limit} )", var(source), minLength.getLimit());
+		}
+
+		@Override public Snippet probe(final MaxLength maxLength) {
+			return template("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.getLimit());
+		}
+
+		@Override public Snippet probe(final MinCount minCount) {
+			throw new UnsupportedOperationException("minimum focus size constraint");
+		}
+
+		@Override public Snippet probe(final MaxCount maxCount) {
+			throw new UnsupportedOperationException("maximum focus size constraint");
+		}
+
+
+		@Override public Snippet probe(final In in) {
+			throw new UnsupportedOperationException("focus range constraint");
+		}
+
+		@Override public Snippet probe(final All all) {
+			return nothing(); // universal constraints handled by field probe
+		}
+
+		@Override public Snippet probe(final Any any) {
+
+			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
+
+			return values(source, any.getValues());
+		}
+
+
+		@Override public Snippet probe(final Field field) {
+
+			final IRI iri=field.getIRI();
+			final Shape shape=field.getShape();
+
+			return snippet(
+
+					shape instanceof All // filtering hook
+							? null // ($) only if actually referenced by filters
+							: edge(var(source), iri, var(shape)),
+
+					all(shape) // target universal constraints
+							.map(values -> values.stream().map(value -> edge(var(source), iri, format(value))))
+							.orElse(null),
+
+					"\n\n",
+
+					filters(shape)
+			);
+		}
+
+
+		@Override public Snippet probe(final And and) {
+			return snippet(and.getShapes().stream().map(shape -> shape.map(this)));
+		}
+
+		@Override public Snippet probe(final Or or) {
+			throw new UnsupportedOperationException("disjunction pattern"); // !!! tbi
+		}
+
+		@Override public Snippet probe(final When when) {
+			throw new UnsupportedOperationException("conditional pattern"); // !!! tbi
+		}
+
+	}
+
+	private static final class PatternProbe extends Traverser<Snippet> {
+
+		// !!! (€) remove optionals if term is required or if exists a filter on the same path
+
+		private final Shape shape;
+
+
+		private PatternProbe(final Shape shape) {
+			this.shape=shape;
+		}
+
+
+		@Override public Snippet probe(final Guard guard) {
+			throw new UnsupportedOperationException("partially redacted shape");
+		}
+
+
+		@Override public Snippet probe(final Field field) {
+
+			final IRI iri=field.getIRI();
+			final Shape shape=field.getShape();
+
+			return template( // (€) optional unless universal constraints are present
+
+					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
+
+					snippet(
+							edge(var(this.shape), iri, var(shape)), "\n",
+							pattern(shape)
+					)
+
+			);
+		}
+
+
+		@Override public Snippet probe(final And and) {
+			return snippet(and.getShapes().stream().map(s -> s.map(this)));
+		}
+
+		@Override public Snippet probe(final Or or) {
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		}
+
+		@Override public Snippet probe(final When when) {
+			throw new UnsupportedOperationException("conditional shape");
+		}
 
 	}
 

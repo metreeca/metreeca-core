@@ -148,6 +148,10 @@ public final class Sources {
 
 	//// SPARQL DSL ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static Snippet var() {
+		return var(new Object());
+	}
+
 	public static Snippet var(final Object object) {
 		return object == null ? nothing() : snippet("?", id(object));
 	}
