@@ -23,10 +23,10 @@ import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
-import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.*;
@@ -40,46 +40,50 @@ import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.complement;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Values.*;
 import static com.metreeca.form.things.Snippets.source;
+import static com.metreeca.form.things.Values.*;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
+import static java.util.Collections.disjoint;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 
-final class ShapedValidator {
+final class GraphValidator {
 
 	Focus validate(final RepositoryConnection connection, final IRI resource, final Shape shape, final Collection<Statement> model) {
 
-		// validate against shape
+		final Focus focus=validate(connection, set(resource), shape, model); // validate against shape
 
-		final Focus focus=validate(connection, set(resource), shape);
-
-		// validate shape envelope
-
-		final Collection<Statement> envelope=focus.outline().collect(toSet());
-
-		final Collection<Statement> outliers=model.stream()
-				.filter(statement -> !envelope.contains(statement))
-				.collect(toList());
+		final Collection<Statement> envelope=focus.outline().collect(toSet()); // collect shape envelope
 
 		// extend validation report with statements outside shape envelope
 
-		return outliers.isEmpty() ? focus : focus(concat(focus.getIssues(), outliers.stream()
-				.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier))
-				.collect(toList())
-		), focus.getFrames());
+		return focus(
+
+				Stream.concat(
+
+						focus.getIssues().stream(),
+						model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
+								issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
+						)
+
+				).collect(toList()),
+
+				focus.getFrames()
+
+		);
 	}
 
-	Focus validate(final RepositoryConnection connection, final Set<Value> focus, final Shape shape) { // !!! testing only
+	Focus validate(
+			final RepositoryConnection connection, final Set<Value> focus, final Shape shape, final Collection<Statement> model
+	) { // !!! testing only
 		return shape
 				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 				.map(new Optimizer())
-				.map(new FocusProbe(connection, focus));
+				.map(new FocusProbe(connection, focus, model));
 	}
 
 
@@ -91,12 +95,21 @@ final class ShapedValidator {
 	private static final class FocusProbe implements Shape.Probe<Focus> {
 
 		private final RepositoryConnection connection;
+
 		private final Collection<Value> focus;
+		private final Collection<Statement> model;
 
 
-		private FocusProbe(final RepositoryConnection connection, final Collection<Value> focus) {
+		private FocusProbe(
+				final RepositoryConnection connection,
+				final Collection<Value> focus,
+				final Collection<Statement> model
+		) {
+
 			this.connection=connection;
+
 			this.focus=focus;
+			this.model=model;
 		}
 
 
@@ -118,43 +131,72 @@ final class ShapedValidator {
 		@Override public Focus probe(final Clazz clazz) {
 			if ( focus.isEmpty() ) { return focus(); } else {
 
-				final Collection<Frame> frames=new ArrayList<>();
+				final Set<Value> hierarchy=stream(connection.prepareTupleQuery(source(
 
-				connection.prepareTupleQuery(source("# clazz constrain\n"
+						"# clazz hierarchy\n"
 								+"\n"
 								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 								+"\n"
-								+"select ?value where {\n"
-								+"\t\n"
+								+"select distinct ?class { ?class rdfs:subClassOf* {class} }",
+
+						format(clazz.getIRI())
+
+				)).evaluate())
+
+						.map(bindings -> bindings.getValue("class"))
+						.collect(toSet());
+
+
+				final Stream<Map.Entry<Value, Value>> fromModel=focus.stream()
+						.flatMap(value -> model.stream()
+								.filter(pattern(value, RDF.TYPE, null))
+								.map(Statement::getObject)
+								.map(type -> entry(value, type))
+						);
+
+				final Stream<Map.Entry<Value, Value>> fromGraph=stream(connection.prepareTupleQuery(source(
+
+						"# type info\n"
+								+"\n"
+								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+								+"\n"
+								+"select ?value ?type {\n"
+								+"\n"
 								+"\tvalues ?value {\n"
 								+"\t\t{values}\n"
 								+"\t}\n"
 								+"\t\n"
-								+"\tfilter not exists { ?value a/rdfs:subClassOf* {clazz} }\n"
+								+"\t?value a ?type\n"
 								+"\t\n"
 								+"}",
 
-						focus.stream().map(Values::format).collect(joining("\n")),
-						format(clazz.getIRI())
+						GraphProcessor.list(focus.stream().map(Values::format), "\n")
 
-				)).evaluate(new AbstractTupleQueryResultHandler() {
-					@Override public void handleSolution(final BindingSet bindings) {
+				)).evaluate()).map(bindings -> entry(
+						bindings.getValue("value"),
+						bindings.getValue("type")
+				));
 
-						frames.add(frame(
-								bindings.getValue("value"),
+
+				final Map<Value, Set<Value>> types=Stream.concat(fromModel, fromGraph)
+						.collect(groupingBy(Map.Entry::getKey, mapping(Map.Entry::getValue, toSet())));
+
+				final Stream<Frame> violations=focus.stream()
+						.filter(value -> disjoint(types.getOrDefault(value, emptySet()), hierarchy))
+						.map(value -> frame(value,
 								set(issue(Issue.Level.Error, "not an instance of target class", clazz))
 						));
 
-					}
-				});
 
 				final Map<IRI, Focus> type=singletonMap(RDF.TYPE, focus(set(), set(frame(clazz.getIRI()))));
 
-				focus.stream() // add rdf:type outlining frames
-						.map(value -> frame(value, set(), type))
-						.forEach(frames::add);
+				final Stream<Frame> outlining=focus.stream() // add rdf:type outlining frames
+						.map(value -> frame(value, set(), type));
 
-				return focus(set(), frames);
+				return focus(emptySet(), Stream.concat(
+						violations, outlining
+				).collect(toList()));
+
 			}
 		}
 
@@ -297,20 +339,20 @@ final class ShapedValidator {
 
 				final Stream<Value> values // compute the new focus set
 
-						=!direct(iri) ?
-						stream(connection.getStatements(null, inverse(iri), value)).map(Statement::getSubject)
+						=direct(iri) ? model.stream()
+						.filter(pattern(value, iri, null))
+						.map(Statement::getObject)
 
-						: value instanceof Resource ?
-						stream(connection.getStatements((Resource)value, iri, null)).map(Statement::getObject)
-
-						: Stream.empty();
+						: model.stream()
+						.filter(pattern(null, inverse(iri), value))
+						.map(Statement::getSubject);
 
 
 				final Set<Value> focus=values.collect(toSet());
 
 				// validate the field shape on the new focus set
 
-				final Focus report=shape.map(new FocusProbe(connection, focus));
+				final Focus report=shape.map(new FocusProbe(connection, focus, model));
 
 				// identifies the values in the new focus set referenced in report frames
 

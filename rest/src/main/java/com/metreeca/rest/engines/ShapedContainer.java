@@ -103,7 +103,7 @@ final class ShapedContainer extends GraphEntity {
 
 				query -> graph.query(connection -> {
 
-					final Collection<Statement> model=new ShapedRetriever().retrieve(connection, resource, query);
+					final Collection<Statement> model=new GraphRetriever().retrieve(connection, resource, query);
 
 					return query.map(new Query.Probe<Result<V, E>>() {
 
@@ -137,16 +137,20 @@ final class ShapedContainer extends GraphEntity {
 
 			return reserve(connection, related).map(reserved -> {
 
-				flock.insert(connection, resource, related, model).add(model);
+				// validate before updating graph to support snapshot transactions
 
-				// !!! validate before altering the db (snapshot isolation)
-
-				final Focus focus=new ShapedValidator().validate(connection, related, create, model);
+				final Focus focus=new GraphValidator().validate(connection, related, create, model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
+
 					connection.rollback();
+
 				} else {
+
+					flock.insert(connection, resource, related, model).add(model);
+
 					connection.commit();
+
 				}
 
 				return focus;

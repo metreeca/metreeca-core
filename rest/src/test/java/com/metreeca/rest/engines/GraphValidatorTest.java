@@ -18,8 +18,11 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
+import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.ValuesTest;
 import com.metreeca.form.truths.ModelAssert;
+import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -31,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashSet;
 import java.util.function.Supplier;
 
+import static com.metreeca.form.FocusAssert.assertThat;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -51,7 +55,9 @@ import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.things.Values.*;
 import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.things.ValuesTest.sandbox;
 import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,14 +66,14 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 
 
-final class ShapedValidatorTest {
+final class GraphValidatorTest {
 
 	private static final IRI x=ValuesTest.item("x");
 	private static final IRI y=ValuesTest.item("y");
 	private static final IRI z=ValuesTest.item("z");
 
 
-	private final Supplier<RepositoryConnection> sandbox=ValuesTest.sandbox();
+	private final Supplier<RepositoryConnection> sandbox=sandbox();
 
 
 	//// Validation ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +150,8 @@ final class ShapedValidatorTest {
 
 		final Focus focus=process(shape, model, x, y);
 
-		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
+		assertThat(focus).isValid();
+
 		ModelAssert.assertThat(focus.outline().collect(toList()))
 				.as("outline computed")
 				.isIsomorphicTo(model);
@@ -327,12 +334,32 @@ final class ShapedValidatorTest {
 
 	@Test void testValidateClazz() {
 
-		final Shape shape=clazz(z);
-		final Model model=decode("<x> a <y>. <y> rdfs:subClassOf <z>.");
+		final Field shape=field(RDF.VALUE, clazz(RDFS.RESOURCE));
 
-		assertThat(validate(shape, model, x)).as("pass").isTrue();
-		assertThat(validate(shape, model, y)).as("fail").isFalse();
+		new Tray()
 
+				.exec(() -> tool(Graph.Factory).update(connection -> {
+
+					assertThat(new GraphValidator().validate(connection, RDF.NIL, shape,
+							decode("rdf:nil rdf:value rdf:first. rdf:first a rdfs:Resource.")))
+							.isValid();
+
+					assertThat(new GraphValidator().validate(connection, RDF.NIL, shape, decode("rdf:nil rdf:value rdf:rest.")))
+							.isNotValid();
+
+				}))
+
+				.exec(() -> tool(Graph.Factory).update(connection -> {
+
+					connection.add(decode("rdf:first a rdfs:Resource."));
+
+					assertThat(new GraphValidator().validate(connection, RDF.NIL, shape, decode("rdf:nil rdf:value rdf:first.")))
+							.isValid();
+
+					assertThat(new GraphValidator().validate(connection, RDF.NIL, shape, decode("rdf:nil rdf:value rdf:rest.")))
+							.isNotValid();
+
+				}));
 	}
 
 
@@ -462,9 +489,10 @@ final class ShapedValidatorTest {
 
 	private Focus process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
 		try (final RepositoryConnection connection=sandbox.get()) {
+
 			connection.add(statements);
-			final ShapedValidator validator=new ShapedValidator();
-			return validator.validate(connection, new LinkedHashSet<>(asList(focus)), shape);
+
+			return new GraphValidator().validate(connection, new LinkedHashSet<>(asList(focus)), shape, emptySet());
 		}
 	}
 

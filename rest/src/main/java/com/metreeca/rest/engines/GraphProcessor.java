@@ -1,0 +1,102 @@
+/*
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca.
+ *
+ * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.metreeca.rest.engines;
+
+import com.metreeca.form.things.Snippets;
+import com.metreeca.form.things.Snippets.Snippet;
+import com.metreeca.form.things.Values;
+import com.metreeca.tray.sys.Trace;
+
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.tray.Tray.tool;
+
+import static java.lang.Math.max;
+import static java.lang.String.format;
+
+
+abstract class GraphProcessor {
+
+	private final Trace trace=tool(Trace.Factory);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	String compile(final Supplier<String> generator) {
+
+		final long start=System.currentTimeMillis();
+
+		final String query=generator.get();
+
+		final long stop=System.currentTimeMillis();
+
+		trace.debug(this, () -> format("executing %s", query.endsWith("\n") ? query : query+"\n"));
+		trace.debug(this, () -> format("generated in %d ms", max(1, stop-start)));
+
+		return query;
+	}
+
+	void evaluate(final Runnable task) {
+
+		final long start=System.currentTimeMillis();
+
+		task.run();
+
+		final long stop=System.currentTimeMillis();
+
+		trace.debug(this, () -> format("evaluated in %d ms", max(1, stop-start)));
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static Snippet edge(final Object source, final IRI iri, final Object target) {
+		return source == null || iri == null || target == null ? Snippets.nothing() : direct(iri)
+				? Snippets.snippet(source, " ", Values.format(iri), " ", target, " .")
+				: Snippets.snippet(target, " ", Values.format(inverse(iri)), " ", source, " .");
+	}
+
+	static Snippet edge(final Object source, final List<IRI> path, final Object target) {
+		return source == null || path == null || path.isEmpty() || target == null ? Snippets.nothing()
+				: Snippets.snippet(source, " ", path(path), " ", target, " .");
+	}
+
+	static Snippet path(final List<IRI> path) {
+		return list(path.stream().map(Values::format), '/');
+	}
+
+	static Snippet list(final Stream<?> items, final Object separator) {
+		return items == null ? Snippets.nothing() : Snippets.snippet(items.flatMap(item -> Stream.of(separator, item)).skip(1));
+	}
+
+	static Snippet var() {
+		return var(new Object());
+	}
+
+	static Snippet var(final Object object) {
+		return object == null ? Snippets.nothing() : Snippets.snippet((Object)"?", Snippets.id(object));
+	}
+
+}

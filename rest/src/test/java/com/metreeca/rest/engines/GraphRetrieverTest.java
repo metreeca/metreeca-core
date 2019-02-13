@@ -66,10 +66,10 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-final class ShapedRetrieverTest {
+final class GraphRetrieverTest {
 
 	private final Supplier<RepositoryConnection> sandbox=sandbox(large());
-	private final ShapedRetriever retriever=new Tray().get(ShapedRetriever::new);
+	private final GraphRetriever retriever=new Tray().get(GraphRetriever::new);
 
 
 	private Collection<Statement> query(final Query query) {

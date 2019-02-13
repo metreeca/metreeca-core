@@ -24,7 +24,6 @@ import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
-import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -40,30 +39,18 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Snippets.*;
-import static com.metreeca.form.things.Values.bnode;
-import static com.metreeca.form.things.Values.direct;
-import static com.metreeca.form.things.Values.format;
-import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.form.things.Values.*;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
-import static java.lang.Math.max;
-import static java.lang.String.format;
 
-
-final class ShapedRetriever {
-
-	private final Trace trace=tool(Trace.Factory);
+final class GraphRetriever extends GraphProcessor {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -355,32 +342,6 @@ final class ShapedRetriever {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String compile(final Supplier<String> generator) {
-
-		final long start=System.currentTimeMillis();
-
-		final String query=generator.get();
-
-		final long stop=System.currentTimeMillis();
-
-		trace.debug(this, () -> format("executing %s", query.endsWith("\n") ? query : query+"\n"));
-		trace.debug(this, () -> format("generated in %d ms", max(1, stop-start)));
-
-		return query;
-	}
-
-	private void evaluate(final Runnable task) {
-
-		final long start=System.currentTimeMillis();
-
-		task.run();
-
-		final long stop=System.currentTimeMillis();
-
-		trace.debug(this, () -> format("evaluated in %d ms", max(1, stop-start)));
-
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -454,44 +415,12 @@ final class ShapedRetriever {
 		), " ");
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static Snippet edge(final Object source, final IRI iri, final Object target) {
-		return direct(iri)
-				? snippet(source, " ", format(iri), " ", target, " .")
-				: snippet(target, " ", format(inverse(iri)), " ", source, " .");
-	}
-
-	private static Snippet edge(final Object source, final List<IRI> path, final Object target) {
-		return path.isEmpty() ? nothing() : snippet(source, " ", path(path), " ", target, " .");
-	}
-
-
-	private static Snippet path(final List<IRI> path) {
-		return list(path.stream().map(Values::format), '/');
-	}
-
-
 	private static Snippet values(final Shape source, final Collection<Value> values) {
 		return snippet("\n\nvalues {source} {\n{values}\n}\n\n",
 
 				var(source), list(values.stream().map(Values::format), "\n")
 
 		);
-	}
-
-	private static Snippet list(final Stream<?> items, final Object separator) {
-		return snippet(items.flatMap(item -> Stream.of(separator, item)).skip(1));
-	}
-
-
-	private static Snippet var() {
-		return var(new Object());
-	}
-
-	private static Snippet var(final Object object) {
-		return object == null ? nothing() : snippet("?", id(object));
 	}
 
 

@@ -115,16 +115,19 @@ final class ShapedResource extends GraphEntity {
 
 			return retrieve(connection, resource, update).map(current -> { // identify updatable description
 
-				connection.remove(current);
-				connection.add(model);
+				// validate before updating graph to support snapshot transactions
 
-				// !!! validate before altering the db (snapshot isolation)
-
-				final Focus focus=new ShapedValidator().validate(connection, resource, update, model);
+				final Focus focus=new GraphValidator().validate(connection, resource, update, model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
+
 					connection.rollback();
+
 				} else {
+
+					connection.remove(current);
+					connection.add(model);
+
 					connection.commit();
 				}
 
@@ -156,7 +159,7 @@ final class ShapedResource extends GraphEntity {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
-		return Optional.of(new ShapedRetriever())
+		return Optional.of(new GraphRetriever())
 				.map(retriever -> retriever.retrieve(connection, resource, edges(and(all(resource), shape))))
 				.filter(model -> !model.isEmpty());
 	}
