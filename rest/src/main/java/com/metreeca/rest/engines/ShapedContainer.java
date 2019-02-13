@@ -141,7 +141,7 @@ final class ShapedContainer extends GraphEntity {
 
 				// !!! validate before altering the db (snapshot isolation)
 
-				final Focus focus=validate(connection, related, create, model);
+				final Focus focus=new ShapedValidator().validate(connection, related, create, model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
 					connection.rollback();

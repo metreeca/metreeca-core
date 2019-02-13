@@ -32,17 +32,15 @@ import java.util.Optional;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.engines.Descriptions.description;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 
-abstract class GraphEntity implements Engine {
+abstract class GraphEntity implements Engine { // !!! remove
 
 	Shape redact(final Shape shape, final IRI task, final IRI view) {
 		return shape.map(new Redactor(map(
@@ -68,30 +66,6 @@ abstract class GraphEntity implements Engine {
 				.map(outlier -> issue(Issue.Level.Error, "statement outside description envelope "+outlier))
 				.collect(toList())
 		);
-	}
-
-	Focus validate(final RepositoryConnection connection, final IRI resource, final Shape shape, final Collection<Statement> model) {
-
-
-		// validate against shape (disable if not transactional) // !!! just downgrade
-
-		final Focus focus=new ShapedValidator().validate(connection, resource, shape);
-
-		// validate shape envelope
-
-		final Collection<Statement> envelope=focus.outline().collect(toSet());
-
-		final Collection<Statement> outliers=model.stream()
-				.filter(statement -> !envelope.contains(statement))
-				.collect(toList());
-
-		// extend validation report with statements outside shape envelope
-
-		return outliers.isEmpty() ? focus : focus(concat(focus.getIssues(), outliers.stream()
-				.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier))
-				.collect(toList())
-		), focus.getFrames());
-
 	}
 
 }

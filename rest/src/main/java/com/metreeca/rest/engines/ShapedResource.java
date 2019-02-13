@@ -58,6 +58,7 @@ final class ShapedResource extends GraphEntity {
 
 	private final Shape convey;
 
+
 	ShapedResource(final Graph graph, final Shape shape) {
 
 		this.graph=graph;
@@ -119,7 +120,7 @@ final class ShapedResource extends GraphEntity {
 
 				// !!! validate before altering the db (snapshot isolation)
 
-				final Focus focus=validate(connection, resource, update, model);
+				final Focus focus=new ShapedValidator().validate(connection, resource, update, model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
 					connection.rollback();
@@ -138,6 +139,7 @@ final class ShapedResource extends GraphEntity {
 		return graph.update(connection -> {
 
 			// !!! merge retrieve/remove operations into a single SPARQL update txn
+			// !!! must check resource existence anyway and would break for CBD shapes
 
 			return retrieve(connection, resource, delete).map(current -> { // identify deletable description
 

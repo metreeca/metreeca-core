@@ -53,20 +53,29 @@ import static java.util.stream.Collectors.toSet;
 
 final class ShapedValidator {
 
-	Focus validate(final RepositoryConnection connection, final Value focus, final Shape shape) {
-		return validate(connection, set(focus), shape);
+	Focus validate(final RepositoryConnection connection, final IRI resource, final Shape shape, final Collection<Statement> model) {
+
+		// validate against shape
+
+		final Focus focus=validate(connection, set(resource), shape);
+
+		// validate shape envelope
+
+		final Collection<Statement> envelope=focus.outline().collect(toSet());
+
+		final Collection<Statement> outliers=model.stream()
+				.filter(statement -> !envelope.contains(statement))
+				.collect(toList());
+
+		// extend validation report with statements outside shape envelope
+
+		return outliers.isEmpty() ? focus : focus(concat(focus.getIssues(), outliers.stream()
+				.map(outlier -> issue(Issue.Level.Error, "statement outside shape envelope "+outlier))
+				.collect(toList())
+		), focus.getFrames());
 	}
 
-	Focus validate(final RepositoryConnection connection, final Set<Value> focus, final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
+	Focus validate(final RepositoryConnection connection, final Set<Value> focus, final Shape shape) { // !!! testing only
 		return shape
 				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 				.map(new Optimizer())
@@ -75,7 +84,6 @@ final class ShapedValidator {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 	/**
 	 * Validate constraints on a focus value set.

@@ -31,7 +31,7 @@ import static java.util.stream.Collectors.*;
 
 
 /**
- * Focus shape validation report.
+ * Shape focus validation report.
  */
 public final class Focus {
 
