@@ -47,7 +47,6 @@ import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
@@ -191,8 +190,6 @@ public final class Throttler implements Wrapper {
 
 	private final UnaryOperator<Shape> area;
 
-	private final Map<Shape, Map<Map<IRI, Set<? extends Value>>, Shape>> cache=new IdentityHashMap<>();
-
 
 	/**
 	 * Creates a throttler
@@ -259,9 +256,9 @@ public final class Throttler implements Wrapper {
 
 				// remove annotations and filtering-only constraints for authorization checks
 
-				final Shape general=shape(shape, true, Form.convey, set(Form.any));
-				final Shape authorized=shape(shape, true, Form.convey, roles);
-				final Shape redacted=shape(shape, false, null, roles);
+				final Shape general=shape(shape, Form.convey, set(Form.any));
+				final Shape authorized=shape(shape, Form.convey, roles);
+				final Shape redacted=shape(shape, null, roles);
 
 				return constant(general) != null ? forbidden(request)
 						: constant(authorized) != null ? refused(request)
@@ -287,7 +284,7 @@ public final class Throttler implements Wrapper {
 
 			} else {
 
-				final Shape redacted=shape(shape, false, Form.convey, request.roles());
+				final Shape redacted=shape(shape, Form.convey, request.roles());
 
 				return response.shape(redacted)
 						.pipe(rdf(), rdf -> Value(envelope(focus, redacted, rdf)))
@@ -301,29 +298,19 @@ public final class Throttler implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape(final Shape shape, final boolean clean, final IRI mode, final Set<Value> roles) {
-		synchronized ( cache ) {
-			return cache
-					.computeIfAbsent(shape, _shape -> new HashMap<>())
-					.computeIfAbsent(variables(clean, mode, roles), variables -> shape
-							.map(area)
-							.map(new Redactor(variables))
-							.map(clean ? new Cleaner() : new Inspector<Shape>() {
-								@Override public Shape probe(final Shape shape) { return shape; }
-							})
-							.map(new Optimizer())
-					);
-		}
+	private Shape shape(final Shape shape, final IRI mode, final Set<Value> roles) {
+		return shape
+				.map(area)
+				.map(new Redactor(variables(mode, roles)))
+				.map(new Optimizer());
 	}
 
-	private Map<IRI, Set<? extends Value>> variables(final boolean clean, final IRI mode, final Set<Value> roles) {
-		return mode == null ? map(
-				entry(RDF.NIL, set(literal(clean))),
+	private Map<IRI, Set<? extends Value>> variables(final IRI mode, final Set<Value> roles) {
+		return mode == null ? map( // !!! support a dummy value in redactor (like form:any, but with noop semantics)
 				entry(Form.task, set(task)),
 				entry(Form.view, set(view)),
 				entry(Form.role, roles)
 		) : map(
-				entry(RDF.NIL, set(literal(clean))),
 				entry(Form.task, set(task)),
 				entry(Form.view, set(view)),
 				entry(Form.mode, set(mode)),

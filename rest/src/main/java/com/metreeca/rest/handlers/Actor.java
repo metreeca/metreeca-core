@@ -22,9 +22,6 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.tray.rdf.Graph;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -34,15 +31,12 @@ import static com.metreeca.tray.Tray.tool;
  * <p>Handles actions on linked data resources; the base class:</p>
  *
  * <ul>
- * <li>creates and caches shape-driven resource {@linkplain #engine(Shape) engines};</li>
  * <li>handles {@link UnsupportedOperationException} thrown by engines.</li>
  * </ul>
  */
-public abstract class Actor extends Delegator {
+public abstract class Actor extends Delegator { // !!! remove
 
 	private final Graph graph=tool(Graph.Factory);
-
-	private final Map<Shape, Engine> engines=new IdentityHashMap<>();
 
 
 	/**
@@ -60,9 +54,7 @@ public abstract class Actor extends Delegator {
 			throw new NullPointerException("null shape");
 		}
 
-		synchronized ( engines ) {
-			return engines.computeIfAbsent(shape, _shape -> new GraphEngine(graph, _shape));
-		}
+		return new GraphEngine(graph, shape);
 	}
 
 
