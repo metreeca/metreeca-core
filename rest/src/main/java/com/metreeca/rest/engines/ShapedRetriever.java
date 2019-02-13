@@ -42,7 +42,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
@@ -124,14 +123,14 @@ final class ShapedRetriever {
 							+"\n"
 							+"} order by {criteria}",
 
-					(Snippet)(source, identifiers) -> pattern
-							.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s), template::add))
+					(Snippet)(source, identifiers) -> Stream
+							.concat(
+									Stream.of(identifiers.apply(root, root)), /// always project root
+									pattern.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s), template::add))
+							)
 							.distinct()
 							.sorted()
-							.map(v -> snippet(" ?", v))
-							.reduce((x, y) -> snippet(x, y))
-							.orElseGet(() -> var(root))
-							.accept(source, identifiers),
+							.forEachOrdered(id -> source.accept(" ?"+id)),
 
 					filter(selector, orders, offset, limit),
 					pattern(pattern),
@@ -140,13 +139,12 @@ final class ShapedRetriever {
 					criteria(root, orders)
 
 			));
-		})).evaluate(new AbstractTupleQueryResultHandler() {
 
-			private final String id=source(id(root));
+		})).evaluate(new AbstractTupleQueryResultHandler() {
 
 			@Override public void handleSolution(final BindingSet bindings) {
 
-				final Value match=bindings.getValue(id);
+				final Value match=bindings.getValue("0"); // root id
 
 				if ( match != null ) {
 
@@ -226,11 +224,9 @@ final class ShapedRetriever {
 					target,
 
 					roots(selector),
-					filters(selector),
+					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					// !!! use filter(selector, emptySet(), 0, 0) to support sampling
-
-					path.isEmpty() ? null : snippet(source, " ", path(path), " ", target, " .")
+					edge(source, path, target)
 
 					// !!! support ordering/slicing?
 
@@ -322,13 +318,11 @@ final class ShapedRetriever {
 
 
 					roots(selector),
-					filters(selector),
+					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					// !!! use filter(selector, emptySet(), 0, 0) to support sampling
+					edge(source, path, target)
 
-					path.isEmpty() ? null : snippet(source, " ", path(path), " ", target, " .")
-				
-					// !!! hadle label/comment language
+					// !!! handle label/comment language
 					// !!! support ordering/slicing?
 
 			));
@@ -461,28 +455,34 @@ final class ShapedRetriever {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private static Snippet edge(final Object source, final IRI iri, final Object target) {
 		return direct(iri)
 				? snippet(source, " ", format(iri), " ", target, " .")
 				: snippet(target, " ", format(inverse(iri)), " ", source, " .");
 	}
 
-	private static Snippet path(final Collection<IRI> path) {
+	private static Snippet edge(final Object source, final List<IRI> path, final Object target) {
+		return path.isEmpty() ? nothing() : snippet(source, " ", path(path), " ", target, " .");
+	}
+
+
+	private static Snippet path(final List<IRI> path) {
 		return list(path.stream().map(Values::format), '/');
 	}
 
 
-	private static Snippet list(final Stream<?> items, final Object separator) {
-		return snippet(items.flatMap(item -> Stream.of(separator, item)).skip(1));
-	}
-
-	private static Snippet values(final Shape source, final Iterable<Value> values) {
+	private static Snippet values(final Shape source, final Collection<Value> values) {
 		return snippet("\n\nvalues {source} {\n{values}\n}\n\n",
 
-				var(source),
-				list(StreamSupport.stream(values.spliterator(), false).map(Values::format), "\n")
+				var(source), list(values.stream().map(Values::format), "\n")
 
 		);
+	}
+
+	private static Snippet list(final Stream<?> items, final Object separator) {
+		return snippet(items.flatMap(item -> Stream.of(separator, item)).skip(1));
 	}
 
 
