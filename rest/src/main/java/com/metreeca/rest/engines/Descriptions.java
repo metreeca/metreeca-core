@@ -28,6 +28,8 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.metreeca.form.things.Values.pattern;
+
 import static java.util.Collections.singleton;
 
 
@@ -63,11 +65,7 @@ final class Descriptions {
 		}
 
 		return description(focus, labelled, (s, p, o) ->
-				StreamSupport.stream(model.spliterator(), true).filter(statement
-						-> (s == null || s.equals(statement.getSubject()))
-						&& (p == null || p.equals(statement.getPredicate()))
-						&& (o == null || o.equals(statement.getObject()))
-				)
+				StreamSupport.stream(model.spliterator(), true).filter(pattern(s, p, o))
 		);
 	}
 

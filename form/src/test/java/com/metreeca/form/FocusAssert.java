@@ -19,6 +19,8 @@ package com.metreeca.form;
 
 import org.assertj.core.api.AbstractAssert;
 
+import static com.metreeca.form.things.Strings.indent;
+
 
 public final class FocusAssert extends AbstractAssert<FocusAssert, Focus> {
 
@@ -43,7 +45,7 @@ public final class FocusAssert extends AbstractAssert<FocusAssert, Focus> {
 		if ( actual.assess(Issue.Level.Error) ) {
 			failWithMessage(
 					"expected focus to contain no errors but was <\n%s\n>",
-					actual.prune(Issue.Level.Warning)
+					indent(actual.prune(Issue.Level.Warning))
 			);
 		}
 
@@ -55,7 +57,7 @@ public final class FocusAssert extends AbstractAssert<FocusAssert, Focus> {
 		isNotNull();
 
 		if ( !actual.assess(Issue.Level.Error) ) {
-			failWithMessage("expected focus to contain errors but was <\n%s\n>", actual);
+			failWithMessage("expected focus to contain errors but was <\n%s\n>", indent(actual));
 		}
 
 		return this;

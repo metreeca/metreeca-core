@@ -37,6 +37,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQueries;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -127,6 +128,14 @@ public final class Values {
 		}
 
 		return !(iri instanceof Inverse);
+	}
+
+
+	public static Predicate<Statement> pattern(final Value subject, final Value predicate, final Value object) {
+		return statement
+				-> (subject == null || subject.equals(statement.getSubject()))
+				&& (predicate == null || predicate.equals(statement.getPredicate()))
+				&& (object == null || object.equals(statement.getObject()));
 	}
 
 
