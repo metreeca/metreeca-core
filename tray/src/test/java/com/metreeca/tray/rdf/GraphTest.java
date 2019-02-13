@@ -19,67 +19,34 @@
 package com.metreeca.tray.rdf;
 
 
-import org.eclipse.rdf4j.query.resultio.text.tsv.SPARQLResultsTSVWriter;
+import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 
 final class GraphTest {
 
-	@Test void testUpdateVisibilityWithinTransaction() { // !!! automate using assertions
 
-		final Repository repository=new SailRepository(new MemoryStore());
+	@Test void testPreventUpdateTransactionsOnReadOnlyRepositories() {
 
-		//final Repository repository=new SailRepository(new NativeStore(new File("data/work")));
-		//final Repository repository=new HTTPRepository("http://localhost:7200/repositories/work"); // graphdb
-		//final Repository repository=new SPARQLRepository("http://localhost:9999/blazegraph/namespace/work/sparql"); // blazegraph
+		final Graph graph=new Graph() {
 
-		//final Repository repository=new StardogRepository(ConnectionConfiguration
-		//		.from("http://localhost:5820/work")
-		//		.credentials("admin", "admin"));
+			private final Repository repository=new SailRepository(new MemoryStore());
 
+			@Override protected Repository repository() { return repository; }
 
-		repository.initialize();
+			@Override protected IsolationLevel isolation() { return READ_ONLY; }
 
-		try (final RepositoryConnection connection=repository.getConnection()) {
+		};
 
-			connection.clear();
+		assertThatThrownBy(() -> graph.update(connection -> {}) )
+				.isInstanceOf(RepositoryException.class);
 
-			connection.begin();
-
-			//try {
-			//	connection.add(Rio.parse(new StringReader("<test:x> <test:y> <test:z>."), "", RDFFormat.TURTLE));
-			//} catch ( final IOException e ) {
-			//	throw new UncheckedIOException(e);
-			//}
-
-			//connection.prepareUpdate(""
-			//		+"insert data { <test:x> <test:y> <test:z> };\n"
-			//		+"insert { <test:w> ?p ?o } where { <test:x> ?p ?o };"
-			//).execute();
-
-			connection.prepareUpdate("insert data { <test:x> <test:y> <test:z> }").execute();
-			connection.prepareUpdate("insert { <test:w> ?p ?o } where { <test:x> ?p ?o };").execute();
-
-			System.out.println("---");
-
-			connection.prepareTupleQuery("select * { ?s ?p ?o } limit 10").
-					evaluate(new SPARQLResultsTSVWriter(System.out));
-
-			//connection.commit();
-			connection.rollback();
-
-			System.out.println("---");
-
-			connection.prepareTupleQuery("select * { ?s ?p ?o } limit 10").
-					evaluate(new SPARQLResultsTSVWriter(System.out));
-
-		}
-
-		repository.shutDown();
 	}
 
 }

@@ -22,8 +22,9 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.Engine;
 
-import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
@@ -31,14 +32,12 @@ import java.util.Optional;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.engines.Descriptions.description;
 
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -73,19 +72,16 @@ abstract class GraphEntity implements Engine {
 
 	Focus validate(final RepositoryConnection connection, final IRI resource, final Shape shape, final Collection<Statement> model) {
 
-		// !!! make sure the validator use updated resource state in 'model' rather than current state in the store
 
 		// validate against shape (disable if not transactional) // !!! just downgrade
 
-		final boolean unsafe=!connection.getIsolationLevel().isCompatibleWith(IsolationLevels.SNAPSHOT);
-
-		final Focus focus=new ShapedValidator().validate(connection, resource, unsafe ? and() : shape);
+		final Focus focus=new ShapedValidator().validate(connection, resource, shape);
 
 		// validate shape envelope
 
 		final Collection<Statement> envelope=focus.outline().collect(toSet());
 
-		final Collection<Statement> outliers=unsafe ? emptySet() : model.stream()
+		final Collection<Statement> outliers=model.stream()
 				.filter(statement -> !envelope.contains(statement))
 				.collect(toList());
 

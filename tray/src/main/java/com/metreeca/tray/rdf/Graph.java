@@ -20,6 +20,8 @@ package com.metreeca.tray.rdf;
 import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 
 import org.eclipse.rdf4j.IsolationLevel;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -39,6 +41,22 @@ import static java.util.Objects.requireNonNull;
  * RDF repository through a {@link ThreadLocal} context variable.</p>
  */
 public abstract class Graph implements AutoCloseable {
+
+	/**
+	 * Read-only isolation level.
+	 *
+	 * <p>Disables update transactions.</p>
+	 */
+	public static final IsolationLevel READ_ONLY=new IsolationLevel() {
+
+		@Override public boolean isCompatibleWith(final IsolationLevel level) { return equals(level); }
+
+		@Override public IRI getURI() { return RDF.NIL; }
+
+		@Override public String toString() { return "READ_ONLY"; }
+
+	};
+
 
 	/**
 	 * Graph factory.

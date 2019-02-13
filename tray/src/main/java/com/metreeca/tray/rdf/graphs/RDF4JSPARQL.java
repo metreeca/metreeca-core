@@ -35,6 +35,9 @@ public final class RDF4JSPARQL extends Graph {
 	private final SPARQLRepository repository; // ;( namespace ops silently ignored
 
 
+	private boolean writable;
+
+
 	/**
 	 * Creates an RDF4J SPARQL graph.
 	 *
@@ -77,6 +80,19 @@ public final class RDF4JSPARQL extends Graph {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	/**
+	 * Configures supports for update transactions on the remote RDF repository.
+	 * @param writable {@code true} if update transactions should be enabled; {@code false} otherwise
+	 * @return this graph store
+	 */
+	public RDF4JSPARQL writable(final boolean writable) {
+
+		this.writable=writable;
+
+		return this;
+	}
 
 	/**
 	 * Configures the credentials for accessing the remote RDF repository.
@@ -121,7 +137,7 @@ public final class RDF4JSPARQL extends Graph {
 	 * @return {@inheritDoc} ({@link IsolationLevels#NONE})
 	 */
 	@Override protected IsolationLevel isolation() {
-		return IsolationLevels.NONE;
+		return writable ? IsolationLevels.NONE : READ_ONLY;
 	}
 
 }
