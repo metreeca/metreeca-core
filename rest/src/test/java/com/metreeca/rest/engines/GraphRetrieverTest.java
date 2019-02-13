@@ -23,7 +23,6 @@ import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -72,7 +71,7 @@ import static org.eclipse.rdf4j.model.vocabulary.RDFS.LABEL;
 final class GraphRetrieverTest {
 
 	private void exec(final Runnable task) {
-		new Tray().exec(graph(large())).exec(task);
+		new Tray().exec(graph(small())).exec(task);
 	}
 
 
@@ -92,62 +91,75 @@ final class GraphRetrieverTest {
 	@Nested final class Edges {
 
 		@Test void testEmptyShape() {
-			exec(() -> assertThat(query(edges(and())))
-					.as("empty focus")
-					.isEmpty());
+			exec(() -> assertThat(query(
+
+					edges(and())
+
+			)).isEmpty());
 		}
 
 		@Test void testEmptyResultSet() {
-			exec(() -> assertThat(query(edges(field(TYPE, all(NIL)))))
-					.as("empty focus")
-					.isEmpty());
+			exec(() -> assertThat(query(
+
+					edges(field(TYPE, all(NIL)))
+
+			)).isEmpty());
 		}
 
 		@Test void testEmptyProjection() {
-			exec(() -> assertThat(query(edges(clazz(term("Product")))))
-					.as("matching focus")
-					.isIsomorphicTo(query("construct { form:root ldp:contains ?product } where { ?product a :Product }")));
+			exec(() -> assertThat(query(
+
+					edges(clazz(term("Employee")))
+
+			)).isIsomorphicTo(query(
+
+					"construct { form:root ldp:contains ?employee } where { ?employee a :Employee }"
+
+			)));
 		}
 
 		@Test void testMatching() {
-			new Tray().exec(() -> {
-				final Collection<Statement> matches=query(edges(field(TYPE, all(term("Product")))));
+			exec(() -> assertThat(query(
 
-				assertThat(matches)
-						.as("matching focus")
-						.isIsomorphicTo(query("construct { form:root ldp:contains ?product. ?product a :Product } where { ?product a :Product }"));
-			});
+					edges(field(TYPE, all(term("Employee"))))
+
+			)).isIsomorphicTo(query(
+
+					"construct { form:root ldp:contains ?employee. ?employee a :Employee } where { ?employee a :Employee }"
+
+			)));
 		}
 
+
 		@Test void testSorting() {
-			new Tray().exec(() -> {
+			exec(() -> {
 
-				final String query="construct { form:root ldp:contains ?product }"
-						+" where { ?product a :Product; rdfs:label ?label; :line ?line }";
+				final String query="construct { form:root ldp:contains ?employee }"
+						+" where { ?employee a :Employee; rdfs:label ?label; :office ?office }";
 
-				final Shape shape=filter().then(field(TYPE, all(term("Product"))));
+				final Shape shape=filter().then(field(TYPE, all(term("Employee"))));
 
 				// convert to lists to assert ordering
 
-				Assertions.assertThat(list(query(query+" order by ?product")))
+				Assertions.assertThat(list(query(edges(shape))))
 						.as("default (on value)")
-						.isEqualTo(list(query(edges(shape))));
+						.isEqualTo(list(query(query+" order by ?employee")));
 
-				Assertions.assertThat(list(query(query+" order by ?label")))
+				Assertions.assertThat(list(query(edges(shape, increasing(LABEL)))))
 						.as("custom increasing")
-						.isEqualTo(list(query(edges(shape, increasing(LABEL)))));
+						.isEqualTo(list(query(query+" order by ?label")));
 
-				Assertions.assertThat(list(query(query+" order by desc(?label)")))
+				Assertions.assertThat(list(query(edges(shape, decreasing(LABEL)))))
 						.as("custom decreasing")
-						.isEqualTo(list(query(edges(shape, decreasing(LABEL)))));
+						.isEqualTo(list(query(query+" order by desc(?label)")));
 
-				Assertions.assertThat(list(query(query+" order by ?line ?label")))
+				Assertions.assertThat(list(query(edges(shape, increasing(term("office")), increasing(LABEL)))))
 						.as("custom combined")
-						.isEqualTo(list(query(edges(shape, increasing(term("line")), increasing(LABEL)))));
+						.isEqualTo(list(query(query+" order by ?office ?label")));
 
-				Assertions.assertThat(list(query(query+" order by desc(?product)")))
+				Assertions.assertThat(list(query(edges(shape, decreasing()))))
 						.as("custom on root")
-						.isEqualTo(list(query(edges(shape, decreasing()))));
+						.isEqualTo(list(query(query+" order by desc(?employee)")));
 			});
 		}
 
@@ -156,7 +168,7 @@ final class GraphRetrieverTest {
 	@Nested final class Stats {
 
 		@Test void testEmptyResultSet() {
-			new Tray().exec(() -> {
+			exec(() -> {
 				final Collection<Statement> matches=query(stats(field(TYPE, all(NIL))));
 
 				assertThat(matches)
@@ -165,9 +177,9 @@ final class GraphRetrieverTest {
 		}
 
 		@Test void testEmptyProjection() {
-			new Tray().exec(() -> assertThat(
+			exec(() -> assertThat(
 
-					query(stats(clazz(term("Product"))))
+					query(stats(clazz(term("Employee"))))
 
 			).isIsomorphicTo(query(""
 					+"\n"
@@ -180,7 +192,7 @@ final class GraphRetrieverTest {
 					+"\n"
 					+"\tselect (count(?p) as ?count) (min(?p) as ?min) (max(?p) as ?max) {\n"
 					+"\n"
-					+"\t\t?p a :Product\n"
+					+"\t\t?p a :Employee\n"
 					+"\n"
 					+"}\n"
 					+"\n"
@@ -189,7 +201,7 @@ final class GraphRetrieverTest {
 		}
 
 		@Test void testRootConstraints() {
-			new Tray().exec(() -> {
+			exec(() -> {
 				final Collection<Statement> matches=query(stats(all(item("employees/1370")), term("account")));
 
 				assertThat(matches)
@@ -217,31 +229,27 @@ final class GraphRetrieverTest {
 	@Nested final class Items {
 
 		@Test void testEmptyResultSet() {
-			new Tray().exec(() -> {
-				final Collection<Statement> matches=query(items(field(TYPE, all(NIL)), list(new IRI[] {})));
-
-				assertThat(matches)
-						.isEmpty();
-			});
+			exec(() -> assertThat(query(items(field(TYPE, all(NIL)), list())))
+					.isEmpty());
 		}
 
 		@Test void testEmptyProjection() {
-			new Tray().exec(() -> {
-				final Collection<Statement> matches=query(items(clazz(term("Product")), list(new IRI[] {})));
+			exec(() -> {
+				final Collection<Statement> matches=query(items(clazz(term("Employee")), list()));
 
 				assertThat(matches)
 						.isIsomorphicTo(query("construct { \n"
 								+"\n"
 								+"\tform:root form:items [\n"
-								+"\t\tform:value ?product;\n"
+								+"\t\tform:value ?employee;\n"
 								+"\t\tform:count 1\n"
 								+"\t].\n"
 								+"\t\n"
-								+"\t?product rdfs:label ?label; rdfs:comment ?comment.\n"
+								+"\t?employee rdfs:label ?label; rdfs:comment ?comment.\n"
 								+"\n"
 								+"} where {\n"
 								+"\n"
-								+"\t?product a :Product; \n"
+								+"\t?employee a :Employee; \n"
 								+"\t\trdfs:label ?label;\n"
 								+"\t\trdfs:comment ?comment.\n"
 								+"\n"
@@ -250,10 +258,8 @@ final class GraphRetrieverTest {
 		}
 
 		@Test void testRootConstraints() {
-			new Tray().exec(() -> {
-				final Collection<Statement> matches=query(items(all(item("employees/1370")), list(new IRI[] {
-						term("account")
-				})));
+			exec(() -> {
+				final Collection<Statement> matches=query(items(all(item("employees/1370")), list(term("account"))));
 
 				assertThat(matches)
 						.isIsomorphicTo(query(""
@@ -300,10 +306,9 @@ final class GraphRetrieverTest {
 
 		// !!! datatype
 
-		// !!! datatype
 		@Test void testClazz() {
-			exec(() -> assertThat(query(edges(clazz(term("Product")))))
-					.isIsomorphicTo(query("construct { form:root ldp:contains ?product } where { ?product a :Product }")));
+			exec(() -> assertThat(query(edges(clazz(term("Employee")))))
+					.isIsomorphicTo(query("construct { form:root ldp:contains ?employee } where { ?employee a :Employee }")));
 		}
 
 
@@ -312,12 +317,12 @@ final class GraphRetrieverTest {
 				assertThat(query(edges(field(term("sell"), minExclusive(literal(decimal(100.17)))))))
 						.isIsomorphicTo(query("construct { \n"
 								+"\n"
-								+"\tform:root ldp:contains ?product.\n"
-								+"\t?product :sell ?sell.\n"
+								+"\tform:root ldp:contains ?employee.\n"
+								+"\t?employee :sell ?sell.\n"
 								+"\t \n"
 								+"} where { \n"
 								+"\n"
-								+"\t?product :sell ?sell filter (?sell > 100.17)\n"
+								+"\t?employee :sell ?sell filter (?sell > 100.17)\n"
 								+"\t\n"
 								+"}"));
 			});
@@ -328,12 +333,12 @@ final class GraphRetrieverTest {
 				assertThat(query(edges(field(term("sell"), maxExclusive(literal(decimal(100.17)))))))
 						.isIsomorphicTo(query("construct { \n"
 								+"\n"
-								+"\tform:root ldp:contains ?product.\n"
-								+"\t?product :sell ?sell.\n"
+								+"\tform:root ldp:contains ?employee.\n"
+								+"\t?employee :sell ?sell.\n"
 								+"\t \n"
 								+"} where { \n"
 								+"\n"
-								+"\t?product :sell ?sell filter (?sell < 100.17)\n"
+								+"\t?employee :sell ?sell filter (?sell < 100.17)\n"
 								+"\t\n"
 								+"}"));
 			});
@@ -343,12 +348,12 @@ final class GraphRetrieverTest {
 			exec(() -> assertThat(query(edges(field(term("sell"), minInclusive(literal(decimal(100)))))))
 					.isIsomorphicTo(query("construct { \n"
 							+"\n"
-							+"\tform:root ldp:contains ?product.\n"
-							+"\t?product :sell ?sell.\n"
+							+"\tform:root ldp:contains ?employee.\n"
+							+"\t?employee :sell ?sell.\n"
 							+"\t \n"
 							+"} where { \n"
 							+"\n"
-							+"\t?product :sell ?sell filter (?sell >= 100)\n"
+							+"\t?employee :sell ?sell filter (?sell >= 100)\n"
 							+"\t\n"
 							+"}")));
 		}
@@ -357,12 +362,12 @@ final class GraphRetrieverTest {
 			exec(() -> assertThat(query(edges(field(term("sell"), maxInclusive(literal(decimal(100)))))))
 					.isIsomorphicTo(query("construct { \n"
 							+"\n"
-							+"\tform:root ldp:contains ?product.\n"
-							+"\t?product :sell ?sell.\n"
+							+"\tform:root ldp:contains ?employee.\n"
+							+"\t?employee :sell ?sell.\n"
 							+"\t \n"
 							+"} where { \n"
 							+"\n"
-							+"\t?product :sell ?sell filter (?sell <= 100)\n"
+							+"\t?employee :sell ?sell filter (?sell <= 100)\n"
 							+"\t\n"
 							+"}")));
 		}
@@ -432,33 +437,33 @@ final class GraphRetrieverTest {
 
 		// !!! in/min/maxCount
 		@Test void testAllDirect() {
-			exec(() -> assertThat(query(edges(field(term("product"),
-					all(item("products/S10_2016"), item("products/S24_2022"))
+			exec(() -> assertThat(query(edges(field(term("employee"),
+					all(item("employees/S10_2016"), item("employees/S24_2022"))
 			))))
 					.isIsomorphicTo(query("construct { \n"
 							+"\n"
 							+"\tform:root ldp:contains ?item.\n"
-							+"\t?item :product ?product.\n"
+							+"\t?item :employee ?employee.\n"
 							+"\t\n"
 							+"} where {\n"
 							+"\n"
-							+"\t?item :product ?product, <products/S10_2016>, <products/S24_2022>\n"
+							+"\t?item :employee ?employee, <employees/S10_2016>, <employees/S24_2022>\n"
 							+"\t\n"
 							+"}")));
 		}
 
 		@Test void testAllInverse() {
 			exec(() -> assertThat(query(edges(field(inverse(term("customer")),
-					all(item("products/S10_2016"), item("products/S24_2022"))
+					all(item("employees/S10_2016"), item("employees/S24_2022"))
 			))))
 					.isIsomorphicTo(query("construct {\n"
 							+"\n"
 							+"\tform:root ldp:contains ?customer.\n"
-							+"\t?product :customer ?customer.\n"
+							+"\t?employee :customer ?customer.\n"
 							+"\n"
 							+"} where {\n"
 							+"\n"
-							+"\t?customer ^:customer ?product, <products/S10_2016>, <products/S24_2022>.\n"
+							+"\t?customer ^:customer ?employee, <employees/S10_2016>, <employees/S24_2022>.\n"
 							+"\t\n"
 							+"}"
 					)));
@@ -466,67 +471,67 @@ final class GraphRetrieverTest {
 
 		@Test void testAllRoot() {
 			exec(() -> assertThat(query(edges(and(
-					all(item("products/S18_2248"), item("products/S24_3969")),
+					all(item("employees/1370"), item("employees/1002")),
 					field(TYPE)
 			))))
 					.isIsomorphicTo(query("construct {\n"
 							+"\n"
-							+"\tform:root ldp:contains ?product.\n"
-							+"\t?product a ?type\n"
+							+"\tform:root ldp:contains ?employee.\n"
+							+"\t?employee a ?type\n"
 							+"\t\n"
 							+"} where {\n"
 							+"\n"
-							+"\tvalues ?product { <products/S18_2248> <products/S24_3969> }\n"
+							+"\tvalues ?employee { <employees/1370> <employees/1002> }\n"
 							+"\t\n"
-							+"\t?product a ?type\n"
+							+"\t?employee a ?type\n"
 							+"\t\n"
 							+"}")));
 		}
 
 		@Test void testAllSingleton() {
-			exec(() -> assertThat(query(edges(field(term("product"), all(item("products/S10_2016"))))))
+			exec(() -> assertThat(query(edges(field(term("employee"), all(item("employees/S10_2016"))))))
 					.isIsomorphicTo(query("construct {\n"
 							+"\n"
 							+"\tform:root ldp:contains ?customer.\n"
-							+"\t?customer :product ?product.\n"
+							+"\t?customer :employee ?employee.\n"
 							+"\t\n"
 							+"} where {\n"
 							+"\n"
-							+"\t?customer :product ?product, <products/S10_2016>\n"
+							+"\t?customer :employee ?employee, <employees/S10_2016>\n"
 							+"\n"
 							+"}")));
 		}
 
 
 		@Test void testAny() {
-			exec(() -> assertThat(query(edges(field(term("product"),
-					any(item("products/S18_2248"), item("products/S24_3969")))
+			exec(() -> assertThat(query(edges(field(term("employee"),
+					any(item("employees/S18_2248"), item("employees/S24_3969")))
 			)))
 					.isIsomorphicTo(query("construct {\n"
 							+"\n"
 							+"\tform:root ldp:contains ?item.\n"
-							+"\t?item :product ?product.\n"
+							+"\t?item :employee ?employee.\n"
 							+"\n"
 							+"} where {\n"
 							+"\n"
-							+"\t?item :product ?product, ?value filter (?value in (<products/S18_2248>, <products/S24_3969>))\n"
+							+"\t?item :employee ?employee, ?value filter (?value in (<employees/S18_2248>, <employees/S24_3969>))\n"
 							+"\t\n"
 							+"}")));
 		}
 
 		@Test void testAnySingleton() {
 			exec(() -> assertThat(query(edges(and(
-					any(item("products/S18_2248")),
+					any(item("employees/1370")),
 					field(LABEL)
 			))))
 					.isIsomorphicTo(query("construct {\n"
 							+"\n"
-							+"\tform:root ldp:contains <products/S18_2248>.\n"
-							+"\t<products/S18_2248> rdfs:label ?label.\n"
+							+"\tform:root ldp:contains <employees/1370>.\n"
+							+"\t<employees/1370> rdfs:label ?label.\n"
 							+"\t\n"
 							+"} where {\n"
 							+"\n"
-							+"\t<products/S18_2248> rdfs:label ?label\n"
+							+"\t<employees/1370> rdfs:label ?label\n"
 							+"\t\n"
 							+"}")));
 		}
@@ -543,20 +548,24 @@ final class GraphRetrieverTest {
 
 
 	@Test void testUseIndependentPatternsAndFilters() {
-		exec(() -> assertThat(query(edges(and(
-				field(term("employee")),
-				when(filter(), field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
-		))))
-				.isIsomorphicTo(query("construct {\n"
-						+"\n"
-						+"\tform:root ldp:contains ?office.\n"
-						+"\t?office :employee ?employee\n"
-						+"\t\n"
-						+"} where {\n"
-						+"\n"
-						+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
-						+"\n"
-						+"}")));
+		exec(() -> assertThat(query(
+
+				edges(and(
+						field(term("employee")),
+						when(filter(), field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
+				))
+
+		)).isIsomorphicTo(query("construct {\n"
+				+"\n"
+				+"\tform:root ldp:contains ?office.\n"
+				+"\t?office :employee ?employee\n"
+				+"\t\n"
+				+"} where {\n"
+				+"\n"
+				+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
+				+"\n"
+				+"}"
+		)));
 	}
 
 }
