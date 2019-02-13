@@ -19,13 +19,10 @@ package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
@@ -38,9 +35,6 @@ import virtuoso.rdf4j.driver.VirtuosoRepository;
  * <p>Manages task execution on an <a href="https://virtuoso.openlinksw.com">Virtuoso</a> repository.</p>
  */
 public final class Virtuoso extends Graph {
-
-	private final VirtuosoRepository repository;
-
 
 	/**
 	 * Creates a Virtuoso graph.
@@ -71,7 +65,7 @@ public final class Virtuoso extends Graph {
 			throw new NullPointerException("null default graph IRI");
 		}
 
-		this.repository=new VirtuosoRepository(url, usr, pwd, dflt.toString()) {
+		repository(new VirtuosoRepository(url, usr, pwd, dflt.toString()) {
 
 			// ;(virtuoso) define default update graph in the preamble
 			// https://github.com/openlink/virtuoso-opensource/issues/417
@@ -102,21 +96,7 @@ public final class Virtuoso extends Graph {
 				};
 			}
 
-		};
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override protected Repository repository() {
-		return repository;
-	}
-
-	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT})
-	 */
-	@Override protected IsolationLevel isolation() {
-		return IsolationLevels.SNAPSHOT;
+		});
 	}
 
 }

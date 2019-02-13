@@ -19,11 +19,9 @@
 package com.metreeca.tray.rdf;
 
 
-import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.repository.Repository;
+import com.metreeca.tray.rdf.graphs.RDF4JMemory;
+
 import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,22 +29,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class GraphTest {
 
-
 	@Test void testPreventUpdateTransactionsOnReadOnlyRepositories() {
+		try (final RDF4JMemory graph=new RDF4JMemory()) {
 
-		final Graph graph=new Graph() {
+			assertThatThrownBy(() ->
 
-			private final Repository repository=new SailRepository(new MemoryStore());
+					graph.isolation(Graph.READ_ONLY).update(connection -> {})
 
-			@Override protected Repository repository() { return repository; }
+			).isInstanceOf(RepositoryException.class);
 
-			@Override protected IsolationLevel isolation() { return READ_ONLY; }
-
-		};
-
-		assertThatThrownBy(() -> graph.update(connection -> {}) )
-				.isInstanceOf(RepositoryException.class);
-
+		}
 	}
 
 }

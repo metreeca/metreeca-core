@@ -32,9 +32,7 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.*;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.*;

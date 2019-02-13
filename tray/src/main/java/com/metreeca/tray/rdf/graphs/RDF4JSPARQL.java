@@ -20,8 +20,6 @@ package com.metreeca.tray.rdf.graphs;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
 
@@ -29,13 +27,24 @@ import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
  * RDF4J SPARQL graph store.
  *
  * <p>Manages task execution on an RDF4J {@link SPARQLRepository}.</p>
+ *
+ * <p><strong>Warning</strong> / the {@linkplain #isolation(IsolationLevel) isolation level} is set to {@link
+ * Graph#READ_ONLY} by default, disabling write access to the repository unless explicitly overridden during tray
+ * configuration, like:</p>
+ *
+ * <pre>{@code
+ * tray.set(Graph.Factory, () -> new RDF4JSPARQL().isolation(IsolationLevels.NONE);
+ * }</pre>
+ *
+ * <p>Note that setting the isolation level to anything different from {@code IsolationLevels.NONE} will cause a runtime
+ * exception on update transactions.</p>
  */
 public final class RDF4JSPARQL extends Graph {
 
-	private final SPARQLRepository repository; // ;( namespace ops silently ignored
+	// ;( namespace ops silently ignored
 
 
-	private boolean writable;
+	{ isolation(READ_ONLY); } // ;( no transaction support
 
 
 	/**
@@ -52,7 +61,7 @@ public final class RDF4JSPARQL extends Graph {
 			throw new NullPointerException("null endpoint url");
 		}
 
-		repository=new SPARQLRepository(url);
+		repository(new SPARQLRepository(url));
 	}
 
 	/**
@@ -75,24 +84,9 @@ public final class RDF4JSPARQL extends Graph {
 			throw new NullPointerException("null update endpoint URL");
 		}
 
-		repository=new SPARQLRepository(query, update);
+		repository(new SPARQLRepository(query, update));
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	/**
-	 * Configures supports for update transactions on the remote RDF repository.
-	 * @param writable {@code true} if update transactions should be enabled; {@code false} otherwise
-	 * @return this graph store
-	 */
-	public RDF4JSPARQL writable(final boolean writable) {
-
-		this.writable=writable;
-
-		return this;
-	}
 
 	/**
 	 * Configures the credentials for accessing the remote RDF repository.
@@ -115,6 +109,8 @@ public final class RDF4JSPARQL extends Graph {
 			throw new NullPointerException("null pwd");
 		}
 
+		final SPARQLRepository repository=(SPARQLRepository)repository();
+
 		if ( repository.isInitialized() ) {
 			throw new IllegalStateException("active repository");
 		}
@@ -124,20 +120,6 @@ public final class RDF4JSPARQL extends Graph {
 		}
 
 		return this;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override protected Repository repository() {
-		return repository;
-	}
-
-	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#NONE})
-	 */
-	@Override protected IsolationLevel isolation() {
-		return writable ? IsolationLevels.NONE : READ_ONLY;
 	}
 
 }
