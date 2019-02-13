@@ -47,7 +47,7 @@ import java.util.stream.StreamSupport;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.things.Sources.*;
+import static com.metreeca.form.things.Snippets.*;
 import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.format;
@@ -108,7 +108,7 @@ final class ShapedRetriever {
 			final Shape pattern=shape.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer());
 			final Shape selector=shape.map(new Redactor(Form.mode, Form.filter)).map(new Pruner()).map(new Optimizer());
 
-			return source(nothing(id(root, pattern, selector)), template(
+			return source(nothing(id(root, pattern, selector)), snippet(
 
 					"# edges query\n"
 							+"\n"
@@ -198,7 +198,7 @@ final class ShapedRetriever {
 			final Object source=var(selector);
 			final Object target=path.isEmpty() ? source : var();
 
-			return source(template(
+			return source(snippet(
 
 					"# stats query\n"
 							+"\n"
@@ -223,16 +223,14 @@ final class ShapedRetriever {
 							+"} group by ?type order by desc(?count) ?type",
 
 
-					target, target, target, // !!! factor
+					target,
 
 					roots(selector),
 					filters(selector),
 
 					// !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					path.isEmpty() ? null : snippet(source, " ", path(path), " ", target, " ."),
-
-					target, target, target // !!! factor
+					path.isEmpty() ? null : snippet(source, " ", path(path), " ", target, " .")
 
 					// !!! support ordering/slicing?
 
@@ -295,7 +293,7 @@ final class ShapedRetriever {
 			final Object source=var(selector);
 			final Object target=path.isEmpty() ? source : var();
 
-			return source(template(
+			return source(snippet(
 
 					"# items query\n"
 							+"\n"
@@ -328,10 +326,8 @@ final class ShapedRetriever {
 
 					// !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					path.isEmpty() ? null : snippet(source, " ", path(path), " ", target, " ."),
-
-					target, target, target // !!! factor
-
+					path.isEmpty() ? null : snippet(source, " ", path(path), " ", target, " .")
+				
 					// !!! hadle label/comment language
 					// !!! support ordering/slicing?
 
@@ -395,7 +391,7 @@ final class ShapedRetriever {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static Snippet filter(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
-		return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : template(
+		return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : snippet(
 
 				"{ select {root} {\n"
 						+"\n"
@@ -440,7 +436,7 @@ final class ShapedRetriever {
 	private static Snippet sorters(final Object root, final Collection<Order> orders) {
 		return snippet(orders.stream()
 				.filter(order -> !order.getPath().isEmpty()) // root already retrieved
-				.map(order -> template(
+				.map(order -> snippet(
 						"optional { {root} {path} {order} }\n", var(root), path(order.getPath()), var(order))
 				)
 		);
@@ -449,7 +445,7 @@ final class ShapedRetriever {
 	private static Snippet criteria(final Object root, final Collection<Order> orders) {
 		return list(Stream.concat(
 
-				orders.stream().map(order -> template(
+				orders.stream().map(order -> snippet(
 						order.isInverse() ? "desc({criterion})" : "asc({criterion})",
 						var(order.getPath().isEmpty() ? root : order)
 				)),
@@ -471,7 +467,6 @@ final class ShapedRetriever {
 				: snippet(target, " ", format(inverse(iri)), " ", source, " .");
 	}
 
-
 	private static Snippet path(final Collection<IRI> path) {
 		return list(path.stream().map(Values::format), '/');
 	}
@@ -482,12 +477,21 @@ final class ShapedRetriever {
 	}
 
 	private static Snippet values(final Shape source, final Iterable<Value> values) {
-		return template("\n\nvalues {source} {\n{values}\n}\n\n",
+		return snippet("\n\nvalues {source} {\n{values}\n}\n\n",
 
 				var(source),
 				list(StreamSupport.stream(values.spliterator(), false).map(Values::format), "\n")
 
 		);
+	}
+
+
+	private static Snippet var() {
+		return var(new Object());
+	}
+
+	private static Snippet var(final Object object) {
+		return object == null ? nothing() : snippet("?", id(object));
 	}
 
 
@@ -581,39 +585,39 @@ final class ShapedRetriever {
 		}
 
 		@Override public Snippet probe(final MinExclusive minExclusive) {
-			return template("filter ( {source} > {value} )", var(source), format(minExclusive.getValue()));
+			return snippet("filter ( {source} > {value} )", var(source), format(minExclusive.getValue()));
 		}
 
 		@Override public Snippet probe(final MaxExclusive maxExclusive) {
-			return template("filter ( {source} < {value} )", var(source), format(maxExclusive.getValue()));
+			return snippet("filter ( {source} < {value} )", var(source), format(maxExclusive.getValue()));
 		}
 
 		@Override public Snippet probe(final MinInclusive minInclusive) {
-			return template("filter ( {source} >= {value} )", var(source), format(minInclusive.getValue()));
+			return snippet("filter ( {source} >= {value} )", var(source), format(minInclusive.getValue()));
 		}
 
 		@Override public Snippet probe(final MaxInclusive maxInclusive) {
-			return template("filter ( {source} <= {value} )", var(source), format(maxInclusive.getValue()));
+			return snippet("filter ( {source} <= {value} )", var(source), format(maxInclusive.getValue()));
 		}
 
 		@Override public Snippet probe(final Pattern pattern) {
-			return template("filter regex({source}, '{pattern}', '{flags}')",
+			return snippet("filter regex({source}, '{pattern}', '{flags}')",
 					var(source), pattern.getText().replace("\\", "\\\\"), pattern.getFlags()
 			);
 		}
 
 		@Override public Snippet probe(final Like like) {
-			return template("filter regex({source}, '{pattern}')",
+			return snippet("filter regex({source}, '{pattern}')",
 					var(source), like.toExpression().replace("\\", "\\\\")
 			);
 		}
 
 		@Override public Snippet probe(final MinLength minLength) {
-			return template("filter (strlen(str({source})) >= {limit} )", var(source), minLength.getLimit());
+			return snippet("filter (strlen(str({source})) >= {limit} )", var(source), minLength.getLimit());
 		}
 
 		@Override public Snippet probe(final MaxLength maxLength) {
-			return template("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.getLimit());
+			return snippet("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.getLimit());
 		}
 
 		@Override public Snippet probe(final MinCount minCount) {
@@ -699,7 +703,7 @@ final class ShapedRetriever {
 			final IRI iri=field.getIRI();
 			final Shape shape=field.getShape();
 
-			return template( // (€) optional unless universal constraints are present
+			return snippet( // (€) optional unless universal constraints are present
 
 					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
 

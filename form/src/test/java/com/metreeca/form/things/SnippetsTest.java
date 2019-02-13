@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Sources.*;
+import static com.metreeca.form.things.Snippets.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-final class SourcesTest {
+final class SnippetsTest {
 
 	@Test void testNothing() {
 
@@ -48,23 +48,28 @@ final class SourcesTest {
 	@Test void testSnippet() {
 
 		assertThat(source(snippet((Object)null))).isEqualTo("");
+		assertThat(source(snippet(1, 2, 3))).isEqualTo("123");
 
 		assertThat(source(snippet(list("an", " ", "iterable")))).isEqualTo("an iterable");
 		assertThat(source(snippet(Stream.of("a", " ", "stream")))).isEqualTo("a stream");
 
 		assertThat(source(snippet(123))).isEqualTo("123");
-		assertThat(source(template("string"))).isEqualTo("string");
+		assertThat(source(snippet("string"))).isEqualTo("string");
 
 	}
 
 	@Test void testTemplate() {
 
-		assertThat(source(template(null))).isEqualTo("");
-		assertThat(source(template("verbatim"))).isEqualTo("verbatim");
+		assertThat(source(snippet(null, "text"))).isEqualTo("text");
+		assertThat(source(snippet("verbatim", " ", "text"))).isEqualTo("verbatim text");
 
-		assertThat(source(template(
+		assertThat(source(snippet(
 				"<< {article} {object} >>", "a", snippet("string")
 		))).isEqualTo("<< a string >>");
+
+		assertThat(source(snippet(
+				"<< {reused} {missing} {reused} >>", "text"
+		))).isEqualTo("<< text text >>");
 
 	}
 

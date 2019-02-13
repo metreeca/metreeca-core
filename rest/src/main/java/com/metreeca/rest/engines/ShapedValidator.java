@@ -41,7 +41,7 @@ import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.complement;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.*;
-import static com.metreeca.form.things.Sources.source;
+import static com.metreeca.form.things.Snippets.source;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 

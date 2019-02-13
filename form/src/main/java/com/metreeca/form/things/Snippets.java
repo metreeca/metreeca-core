@@ -19,23 +19,23 @@ package com.metreeca.form.things;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptyIterator;
 
 
 /**
  * Source code generation utilities.
  */
-public final class Sources {
+public final class Snippets {
 
-	private static final Pattern VariablePattern=Pattern.compile("\\{\\w+}");
-
-	private static final HashMap<String, String[]> templates=new HashMap<>();
+	private static final Pattern VariablePattern=Pattern.compile("\\{\\w+}"); // e.g. {value}
 
 
 	@FunctionalInterface public static interface Snippet {
@@ -48,7 +48,7 @@ public final class Sources {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String source(final String template, final Object... args) {
-		return source(template(template, args));
+		return source(snippet(template, args));
 	}
 
 	public static String source(final Object... snippets) {
@@ -88,7 +88,6 @@ public final class Sources {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	public static Snippet nothing() {
 		return (source, identifiers) -> {};
 	}
@@ -98,28 +97,41 @@ public final class Sources {
 	}
 
 
-	public static Snippet snippet(final Object... snippets) {
-		return (source, identifiers) -> generate(snippets, source, identifiers);
+	public static Snippet snippet(final String template, final Object... args) {
+		return template == null || template.isEmpty() ? snippet(args) : (source, identifiers) -> {
+
+			final Matcher matcher=VariablePattern.matcher(template);
+			final Map<CharSequence, Object> variables=new HashMap<>();
+			final Iterator<Object> iterator=(args == null) ? emptyIterator() : stream(args).iterator();
+
+			int last=0;
+
+			while ( matcher.find() ) {
+
+				final int start=matcher.start();
+				final int end=matcher.end();
+
+				source.accept(template.subSequence(last, start)); // leading text
+
+				generate(variables.computeIfAbsent( // cached variable value, if available
+						template.subSequence(start, end),
+						name -> iterator.hasNext() ? iterator.next() : null
+				), source, identifiers);
+
+				last=end;
+			}
+
+			source.accept(template.subSequence(last, template.length())); // trailing text
+
+			while ( iterator.hasNext() ) {
+				generate(iterator.next(), source, identifiers); // trailing args
+			}
+
+		};
 	}
 
-	public static Snippet template(final String template, final Object... args) {
-		if ( template == null || template.isEmpty() ) { return nothing(); } else {
-
-			final String[] chunks=templates.computeIfAbsent(template, VariablePattern::split);
-
-			return (source, identifiers) -> {
-
-				for (int i=0; i < chunks.length; i++) {
-
-					source.accept(chunks[i]);
-
-					if ( i < args.length ) {
-						generate(args[i], source, identifiers);
-					}
-
-				}
-			};
-		}
+	public static Snippet snippet(final Object... snippets) {
+		return (source, identifiers) -> generate(snippets, source, identifiers);
 	}
 
 
@@ -143,17 +155,6 @@ public final class Sources {
 			source.accept(String.valueOf(id));
 
 		};
-	}
-
-
-	//// SPARQL DSL ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Snippet var() {
-		return var(new Object());
-	}
-
-	public static Snippet var(final Object object) {
-		return object == null ? nothing() : snippet("?", id(object));
 	}
 
 
@@ -192,7 +193,7 @@ public final class Sources {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Sources() {} // utility
+	private Snippets() {} // utility
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,7 +231,11 @@ public final class Sources {
 
 		@Override public Appendable append(final char c) throws IOException {
 
-			if ( c == '\t' ) {
+			if ( c == '\f' ) {
+
+				append('\n').append('\n');
+
+			} else if ( c == '\t' ) {
 
 				if ( last != '\0' && last != '\n' ) {
 					++indent;
@@ -270,6 +275,7 @@ public final class Sources {
 
 			return this;
 		}
+
 
 		@Override public String toString() { return target.toString(); }
 
