@@ -22,6 +22,7 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
+import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -30,6 +31,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Focus.focus;
@@ -38,10 +40,11 @@ import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.complement;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Snippets.source;
 import static com.metreeca.form.things.Values.*;
+import static com.metreeca.rest.engines.GraphProcessor.list;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
@@ -53,19 +56,26 @@ import static java.util.stream.Collectors.*;
 
 final class GraphValidator {
 
-	Focus validate(final RepositoryConnection connection, final IRI resource, final Shape shape, final Collection<Statement> model) {
+	private final Graph graph=tool(Graph.Factory);
 
-		final Focus focus=validate(connection, set(resource), shape, model); // validate against shape
+
+	Focus validate(final IRI resource, final Shape shape, final Collection<Statement> model) {
+
+		final Focus focus=graph.query(connection -> { // validate against shape
+			return shape
+					.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
+					.map(new Optimizer())
+					.map(new ReportProbe(connection, set(resource), model));
+		});
 
 		final Collection<Statement> envelope=focus.outline().collect(toSet()); // collect shape envelope
 
-		// extend validation report with statements outside shape envelope
-
-		return focus(
+		return focus( // extend validation report with errors for statements outside shape envelope
 
 				Stream.concat(
 
 						focus.getIssues().stream(),
+
 						model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
 								issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
 						)
@@ -77,22 +87,13 @@ final class GraphValidator {
 		);
 	}
 
-	Focus validate(
-			final RepositoryConnection connection, final Set<Value> focus, final Shape shape, final Collection<Statement> model
-	) { // !!! testing only
-		return shape
-				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
-				.map(new Optimizer())
-				.map(new FocusProbe(connection, focus, model));
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Validate constraints on a focus value set.
 	 */
-	private static final class FocusProbe implements Shape.Probe<Focus> {
+	private static final class ReportProbe implements Shape.Probe<Focus> {
 
 		private final RepositoryConnection connection;
 
@@ -100,7 +101,7 @@ final class GraphValidator {
 		private final Collection<Statement> model;
 
 
-		private FocusProbe(
+		private ReportProbe(
 				final RepositoryConnection connection,
 				final Collection<Value> focus,
 				final Collection<Statement> model
@@ -131,13 +132,15 @@ final class GraphValidator {
 		@Override public Focus probe(final Clazz clazz) {
 			if ( focus.isEmpty() ) { return focus(); } else {
 
+				// retrieve the class hierarchy rooted in the expected class
+
 				final Set<Value> hierarchy=stream(connection.prepareTupleQuery(source(
 
 						"# clazz hierarchy\n"
 								+"\n"
 								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 								+"\n"
-								+"select distinct ?class { ?class rdfs:subClassOf* {class} }",
+								+"select distinct ?class { ?class rdfs:subClassOf* {root} }",
 
 						format(clazz.getIRI())
 
@@ -147,54 +150,59 @@ final class GraphValidator {
 						.collect(toSet());
 
 
-				final Stream<Map.Entry<Value, Value>> fromModel=focus.stream()
-						.flatMap(value -> model.stream()
+				// retrieve type info for focus nodes
+
+				final Map<Value, Set<Value>> types=Stream.concat(
+
+						// retrieve type info from the validated model
+
+						focus.stream().flatMap(value -> model.stream()
 								.filter(pattern(value, RDF.TYPE, null))
 								.map(Statement::getObject)
-								.map(type -> entry(value, type))
-						);
+								.map(type1 -> entry(value, type1))
+						),
 
-				final Stream<Map.Entry<Value, Value>> fromGraph=stream(connection.prepareTupleQuery(source(
+						// retrieve type info from graph
 
-						"# type info\n"
-								+"\n"
-								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-								+"\n"
-								+"select ?value ?type {\n"
-								+"\n"
-								+"\tvalues ?value {\n"
-								+"\t\t{values}\n"
-								+"\t}\n"
-								+"\t\n"
-								+"\t?value a ?type\n"
-								+"\t\n"
-								+"}",
+						stream(connection.prepareTupleQuery(source(
 
-						GraphProcessor.list(focus.stream().map(Values::format), "\n")
+								"# type info\n"
+										+"\n"
+										+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+										+"\n"
+										+"select ?value ?type {\n"
+										+"\n"
+										+"\tvalues ?value {\n"
+										+"\t\t{values}\n"
+										+"\t}\n"
+										+"\n"
+										+"\t?value a ?type\n"
+										+"\n"
+										+"}",
 
-				)).evaluate()).map(bindings -> entry(
-						bindings.getValue("value"),
-						bindings.getValue("type")
-				));
+								list(focus.stream().map(Values::format), "\n")
 
+						)).evaluate()).map(bindings -> entry(
+								bindings.getValue("value"),
+								bindings.getValue("type")
+						))
 
-				final Map<Value, Set<Value>> types=Stream.concat(fromModel, fromGraph)
-						.collect(groupingBy(Map.Entry::getKey, mapping(Map.Entry::getValue, toSet())));
-
-				final Stream<Frame> violations=focus.stream()
-						.filter(value -> disjoint(types.getOrDefault(value, emptySet()), hierarchy))
-						.map(value -> frame(value,
-								set(issue(Issue.Level.Error, "not an instance of target class", clazz))
-						));
+				).collect(groupingBy(Map.Entry::getKey, mapping(Map.Entry::getValue, toSet())));
 
 
 				final Map<IRI, Focus> type=singletonMap(RDF.TYPE, focus(set(), set(frame(clazz.getIRI()))));
 
-				final Stream<Frame> outlining=focus.stream() // add rdf:type outlining frames
-						.map(value -> frame(value, set(), type));
-
 				return focus(emptySet(), Stream.concat(
-						violations, outlining
+
+						focus.stream() // generate the validation report
+								.filter(value -> disjoint(types.getOrDefault(value, emptySet()), hierarchy))
+								.map(value -> frame(value,
+										set(issue(Issue.Level.Error, "not an instance of target class", clazz))
+								)),
+
+						focus.stream() // add rdf:type frames to support outlining
+								.map(value -> frame(value, set(), type))
+
 				).collect(toList()));
 
 			}
@@ -255,12 +263,10 @@ final class GraphValidator {
 
 			final String expression=like.toExpression();
 
+			final Predicate<String> predicate=java.util.regex.Pattern.compile(expression).asPredicate();
+
 			return focus(set(), focus.stream()
-					.filter(value -> !java.util.regex.Pattern
-							.compile(expression)
-							.asPredicate()
-							.test(text(value))
-					)
+					.filter(value -> !predicate.test(text(value)))
 					.map(value -> frame(value, set(issue(Issue.Level.Error, "invalid lexical value", like))))
 					.collect(toList())
 			);
@@ -337,22 +343,18 @@ final class GraphValidator {
 
 			return focus(set(), focus.stream().map(value -> { // for each focus value
 
-				final Stream<Value> values // compute the new focus set
+				// compute the new focus set
 
-						=direct(iri) ? model.stream()
-						.filter(pattern(value, iri, null))
-						.map(Statement::getObject)
+				final Set<Value> focus=(direct(iri)
 
-						: model.stream()
-						.filter(pattern(null, inverse(iri), value))
-						.map(Statement::getSubject);
+						? model.stream().filter(pattern(value, iri, null)).map(Statement::getObject)
+						: model.stream().filter(pattern(null, inverse(iri), value)).map(Statement::getSubject)
 
-
-				final Set<Value> focus=values.collect(toSet());
+				).collect(toSet());
 
 				// validate the field shape on the new focus set
 
-				final Focus report=shape.map(new FocusProbe(connection, focus, model));
+				final Focus report=shape.map(new ReportProbe(connection, focus, model));
 
 				// identifies the values in the new focus set referenced in report frames
 
@@ -365,7 +367,8 @@ final class GraphValidator {
 
 				// create an empty frame for each unreferenced value to support statement outlining
 
-				final List<Frame> placeholders=complement(focus, referenced).stream()
+				final List<Frame> placeholders=focus.stream()
+						.filter(v -> !referenced.contains(v))
 						.map(Frame::frame)
 						.collect(toList());
 
@@ -381,7 +384,7 @@ final class GraphValidator {
 		@Override public Focus probe(final And and) {
 			return and.getShapes().stream()
 					.map(shape -> shape.map(this))
-					.reduce(focus(), Focus::merge);
+					.reduce(focus(), (focus1, focus12) -> focus1.merge(focus12));
 		}
 
 		@Override public Focus probe(final Or or) {

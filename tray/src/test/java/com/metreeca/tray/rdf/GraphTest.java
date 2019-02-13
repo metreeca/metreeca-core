@@ -21,13 +21,35 @@ package com.metreeca.tray.rdf;
 
 import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
+
+import static com.metreeca.form.things.ValuesTest.construct;
+import static com.metreeca.form.things.ValuesTest.export;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-final class GraphTest {
+public final class GraphTest {
+
+	public static Model graph(final Resource... contexts) {
+		return tool(Graph.Factory).query(connection -> { return export(connection, contexts); });
+	}
+
+	public static Model graph(final String sparql) {
+		return tool(Graph.Factory).query(connection -> { return construct(connection, sparql); });
+	}
+
+	public static Runnable graph(final Iterable<Statement> model, final Resource... contexts) {
+		return () -> tool(Graph.Factory).update(connection -> { connection.add(model, contexts); });
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testPreventUpdateTransactionsOnReadOnlyRepositories() {
 		try (final RDF4JMemory graph=new RDF4JMemory()) {

@@ -39,7 +39,7 @@ import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
 

@@ -32,12 +32,12 @@ public final class Form {
 
 	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static final IRI ValueType=iri(Namespace, "value"); // abstract datatype IRI for values
+	public static final IRI ResourceType=iri(Namespace, "resource"); // abstract datatype IRI for resources
+
 	public static final IRI IRIType=iri(Namespace, "iri"); // datatype IRI for IRI references
 	public static final IRI BNodeType=iri(Namespace, "bnode"); // datatype IRI for blank nodes
 	public static final IRI LiteralType=iri(Namespace, "literal"); // abstract datatype IRI for literals
-
-	public static final IRI ResourceType=iri(Namespace, "resource"); // abstract datatype IRI for resources
-	public static final IRI ValueType=iri(Namespace, "value"); // abstract datatype IRI for values
 
 
 	//// Shape Metadata ////////////////////////////////////////////////////////////////////////////////////////////////

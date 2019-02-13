@@ -52,15 +52,7 @@ import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUti
 
 final class GraphRetriever extends GraphProcessor {
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	Collection<Statement> retrieve(final RepositoryConnection connection, final Resource focus, final Query query) {
-
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
-
 		return query.map(new Query.Probe<Collection<Statement>>() {
 
 			@Override public Collection<Statement> probe(final Edges edges) { return edges(connection, focus, edges); }
@@ -342,9 +334,6 @@ final class GraphRetriever extends GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private static Snippet filter(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
 		return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : snippet(
 
@@ -486,6 +475,55 @@ final class GraphRetriever extends GraphProcessor {
 
 	}
 
+	private static final class PatternProbe extends Traverser<Snippet> {
+
+		// !!! (€) remove optionals if term is required or if exists a filter on the same path
+
+		private final Shape shape;
+
+
+		private PatternProbe(final Shape shape) {
+			this.shape=shape;
+		}
+
+
+		@Override public Snippet probe(final Guard guard) {
+			throw new UnsupportedOperationException("partially redacted shape");
+		}
+
+
+		@Override public Snippet probe(final Field field) {
+
+			final IRI iri=field.getIRI();
+			final Shape shape=field.getShape();
+
+			return snippet( // (€) optional unless universal constraints are present
+
+					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
+
+					snippet(
+							edge(var(this.shape), iri, var(shape)), "\n",
+							pattern(shape)
+					)
+
+			);
+		}
+
+
+		@Override public Snippet probe(final And and) {
+			return snippet(and.getShapes().stream().map(s -> s.map(this)));
+		}
+
+		@Override public Snippet probe(final Or or) {
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		}
+
+		@Override public Snippet probe(final When when) {
+			throw new UnsupportedOperationException("conditional shape");
+		}
+
+	}
+
 	private static final class FilterProbe implements Shape.Probe<Snippet> {
 
 		private final Shape source;
@@ -606,55 +644,6 @@ final class GraphRetriever extends GraphProcessor {
 
 		@Override public Snippet probe(final When when) {
 			throw new UnsupportedOperationException("conditional pattern"); // !!! tbi
-		}
-
-	}
-
-	private static final class PatternProbe extends Traverser<Snippet> {
-
-		// !!! (€) remove optionals if term is required or if exists a filter on the same path
-
-		private final Shape shape;
-
-
-		private PatternProbe(final Shape shape) {
-			this.shape=shape;
-		}
-
-
-		@Override public Snippet probe(final Guard guard) {
-			throw new UnsupportedOperationException("partially redacted shape");
-		}
-
-
-		@Override public Snippet probe(final Field field) {
-
-			final IRI iri=field.getIRI();
-			final Shape shape=field.getShape();
-
-			return snippet( // (€) optional unless universal constraints are present
-
-					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
-
-					snippet(
-							edge(var(this.shape), iri, var(shape)), "\n",
-							pattern(shape)
-					)
-
-			);
-		}
-
-
-		@Override public Snippet probe(final And and) {
-			return snippet(and.getShapes().stream().map(s -> s.map(this)));
-		}
-
-		@Override public Snippet probe(final Or or) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-		}
-
-		@Override public Snippet probe(final When when) {
-			throw new UnsupportedOperationException("conditional shape");
 		}
 
 	}

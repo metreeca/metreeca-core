@@ -139,7 +139,7 @@ final class ShapedContainer extends GraphEntity {
 
 				// validate before updating graph to support snapshot transactions
 
-				final Focus focus=new GraphValidator().validate(connection, related, create, model);
+				final Focus focus=new GraphValidator().validate(related, create, model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
 

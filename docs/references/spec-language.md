@@ -169,5 +169,5 @@ Parametric guards for the [mode](../javadocs/com/metreeca/form/Form.html#mode) a
 
 | shorthand                                                    | usage pattern                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [convey](../javadocs/com/metreeca/form/Shape.html#convey-com.metreeca.form.Shape...-)() | target shapes are to be used only for extracting outgoing data and validating incoming data and not for selecting existing resources to be processed |
-| [filter](../javadocs/com/metreeca/form/Shape.html#filter-com.metreeca.form.Shape...-)() | target shapes are to be used only for selecting existing resources to be processed and not for validating incoming data |
+| [convey](../javadocs/com/metreeca/form/Shape.html#convey-com.metreeca.form.Shape...-)() | target shapes are to be used only for validating incoming data or extracting outgoing data and not for selecting existing resources to be processed |
+| [filter](../javadocs/com/metreeca/form/Shape.html#filter-com.metreeca.form.Shape...-)() | target shapes are to be used only for selecting existing resources to be processed and not for validating incoming data or extracting outgoing data |

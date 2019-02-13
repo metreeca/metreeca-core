@@ -117,7 +117,7 @@ final class ShapedResource extends GraphEntity {
 
 				// validate before updating graph to support snapshot transactions
 
-				final Focus focus=new GraphValidator().validate(connection, resource, update, model);
+				final Focus focus=new GraphValidator().validate(resource, update, model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
 

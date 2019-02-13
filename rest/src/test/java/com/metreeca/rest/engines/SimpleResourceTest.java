@@ -33,13 +33,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
+import static com.metreeca.form.FocusAssert.assertThat;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -120,9 +121,9 @@ final class SimpleResourceTest {
 
 				assertThat(engine().update(item("employees/1370"), update))
 						.isPresent()
-						.hasValueSatisfying(focus -> assertThat(focus.assess(Issue.Level.Warning))
+						.hasValueSatisfying(focus -> assertThat(focus)
 								.as("success reported")
-								.isFalse()
+								.isValid()
 						);
 
 				assertThat(graph())

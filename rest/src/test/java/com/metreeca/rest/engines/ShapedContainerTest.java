@@ -53,7 +53,7 @@ import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;

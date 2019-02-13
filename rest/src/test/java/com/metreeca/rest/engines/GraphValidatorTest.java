@@ -19,19 +19,18 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.Field;
-import com.metreeca.form.things.ValuesTest;
 import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.function.Supplier;
 
 import static com.metreeca.form.FocusAssert.assertThat;
@@ -53,447 +52,528 @@ import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.MinLength.minLength;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.things.Values.*;
+import static com.metreeca.form.things.Values.integer;
+import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.sandbox;
-import static com.metreeca.form.things.ValuesTest.term;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 
 final class GraphValidatorTest {
 
-	private static final IRI x=ValuesTest.item("x");
-	private static final IRI y=ValuesTest.item("y");
-	private static final IRI z=ValuesTest.item("z");
+	private static final IRI x=item("x");
+	private static final IRI y=item("y");
+	private static final IRI z=item("z");
 
 
 	private final Supplier<RepositoryConnection> sandbox=sandbox();
 
 
+	private Collection<Statement> model(final String... model) {
+		return model.length == 0 ? emptySet() : decode("rdf:nil rdf:value "
+				+stream(model).collect(joining(" . ", "", " . "))
+		);
+	}
+
+
+	private Focus validate(final Shape shape, final String... model) {
+		return validate(shape, model(model));
+	}
+
+	private Focus validate(final Shape shape, final Collection<Statement> model) {
+		return new GraphValidator().validate(RDF.NIL, field(RDF.VALUE, shape), model);
+	}
+
+
 	//// Validation ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testGenerateTraceNodes() {
+		new Tray().exec(() -> {
 
-		final Shape shape=maxInclusive(literal(10));
+			final Shape shape=maxInclusive(literal(10));
 
-		final Focus report=process(shape, literal(1), literal(100));
+			final Focus report=validate(shape, "1, 100");
 
-		assertThat(report.assess(Issue.Level.Error))
-				.as("report severity level")
-				.isTrue();
+			assertThat(report.assess(Issue.Level.Error))
+					.as("report severity level")
+					.isTrue();
 
-		assertThat(report.getFrames().stream()
-				.flatMap(frame -> frame.getIssues().stream())
-				.anyMatch(issue -> issue.getShape().equals(shape)))
-				.as("reference failed shape")
-				.isTrue();
+			final Collection<Frame> frames=report.getFrames().stream()
+					.flatMap(frame -> frame.getFields().get(RDF.VALUE).getFrames().stream())
+					.collect(toList());
 
-		assertThat(report.getFrames().stream()
-				.map(Frame::getValue)
-				.anyMatch(value -> value.equals(literal(100))))
-				.as("reference offending values")
-				.isTrue();
+			assertThat(frames.stream()
+					.flatMap(frame -> frame.getIssues().stream())
+					.anyMatch(issue -> issue.getShape().equals(shape)))
+					.as("reference failed shape")
+					.isTrue();
 
+			assertThat(frames.stream()
+					.map(Frame::getValue)
+					.anyMatch(value -> value.equals(literal(integer(100)))))
+					.as("reference offending values")
+					.isTrue();
+
+		});
 	}
 
 
 	@Test void testValidateDirectEdgeFields() {
+		new Tray().exec(() -> {
 
-		final Shape shape=field(RDF.VALUE, any(RDF.NIL));
+			final Shape shape=field(RDF.VALUE, all(y));
 
-		final Focus focus=process(shape, x, y);
+			assertThat(validate(shape, "<x>", "<x> rdf:value <y>")).isValid();
+			assertThat(validate(shape, "<x>")).isNotValid();
 
-		assertThat(focus.assess(Issue.Level.Error)).as("identify invalid field").isTrue();
-
+		});
 	}
 
 	@Test void testValidateInverseEdgeFields() {
+		new Tray().exec(() -> {
 
-		final Shape shape=field(inverse(RDF.VALUE), any(RDF.NIL));
+			final Shape shape=field(inverse(RDF.VALUE), all(y));
 
-		final Focus focus=process(shape, x, y);
+			assertThat(validate(shape, "<x>", "<y> rdf:value <x>")).isValid();
+			assertThat(validate(shape, "<x>")).isNotValid();
 
-		assertThat(focus.assess(Issue.Level.Error)).as("identify invalid field").isTrue();
-
+		});
 	}
 
 
 	//// Outlining /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testOutlineClasses() {
+		new Tray().exec(() -> {
 
-		final Shape shape=clazz(RDFS.RESOURCE);
-		final Model model=decode("rdf:first a rdfs:Resource.");
+			final Shape shape=clazz(RDFS.RESOURCE);
 
-		final Focus focus=process(shape, model, RDF.FIRST);
+			final Collection<Statement> model=model("<x>", "<x> a rdfs:Resource");
 
-		assertThat(focus.assess(Issue.Level.Error))
-				.as("validated").
-				isFalse();
+			final Focus focus=validate(shape, model);
 
-		ModelAssert.assertThat(focus.outline().collect(toList()))
-				.as("outline computed")
-				.isIsomorphicTo(model);
+			assertThat(focus).isValid();
+			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
+		});
 	}
 
 	@Test void testOutlineDirectEdgeFields() {
+		new Tray().exec(() -> {
 
-		final Shape shape=field(RDF.VALUE, any(RDF.NIL));
-		final Model model=decode("<x> rdf:value rdf:nil. <y> rdf:value rdf:nil.");
+			final Field shape=field(RDF.VALUE, any(RDF.NIL));
 
-		final Focus focus=process(shape, model, x, y);
+			final Collection<Statement> model=model("<x>", " <x> rdf:value rdf:nil");
 
-		assertThat(focus).isValid();
+			final Focus focus=validate(shape, model);
 
-		ModelAssert.assertThat(focus.outline().collect(toList()))
-				.as("outline computed")
-				.isIsomorphicTo(model);
+			assertThat(focus).isValid();
+			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
+		});
 	}
 
 	@Test void testOutlineInverseEdgeFields() {
+		new Tray().exec(() -> {
 
-		final Shape shape=field(inverse(RDF.VALUE), any(RDF.NIL));
-		final Model model=decode("rdf:nil rdf:value <x>. rdf:nil rdf:value <y>.");
+			final Field shape=field(inverse(RDF.VALUE), any(RDF.NIL));
 
-		final Focus focus=process(shape, model, x, y);
+			final Collection<Statement> model=model("<x>", " rdf:nil rdf:value <x>");
 
-		System.out.println(focus);
+			final Focus focus=validate(shape, model);
 
-		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
-		ModelAssert.assertThat(focus.outline().collect(toList()))
-				.as("outline computed")
-				.isIsomorphicTo(model);
+			assertThat(focus).isValid();
+			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
+		});
 	}
 
 	@Test void testOutlineMultipleObjects() {
+		new Tray().exec(() -> {
 
-		final Shape shape=field(RDF.VALUE, and());
-		final Model model=decode("<x> rdf:value rdf:first, rdf:rest. <y> rdf:value rdf:first, rdf:rest.");
+			final Field shape=field(RDF.VALUE);
 
-		final Focus focus=process(shape, model, x, y);
+			final Collection<Statement> model=model("<x>, <y>",
+					"<x> rdf:value rdf:first, rdf:rest",
+					"<y> rdf:value rdf:first, rdf:rest"
+			);
 
-		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
-		ModelAssert.assertThat(focus.outline().collect(toList()))
-				.as("outline computed")
-				.isIsomorphicTo(model);
+			final Focus focus=validate(shape, model);
 
+			assertThat(focus).isValid();
+			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
+
+		});
 	}
 
 	@Test void testOutlineMultipleSources() {
+		new Tray().exec(() -> {
 
-		final Shape shape=field(inverse(RDF.VALUE), and());
-		final Model model=decode(
-				"rdf:first rdf:value <x>. rdf:rest rdf:value <x>. rdf:first rdf:value <y>. rdf:rest rdf:value <y>."
-		);
+			final Field shape=field(inverse(RDF.VALUE));
 
-		final Focus focus=process(shape, model, x, y);
+			final Collection<Statement> model=model("<x>, <y>",
+					"rdf:first rdf:value <x>",
+					"rdf:rest rdf:value <x>",
+					"rdf:first rdf:value <y>",
+					"rdf:rest rdf:value <y>"
+			);
 
-		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
-		ModelAssert.assertThat(focus.outline().collect(toList())).as("outline computed").isIsomorphicTo(model);
+			final Focus focus=validate(shape, model);
 
+			assertThat(focus).isValid();
+			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
+
+		});
 	}
 
 	@Test void testOutlineMultipleDirectEdges() {
+		new Tray().exec(() -> {
 
-		final Shape shape=and(
-				field(RDF.FIRST, and()),
-				field(RDF.REST, and())
-		);
+			final Shape shape=and(
+					field(RDF.FIRST, and()),
+					field(RDF.REST, and())
+			);
 
-		final Model model=decode(
-				"<x> rdf:first rdf:value; rdf:rest rdf:value . <y> rdf:first rdf:value; rdf:rest rdf:value .");
+			final Collection<Statement> model=model("<x>, <y>",
+					"<x> rdf:first rdf:value; rdf:rest rdf:value",
+					"<y> rdf:first rdf:value; rdf:rest rdf:value"
+			);
 
-		final Focus focus=process(shape, model, x, y);
+			final Focus focus=validate(shape, model);
 
-		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
-		ModelAssert.assertThat(focus.outline().collect(toList()))
-				.as("outline computed")
-				.isIsomorphicTo(model);
+			assertThat(focus).isValid();
+			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
+		});
 	}
 
 	@Test void testOutlineMultipleInverseEdges() {
+		new Tray().exec(() -> {
 
-		final Shape shape=and(
-				field(inverse(RDF.FIRST), and()),
-				field(inverse(RDF.REST), and())
-		);
+			final Shape shape=and(
+					field(inverse(RDF.FIRST)),
+					field(inverse(RDF.REST))
+			);
 
-		final Model model=decode(
-				"rdf:value rdf:first <x>. rdf:value rdf:rest <x>. rdf:value rdf:first <y>. rdf:value rdf:rest <y>.");
+			final Collection<Statement> model=model("<x>, <y>",
+					"rdf:value rdf:first <x>",
+					"rdf:value rdf:rest <x>",
+					"rdf:value rdf:first <y>",
+					"rdf:value rdf:rest <y>"
+			);
 
-		final Focus focus=process(shape, model, x, y);
+			final Focus focus=validate(shape, model);
 
-		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
-		ModelAssert.assertThat(focus.outline().collect(toList()))
-				.as("outline computed")
-				.isIsomorphicTo(model);
+			assertThat(focus).isValid();
+			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
+		});
 	}
 
 	@Test void testOutlineMultipleDirectEdgeValuePairs() {
+		new Tray().exec(() -> {
 
-		final Shape shape=and(
-				field(inverse(RDF.FIRST), and()),
-				field(inverse(RDF.REST), and())
-		);
+			final Shape shape=and(
+					field(inverse(RDF.FIRST)),
+					field(inverse(RDF.REST))
+			);
 
-		final Model model=decode(""
-				+"rdf:first rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest ."
-				+"rdf:rest rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest ."
-		);
+			final Collection<Statement> model=model("rdf:first, rdf:rest",
+					"rdf:first rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest",
+					"rdf:rest rdf:first rdf:first, rdf:rest; rdf:rest rdf:first, rdf:rest"
+			);
 
-		final Focus focus=process(shape, model, RDF.FIRST, RDF.REST);
+			final Focus focus=validate(shape, model);
 
-		assertThat(focus.assess(Issue.Level.Error)).as("validated").isFalse();
-		ModelAssert.assertThat(focus.outline().collect(toList()))
-				.as("outline computed")
-				.isIsomorphicTo(model);
+			assertThat(focus).isValid();
+			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
+		});
 	}
 
 
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testValidateMinCount() {
+		new Tray().exec(() -> {
 
-		final Shape shape=minCount(2);
+			final Shape shape=minCount(2);
 
-		assertThat(validate(shape, x, y, z)).as("pass").isTrue();
-		assertThat(validate(shape, x)).as("fail").isFalse();
+			assertThat(validate(shape, "1, 2, 3")).isValid();
+			assertThat(validate(shape, "1")).isNotValid();
 
+		});
 	}
 
 	@Test void testValidateMaxCount() {
+		new Tray().exec(() -> {
 
-		final Shape shape=maxCount(2);
+			final Shape shape=maxCount(2);
 
-		assertThat(validate(shape, x, y)).as("pass").isTrue();
-		assertThat(validate(shape, x, y, z)).as("fail").isFalse();
+			assertThat(validate(shape, "1, 2")).isValid();
+			assertThat(validate(shape, "1, 2, 3")).isNotValid();
 
+		});
 	}
 
 	@Test void testValidateIn() {
+		new Tray().exec(() -> {
 
-		final Shape shape=in(x, y);
+			final Shape shape=in(x, y);
 
-		assertThat(validate(shape, x, y)).as("pass").isTrue();
-		assertThat(validate(shape, x, z)).as("fail").isFalse();
-		assertThat(validate(shape)).as("pass / empty focus").isTrue();
+			assertThat(validate(shape, "<x>, <y>")).isValid();
+			assertThat(validate(shape, "<x>, <y>, <z>")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 	@Test void testValidateAll() {
+		new Tray().exec(() -> {
 
-		final Shape shape=all(x, y);
+			final Shape shape=all(x, y);
 
-		assertThat(validate(shape, x, y, z)).as("pass").isTrue();
-		assertThat(validate(shape, x)).as("fail").isFalse();
-		assertThat(validate(shape)).as("fail / empty focus").isFalse();
+			assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
+			assertThat(validate(shape, "<x>")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isNotValid();
+
+		});
 	}
 
 	@Test void testValidateAny() {
+		new Tray().exec(() -> {
 
-		final Shape shape=any(x, y);
+			final Shape shape=any(x, y);
 
-		assertThat(validate(shape, x)).as("pass").isTrue();
-		assertThat(validate(shape, z)).as("fail").isFalse();
-		assertThat(validate(shape)).as("fail / empty focus").isFalse();
+			assertThat(validate(shape, "<x>")).isValid();
+			assertThat(validate(shape, "<z>")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isNotValid();
+
+		});
 	}
 
 
 	@Test void testValidateDatatype() {
+		new Tray().exec(() -> {
 
-		assertThat(validate(datatype(Form.BNodeType))).as("pass / empty").isTrue();
-		assertThat(validate(datatype(Form.BNodeType), bnode())).as("pass / blank").isTrue();
-		assertThat(validate(datatype(Form.IRIType), term("iri"))).as("pass / iri").isTrue();
-		assertThat(validate(datatype(XMLSchema.STRING), literal("text"))).as("pass / plain literal").isTrue();
-		assertThat(validate(datatype(RDF.LANGSTRING), literal("text", "en"))).as("pass / tagged literal").isTrue();
-		assertThat(validate(datatype(XMLSchema.BOOLEAN), literal(true))).as("pass / typed literal").isTrue();
+			assertThat(validate(datatype(Form.ValueType), "<x>")).isValid();
+			assertThat(validate(datatype(Form.ValueType), "_:x")).isValid();
+			assertThat(validate(datatype(Form.ValueType), "1")).isValid();
 
-		assertThat(validate(datatype(Form.IRIType), bnode())).as("fail").isFalse();
+			assertThat(validate(datatype(Form.ResourceType), "<x>")).isValid();
+			assertThat(validate(datatype(Form.ResourceType), "_:x")).isValid();
+			assertThat(validate(datatype(Form.ResourceType), "1")).isNotValid();
 
-		assertThat(validate(datatype(Form.ResourceType), bnode())).as("pass / generic resource").isTrue();
-		assertThat(validate(datatype(Form.ResourceType), literal(true))).as("fail / generic resource").isFalse();
+			assertThat(validate(datatype(Form.BNodeType), "_:x")).isValid();
+			assertThat(validate(datatype(Form.BNodeType), "1")).isNotValid();
 
-		assertThat(validate(datatype(RDFS.LITERAL), literal(true))).as("pass / generic literal").isTrue();
-		assertThat(validate(datatype(RDFS.LITERAL), bnode())).as("fail / generic literal").isFalse();
+			assertThat(validate(datatype(Form.IRIType), "<x>")).isValid();
+			assertThat(validate(datatype(Form.IRIType), "_:x")).isNotValid();
 
+			assertThat(validate(datatype(Form.LiteralType), "'x'")).isValid();
+			assertThat(validate(datatype(Form.LiteralType), "1")).isValid();
+			assertThat(validate(datatype(Form.LiteralType), "_:x")).isNotValid();
+
+			assertThat(validate(datatype(RDFS.LITERAL), "'x'")).isValid();
+			assertThat(validate(datatype(RDFS.LITERAL), "1")).isValid();
+			assertThat(validate(datatype(RDFS.LITERAL), "_:x")).isNotValid();
+
+			assertThat(validate(datatype(XMLSchema.STRING), "'text'")).isValid();
+			assertThat(validate(datatype(XMLSchema.STRING), "_:x")).isNotValid();
+
+			assertThat(validate(datatype(RDF.LANGSTRING), "'text'@en")).isValid();
+			assertThat(validate(datatype(RDF.LANGSTRING), "_:x")).isNotValid();
+
+			assertThat(validate(datatype(XMLSchema.BOOLEAN), "true")).isValid();
+			assertThat(validate(datatype(XMLSchema.BOOLEAN), "_:x")).isNotValid();
+
+			assertThat(validate(datatype(Form.IRIType))).as("empty focus").isValid();
+
+		});
 	}
 
 	@Test void testValidateClazz() {
 
-		final Field shape=field(RDF.VALUE, clazz(RDFS.RESOURCE));
+		final Shape shape=clazz(RDFS.RESOURCE);
 
 		new Tray()
 
-				.exec(() -> tool(Graph.Factory).update(connection -> {
+				.exec(() -> { // validate using type info retrieved from model
 
-					assertThat(new GraphValidator().validate(connection, RDF.NIL, shape,
-							decode("rdf:nil rdf:value rdf:first. rdf:first a rdfs:Resource.")))
-							.isValid();
+					assertThat(validate(shape, "rdf:first", "rdf:first a rdfs:Resource")).isValid();
 
-					assertThat(new GraphValidator().validate(connection, RDF.NIL, shape, decode("rdf:nil rdf:value rdf:rest.")))
-							.isNotValid();
+					assertThat(validate(shape, "rdf:rest")).isNotValid();
 
-				}))
+				})
 
-				.exec(() -> tool(Graph.Factory).update(connection -> {
+				.exec(graph(decode("rdf:first a rdfs:Resource."))) // inject type info into graph
 
-					connection.add(decode("rdf:first a rdfs:Resource."));
+				.exec(() -> { // validate using type info retrieved from graph
 
-					assertThat(new GraphValidator().validate(connection, RDF.NIL, shape, decode("rdf:nil rdf:value rdf:first.")))
-							.isValid();
+					assertThat(validate(shape, "rdf:first")).isValid();
 
-					assertThat(new GraphValidator().validate(connection, RDF.NIL, shape, decode("rdf:nil rdf:value rdf:rest.")))
-							.isNotValid();
+					assertThat(validate(shape, "rdf:rest")).isNotValid();
 
-				}));
+				});
 	}
 
 
 	@Test void testValidateMinExclusive() {
+		new Tray().exec(() -> {
 
-		final Shape shape=minExclusive(literal(1));
+			final Shape shape=minExclusive(literal(1));
 
-		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
-		assertThat(validate(shape, literal(1))).as("integer / fail / equal").isFalse();
-		assertThat(validate(shape, literal(0))).as("integer / fail").isFalse();
+			assertThat(validate(shape, "2")).isValid();
+			assertThat(validate(shape, "1")).isNotValid();
+			assertThat(validate(shape, "0")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 	@Test void testValidateMaxExclusive() {
+		new Tray().exec(() -> {
 
-		final Shape shape=maxExclusive(literal(10));
+			final Shape shape=maxExclusive(literal(10));
 
-		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
-		assertThat(validate(shape, literal(10))).as("integer / fail / equal").isFalse();
-		assertThat(validate(shape, literal(100))).as("integer / fail").isFalse();
+			assertThat(validate(shape, "2")).isValid();
+			assertThat(validate(shape, "10")).isNotValid();
+			assertThat(validate(shape, "100")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 	@Test void testValidateMinInclusive() {
+		new Tray().exec(() -> {
 
-		final Shape shape=minInclusive(literal(1));
+			final Shape shape=minInclusive(literal(1));
 
-		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
-		assertThat(validate(shape, literal(1))).as("integer / pass / equal").isTrue();
-		assertThat(validate(shape, literal(0))).as("integer / fail").isFalse();
+			assertThat(validate(shape, "2")).isValid();
+			assertThat(validate(shape, "1")).isValid();
+			assertThat(validate(shape, "0")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 	@Test void testValidateMaxInclusive() {
+		new Tray().exec(() -> {
 
-		final Shape shape=maxInclusive(literal(10));
+			final Shape shape=maxInclusive(literal(10));
 
-		assertThat(validate(shape, literal(2))).as("integer / pass").isTrue();
-		assertThat(validate(shape, literal(10))).as("integer / pass / equal").isTrue();
-		assertThat(validate(shape, literal(100))).as("integer / fail").isFalse();
+			assertThat(validate(shape, "2")).isValid();
+			assertThat(validate(shape, "10")).isValid();
+			assertThat(validate(shape, "100")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 
 	@Test void testValidatePattern() {
+		new Tray().exec(() -> {
 
-		final Shape shape=pattern(".*\\.org");
+			final Shape shape=pattern(".*\\.org");
 
-		assertThat(validate(shape, iri("http://exampe.org"))).as("iri / pass").isTrue();
-		assertThat(validate(shape, iri("http://exampe.com"))).as("iri / fail").isFalse();
+			assertThat(validate(shape, "<http://exampe.org>")).isValid();
+			assertThat(validate(shape, "<http://exampe.com>")).isNotValid();
 
-		assertThat(validate(shape, literal("example.org"))).as("string / pass").isTrue();
-		assertThat(validate(shape, literal("example.com"))).as("string / fail").isFalse();
+			assertThat(validate(shape, "'example.org'")).isValid();
+			assertThat(validate(shape, "'example.com'")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 	@Test void testValidateLike() {
+		new Tray().exec(() -> {
 
-		final Shape shape=like("ex.org");
+			final Shape shape=like("ex.org");
 
-		assertThat(validate(shape, iri("http://exampe.org/"))).as("iri / pass").isTrue();
-		assertThat(validate(shape, iri("http://exampe.com/"))).as("iri / fail").isFalse();
+			assertThat(validate(shape, "<http://exampe.org/>")).isValid();
+			assertThat(validate(shape, "<http://exampe.com/>")).isNotValid();
 
-		assertThat(validate(shape, literal("example.org"))).as("string / pass").isTrue();
-		assertThat(validate(shape, literal("example.com"))).as("string / fail").isFalse();
+			assertThat(validate(shape, "'example.org'")).isValid();
+			assertThat(validate(shape, "'example.com'")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 	@Test void testValidateMinLength() {
+		new Tray().exec(() -> {
 
-		final Shape shape=minLength(3);
+			final Shape shape=minLength(3);
 
-		assertThat(validate(shape, literal(100))).as("number / pass").isTrue();
-		assertThat(validate(shape, literal(99))).as("number / fail").isFalse();
+			assertThat(validate(shape, "100")).isValid();
+			assertThat(validate(shape, "99")).isNotValid();
 
-		assertThat(validate(shape, literal("100"))).as("string / pass").isTrue();
-		assertThat(validate(shape, literal("99"))).as("string / fail").isFalse();
+			assertThat(validate(shape, "'100'")).isValid();
+			assertThat(validate(shape, "'99'")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 	@Test void testValidateMaxLength() {
+		new Tray().exec(() -> {
 
-		final Shape shape=maxLength(2);
+			final Shape shape=maxLength(2);
 
-		assertThat(validate(shape, literal(99))).as("number / pass").isTrue();
-		assertThat(validate(shape, literal(100))).as("number / fail").isFalse();
+			assertThat(validate(shape, "99")).isValid();
+			assertThat(validate(shape, "100")).isNotValid();
 
-		assertThat(validate(shape, literal("99"))).as("string / pass").isTrue();
-		assertThat(validate(shape, literal("100"))).as("string / fail").isFalse();
+			assertThat(validate(shape, "'99'")).isValid();
+			assertThat(validate(shape, "'100'")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isValid();
+
+		});
 	}
 
 
 	@Test void testValidateConjunction() {
+		new Tray().exec(() -> {
 
-		final Shape shape=and(any(literal(1)), any(literal(2)));
+			final Shape shape=and(any(x), any(y));
 
-		assertThat(validate(shape, literal(1), literal(2), literal(3))).as("pass").isTrue();
-		assertThat(validate(shape, literal(1), literal(3))).as("fail").isFalse();
+			assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
+			assertThat(validate(shape, "<x>, <z>")).isNotValid();
 
+			assertThat(validate(shape)).as("empty focus").isNotValid();
+
+		});
 	}
 
 	@Test void testValidateDisjunction() {
+		new Tray().exec(() -> {
 
-		final Shape shape=or(all(literal(1), literal(2)), all(literal(1), literal(3)));
+			final Shape shape=or(all(x, y), all(x, z));
 
-		assertThat(validate(shape, literal(3), literal(2), literal(1))).as("pass").isTrue();
-		assertThat(validate(shape, literal(3), literal(2))).as("fail").isFalse();
+			assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
+			assertThat(validate(shape, "<y>, <z>")).isNotValid();
 
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private boolean validate(final Shape shape, final Value... focus) {
-		return validate(shape, emptySet(), focus);
-	}
-
-	private boolean validate(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
-		return !process(shape, statements, focus).assess(Issue.Level.Error);
-	}
-
-
-	private Focus process(final Shape shape, final Value... focus) {
-		return process(shape, emptySet(), focus);
-	}
-
-	private Focus process(final Shape shape, final Iterable<Statement> statements, final Value... focus) {
-		try (final RepositoryConnection connection=sandbox.get()) {
-
-			connection.add(statements);
-
-			return new GraphValidator().validate(connection, new LinkedHashSet<>(asList(focus)), shape, emptySet());
-		}
+		});
 	}
 
 }
