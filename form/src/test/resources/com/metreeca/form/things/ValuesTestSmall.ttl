@@ -3,6 +3,124 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix ldp: <http://www.w3.org/ns/ldp#> .
 
+
+#### Offices ###########################################################################################################
+
+<offices-basic> ldp:contains <offices/1>, <offices/6>,
+		<offices/4>, <offices/2>, <offices/3>,
+		<offices/7>, <offices/5> .
+
+<offices/1> a :Office;
+	:country <http://sws.geonames.org/6252001/>;
+	:city <http://sws.geonames.org/5391959/>;
+	:employee <employees/1002>, <employees/1056>,
+		<employees/1076>, <employees/1143>, <employees/1165>,
+		<employees/1166>;
+	rdfs:label "San Francisco (USA)";
+	:code "1";
+	:state "CA" .
+
+<offices/6> a :Office;
+	:employee <employees/1088>, <employees/1611>,
+		<employees/1612>, <employees/1619>;
+	rdfs:label "Sydney (Australia)";
+	:code "6";
+	:area "APAC";
+	:country <http://sws.geonames.org/2077456/>;
+	:city <http://sws.geonames.org/2147714/> .
+
+<offices/4> a :Office;
+	:employee <employees/1102>, <employees/1337>,
+		<employees/1370>, <employees/1401>, <employees/1702>;
+	rdfs:label "Paris (France)";
+	:code "4";
+	:area "EMEA";
+	:country <http://sws.geonames.org/3017382/>;
+	:city <http://sws.geonames.org/2988507/> .
+
+<offices/2> a :Office;
+	:employee <employees/1188>, <employees/1216>;
+	rdfs:label "Boston (USA)";
+	:code "2";
+	:state "MA";
+	:country <http://sws.geonames.org/6252001/>;
+	:city <http://sws.geonames.org/4930956/> .
+
+<offices/3> a :Office;
+	:country <http://sws.geonames.org/6252001/>;
+	:city <http://sws.geonames.org/5128581/>;
+	:employee <employees/1286>, <employees/1323>;
+	rdfs:label "NYC (USA)";
+	:code "3";
+	:state "NY" .
+
+<offices/7> a :Office;
+	:employee <employees/1501>, <employees/1504>;
+	rdfs:label "London (UK)";
+	:code "7";
+	:area "EMEA";
+	:country <http://sws.geonames.org/2635167/>;
+	:city <http://sws.geonames.org/2643743/> .
+
+<offices/5> a :Office;
+	:employee <employees/1621>, <employees/1625>;
+	rdfs:label "Tokyo (Japan)";
+	:code "5";
+	:state "Chiyoda-Ku";
+	:area "Japan";
+	:country <http://sws.geonames.org/1861060/>;
+	:city <http://sws.geonames.org/1850147/> .
+
+
+<employees/1002> :office <offices/1> .
+
+<employees/1056> :office <offices/1> .
+
+<employees/1076> :office <offices/1> .
+
+<employees/1088> :office <offices/6> .
+
+<employees/1102> :office <offices/4> .
+
+<employees/1143> :office <offices/1> .
+
+<employees/1165> :office <offices/1> .
+
+<employees/1166> :office <offices/1> .
+
+<employees/1188> :office <offices/2> .
+
+<employees/1216> :office <offices/2> .
+
+<employees/1286> :office <offices/3> .
+
+<employees/1323> :office <offices/3> .
+
+<employees/1337> :office <offices/4> .
+
+<employees/1370> :office <offices/4> .
+
+<employees/1401> :office <offices/4> .
+
+<employees/1501> :office <offices/7> .
+
+<employees/1504> :office <offices/7> .
+
+<employees/1611> :office <offices/6> .
+
+<employees/1612> :office <offices/6> .
+
+<employees/1619> :office <offices/6> .
+
+<employees/1621> :office <offices/5> .
+
+<employees/1625> :office <offices/5> .
+
+<employees/1702> :office <offices/4> .
+
+
+#### Employees #########################################################################################################
+
 <employees-basic/> a ldp:BasicContainer; ldp:contains
 		<employees/1002>,
 		<employees/1056>,
