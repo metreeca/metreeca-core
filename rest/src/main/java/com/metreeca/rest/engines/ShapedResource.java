@@ -27,7 +27,6 @@ import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -76,7 +75,7 @@ final class ShapedResource extends GraphEntity {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Collection<Statement> relate(final IRI resource) {
-		return graph.query(connection -> { return retrieve(connection, resource, relate).orElseGet(Sets::set); });
+		return graph.query(connection -> { return retrieve(resource, relate).orElseGet(Sets::set); });
 	}
 
 	@Override public <V, E> Result<V, E> relate(final IRI resource,
@@ -113,7 +112,7 @@ final class ShapedResource extends GraphEntity {
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
-			return retrieve(connection, resource, update).map(current -> { // identify updatable description
+			return retrieve(resource, update).map(current -> { // identify updatable description
 
 				// validate before updating graph to support snapshot transactions
 
@@ -144,7 +143,7 @@ final class ShapedResource extends GraphEntity {
 			// !!! merge retrieve/remove operations into a single SPARQL update txn
 			// !!! must check resource existence anyway and would break for CBD shapes
 
-			return retrieve(connection, resource, delete).map(current -> { // identify deletable description
+			return retrieve(resource, delete).map(current -> { // identify deletable description
 
 				flock.remove(connection, resource, current).remove(current);
 
@@ -158,9 +157,9 @@ final class ShapedResource extends GraphEntity {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Optional<Collection<Statement>> retrieve(final RepositoryConnection connection, final IRI resource, final Shape shape) {
+	private Optional<Collection<Statement>> retrieve(final IRI resource, final Shape shape) {
 		return Optional.of(new GraphRetriever())
-				.map(retriever -> retriever.retrieve(connection, resource, edges(and(all(resource), shape))))
+				.map(retriever -> retriever.retrieve(resource, edges(and(all(resource), shape))))
 				.filter(model -> !model.isEmpty());
 	}
 
