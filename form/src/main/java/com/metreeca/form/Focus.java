@@ -159,6 +159,35 @@ public final class Focus {
 	}
 
 	/**
+	 * Removes issues and frames below a target severity level.
+	 *
+	 * @param limit the minimum severity level to be retained
+	 *
+	 * @return a copy of this report retaining only issues and frames reaching the severity {@code limit}
+	 *
+	 * @throws NullPointerException if {@code limit} is null
+	 */
+	public Focus prune(final Issue.Level limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		return new Focus(
+
+				issues.stream()
+						.filter(issue -> issue.assess(limit))
+						.collect(toSet()),
+
+				frames.stream()
+						.filter(frame -> frame.assess(limit))
+						.map(frame -> frame.prune(limit))
+						.collect(toSet())
+
+		);
+	}
+
+	/**
 	 * Computes the statement outline of this report.
 	 *
 	 * @return a stream of statements recursively generated from {@linkplain Frame frames} in this report

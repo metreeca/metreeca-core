@@ -198,7 +198,7 @@ public final class Failure implements Function<Response, Response> {
 		// !!! rewrite references to external base IRI
 		// !!! support other formats with content negotiation
 
-		return trace(json(focus));
+		return trace(json(focus.prune(Issue.Level.Warning)));
 	}
 
 
