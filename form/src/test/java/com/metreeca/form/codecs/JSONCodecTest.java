@@ -17,9 +17,6 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.things.Lists;
-import com.metreeca.form.things.Maps;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -27,6 +24,8 @@ import java.util.Map;
 
 import javax.json.*;
 
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Maps.union;
 import static com.metreeca.form.things.Values.bnode;
@@ -41,7 +40,7 @@ public abstract class JSONCodecTest {
 	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected static List<Object> array(final Object... items) {
-		return Lists.list(items);
+		return list(items);
 	}
 
 	@SafeVarargs protected static Map<String, Object> object(final Map.Entry<String, Object>... fields) {
@@ -53,7 +52,7 @@ public abstract class JSONCodecTest {
 	}
 
 	protected static Map.Entry<String, Object> field(final String label, final Object value) {
-		return Maps.entry(label, value);
+		return entry(label, value);
 	}
 
 
