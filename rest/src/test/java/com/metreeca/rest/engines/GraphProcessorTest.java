@@ -19,6 +19,7 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.rdf.graphs.RDF4JRemote;
 import com.metreeca.tray.rdf.graphs.RDF4JSPARQL;
 
 import org.eclipse.rdf4j.IsolationLevels;
@@ -33,7 +34,8 @@ abstract class GraphProcessorTest {
 	protected void exec(final Runnable... tasks) {
 		new Tray()
 
-				.set(Graph.Factory, () -> new RDF4JSPARQL("https://dydra.com/metreeca/birt-small/sparql").isolation(READ_ONLY))
+				//.set(Graph.Factory, this::dydra)
+				//.set(Graph.Factory, this::graphdb)
 
 				.exec(() -> {
 
@@ -50,6 +52,17 @@ abstract class GraphProcessorTest {
 				.exec(tasks)
 
 				.clear();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Graph graphdb() {
+		return new RDF4JRemote("http://localhost:7200/repositories/birt-small");
+	}
+
+	private Graph dydra() {
+		return new RDF4JSPARQL("https://dydra.com/metreeca/birt-small/sparql").isolation(READ_ONLY);
 	}
 
 }
