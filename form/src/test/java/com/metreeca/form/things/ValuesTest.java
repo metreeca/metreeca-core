@@ -124,7 +124,9 @@ public final class ValuesTest {
 									relate().then(field(RDFS.LABEL, Textual))
 							))
 
-					))
+					)),
+
+			delete().then(field(term("office")))
 
 	);
 

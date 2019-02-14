@@ -6,16 +6,19 @@
 
 #### Offices ###########################################################################################################
 
-<offices-basic> ldp:contains <offices/1>, <offices/6>,
-		<offices/4>, <offices/2>, <offices/3>,
-		<offices/7>, <offices/5> .
+<offices-basic> ldp:contains
+	<offices/1>,
+	<offices/6>,
+	<offices/4>,
+	<offices/2>,
+	<offices/3>,
+	<offices/7>,
+	<offices/5> .
 
 <offices/1> a :Office;
 	:country <http://sws.geonames.org/6252001/>;
 	:city <http://sws.geonames.org/5391959/>;
-	:employee <employees/1002>, <employees/1056>,
-		<employees/1076>, <employees/1143>, <employees/1165>,
-		<employees/1166>;
+	:employee <employees/1002>, <employees/1056>, <employees/1076>, <employees/1143>, <employees/1165>, <employees/1166>;
 	rdfs:label "San Francisco (USA)";
 	:code "1";
 	:state "CA" .
@@ -30,8 +33,7 @@
 	:city <http://sws.geonames.org/2147714/> .
 
 <offices/4> a :Office;
-	:employee <employees/1102>, <employees/1337>,
-		<employees/1370>, <employees/1401>, <employees/1702>;
+	:employee <employees/1102>, <employees/1337>, <employees/1370>, <employees/1401>, <employees/1702>;
 	rdfs:label "Paris (France)";
 	:code "4";
 	:area "EMEA";

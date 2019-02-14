@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Snippets.*;
 import static com.metreeca.form.things.Values.*;
@@ -186,6 +187,7 @@ final class GraphRetriever extends GraphProcessor {
 
 					"# stats query\n"
 							+"\n"
+							+"prefix form: <app://form.metreeca.com/terms#>\n"
 							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 							+"\n"
 							+"select ?type\t\n"
@@ -202,7 +204,7 @@ final class GraphRetriever extends GraphProcessor {
 							+"\n"
 							+"\t{path}\n"
 							+"\n"
-							+"\tbind(if(isBlank({target}) || isIRI({target}), rdfs:Resource, datatype({target})) as ?type)\n"
+							+"\tbind (if(isBlank({target}), form:bnode, if(isIRI({target}), form:iri, datatype({target}))) as ?type)\n"
 							+"\n"
 							+"} group by ?type order by desc(?count) ?type",
 
@@ -611,11 +613,12 @@ final class GraphRetriever extends GraphProcessor {
 			return nothing(); // universal constraints handled by field probe
 		}
 
-		@Override public Snippet probe(final Any any) {
+		@Override public Snippet probe(final Any any) { // singleton universal constraints handled by field probe
 
 			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
 
-			return values(source, any.getValues());
+			return any.getValues().size() > 1 ? values(source, any.getValues()) : nothing();
+
 		}
 
 
@@ -624,14 +627,25 @@ final class GraphRetriever extends GraphProcessor {
 			final IRI iri=field.getIRI();
 			final Shape shape=field.getShape();
 
+			final Optional<Set<Value>> all=all(shape);
+			final Optional<Set<Value>> any=any(shape);
+
+			final Optional<Value> singleton=any
+					.filter(values -> values.size() == 1)
+					.map(values -> values.iterator().next());
+
 			return snippet(
 
-					shape instanceof All // filtering hook
+					(shape instanceof All || singleton.isPresent()) // filtering hook
 							? null // ($) only if actually referenced by filters
 							: edge(var(source), iri, var(shape)),
 
-					all(shape) // target universal constraints
+					all // target universal constraints
 							.map(values -> values.stream().map(value -> edge(var(source), iri, format(value))))
+							.orElse(null),
+
+					singleton // target singleton existential constraints
+							.map(value  -> edge(var(source), iri, format(value)))
 							.orElse(null),
 
 					"\n\n",

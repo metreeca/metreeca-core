@@ -74,13 +74,13 @@ abstract class GraphProcessor {
 
 	static Snippet edge(final Object source, final IRI iri, final Object target) {
 		return source == null || iri == null || target == null ? Snippets.nothing() : direct(iri)
-				? Snippets.snippet(source, " ", Values.format(iri), " ", target, " .")
-				: Snippets.snippet(target, " ", Values.format(inverse(iri)), " ", source, " .");
+				? Snippets.snippet(source, " ", Values.format(iri), " ", target, " .\n")
+				: Snippets.snippet(target, " ", Values.format(inverse(iri)), " ", source, " .\n");
 	}
 
 	static Snippet edge(final Object source, final List<IRI> path, final Object target) {
 		return source == null || path == null || path.isEmpty() || target == null ? Snippets.nothing()
-				: Snippets.snippet(source, " ", path(path), " ", target, " .");
+				: Snippets.snippet(source, " ", path(path), " ", target, " .\n");
 	}
 
 	static Snippet path(final List<IRI> path) {
