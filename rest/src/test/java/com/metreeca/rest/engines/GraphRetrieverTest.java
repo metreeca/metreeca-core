@@ -25,6 +25,7 @@ import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -41,17 +42,23 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
+import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Guard.guard;
+import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.Like.like;
+import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.Meta.meta;
+import static com.metreeca.form.shapes.MinCount.minCount;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.MinLength.minLength;
+import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.integer;
 import static com.metreeca.form.things.Values.inverse;
@@ -61,8 +68,6 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.rdf4j.model.vocabulary.RDF.NIL;
-import static org.eclipse.rdf4j.model.vocabulary.RDF.VALUE;
 
 
 final class GraphRetrieverTest {
@@ -92,7 +97,7 @@ final class GraphRetrieverTest {
 		@Test void testEmptyResultSet() {
 			exec(() -> assertThat(query(
 
-					edges(field(RDF.TYPE, all(NIL)))
+					edges(field(RDF.TYPE, all(RDF.NIL)))
 
 			)).isEmpty());
 		}
@@ -180,7 +185,7 @@ final class GraphRetrieverTest {
 		@Test void testEmptyResultSet() {
 			exec(() -> assertThat(query(
 
-					stats(field(RDF.TYPE, all(NIL)))
+					stats(field(RDF.TYPE, all(RDF.NIL)))
 
 			)).isIsomorphicTo(decode(
 
@@ -249,7 +254,7 @@ final class GraphRetrieverTest {
 		@Test void testEmptyResultSet() {
 			exec(() -> assertThat(query(
 
-					items(field(RDF.TYPE, all(NIL)))
+					items(field(RDF.TYPE, all(RDF.NIL)))
 
 			)).isEmpty());
 		}
@@ -315,7 +320,7 @@ final class GraphRetrieverTest {
 		@Test void testMeta() {
 			exec(() -> assertThat(query(
 
-					edges(meta(VALUE, NIL))
+					edges(meta(RDF.VALUE, RDF.NIL))
 
 			)).as("ignore annotations")
 					.isEmpty());
@@ -323,7 +328,7 @@ final class GraphRetrieverTest {
 
 		@Test void testGuard() {
 			exec(() -> assertThatThrownBy(() ->
-					query(edges(guard(VALUE, NIL)))
+					query(edges(guard(RDF.VALUE, RDF.NIL)))
 
 			).as("reject partially redacted shapes")
 					.isInstanceOf(UnsupportedOperationException.class));
@@ -333,7 +338,31 @@ final class GraphRetrieverTest {
 
 	@Nested final class TermConstraints {
 
-		// !!! datatype
+		@Test void testDatatype() {
+			exec(() -> {
+
+				assertThat(query(
+
+						edges(filter().then(field(term("code"), datatype(XMLSchema.INTEGER))))
+
+				)).isEmpty();
+
+				assertThat(query(
+
+						edges(filter().then(field(term("code"), datatype(XMLSchema.STRING))))
+
+				)).isIsomorphicTo(graph(
+
+						"construct { form:root ldp:contains ?item } where {\n"
+								+"\n"
+								+"\t?item :code ?code filter ( datatype(?code) = xsd:string )\n"
+								+"\n"
+								+"}"
+
+				));
+
+			});
+		}
 
 		@Test void testClazz() {
 			exec(() -> assertThat(query(
@@ -521,7 +550,31 @@ final class GraphRetrieverTest {
 
 	@Nested final class SetConstraints {
 
-		// !!! in/min/maxCount
+		@Test void testMinCount() {
+			exec(() -> assertThatThrownBy(() -> query(
+
+					edges(field(term("employee"), minCount(3)))
+
+			)).isInstanceOf(UnsupportedOperationException.class));
+		}
+
+		@Test void testMaxCount() {
+			exec(() -> assertThatThrownBy(() -> query(
+
+					edges(field(term("employee"), maxCount(3)))
+
+			)).isInstanceOf(UnsupportedOperationException.class));
+		}
+
+
+		@Test void testIn() {
+			exec(() -> assertThatThrownBy(() -> query(
+
+					edges(field(term("office"), in(item("employees/1621"), item("employees/1625"))))
+
+			)).isInstanceOf(UnsupportedOperationException.class));
+		}
+
 
 		@Test void testAllDirect() {
 			exec(() -> assertThat(query(
@@ -696,9 +749,70 @@ final class GraphRetrieverTest {
 
 	@Nested final class StructuralConstraints {
 
+		@Test void testField() {
+			exec(() -> assertThat(query(
+
+					edges(field(term("country")))
+
+			)).isIsomorphicTo(graph(
+
+					"construct {\n"
+							+"\n"
+							+"\tform:root ldp:contains ?item.\n"
+							+"\t?item :country ?country.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t?item :country ?country.\n"
+							+"\n"
+							+"}"
+
+			)));
+		}
+
 	}
 
 	@Nested final class LogicalConstraints {
+
+		@Test void testAnd() {
+			exec(() -> assertThat(query(
+
+					edges(and(
+							field(term("country")),
+							field(term("city"))
+					))
+
+			)).isIsomorphicTo(graph(
+
+					"construct {\n"
+							+"\n"
+							+"\tform:root ldp:contains ?item.\n"
+							+"\t?item :country ?country; :city ?city.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t?item :country ?country; :city ?city.\n"
+							+"\n"
+							+"}"
+
+			)));
+		}
+
+		@Test void testOr() {
+			exec(() -> assertThatThrownBy(() -> query(
+
+					edges(or())
+
+			)).isInstanceOf(UnsupportedOperationException.class));
+		}
+
+		@Test void testWhen() {
+			exec(() -> assertThatThrownBy(() -> query(
+
+					edges(when(guard(RDF.VALUE, RDF.NIL), clazz(RDFS.LITERAL)))
+
+			)).isInstanceOf(UnsupportedOperationException.class));
+		}
 
 	}
 

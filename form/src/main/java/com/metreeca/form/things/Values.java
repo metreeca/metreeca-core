@@ -105,10 +105,10 @@ public final class Values {
 	//// Accessors /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static boolean is(final Value value, final IRI type) {
-		return value != null && (type(value).equals(type) || Form.ValueType.equals(type))
+		return value != null && (type(value).equals(type) || Form.ValueType.equals(type) || RDFS.RESOURCE.equals(type))
 				|| value instanceof Resource && Form.ResourceType.equals(type) // abstract resource datatype
 				|| value instanceof Literal && Form.LiteralType.equals(type) // abstract literal datatype
-				|| value instanceof Literal && RDFS.LITERAL.equals(type); // abstract resource datatype using rdfs: IRI
+				|| value instanceof Literal && RDFS.LITERAL.equals(type); // abstract literal datatype using rdfs: IRI
 	}
 
 	/**

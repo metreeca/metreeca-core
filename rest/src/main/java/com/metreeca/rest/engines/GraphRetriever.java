@@ -553,7 +553,22 @@ final class GraphRetriever extends GraphProcessor {
 
 
 		@Override public Snippet probe(final Datatype datatype) {
-			throw new UnsupportedOperationException("datatype constraint");
+
+			final IRI iri=datatype.getIRI();
+
+			return iri.equals(Form.ValueType) || iri.equals(RDFS.RESOURCE) ? nothing() : snippet(
+
+					iri.equals(Form.ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )"
+							: iri.equals(Form.BNodeType) ? "filter isBlank({value})"
+							: iri.equals(Form.IRIType) ? "filter isIRI({value})"
+							: iri.equals(Form.LiteralType) || iri.equals(RDFS.LITERAL) ? "filter isLiteral({value})"
+							: "filter ( datatype({value}) = <{datatype}> )",
+
+					var(source),
+					iri
+
+			);
+
 		}
 
 		@Override public Snippet probe(final Clazz clazz) {
@@ -595,6 +610,7 @@ final class GraphRetriever extends GraphProcessor {
 		@Override public Snippet probe(final MaxLength maxLength) {
 			return snippet("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.getLimit());
 		}
+
 
 		@Override public Snippet probe(final MinCount minCount) {
 			throw new UnsupportedOperationException("minimum focus size constraint");
@@ -645,7 +661,7 @@ final class GraphRetriever extends GraphProcessor {
 							.orElse(null),
 
 					singleton // target singleton existential constraints
-							.map(value  -> edge(var(source), iri, format(value)))
+							.map(value -> edge(var(source), iri, format(value)))
 							.orElse(null),
 
 					"\n\n",
