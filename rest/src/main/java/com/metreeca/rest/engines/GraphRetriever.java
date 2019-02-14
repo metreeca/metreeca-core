@@ -206,7 +206,7 @@ final class GraphRetriever extends GraphProcessor {
 							+"\n"
 							+"\tbind (if(isBlank({target}), form:bnode, if(isIRI({target}), form:iri, datatype({target}))) as ?type)\n"
 							+"\n"
-							+"} group by ?type order by desc(?count) ?type",
+							+"} group by ?type having ( count({target}) > 0 ) order by desc(?count) ?type",
 
 
 					target,
@@ -214,7 +214,7 @@ final class GraphRetriever extends GraphProcessor {
 					roots(selector),
 					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					edge(source, path, target)
+					path(source, path, target)
 
 					// !!! support ordering/slicing?
 
@@ -300,15 +300,14 @@ final class GraphRetriever extends GraphProcessor {
 							+"\toptional { {target} rdfs:label ?l }\n"
 							+"\toptional { {target} rdfs:comment ?n }\n"
 							+"\t\t\n"
-							+"} group by {target} having ( ?count > 0 ) order by desc(?count) ?value",
+							+"} group by {target} having ( count({source}) > 0 ) order by desc(?count) ?value",
 
 					target, source,
-
 
 					roots(selector),
 					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					edge(source, path, target)
+					path(source, path, target)
 
 					// !!! handle label/comment language
 					// !!! support ordering/slicing?

@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
@@ -260,6 +261,10 @@ public abstract class Graph implements AutoCloseable {
 				return task.apply(connection);
 
 			} else {
+
+				if ( connection.getIsolationLevel().equals(READ_ONLY) ) {
+					throw new RepositoryReadOnlyException("isolation level set to "+READ_ONLY);
+				}
 
 				try {
 

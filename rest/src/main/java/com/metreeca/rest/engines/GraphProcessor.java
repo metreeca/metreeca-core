@@ -24,7 +24,7 @@ import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -72,24 +72,27 @@ abstract class GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	static Snippet path(final Collection<IRI> path) {
+		return list(path.stream().map(Values::format), '/');
+	}
+
+
+	static Snippet path(final Object source, final Collection<IRI> path, final Object target) {
+		return source == null || path == null || path.isEmpty() || target == null ? Snippets.nothing()
+				: Snippets.snippet(source, " ", path(path), " ", target, " .\n");
+	}
+
 	static Snippet edge(final Object source, final IRI iri, final Object target) {
 		return source == null || iri == null || target == null ? Snippets.nothing() : direct(iri)
 				? Snippets.snippet(source, " ", Values.format(iri), " ", target, " .\n")
 				: Snippets.snippet(target, " ", Values.format(inverse(iri)), " ", source, " .\n");
 	}
 
-	static Snippet edge(final Object source, final List<IRI> path, final Object target) {
-		return source == null || path == null || path.isEmpty() || target == null ? Snippets.nothing()
-				: Snippets.snippet(source, " ", path(path), " ", target, " .\n");
-	}
-
-	static Snippet path(final List<IRI> path) {
-		return list(path.stream().map(Values::format), '/');
-	}
 
 	static Snippet list(final Stream<?> items, final Object separator) {
 		return items == null ? Snippets.nothing() : Snippets.snippet(items.flatMap(item -> Stream.of(separator, item)).skip(1));
 	}
+
 
 	static Snippet var() {
 		return var(new Object());

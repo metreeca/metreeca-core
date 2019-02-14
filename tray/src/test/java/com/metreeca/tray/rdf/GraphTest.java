@@ -24,7 +24,7 @@ import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.things.ValuesTest.construct;
@@ -58,7 +58,7 @@ public final class GraphTest {
 
 					graph.isolation(Graph.READ_ONLY).update(connection -> {})
 
-			).isInstanceOf(RepositoryException.class);
+			).isInstanceOf(RepositoryReadOnlyException.class);
 
 		}
 	}

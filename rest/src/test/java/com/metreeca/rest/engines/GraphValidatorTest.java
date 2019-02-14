@@ -20,18 +20,15 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.Field;
 import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.function.Supplier;
 
 import static com.metreeca.form.FocusAssert.assertThat;
 import static com.metreeca.form.shapes.All.all;
@@ -57,8 +54,7 @@ import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.things.ValuesTest.item;
-import static com.metreeca.form.things.ValuesTest.sandbox;
-import static com.metreeca.tray.rdf.GraphTest.graph;
+import static com.metreeca.form.things.ValuesTest.term;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,14 +64,11 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphValidatorTest {
+final class GraphValidatorTest extends GraphProcessorTest {
 
 	private static final IRI x=item("x");
 	private static final IRI y=item("y");
 	private static final IRI z=item("z");
-
-
-	private final Supplier<RepositoryConnection> sandbox=sandbox();
 
 
 	private Collection<Statement> model(final String... model) {
@@ -97,7 +90,7 @@ final class GraphValidatorTest {
 	//// Validation ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testGenerateTraceNodes() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=maxInclusive(literal(10));
 
@@ -128,7 +121,7 @@ final class GraphValidatorTest {
 
 
 	@Test void testValidateDirectEdgeFields() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=field(RDF.VALUE, all(y));
 
@@ -139,7 +132,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateInverseEdgeFields() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=field(inverse(RDF.VALUE), all(y));
 
@@ -153,7 +146,7 @@ final class GraphValidatorTest {
 	//// Outlining /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testOutlineClasses() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=clazz(RDFS.RESOURCE);
 
@@ -168,7 +161,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testOutlineDirectEdgeFields() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Field shape=field(RDF.VALUE, any(RDF.NIL));
 
@@ -183,7 +176,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testOutlineInverseEdgeFields() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Field shape=field(inverse(RDF.VALUE), any(RDF.NIL));
 
@@ -198,7 +191,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testOutlineMultipleObjects() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Field shape=field(RDF.VALUE);
 
@@ -216,7 +209,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testOutlineMultipleSources() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Field shape=field(inverse(RDF.VALUE));
 
@@ -236,7 +229,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testOutlineMultipleDirectEdges() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=and(
 					field(RDF.FIRST, and()),
@@ -257,7 +250,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testOutlineMultipleInverseEdges() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=and(
 					field(inverse(RDF.FIRST)),
@@ -280,7 +273,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testOutlineMultipleDirectEdgeValuePairs() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=and(
 					field(inverse(RDF.FIRST)),
@@ -304,7 +297,7 @@ final class GraphValidatorTest {
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testValidateMinCount() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=minCount(2);
 
@@ -315,7 +308,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateMaxCount() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=maxCount(2);
 
@@ -326,7 +319,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateIn() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=in(x, y);
 
@@ -339,7 +332,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateAll() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=all(x, y);
 
@@ -352,7 +345,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateAny() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=any(x, y);
 
@@ -366,7 +359,7 @@ final class GraphValidatorTest {
 
 
 	@Test void testValidateDatatype() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			assertThat(validate(datatype(Form.ValueType), "<x>")).isValid();
 			assertThat(validate(datatype(Form.ValueType), "_:x")).isValid();
@@ -401,33 +394,26 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateClazz() {
+		exec(() -> {
 
-		final Shape shape=clazz(RDFS.RESOURCE);
+			final Shape shape=clazz(term("Employee"));
 
-		new Tray()
+			// validate using type info retrieved from model
 
-				.exec(() -> { // validate using type info retrieved from model
+			assertThat(validate(shape, "<employees/9999>", "<employees/9999> a :Employee")).isValid();
+			assertThat(validate(shape, "<offices/9999>")).isNotValid();
 
-					assertThat(validate(shape, "rdf:first", "rdf:first a rdfs:Resource")).isValid();
+			// validate using type info retrieved from graph
 
-					assertThat(validate(shape, "rdf:rest")).isNotValid();
+			assertThat(validate(shape, "<employees/1370>")).isValid();
+			assertThat(validate(shape, "<offices/1>")).isNotValid();
 
-				})
-
-				.exec(graph(decode("rdf:first a rdfs:Resource."))) // inject type info into graph
-
-				.exec(() -> { // validate using type info retrieved from graph
-
-					assertThat(validate(shape, "rdf:first")).isValid();
-
-					assertThat(validate(shape, "rdf:rest")).isNotValid();
-
-				});
+		});
 	}
 
 
 	@Test void testValidateMinExclusive() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=minExclusive(literal(1));
 
@@ -441,7 +427,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateMaxExclusive() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=maxExclusive(literal(10));
 
@@ -455,7 +441,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateMinInclusive() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=minInclusive(literal(1));
 
@@ -469,7 +455,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateMaxInclusive() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=maxInclusive(literal(10));
 
@@ -484,7 +470,7 @@ final class GraphValidatorTest {
 
 
 	@Test void testValidatePattern() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=pattern(".*\\.org");
 
@@ -500,7 +486,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateLike() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=like("ex.org");
 
@@ -516,7 +502,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateMinLength() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=minLength(3);
 
@@ -532,7 +518,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateMaxLength() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=maxLength(2);
 
@@ -549,7 +535,7 @@ final class GraphValidatorTest {
 
 
 	@Test void testValidateConjunction() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=and(any(x), any(y));
 
@@ -562,7 +548,7 @@ final class GraphValidatorTest {
 	}
 
 	@Test void testValidateDisjunction() {
-		new Tray().exec(() -> {
+		exec(() -> {
 
 			final Shape shape=or(all(x, y), all(x, z));
 

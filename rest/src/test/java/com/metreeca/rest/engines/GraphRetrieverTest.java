@@ -19,7 +19,6 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
-import com.metreeca.tray.Tray;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Statement;
@@ -63,19 +62,16 @@ import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.integer;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.things.ValuesTest.item;
+import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-final class GraphRetrieverTest {
-
-	private void exec(final Runnable task) {
-		new Tray().exec(graph(small())).exec(task);
-	}
-
+final class GraphRetrieverTest extends GraphProcessorTest {
 
 	private Collection<Statement> query(final Query query) {
 		return new GraphRetriever().retrieve(root, query);
@@ -314,6 +310,8 @@ final class GraphRetrieverTest {
 
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Nested final class Annotations {
 
@@ -832,6 +830,8 @@ final class GraphRetrieverTest {
 
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testUseIndependentPatternsAndFilters() {
 		exec(() -> assertThat(query(
