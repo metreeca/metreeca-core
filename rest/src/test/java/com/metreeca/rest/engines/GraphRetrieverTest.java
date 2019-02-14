@@ -799,11 +799,27 @@ final class GraphRetrieverTest {
 		}
 
 		@Test void testOr() {
-			exec(() -> assertThatThrownBy(() -> query(
+			exec(() -> assertThat(query(
 
-					edges(or())
+					edges(or(
+							clazz(term("Office")),
+							clazz(term("Employee"))
+					))
 
-			)).isInstanceOf(UnsupportedOperationException.class));
+
+			)).isIsomorphicTo(graph(
+
+					"construct {\n"
+							+"\n"
+							+"\tform:root ldp:contains ?item.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t{ ?item a :Office } union { ?item a :Employee }\n"
+							+"\n"
+							+"}"
+
+			)));
 		}
 
 		@Test void testWhen() {

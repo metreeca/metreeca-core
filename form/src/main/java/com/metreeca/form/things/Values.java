@@ -23,7 +23,6 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
@@ -104,11 +103,12 @@ public final class Values {
 
 	//// Accessors /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static boolean is(final Value value, final IRI type) {
-		return value != null && (type(value).equals(type) || Form.ValueType.equals(type) || RDFS.RESOURCE.equals(type))
-				|| value instanceof Resource && Form.ResourceType.equals(type) // abstract resource datatype
-				|| value instanceof Literal && Form.LiteralType.equals(type) // abstract literal datatype
-				|| value instanceof Literal && RDFS.LITERAL.equals(type); // abstract literal datatype using rdfs: IRI
+	public static boolean is(final Value value, final IRI datatype) {
+		return value != null && (type(value).equals(datatype)
+				|| Form.ValueType.equals(datatype)
+				|| value instanceof Resource && Form.ResourceType.equals(datatype)
+				|| value instanceof Literal && Form.LiteralType.equals(datatype)
+		);
 	}
 
 	/**

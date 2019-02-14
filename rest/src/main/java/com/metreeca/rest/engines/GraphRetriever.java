@@ -524,7 +524,7 @@ final class GraphRetriever extends GraphProcessor {
 		}
 
 		@Override public Snippet probe(final Or or) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return snippet(or.getShapes().stream().map(s -> s.map(this)));
 		}
 
 		@Override public Snippet probe(final When when) {
@@ -556,12 +556,12 @@ final class GraphRetriever extends GraphProcessor {
 
 			final IRI iri=datatype.getIRI();
 
-			return iri.equals(Form.ValueType) || iri.equals(RDFS.RESOURCE) ? nothing() : snippet(
+			return iri.equals(Form.ValueType) ? nothing() : snippet(
 
 					iri.equals(Form.ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )"
 							: iri.equals(Form.BNodeType) ? "filter isBlank({value})"
 							: iri.equals(Form.IRIType) ? "filter isIRI({value})"
-							: iri.equals(Form.LiteralType) || iri.equals(RDFS.LITERAL) ? "filter isLiteral({value})"
+							: iri.equals(Form.LiteralType) ? "filter isLiteral({value})"
 							: "filter ( datatype({value}) = <{datatype}> )",
 
 					var(source),
@@ -676,7 +676,10 @@ final class GraphRetriever extends GraphProcessor {
 		}
 
 		@Override public Snippet probe(final Or or) {
-			throw new UnsupportedOperationException("disjunction pattern"); // !!! tbi
+			return list(
+					or.getShapes().stream().map(s -> snippet("{\f{branch}\f}", s.map(this))),
+					" union "
+			);
 		}
 
 		@Override public Snippet probe(final When when) {

@@ -386,10 +386,6 @@ final class GraphValidatorTest {
 			assertThat(validate(datatype(Form.LiteralType), "1")).isValid();
 			assertThat(validate(datatype(Form.LiteralType), "_:x")).isNotValid();
 
-			assertThat(validate(datatype(RDFS.LITERAL), "'x'")).isValid();
-			assertThat(validate(datatype(RDFS.LITERAL), "1")).isValid();
-			assertThat(validate(datatype(RDFS.LITERAL), "_:x")).isNotValid();
-
 			assertThat(validate(datatype(XMLSchema.STRING), "'text'")).isValid();
 			assertThat(validate(datatype(XMLSchema.STRING), "_:x")).isNotValid();
 
