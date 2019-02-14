@@ -169,7 +169,7 @@ final class GraphRetriever extends GraphProcessor {
 
 		final Model model=new LinkedHashModel();
 
-		final Collection<Literal> counts=new ArrayList<>();
+		final Collection<BigInteger> counts=new ArrayList<>();
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
@@ -225,12 +225,15 @@ final class GraphRetriever extends GraphProcessor {
 			@Override public void handleSolution(final BindingSet bindings) {
 
 				final Resource type=(Resource)bindings.getValue("type");
-				final Literal count=(Literal)bindings.getValue("count");
+
+				final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
 				final Value min=bindings.getValue("min");
 				final Value max=bindings.getValue("max");
 
+				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+
 				if ( type != null ) { model.add(focus, Form.stats, type); }
-				if ( type != null && count != null ) { model.add(type, Form.count, count); }
+				if ( type != null && count != null ) { model.add(type, Form.count, literal(count)); }
 				if ( type != null && min != null ) { model.add(type, Form.min, min); }
 				if ( type != null && max != null ) { model.add(type, Form.max, max); }
 
@@ -242,10 +245,10 @@ final class GraphRetriever extends GraphProcessor {
 
 		}));
 
-		model.add(focus, Form.count, literal(BigInteger.valueOf(counts.stream()
+		model.add(focus, Form.count, literal(counts.stream()
 				.filter(Objects::nonNull)
-				.mapToLong(Literal::longValue)
-				.sum())));
+				.reduce(BigInteger.ZERO, BigInteger::add)
+		));
 
 		mins.stream()
 				.filter(Objects::nonNull)
@@ -322,11 +325,13 @@ final class GraphRetriever extends GraphProcessor {
 				final Value label=bindings.getValue("label");
 				final Value notes=bindings.getValue("notes");
 
+				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+
 				final BNode item=bnode();
 
 				if ( item != null ) { model.add(focus, Form.items, item); }
 				if ( item != null && value != null ) { model.add(item, Form.value, value); }
-				if ( item != null && count != null ) { model.add(item, Form.count, count); }
+				if ( item != null && count != null ) { model.add(item, Form.count, literal(integer(count).orElse(BigInteger.ZERO))); }
 
 				// !!! manage multiple languages
 

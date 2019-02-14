@@ -21,14 +21,16 @@ package com.metreeca.tray.rdf;
 
 import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
 import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.export;
+import static com.metreeca.form.things.ValuesTest.select;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -40,12 +42,18 @@ public final class GraphTest {
 		return tool(Graph.Factory).query(connection -> { return export(connection, contexts); });
 	}
 
+	public static Runnable graph(final Iterable<Statement> model, final Resource... contexts) {
+		return () -> tool(Graph.Factory).update(connection -> { connection.add(model, contexts); });
+	}
+
+
+
 	public static Model graph(final String sparql) {
 		return tool(Graph.Factory).query(connection -> { return construct(connection, sparql); });
 	}
 
-	public static Runnable graph(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> tool(Graph.Factory).update(connection -> { connection.add(model, contexts); });
+	public static List<Map<String, Value>> tuples(final String sparql) {
+		return tool(Graph.Factory).query(connection -> { return select(connection, sparql); });
 	}
 
 

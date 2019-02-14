@@ -21,12 +21,20 @@ import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.rdf.graphs.RDF4JRemote;
 import com.metreeca.tray.rdf.graphs.RDF4JSPARQL;
+import com.metreeca.tray.rdf.graphs.Virtuoso;
 
 import org.eclipse.rdf4j.IsolationLevels;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.VOID;
+import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.ValuesTest.Base;
 import static com.metreeca.form.things.ValuesTest.small;
+import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.rdf.Graph.READ_ONLY;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 
 
 abstract class GraphProcessorTest {
@@ -34,8 +42,9 @@ abstract class GraphProcessorTest {
 	protected void exec(final Runnable... tasks) {
 		new Tray()
 
-				//.set(Graph.Factory, this::dydra)
 				//.set(Graph.Factory, this::graphdb)
+				//.set(Graph.Factory, this::virtuoso)
+				//.set(Graph.Factory, this::dydra)
 
 				.exec(() -> {
 
@@ -43,7 +52,9 @@ abstract class GraphProcessorTest {
 
 					if ( graph.isolation().isCompatibleWith(IsolationLevels.NONE) ) {
 						graph.update(connection -> {
-							if ( connection.isEmpty() ) { connection.add(small()); }
+							if ( !connection.hasStatement(iri(Base), RDF.TYPE, VOID.DATASET, false) ) {
+								connection.add(small());
+							}
 						});
 					}
 
@@ -61,8 +72,22 @@ abstract class GraphProcessorTest {
 		return new RDF4JRemote("http://localhost:7200/repositories/birt-small");
 	}
 
+	private Graph virtuoso() {
+		return new Virtuoso("jdbc:virtuoso://localhost:1111/", "dba", "dba", iri(Base));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private Graph dydra() {
 		return new RDF4JSPARQL("https://dydra.com/metreeca/birt-small/sparql").isolation(READ_ONLY);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testUploadDataset() { // make sure the test dataset is actually loaded…
+		exec(() -> assertThat(graph("construct where { ?office a :Office }")).isNotEmpty());
 	}
 
 }

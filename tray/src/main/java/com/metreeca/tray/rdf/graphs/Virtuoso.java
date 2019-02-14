@@ -40,7 +40,7 @@ public final class Virtuoso extends Graph {
 	 * Creates a Virtuoso graph.
 	 *
 	 * @param url  the <a href="http://docs.openlinksw.com/virtuoso/jdbcurl4mat/">JDBC URL</a> of a remote Virtuoso
-	 *             server
+	 *             server (e.g. {@code jdbc:virtuoso://localhost:1111/})
 	 * @param usr  the username of the account on the remote Virtuoso server
 	 * @param pwd  the password of the account on the remote Virtuoso server
 	 * @param dflt the IRI of the default graph for update operations on the remote Virtuoso server
