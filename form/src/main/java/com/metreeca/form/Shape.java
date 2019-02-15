@@ -40,7 +40,6 @@ import static java.util.Arrays.asList;
  */
 public interface Shape {
 
-
 	//// Shorthands ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape required() { return and(minCount(1), maxCount(1)); }
