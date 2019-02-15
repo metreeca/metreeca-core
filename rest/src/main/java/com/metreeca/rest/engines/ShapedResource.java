@@ -36,6 +36,7 @@ import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Meta.metas;
+import static com.metreeca.form.things.Lambdas.memoize;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
 
@@ -48,46 +49,63 @@ import static com.metreeca.rest.engines.Flock.flock;
 final class ShapedResource extends GraphEntity {
 
 	private final Graph graph;
-	private final Flock flock;
+	private final Shape shape;
 
-	private final Shape relate;
-	private final Shape update;
-	private final Shape delete;
+	private final Function<Shape, Flock> flock=memoize(s ->
+			flock(metas(s)).orElseGet(Flock.None::new)
+	);
 
-	private final Shape convey;
+	private final Function<Shape, Shape> relate=memoize(s -> s
+			.map(new Redactor(Form.task, Form.relate))
+			.map(new Redactor(Form.view, Form.detail))
+			.map(new Redactor(Form.role, Form.any))
+			.map(new Optimizer())
+	);
+
+	private final Function<Shape, Shape> update=memoize(s -> s
+			.map(new Redactor(Form.task, Form.update))
+			.map(new Redactor(Form.view, Form.detail))
+			.map(new Redactor(Form.role, Form.any))
+			.map(new Optimizer())
+	);
+
+	private final Function<Shape, Shape> delete=memoize(s -> s
+			.map(new Redactor(Form.task, Form.delete))
+			.map(new Redactor(Form.view, Form.detail))
+			.map(new Redactor(Form.role, Form.any))
+			.map(new Optimizer())
+	);
+
+	private final Function<Shape, Shape> convey=memoize(s -> s
+			.map(relate)
+			.map(new Redactor(Form.mode, Form.convey))
+			.map(new Optimizer())
+	);
 
 
 	ShapedResource(final Graph graph, final Shape shape) {
-
 		this.graph=graph;
-		this.flock=flock(metas(shape)).orElseGet(Flock.None::new);
-
-		this.relate=redact(shape, Form.relate, Form.detail);
-		this.update=redact(shape, Form.update, Form.detail);
-		this.delete=redact(shape, Form.delete, Form.detail);
-
-		this.convey=relate.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer());
-
+		this.shape=shape;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Collection<Statement> relate(final IRI resource) {
-		return graph.query(connection -> { return retrieve(resource, relate).orElseGet(Sets::set); });
+		return graph.query(connection -> { return retrieve(resource, shape.map(relate)).orElseGet(Sets::set); });
 	}
 
 	@Override public <V, E> Result<V, E> relate(final IRI resource,
 			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
-		return parser.apply(relate).fold(
+		return parser.apply(shape.map(relate)).fold(
 
 				query -> {
 
-					if ( query.equals(edges(relate))) {
+					if ( query.equals(edges(shape.map(relate))) ) {
 
-						return Value(mapper.apply(convey, relate(resource)));
+						return Value(mapper.apply(shape.map(convey), relate(resource)));
 
 					} else {
 
@@ -111,11 +129,11 @@ final class ShapedResource extends GraphEntity {
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
-			return retrieve(resource, update).map(current -> { // identify updatable description
+			return retrieve(resource, shape.map(update)).map(current -> { // identify updatable description
 
 				// validate before updating graph to support snapshot transactions
 
-				final Focus focus=new GraphValidator().validate(resource, update, model);
+				final Focus focus=new GraphValidator().validate(resource, shape.map(update), model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
 
@@ -142,9 +160,9 @@ final class ShapedResource extends GraphEntity {
 			// !!! merge retrieve/remove operations into a single SPARQL update txn
 			// !!! must check resource existence anyway and would break for CBD shapes
 
-			return retrieve(resource, delete).map(current -> { // identify deletable description
+			return retrieve(resource, shape.map(delete)).map(current -> { // identify deletable description
 
-				flock.remove(connection, resource, current).remove(current);
+				shape.map(flock).remove(connection, resource, current).remove(current);
 
 				return resource;
 

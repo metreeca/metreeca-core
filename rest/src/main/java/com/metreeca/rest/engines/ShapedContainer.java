@@ -41,6 +41,7 @@ import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.metas;
+import static com.metreeca.form.things.Lambdas.memoize;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
 import static com.metreeca.rest.wrappers.Throttler.container;
@@ -55,30 +56,43 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
 final class ShapedContainer extends GraphEntity {
 
 	private final Graph graph;
-	private final Flock flock;
+	private final Shape shape;
 
-	private final Shape browse;
-	private final Shape create;
+	private final Function<Shape, Flock> flock=memoize(s ->
+			flock(metas(resource().apply(s))).orElseGet(Flock.None::new)
+	);
 
-	private final Field convey;
+	private final Function<Shape, Shape> browse=memoize(s -> s
+			.map(resource())
+			.map(new Redactor(Form.task, Form.relate))
+			.map(new Redactor(Form.view, Form.digest))
+			.map(new Redactor(Form.role, Form.any))
+			.map(new Optimizer())
+	);
+
+	private final Function<Shape, Shape> create=memoize(s -> s
+			.map(resource())
+			.map(new Redactor(Form.task, Form.create))
+			.map(new Redactor(Form.view, Form.detail))
+			.map(new Redactor(Form.role, Form.any))
+			.map(new Optimizer())
+	);
+
+	private final Function<Shape, Field> convey=memoize(s -> field(LDP.CONTAINS, s
+			.map(browse)
+			.map(new Redactor(Form.mode, Form.convey))
+			.map(new Optimizer())
+	));
 
 	private final Engine delegate;
 
 
 	ShapedContainer(final Graph graph, final Shape shape) {
 
-		final Shape container=container().apply(shape);
-		final Shape resource=resource().apply(shape);
-
 		this.graph=graph;
-		this.flock=flock(metas(resource)).orElseGet(Flock.None::new);
+		this.shape=shape;
 
-		this.browse=redact(resource, Form.relate, Form.digest);
-		this.create=redact(resource, Form.create, Form.detail);
-
-		this.convey=field(LDP.CONTAINS, browse.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer()));
-
-		this.delegate=new ShapedResource(graph, container);
+		this.delegate=new ShapedResource(graph, container().apply(shape));
 	}
 
 
@@ -98,7 +112,7 @@ final class ShapedContainer extends GraphEntity {
 			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
-		return parser.apply(and(browse, filter().then(flock.anchor(resource)))).fold(
+		return parser.apply(and(shape.map(browse), filter().then(shape.map(flock).anchor(resource)))).fold(
 
 				query -> graph.query(connection -> {
 
@@ -107,7 +121,7 @@ final class ShapedContainer extends GraphEntity {
 					return query.map(new Query.Probe<Result<V, E>>() {
 
 						@Override public Result<V, E> probe(final Edges edges) {
-							return Value(mapper.apply(convey, model));
+							return Value(mapper.apply(shape.map(convey), model));
 						}
 
 						@Override public Result<V, E> probe(final Stats stats) {
@@ -138,7 +152,7 @@ final class ShapedContainer extends GraphEntity {
 
 				// validate before updating graph to support snapshot transactions
 
-				final Focus focus=new GraphValidator().validate(related, create, model);
+				final Focus focus=new GraphValidator().validate(related, shape.map(create), model);
 
 				if ( focus.assess(Issue.Level.Error) ) {
 
@@ -146,7 +160,7 @@ final class ShapedContainer extends GraphEntity {
 
 				} else {
 
-					flock.insert(connection, resource, related, model).add(model);
+					shape.map(flock).insert(connection, resource, related, model).add(model);
 
 					connection.commit();
 

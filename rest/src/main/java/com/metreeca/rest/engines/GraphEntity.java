@@ -17,12 +17,10 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.*;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.Focus;
+import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -32,24 +30,12 @@ import java.util.Optional;
 
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.engines.Descriptions.description;
 
 import static java.util.stream.Collectors.toList;
 
 
 abstract class GraphEntity implements Engine { // !!! remove
-
-	Shape redact(final Shape shape, final IRI task, final IRI view) {
-		return shape.map(new Redactor(map(
-				entry(Form.task, set(task)),
-				entry(Form.view, set(view)),
-				entry(Form.role, set(Form.any))
-		))).map(new Optimizer());
-	}
-
 
 	Optional<Resource> reserve(final RepositoryConnection connection, final Resource resource) {
 		return Optional.ofNullable(connection.hasStatement(resource, null, null, true)
