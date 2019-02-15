@@ -35,8 +35,8 @@ import java.util.function.Function;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Memo.memoizing;
 import static com.metreeca.form.shapes.Meta.metas;
-import static com.metreeca.form.things.Lambdas.memoize;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
 
@@ -48,39 +48,42 @@ import static com.metreeca.rest.engines.Flock.flock;
  */
 final class ShapedResource extends GraphEntity {
 
-	private final Graph graph;
-	private final Shape shape;
-
-	private final Function<Shape, Flock> flock=memoize(s ->
+	private static final Function<Shape, Flock> flock=memoizing(s ->
 			flock(metas(s)).orElseGet(Flock.None::new)
 	);
 
-	private final Function<Shape, Shape> relate=memoize(s -> s
+	private static final Function<Shape, Shape> relate=memoizing(s -> s
 			.map(new Redactor(Form.task, Form.relate))
 			.map(new Redactor(Form.view, Form.detail))
 			.map(new Redactor(Form.role, Form.any))
 			.map(new Optimizer())
 	);
 
-	private final Function<Shape, Shape> update=memoize(s -> s
+	private static final Function<Shape, Shape> update=memoizing(s -> s
 			.map(new Redactor(Form.task, Form.update))
 			.map(new Redactor(Form.view, Form.detail))
 			.map(new Redactor(Form.role, Form.any))
 			.map(new Optimizer())
 	);
 
-	private final Function<Shape, Shape> delete=memoize(s -> s
+	private static final Function<Shape, Shape> delete=memoizing(s -> s
 			.map(new Redactor(Form.task, Form.delete))
 			.map(new Redactor(Form.view, Form.detail))
 			.map(new Redactor(Form.role, Form.any))
 			.map(new Optimizer())
 	);
 
-	private final Function<Shape, Shape> convey=memoize(s -> s
+	private static final Function<Shape, Shape> convey=memoizing(s -> s
 			.map(relate)
 			.map(new Redactor(Form.mode, Form.convey))
 			.map(new Optimizer())
 	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Graph graph;
+	private final Shape shape;
 
 
 	ShapedResource(final Graph graph, final Shape shape) {

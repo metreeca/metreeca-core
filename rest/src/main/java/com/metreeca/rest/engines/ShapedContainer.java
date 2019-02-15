@@ -40,8 +40,8 @@ import java.util.function.Function;
 import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Memo.memoizing;
 import static com.metreeca.form.shapes.Meta.metas;
-import static com.metreeca.form.things.Lambdas.memoize;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
 import static com.metreeca.rest.wrappers.Throttler.container;
@@ -55,14 +55,11 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
  */
 final class ShapedContainer extends GraphEntity {
 
-	private final Graph graph;
-	private final Shape shape;
-
-	private final Function<Shape, Flock> flock=memoize(s ->
+	private static final Function<Shape, Flock> flock=memoizing(s ->
 			flock(metas(resource().apply(s))).orElseGet(Flock.None::new)
 	);
 
-	private final Function<Shape, Shape> browse=memoize(s -> s
+	private static final Function<Shape, Shape> browse=memoizing(s -> s
 			.map(resource())
 			.map(new Redactor(Form.task, Form.relate))
 			.map(new Redactor(Form.view, Form.digest))
@@ -70,7 +67,7 @@ final class ShapedContainer extends GraphEntity {
 			.map(new Optimizer())
 	);
 
-	private final Function<Shape, Shape> create=memoize(s -> s
+	private static final Function<Shape, Shape> create=memoizing(s -> s
 			.map(resource())
 			.map(new Redactor(Form.task, Form.create))
 			.map(new Redactor(Form.view, Form.detail))
@@ -78,11 +75,17 @@ final class ShapedContainer extends GraphEntity {
 			.map(new Optimizer())
 	);
 
-	private final Function<Shape, Field> convey=memoize(s -> field(LDP.CONTAINS, s
+	private static final Function<Shape, Field> convey=memoizing(s -> field(LDP.CONTAINS, s
 			.map(browse)
 			.map(new Redactor(Form.mode, Form.convey))
 			.map(new Optimizer())
 	));
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Graph graph;
+	private final Shape shape;
 
 	private final Engine delegate;
 

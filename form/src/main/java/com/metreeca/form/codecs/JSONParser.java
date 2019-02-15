@@ -39,6 +39,7 @@ import java.net.URI;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -50,6 +51,7 @@ import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.shapes.Memo.memoizing;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -59,11 +61,18 @@ import static java.util.stream.Collectors.toMap;
 
 public final class JSONParser extends AbstractRDFParser {
 
-	private static final Pattern EdgePattern=Pattern
-			.compile("(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:.*)>)");
+	private static final Pattern EdgePattern
+			=Pattern.compile("(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:.*)>)");
 
+	private final DecimalFormat DoubleFormat
+			=new DecimalFormat("0.0##E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
-	private final DecimalFormat DoubleFormat=new DecimalFormat("0.0##E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
+	private static final Function<Shape, Shape> ShapeCompiler=memoizing(s -> s
+			.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
+			.map(new Optimizer())
+			.map(new Inferencer()) // infer implicit constraints to drive json shorthands
+			.map(new Optimizer())
+	);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,12 +120,7 @@ public final class JSONParser extends AbstractRDFParser {
 		final Resource focus=getParserConfig().get(JSONCodec.Focus);
 		final Shape shape=getParserConfig().get(JSONCodec.Shape);
 
-		final Shape driver=(shape == null) ? null : shape
-
-				.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
-				.map(new Optimizer())
-				.map(new Inferencer()) // infer implicit constraints to drive json shorthands
-				.map(new Optimizer());
+		final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
 
 		if ( rdfHandler != null ) {
 			rdfHandler.startRDF();

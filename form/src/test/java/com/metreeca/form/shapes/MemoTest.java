@@ -15,23 +15,23 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.things;
+package com.metreeca.form.shapes;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
-import static com.metreeca.form.things.Lambdas.memoize;
+import static com.metreeca.form.shapes.Memo._memoize;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class LambdasTest {
+final class MemoTest {
 
 	@Test void testMemoizeMappers() {
 
 		final Function<Object, Object> mapper=key -> new Object();
-		final Function<Object, Object> memoized=memoize(mapper);
+		final Function<Object, Object> memoized=_memoize(mapper);
 
 		assertThat(mapper.apply("key")).isNotSameAs(mapper.apply("key"));
 		assertThat(memoized.apply("key")).isSameAs(memoized.apply("key"));

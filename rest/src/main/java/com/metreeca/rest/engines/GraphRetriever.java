@@ -89,45 +89,47 @@ final class GraphRetriever extends GraphProcessor {
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> {
+		final Shape pattern=shape.map(ConveyCompiler);
+		final Shape selector=shape.map(FilterCompiler);
 
-			final Shape pattern=shape.map(new Redactor(Form.mode, Form.convey)).map(new Optimizer());
-			final Shape selector=shape.map(new Redactor(Form.mode, Form.filter)).map(new Pruner()).map(new Optimizer());
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
 
-			return source(nothing(id(root, pattern, selector)), snippet(
+				nothing(id(root, pattern, selector)), // link root to pattern and selector shapes
 
-					"# edges query\n"
-							+"\n"
-							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-							+"\n"
-							+"select {variables} where {\n"
-							+"\n"
-							+"\t{filter}\n"
-							+"\n"
-							+"\t{pattern}\n"
-							+"\n"
-							+"\t{sorters}\n"
-							+"\n"
-							+"} order by {criteria}",
+				snippet(
 
-					(Snippet)(source, identifiers) -> Stream
-							.concat(
-									Stream.of(identifiers.apply(root, root)), /// always project root
-									pattern.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s), template::add))
-							)
-							.distinct()
-							.sorted()
-							.forEachOrdered(id -> source.accept(" ?"+id)),
+						"# edges query\n"
+								+"\n"
+								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+								+"\n"
+								+"select {variables} where {\n"
+								+"\n"
+								+"\t{filter}\n"
+								+"\n"
+								+"\t{pattern}\n"
+								+"\n"
+								+"\t{sorters}\n"
+								+"\n"
+								+"} order by {criteria}",
 
-					filter(selector, orders, offset, limit),
-					pattern(pattern),
+						(Snippet)(source, identifiers) -> Stream
+								.concat(
+										Stream.of(identifiers.apply(root, root)), /// always project root
+										pattern.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s), template::add))
+								)
+								.distinct()
+								.sorted()
+								.forEachOrdered(id -> source.accept(" ?"+id)),
 
-					sorters(root, orders), // !!! (€) don't extract if already present in pattern
-					criteria(root, orders)
+						filter(selector, orders, offset, limit),
+						pattern(pattern),
 
-			));
+						sorters(root, orders), // !!! (€) don't extract if already present in pattern
+						criteria(root, orders)
 
-		})).evaluate(new AbstractTupleQueryResultHandler() {
+				)
+
+		))).evaluate(new AbstractTupleQueryResultHandler() {
 
 			@Override public void handleSolution(final BindingSet bindings) {
 
@@ -173,54 +175,47 @@ final class GraphRetriever extends GraphProcessor {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> {
+		final Shape selector=shape.map(FilterCompiler);
 
-			final Shape selector=shape
-					.map(new Redactor(Form.mode, Form.filter))
-					.map(new Pruner())
-					.map(new Optimizer());
+		final Object source=var(selector);
+		final Object target=path.isEmpty() ? source : var();
 
-			final Object source=var(selector);
-			final Object target=path.isEmpty() ? source : var();
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
 
-			return source(snippet(
-
-					"# stats query\n"
-							+"\n"
-							+"prefix form: <app://form.metreeca.com/terms#>\n"
-							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-							+"\n"
-							+"select ?type\t\n"
-							+"\n"
-							+"\t(count(distinct {target}) as ?count)\n"
-							+"\t(min({target}) as ?min)\n"
-							+"\t(max({target}) as ?max) \n"
-							+"\n"
-							+"\bwhere {\n"
-							+"\n"
-							+"\t{roots}\n"
-							+"\n"
-							+"\t{filters}\n"
-							+"\n"
-							+"\t{path}\n"
-							+"\n"
-							+"\tbind (if(isBlank({target}), form:bnode, if(isIRI({target}), form:iri, datatype({target}))) as ?type)\n"
-							+"\n"
-							+"} group by ?type having ( count({target}) > 0 ) order by desc(?count) ?type",
+				"# stats query\n"
+						+"\n"
+						+"prefix form: <app://form.metreeca.com/terms#>\n"
+						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+						+"\n"
+						+"select ?type\t\n"
+						+"\n"
+						+"\t(count(distinct {target}) as ?count)\n"
+						+"\t(min({target}) as ?min)\n"
+						+"\t(max({target}) as ?max) \n"
+						+"\n"
+						+"\bwhere {\n"
+						+"\n"
+						+"\t{roots}\n"
+						+"\n"
+						+"\t{filters}\n"
+						+"\n"
+						+"\t{path}\n"
+						+"\n"
+						+"\tbind (if(isBlank({target}), form:bnode, if(isIRI({target}), form:iri, datatype({target}))) as ?type)\n"
+						+"\n"
+						+"} group by ?type having ( count({target}) > 0 ) order by desc(?count) ?type",
 
 
-					target,
+				target,
 
-					roots(selector),
-					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+				roots(selector),
+				filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					path(source, path, target)
+				path(source, path, target)
 
-					// !!! support ordering/slicing?
+				// !!! support ordering/slicing?
 
-			));
-
-		})).evaluate(new AbstractTupleQueryResultHandler() {
+		)))).evaluate(new AbstractTupleQueryResultHandler() {
 
 			@Override public void handleSolution(final BindingSet bindings) {
 
@@ -270,54 +265,47 @@ final class GraphRetriever extends GraphProcessor {
 
 		final Model model=new LinkedHashModel();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> {
+		final Shape selector=shape.map(FilterCompiler);
 
-			final Shape selector=shape
-					.map(new Redactor(Form.mode, Form.filter))
-					.map(new Pruner())
-					.map(new Optimizer());
+		final Object source=var(selector);
+		final Object target=path.isEmpty() ? source : var();
 
-			final Object source=var(selector);
-			final Object target=path.isEmpty() ? source : var();
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
 
-			return source(snippet(
+				"# items query\n"
+						+"\n"
+						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+						+"\n"
+						+"select ({target} as ?value)\t\n"
+						+"\n"
+						+"\t(sample(?l) as ?label)\n"
+						+"\t(sample(?n) as ?notes)\n"
+						+"\t(count(distinct {source}) as ?count)\n"
+						+"\n"
+						+"\bwhere {\n"
+						+"\n"
+						+"\t{roots}\n"
+						+"\t\n"
+						+"\t{filters}\n"
+						+"\t\n"
+						+"\t{path}\n"
+						+"\t\n"
+						+"\toptional { {target} rdfs:label ?l }\n"
+						+"\toptional { {target} rdfs:comment ?n }\n"
+						+"\t\t\n"
+						+"} group by {target} having ( count({source}) > 0 ) order by desc(?count) ?value",
 
-					"# items query\n"
-							+"\n"
-							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-							+"\n"
-							+"select ({target} as ?value)\t\n"
-							+"\n"
-							+"\t(sample(?l) as ?label)\n"
-							+"\t(sample(?n) as ?notes)\n"
-							+"\t(count(distinct {source}) as ?count)\n"
-							+"\n"
-							+"\bwhere {\n"
-							+"\n"
-							+"\t{roots}\n"
-							+"\t\n"
-							+"\t{filters}\n"
-							+"\t\n"
-							+"\t{path}\n"
-							+"\t\n"
-							+"\toptional { {target} rdfs:label ?l }\n"
-							+"\toptional { {target} rdfs:comment ?n }\n"
-							+"\t\t\n"
-							+"} group by {target} having ( count({source}) > 0 ) order by desc(?count) ?value",
+				target, source,
 
-					target, source,
+				roots(selector),
+				filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					roots(selector),
-					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+				path(source, path, target)
 
-					path(source, path, target)
+				// !!! handle label/comment language
+				// !!! support ordering/slicing?
 
-					// !!! handle label/comment language
-					// !!! support ordering/slicing?
-
-			));
-
-		})).evaluate(new AbstractTupleQueryResultHandler() {
+		)))).evaluate(new AbstractTupleQueryResultHandler() {
 			@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
 
 				final Value value=bindings.getValue("value");
@@ -331,7 +319,9 @@ final class GraphRetriever extends GraphProcessor {
 
 				if ( item != null ) { model.add(focus, Form.items, item); }
 				if ( item != null && value != null ) { model.add(item, Form.value, value); }
-				if ( item != null && count != null ) { model.add(item, Form.count, literal(integer(count).orElse(BigInteger.ZERO))); }
+				if ( item != null && count != null ) {
+					model.add(item, Form.count, literal(integer(count).orElse(BigInteger.ZERO)));
+				}
 
 				// !!! manage multiple languages
 

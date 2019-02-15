@@ -24,12 +24,14 @@ import com.metreeca.form.shapes.*;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
@@ -54,7 +56,8 @@ public final class Redactor extends Traverser<Shape> {
 		this(map(entry(axis, values)));
 	}
 
-	public Redactor(final Map<IRI, Set<? extends Value>> variables) {
+
+	Redactor(final Map<IRI, Set<? extends Value>> variables) {
 
 		if ( variables == null ) {
 			throw new NullPointerException("null variables");

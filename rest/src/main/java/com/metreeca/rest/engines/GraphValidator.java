@@ -18,8 +18,6 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 import com.metreeca.tray.rdf.Graph;
@@ -43,7 +41,6 @@ import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Snippets.source;
 import static com.metreeca.form.things.Values.*;
-import static com.metreeca.rest.engines.GraphProcessor.list;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -54,7 +51,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.*;
 
 
-final class GraphValidator {
+final class GraphValidator extends GraphProcessor {
 
 	private final Graph graph=tool(Graph.Factory);
 
@@ -62,10 +59,7 @@ final class GraphValidator {
 	Focus validate(final IRI resource, final Shape shape, final Collection<Statement> model) {
 
 		final Focus focus=graph.query(connection -> { // validate against shape
-			return shape
-					.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
-					.map(new Optimizer())
-					.map(new ReportProbe(connection, set(resource), model));
+			return shape.map(ConveyCompiler).map(new ReportProbe(connection, set(resource), model));
 		});
 
 		final Collection<Statement> envelope=focus.outline().collect(toSet()); // collect shape envelope

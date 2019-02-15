@@ -19,7 +19,6 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Cleaner;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.ValuesTest;
@@ -40,15 +39,13 @@ import java.util.Collection;
 
 import static com.metreeca.form.Shape.relate;
 import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
@@ -166,11 +163,12 @@ final class ThrottlerTest {
 					.handle(request())
 
 					.accept(response -> assertThat(response.request().shape())
-							.isEqualTo(shape.map(new Redactor(map(
-									entry(Form.task, set(task)),
-									entry(Form.view, set(view)),
-									entry(Form.role, set(role))
-							))).map(new Optimizer()))
+							.isEqualTo(shape
+									.map(new Redactor(Form.task, task))
+									.map(new Redactor(Form.view, view))
+									.map(new Redactor(Form.role, role))
+									.map(new Optimizer())
+							)
 					)
 			);
 		}
@@ -279,11 +277,12 @@ final class ThrottlerTest {
 					.handle(request())
 
 					.accept(response -> assertThat(response.request().shape())
-							.isEqualTo(shape.map(new Redactor(map(
-									entry(Form.task, set(task)),
-									entry(Form.view, set(view)),
-									entry(Form.role, set(role))
-							))).map(new Optimizer()))
+							.isEqualTo(shape
+									.map(new Redactor(Form.task, task))
+									.map(new Redactor(Form.view, view))
+									.map(new Redactor(Form.role, role))
+									.map(new Optimizer())
+							)
 					)
 			);
 		}
@@ -339,13 +338,9 @@ final class ThrottlerTest {
 								)
 						)
 
-						.satisfies(shape -> assertThat(shape
-										.map(new Redactor(Form.role, Form.none))
-										.map(new Cleaner())
-										.map(new Optimizer())
-								)
-										.as("role-based authorization preserved")
-										.isEqualTo(pass())
+						.satisfies(shape -> assertThat(pass(shape.map(new Redactor(Form.role, Form.none))))
+								.as("role-based authorization preserved")
+								.isTrue()
 						);
 			}
 

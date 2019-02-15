@@ -41,11 +41,11 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.shapes.Memo.memoizing;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.things.Lambdas.memoize;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Handler.forbidden;
@@ -68,8 +68,8 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>redacts the request shape according to the provided {@linkplain #Throttler(Value, Value, UnaryOperator)
- * task/view/area parameters} and the request user roles; {@code mode} redaction is left to final shape consumers;</li>
+ * <li>redacts the request shape according to the provided task, view and area {@linkplain #Throttler(Value, Value,
+ * Function) parameters} and the request user roles; {@code mode} redaction is left to final shape consumers;</li>
  *
  * <li>enforces shape-based access control according to the redacted request shape;</li>
  *
@@ -105,21 +105,17 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Throttler implements Wrapper {
 
-	public static Function<Shape, Shape> role(final Set<Value> roles) {
-		return s -> s
-				.map(new Redactor(Form.role, roles))
-				.map(new Optimizer());
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private static final Set<IRI> ContainerMetadata=set(
 			RDF.TYPE,
 			LDP.MEMBERSHIP_RESOURCE,
 			LDP.HAS_MEMBER_RELATION,
 			LDP.IS_MEMBER_OF_RELATION,
 			LDP.INSERTED_CONTENT_RELATION
+	);
+
+	private static final Function<Shape, Shape> anyone=memoizing(s -> s
+			.map(new Redactor(Form.role, set(Form.any)))
+			.map(new Optimizer())
 	);
 
 
@@ -233,14 +229,14 @@ public final class Throttler implements Wrapper {
 			throw new NullPointerException("null area");
 		}
 
-		this.common=memoize(shape -> shape
+		this.common=memoizing(shape -> shape
 				.map(area)
 				.map(new Redactor(Form.task, task))
 				.map(new Redactor(Form.view, view))
 				.map(new Optimizer())
 		);
 
-		this.convey=memoize(shape -> shape
+		this.convey=memoizing(shape -> shape
 				.map(common)
 				.map(new Redactor(Form.mode, Form.convey))
 				.map(new Optimizer())
@@ -272,9 +268,19 @@ public final class Throttler implements Wrapper {
 
 				// remove annotations and filtering-only constraints for authorization checks
 
-				final Shape general=shape.map(convey).map(role(set(Form.any)));
-				final Shape authorized=shape.map(convey).map(role(roles));
-				final Shape redacted=shape.map(common).map(role(roles));
+				final Shape general=shape
+						.map(convey)
+						.map(anyone);
+
+				final Shape authorized=shape
+						.map(convey)
+						.map(new Redactor(Form.role, roles))
+						.map(new Optimizer());
+
+				final Shape redacted=shape
+						.map(common)
+						.map(new Redactor(Form.role, roles))
+						.map(new Optimizer());
 
 				return empty(general) ? forbidden(request)
 						: empty(authorized) ? refused(request)
@@ -300,7 +306,10 @@ public final class Throttler implements Wrapper {
 
 			} else {
 
-				final Shape redacted=shape.map(convey).map(role(request.roles()));
+				final Shape redacted=shape
+						.map(convey)
+						.map(new Redactor(Form.role, request.roles()))
+						.map(new Optimizer());
 
 				return response.shape(redacted)
 						.pipe(rdf(), rdf -> Value(envelope(focus, redacted, rdf)))

@@ -17,6 +17,11 @@
 
 package com.metreeca.rest.engines;
 
+import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Pruner;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Snippets;
 import com.metreeca.form.things.Snippets.Snippet;
 import com.metreeca.form.things.Values;
@@ -25,9 +30,11 @@ import com.metreeca.tray.sys.Trace;
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.shapes.Memo.memoizing;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.tray.Tray.tool;
@@ -37,6 +44,20 @@ import static java.lang.String.format;
 
 
 abstract class GraphProcessor {
+
+	static final Function<Shape, Shape> ConveyCompiler=memoizing(s -> s
+			.map(new Redactor(Form.mode, Form.convey))
+			.map(new Optimizer())
+	);
+
+	static final Function<Shape, Shape> FilterCompiler=memoizing(s -> s
+			.map(new Redactor(Form.mode, Form.filter))
+			.map(new Pruner())
+			.map(new Optimizer())
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Trace trace=tool(Trace.Factory);
 

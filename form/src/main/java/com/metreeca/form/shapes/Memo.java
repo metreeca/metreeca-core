@@ -15,8 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.form.things;
+package com.metreeca.form.shapes;
 
+
+import com.metreeca.form.Shape;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,9 +26,9 @@ import java.util.function.Function;
 
 
 /**
- * Lambdas utilities.
+ * Memo utilities.
  */
-public final class Lambdas {
+public final class Memo {
 
 	/**
 	 * Creates a memoizing function.
@@ -39,7 +41,7 @@ public final class Lambdas {
 	 *
 	 * @throws NullPointerException if {@code function} is null
 	 */
-	public static <V, R> Function<V, R> memoize(final Function<V, R> function) {
+	public static <V, R> Function<V, R> _memoize(final Function<V, R> function) {
 
 		if ( function == null ) {
 			throw new NullPointerException("null mapper");
@@ -57,8 +59,33 @@ public final class Lambdas {
 	}
 
 
+	public static Shape memo(final Shape shape) {
+		return shape;
+	}
+
+	/**
+	 * Creates a memoizing function.
+	 *
+	 * @param function the function whose results are to be memoized
+	 * @param <V>    the type of the input value for {@code function}
+	 * @param <R>    the type of the return value for {@code function}
+	 *
+	 * @return a function memoizing results computed by {@code function}
+	 *
+	 * @throws NullPointerException if {@code function} is null
+	 */
+	public static <V, R> Function<V, R> memoizing(final Function<V, R> function) {
+
+		if ( function == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return function;
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Lambdas() {} // utility
+	private Memo() {} // utility
 
 }
