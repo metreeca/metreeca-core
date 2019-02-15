@@ -79,7 +79,7 @@ final class ThrottlerTest {
 	@Nested final class Simple {
 
 		private Throttler throttler() {
-			return new Throttler(Form.any, Form.any);
+			return new Throttler(RDF.NIL, RDF.NIL);
 		}
 
 		private Handler handler(final Collection<Statement> model) {
@@ -137,7 +137,7 @@ final class ThrottlerTest {
 
 		private final IRI task=Form.relate;
 		private final IRI view=Form.detail;
-		private final IRI role=ValuesTest.Salesman;
+		private final IRI role=Salesman;
 
 
 		private Throttler throttler() {

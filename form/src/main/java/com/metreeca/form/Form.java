@@ -128,11 +128,6 @@ public final class Form {
 	public static final IRI convey=iri(Namespace, "convey");
 	public static final IRI filter=iri(Namespace, "filter");
 
-	/**
-	 * Wildcard axis value.
-	 */
-	public static final IRI any=iri(Namespace, "any");
-
 
 	//// Query Results Properties //////////////////////////////////////////////////////////////////////////////////////
 

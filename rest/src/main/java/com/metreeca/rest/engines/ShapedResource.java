@@ -55,21 +55,21 @@ final class ShapedResource extends GraphEntity {
 	private static final Function<Shape, Shape> relate=memoizing(s -> s
 			.map(new Redactor(Form.task, Form.relate))
 			.map(new Redactor(Form.view, Form.detail))
-			.map(new Redactor(Form.role, Form.any))
+			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 
 	private static final Function<Shape, Shape> update=memoizing(s -> s
 			.map(new Redactor(Form.task, Form.update))
 			.map(new Redactor(Form.view, Form.detail))
-			.map(new Redactor(Form.role, Form.any))
+			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 
 	private static final Function<Shape, Shape> delete=memoizing(s -> s
 			.map(new Redactor(Form.task, Form.delete))
 			.map(new Redactor(Form.view, Form.detail))
-			.map(new Redactor(Form.role, Form.any))
+			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 

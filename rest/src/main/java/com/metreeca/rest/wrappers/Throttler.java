@@ -114,7 +114,7 @@ public final class Throttler implements Wrapper {
 	);
 
 	private static final Function<Shape, Shape> anyone=memoizing(s -> s
-			.map(new Redactor(Form.role, set(Form.any)))
+			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 

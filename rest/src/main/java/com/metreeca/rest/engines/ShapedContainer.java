@@ -63,7 +63,7 @@ final class ShapedContainer extends GraphEntity {
 			.map(resource())
 			.map(new Redactor(Form.task, Form.relate))
 			.map(new Redactor(Form.view, Form.digest))
-			.map(new Redactor(Form.role, Form.any))
+			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 
@@ -71,7 +71,7 @@ final class ShapedContainer extends GraphEntity {
 			.map(resource())
 			.map(new Redactor(Form.task, Form.create))
 			.map(new Redactor(Form.view, Form.detail))
-			.map(new Redactor(Form.role, Form.any))
+			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 
