@@ -29,18 +29,22 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static javax.json.Json.createObjectBuilder;
 
@@ -55,9 +59,20 @@ final class RelatorTest {
 	}
 
 
+	@SafeVarargs private final <V> String query(final Map.Entry<String, V>... entries) {
+		return createObjectBuilder(map(entries)).build().toString();
+	}
+
+	private Map.Entry<String, Map<String, Object>> filter(final String path, final Object value) {
+		return entry("filter", map(entry(path, value)));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Nested final class Resource {
 
-		private Request resource() {
+		private Request simple() {
 			return new Request()
 					.method(Request.GET)
 					.base(Base)
@@ -70,7 +85,7 @@ final class RelatorTest {
 			@Test void testRelate() {
 				exec(() -> new Relator()
 
-						.handle(resource())
+						.handle(simple())
 
 						.accept(response -> assertThat(response)
 
@@ -85,11 +100,25 @@ final class RelatorTest {
 				);
 			}
 
+			@Test void testRelateFiltered() {
+				exec(() -> new Relator()
+
+						.handle(simple().query(query(entry("offset", 100))))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> JSONAssert.assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
+
 
 			@Test void testUnknown() {
 				exec(() -> new Relator()
 
-						.handle(resource().path("/employees/9999"))
+						.handle(simple().path("/employees/9999"))
 
 						.accept(response -> assertThat(response).hasStatus(Response.NotFound))
 				);
@@ -99,8 +128,8 @@ final class RelatorTest {
 
 		@Nested final class Shaped {
 
-			private Request resource() {
-				return Resource.this.resource()
+			private Request shaped() {
+				return simple()
 						.roles(Manager)
 						.shape(Employee);
 			}
@@ -109,7 +138,7 @@ final class RelatorTest {
 			@Test void testRelate() {
 				exec(() -> new Relator()
 
-						.handle(resource())
+						.handle(shaped())
 
 						.accept(response -> tool(Graph.Factory).query(connection -> {
 
@@ -129,10 +158,10 @@ final class RelatorTest {
 				);
 			}
 
-			@Test void testRelatePartial() {
+			@Test void testRelateThrottled() {
 				exec(() -> new Relator()
 
-						.handle(resource().roles(Salesman))
+						.handle(shaped().roles(Salesman))
 
 						.accept(response -> tool(Graph.Factory).query(connection -> {
 
@@ -154,11 +183,25 @@ final class RelatorTest {
 				);
 			}
 
+			@Test void testRelateFiltered() {
+				exec(() -> new Relator()
+
+						.handle(shaped().query(query(filter("seniority", 3))))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> JSONAssert.assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
+
 
 			@Test void testUnauthorized() {
 				exec(() -> new Relator()
 
-						.handle(resource().shape(when(guard(Form.role, Form.root), field(RDF.TYPE))))
+						.handle(shaped().shape(when(guard(Form.role, Form.root), field(RDF.TYPE))))
 
 						.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
 
@@ -168,7 +211,7 @@ final class RelatorTest {
 			@Test void testForbidden() {
 				exec(() -> new Relator()
 
-						.handle(resource().shape(or()))
+						.handle(shaped().shape(or()))
 
 						.accept(response -> assertThat(response).hasStatus(Response.Forbidden))
 
@@ -178,7 +221,7 @@ final class RelatorTest {
 			@Test void testUnknown() {
 				exec(() -> new Relator()
 
-						.handle(resource().path("/employees/9999"))
+						.handle(shaped().path("/employees/9999"))
 
 						.accept(response -> assertThat(response).hasStatus(Response.NotFound))
 
@@ -202,7 +245,7 @@ final class RelatorTest {
 
 		@Nested final class Simple {
 
-			@Test void testBrowse() {
+			@Test void testBrowseFiltered() {
 				exec(() -> new Relator()
 
 						.handle(simple().query("{ \"filter\": { \">\": 10 } }"))
@@ -268,9 +311,8 @@ final class RelatorTest {
 
 						.handle(shaped()
 								.roles(Salesman)
-								.query(createObjectBuilder()
-										.add("filter", createObjectBuilder().add("title", "Sales Rep"))
-										.build().toString()))
+								.query(query(filter("title", "Sales Rep")))
+						)
 
 						.accept(response -> assertThat(response)
 

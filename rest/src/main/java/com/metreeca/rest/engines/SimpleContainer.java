@@ -22,7 +22,6 @@ import com.metreeca.rest.Engine;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
-import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -106,7 +105,7 @@ final class SimpleContainer extends GraphEntity {
 
 					} else {
 
-						throw new NotImplementedException("simple container filtered browsing not supported");
+						throw new UnsupportedOperationException("simple container filtered browsing not supported");
 
 					}
 				},
@@ -138,11 +137,11 @@ final class SimpleContainer extends GraphEntity {
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
-		throw new NotImplementedException("simple container updating not supported");
+		throw new UnsupportedOperationException("simple container updating not supported");
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {
-		throw new NotImplementedException("simple container deletion not supported");
+		throw new UnsupportedOperationException("simple container deletion not supported");
 	}
 
 }

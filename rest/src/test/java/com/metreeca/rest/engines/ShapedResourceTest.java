@@ -23,7 +23,6 @@ import com.metreeca.form.probes.Cleaner;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.Engine;
-import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
@@ -43,10 +42,10 @@ import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -119,7 +118,7 @@ final class ShapedResourceTest {
 		@Test void testUnsupported() {
 			exec(() -> assertThatThrownBy(() -> engine().create(
 					item("employees/1370"), item("employees/9999"), set()
-			)).isInstanceOf(Actor.NotImplementedException.class));
+			)).isInstanceOf(UnsupportedOperationException.class));
 		}
 
 	}

@@ -20,12 +20,16 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
+import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
+import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
+
+import java.util.function.Function;
 
 import javax.json.JsonValue;
 
@@ -40,7 +44,7 @@ import static com.metreeca.tray.Tray.tool;
  * LDP resource updater.
  *
  * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item() focus
- * item}.</p>
+ * item}, according to the following operating modes.</p>
  *
  * <p>If the request target is a {@linkplain Request#container() container}:</p>
  *
@@ -84,9 +88,12 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Updater extends Actor {
+public final class Updater extends Delegator {
 
 	private final Trace trace=tool(Trace.Factory);
+	private final Graph graph=tool(Graph.Factory);
+
+	private final Function<Shape, GraphEngine> engine=shape -> new GraphEngine(graph, shape); // !!! cache
 
 
 	public Updater() {
@@ -104,9 +111,13 @@ public final class Updater extends Actor {
 	}
 
 	private Handler updater() {
-		return request -> request.body(rdf()).fold(
+		return request -> request.container()? request.reply(
 
-				model -> request.reply(response -> engine(request.shape())
+				new Failure().status(Response.NotImplemented).cause("container updating not supported")
+
+		) : request.body(rdf()).fold(
+
+				model -> request.reply(response -> request.shape().map(engine)
 
 						.update(request.item(), trace.trace(this, model))
 

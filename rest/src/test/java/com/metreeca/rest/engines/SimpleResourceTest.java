@@ -19,7 +19,6 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
-import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
@@ -100,7 +99,7 @@ final class SimpleResourceTest {
 		@Test void testUnsupported() {
 			exec(() -> assertThatThrownBy(() -> engine().create(
 					item("employees/1370"), item("employees/9999"), set()
-			)).isInstanceOf(NotImplementedException.class));
+			)).isInstanceOf(UnsupportedOperationException.class));
 		}
 
 	}

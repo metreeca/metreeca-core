@@ -20,18 +20,21 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
+import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.formats.RDFFormat;
-import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.Shape.constant;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.rest.Message.link;
@@ -42,6 +45,7 @@ import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 import static com.metreeca.rest.wrappers.Throttler.entity;
 import static com.metreeca.rest.wrappers.Throttler.resource;
+import static com.metreeca.tray.Tray.tool;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
@@ -51,7 +55,7 @@ import static java.util.stream.Collectors.toList;
  * LDP resource relator.
  *
  * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item() focus
- * item}.</p>
+ * item}, according to the following operating modes.</p>
  *
  * <p>If the focus item is a {@linkplain Request#container() container} and the request includes an expected
  * {@linkplain Request#shape() shape}:</p>
@@ -127,13 +131,18 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Relator extends Actor {
+public final class Relator extends Delegator {
 
 	private static final Pattern RepresentationPattern=Pattern
 			.compile("\\s*return\\s*=\\s*representation\\s*;\\s*include\\s*=\\s*\"(?<representation>[^\"]*)\"\\s*");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Graph graph=tool(Graph.Factory);
+
+	private final Function<Shape, GraphEngine> engine=shape -> new GraphEngine(graph, shape); // !!! cache
+
 
 	public Relator() {
 		delegate(relator().with(annotator()).with(throttler()));
@@ -165,43 +174,25 @@ public final class Relator extends Actor {
 
 			final IRI item=request.item();
 
-			final boolean resource=!request.container();
+			final boolean container=request.container();
 			final boolean minimal=include(request, LDP.PREFER_MINIMAL_CONTAINER);
 			final boolean total=request.query().isEmpty();
 
-			final Engine engine=engine(request.shape());
+			final Engine engine=request.shape().map(this.engine);
 
-			if ( resource || minimal ) {
-
-				// !!! 410 Gone if previously known
-
-				return engine
-
-						.relate(item, request::query, (shape, model) -> response
-
-								.status(resource && total && model.isEmpty() ? NotFound : OK)
-
-								.header("+Preference-Applied",
-										minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
-								)
-
-								.shape(shape)
-								.body(rdf(), model)
-
-						)
-
-						.fold(
-								identity(),
-								response::map
-						);
-
-			} else {
+			if ( container && !minimal ) {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
 				// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
-				return engine
+				return Boolean.TRUE.equals(constant(request.shape())) && !total ? response.map(
+
+						new Failure()
+								.status(Response.NotImplemented)
+								.cause("simple container filtered browsing not supported")
+
+				) : engine
 
 						.browse(item, request::query, (rshape, rmodel) -> {
 
@@ -230,6 +221,36 @@ public final class Relator extends Actor {
 							}
 
 						}).fold(
+								identity(),
+								response::map
+						);
+
+			} else {
+
+				// !!! 410 Gone if previously known
+
+				return !container && !total ? response.map(
+
+						new Failure()
+								.status(Response.NotImplemented)
+								.cause("resource browsing not supported")
+
+				) :engine
+
+						.relate(item, request::query, (shape, model) -> response
+
+								.status(!container && model.isEmpty() ? NotFound : OK)
+
+								.header("+Preference-Applied",
+										minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
+								)
+
+								.shape(shape)
+								.body(rdf(), model)
+
+						)
+
+						.fold(
 								identity(),
 								response::map
 						);

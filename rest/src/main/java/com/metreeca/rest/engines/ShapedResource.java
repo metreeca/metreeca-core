@@ -22,7 +22,6 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Sets;
 import com.metreeca.rest.Result;
-import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -92,7 +91,7 @@ final class ShapedResource extends GraphEntity {
 
 					} else {
 
-						throw new NotImplementedException("shaped resource filtered retrieval not supported");
+						throw new UnsupportedOperationException("shaped resource filtered retrieval not supported");
 
 					}
 				},
@@ -106,7 +105,7 @@ final class ShapedResource extends GraphEntity {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
-		throw new NotImplementedException("shaped related resource creation not supported");
+		throw new UnsupportedOperationException("shaped related resource creation not supported");
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {

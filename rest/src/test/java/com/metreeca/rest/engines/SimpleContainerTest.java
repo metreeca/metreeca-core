@@ -20,7 +20,6 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.rest.Engine;
-import com.metreeca.rest.handlers.Actor;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
@@ -39,9 +38,9 @@ import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -87,7 +86,7 @@ final class SimpleContainerTest {
 			@Test void testBrowseFiltered() {
 				exec(() -> assertThatThrownBy(() -> engine()
 						.browse(container, shape -> Value(stats(shape, list())), (shape, model) -> model)
-				).isInstanceOf(Actor.NotImplementedException.class));
+				).isInstanceOf(UnsupportedOperationException.class));
 			}
 
 		}

@@ -19,20 +19,26 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.engines.GraphEngine;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
+
+import java.util.function.Function;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.wrappers.Throttler.entity;
 import static com.metreeca.rest.wrappers.Throttler.resource;
+import static com.metreeca.tray.Tray.tool;
 
 
 /**
  * LDP resource deleter.
  *
- * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item() focus item}.</p>
+ * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item() focus
+ * item}, according to the following operating modes.</p>
  *
  * <p>If the request target is a {@linkplain Request#container() container}:</p>
  *
@@ -41,7 +47,7 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
  * <li>the request is reported with a {@linkplain Response#NotImplemented} status code.</li>
  *
  * </ul>
-*
+ *
  * <p>If the request includes an expected {@linkplain Request#shape() resource shape}:</p>
  *
  * <ul>
@@ -66,7 +72,12 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Deleter extends Actor {
+public final class Deleter extends Delegator {
+
+	private final Graph graph=tool(Graph.Factory);
+
+	private final Function<Shape, GraphEngine> engine=shape -> new GraphEngine(graph, shape); // !!! cache
+
 
 	public Deleter() {
 		delegate(deleter().with(throttler()));
@@ -82,7 +93,11 @@ public final class Deleter extends Actor {
 	}
 
 	private Handler deleter() {
-		return request -> request.reply(response -> engine(request.shape())
+		return request -> request.container()? request.reply(
+
+				new Failure().status(Response.NotImplemented).cause("container deletion not supported")
+
+		) : request.reply(response -> request.shape().map(engine)
 
 				.delete(request.item())
 

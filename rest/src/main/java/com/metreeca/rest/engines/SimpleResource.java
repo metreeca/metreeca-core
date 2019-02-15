@@ -22,7 +22,6 @@ import com.metreeca.form.things.Sets;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
-import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -77,7 +76,7 @@ final class SimpleResource extends GraphEntity {
 
 					} else {
 
-						throw new NotImplementedException("simple resource filtered retrieval not supported");
+						throw new UnsupportedOperationException("simple resource filtered retrieval not supported");
 
 					}
 				},
@@ -91,7 +90,7 @@ final class SimpleResource extends GraphEntity {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
-		throw new NotImplementedException("simple related resource creation not supported");
+		throw new UnsupportedOperationException("simple related resource creation not supported");
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {

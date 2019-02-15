@@ -26,7 +26,6 @@ import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.Field;
 import com.metreeca.rest.Engine;
 import com.metreeca.rest.Result;
-import com.metreeca.rest.handlers.Actor.NotImplementedException;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -161,11 +160,11 @@ final class ShapedContainer extends GraphEntity {
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
-		throw new NotImplementedException("shaped container updating not supported");
+		throw new UnsupportedOperationException("shaped container updating not supported");
 	}
 
 	@Override public Optional<IRI> delete(final IRI resource) {
-		throw new NotImplementedException("shaped container deletion not supported");
+		throw new UnsupportedOperationException("shaped container deletion not supported");
 	}
 
 }
