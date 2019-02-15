@@ -35,7 +35,7 @@ import java.util.function.Function;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Memo.memoizing;
+import static com.metreeca.form.shapes.Memo.memoizable;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
@@ -48,32 +48,32 @@ import static com.metreeca.rest.engines.Flock.flock;
  */
 final class ShapedResource extends GraphEntity {
 
-	private static final Function<Shape, Flock> flock=memoizing(s ->
+	private static final Function<Shape, Flock> flock=memoizable(s ->
 			flock(metas(s)).orElseGet(Flock.None::new)
 	);
 
-	private static final Function<Shape, Shape> relate=memoizing(s -> s
+	private static final Function<Shape, Shape> relate=memoizable(s -> s
 			.map(new Redactor(Form.task, Form.relate))
 			.map(new Redactor(Form.view, Form.detail))
 			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 
-	private static final Function<Shape, Shape> update=memoizing(s -> s
+	private static final Function<Shape, Shape> update=memoizable(s -> s
 			.map(new Redactor(Form.task, Form.update))
 			.map(new Redactor(Form.view, Form.detail))
 			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 
-	private static final Function<Shape, Shape> delete=memoizing(s -> s
+	private static final Function<Shape, Shape> delete=memoizable(s -> s
 			.map(new Redactor(Form.task, Form.delete))
 			.map(new Redactor(Form.view, Form.detail))
 			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 
-	private static final Function<Shape, Shape> convey=memoizing(s -> s
+	private static final Function<Shape, Shape> convey=memoizable(s -> s
 			.map(relate)
 			.map(new Redactor(Form.mode, Form.convey))
 			.map(new Optimizer())

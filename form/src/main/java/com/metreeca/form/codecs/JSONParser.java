@@ -51,7 +51,7 @@ import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
-import static com.metreeca.form.shapes.Memo.memoizing;
+import static com.metreeca.form.shapes.Memo.memoizable;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -67,7 +67,7 @@ public final class JSONParser extends AbstractRDFParser {
 	private final DecimalFormat DoubleFormat
 			=new DecimalFormat("0.0##E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
-	private static final Function<Shape, Shape> ShapeCompiler=memoizing(s -> s
+	private static final Function<Shape, Shape> ShapeCompiler=memoizable(s -> s
 			.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 			.map(new Optimizer())
 			.map(new Inferencer()) // infer implicit constraints to drive json shorthands

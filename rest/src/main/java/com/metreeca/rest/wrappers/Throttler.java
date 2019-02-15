@@ -41,7 +41,7 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.fields;
-import static com.metreeca.form.shapes.Memo.memoizing;
+import static com.metreeca.form.shapes.Memo.memoizable;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.shapes.Or.or;
@@ -113,7 +113,7 @@ public final class Throttler implements Wrapper {
 			LDP.INSERTED_CONTENT_RELATION
 	);
 
-	private static final Function<Shape, Shape> anyone=memoizing(s -> s
+	private static final Function<Shape, Shape> anyone=memoizable(s -> s
 			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
@@ -229,14 +229,14 @@ public final class Throttler implements Wrapper {
 			throw new NullPointerException("null area");
 		}
 
-		this.common=memoizing(shape -> shape
+		this.common=memoizable(shape -> shape
 				.map(area)
 				.map(new Redactor(Form.task, task))
 				.map(new Redactor(Form.view, view))
 				.map(new Optimizer())
 		);
 
-		this.convey=memoizing(shape -> shape
+		this.convey=memoizable(shape -> shape
 				.map(common)
 				.map(new Redactor(Form.mode, Form.convey))
 				.map(new Optimizer())

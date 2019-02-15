@@ -34,7 +34,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.shapes.Memo.memoizing;
+import static com.metreeca.form.shapes.Memo.memoizable;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.tray.Tray.tool;
@@ -45,12 +45,12 @@ import static java.lang.String.format;
 
 abstract class GraphProcessor {
 
-	static final Function<Shape, Shape> ConveyCompiler=memoizing(s -> s
+	static final Function<Shape, Shape> ConveyCompiler=memoizable(s -> s
 			.map(new Redactor(Form.mode, Form.convey))
 			.map(new Optimizer())
 	);
 
-	static final Function<Shape, Shape> FilterCompiler=memoizing(s -> s
+	static final Function<Shape, Shape> FilterCompiler=memoizable(s -> s
 			.map(new Redactor(Form.mode, Form.filter))
 			.map(new Pruner())
 			.map(new Optimizer())

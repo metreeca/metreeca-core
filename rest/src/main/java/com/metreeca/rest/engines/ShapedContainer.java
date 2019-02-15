@@ -40,7 +40,7 @@ import java.util.function.Function;
 import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.Memo.memoizing;
+import static com.metreeca.form.shapes.Memo.memoizable;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.engines.Flock.flock;
@@ -55,11 +55,11 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
  */
 final class ShapedContainer extends GraphEntity {
 
-	private static final Function<Shape, Flock> flock=memoizing(s ->
+	private static final Function<Shape, Flock> flock=memoizable(s ->
 			flock(metas(resource().apply(s))).orElseGet(Flock.None::new)
 	);
 
-	private static final Function<Shape, Shape> browse=memoizing(s -> s
+	private static final Function<Shape, Shape> browse=memoizable(s -> s
 			.map(resource())
 			.map(new Redactor(Form.task, Form.relate))
 			.map(new Redactor(Form.view, Form.digest))
@@ -67,7 +67,7 @@ final class ShapedContainer extends GraphEntity {
 			.map(new Optimizer())
 	);
 
-	private static final Function<Shape, Shape> create=memoizing(s -> s
+	private static final Function<Shape, Shape> create=memoizable(s -> s
 			.map(resource())
 			.map(new Redactor(Form.task, Form.create))
 			.map(new Redactor(Form.view, Form.detail))
@@ -75,7 +75,7 @@ final class ShapedContainer extends GraphEntity {
 			.map(new Optimizer())
 	);
 
-	private static final Function<Shape, Field> convey=memoizing(s -> field(LDP.CONTAINS, s
+	private static final Function<Shape, Field> convey=memoizable(s -> field(LDP.CONTAINS, s
 			.map(browse)
 			.map(new Redactor(Form.mode, Form.convey))
 			.map(new Optimizer())
