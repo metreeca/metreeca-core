@@ -36,6 +36,7 @@ import java.util.function.Function;
 
 import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.Meta.metas;
+import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -45,15 +46,13 @@ import static com.metreeca.form.shapes.Meta.metas;
  */
 public final class GraphEngine implements Engine {
 
+	private final Graph graph=tool(Graph.Factory);
+
 	private final Engine resource;
 	private final Engine container;
 
 
-	public GraphEngine(final Graph graph, final Shape shape) {
-
-		if ( graph == null ) {
-			throw new NullPointerException("null graph");
-		}
+	public GraphEngine(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

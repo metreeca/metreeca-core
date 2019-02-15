@@ -15,21 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+/**
+ * Basic resource engines.
+ */
 
-import com.metreeca.rest.Engine;
-
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-
-import java.util.Optional;
-
-
-abstract class GraphEntity implements Engine { // !!! remove
-
-	Optional<Resource> reserve(final RepositoryConnection connection, final Resource resource) {
-		return Optional.ofNullable(connection.hasStatement(resource, null, null, true)
-				|| connection.hasStatement(null, null, resource, true) ? null : resource);
-	}
-
-}
+package com.metreeca.rest.engines_;

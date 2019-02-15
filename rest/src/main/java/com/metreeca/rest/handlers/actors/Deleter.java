@@ -31,7 +31,6 @@ import java.util.function.Function;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.wrappers.Throttler.entity;
 import static com.metreeca.rest.wrappers.Throttler.resource;
-import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -74,9 +73,7 @@ import static com.metreeca.tray.Tray.tool;
  */
 public final class Deleter extends Delegator {
 
-	private final Graph graph=tool(Graph.Factory);
-
-	private final Function<Shape, GraphEngine> engine=shape -> new GraphEngine(graph, shape); // !!! cache
+	private final Function<Shape, GraphEngine> engine=GraphEngine::new; // !!! cache
 
 
 	public Deleter() {

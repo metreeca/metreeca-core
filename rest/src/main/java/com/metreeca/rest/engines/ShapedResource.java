@@ -161,7 +161,7 @@ final class ShapedResource extends GraphEntity {
 		return graph.update(connection -> {
 
 			// !!! merge retrieve/remove operations into a single SPARQL update txn
-			// !!! must check resource existence anyway and would break for CBD shapes
+			// !!! must check resource existence anyway and wouldn't work for CBD shapes
 
 			return retrieve(resource, shape.map(delete)).map(current -> { // identify deletable description
 

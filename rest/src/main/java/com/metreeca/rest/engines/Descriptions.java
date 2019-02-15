@@ -17,7 +17,6 @@
 
 package com.metreeca.rest.engines;
 
-import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -26,9 +25,10 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.*;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.metreeca.form.things.Values.pattern;
+
+import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 import static java.util.Collections.singleton;
 
@@ -54,19 +54,8 @@ final class Descriptions {
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code model} is null
 	 */
-	public static Collection<Statement> description(final Resource focus, final boolean labelled, final Iterable<Statement> model) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
-		return description(focus, labelled, (s, p, o) ->
-				StreamSupport.stream(model.spliterator(), true).filter(pattern(s, p, o))
-		);
+	public static Collection<Statement> description(final Resource focus, final boolean labelled, final Collection<Statement> model) {
+		return description(focus, labelled, (s, p, o) -> model.stream().filter(pattern(s, p, o)));
 	}
 
 	/**
@@ -85,17 +74,7 @@ final class Descriptions {
 
 		// !!! optimize for SPARQL
 
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( connection == null ) {
-			throw new NullPointerException("null connection");
-		}
-
-		return description(focus, labelled, (s, p, o) ->
-				Iterations.stream(connection.getStatements(s, p, o, true))
-		);
+		return description(focus, labelled, (s, p, o) -> stream(connection.getStatements(s, p, o, true)));
 	}
 
 

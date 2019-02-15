@@ -48,6 +48,7 @@ import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Snippets.*;
 import static com.metreeca.form.things.Values.*;
+import static com.metreeca.rest.engines.Descriptions.description;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
@@ -58,15 +59,21 @@ final class GraphRetriever extends GraphProcessor {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	Collection<Statement> retrieve(final Resource focus, final Query query) {
+	Collection<Statement> _retrieve(final Resource resource, final boolean labelled) {
+		return graph.query(connection -> {
+			return description(resource, labelled, connection);
+		});
+	}
+
+	Collection<Statement> retrieve(final Resource resource, final Query query) {
 		return graph.query(connection -> {
 			return query.map(new Query.Probe<Collection<Statement>>() {
 
-				@Override public Collection<Statement> probe(final Edges edges) { return edges(connection, focus, edges); }
+				@Override public Collection<Statement> probe(final Edges edges) { return edges(connection, resource, edges); }
 
-				@Override public Collection<Statement> probe(final Stats stats) { return stats(connection, focus, stats); }
+				@Override public Collection<Statement> probe(final Stats stats) { return stats(connection, resource, stats); }
 
-				@Override public Collection<Statement> probe(final Items items) { return items(connection, focus, items); }
+				@Override public Collection<Statement> probe(final Items items) { return items(connection, resource, items); }
 
 			});
 		});

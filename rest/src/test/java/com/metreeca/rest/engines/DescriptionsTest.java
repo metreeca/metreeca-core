@@ -17,13 +17,10 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.things.ValuesTest;
-
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -87,7 +84,7 @@ final class DescriptionsTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromModel() {
+	@Test void testRetrieveSymmetricConciseBoundedDescription() {
 
 			final Model cell=new LinkedHashModel(description(focus, false, model));
 
@@ -96,7 +93,7 @@ final class DescriptionsTest {
 
 	}
 
-	@Test void testRetrieveLabelledSymmetricConciseBoundedDescriptionFromModel() {
+	@Test void testRetrieveLabelledSymmetricConciseBoundedDescription() {
 
 		final Model cell=(Model)description(focus, true, model);
 
@@ -118,43 +115,5 @@ final class DescriptionsTest {
 
 	}
 
-
-	@Test void testRetrieveSymmetricConciseBoundedDescriptionFromRepository() {
-
-		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
-
-			final Model cell=new LinkedHashModel(description(focus, false, connection));
-
-			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
-			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
-
-		}
-
-	}
-
-	@Test void testRetrieveLabelledSymmetricConciseBoundedDescriptionFromRepository() {
-
-		try (final RepositoryConnection connection=ValuesTest.sandbox(model).get()) {
-
-			final Model cell=new LinkedHashModel(description(focus, true, connection));
-
-			assertThat(cell.subjects())
-					.containsOnly(focus, _dblank, _iblank, direct, inverse);
-
-			assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
-					.containsOnly(focus, _dblank, _iblank, direct);
-
-			assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
-
-					statement(direct, RDFS.LABEL, dlabel),
-					statement(direct, RDFS.COMMENT, dcomment),
-
-					statement(inverse, RDFS.LABEL, ilabel),
-					statement(inverse, RDFS.COMMENT, icomment)
-
-			);
-		}
-
-	}
 
 }

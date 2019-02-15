@@ -163,7 +163,7 @@ final class ShapedContainer extends GraphEntity {
 
 				} else {
 
-					shape.map(flock).insert(connection, resource, related, model).add(model);
+					shape.map(flock).insert(connection, resource, reserved, model).add(model);
 
 					connection.commit();
 

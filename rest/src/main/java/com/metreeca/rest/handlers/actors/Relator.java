@@ -20,8 +20,8 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.bodies.RDFBody;
+import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
@@ -45,7 +45,6 @@ import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.rest.wrappers.Throttler.entity;
 import static com.metreeca.rest.wrappers.Throttler.resource;
-import static com.metreeca.tray.Tray.tool;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
@@ -139,9 +138,7 @@ public final class Relator extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Graph graph=tool(Graph.Factory);
-
-	private final Function<Shape, GraphEngine> engine=shape -> new GraphEngine(graph, shape); // !!! cache
+	private final Function<Shape, GraphEngine> engine=GraphEngine::new; // !!! cache
 
 
 	public Relator() {
@@ -228,19 +225,13 @@ public final class Relator extends Delegator {
 
 			} else {
 
-				// !!! 410 Gone if previously known
+				return total
 
-				return !container && !total ? response.map(
-
-						new Failure()
-								.status(Response.NotImplemented)
-								.cause("resource browsing not supported")
-
-				) :engine
+						? engine
 
 						.relate(item, request::query, (_shape, model) -> response
 
-								.status(!container && model.isEmpty() ? NotFound : OK)
+								.status(!container && model.isEmpty() ? NotFound : OK) // !!! 410 Gone if previously known
 
 								.header("+Preference-Applied",
 										minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
@@ -254,6 +245,13 @@ public final class Relator extends Delegator {
 						.fold(
 								identity(),
 								response::map
+						)
+
+						: response
+
+						.map(new Failure()
+								.status(Response.NotImplemented)
+								.cause("resource browsing not supported")
 						);
 
 			}

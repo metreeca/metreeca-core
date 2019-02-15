@@ -22,9 +22,7 @@ import com.metreeca.rest.Engine;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
@@ -34,11 +32,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.engines.Descriptions.description;
 import static com.metreeca.rest.engines.Flock.flock;
 
 import static java.util.stream.Collectors.toList;
@@ -52,6 +49,8 @@ import static java.util.stream.Collectors.toList;
 final class SimpleContainer extends GraphEntity {
 
 	private final Graph graph;
+	private final Shape shape;
+
 	private final Flock flock;
 
 	private final Engine delegate;
@@ -60,6 +59,7 @@ final class SimpleContainer extends GraphEntity {
 	SimpleContainer(final Graph graph, final Map<IRI, Value> metadata) {
 
 		this.graph=graph;
+		this.shape=pass();
 		this.flock=flock(metadata).orElseGet(Flock.Basic::new);
 
 		this.delegate=new SimpleResource(graph, metadata);
@@ -84,19 +84,19 @@ final class SimpleContainer extends GraphEntity {
 			final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
-		return parser.apply(and()).fold(
+		return parser.apply(shape).fold(
 
 				query -> {
 
-					if ( query.equals(edges(and())) ) {
+					if ( query.equals(edges(shape)) ) {
 
 						return graph.query(connection -> {
 
-							return Value(mapper.apply(and(), flock
+							return Value(mapper.apply(shape, flock
 									.items(connection, resource)
 									.flatMap(item -> Stream.concat(
 											Stream.of(statement(resource, LDP.CONTAINS, item)),
-											description(item, true, connection).stream()
+											new GraphRetriever()._retrieve(item, true).stream()
 									))
 									.collect(toList())
 							));
@@ -123,10 +123,18 @@ final class SimpleContainer extends GraphEntity {
 
 			return reserve(connection, related).map(reserved -> {
 
-				final Focus focus=validate(related, model);
+				final Focus focus=new GraphValidator().validate(related, shape, model);
 
-				if ( !focus.assess(Issue.Level.Error) ) {
+				if ( focus.assess(Issue.Level.Error) ) {
+
+					connection.rollback();
+
+				} else {
+
 					flock.insert(connection, resource, reserved, model).add(model);
+
+					connection.commit();
+
 				}
 
 				return focus;

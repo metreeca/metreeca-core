@@ -23,7 +23,6 @@ import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Map;
@@ -31,10 +30,9 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.engines.Descriptions.description;
 import static com.metreeca.rest.engines.Flock.flock;
 
 
@@ -46,11 +44,16 @@ import static com.metreeca.rest.engines.Flock.flock;
 final class SimpleResource extends GraphEntity {
 
 	private final Graph graph;
+	private final Shape shape;
+
 	private final Flock flock;
 
 
 	SimpleResource(final Graph graph, final Map<IRI, Value> metadata) {
+
 		this.graph=graph;
+		this.shape=pass();
+
 		this.flock=flock(metadata).orElseGet(Flock.None::new);
 	}
 
@@ -58,20 +61,20 @@ final class SimpleResource extends GraphEntity {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Collection<Statement> relate(final IRI resource) {
-		return graph.query(connection -> { return retrieve(connection, resource, true).orElseGet(Sets::set); });
+		return graph.query(connection -> { return retrieve(resource, true).orElseGet(Sets::set); });
 	}
 
 	@Override public <V, E> Result<V, E> relate(final IRI resource,
 			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
 	) {
 
-		return parser.apply(and()).fold(
+		return parser.apply(shape).fold(
 
 				query -> {
 
-					if ( query.equals(edges(and()))) {
+					if ( query.equals(edges(shape))) {
 
-						return Value(mapper.apply(and(), relate(resource)));
+						return Value(mapper.apply(shape, relate(resource)));
 
 
 					} else {
@@ -96,15 +99,20 @@ final class SimpleResource extends GraphEntity {
 	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
-			return retrieve(connection, resource, false).map(current -> {
+			return retrieve(resource, false).map(current -> {
 
-				final Focus focus=validate(resource, model);
+				final Focus focus=new GraphValidator().validate(resource, shape, model);
 
-				if ( !focus.assess(Issue.Level.Error) ) {
+				if ( focus.assess(Issue.Level.Error) ) {
+
+					connection.rollback();
+
+				} else {
 
 					connection.remove(current);
 					connection.add(model);
 
+					connection.commit();
 				}
 
 				return focus;
@@ -122,7 +130,7 @@ final class SimpleResource extends GraphEntity {
 
 		return graph.update(connection -> {
 
-			return retrieve(connection, resource, false).map(current -> {
+			return retrieve(resource, false).map(current -> {
 
 				flock.remove(connection, resource, current).remove(current);
 
@@ -138,9 +146,9 @@ final class SimpleResource extends GraphEntity {
 	//// !!! ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Optional<Collection<Statement>> retrieve(
-			final RepositoryConnection connection, final Resource resource, final boolean labelled
+			final Resource resource, final boolean labelled
 	) {
-		return Optional.of(description(resource, labelled, connection)).filter(statements -> !statements.isEmpty());
+		return Optional.of(new GraphRetriever()._retrieve(resource, labelled)).filter(statements -> !statements.isEmpty());
 	}
 
 }

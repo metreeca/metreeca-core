@@ -22,9 +22,7 @@ import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -35,12 +33,14 @@ import java.util.stream.Stream;
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Snippets.source;
 import static com.metreeca.form.things.Values.*;
+import static com.metreeca.rest.engines.Descriptions.description;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -56,29 +56,41 @@ final class GraphValidator extends GraphProcessor {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	Focus validate(final IRI resource, final Shape shape, final Collection<Statement> model) {
+	Focus validate(final Resource resource, final Shape shape, final Collection<Statement> model) { // !!! refactor
+		if ( pass(shape) ) {
 
-		final Focus focus=graph.query(connection -> { // validate against shape
-			return shape.map(ConveyCompiler).map(new ReportProbe(connection, set(resource), model));
-		});
+			final Collection<Statement> envelope=description(resource, false, model);
 
-		final Collection<Statement> envelope=focus.outline().collect(toSet()); // collect shape envelope
+			return focus(model.stream()
+					.filter(statement -> !envelope.contains(statement))
+					.map(outlier -> issue(Issue.Level.Error, "statement outside description envelope "+outlier))
+					.collect(toList())
+			);
 
-		return focus( // extend validation report with errors for statements outside shape envelope
+		} else {
 
-				Stream.concat(
+			final Focus focus=graph.query(connection -> { // validate against shape
+				return shape.map(ConveyCompiler).map(new ReportProbe(connection, set(resource), model));
+			});
 
-						focus.getIssues().stream(),
+			final Collection<Statement> envelope=focus.outline().collect(toSet()); // collect shape envelope
 
-						model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
-								issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
-						)
+			return focus( // extend validation report with errors for statements outside shape envelope
 
-				).collect(toList()),
+					Stream.concat(
 
-				focus.getFrames()
+							focus.getIssues().stream(),
 
-		);
+							model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
+									issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
+							)
+
+					).collect(toList()),
+
+					focus.getFrames()
+
+			);
+		}
 	}
 
 
