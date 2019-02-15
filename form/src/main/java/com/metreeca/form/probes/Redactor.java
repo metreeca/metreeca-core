@@ -48,8 +48,10 @@ public final class Redactor extends Traverser<Shape> {
 	private final Map<IRI, Set<? extends Value>> variables;
 
 
-	public Redactor(final IRI axis, final Value... values) {
-		this(map(entry(axis, set(values))));
+	public Redactor(final IRI axis, final Value... values) { this(axis, set(values)); }
+
+	public Redactor(final IRI axis, final Set<Value> values) {
+		this(map(entry(axis, values)));
 	}
 
 	public Redactor(final Map<IRI, Set<? extends Value>> variables) {

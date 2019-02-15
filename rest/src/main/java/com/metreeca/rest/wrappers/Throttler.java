@@ -32,6 +32,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
@@ -44,8 +45,8 @@ import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.things.Lambdas.memoize;
 import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
@@ -103,6 +104,15 @@ import static java.util.stream.Collectors.toList;
  * </ul>
  */
 public final class Throttler implements Wrapper {
+
+	public static Function<Shape, Shape> role(final Set<Value> roles) {
+		return s -> s
+				.map(new Redactor(Form.role, roles))
+				.map(new Optimizer());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final Set<IRI> ContainerMetadata=set(
 			RDF.TYPE,
@@ -184,10 +194,8 @@ public final class Throttler implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	private final Value task;
-	private final Value view;
-
-	private final UnaryOperator<Shape> area;
+	private final Function<Shape, Shape> common;
+	private final Function<Shape, Shape> convey;
 
 
 	/**
@@ -211,7 +219,7 @@ public final class Throttler implements Wrapper {
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	public Throttler(final Value task, final Value view, final UnaryOperator<Shape> area) {
+	public Throttler(final Value task, final Value view, final Function<Shape, Shape> area) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -225,9 +233,18 @@ public final class Throttler implements Wrapper {
 			throw new NullPointerException("null area");
 		}
 
-		this.task=task;
-		this.view=view;
-		this.area=area;
+		this.common=memoize(shape -> shape
+				.map(area)
+				.map(new Redactor(Form.task, task))
+				.map(new Redactor(Form.view, view))
+				.map(new Optimizer())
+		);
+
+		this.convey=memoize(shape -> shape
+				.map(common)
+				.map(new Redactor(Form.mode, Form.convey))
+				.map(new Optimizer())
+		);
 	}
 
 
@@ -255,9 +272,9 @@ public final class Throttler implements Wrapper {
 
 				// remove annotations and filtering-only constraints for authorization checks
 
-				final Shape general=shape(shape, Form.convey, set(Form.any));
-				final Shape authorized=shape(shape, Form.convey, roles);
-				final Shape redacted=shape(shape, null, roles);
+				final Shape general=shape.map(convey).map(role(set(Form.any)));
+				final Shape authorized=shape.map(convey).map(role(roles));
+				final Shape redacted=shape.map(common).map(role(roles));
 
 				return empty(general) ? forbidden(request)
 						: empty(authorized) ? refused(request)
@@ -283,7 +300,7 @@ public final class Throttler implements Wrapper {
 
 			} else {
 
-				final Shape redacted=shape(shape, Form.convey, request.roles());
+				final Shape redacted=shape.map(convey).map(role(request.roles()));
 
 				return response.shape(redacted)
 						.pipe(rdf(), rdf -> Value(envelope(focus, redacted, rdf)))
@@ -297,27 +314,6 @@ public final class Throttler implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape(final Shape shape, final IRI mode, final Set<Value> roles) {
-		return shape
-				.map(area)
-				.map(new Redactor(variables(mode, roles)))
-				.map(new Optimizer());
-	}
-
-	private Map<IRI, Set<? extends Value>> variables(final IRI mode, final Set<Value> roles) {
-		return mode == null ? map( // !!! support a dummy value in redactor (like form:any, but with noop semantics)
-				entry(Form.task, set(task)),
-				entry(Form.view, set(view)),
-				entry(Form.role, roles)
-		) : map(
-				entry(Form.task, set(task)),
-				entry(Form.view, set(view)),
-				entry(Form.mode, set(mode)),
-				entry(Form.role, roles)
-		);
-	}
-
-
 	private <V extends Collection<Statement>> V expand(final IRI focus, final Shape shape, final V model) {
 
 		model.addAll(shape // add implied statements
@@ -327,8 +323,6 @@ public final class Throttler implements Wrapper {
 
 		return model;
 	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	/**
