@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.rest.*;
 
@@ -29,9 +29,9 @@ import static com.metreeca.rest.Result.Value;
 /**
  * Raw textual output body format.
  */
-public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
+public final class WriterBody implements Body<Consumer<Supplier<Writer>>> {
 
-	private static final WriterFormat Instance=new WriterFormat();
+	private static final WriterBody Instance=new WriterBody();
 
 
 	/**
@@ -45,14 +45,14 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 	 *
 	 * @return the singleton textual output body format instance
 	 */
-	public static WriterFormat writer() {
+	public static WriterBody writer() {
 		return Instance;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private WriterFormat() {}
+	private WriterBody() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

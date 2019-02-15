@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.bodies.OutputBody.output;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;

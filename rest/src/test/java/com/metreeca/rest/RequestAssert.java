@@ -46,7 +46,7 @@ public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
 		//
 		//	builder.append('\n');
 		//
-		//	request.body(TextFormat.text()).use(text -> {
+		//	request.body(TextBody.text()).use(text -> {
 		//		if ( !text.isEmpty() ) {
 		//
 		//			final int limit=builder.capacity();

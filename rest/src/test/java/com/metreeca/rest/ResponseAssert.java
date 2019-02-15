@@ -18,16 +18,16 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.things.Codecs;
-import com.metreeca.rest.formats.TextFormat;
 
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.rest.bodies.ReaderBody.reader;
+import static com.metreeca.rest.bodies.TextBody.text;
+import static com.metreeca.rest.bodies.WriterBody.writer;
 
 
 public final class ResponseAssert extends MessageAssert<ResponseAssert, Response> {
@@ -56,7 +56,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 			builder.append('\n');
 
-			response.body(TextFormat.text()).use(text -> {
+			response.body(text()).use(text -> {
 				if ( !text.isEmpty() ) {
 
 					final int limit=builder.capacity();

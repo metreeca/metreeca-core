@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.*;
@@ -24,16 +24,16 @@ import java.io.*;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.bodies.ReaderBody.reader;
+import static com.metreeca.rest.bodies.WriterBody.writer;
 
 
 /**
  * Textual body format.
  */
-public final class TextFormat implements Format<String> {
+public final class TextBody implements Body<String> {
 
-	private static final TextFormat Instance=new TextFormat();
+	private static final TextBody Instance=new TextBody();
 
 
 	/**
@@ -41,21 +41,21 @@ public final class TextFormat implements Format<String> {
 	 *
 	 * @return the singleton textual format instance
 	 */
-	public static TextFormat text() {
+	public static TextBody text() {
 		return Instance;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private TextFormat() {}
+	private TextBody() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
-	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
+	 * supplied by its {@link ReaderBody} body, if one is present; a failure describing the processing error,
 	 * otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
@@ -71,13 +71,13 @@ public final class TextFormat implements Format<String> {
 					}
 				},
 
-				error -> error.equals(Format.Missing) ? Value("") : Error(error)
+				error -> error.equals(Body.Missing) ? Value("") : Error(error)
 
 		);
 	}
 
 	/**
-	 * Configures the {@link WriterFormat} body of {@code message} to write the textual {@code value} to the output
+	 * Configures the {@link WriterBody} body of {@code message} to write the textual {@code value} to the output
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {

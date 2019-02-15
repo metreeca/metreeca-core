@@ -18,7 +18,7 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.*;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.rest.bodies.JSONBody;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.groupingBy;
  * HTTP processing failure.
  *
  * <p>Reports an error condition in an HTTP request processing operation; can be {@linkplain #apply(Response)
- * transferred} to the {@linkplain JSONFormat JSON} body of an HTTP response like:</p>
+ * transferred} to the {@linkplain JSONBody JSON} body of an HTTP response like:</p>
  *
  * <pre>{@code
  * <status>
@@ -222,7 +222,7 @@ public final class Failure implements Function<Response, Response> {
 		return response
 				.status(status)
 				.cause(cause)
-				.body(JSONFormat.json(), ticket());
+				.body(JSONBody.json(), ticket());
 	}
 
 

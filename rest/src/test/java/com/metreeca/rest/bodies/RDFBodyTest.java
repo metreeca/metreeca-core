@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.bodies;
 
 
 import com.metreeca.form.things.Codecs;
@@ -24,13 +24,13 @@ import com.metreeca.rest.Request;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-final class RDFFormatTest {
+final class RDFBodyTest {
 
 	@Test void testHandleMissingInput() {
 		new Request().body(rdf()).fold(

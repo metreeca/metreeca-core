@@ -23,7 +23,7 @@ import com.metreeca.form.probes.*;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Sets;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -50,7 +50,7 @@ import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toCollection;
@@ -72,7 +72,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <li>enforces shape-based access control according to the redacted request shape;</li>
  *
- * <li>extends the {@linkplain RDFFormat RDF payload} with the statements inferred from the redacted shape;</li>
+ * <li>extends the {@linkplain RDFBody RDF payload} with the statements inferred from the redacted shape;</li>
  *
  * <li>associates the redacted shape to the request forwarded to the wrapped handler.</li>
  *
@@ -85,9 +85,9 @@ import static java.util.stream.Collectors.toList;
  * <li>redacts the response shape according to the provided {@linkplain #Throttler(Value, Value) task/view
  * parameters} and the request user roles, hiding also filtering-only shapes;</li>
  *
- * <li>extends the {@linkplain RDFFormat RDF payload} with the statements inferred from the redacted shape;</li>
+ * <li>extends the {@linkplain RDFBody RDF payload} with the statements inferred from the redacted shape;</li>
  *
- * <li>trims {@linkplain RDFFormat RDF payload} statements exceeding the allowed envelope of the redacted shape;</li>
+ * <li>trims {@linkplain RDFBody RDF payload} statements exceeding the allowed envelope of the redacted shape;</li>
  *
  * <li>associates the redacted shape to the response forwarded to the consumer.</li>
  *
@@ -97,7 +97,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>trims {@linkplain RDFFormat RDF payload} statements exceeding the {@linkplain Throttler#network(IRI, Iterable)
+ * <li>trims {@linkplain RDFBody RDF payload} statements exceeding the {@linkplain Throttler#network(IRI, Iterable)
  * connectivity network} of the response focus {@linkplain Message#item() item}.</li>
  *
  * </ul>

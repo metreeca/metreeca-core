@@ -15,8 +15,34 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Basic body formats.
- */
+package com.metreeca.rest.bodies;
 
-package com.metreeca.rest.formats;
+import com.metreeca.rest.Body;
+
+import java.io.Reader;
+import java.util.function.Supplier;
+
+
+/**
+ * Textual input body format.
+ */
+public final class ReaderBody implements Body<Supplier<Reader>> {
+
+	private static final ReaderBody Instance=new ReaderBody();
+
+
+	/**
+	 * Retrieves the textual input body format.
+	 *
+	 * @return the singleton textual input body format instance
+	 */
+	public static ReaderBody reader() {
+		return Instance;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private ReaderBody() {}
+
+}

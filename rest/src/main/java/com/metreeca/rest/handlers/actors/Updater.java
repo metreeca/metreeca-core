@@ -23,7 +23,7 @@ import com.metreeca.form.Issue;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.engines.GraphEngine;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
@@ -34,7 +34,7 @@ import java.util.function.Function;
 import javax.json.JsonValue;
 
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.rest.wrappers.Throttler.container;
 import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
@@ -61,7 +61,7 @@ import static com.metreeca.tray.Tray.tool;
  * <li>the resource shape is extracted and redacted taking into account request user {@linkplain Request#roles()
  * roles}, {@link Form#update} task, {@link Form#convey} mode and {@link Form#detail} view</li>
  *
- * <li>the request {@link RDFFormat RDF body} is expected to contain an RDF description of the resource to be updated
+ * <li>the request {@link RDFBody RDF body} is expected to contain an RDF description of the resource to be updated
  * matched by the redacted resource shape; statements outside this envelope are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</li>
  *
@@ -74,7 +74,7 @@ import static com.metreeca.tray.Tray.tool;
  *
  * <ul>
  *
- * <li>the request {@link RDFFormat RDF body} is expected to contain a symmetric concise bounded description of the
+ * <li>the request {@link RDFBody RDF body} is expected to contain a symmetric concise bounded description of the
  * resource to be updated; statements outside this envelope are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element;</li>
  *

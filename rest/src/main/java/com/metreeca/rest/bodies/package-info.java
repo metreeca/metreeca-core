@@ -15,33 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
-
-import com.metreeca.rest.Format;
-
-import java.io.Reader;
-import java.util.function.Supplier;
-
-
 /**
- * Textual input body format.
+ * Basic body formats.
  */
-public final class ReaderFormat implements Format<Supplier<Reader>> {
 
-	private static final ReaderFormat Instance=new ReaderFormat();
-
-	/**
-	 * Retrieves the textual input body format.
-	 *
-	 * @return the singleton textual input body format instance
-	 */
-	public static ReaderFormat reader() {
-		return Instance;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private ReaderFormat() {}
-
-}
+package com.metreeca.rest.bodies;

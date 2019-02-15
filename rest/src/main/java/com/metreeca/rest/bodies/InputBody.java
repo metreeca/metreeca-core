@@ -15,9 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.bodies;
 
-import com.metreeca.rest.Format;
+import com.metreeca.rest.Body;
 
 import java.io.InputStream;
 import java.util.function.Supplier;
@@ -26,9 +26,9 @@ import java.util.function.Supplier;
 /**
  * Raw binary input body format.
  */
-public final class InputFormat implements Format<Supplier<InputStream>> {
+public final class InputBody implements Body<Supplier<InputStream>> {
 
-	private static final InputFormat Instance=new InputFormat();
+	private static final InputBody Instance=new InputBody();
 
 
 	/**
@@ -36,13 +36,13 @@ public final class InputFormat implements Format<Supplier<InputStream>> {
 	 *
 	 * @return the singleton raw binary input body format instance
 	 */
-	public static InputFormat input() {
+	public static InputBody input() {
 		return Instance;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private InputFormat() {}
+	private InputBody() {}
 
 }

@@ -27,7 +27,7 @@ import org.eclipse.rdf4j.model.vocabulary.LDP;
 import java.util.Optional;
 
 import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.bodies.TextBody.text;
 
 
 /**

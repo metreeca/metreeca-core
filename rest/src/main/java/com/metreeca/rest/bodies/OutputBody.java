@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.rest.*;
 
@@ -29,9 +29,9 @@ import static com.metreeca.rest.Result.Value;
 /**
  * Raw binary output body format.
  */
-public final class OutputFormat implements Format<Consumer<Supplier<OutputStream>>> {
+public final class OutputBody implements Body<Consumer<Supplier<OutputStream>>> {
 
-	private static final OutputFormat Instance=new OutputFormat();
+	private static final OutputBody Instance=new OutputBody();
 
 
 	/**
@@ -45,14 +45,14 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 	 *
 	 * @return the singleton raw binary output body format instance
 	 */
-	public static OutputFormat output() {
+	public static OutputBody output() {
 		return Instance;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private OutputFormat() {}
+	private OutputBody() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

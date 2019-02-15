@@ -21,7 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.engines.GraphEngine;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
@@ -42,7 +42,7 @@ import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.rest.wrappers.Throttler.entity;
 import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
@@ -66,7 +66,7 @@ import static java.util.stream.Collectors.toList;
  * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#convey}
  * mode and {@link Form#digest} view;</li>
  *
- * <li>the response {@linkplain RDFFormat RDF body} includes the RDF description of the container as matched by the
+ * <li>the response {@linkplain RDFBody RDF body} includes the RDF description of the container as matched by the
  * {@linkplain Throttler#container() container section} of redacted shape, linked using the {@code ldp:contains}
  * property to the RDF description of the container items matched by the {@linkplain Throttler#resource() resource
  * section} of redacted shape;</li>
@@ -83,7 +83,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>the response {@linkplain RDFFormat RDF body} includes the symmetric concise bounded description of the
+ * <li>the response {@linkplain RDFBody RDF body} includes the symmetric concise bounded description of the
  * container, linked using the {@code ldp:contains} property to the symmetric concise bounded description of the
  * container items, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced
  * IRIs;</li>
@@ -112,7 +112,7 @@ import static java.util.stream.Collectors.toList;
  * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail}
  * view and {@link Form#convey} mode;</li>
  *
- * <li>the response {@link RDFFormat RDF body} contains the RDF description of the request focus, as matched by the
+ * <li>the response {@link RDFBody RDF body} contains the RDF description of the request focus, as matched by the
  * redacted request shape.</li>
  *
  * </ul>
@@ -121,7 +121,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>the response {@link RDFFormat RDF body} contains the symmetric concise bounded description of the request focus
+ * <li>the response {@link RDFBody RDF body} contains the symmetric concise bounded description of the request focus
  * item, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced IRIs;</li>
  *
  * </ul>

@@ -18,8 +18,6 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
-import com.metreeca.rest.formats.DataFormat;
-import com.metreeca.rest.formats.TextFormat;
 
 import org.assertj.core.api.AbstractAssert;
 
@@ -27,6 +25,8 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.rest.bodies.DataBody.data;
+import static com.metreeca.rest.bodies.TextBody.text;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -169,7 +169,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	public A hasBody(final Format<?> format) {
+	public A hasBody(final Body<?> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
@@ -178,10 +178,10 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		return hasBody(format, body -> {});
 	}
 
-	public <V> A hasBody(final Format<V> format, final Consumer<V> assertions) {
+	public <V> A hasBody(final Body<V> body, final Consumer<V> assertions) {
 
-		if ( format == null ) {
-			throw new NullPointerException("null format");
+		if ( body == null ) {
+			throw new NullPointerException("null body");
 		}
 
 		if ( assertions == null ) {
@@ -190,7 +190,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		return actual.body(format).fold(
+		return actual.body(body).fold(
 
 				value -> {
 
@@ -202,7 +202,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 				error -> fail(
 						"expected response to have a <%s> body but was unable to retrieve one (%s)",
-						format.getClass().getSimpleName(), error
+						body.getClass().getSimpleName(), error
 				)
 		);
 	}
@@ -212,13 +212,13 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		actual.body(DataFormat.data()).value().ifPresent(data -> {
+		actual.body(data()).value().ifPresent(data -> {
 			if ( data.length > 0 ) {
 				failWithMessage("expected empty body but had binary body of length <%d>", data.length);
 			}
 		});
 
-		actual.body(TextFormat.text()).value().ifPresent(text -> {
+		actual.body(text()).value().ifPresent(text -> {
 			if ( !text.isEmpty() ) {
 				failWithMessage(
 						"expected empty body but had textual body of length <%d> (%s)",
@@ -230,15 +230,15 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		return myself;
 	}
 
-	public A doesNotHaveBody(final Format<?> format) {
+	public A doesNotHaveBody(final Body<?> body) {
 
-		if ( format == null ) {
-			throw new NullPointerException("null format");
+		if ( body == null ) {
+			throw new NullPointerException("null body");
 		}
 
 		isNotNull();
 
-		return actual.body(format).fold(
+		return actual.body(body).fold(
 				value -> fail("expected response to have no <%s> body but has one"),
 				error -> myself
 		);

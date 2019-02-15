@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.JSONCodec;
@@ -40,8 +40,8 @@ import javax.json.JsonObjectBuilder;
 import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
@@ -49,9 +49,9 @@ import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 /**
  * RDF body format.
  */
-public final class RDFFormat implements Format<Collection<Statement>> {
+public final class RDFBody implements Body<Collection<Statement>> {
 
-	private static final RDFFormat Instance=new RDFFormat();
+	private static final RDFBody Instance=new RDFBody();
 
 
 	/**
@@ -59,20 +59,20 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 *
 	 * @return the singleton RDF body format instance
 	 */
-	public static RDFFormat rdf() {
+	public static RDFBody rdf() {
 		return Instance;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private RDFFormat() {}
+	private RDFBody() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
+	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputBody}
 	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
 	 * status, otherwise
 	 */
@@ -152,7 +152,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 				},
 
-				error -> error.equals(Format.Missing)
+				error -> error.equals(Body.Missing)
 						? Value(new LinkedHashSet<>()) // order-preserving and writable
 						: Error(error)
 
@@ -160,7 +160,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the RDF {@code value} to the
+	 * Configures the {@link OutputBody} representation of {@code message} to write the RDF {@code value} to the
 	 * accepted output stream and sets the {@code Content-Type} header to the MIME type of the RDF serialization
 	 * selected according to the {@code Accept} header of the request associated to the message, if one is present, or
 	 * to {@code "text/turtle"}, otherwise.

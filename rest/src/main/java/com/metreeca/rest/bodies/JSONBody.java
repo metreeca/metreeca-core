@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.rest.*;
 
@@ -28,8 +28,8 @@ import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.bodies.ReaderBody.reader;
+import static com.metreeca.rest.bodies.WriterBody.writer;
 
 import static java.util.Collections.singletonMap;
 
@@ -39,9 +39,9 @@ import static java.util.Collections.singletonMap;
  *
  * @see "https://javaee.github.io/jsonp/"
  */
-public final class JSONFormat implements Format<JsonObject> {
+public final class JSONBody implements Body<JsonObject> {
 
-	private static final JSONFormat Instance=new JSONFormat();
+	private static final JSONBody Instance=new JSONBody();
 
 
 	/**
@@ -64,21 +64,21 @@ public final class JSONFormat implements Format<JsonObject> {
 	 *
 	 * @return the singleton JSON body format instance
 	 */
-	public static JSONFormat json() {
+	public static JSONBody json() {
 		return Instance;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSONFormat() {}
+	private JSONBody() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal
+	 * {@link ReaderBody} representation, if one is present and the value of the {@code Content-Type} header is equal
 	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
@@ -106,7 +106,7 @@ public final class JSONFormat implements Format<JsonObject> {
 							}
 						},
 
-						error -> error.equals(Format.Missing) ? Value(JsonValue.EMPTY_JSON_OBJECT) : Error(error)
+						error -> error.equals(Body.Missing) ? Value(JsonValue.EMPTY_JSON_OBJECT) : Error(error)
 
 				)
 
@@ -114,7 +114,7 @@ public final class JSONFormat implements Format<JsonObject> {
 	}
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
+	 * Configures the {@link WriterBody} representation of {@code message} to write the JSON {@code value} to the
 	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {

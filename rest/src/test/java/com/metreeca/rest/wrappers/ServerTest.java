@@ -28,8 +28,8 @@ import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.rest.bodies.TextBody.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

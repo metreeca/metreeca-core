@@ -49,8 +49,8 @@ import static com.metreeca.form.truths.JSONAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.truths.ValueAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.rest.handlers.actors.Creator.auto;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 

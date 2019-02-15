@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.*;
@@ -24,18 +24,18 @@ import java.io.*;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
 
 
 /**
  * Binary body format.
  */
-public final class DataFormat implements Format<byte[]> {
+public final class DataBody implements Body<byte[]> {
 
 	private static final byte[] empty=new byte[0];
 
-	private static final DataFormat Instance=new DataFormat();
+	private static final DataBody Instance=new DataBody();
 
 
 	/**
@@ -43,21 +43,21 @@ public final class DataFormat implements Format<byte[]> {
 	 *
 	 * @return the singleton binary body format instance
 	 */
-	public static DataFormat data() {
+	public static DataBody data() {
 		return Instance;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private DataFormat() {}
+	private DataBody() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
-	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing error,
+	 * stream supplied by its {@link InputBody} body, if one is available; a failure describing the processing error,
 	 * otherwise
 	 */
 	@Override public Result<byte[], Failure> get(final Message<?> message) {
@@ -73,13 +73,13 @@ public final class DataFormat implements Format<byte[]> {
 					}
 				},
 
-				error -> error.equals(Format.Missing) ?  Value(empty) : Error(error)
+				error -> error.equals(Body.Missing) ?  Value(empty) : Error(error)
 
 		);
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} body of {@code message} to write the binary {@code value} to the output
+	 * Configures the {@link OutputBody} body of {@code message} to write the binary {@code value} to the output
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {

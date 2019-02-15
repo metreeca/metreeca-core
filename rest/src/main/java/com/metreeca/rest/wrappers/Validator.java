@@ -20,7 +20,7 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Statement;
 
@@ -30,7 +30,7 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Validating preprocessor.
  *
- * <p>Applies custom validation {@linkplain #Validator(Collection) rules} to the {@linkplain RDFFormat RDF payload} of
+ * <p>Applies custom validation {@linkplain #Validator(Collection) rules} to the {@linkplain RDFBody RDF payload} of
  * incoming requests.</p>
  */
 public final class Validator implements Wrapper {
@@ -59,7 +59,7 @@ public final class Validator implements Wrapper {
 	 * error}, the request fails with a {@link Response#UnprocessableEntity} status code; otherwise, the request is
 	 * routed to the wrapped handler.</p>
 	 *
-	 * @param rules the custom validation rules to be applied to the {@linkplain RDFFormat RDF payload} of incoming
+	 * @param rules the custom validation rules to be applied to the {@linkplain RDFBody RDF payload} of incoming
 	 *              requests
 	 *
 	 * @throws NullPointerException if {@code rules} is null or contains null values

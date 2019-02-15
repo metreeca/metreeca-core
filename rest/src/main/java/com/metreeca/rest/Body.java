@@ -28,7 +28,7 @@ import static com.metreeca.rest.Result.Error;
  *
  * @param <V> the type of the structured message body managed by the body format
  */
-public interface Format<V> {
+public interface Body<V> {
 
 	/**
 	 * The default failure reporting missing message bodies.
@@ -47,7 +47,7 @@ public interface Format<V> {
 	 * </ul>
 	 *
 	 * <p>The default implementation returns a failure reporting the {@link Response#UnsupportedMediaType} status,
-	 * unless explicitly {@linkplain Message#body(Format, Object) overridden}.</p>
+	 * unless explicitly {@linkplain Message#body(Body, Object) overridden}.</p>
 	 *
 	 * @param message the message the structured body managed by this body format is to be retrieved from
 	 *
@@ -67,8 +67,6 @@ public interface Format<V> {
 
 	/**
 	 * Configures a message to hold a structured body.
-	 *
-	 * <p>The default implementation has no effect.</p>
 	 *
 	 * <p>The default implementation has no effects.</p>
 	 *
