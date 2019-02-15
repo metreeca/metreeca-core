@@ -26,7 +26,7 @@ import org.assertj.core.api.AbstractAssert;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.tray.sys.Trace.clip;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -130,7 +130,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( shape.equals(pass()) ) {
+		if ( pass(shape) ) {
 			failWithMessage("expected message to have a shape but has none", shape);
 		}
 
@@ -158,7 +158,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( !shape.equals(pass()) ) {
+		if ( !pass(shape) ) {
 			failWithMessage("expected message to have no shape but has <%s>", shape);
 		}
 

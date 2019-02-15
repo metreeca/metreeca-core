@@ -26,7 +26,7 @@ import static com.metreeca.rest.Result.Error;
  *
  * <p>Manages the conversion between raw and structured message bodies.</p>
  *
- * @param <V> the type of the structured message body managed by the format
+ * @param <V> the type of the structured message body managed by the body format
  */
 public interface Format<V> {
 
@@ -49,9 +49,9 @@ public interface Format<V> {
 	 * <p>The default implementation returns a failure reporting the {@link Response#UnsupportedMediaType} status,
 	 * unless explicitly {@linkplain Message#body(Format, Object) overridden}.</p>
 	 *
-	 * @param message the message the structured body managed by this format is to be retrieved from
+	 * @param message the message the structured body managed by this body format is to be retrieved from
 	 *
-	 * @return a value result providing access to the structured body managed by this format, if it was possible to
+	 * @return a value result providing access to the structured body managed by this body format, if it was possible to
 	 * derive one from {@code message}; an error result providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
@@ -72,7 +72,7 @@ public interface Format<V> {
 	 *
 	 * <p>The default implementation has no effects.</p>
 	 *
-	 * @param message the message to be configured to hold a structured body managed by this format
+	 * @param message the message to be configured to hold a structured body managed by this body format
 	 * @param <T>     the type of {@code message}
 	 *
 	 * @return the configured {@code message}

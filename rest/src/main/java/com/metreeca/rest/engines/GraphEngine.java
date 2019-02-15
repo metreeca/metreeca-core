@@ -34,10 +34,8 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.metreeca.form.Shape.constant;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.Meta.metas;
-
-import static java.lang.Boolean.TRUE;
 
 
 /**
@@ -61,7 +59,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null shape");
 		}
 
-		final boolean simple=TRUE.equals(constant(shape)); // ignore metadata
+		final boolean simple=pass(shape); // ignore metadata
 
 		final Map<IRI, Value> metadata=metas(shape);
 

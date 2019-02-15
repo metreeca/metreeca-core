@@ -27,7 +27,7 @@ import java.util.function.Function;
 
 import javax.json.*;
 
-import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.things.Values.format;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -315,7 +315,7 @@ public final class Failure implements Function<Response, Response> {
 	}
 
 	private JsonString json(final Issue issue) {
-		return Json.createValue(issue.getMessage()+(issue.getShape().equals(pass()) ? "" : " : "+issue.getShape()));
+		return Json.createValue(issue.getMessage()+(pass(issue.getShape()) ? "" : " : "+issue.getShape()));
 	}
 
 

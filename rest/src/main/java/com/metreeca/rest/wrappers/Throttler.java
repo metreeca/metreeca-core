@@ -35,10 +35,10 @@ import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.constant;
+import static com.metreeca.form.probes.Evaluator.empty;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
@@ -52,7 +52,6 @@ import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.RDFFormat.rdf;
 
-import static java.lang.Boolean.TRUE;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
@@ -130,7 +129,7 @@ public final class Throttler implements Wrapper {
 	 * actually included, or an empty shape, otherwise
 	 */
 	public static UnaryOperator<Shape> container() {
-		return merge((container, resource) -> TRUE.equals(constant(resource)) ? pass() : container);
+		return merge((container, resource) -> pass(resource) ? pass() : container);
 	}
 
 	/**
@@ -140,7 +139,7 @@ public final class Throttler implements Wrapper {
 	 * ldp:contains} fields, if one is actually included, or the source shape, otherwise
 	 */
 	public static UnaryOperator<Shape> resource() {
-		return merge((container, resource) -> TRUE.equals(constant(resource)) ? container : resource);
+		return merge((container, resource) -> pass(resource) ? container : resource);
 	}
 
 
@@ -248,7 +247,7 @@ public final class Throttler implements Wrapper {
 			final Shape shape=request.shape();
 			final Set<Value> roles=request.roles();
 
-			if ( TRUE.equals(constant(shape)) ) {
+			if ( pass(shape) ) {
 
 				return handler.handle(request);
 
@@ -260,8 +259,8 @@ public final class Throttler implements Wrapper {
 				final Shape authorized=shape(shape, Form.convey, roles);
 				final Shape redacted=shape(shape, null, roles);
 
-				return constant(general) != null ? forbidden(request)
-						: constant(authorized) != null ? refused(request)
+				return empty(general) ? forbidden(request)
+						: empty(authorized) ? refused(request)
 						: handler.handle(request.shape(redacted)
 						.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
 				);
@@ -277,7 +276,7 @@ public final class Throttler implements Wrapper {
 			final IRI focus=request.item();
 			final Shape shape=response.shape();
 
-			if ( TRUE.equals(constant(shape)) ) {
+			if ( pass(shape) ) {
 
 				return response
 						.pipe(rdf(), rdf -> Value(network(focus, rdf)));

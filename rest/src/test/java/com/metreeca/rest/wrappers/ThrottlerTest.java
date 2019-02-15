@@ -41,7 +41,7 @@ import java.util.Collection;
 import static com.metreeca.form.Shape.relate;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;

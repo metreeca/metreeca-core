@@ -34,7 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Shape.constant;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.rest.Message.link;
@@ -173,12 +173,13 @@ public final class Relator extends Delegator {
 		return request -> request.reply(response -> {
 
 			final IRI item=request.item();
+			final Shape shape=request.shape();
 
 			final boolean container=request.container();
 			final boolean minimal=include(request, LDP.PREFER_MINIMAL_CONTAINER);
 			final boolean total=request.query().isEmpty();
 
-			final Engine engine=request.shape().map(this.engine);
+			final Engine engine=shape.map(this.engine);
 
 			if ( container && !minimal ) {
 
@@ -186,7 +187,7 @@ public final class Relator extends Delegator {
 
 				// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
-				return Boolean.TRUE.equals(constant(request.shape())) && !total ? response.map(
+				return pass(shape) && !total ? response.map(
 
 						new Failure()
 								.status(Response.NotImplemented)
@@ -200,7 +201,7 @@ public final class Relator extends Delegator {
 
 								return engine
 
-										.relate(item, shape -> Value(edges(shape)), (cshape, cmodel) -> response
+										.relate(item, _shape -> Value(edges(_shape)), (cshape, cmodel) -> response
 												.status(OK)
 												.shape(and(cshape, rshape))
 												.body(rdf(), Stream
@@ -237,7 +238,7 @@ public final class Relator extends Delegator {
 
 				) :engine
 
-						.relate(item, request::query, (shape, model) -> response
+						.relate(item, request::query, (_shape, model) -> response
 
 								.status(!container && model.isEmpty() ? NotFound : OK)
 
@@ -245,7 +246,7 @@ public final class Relator extends Delegator {
 										minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
 								)
 
-								.shape(shape)
+								.shape(_shape)
 								.body(rdf(), model)
 
 						)

@@ -30,12 +30,14 @@ import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
 import java.io.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import static com.metreeca.form.Shape.constant;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -88,7 +90,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 							.service(RDFParserRegistry.getInstance(), TURTLE, type)
 							.getParser();
 
-					parser.set(JSONCodec.Shape, constant(shape) == null ? shape : null); // !!! handle empty shape directly in JSONParser
+					parser.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
 					parser.set(JSONCodec.Focus, focus);
 
 					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
@@ -187,7 +189,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 						final RDFWriter writer=factory.getWriter(output);
 
-						writer.set(JSONCodec.Shape, constant(shape) == null ? shape : null); // !!! handle empty shape directly in JSONParser
+						writer.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
 						writer.set(JSONCodec.Focus, message.item());
 
 						Rio.write(rdf, writer);

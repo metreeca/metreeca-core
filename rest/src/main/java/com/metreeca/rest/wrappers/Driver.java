@@ -26,8 +26,7 @@ import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Optional;
 
-import static com.metreeca.form.Shape.empty;
-import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.rest.formats.TextFormat.text;
 
 
@@ -84,7 +83,7 @@ public final class Driver implements Wrapper {
 	 * Creates a content driver.
 	 *
 	 * @param shape the shape driving the lifecycle of the linked data resources managed by the wrapped handler
-	 **
+	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
 	public Driver(final Shape shape) {
@@ -112,7 +111,7 @@ public final class Driver implements Wrapper {
 
 		// !!! handle HEAD requests on ?specs (delegate to Worker)
 
-		return !shape.equals(pass()) && request.method().equals(Request.GET) && request.query().equals(SpecsQuery)
+		return !pass(shape) && request.method().equals(Request.GET) && request.query().equals(SpecsQuery)
 
 				? Optional.of(request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", "text/plain")
@@ -123,11 +122,11 @@ public final class Driver implements Wrapper {
 
 
 	private Request before(final Request request) {
-		return shape.equals(pass()) ? request : request.shape(shape);
+		return pass(shape) ? request : request.shape(shape);
 	}
 
 	private Response after(final Response response) {
-		return shape.equals(pass()) ? response : response.header("+Link", String.format(
+		return pass(shape) ? response : response.header("+Link", String.format(
 				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, LDP.CONSTRAINED_BY
 		));
 	}
