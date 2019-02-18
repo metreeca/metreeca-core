@@ -20,6 +20,8 @@ package com.metreeca.rest.engines;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
+import com.metreeca.tray.rdf.GraphTest;
+import com.metreeca.tray.rdf.graphs.Stardog;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Statement;
@@ -67,7 +69,6 @@ import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.tray.rdf.GraphTest.tuples;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -78,18 +79,37 @@ import static java.util.stream.Collectors.toList;
 final class GraphRetrieverTest extends GraphProcessorTest {
 
 	private Collection<Statement> query(final Query query) {
-		return new GraphRetriever().retrieve(root, query);
-	}
+		return new GraphRetriever()
 
+				.retrieve(root, query)
 
-	private Collection<Statement> fixInts(final Collection<Statement> model) { // ;(virtuoso) counts reported as xsd:int
-		return model.stream()
-				.map(statement -> type(statement.getObject()).equals(XMLSchema.INT)? statement(
+				.stream()
+
+				// ;(virtuoso) counts reported as xsd:int
+
+				.map(statement -> type(statement.getObject()).equals(XMLSchema.INT) ? statement(
 						statement.getSubject(),
 						statement.getPredicate(),
 						literal(integer(statement.getObject()).orElse(BigInteger.ZERO)),
 						statement.getContext()
 				) : statement)
+
+				.collect(toList());
+	}
+
+	private List<Statement> graph(final String sparql) {
+		return GraphTest.graph(sparql)
+
+				.stream()
+
+				// ;(stardog) statement from default context explicitly tagged
+
+				.map(statement -> Stardog.Default.equals(statement.getContext()) ? statement(
+						statement.getSubject(),
+						statement.getPredicate(),
+						statement.getObject()
+				) : statement)
+
 				.collect(toList());
 	}
 
@@ -204,7 +224,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 					stats(clazz(term("Employee")))
 
-			)).isIsomorphicTo(fixInts(graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -224,7 +244,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 							+"\n"
 							+"}"
 
-			))));
+			)));
 		}
 
 		@Test void testRootConstraints() {
@@ -232,7 +252,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 					stats(all(item("employees/1370")), term("account"))
 
-			)).isIsomorphicTo(fixInts(graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -249,7 +269,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 							+"\n"
 							+"}"
 
-			))));
+			)));
 		}
 
 	}
@@ -269,7 +289,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 					items(clazz(term("Employee")))
 
-			)).isIsomorphicTo(fixInts(graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -287,7 +307,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 							+"\n"
 							+"}"
 
-			))));
+			)));
 		}
 
 		@Test void testRootConstraints() {
@@ -537,7 +557,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 					edges(field(RDFS.LABEL, like("ger bo")))
 
-			)).isIsomorphicTo(graph( // ;(virtuoso) xsd:string != string
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"

@@ -19,10 +19,9 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.rdf.graphs.RDF4JRemote;
-import com.metreeca.tray.rdf.graphs.RDF4JSPARQL;
-import com.metreeca.tray.rdf.graphs.Virtuoso;
+import com.metreeca.tray.rdf.graphs.*;
 
+import com.complexible.stardog.api.ConnectionConfiguration;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
@@ -44,6 +43,7 @@ abstract class GraphProcessorTest {
 
 				//.set(Graph.Factory, this::graphdb)
 				//.set(Graph.Factory, this::virtuoso)
+				//.set(Graph.Factory, this::stardog)
 				//.set(Graph.Factory, this::dydra)
 
 				.exec(() -> {
@@ -74,6 +74,13 @@ abstract class GraphProcessorTest {
 
 	private Graph virtuoso() {
 		return new Virtuoso("jdbc:virtuoso://localhost:1111/", "dba", "dba", iri(Base));
+	}
+
+	private Graph stardog() {
+		return new Stardog(ConnectionConfiguration
+				.from("http://localhost:5820/birt-small")
+				.credentials("admin", "admin")
+		);
 	}
 
 
