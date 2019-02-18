@@ -21,6 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
+import com.metreeca.rest.engines.Engine;
 import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;

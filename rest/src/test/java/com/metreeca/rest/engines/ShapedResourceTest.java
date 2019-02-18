@@ -17,16 +17,10 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
-import com.metreeca.form.probes.Cleaner;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
-import com.metreeca.rest.Engine;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -34,7 +28,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.meta;
@@ -42,8 +35,6 @@ import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 
@@ -70,48 +61,6 @@ final class ShapedResourceTest {
 	}
 
 
-	@Nested final class Relate {
-
-		@Test void testRelate() {
-			exec(() -> {
-
-				final IRI hernandez=item("employees/1370");
-				final IRI bondur=item("employees/1102");
-
-				assertThat(engine().relate(hernandez, shape -> Value(edges(shape)), (shape, model) -> {
-
-					assertThat(shape.map(new Cleaner()).map(new Optimizer()))
-							.as("resource shape in convey mode (ignoring metadata)")
-							.isEqualTo(resource().apply(shape)
-									.map(new Cleaner())
-									.map(new Redactor(Form.mode, Form.convey))
-									.map(new Optimizer())
-							);
-
-					assertThat(model)
-
-							.as("resource description")
-							.hasStatement(hernandez, term("code"), literal("1370"))
-							.hasStatement(hernandez, term("supervisor"), bondur)
-
-							.as("connected resource description")
-							.hasStatement(bondur, RDFS.LABEL, literal("Gerard Bondur"))
-							.doesNotHaveStatement(bondur, term("code"), null);
-
-					return model;
-
-				}).value()).isPresent();
-
-			});
-		}
-
-		@Test void testUnknown() {
-			exec(() -> assertThat(engine().relate(item("employees/9999")))
-					.as("empty description")
-					.isEmpty());
-		}
-
-	}
 
 	@Nested final class Create {
 

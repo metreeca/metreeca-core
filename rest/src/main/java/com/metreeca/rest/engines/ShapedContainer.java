@@ -24,7 +24,6 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.Field;
-import com.metreeca.rest.Engine;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
@@ -147,8 +146,7 @@ final class ShapedContainer extends GraphEntity {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Optional<Focus> create(final IRI resource, final IRI related,
-			final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
 			return reserve(connection, related).map(reserved -> {

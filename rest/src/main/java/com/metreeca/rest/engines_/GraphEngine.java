@@ -17,9 +17,9 @@
 
 package com.metreeca.rest.engines_;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -27,8 +27,19 @@ import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static com.metreeca.form.Focus.focus;
+import static com.metreeca.form.Issue.issue;
+import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.form.queries.Edges.edges;
+import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.tray.Tray.tool;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -36,12 +47,20 @@ import static com.metreeca.tray.Tray.tool;
  *
  * <p>Manages CRUD operations on linked data resources stored in the system {@linkplain Graph graph}.</p>
  */
-public final class GraphEngine {
+public final class GraphEngine implements _Engine {
+
+	private static final Function<Shape, Shape> convey=memoizable(s -> s
+			.map(new Redactor(Form.mode, Form.convey))
+			.map(new Optimizer())
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Graph graph=tool(Graph.Factory);
 
 
-	public Collection<Statement> relate(final IRI resource, final Query query) {
+	@Override public Collection<Statement> relate(final IRI resource, final Query query) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");
@@ -51,24 +70,12 @@ public final class GraphEngine {
 			throw new NullPointerException("null query");
 		}
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return graph.query(connection -> {
+			return query.map(new GraphRetriever(connection, resource, true));
+		});
 	}
 
-	public Collection<Statement> browse(final IRI resource, final Query query) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
-
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
-
-
-	public Optional<Focus> create(final IRI resource, final Shape shape, final IRI related, final Collection<Statement> model) {
+	@Override public Optional<Focus> create(final IRI resource, final Shape shape, final IRI related, final Collection<Statement> model) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");
@@ -87,9 +94,30 @@ public final class GraphEngine {
 		}
 
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		//return graph.update(connection -> {
+		//
+		//	return reserve(connection, related).map(reserved -> {
+		//
+		//		// validate before updating graph to support snapshot transactions
+		//
+		//		final Focus focus=new GraphValidator().validate(related, shape, model);
+		//
+		//		if ( !focus.assess(Issue.Level.Error) ) {
+		//
+		//			shape.map(flock).insert(connection, resource, reserved, model).add(model);
+		//
+		//		}
+		//
+		//		return focus;
+		//
+		//	});
+		//
+		//});
+
 	}
 
-	public Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
+	@Override public Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");
@@ -103,10 +131,55 @@ public final class GraphEngine {
 			throw new NullPointerException("null model");
 		}
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return graph.update(connection -> {
+			return Optional.of(edges(shape))
+
+					.map(query -> query.map(new GraphRetriever(connection, resource, false)))
+					.filter(current -> !current.isEmpty())
+
+					.map(current -> {
+
+						// validate against shape before updating graph to support snapshot transactions
+
+						final Shape xxx=shape.map(convey);
+
+						final Focus focus=xxx  // validate against shape
+								.map(new GraphValidator(connection, set(resource), model));
+
+
+						final Collection<Statement> envelope=pass(xxx)
+								? set() // !!! description(resource, false, model)
+								: focus.outline().collect(toSet()); // collect shape envelope
+
+						final Focus extended=focus( // extend validation report with errors for statements outside shape envelope
+
+								Stream.concat(
+
+										focus.getIssues().stream(),
+
+										model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
+												issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
+										)
+
+								).collect(toList()),
+
+								focus.getFrames()
+
+						);
+
+
+						if ( !extended.assess(Issue.Level.Error) ) {
+							connection.remove(current);
+							connection.add(model);
+						}
+
+						return extended;
+
+					});
+		});
 	}
 
-	public Optional<Focus> delete(final IRI resource, final Shape shape) {
+	@Override public Optional<Focus> delete(final IRI resource, final Shape shape) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");
@@ -116,7 +189,23 @@ public final class GraphEngine {
 			throw new NullPointerException("null shape");
 		}
 
+
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		//return graph.update(connection -> {
+		//
+		//	// !!! merge retrieve/remove operations into a single SPARQL update txn
+		//	// !!! must check resource existence anyway and wouldn't work for CBD shapes
+		//
+		//	return retrieve(resource, shape.map(current -> { // identify deletable description
+		//
+		//		shape.map(flock).remove(connection, resource, current).remove(current);
+		//
+		//		return resource;
+		//
+		//	});
+		//
+		//});
 	}
 
 }

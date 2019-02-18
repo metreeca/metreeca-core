@@ -17,8 +17,6 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.rest.Engine;
-
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 

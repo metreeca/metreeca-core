@@ -23,7 +23,6 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
-import com.metreeca.rest.Engine;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 
@@ -100,101 +99,6 @@ final class ShapedContainerTest {
 		}
 
 
-		@Nested final class Browse {
-
-			@Test void testBrowse() {
-				exec(() -> assertThat(engine().browse(container))
-
-						.as("item descriptions linked to container")
-						.hasSubset(decode("<employees-basic/> ldp:contains <employees/1370>, <employees/1166>."))
-
-						.as("item descriptions included")
-						.hasSubset(decode("<employees/1370> :code '1370'. <employees/1166> :code '1166'."))
-
-						.as("out of shape properties excluded")
-						.doesNotHaveSubset(decode("<employees/1370> a :Employee. <employees/1166> a :Employee."))
-				);
-			}
-
-			@Test void testBrowseEdges() {
-				exec(() -> assertThat(engine().browse(container,
-
-						shape -> Value(edges(and(shape, filter().then(
-								field(term("title"), all(literal("President"))))
-						))),
-
-						(shape, model) -> {
-
-							assertThat(shape.map(new Cleaner()).map(new Optimizer()))
-									.as("ldp:contains+resource shape in convey mode (ignoring metadata)")
-									.isEqualTo(field(LDP.CONTAINS, resource().apply(shape()))
-											.map(new Cleaner())
-											.map(new Redactor(Form.mode, Form.convey))
-											.map(new Optimizer())
-									);
-
-							assertThat(model).isIsomorphicTo(decode(""
-									+"<employees-basic/> ldp:contains <employees/1002>. "
-									+"<employees/1002> :code '1002'."
-							));
-
-							return model;
-
-						}
-
-				).value()).isPresent());
-			}
-
-			@Test void testBrowseStats() {
-				exec(() -> assertThat(engine().browse(container,
-
-						shape -> Value(stats(shape, list(term("title")))),
-
-						(shape, model) -> {
-
-							assertThat(shape)
-									.as("query-specific shape")
-									.isEqualTo(Stats.Shape);
-
-							assertThat(model)
-									.as("query-specific payload")
-									.hasStatement(container, Form.count, null)
-									.hasStatement(container, Form.stats, XMLSchema.STRING)
-									.hasStatement(XMLSchema.STRING, Form.count, null);
-
-							return model;
-
-						}
-
-						).value()).isPresent()
-				);
-			}
-
-			@Test void testBrowseItems() {
-				exec(() -> assertThat(engine().browse(container,
-
-						shape -> Value(items(shape, list(term("title")))),
-
-						(shape, model) -> {
-
-							assertThat(shape)
-									.as("query-specific shape")
-									.isEqualTo(Items.Shape);
-
-							assertThat(model)
-									.as("query-specific payload")
-									.hasStatement(container, Form.items, null)
-									.hasStatement(null, Form.value, literal("President"));
-
-							return model;
-
-						}
-
-						).value()).isPresent()
-				);
-			}
-
-		}
 
 		@Nested final class Create {
 

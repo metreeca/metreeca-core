@@ -18,7 +18,6 @@
 package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
-import com.metreeca.rest.Engine;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.rdf.Graph;
 
