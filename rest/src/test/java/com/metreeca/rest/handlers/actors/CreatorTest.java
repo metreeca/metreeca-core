@@ -483,6 +483,7 @@ final class CreatorTest {
 
 	}
 
+
 	@Nested final class Slugs {
 
 		@Nested final class Auto {

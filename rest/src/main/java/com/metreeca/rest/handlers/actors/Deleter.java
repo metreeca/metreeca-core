@@ -79,8 +79,8 @@ public final class Deleter extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.delete, Form.detail, _Combos::entity),
-				new Throttler(Form.delete, Form.detail, _Combos::resource)
+				new Throttler(Form.delete, Form.detail, _Shapes::entity),
+				new Throttler(Form.delete, Form.detail, _Shapes::resource)
 		);
 	}
 

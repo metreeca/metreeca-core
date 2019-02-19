@@ -19,12 +19,15 @@ package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.handlers.actors._Engine;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -37,6 +40,7 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.form.things.Structures.description;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.stream.Collectors.toList;
@@ -52,6 +56,11 @@ public final class GraphEngine implements _Engine {
 
 	private static final Function<Shape, Shape> convey=memoizable(s -> s
 			.map(new Redactor(Form.mode, Form.convey))
+			.map(new Optimizer())
+	);
+
+	private static final Function<Shape, Shape> filter=memoizable(s -> s
+			.map(new Redactor(Form.mode, Form.filter))
 			.map(new Optimizer())
 	);
 
@@ -76,6 +85,7 @@ public final class GraphEngine implements _Engine {
 		});
 	}
 
+
 	@Override public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
 
 		if ( resource == null ) {
@@ -90,27 +100,33 @@ public final class GraphEngine implements _Engine {
 			throw new NullPointerException("null model");
 		}
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return graph.update(connection -> {
 
-		//return graph.update(connection -> {
-		//
-		//	return reserve(connection, related).map(reserved -> {
-		//
-		//		// validate before updating graph to support snapshot transactions
-		//
-		//		final Focus focus=new GraphValidator().validate(related, shape, model);
-		//
-		//		if ( !focus.assess(Issue.Level.Error) ) {
-		//
-		//			shape.map(flock).insert(connection, resource, reserved, model).add(model);
-		//
-		//		}
-		//
-		//		return focus;
-		//
-		//	});
-		//
-		//});
+			return Optional.of(resource)
+
+					.filter(reserved -> !(
+							connection.hasStatement(reserved, null, null, true)
+									|| connection.hasStatement(null, null, reserved, true)
+					))
+
+					.map(reserved -> {
+
+						// validate before updating graph to support snapshot transactions
+
+						final Focus focus=validate(connection, resource, shape, model);
+
+						if ( !focus.assess(Issue.Level.Error) ) {
+
+							connection.add(shape.map(filter).map(new Outliner(reserved)).collect(toList()));
+							connection.add(model);
+
+						}
+
+						return focus;
+
+					});
+
+		});
 
 	}
 
@@ -129,50 +145,20 @@ public final class GraphEngine implements _Engine {
 		}
 
 		return graph.update(connection -> {
-			return Optional.of(edges(shape))
+			return retrieve(connection, resource, shape).map(current -> {
 
-					.map(query -> query.map(new GraphRetriever(connection, resource, false)))
-					.filter(current -> !current.isEmpty())
+				// validate against shape before updating graph to support snapshot transactions
 
-					.map(current -> {
+				final Focus focus=validate(connection, resource, shape, model);
 
-						// validate against shape before updating graph to support snapshot transactions
+				if ( !focus.assess(Issue.Level.Error) ) {
+					connection.remove(current);
+					connection.add(model);
+				}
 
-						final Shape xxx=shape.map(convey);
+				return focus;
 
-						final Focus focus=xxx  // validate against shape
-								.map(new GraphValidator(connection, set(resource), model));
-
-
-						final Collection<Statement> envelope=pass(xxx)
-								? set() // !!! description(resource, false, model)
-								: focus.outline().collect(toSet()); // collect shape envelope
-
-						final Focus extended=focus( // extend validation report with errors for statements outside shape envelope
-
-								Stream.concat(
-
-										focus.getIssues().stream(),
-
-										model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
-												issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
-										)
-
-								).collect(toList()),
-
-								focus.getFrames()
-
-						);
-
-
-						if ( !extended.assess(Issue.Level.Error) ) {
-							connection.remove(current);
-							connection.add(model);
-						}
-
-						return extended;
-
-					});
+			});
 		});
 	}
 
@@ -203,6 +189,51 @@ public final class GraphEngine implements _Engine {
 		//	});
 		//
 		//});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Optional<Collection<Statement>> retrieve(
+			final RepositoryConnection connection, final IRI resource, final Shape shape
+	) {
+		return Optional.of(edges(shape))
+
+				.map(query -> query.map(new GraphRetriever(connection, resource, false)))
+
+				.filter(current -> !current.isEmpty());
+	}
+
+	private Focus validate(final RepositoryConnection connection,
+			final Resource resource, final Shape shape, final Collection<Statement> model
+	) {
+
+		final Shape xxx=shape.map(convey);
+
+		// validate against shape
+
+		final Focus focus=xxx
+				.map(new GraphValidator(connection, set(resource), model));
+
+		final Collection<Statement> envelope=pass(xxx)
+				? description(resource, false, model) // collect resource cbd
+				: focus.outline().collect(toSet()); // collect shape envelope
+
+		return focus( // extend validation report with errors for statements outside shape envelope
+
+				Stream.concat(
+
+						focus.getIssues().stream(),
+
+						model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
+								issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
+						)
+
+				).collect(toList()),
+
+				focus.getFrames()
+
+		);
 	}
 
 }

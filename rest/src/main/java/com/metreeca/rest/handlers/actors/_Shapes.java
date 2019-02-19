@@ -54,11 +54,9 @@ import static java.util.stream.Collectors.toList;
 
 
 /**
- * LDP Container profile.
- *
- * <p>Manages containment/membership triples for LDP containers.</p>
+ * Shape utilities.
  */
-public final class _Combos {
+public final class _Shapes {
 
 	private static final Set<IRI> ContainerMetadata=set(
 			RDF.TYPE,
@@ -253,7 +251,7 @@ public final class _Combos {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Combos() {} // utility
+	private _Shapes() {} // utility
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

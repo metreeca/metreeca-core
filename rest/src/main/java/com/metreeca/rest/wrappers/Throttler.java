@@ -22,7 +22,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.handlers.actors._Combos;
+import com.metreeca.form.things.Structures;
+import com.metreeca.rest.handlers.actors._Shapes;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -83,7 +84,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>trims {@linkplain RDFBody RDF payload} statements exceeding the {@linkplain Throttler#network(IRI, Iterable)
+ * <li>trims {@linkplain RDFBody RDF payload} statements exceeding the {@linkplain Structures#network(IRI, Iterable)
  * connectivity network} of the response focus {@linkplain Message#item() item}.</li>
  *
  * </ul>
@@ -111,7 +112,7 @@ public final class Throttler implements Wrapper {
 	 * @throws NullPointerException if either {@code task} or {@code view} is null
 	 */
 	public Throttler(final Value task, final Value view) {
-		this(task, view, _Combos::entity);
+		this(task, view, _Shapes::entity);
 	}
 
 	/**
@@ -210,7 +211,7 @@ public final class Throttler implements Wrapper {
 			if ( pass(shape) ) {
 
 				return response.shape(shape)
-						.pipe(rdf(), rdf -> Value(network(item, rdf)));
+						.pipe(rdf(), rdf -> Value(Structures.network(item, rdf)));
 
 			} else {
 
@@ -232,49 +233,6 @@ public final class Throttler implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves a reachable network from a statement source.
-	 *
-	 * @param resource the resource whose reachable network is to be retrieved
-	 * @param model    the statement source the description is to be retrieved from
-	 *
-	 * @return the reachable network of {@code focus} retrieved from {@code model}
-	 *
-	 * @throws NullPointerException if either {@code focus} or {@code model} is null
-	 */
-	private Model network(final IRI resource, final Iterable<Statement> model) {
-
-		final Model network=new LinkedHashModel();
-
-		final Queue<Value> pending=new ArrayDeque<>(singleton(resource));
-		final Collection<Value> visited=new HashSet<>();
-
-		while ( !pending.isEmpty() ) {
-
-			final Value value=pending.remove();
-
-			if ( visited.add(value) ) {
-				model.forEach(statement -> {
-					if ( statement.getSubject().equals(value) ) {
-
-						network.add(statement);
-						pending.add(statement.getObject());
-
-					} else if ( statement.getObject().equals(value) ) {
-
-						network.add(statement);
-						pending.add(statement.getSubject());
-
-					}
-
-				});
-			}
-
-		}
-
-		return network;
-	}
-
-	/**
 	 * Retrieves a shape envelope from a statement source.
 	 *
 	 * @param resource the resource whose envelope is to be retrieved
@@ -289,11 +247,10 @@ public final class Throttler implements Wrapper {
 		return shape.map(new Extractor(model, singleton(resource))).collect(toCollection(LinkedHashModel::new));
 	}
 
-
-	private <V extends Collection<Statement>> V expand(final IRI focus, final Shape shape, final V model) {
+	private <V extends Collection<Statement>> V expand(final IRI resource, final Shape shape, final V model) {
 
 		model.addAll(shape // add implied statements
-				.map(new Outliner(focus)) // shape already redacted for convey mode
+				.map(new Outliner(resource)) // shape already redacted for convey mode
 				.collect(toList())
 		);
 

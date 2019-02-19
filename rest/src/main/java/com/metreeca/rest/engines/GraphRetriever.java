@@ -23,6 +23,7 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
+import com.metreeca.form.things.Structures;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -151,7 +152,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 					if ( template.isEmpty() ) { // wildcard shape => symmetric+labelled concise bounded description
 
-						model.addAll(description(match, labelled, connection));
+						model.addAll(Structures.description((Resource)match, labelled, connection));
 
 					} else {
 						template.forEach(statement -> {

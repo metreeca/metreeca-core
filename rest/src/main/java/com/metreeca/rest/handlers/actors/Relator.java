@@ -46,8 +46,8 @@ import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.handlers.actors._Combos.container;
-import static com.metreeca.rest.handlers.actors._Combos.resource;
+import static com.metreeca.rest.handlers.actors._Shapes.container;
+import static com.metreeca.rest.handlers.actors._Shapes.resource;
 
 
 /**
@@ -161,8 +161,8 @@ public final class Relator extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.relate, Form.digest, _Combos::entity),
-				new Throttler(Form.relate, Form.detail, _Combos::resource)
+				new Throttler(Form.relate, Form.digest, _Shapes::entity),
+				new Throttler(Form.relate, Form.detail, _Shapes::resource)
 		);
 	}
 
@@ -183,7 +183,7 @@ public final class Relator extends Delegator {
 						.status(Response.NotImplemented)
 						.cause("resource filtered retrieval not supported")
 
-				) : request.query(_Combos.resource(item, shape)).fold(
+				) : request.query(_Shapes.resource(item, shape)).fold(
 
 						query -> {
 
@@ -225,7 +225,7 @@ public final class Relator extends Delegator {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return request.query(_Combos.container(item, resource(shape))).fold(
+				return request.query(_Shapes.container(item, resource(shape))).fold(
 
 						query -> {
 
@@ -261,7 +261,7 @@ public final class Relator extends Delegator {
 										.shape(shape)
 										.body(rdf(), concat(
 												matches,
-												engine.relate(item, edges(_Combos.resource(item, container(shape))))
+												engine.relate(item, edges(_Shapes.resource(item, container(shape))))
 										));
 
 							}

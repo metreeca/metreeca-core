@@ -23,37 +23,22 @@ import com.metreeca.form.things.Values;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.things.Values.pattern;
 import static com.metreeca.tray.Tray.tool;
-
-import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 import static java.lang.Math.max;
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
 
 
 abstract class GraphProcessor {
 
 	private final Trace trace=tool(Trace.Factory);
-
-
-	@FunctionalInterface  static interface Source {
-
-		public Stream<Statement> match(final Resource subject, final IRI predicate, final Value object);
-
-	}
 
 
 	//// Tracing ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,82 +66,6 @@ abstract class GraphProcessor {
 		final long stop=System.currentTimeMillis();
 
 		trace.debug(this, () -> format("evaluated in %d ms", max(1, stop-start)));
-
-	}
-
-
-	//// Concise Bounded Description ///////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves a symmetric concise bounded description from a statement source.
-	 *
-	 * @param focus    the resource whose symmetric concise bounded description is to be retrieved
-	 * @param labelled if {@code true}, the retrieved description will be extended with {@code rdf:type} and {@code
-	 *                 rdfs:label/comment} annotations for all referenced IRIs
-	 * @param model    the statement source the description is to be retrieved from
-	 *
-	 * @return the symmetric concise bounded description of {@code focus} retrieved from {@code model}
-	 *
-	 * @throws NullPointerException if either {@code focus} or {@code model} is null
-	 */
-	Collection<Statement> description(final Value focus, final boolean labelled, final Collection<Statement> model) {
-		return description(focus, labelled, (s, p, o) -> model.stream().filter(pattern(s, p, o)));
-	}
-
-	/**
-	 * Retrieves the symmetric concise bounded description of a resource from a repository.
-	 *
-	 * @param focus      the resource whose symmetric concise bounded description is to be retrieved
-	 * @param labelled   if {@code true}, the retrieved description will be extended with {@code rdf:type} and {@code
-	 *                   rdfs:label/comment} annotations for all referenced IRIs
-	 * @param connection the connection to the repository the description is to be retrieved from
-	 *
-	 * @return the symmetric concise bounded description of {@code focus} retrieved from {@code connection}
-	 *
-	 * @throws NullPointerException if either {@code focus} or {@code connection} is null
-	 */
-	Collection<Statement> description(final Value focus, final boolean labelled, final RepositoryConnection connection) {
-
-		// !!! optimize for SPARQL
-
-		return description(focus, labelled, (s, p, o) -> stream(connection.getStatements(s, p, o, true)));
-	}
-
-
-	private Collection<Statement> description(final Value focus, final boolean labelled, final Source source) {
-
-		final Model description=new LinkedHashModel();
-
-		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
-		final Collection<Value> visited=new HashSet<>();
-
-		while ( !pending.isEmpty() ) {
-
-			final Value value=pending.remove();
-
-			if ( visited.add(value) ) {
-				if ( value.equals(focus) || value instanceof BNode ) {
-
-					source.match((Resource)value, null, null)
-							.peek(statement -> pending.add(statement.getObject()))
-							.forEach(description::add);
-
-					source.match(null, null, value)
-							.peek(statement -> pending.add(statement.getSubject()))
-							.forEach(description::add);
-
-				} else if ( labelled && value instanceof IRI ) {
-
-					source.match((Resource)value, RDF.TYPE, null).forEach(description::add);
-					source.match((Resource)value, RDFS.LABEL, null).forEach(description::add);
-					source.match((Resource)value, RDFS.COMMENT, null).forEach(description::add);
-
-				}
-			}
-
-		}
-
-		return description;
 
 	}
 
