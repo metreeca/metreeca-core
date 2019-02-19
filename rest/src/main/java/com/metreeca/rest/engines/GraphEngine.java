@@ -35,6 +35,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Focus.focus;
+import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
@@ -85,7 +86,6 @@ public final class GraphEngine implements _Engine {
 		});
 	}
 
-
 	@Override public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
 
 		if ( resource == null ) {
@@ -117,7 +117,7 @@ public final class GraphEngine implements _Engine {
 
 						if ( !focus.assess(Issue.Level.Error) ) {
 
-							connection.add(shape.map(filter).map(new Outliner(reserved)).collect(toList()));
+							connection.add(outline(reserved, shape));
 							connection.add(model);
 
 						}
@@ -172,27 +172,29 @@ public final class GraphEngine implements _Engine {
 			throw new NullPointerException("null shape");
 		}
 
+		return graph.update(connection -> {
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			// !!! merge retrieve/remove operations into a single SPARQL update txn
+			// !!! must check resource existence anyway and wouldn't work for CBD shapes
 
-		//return graph.update(connection -> {
-		//
-		//	// !!! merge retrieve/remove operations into a single SPARQL update txn
-		//	// !!! must check resource existence anyway and wouldn't work for CBD shapes
-		//
-		//	return retrieve(resource, shape.map(current -> { // identify deletable description
-		//
-		//		shape.map(flock).remove(connection, resource, current).remove(current);
-		//
-		//		return resource;
-		//
-		//	});
-		//
-		//});
+			return retrieve(connection, resource, shape).map(current -> {
+
+				connection.remove(outline(resource, shape));
+				connection.remove(current);
+
+				return focus(set(), set(frame(resource)));
+
+			});
+
+		});
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Iterable<Statement> outline(final Resource resource, final Shape shape) {
+		return shape.map(filter).map(new Outliner(resource)).collect(toList());
+	}
 
 	private Optional<Collection<Statement>> retrieve(
 			final RepositoryConnection connection, final IRI resource, final Shape shape
@@ -208,14 +210,12 @@ public final class GraphEngine implements _Engine {
 			final Resource resource, final Shape shape, final Collection<Statement> model
 	) {
 
-		final Shape xxx=shape.map(convey);
+		final Shape target=shape.map(convey);
 
-		// validate against shape
-
-		final Focus focus=xxx
+		final Focus focus=target // validate against shape
 				.map(new GraphValidator(connection, set(resource), model));
 
-		final Collection<Statement> envelope=pass(xxx)
+		final Collection<Statement> envelope=pass(target)
 				? description(resource, false, model) // collect resource cbd
 				: focus.outline().collect(toSet()); // collect shape envelope
 

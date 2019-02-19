@@ -66,8 +66,8 @@ import static com.metreeca.rest.handlers.actors._Shapes.resource;
  * view;</li>
  *
  * <li>the response {@linkplain RDFBody RDF body} includes the RDF description of the container as matched by the
- * {@linkplain Throttler#container() container section} of redacted shape, linked using the {@code ldp:contains}
- * property to the RDF description of the container items matched by the {@linkplain Throttler#resource() resource
+ * {@linkplain _Shapes#container(Shape) container section} of redacted shape, linked using the {@code ldp:contains}
+ * property to the RDF description of the container items matched by the {@linkplain _Shapes#resource(Shape) resource
  * section} of redacted shape;</li>
  *
  * <li>contained items are selected as required by the LDP container profile {@linkplain
@@ -183,7 +183,7 @@ public final class Relator extends Delegator {
 						.status(Response.NotImplemented)
 						.cause("resource filtered retrieval not supported")
 
-				) : request.query(_Shapes.resource(item, shape)).fold(
+				) : request.query(resource(item, shape)).fold(
 
 						query -> {
 
@@ -225,7 +225,7 @@ public final class Relator extends Delegator {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return request.query(_Shapes.container(item, resource(shape))).fold(
+				return request.query(container(item, resource(shape))).fold(
 
 						query -> {
 
@@ -261,7 +261,7 @@ public final class Relator extends Delegator {
 										.shape(shape)
 										.body(rdf(), concat(
 												matches,
-												engine.relate(item, edges(_Shapes.resource(item, container(shape))))
+												engine.relate(item, edges(resource(item, container(shape))))
 										));
 
 							}

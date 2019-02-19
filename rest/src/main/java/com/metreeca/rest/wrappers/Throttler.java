@@ -20,27 +20,27 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.*;
+import com.metreeca.form.things.Structures;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.form.things.Structures;
 import com.metreeca.rest.handlers.actors._Shapes;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
 import java.util.function.Function;
 
 import static com.metreeca.form.probes.Evaluator.empty;
 import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.Memoizing.memoizable;
+import static com.metreeca.form.things.Structures.envelope;
+import static com.metreeca.form.things.Structures.network;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
-import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 
@@ -84,8 +84,8 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>trims {@linkplain RDFBody RDF payload} statements exceeding the {@linkplain Structures#network(IRI, Iterable)
- * connectivity network} of the response focus {@linkplain Message#item() item}.</li>
+ * <li>trims {@linkplain RDFBody RDF payload} statements exceeding the {@linkplain Structures#network(Resource,
+ * Iterable)} connectivity network} of the response focus {@linkplain Message#item() item}.</li>
  *
  * </ul>
  */
@@ -211,7 +211,7 @@ public final class Throttler implements Wrapper {
 			if ( pass(shape) ) {
 
 				return response.shape(shape)
-						.pipe(rdf(), rdf -> Value(Structures.network(item, rdf)));
+						.pipe(rdf(), rdf -> Value(network(item, rdf)));
 
 			} else {
 
@@ -231,21 +231,6 @@ public final class Throttler implements Wrapper {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves a shape envelope from a statement source.
-	 *
-	 * @param resource the resource whose envelope is to be retrieved
-	 * @param shape    the shape whose envelope is to be retrieved
-	 * @param model    the statement source the description is to be retrieved from
-	 *
-	 * @return the {@code shape} envelope of {@code focus} retrieved from {@code model}
-	 *
-	 * @throws NullPointerException if any argument is null
-	 */
-	private Model envelope(final Value resource, final Shape shape, final Iterable<Statement> model) {
-		return shape.map(new Extractor(model, singleton(resource))).collect(toCollection(LinkedHashModel::new));
-	}
 
 	private <V extends Collection<Statement>> V expand(final IRI resource, final Shape shape, final V model) {
 

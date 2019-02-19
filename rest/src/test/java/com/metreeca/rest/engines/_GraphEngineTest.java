@@ -43,7 +43,7 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 
 
-final class GraphEngineTest {
+final class _GraphEngineTest {
 
 	private final IRI Hernandez=item("employees/1370");
 	private final IRI Bondur=item("employees/1102");
@@ -73,7 +73,7 @@ final class GraphEngineTest {
 
 	@Nested final class Relate {
 
-		private final Shape Employee=GraphEngineTest.Employee
+		private final Shape Employee=_GraphEngineTest.Employee
 				.map(new Redactor(Form.task, Form.relate))
 				.map(new Redactor(Form.view, Form.detail))
 				.map(new Optimizer());
@@ -132,7 +132,7 @@ final class GraphEngineTest {
 
 	@Nested final class Create {
 
-		private final Shape Employee=GraphEngineTest.Employee
+		private final Shape Employee=_GraphEngineTest.Employee
 				.map(new Redactor(Form.task, Form.create))
 				.map(new Redactor(Form.view, Form.detail))
 				.map(new Optimizer());
@@ -294,7 +294,7 @@ final class GraphEngineTest {
 
 	@Nested final class Update {
 
-		private final Shape Employee=GraphEngineTest.Employee
+		private final Shape Employee=_GraphEngineTest.Employee
 				.map(new Redactor(Form.task, Form.update))
 				.map(new Redactor(Form.view, Form.detail))
 				.map(new Optimizer());
@@ -304,7 +304,7 @@ final class GraphEngineTest {
 			@Test void testUpdate() {
 				exec(() -> {
 
-					final Model update=decode("</employees/1370>"
+					final Model update=decode("<employees/1370>"
 							+":forename 'Tino';"
 							+":surname 'Faussone';"
 							+":email 'tfaussone@example.com';"
@@ -446,7 +446,7 @@ final class GraphEngineTest {
 
 	@Nested final class Delete {
 
-		private final Shape Employee=GraphEngineTest.Employee
+		private final Shape Employee=_GraphEngineTest.Employee
 				.map(new Redactor(Form.task, Form.delete))
 				.map(new Redactor(Form.view, Form.detail))
 				.map(new Optimizer());

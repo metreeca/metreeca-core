@@ -38,14 +38,14 @@ import java.util.Optional;
 public interface _Engine {
 
 	/**
-	 * Retrieves a resource.
+	 * Relates a resource.
 	 *
 	 * @param resource the IRI identifying the resource whose description is to be retrieved
-	 * @param query    the query defining the details of {@code resource} to be retrieved; matched resources other than
-	 *                 {@code resource} are linked to {@code resource} with the {@code ldp:contains} property
+	 * @param query    the query defining the details of {@code resource} to be retrieved;
 	 *
 	 * @return the description of {@code resource} matched by {@code query}; empty if a matching description for {@code
-	 * resource} was not found
+	 * resource} was not found;  related resources matched by {@code query} are linked to {@code resource} with the
+	 * {@code ldp:contains} property
 	 *
 	 * @throws NullPointerException          if either {@code resource} or {@code query} is {@code null}
 	 * @throws UnsupportedOperationException if resource retrieval is not supported by this engine
@@ -53,11 +53,11 @@ public interface _Engine {
 	public Collection<Statement> relate(final IRI resource, final Query query);
 
 	/**
-	 * Creates a related resource.
+	 * Creates a resource.
 	 *
-	 * @param resource the IRI identifying the owning resource for the related resource to be created
-	 * @param model    the description for the new related resource owned by {@code resource}; must describe the related
-	 *                 resource using {@code related} as subject
+	 * @param resource the IRI identifying the resource whose description is to be created
+	 * @param shape    the validation shape for the description of the resource;
+	 * @param model    the description for {@code resource} to be created
 	 *
 	 * @return an optional validation report for the operation; empty a description for {@code resource} is already
 	 * present
@@ -71,6 +71,7 @@ public interface _Engine {
 	 * Updates a resource.
 	 *
 	 * @param resource the IRI identifying the resource whose description is to be updated
+	 * @param shape    the validation shape for the description of the resource
 	 * @param model    the updated description for {@code resource}
 	 *
 	 * @return an optional validation report for the operation; empty if a description for {@code resource} was not
@@ -85,6 +86,7 @@ public interface _Engine {
 	 * Deletes a resource.
 	 *
 	 * @param resource the IRI identifying the resource whose description is to be deleted
+	 * @param shape    the validation shape for the description of the resource
 	 *
 	 * @return an optional IRI identifying the deleted resource; empty if a description for {@code resource} was not
 	 * found

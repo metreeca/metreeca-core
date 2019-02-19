@@ -17,6 +17,9 @@
 
 package com.metreeca.form.things;
 
+import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Extractor;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -32,6 +35,7 @@ import static com.metreeca.form.things.Values.pattern;
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toCollection;
 
 
 /**
@@ -191,7 +195,6 @@ public final class Structures {
 	}
 
 
-
 	private static Model network(final Resource resource, final Source source) {
 
 		final Model network=new LinkedHashModel();
@@ -221,6 +224,37 @@ public final class Structures {
 		}
 
 		return network;
+	}
+
+
+	//// Shape Envelope ////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the shape envelope of a resource from a statement source.
+	 *
+	 * @param resource the resource whose shape envelope is to be retrieved
+	 * @param shape    the shape whose envelope is to be retrieved
+	 * @param model    the statement source the shape envelope is to be retrieved from
+	 *
+	 * @return the {@code shape} envelope of {@code resource} retrieved from {@code model}
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static Model envelope(final Resource resource, final Shape shape, final Iterable<Statement> model) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return shape.map(new Extractor(model, singleton(resource))).collect(toCollection(LinkedHashModel::new));
 	}
 
 

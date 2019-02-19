@@ -32,6 +32,7 @@ import javax.json.JsonValue;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.rest.handlers.actors._Shapes.resource;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -113,7 +114,11 @@ public final class Updater extends Delegator {
 
 				model -> request.reply(response -> engine
 
-						.update(request.item(), request.shape(), trace.trace(this, model)) // !!! anchoring
+						.update(
+								request.item(),
+								resource(request.item(), request.shape()),
+								trace.trace(this, model)
+						)
 
 						.map(focus -> focus.assess(Issue.Level.Error) // shape violations
 

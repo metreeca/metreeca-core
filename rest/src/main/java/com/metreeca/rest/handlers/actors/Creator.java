@@ -215,7 +215,7 @@ public final class Creator extends Delegator {
 								.create(
 										resource,
 										container(container, request.shape()),
-										trace.trace(this, rewrite(resource, container, model))
+										rewrite(resource, container, trace.trace(this, model))
 								)
 
 								.map(focus -> focus.assess(Level.Error) // shape violations

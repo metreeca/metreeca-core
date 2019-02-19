@@ -26,6 +26,7 @@ import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.rest.handlers.actors._Shapes.resource;
 
 
 /**
@@ -91,7 +92,7 @@ public final class Deleter extends Delegator {
 
 		) : request.reply(response -> engine
 
-				.delete(request.item(), request.shape()) // !!! anchoring
+				.delete(request.item(), resource(request.item(), request.shape()))
 
 				.map(iri -> response.status(Response.NoContent))
 
