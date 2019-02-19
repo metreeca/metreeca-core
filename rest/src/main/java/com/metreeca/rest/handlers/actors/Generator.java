@@ -36,8 +36,6 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.wrappers.Throttler.entity;
-import static com.metreeca.rest.wrappers.Throttler.resource;
 
 
 /**
@@ -92,8 +90,8 @@ public final class Generator extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.relate, Form.digest, entity()),
-				new Throttler(Form.relate, Form.detail, resource())
+				new Throttler(Form.relate, Form.digest, Throttler::entity),
+				new Throttler(Form.relate, Form.detail, Throttler::resource)
 		);
 	}
 

@@ -17,9 +17,11 @@
 
 package com.metreeca.rest.engines;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
+import com.metreeca.tray.rdf.Graph;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Statement;
@@ -33,7 +35,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.metreeca.form.Form.root;
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.Shape.filter;
@@ -67,6 +68,7 @@ import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.tray.rdf.GraphTest.tuples;
 
@@ -78,23 +80,28 @@ import static java.util.stream.Collectors.toList;
 final class GraphRetrieverTest extends GraphProcessorTest {
 
 	private Collection<Statement> query(final Query query) {
-		return new GraphRetriever().retrieve(root, query);
+		return tool(Graph.Factory).query(connection -> {
+			return query
+
+					.map(new GraphRetriever(connection, Form.root, true))
+
+					.stream()
+
+					// ;(virtuoso) counts reported as xsd:int
+
+					.map(statement -> type(statement.getObject()).equals(XMLSchema.INT) ? statement(
+							statement.getSubject(),
+							statement.getPredicate(),
+							literal(integer(statement.getObject()).orElse(BigInteger.ZERO)),
+							statement.getContext()
+					) : statement)
+
+					.collect(toList());
+		});
 	}
 
 
-	private Collection<Statement> fixInts(final Collection<Statement> model) { // ;(virtuoso) counts reported as xsd:int
-		return model.stream()
-				.map(statement -> type(statement.getObject()).equals(XMLSchema.INT)? statement(
-						statement.getSubject(),
-						statement.getPredicate(),
-						literal(integer(statement.getObject()).orElse(BigInteger.ZERO)),
-						statement.getContext()
-				) : statement)
-				.collect(toList());
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Queries ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Nested final class Edges {
 
@@ -117,11 +124,35 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testEmptyProjection() {
 			exec(() -> assertThat(query(
 
-					edges(clazz(term("Employee")))
+					edges(any(item("employees/1002"), item("employees/1056")))
 
-			)).isIsomorphicTo(graph(
+			)).isIsomorphicTo(graph( // empty template => symmetric+labelled concise bounded description
 
-					"construct { form:root ldp:contains ?employee } where { ?employee a :Employee }"
+					"construct {\n"
+							+"\n"
+							+"\tform:root ldp:contains ?employee.\n"
+							+"\t\n"
+							+"\t?employee ?d ?r.\n"
+							+"\t?r ?i ?employee.\n"
+							+"\n"
+							+"\t?r rdf:type ?t.\n"
+							+"\t?r rdfs:label ?l.\n"
+							+"\t?r rdfs:comment ?c.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\tvalues ?employee {\n"
+							+"\t\t<employees/1002>\n"
+							+"\t\t<employees/1056>\n"
+							+"\t}\n"
+							+"\n"
+							+"\t{ ?employee ?d ?r } union { ?r ?i ?employee }\n"
+							+"\n"
+							+"\toptional { ?r rdf:type ?t }\n"
+							+"\toptional { ?r rdfs:label ?l }\n"
+							+"\toptional { ?r rdfs:comment ?c }\n"
+							+"\n"
+							+"}"
 
 			)));
 		}
@@ -145,18 +176,19 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 				final String query="select ?employee "
 						+" where { ?employee a :Employee; rdfs:label ?label; :office ?office }";
 
-				final Shape shape=filter().then(field(RDF.TYPE, all(term("Employee"))));
-
+				final Shape shape=filter().then(clazz(term("Employee")));
 
 				final Function<Query, List<Value>> actual=edges -> query(edges)
 						.stream()
 						.filter(Values.pattern(null, LDP.CONTAINS, null))
 						.map(Statement::getObject)
+						.distinct()
 						.collect(toList());
 
 				final Function<String, List<Value>> expected=sparql -> tuples(sparql)
 						.stream()
 						.map(map -> map.get("employee"))
+						.distinct()
 						.collect(toList());
 
 
@@ -164,11 +196,11 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 						.as("default (on value)")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?employee"));
 
-				Assertions.assertThat(actual.apply(com.metreeca.form.queries.Edges.edges(shape, increasing(RDFS.LABEL))))
+				Assertions.assertThat(actual.apply(edges(shape, increasing(RDFS.LABEL))))
 						.as("custom increasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?label"));
 
-				Assertions.assertThat(actual.apply(com.metreeca.form.queries.Edges.edges(shape, decreasing(RDFS.LABEL))))
+				Assertions.assertThat(actual.apply(edges(shape, decreasing(RDFS.LABEL))))
 						.as("custom decreasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?label)"));
 
@@ -176,7 +208,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 						.as("custom combined")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?office ?label"));
 
-				Assertions.assertThat(actual.apply(com.metreeca.form.queries.Edges.edges(shape, decreasing())))
+				Assertions.assertThat(actual.apply(edges(shape, decreasing())))
 						.as("custom on root")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?employee)"));
 
@@ -204,7 +236,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 					stats(clazz(term("Employee")))
 
-			)).isIsomorphicTo(fixInts(graph(
+			)).isIsomorphicTo((Collection<Statement>)graph(
 
 					"construct { \n"
 							+"\n"
@@ -224,7 +256,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 							+"\n"
 							+"}"
 
-			))));
+			)));
 		}
 
 		@Test void testRootConstraints() {
@@ -232,7 +264,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 					stats(all(item("employees/1370")), term("account"))
 
-			)).isIsomorphicTo(fixInts(graph(
+			)).isIsomorphicTo((Collection<Statement>)graph(
 
 					"construct { \n"
 							+"\n"
@@ -249,7 +281,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 							+"\n"
 							+"}"
 
-			))));
+			)));
 		}
 
 	}
@@ -269,7 +301,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 					items(clazz(term("Employee")))
 
-			)).isIsomorphicTo(fixInts(graph(
+			)).isIsomorphicTo((Collection<Statement>)graph(
 
 					"construct { \n"
 							+"\n"
@@ -287,7 +319,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 							+"\n"
 							+"}"
 
-			))));
+			)));
 		}
 
 		@Test void testRootConstraints() {
@@ -320,7 +352,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Nested final class Annotations {
 
@@ -350,17 +382,22 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 				assertThat(query(
 
-						edges(filter().then(field(term("code"), datatype(XMLSchema.INTEGER))))
+						edges(field(term("code"), datatype(XMLSchema.INTEGER)))
 
 				)).isEmpty();
 
 				assertThat(query(
 
-						edges(filter().then(field(term("code"), datatype(XMLSchema.STRING))))
+						edges(field(term("code"), datatype(XMLSchema.STRING)))
 
 				)).isIsomorphicTo(graph(
 
-						"construct { form:root ldp:contains ?item } where {\n"
+						"construct {\n"
+								+"\n"
+								+"\tform:root ldp:contains ?item.\n"
+								+"\t?item :code ?code.\n"
+								+"\n"
+								+"} where {\n"
 								+"\n"
 								+"\t?item :code ?code filter ( datatype(?code) = xsd:string )\n"
 								+"\n"
@@ -374,11 +411,22 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testClazz() {
 			exec(() -> assertThat(query(
 
-					edges(clazz(term("Employee")))
+					edges(and(field(RDF.TYPE), clazz(term("Employee"))))
 
 			)).isIsomorphicTo(graph(
 
-					"construct { form:root ldp:contains ?employee } where { ?employee a :Employee }"
+					"construct {\n"
+							+"\n"
+							+"\tform:root ldp:contains ?employee.\n"
+							+"\t?employee a ?type\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\tvalues ?type { :Employee }\n"
+							+"\n"
+							+"\t?employee a ?type\n"
+							+"\n"
+							+"}"
 
 			)));
 		}
@@ -808,10 +856,12 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testOr() {
 			exec(() -> assertThat(query(
 
-					edges(or(
-							clazz(term("Office")),
-							clazz(term("Employee"))
-					))
+					edges(and(
+							field(RDF.TYPE),
+							or(
+									clazz(term("Office")),
+									clazz(term("Employee"))
+							)))
 
 
 			)).isIsomorphicTo(graph(
@@ -819,10 +869,16 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 					"construct {\n"
 							+"\n"
 							+"\tform:root ldp:contains ?item.\n"
+							+"\t?item a ?type.\n"
 							+"\n"
 							+"} where {\n"
 							+"\n"
-							+"\t{ ?item a :Office } union { ?item a :Employee }\n"
+							+"\tvalues ?type {\n"
+							+"\t\t:Office\n"
+							+"\t\t:Employee\n"
+							+"\t}\n"
+							+"\n"
+							+"\t?item a ?type.\n"
 							+"\n"
 							+"}"
 

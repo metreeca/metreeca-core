@@ -15,22 +15,40 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines_;
+package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Traverser;
+import com.metreeca.form.shapes.*;
+import com.metreeca.form.things.Sets;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static com.metreeca.form.Shape.filter;
+import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.inverse;
+
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -38,34 +56,43 @@ import static com.metreeca.form.things.Values.inverse;
  *
  * <p>Manages containment/membership triples for LDP containers.</p>
  */
-interface _Profile {
+public abstract class _Profile {
 
-	public static _Profile profile(final Shape shape) {
+	private static final Function<Shape, _Profile> profile=memoizable(shape -> {
 
 		final Map<IRI, Value> metadata=metas(shape);
 		final Value type=metadata.get(RDF.TYPE);
 
 		return LDP.BASIC_CONTAINER.equals(type) ? new Basic()
 				: LDP.DIRECT_CONTAINER.equals(type) ? new Direct(metadata)
-				: new None();
+				: new Basic();
 
+	});
+
+
+	public static Shape anchor(final Resource resource, final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return and(shape, filter().then(profile.apply(shape).anchor(resource)));
 	}
-
-
-	public Shape anchor(final Resource resource);
-
-	public RepositoryConnection insert(final RepositoryConnection connection,
-			final Resource container, final Resource resource, final Collection<Statement> model
-	);
-
-	public RepositoryConnection remove(final RepositoryConnection connection,
-			final Resource resource, final Collection<Statement> model
-	);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	final class None implements _Profile {
+	private _Profile() {} // ADT
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	protected abstract Shape anchor(final Resource resource);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class None extends _Profile {
 
 		private None() {}
 
@@ -74,26 +101,9 @@ interface _Profile {
 			return and();
 		}
 
-
-		@Override public RepositoryConnection insert(final RepositoryConnection connection,
-				final Resource container, final Resource resource, final Collection<Statement> model
-		) {
-
-			return connection;
-
-		}
-
-		@Override public RepositoryConnection remove(final RepositoryConnection connection,
-				final Resource resource, final Collection<Statement> model
-		) {
-
-			return connection;
-
-		}
-
 	}
 
-	final class Basic implements _Profile {
+	private static final class Basic extends _Profile {
 
 		private Basic() {}
 
@@ -102,29 +112,9 @@ interface _Profile {
 			return field(inverse(LDP.CONTAINS), resource);
 		}
 
-		@Override public RepositoryConnection insert(final RepositoryConnection connection,
-				final Resource container, final Resource resource, final Collection<Statement> model
-		) {
-
-			connection.add(container, LDP.CONTAINS, resource);
-
-			return connection;
-
-		}
-
-		@Override public RepositoryConnection remove(final RepositoryConnection connection,
-				final Resource resource, final Collection<Statement> model
-		) {
-
-			connection.remove((Resource)null, LDP.CONTAINS, resource);
-
-			return connection;
-
-		}
-
 	}
 
-	final class Direct implements _Profile {
+	private static final class Direct extends _Profile {
 
 		private final IRI relation;
 
@@ -167,45 +157,9 @@ interface _Profile {
 					: and();
 		}
 
-		@Override public RepositoryConnection insert(final RepositoryConnection connection,
-				final Resource container, final Resource resource, final Collection<Statement> model
-		) {
-
-			if ( relation != null && subject != null ) {
-				connection.add(subject(container), relation, resource);
-			}
-
-			if ( relation != null && object != null ) {
-				connection.add(resource, relation, object(container));
-			}
-
-			return connection;
-		}
-
-		@Override public RepositoryConnection remove(final RepositoryConnection connection,
-				final Resource resource, final Collection<Statement> model
-		) {
-
-			if ( relation != null && subject != null ) {
-				connection.remove((Resource)null, relation, resource);
-			}
-
-			if ( relation != null && object != null ) {
-				connection.remove(resource, relation, null);
-			}
-
-			return connection;
-		}
-
-
-		private Resource subject(final Resource container) {
-			return subject.equals(LDP.CONTAINER) ? container : subject;
-		}
-
-		private Value object(final Value container) {
-			return object.equals(LDP.CONTAINER) ? container : object;
-		}
-
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

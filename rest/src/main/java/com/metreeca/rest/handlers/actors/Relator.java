@@ -18,37 +18,39 @@
 package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
+import com.metreeca.form.queries.Edges;
+import com.metreeca.form.queries.Items;
+import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.engines.Engine;
 import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
-import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.queries.Edges.edges;
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.rest.Message.link;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.wrappers.Throttler.entity;
-import static com.metreeca.rest.wrappers.Throttler.resource;
-
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
+import static com.metreeca.rest.handlers.actors._Profile.anchor;
 
 
 /**
@@ -62,9 +64,9 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>the response includes the derived shape actually used in the {@linkplain Engine#browse(IRI) browsing} process,
- * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#convey}
- * mode and {@link Form#digest} view;</li>
+ * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
+ * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#convey} mode and {@link Form#digest}
+ * view;</li>
  *
  * <li>the response {@linkplain RDFBody RDF body} includes the RDF description of the container as matched by the
  * {@linkplain Throttler#container() container section} of redacted shape, linked using the {@code ldp:contains}
@@ -108,9 +110,9 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>the response includes the derived shape actually used in the {@linkplain Engine#relate(IRI) retrieval} process,
- * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail}
- * view and {@link Form#convey} mode;</li>
+ * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
+ * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail} view and {@link Form#convey}
+ * mode;</li>
  *
  * <li>the response {@link RDFBody RDF body} contains the RDF description of the request focus, as matched by the
  * redacted request shape.</li>
@@ -139,7 +141,7 @@ public final class Relator extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Function<Shape, GraphEngine> engine=GraphEngine::new; // !!! cache
+	private final _Engine engine=new GraphEngine();
 
 
 	public Relator() {
@@ -162,8 +164,8 @@ public final class Relator extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.relate, Form.digest, entity()),
-				new Throttler(Form.relate, Form.detail, resource())
+				new Throttler(Form.relate, Form.digest, Throttler::entity),
+				new Throttler(Form.relate, Form.detail, Throttler::resource)
 		);
 	}
 
@@ -173,87 +175,105 @@ public final class Relator extends Delegator {
 			final IRI item=request.item();
 			final Shape shape=request.shape();
 
-			final boolean container=request.container();
+			final boolean resource=!request.container();
 			final boolean minimal=include(request, LDP.PREFER_MINIMAL_CONTAINER);
-			final boolean total=request.query().isEmpty();
+			final boolean filtered=!request.query().isEmpty();
 
-			final Engine engine=shape.map(this.engine);
+			if ( resource || minimal ) {
 
-			if ( container && !minimal ) {
+				return filtered ? response.map(new Failure()
 
-				// containers are currently virtual and respond always with 200 OK even if not described in the graph
+						.status(Response.NotImplemented)
+						.cause("resource filtered retrieval not supported")
 
-				// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+				) : request.query(and(shape, filter().then(all(item)))).fold(
 
-				return pass(shape) && !total ? response.map(
+						query -> {
 
-						new Failure()
-								.status(Response.NotImplemented)
-								.cause("simple container filtered browsing not supported")
+							final Collection<Statement> model=engine.relate(item, query);
 
-				) : engine
+							return response
 
-						.browse(item, request::query, (rshape, rmodel) -> {
+									.status(resource && model.isEmpty() ? NotFound : OK) // !!! 410 Gone if previously known
 
-							if ( total ) { // retrieve container description
+									.header("+Preference-Applied",
+											minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
+									)
 
-								return engine
+									.shape(query.map(new Query.Probe<Shape>() {
 
-										.relate(item, _shape -> Value(edges(_shape)), (cshape, cmodel) -> response
-												.status(OK)
-												.shape(and(cshape, rshape))
-												.body(rdf(), Stream
-														.concat(cmodel.stream(), rmodel.stream())
-														.collect(toList())
-												)
-										)
+										@Override public Shape probe(final Edges edges) {
+											return edges.getShape(); // !!! add ldp:contains if edges.path is not empty
+										}
 
-										.fold(identity(), unexpected -> response);
+										@Override public Shape probe(final Stats stats) {
+											return Stats.Shape;
+										}
 
-							} else {
+										@Override public Shape probe(final Items items) {
+											return Items.Shape;
+										}
 
-								return response
-										.status(OK)
-										.shape(rshape)
-										.body(rdf(), rmodel);
+									}))
 
-							}
+									.body(rdf(), model);
 
-						}).fold(
-								identity(),
-								response::map
-						);
+						},
+
+						response::map
+
+				);
 
 			} else {
 
-				return total
+				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-						? engine
+				return request.query(anchor(item, ((Function<Shape, Shape>)Throttler::resource).apply(shape))).fold(
 
-						.relate(item, request::query, (_shape, model) -> response
+						query -> {
 
-								.status(!container && model.isEmpty() ? NotFound : OK) // !!! 410 Gone if previously known
+							final Collection<Statement> matches=engine.relate(item, query);
 
-								.header("+Preference-Applied",
-										minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
-								)
+							if ( filtered ) {
 
-								.shape(_shape)
-								.body(rdf(), model)
+								return response
+										.status(OK)
+										.shape(query.map(new Query.Probe<Shape>() {
 
-						)
+											@Override public Shape probe(final Edges edges) {
+												return field(LDP.CONTAINS, edges.getShape());
+											}
 
-						.fold(
-								identity(),
-								response::map
-						)
+											@Override public Shape probe(final Stats stats) {
+												return Stats.Shape;
+											}
 
-						: response
+											@Override public Shape probe(final Items items) {
+												return Items.Shape;
+											}
 
-						.map(new Failure()
-								.status(Response.NotImplemented)
-								.cause("resource browsing not supported")
-						);
+										}))
+										.body(rdf(), matches);
+
+							} else { // retrieve container description
+
+								// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+
+								return response
+										.status(OK)
+										.shape(shape)
+										.body(rdf(), concat(
+												matches,
+												engine.relate(item, edges(and(((Function<Shape, Shape>)Throttler::container).apply(shape), filter().then(all(item)))))
+										));
+
+							}
+
+						},
+
+						response::map
+
+				);
 
 			}
 

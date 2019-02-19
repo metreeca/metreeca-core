@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines_;
+package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Focus;
 import com.metreeca.form.Query;
@@ -41,7 +41,8 @@ public interface _Engine {
 	 * Retrieves a resource.
 	 *
 	 * @param resource the IRI identifying the resource whose description is to be retrieved
-	 * @param query    the query defining the details of {@code resource} to be retrieved
+	 * @param query    the query defining the details of {@code resource} to be retrieved; matched resources other than
+	 *                 {@code resource} are linked to {@code resource} with the {@code ldp:contains} property
 	 *
 	 * @return the description of {@code resource} matched by {@code query}; empty if a matching description for {@code
 	 * resource} was not found
@@ -55,7 +56,6 @@ public interface _Engine {
 	 * Creates a related resource.
 	 *
 	 * @param resource the IRI identifying the owning resource for the related resource to be created
-	 * @param related  the IRI to be assigned to the new related resource
 	 * @param model    the description for the new related resource owned by {@code resource}; must describe the related
 	 *                 resource using {@code related} as subject
 	 *
@@ -65,7 +65,7 @@ public interface _Engine {
 	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
 	 * @throws UnsupportedOperationException if resource creation is not supported by this engine
 	 */
-	public Optional<Focus> create(final IRI resource, final Shape shape, final IRI related, final Collection<Statement> model);
+	public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model);
 
 	/**
 	 * Updates a resource.

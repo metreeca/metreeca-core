@@ -17,157 +17,192 @@
 
 package com.metreeca.rest.engines;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
-import com.metreeca.rest.Result;
+import com.metreeca.form.*;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
+import com.metreeca.rest.handlers.actors._Engine;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static com.metreeca.form.Focus.focus;
+import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.shapes.Meta.metas;
+import static com.metreeca.form.queries.Edges.edges;
+import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.tray.Tray.tool;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
  * Graph-based engine.
  *
- * <p>Manages CRUD operations on linked data resources stored in a {@linkplain Graph graph}.</p>
+ * <p>Manages CRUD operations on linked data resources stored in the system {@linkplain Graph graph}.</p>
  */
-public final class GraphEngine implements Engine {
+public final class GraphEngine implements _Engine {
+
+	private static final Function<Shape, Shape> convey=memoizable(s -> s
+			.map(new Redactor(Form.mode, Form.convey))
+			.map(new Optimizer())
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Graph graph=tool(Graph.Factory);
 
-	private final Engine resource;
-	private final Engine container;
 
+	@Override public Collection<Statement> relate(final IRI resource, final Query query) {
 
-	public GraphEngine(final Shape shape) {
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		if ( query == null ) {
+			throw new NullPointerException("null query");
+		}
+
+		return graph.query(connection -> {
+			return query.map(new GraphRetriever(connection, resource, true));
+		});
+	}
+
+	@Override public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		final boolean simple=pass(shape); // ignore metadata
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
 
-		final Map<IRI, Value> metadata=metas(shape);
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 
-		this.resource=simple ? new SimpleResource(graph, metadata) : new ShapedResource(graph, shape);
-		this.container=simple ? new SimpleContainer(graph, metadata) : new ShapedContainer(graph, shape);
+		//return graph.update(connection -> {
+		//
+		//	return reserve(connection, related).map(reserved -> {
+		//
+		//		// validate before updating graph to support snapshot transactions
+		//
+		//		final Focus focus=new GraphValidator().validate(related, shape, model);
+		//
+		//		if ( !focus.assess(Issue.Level.Error) ) {
+		//
+		//			shape.map(flock).insert(connection, resource, reserved, model).add(model);
+		//
+		//		}
+		//
+		//		return focus;
+		//
+		//	});
+		//
+		//});
+
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Collection<Statement> relate(final IRI resource) {
+	@Override public Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");
 		}
 
-		return delegate(resource).relate(resource);
-	}
-
-	@Override public <V, E> Result<V, E> relate(final IRI resource,
-			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
-	) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( parser == null ) {
-			throw new NullPointerException("null parser");
-		}
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return delegate(resource).relate(resource, parser, mapper);
-	}
-
-	@Override public Collection<Statement> browse(final IRI resource) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		return delegate(resource).browse(resource);
-	}
-
-	@Override public <V, E> Result<V, E> browse(final IRI resource,
-			final Function<Shape, Result<? extends Query, E>> parser, final BiFunction<Shape, Collection<Statement>, V> mapper
-	) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( parser == null ) {
-			throw new NullPointerException("null parser");
-		}
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return delegate(resource).browse(resource, parser, mapper);
-	}
-
-	@Override public Optional<Focus> create(final IRI resource, final IRI related, final Collection<Statement> model) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( related == null ) {
-			throw new NullPointerException("null slug");
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
 		}
 
 		if ( model == null ) {
 			throw new NullPointerException("null model");
 		}
 
-		return delegate(resource).create(resource, related, model);
+		return graph.update(connection -> {
+			return Optional.of(edges(shape))
+
+					.map(query -> query.map(new GraphRetriever(connection, resource, false)))
+					.filter(current -> !current.isEmpty())
+
+					.map(current -> {
+
+						// validate against shape before updating graph to support snapshot transactions
+
+						final Shape xxx=shape.map(convey);
+
+						final Focus focus=xxx  // validate against shape
+								.map(new GraphValidator(connection, set(resource), model));
+
+
+						final Collection<Statement> envelope=pass(xxx)
+								? set() // !!! description(resource, false, model)
+								: focus.outline().collect(toSet()); // collect shape envelope
+
+						final Focus extended=focus( // extend validation report with errors for statements outside shape envelope
+
+								Stream.concat(
+
+										focus.getIssues().stream(),
+
+										model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
+												issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
+										)
+
+								).collect(toList()),
+
+								focus.getFrames()
+
+						);
+
+
+						if ( !extended.assess(Issue.Level.Error) ) {
+							connection.remove(current);
+							connection.add(model);
+						}
+
+						return extended;
+
+					});
+		});
 	}
 
-	@Override public Optional<Focus> update(final IRI resource, final Collection<Statement> model) {
+	@Override public Optional<Focus> delete(final IRI resource, final Shape shape) {
 
 		if ( resource == null ) {
 			throw new NullPointerException("null resource");
 		}
 
-		if ( model == null ) {
-			throw new NullPointerException("null model");
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
 		}
 
-		return delegate(resource).update(resource, model);
-	}
 
-	@Override public Optional<IRI> delete(final IRI resource) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		return delegate(resource).delete(resource);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Engine delegate(final Value target) {
-		return target.stringValue().endsWith("/") ? container : resource;
+		//return graph.update(connection -> {
+		//
+		//	// !!! merge retrieve/remove operations into a single SPARQL update txn
+		//	// !!! must check resource existence anyway and wouldn't work for CBD shapes
+		//
+		//	return retrieve(resource, shape.map(current -> { // identify deletable description
+		//
+		//		shape.map(flock).remove(connection, resource, current).remove(current);
+		//
+		//		return resource;
+		//
+		//	});
+		//
+		//});
 	}
 
 }

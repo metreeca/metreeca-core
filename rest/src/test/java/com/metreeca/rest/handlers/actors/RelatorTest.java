@@ -22,7 +22,6 @@ import com.metreeca.form.truths.JSONAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -43,7 +42,6 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static javax.json.Json.createObjectBuilder;
@@ -59,8 +57,12 @@ final class RelatorTest {
 	}
 
 
-	@SafeVarargs private final <V> String query(final Map.Entry<String, V>... entries) {
+	@SafeVarargs private final String query(final Map.Entry<String, ?>... entries) {
 		return createObjectBuilder(map(entries)).build().toString();
+	}
+
+	private Map.Entry<String, String> path(final String path) {
+		return entry("path", path);
 	}
 
 	private Map.Entry<String, Map<String, Object>> filter(final String path, final Object value) {
@@ -76,7 +78,7 @@ final class RelatorTest {
 			return new Request()
 					.method(Request.GET)
 					.base(Base)
-					.path("/employees/1370");
+					.path("/employees/1102");
 		}
 
 
@@ -140,21 +142,19 @@ final class RelatorTest {
 
 						.handle(shaped())
 
-						.accept(response -> tool(Graph.Factory).query(connection -> {
+						.accept(response -> assertThat(response)
 
-							assertThat(response)
+								.hasStatus(Response.OK)
 
-									.hasStatus(Response.OK)
+								.hasShape()
 
-									.hasShape()
-
-									.hasBody(rdf(), rdf -> assertThat(rdf)
-											.as("items retrieved")
-											.hasSubset(construct(connection,
-													"construct where { <employees/1370> a :Employee; :code ?c; :seniority ?s }"
-											)));
-
-						}))
+								.hasBody(rdf(), rdf -> assertThat(rdf)
+										.as("items retrieved")
+										.hasSubset(graph(
+												"construct where { <employees/1102> a :Employee; :code ?c; :seniority ?s }"
+										))
+								)
+						)
 				);
 			}
 
@@ -163,36 +163,62 @@ final class RelatorTest {
 
 						.handle(shaped().roles(Salesman))
 
-						.accept(response -> tool(Graph.Factory).query(connection -> {
+						.accept(response -> assertThat(response)
 
-							assertThat(response)
+								.hasStatus(Response.OK)
 
-									.hasStatus(Response.OK)
+								.hasBody(rdf(), rdf -> assertThat(rdf)
 
-									.hasBody(rdf(), rdf -> assertThat(rdf)
+										.as("items retrieved")
+										.hasSubset(graph(
+												"construct where { <employees/1102> a :Employee; :code ?c }"
+										))
 
-											.as("items retrieved")
-											.hasSubset(construct(connection,
-													"construct where { <employees/1370> a :Employee; :code ?c }"
-											))
-
-											.as("properties restricted to manager role not included")
-											.doesNotHaveStatement(null, term("seniority"), null));
-
-						}))
+										.as("properties restricted to manager role not included")
+										.doesNotHaveStatement(null, term("seniority"), null)
+								)
+						)
 				);
 			}
 
 			@Test void testRelateFiltered() {
 				exec(() -> new Relator()
 
-						.handle(shaped().query(query(filter("seniority", 3))))
+						.handle(shaped().query(query(
+								path("subordinate"),
+								filter("seniority", map(entry(">=", 2)))
+						)))
 
 						.accept(response -> assertThat(response)
-								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> JSONAssert.assertThat(json)
-										.hasField("cause")
-								)
+
+										.hasStatus(Response.NotImplemented)
+
+										.hasBody(json(), json -> JSONAssert.assertThat(json)
+												.hasField("cause")
+										)
+
+								//.hasStatus(Response.OK)
+								//
+								//.hasBody(rdf(), rdf -> assertThat(rdf)
+								//
+								//		.as("items retrieved")
+								//		.hasSubset(graph(
+								//				"construct {\n"
+								//						+"\n"
+								//						+"\t<employees/1102> ldp:contains ?employee.\n"
+								//						+"\t?employee rdfs:label ?label.\n"
+								//						+"\n"
+								//						+"} where {\n"
+								//						+"\n"
+								//						+"\t<employees/1102> :subordinate ?employee.\n"
+								//						+"\n"
+								//						+"\t?employee rdfs:label ?label; :seniority ?seniority.\n"
+								//						+"\n"
+								//						+"\tfilter ( ?seniority >= 2 )\n"
+								//						+"\n"
+								//						+"}"
+								//		))
+
 						)
 				);
 			}
@@ -239,19 +265,66 @@ final class RelatorTest {
 					.roles(Manager)
 					.method(Request.GET)
 					.base(Base)
-					.path("/employees/");
+					.path("/employees-basic/");
 		}
 
 
 		@Nested final class Simple {
 
+			@Test void testBrowse() {
+				exec(() -> new Relator()
+
+						.handle(simple())
+
+						.accept(response -> assertThat(response)
+
+								.hasStatus(Response.OK)
+
+								.doesNotHaveShape()
+
+								.hasBody(rdf(), rdf -> assertThat(rdf)
+
+										.as("labelled descriptions included")
+										.hasSubset(graph("construct {\n"
+												+"\n"
+												+"\t<employees-basic/> ldp:contains ?employee.\n"
+												+"\n"
+												+"\t?employee :code ?code; :office ?office.\n"
+												+"\t?office rdfs:label ?label.\n"
+												+"\n"
+												+"} where {\n"
+												+"\n"
+												+"\t?employee a :Employee; :code ?code; :office ?office.\n"
+												+"\t?office rdfs:label ?label.\n"
+												+"\n"
+												+"}"
+										))
+
+										.as("connected resources not described")
+										.doesNotHaveSubset(graph("construct {\n"
+												+"\n"
+												+"\t?office :code ?code.\n"
+												+"\n"
+												+"} where {\n"
+												+"\n"
+												+"\t?employee a :Employee; :office ?office.\n"
+												+"\t?office :code ?code.\n"
+												+"\n"
+												+"}"
+										))
+
+								)
+						)
+				);
+			}
+
 			@Test void testBrowseFiltered() {
 				exec(() -> new Relator()
 
-						.handle(simple().query("{ \"filter\": { \">\": 10 } }"))
+						.handle(simple().query(query(filter("seniority", map(entry(">=", 2))))))
 
 						.accept(response -> assertThat(response)
-								.hasStatus(Response.NotImplemented)
+								.hasStatus(Response.UnprocessableEntity)
 								.hasBody(json())
 						)
 				);
@@ -262,7 +335,9 @@ final class RelatorTest {
 		@Nested final class Shaped {
 
 			private Request shaped() {
-				return simple().shape(Employees);
+				return simple()
+						.shape(Employees)
+						.path("/employees/");
 			}
 
 
@@ -285,7 +360,7 @@ final class RelatorTest {
 				);
 			}
 
-			@Test void testBrowseLimited() {
+			@Test void testBrowseThrottled() {
 				exec(() -> new Relator()
 
 						.handle(shaped().roles(Salesman))
@@ -335,7 +410,7 @@ final class RelatorTest {
 			}
 
 
-			@Test void testDrivePreferEmptyContainer() {
+			@Test void testHandlePreferMinimalContainer() {
 				exec(() -> new Relator()
 
 						.handle(shaped().header("Prefer", String.format(

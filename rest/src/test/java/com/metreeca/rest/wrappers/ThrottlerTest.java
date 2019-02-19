@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.function.Function;
 
 import static com.metreeca.form.Shape.relate;
 import static com.metreeca.form.Shape.required;
@@ -53,9 +54,6 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.wrappers.Throttler.container;
-import static com.metreeca.rest.wrappers.Throttler.entity;
-import static com.metreeca.rest.wrappers.Throttler.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -298,7 +296,7 @@ final class ThrottlerTest {
 							.hasStatus(Response.OK)
 							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.as("extended with implied statements and trimmed")
-									.isIsomorphicTo(decode("<> a :Employee; :email 'tino.faussone@example.com'."))
+									.isIsomorphicTo(decode("<> :email 'tino.faussone@example.com'."))
 							)
 					)
 			);
@@ -322,7 +320,7 @@ final class ThrottlerTest {
 		@Nested final class Entity {
 
 			@Test void testForwardAndAnnotateComboShape() {
-				assertThat(entity().apply(Employees))
+				assertThat(((Function<Shape, Shape>)Throttler::entity).apply(Employees))
 
 						.satisfies(shape -> assertThat(fields(shape).keySet())
 								.as("all fields retained")
@@ -345,7 +343,7 @@ final class ThrottlerTest {
 			}
 
 			@Test void testForwardAndAnnotateContainerShape() {
-				assertThat(entity().apply(Container))
+				assertThat(((Function<Shape, Shape>)Throttler::entity).apply(Container))
 
 						.satisfies(shape -> assertThat(fields(shape))
 								.as("only container fields retained")
@@ -363,7 +361,7 @@ final class ThrottlerTest {
 			}
 
 			@Test void testForwardResourceShape() {
-				assertThat(entity().apply(Employee))
+				assertThat(((Function<Shape, Shape>)Throttler::entity).apply(Employee))
 						.as("only resource shape found")
 						.isEqualTo(Employee.map(new Optimizer()));
 			}
@@ -373,7 +371,7 @@ final class ThrottlerTest {
 		@Nested final class Resource {
 
 			@Test void testExtractAndAnnotateResourceShapeFromComboShape() {
-				assertThat(resource().apply(Employees))
+				assertThat(((Function<Shape, Shape>)Throttler::resource).apply(Employees))
 
 						.satisfies(shape -> assertThat(fields(shape))
 								.as("only resource fields retained")
@@ -391,7 +389,7 @@ final class ThrottlerTest {
 			}
 
 			@Test void testForwardAndAnnotateContainerShape() {
-				assertThat(resource().apply(Container))
+				assertThat(((Function<Shape, Shape>)Throttler::resource).apply(Container))
 
 						.satisfies(shape -> assertThat(fields(shape))
 								.as("only container fields retained")
@@ -409,7 +407,7 @@ final class ThrottlerTest {
 			}
 
 			@Test void testForwardResourceShape() {
-				assertThat(resource().apply(Employee))
+				assertThat(((Function<Shape, Shape>)Throttler::resource).apply(Employee))
 						.as("only resource shape found")
 						.isEqualTo(Employee.map(new Optimizer()));
 			}
@@ -418,7 +416,7 @@ final class ThrottlerTest {
 
 				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
-				assertThat(resource().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
+				assertThat(((Function<Shape, Shape>)Throttler::resource).apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
 			}
 
@@ -427,7 +425,7 @@ final class ThrottlerTest {
 		@Nested final class Container {
 
 			@Test void testExtractAndAnnotateContainerShapeFromComboShape() {
-				assertThat(container().apply(Employees))
+				assertThat(((Function<Shape, Shape>)Throttler::container).apply(Employees))
 
 						.satisfies(shape -> assertThat(fields(shape).keySet())
 								.as("only container fields retained")
@@ -449,7 +447,7 @@ final class ThrottlerTest {
 			}
 
 			@Test void testIgnoreResourceShape() {
-				assertThat(container().apply(Employee))
+				assertThat(((Function<Shape, Shape>)Throttler::container).apply(Employee))
 						.as("no container shape found")
 						.isEqualTo(pass());
 
@@ -459,7 +457,7 @@ final class ThrottlerTest {
 
 				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER), field(LDP.CONTAINS, required()));
 
-				assertThat(container().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
+				assertThat(((Function<Shape, Shape>)Throttler::container).apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
 			}
 

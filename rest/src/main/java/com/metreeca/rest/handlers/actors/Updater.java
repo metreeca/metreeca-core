@@ -20,23 +20,18 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
-import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.bodies.RDFBody;
+import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
-import java.util.function.Function;
-
 import javax.json.JsonValue;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.wrappers.Throttler.container;
-import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -92,7 +87,7 @@ public final class Updater extends Delegator {
 
 	private final Trace trace=tool(Trace.Factory);
 
-	private final Function<Shape, GraphEngine> engine=GraphEngine::new; // !!! cache
+	private final _Engine engine=new GraphEngine();
 
 
 	public Updater() {
@@ -104,8 +99,8 @@ public final class Updater extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.update, Form.detail, container()),
-				new Throttler(Form.update, Form.detail, resource())
+				new Throttler(Form.update, Form.detail, Throttler::container),
+				new Throttler(Form.update, Form.detail, Throttler::resource)
 		);
 	}
 
@@ -116,9 +111,9 @@ public final class Updater extends Delegator {
 
 		) : request.body(rdf()).fold(
 
-				model -> request.reply(response -> request.shape().map(engine)
+				model -> request.reply(response -> engine
 
-						.update(request.item(), trace.trace(this, model))
+						.update(request.item(), request.shape(), trace.trace(this, model)) // !!! anchoring
 
 						.map(focus -> focus.assess(Issue.Level.Error) // shape violations
 

@@ -20,10 +20,9 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
-import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.bodies.RDFBody;
+import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
@@ -33,7 +32,6 @@ import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import javax.json.JsonValue;
 
@@ -42,7 +40,6 @@ import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Response.NotImplemented;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.repository.util.Connections.getStatement;
@@ -153,7 +150,7 @@ public final class Creator extends Delegator {
 
 	private final BiFunction<Request, Collection<Statement>, String> slug;
 
-	private final Function<Shape, GraphEngine> engine=GraphEngine::new; // !!! cache
+	private final _Engine engine=new GraphEngine();
 
 
 
@@ -189,7 +186,7 @@ public final class Creator extends Delegator {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper throttler() {
-		return new Throttler(Form.create, Form.detail, resource());
+		return new Throttler(Form.create, Form.detail, Throttler::resource);
 	}
 
 	private Handler creator() {
@@ -211,11 +208,11 @@ public final class Creator extends Delegator {
 						final IRI source=request.item();
 						final IRI target=iri(request.stem(), name);
 
-						return request.reply(response -> request.shape().map(engine)
+						return request.reply(response -> engine
 
 								// !!! recognize txns failures due to conflicting slugs and report as 409 Conflict
 
-								.create(source, target, trace.trace(this, rewrite(source, target, model)))
+								.create( target, request.shape(), trace.trace(this, rewrite(target, source, model))) // !!! anchors
 
 								.map(focus -> focus.assess(Level.Error) // shape violations
 
@@ -258,20 +255,20 @@ public final class Creator extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> rewrite(final IRI source, final IRI target, final Collection<Statement> model) {
-		return model.stream().map(statement -> rewrite(source, target, statement)).collect(toList());
+	private Collection<Statement> rewrite(final IRI target, final IRI source, final Collection<Statement> model) {
+		return model.stream().map(statement -> rewrite(target, source, statement)).collect(toList());
 	}
 
-	private Statement rewrite(final IRI source, final IRI target, final Statement statement) {
+	private Statement rewrite(final IRI target, final IRI source, final Statement statement) {
 		return statement(
-				rewrite(source, target, statement.getSubject()),
-				rewrite(source, target, statement.getPredicate()),
-				rewrite(source, target, statement.getObject()),
-				rewrite(source, target, statement.getContext())
+				rewrite(target, source, statement.getSubject()),
+				rewrite(target, source, statement.getPredicate()),
+				rewrite(target, source, statement.getObject()),
+				rewrite(target, source, statement.getContext())
 		);
 	}
 
-	private <T extends Value> T rewrite(final T source, final T target, final T value) {
+	private <T extends Value> T rewrite(final T target, final T source, final T value) {
 		return source.equals(value) ? target : value;
 	}
 

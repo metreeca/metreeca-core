@@ -30,12 +30,12 @@ import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.item;
-import static com.metreeca.rest.engines.Descriptions.description;
+import static com.metreeca.rest.engines._Descriptions.description;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class DescriptionsTest {
+final class _DescriptionsTest {
 
 	private static final IRI focus=item("focus");
 

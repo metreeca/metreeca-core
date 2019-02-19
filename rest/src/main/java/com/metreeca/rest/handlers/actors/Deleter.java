@@ -19,18 +19,13 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.engines.GraphEngine;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
-import java.util.function.Function;
-
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.wrappers.Throttler.entity;
-import static com.metreeca.rest.wrappers.Throttler.resource;
 
 
 /**
@@ -73,7 +68,7 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
  */
 public final class Deleter extends Delegator {
 
-	private final Function<Shape, GraphEngine> engine=GraphEngine::new; // !!! cache
+	private final _Engine engine=new GraphEngine();
 
 
 	public Deleter() {
@@ -84,8 +79,8 @@ public final class Deleter extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.delete, Form.detail, entity()),
-				new Throttler(Form.delete, Form.detail, resource())
+				new Throttler(Form.delete, Form.detail, Throttler::entity),
+				new Throttler(Form.delete, Form.detail, Throttler::resource)
 		);
 	}
 
@@ -94,9 +89,9 @@ public final class Deleter extends Delegator {
 
 				new Failure().status(Response.NotImplemented).cause("container deletion not supported")
 
-		) : request.reply(response -> request.shape().map(engine)
+		) : request.reply(response -> engine
 
-				.delete(request.item())
+				.delete(request.item(), request.shape()) // !!! anchoring
 
 				.map(iri -> response.status(Response.NoContent))
 

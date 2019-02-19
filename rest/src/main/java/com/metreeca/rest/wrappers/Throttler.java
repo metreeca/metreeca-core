@@ -33,7 +33,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.probes.Evaluator.empty;
@@ -113,43 +112,83 @@ public final class Throttler implements Wrapper {
 			LDP.INSERTED_CONTENT_RELATION
 	);
 
+
 	private static final Function<Shape, Shape> anyone=memoizable(s -> s
 			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
 
+	private static final Function<Shape, Shape> entity=memoizable(
+			shape -> and(metadata(shape), shape).map(new Optimizer())
+	);
+
+	private static final Function<Shape, Shape> container=memoizable(
+			merge((container, resource) -> pass(resource) ? pass() : container)
+	);
+
+	private static final Function<Shape, Shape> resource=memoizable(
+			merge((container, resource) -> pass(resource) ? container : resource)
+	);
+
 
 	/**
-	 * Creates an identity shape operator.
+	 * Retrieves the entity section of a shape.
 	 *
-	 * @return a shape operator returning its input shape
+	 * @param shape the shape whose entity section is to be retrieved
+	 *
+	 * @return the input {@code shape}
+	 *
+	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public static UnaryOperator<Shape> entity() {
-		return shape -> and(metadata(shape), shape).map(new Optimizer());
+	public static Shape entity(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shape.map(entity);
 	}
 
 	/**
-	 * Creates a container shape operator.
+	 * Retrieves the container section of a shape.
 	 *
-	 * @return a shape operator returning a shape pruned of {@linkplain LDP#CONTAINS ldp:contains} fields, if one is
-	 * actually included, or an empty shape, otherwise
+	 * @param shape the shape whose container section is to be retrieved
+	 *
+	 * @return the input {@code shape} pruned of {@linkplain LDP#CONTAINS ldp:contains} fields, if at least one is
+	 * actually included; an empty shape, otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public static UnaryOperator<Shape> container() {
-		return merge((container, resource) -> pass(resource) ? pass() : container);
+	public static Shape container(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shape.map(container);
 	}
 
 	/**
-	 * Creates a resource shape operator.
+	 * Retrieves the resource section of a shape.
 	 *
-	 * @return a shape operator returning a shape limited to the shapes associated to {@linkplain LDP#CONTAINS
-	 * ldp:contains} fields, if one is actually included, or the source shape, otherwise
+	 * @param shape the shape whose resource section is to be retrieved
+	 *
+	 * @return the conjunction of the shapes associated to {@linkplain LDP#CONTAINS ldp:contains} fields in the input
+	 * {@code shape}, if at least one is actually included; the source {@code shape}, otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public static UnaryOperator<Shape> resource() {
-		return merge((container, resource) -> pass(resource) ? container : resource);
+	public static Shape resource(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shape.map(resource);
 	}
 
 
-	private static UnaryOperator<Shape> merge(final BinaryOperator<Shape> merger) {
+	private static Function<Shape, Shape> merge(final BinaryOperator<Shape> merger) {
 		return shape -> {
 
 			final Shape container=shape
@@ -168,7 +207,6 @@ public final class Throttler implements Wrapper {
 
 		};
 	}
-
 
 	private static Shape metadata(final Shape shape) {
 
@@ -189,7 +227,6 @@ public final class Throttler implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	private final Function<Shape, Shape> common;
 	private final Function<Shape, Shape> convey;
 
@@ -203,7 +240,7 @@ public final class Throttler implements Wrapper {
 	 * @throws NullPointerException if either {@code task} or {@code view} is null
 	 */
 	public Throttler(final Value task, final Value view) {
-		this(task, view, entity());
+		this(task, view, Throttler::entity);
 	}
 
 	/**
@@ -296,24 +333,24 @@ public final class Throttler implements Wrapper {
 	private Wrapper post() {
 		return handler -> request -> handler.handle(request).map(response -> {
 
-			final IRI focus=request.item();
-			final Shape shape=response.shape();
+			final IRI item=request.item();
+			final Shape shape=response.shape().map(convey);
 
 			if ( pass(shape) ) {
 
-				return response
-						.pipe(rdf(), rdf -> Value(network(focus, rdf)));
+				return response.shape(shape)
+						.pipe(rdf(), rdf -> Value(network(item, rdf)));
 
 			} else {
 
 				final Shape redacted=shape
-						.map(convey)
+
 						.map(new Redactor(Form.role, request.roles()))
 						.map(new Optimizer());
 
 				return response.shape(redacted)
-						.pipe(rdf(), rdf -> Value(envelope(focus, redacted, rdf)))
-						.pipe(rdf(), rdf -> Value(expand(focus, redacted, rdf)));
+						.pipe(rdf(), rdf -> Value(envelope(item, redacted, rdf)))
+						.pipe(rdf(), rdf -> Value(expand(item, redacted, rdf)));
 
 			}
 
@@ -337,26 +374,18 @@ public final class Throttler implements Wrapper {
 	/**
 	 * Retrieves a reachable network from a statement source.
 	 *
-	 * @param focus the resource whose reachable network is to be retrieved
+	 * @param resource the resource whose reachable network is to be retrieved
 	 * @param model the statement source the description is to be retrieved from
 	 *
 	 * @return the reachable network of {@code focus} retrieved from {@code model}
 	 *
 	 * @throws NullPointerException if either {@code focus} or {@code model} is null
 	 */
-	private Model network(final IRI focus, final Iterable<Statement> model) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
+	private Model network(final IRI resource, final Iterable<Statement> model) {
 
 		final Model network=new LinkedHashModel();
 
-		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
+		final Queue<Value> pending=new ArrayDeque<>(singleton(resource));
 		final Collection<Value> visited=new HashSet<>();
 
 		while ( !pending.isEmpty() ) {
@@ -388,7 +417,7 @@ public final class Throttler implements Wrapper {
 	/**
 	 * Retrieves a shape envelope from a statement source.
 	 *
-	 * @param focus the resource whose envelope is to be retrieved
+	 * @param resource the resource whose envelope is to be retrieved
 	 * @param shape the shape whose envelope is to be retrieved
 	 * @param model the statement source the description is to be retrieved from
 	 *
@@ -396,21 +425,8 @@ public final class Throttler implements Wrapper {
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	private Model envelope(final Value focus, final Shape shape, final Iterable<Statement> model) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
-		return shape.map(new Extractor(model, singleton(focus))).collect(toCollection(LinkedHashModel::new));
+	private Model envelope(final Value resource, final Shape shape, final Iterable<Statement> model) {
+		return shape.map(new Extractor(model, singleton(resource))).collect(toCollection(LinkedHashModel::new));
 	}
 
 

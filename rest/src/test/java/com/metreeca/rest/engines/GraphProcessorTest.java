@@ -76,9 +76,6 @@ abstract class GraphProcessorTest {
 		return new Virtuoso("jdbc:virtuoso://localhost:1111/", "dba", "dba", iri(Base));
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private Graph dydra() {
 		return new RDF4JSPARQL("https://dydra.com/metreeca/birt-small/sparql").isolation(READ_ONLY);
 	}

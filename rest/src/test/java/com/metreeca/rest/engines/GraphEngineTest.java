@@ -15,71 +15,43 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines_;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.ValuesTest;
+import com.metreeca.rest.handlers.actors._Engine;
 import com.metreeca.tray.Tray;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.vocabulary.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.Form.stats;
 import static com.metreeca.form.Shape.filter;
-import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.queries.Items.items;
-import static com.metreeca.form.queries.Stats.stats;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.Meta.meta;
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.Values.pattern;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.wrappers.Throttler.resource;
 import static com.metreeca.tray.rdf.GraphTest.graph;
-
-import static java.util.stream.Collectors.toSet;
 
 
 final class GraphEngineTest {
 
-	private final IRI Paris=item("offices/4");
 	private final IRI Hernandez=item("employees/1370");
 	private final IRI Bondur=item("employees/1102");
-
-	private final IRI BasicContainer=item("/employees-basic/");
-	private final IRI DirectContainer=item("/employees/");
-
-	private static final Shape BasicMetadata=and(
-			meta(RDF.TYPE, LDP.BASIC_CONTAINER)
-	);
-
-	private static final Shape DirectMetadata=and(
-			meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
-			meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-			meta(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-	);
+	private final IRI Unknown=item("employees/9999");
 
 	public static final Shape Employee=ValuesTest.Employee
-			.map(resource())
 			.map(new Redactor(Form.role, Salesman))
 			.map(new Optimizer());
-
-	private final Shape TitleFilter=filter().then(
-			field(term("title"), all(literal("President")))
-	);
 
 
 	private void exec(final Runnable task) {
@@ -107,41 +79,37 @@ final class GraphEngineTest {
 				.map(new Optimizer());
 
 
-		@Nested final class SimpleResource {
+		@Nested final class Simple {
 
 			@Test void testRelate() {
-				exec(() -> {
+				exec(() -> assertThat(engine().relate(Hernandez, edges(filter().then(all(Hernandez)))))
 
-					assertThat(engine().relate(Hernandez, edges(pass())))
+						.as("resource description")
+						.hasStatement(Hernandez, term("code"), literal("1370"))
+						.hasStatement(Hernandez, term("supervisor"), Bondur)
 
-							.as("resource description")
-							.hasStatement(Hernandez, term("code"), literal("1370"))
-							.hasStatement(Hernandez, term("supervisor"), Bondur)
-
-							.as("labelled connected resource description")
-							.hasStatement(Bondur, RDF.TYPE, term("Employee"))
-							.hasStatement(Bondur, RDFS.LABEL, literal("Gerard Bondur"))
-							.doesNotHaveStatement(Bondur, term("code"), null);
-
-				});
+						.as("labelled connected resource description")
+						.hasStatement(Bondur, RDF.TYPE, term("Employee"))
+						.hasStatement(Bondur, RDFS.LABEL, literal("Gerard Bondur"))
+						.doesNotHaveStatement(Bondur, term("code"), null));
 			}
 
 			@Test void testUnknown() {
-				exec(() -> assertThat(engine().relate(item("employees/9999"), edges(pass())))
+				exec(() -> assertThat(engine().relate(Unknown, edges(filter().then(all(Hernandez)))))
 						.as("empty description")
 						.isEmpty());
 			}
 
 		}
 
-		@Nested final class ShapedResource {
+		@Nested final class Shaped {
 
 			@Test void testRelate() {
 				exec(() -> {
 
 					final IRI hernandez=item("employees/1370");
 
-					assertThat(engine().relate(hernandez, edges(Employee)))
+					assertThat(engine().relate(hernandez, edges(and(Employee, filter().then(all(Hernandez))))))
 
 							.as("resource description")
 							.hasStatement(hernandez, term("code"), literal("1370"))
@@ -153,135 +121,9 @@ final class GraphEngineTest {
 			}
 
 			@Test void testUnknown() {
-				exec(() -> assertThat(engine().relate(item("employees/9999"), edges(Employee)))
+				exec(() -> assertThat(engine().relate(Unknown, edges(and(Employee, filter().then(all(Unknown))))))
 						.as("empty description")
 						.isEmpty());
-			}
-
-		}
-
-		@Nested final class SimpleBasicContainer {
-
-			@Test void testRelate() {
-				exec(() -> assertThat(engine().relate(BasicContainer, edges(and(BasicMetadata, and()))))
-
-						.as("item descriptions linked to container")
-						.hasStatement(BasicContainer, LDP.CONTAINS, Hernandez)
-
-						.as("item descriptions included")
-						.hasStatement(Hernandez, term("code"), literal("1370"))
-						.hasStatement(Hernandez, term("supervisor"), Bondur)
-
-						.as("connected resource short description included")
-						.hasStatement(Paris, RDFS.LABEL, null)
-						.doesNotHaveStatement(Paris, term("code"), null));
-
-			}
-
-			@Test void testEmpty() {
-				exec(() -> assertThat(engine().relate(term("employees-none/"), edges(and(BasicMetadata, and()))))
-						.isEmpty()
-				);
-			}
-
-		}
-
-		@Nested final class SimpleDirectContainer {
-
-			@Test void testRelate() {
-				exec(() -> assertThat(engine().relate(BasicContainer, edges(and(DirectMetadata, and()))))
-
-						.as("item descriptions linked to container")
-						.hasStatement(BasicContainer, LDP.CONTAINS, Hernandez)
-
-						.as("item descriptions included")
-						.hasStatement(Hernandez, term("code"), literal("1370"))
-						.hasStatement(Hernandez, term("supervisor"), Bondur)
-
-						.as("connected resource short description included")
-						.hasStatement(Paris, RDFS.LABEL, null)
-						.doesNotHaveStatement(Paris, term("code"), null));
-
-			}
-
-			@Test void testEmpty() {
-				exec(() -> assertThat(engine().relate(DirectContainer, edges(and(and(
-						meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
-						meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-						meta(LDP.MEMBERSHIP_RESOURCE, RDF.NIL)
-				), and())))).isEmpty());
-			}
-
-		}
-
-		@Nested final class ShapedBasicContainer {
-
-			@Test void testRelate() {
-				exec(() -> assertThat(engine().relate(BasicContainer, edges(and(BasicMetadata, Employee))))
-
-						.as("item descriptions linked to container")
-						.hasStatement(BasicContainer, LDP.CONTAINS, Hernandez)
-
-						.as("item descriptions included")
-						.hasStatement(Hernandez, term("code"), literal("1370"))
-
-						.as("restricted properties excluded")
-						.doesNotHaveStatement(Hernandez, term("supervisor"), null)
-
-				);
-			}
-
-		}
-
-		@Nested final class ShapedDirectContainer {
-
-			@Test void testRelate() {
-				exec(() -> assertThat(engine().relate(DirectContainer, edges(and(DirectMetadata, Employee))))
-
-						.as("item descriptions linked to container")
-						.hasStatement(DirectContainer, LDP.CONTAINS, Hernandez)
-
-						.as("item descriptions included")
-						.hasStatement(Hernandez, term("code"), literal("1370"))
-
-						.as("restricted properties excluded")
-						.doesNotHaveStatement(Hernandez, term("supervisor"), null)
-
-				);
-			}
-
-			@Test void testRelateFiltered() {
-				exec(() -> Assertions.assertThat(engine()
-								.relate(DirectContainer, edges(and(DirectMetadata, Employee, TitleFilter)))
-								.stream()
-								.filter(pattern(null, LDP.CONTAINS, null))
-								.map(Statement::getObject)
-								.collect(toSet())
-						).containsOnly(item("employees/1002"))
-
-				);
-
-			}
-
-			@Test void testRelateStats() {
-				exec(() -> assertThat(engine().relate(DirectContainer, stats(and(DirectMetadata, Employee), list(term("title")))))
-
-						.as("query-specific payload")
-						.hasStatement(DirectContainer, Form.count, null)
-						.hasStatement(DirectContainer, stats, XMLSchema.STRING)
-						.hasStatement(XMLSchema.STRING, Form.count, null)
-
-				);
-			}
-
-			@Test void testRelateItems() {
-				exec(() -> assertThat(engine().relate(DirectContainer, items(and(DirectMetadata, Employee), list(term("title")))))
-
-						.as("query-specific payload")
-						.hasStatement(DirectContainer, Form.items, null)
-						.hasStatement(null, Form.value, literal("President"))
-
-				);
 			}
 
 		}
@@ -516,7 +358,7 @@ final class GraphEngineTest {
 			@Test void testUnknown() {
 				exec(() -> {
 
-					Assertions.assertThat(engine().update(item("employees/9999"), and(), set()))
+					Assertions.assertThat(engine().update(Unknown, and(), set()))
 							.as("not found ")
 							.isNotPresent();
 
@@ -587,7 +429,7 @@ final class GraphEngineTest {
 			@Test void testUnknown() {
 				exec(() -> {
 
-					Assertions.assertThat(engine().update(item("employees/9999"), Employee, set()))
+					Assertions.assertThat(engine().update(Unknown, Employee, set()))
 							.as("not found ")
 							.isNotPresent();
 

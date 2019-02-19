@@ -96,8 +96,6 @@ public final class ValuesTest {
 
 	public static final Shape Employee=role(Manager, Salesman).then(
 
-			clazz(term("Employee")), // implies rdf:type :Employee
-
 			convey().then(
 					server().then(
 							field(RDF.TYPE, and(required(), datatype(Form.IRIType))),
@@ -119,14 +117,18 @@ public final class ValuesTest {
 									optional(), datatype(Form.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							)),
+
 							field(term("subordinate"), and(
 									optional(), datatype(Form.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							))
 
-					)),
+					)
+			),
 
-			delete().then(field(term("office")))
+			delete().then(
+					field(term("office"))
+			)
 
 	);
 

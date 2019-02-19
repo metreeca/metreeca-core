@@ -40,7 +40,7 @@ import static java.util.Collections.singleton;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-final class Descriptions {
+final class _Descriptions {
 
 	/**
 	 * Retrieves a symmetric concise bounded description from a statement source.
@@ -118,7 +118,7 @@ final class Descriptions {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Descriptions() {} // utility
+	private _Descriptions() {} // utility
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
