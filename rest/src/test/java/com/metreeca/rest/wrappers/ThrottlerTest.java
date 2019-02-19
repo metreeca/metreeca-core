@@ -29,35 +29,27 @@ import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.function.Function;
 
-import static com.metreeca.form.Shape.relate;
-import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
-import static com.metreeca.form.shapes.Meta.metas;
-import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.things.ValuesTest.Employee;
+import static com.metreeca.form.things.ValuesTest.Salesman;
+import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static java.util.stream.Collectors.toSet;
 
 
 final class ThrottlerTest {
@@ -300,166 +292,6 @@ final class ThrottlerTest {
 							)
 					)
 			);
-
-		}
-
-	}
-
-	@Nested final class Splitters {
-
-		private final Shape Container=and(relate().then(
-				field(RDF.TYPE, LDP.DIRECT_CONTAINER),
-				field(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-				field(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-				),
-				field(RDFS.LABEL, Textual),
-				field(RDFS.COMMENT, Textual)
-		);
-
-
-		@Nested final class Entity {
-
-			@Test void testForwardAndAnnotateComboShape() {
-				assertThat(((Function<Shape, Shape>)Throttler::entity).apply(Employees))
-
-						.satisfies(shape -> assertThat(fields(shape).keySet())
-								.as("all fields retained")
-								.isEqualTo(fields(Employees.map(new Optimizer())).keySet())
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						)
-
-						.satisfies(shape -> assertThat(pass(shape.map(new Redactor(Form.role, Form.none))))
-								.as("role-based authorization preserved")
-								.isTrue()
-						);
-			}
-
-			@Test void testForwardAndAnnotateContainerShape() {
-				assertThat(((Function<Shape, Shape>)Throttler::entity).apply(Container))
-
-						.satisfies(shape -> assertThat(fields(shape))
-								.as("only container fields retained")
-								.isEqualTo(fields(Container.map(new Optimizer())))
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						);
-			}
-
-			@Test void testForwardResourceShape() {
-				assertThat(((Function<Shape, Shape>)Throttler::entity).apply(Employee))
-						.as("only resource shape found")
-						.isEqualTo(Employee.map(new Optimizer()));
-			}
-
-		}
-
-		@Nested final class Resource {
-
-			@Test void testExtractAndAnnotateResourceShapeFromComboShape() {
-				assertThat(((Function<Shape, Shape>)Throttler::resource).apply(Employees))
-
-						.satisfies(shape -> assertThat(fields(shape))
-								.as("only resource fields retained")
-								.isEqualTo(fields(Employee.map(new Optimizer())))
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						);
-			}
-
-			@Test void testForwardAndAnnotateContainerShape() {
-				assertThat(((Function<Shape, Shape>)Throttler::resource).apply(Container))
-
-						.satisfies(shape -> assertThat(fields(shape))
-								.as("only container fields retained")
-								.isEqualTo(fields(Container.map(new Optimizer())))
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						);
-			}
-
-			@Test void testForwardResourceShape() {
-				assertThat(((Function<Shape, Shape>)Throttler::resource).apply(Employee))
-						.as("only resource shape found")
-						.isEqualTo(Employee.map(new Optimizer()));
-			}
-
-			@Test void testPreserveExistingAnnotations() {
-
-				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
-
-				assertThat(((Function<Shape, Shape>)Throttler::resource).apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
-
-			}
-
-		}
-
-		@Nested final class Container {
-
-			@Test void testExtractAndAnnotateContainerShapeFromComboShape() {
-				assertThat(((Function<Shape, Shape>)Throttler::container).apply(Employees))
-
-						.satisfies(shape -> assertThat(fields(shape).keySet())
-								.as("only container fields retained")
-								.isEqualTo(fields(Employees)
-										.keySet().stream()
-										.filter(iri -> !iri.equals(LDP.CONTAINS))
-										.collect(toSet())
-								)
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						);
-			}
-
-			@Test void testIgnoreResourceShape() {
-				assertThat(((Function<Shape, Shape>)Throttler::container).apply(Employee))
-						.as("no container shape found")
-						.isEqualTo(pass());
-
-			}
-
-			@Test void testPreserveExistingAnnotations() {
-
-				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER), field(LDP.CONTAINS, required()));
-
-				assertThat(((Function<Shape, Shape>)Throttler::container).apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
-
-			}
 
 		}
 

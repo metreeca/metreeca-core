@@ -95,7 +95,7 @@ final class GraphEngineTest {
 			}
 
 			@Test void testUnknown() {
-				exec(() -> assertThat(engine().relate(Unknown, edges(filter().then(all(Hernandez)))))
+				exec(() -> assertThat(engine().relate(Unknown, edges(filter().then(all(Unknown)))))
 						.as("empty description")
 						.isEmpty());
 			}

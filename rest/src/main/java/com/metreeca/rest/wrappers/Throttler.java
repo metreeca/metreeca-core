@@ -20,33 +20,19 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.*;
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Sets;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
+import com.metreeca.rest.handlers.actors._Combos;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.metreeca.form.probes.Evaluator.empty;
 import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Memo.memoizable;
-import static com.metreeca.form.shapes.Meta.meta;
-import static com.metreeca.form.shapes.Meta.metas;
-import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
@@ -104,125 +90,10 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Throttler implements Wrapper {
 
-	private static final Set<IRI> ContainerMetadata=set(
-			RDF.TYPE,
-			LDP.MEMBERSHIP_RESOURCE,
-			LDP.HAS_MEMBER_RELATION,
-			LDP.IS_MEMBER_OF_RELATION,
-			LDP.INSERTED_CONTENT_RELATION
-	);
-
-
 	private static final Function<Shape, Shape> anyone=memoizable(s -> s
 			.map(new Redactor(Form.role))
 			.map(new Optimizer())
 	);
-
-	private static final Function<Shape, Shape> entity=memoizable(
-			shape -> and(metadata(shape), shape).map(new Optimizer())
-	);
-
-	private static final Function<Shape, Shape> container=memoizable(
-			merge((container, resource) -> pass(resource) ? pass() : container)
-	);
-
-	private static final Function<Shape, Shape> resource=memoizable(
-			merge((container, resource) -> pass(resource) ? container : resource)
-	);
-
-
-	/**
-	 * Retrieves the entity section of a shape.
-	 *
-	 * @param shape the shape whose entity section is to be retrieved
-	 *
-	 * @return the input {@code shape}
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public static Shape entity(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return shape.map(entity);
-	}
-
-	/**
-	 * Retrieves the container section of a shape.
-	 *
-	 * @param shape the shape whose container section is to be retrieved
-	 *
-	 * @return the input {@code shape} pruned of {@linkplain LDP#CONTAINS ldp:contains} fields, if at least one is
-	 * actually included; an empty shape, otherwise
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public static Shape container(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return shape.map(container);
-	}
-
-	/**
-	 * Retrieves the resource section of a shape.
-	 *
-	 * @param shape the shape whose resource section is to be retrieved
-	 *
-	 * @return the conjunction of the shapes associated to {@linkplain LDP#CONTAINS ldp:contains} fields in the input
-	 * {@code shape}, if at least one is actually included; the source {@code shape}, otherwise
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public static Shape resource(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return shape.map(resource);
-	}
-
-
-	private static Function<Shape, Shape> merge(final BinaryOperator<Shape> merger) {
-		return shape -> {
-
-			final Shape container=shape
-					.map(new ContainerTraverser())
-					.map(new Optimizer());
-
-			final Shape resource=shape
-					.map(new ResourceTraverser())
-					.map(new Optimizer());
-
-			final Shape metadata=metadata(container);
-
-			// container metadata is added both to container and to resource shape to drive engines
-
-			return merger.apply(and(metadata, container), and(metadata, resource)).map(new Optimizer());
-
-		};
-	}
-
-	private static Shape metadata(final Shape shape) {
-
-		final Stream<Meta> metas=metas(shape) // extract existing metadata annotations
-				.entrySet().stream()
-				.map(entry -> meta(entry.getKey(), entry.getValue()));
-
-		final Stream<Meta> fields=fields(shape) // convert container LDP properties to metadata annotations
-				.entrySet().stream()
-				.filter(entry -> ContainerMetadata.contains(entry.getKey()))
-				.map(entry -> entry(entry.getKey(), all(entry.getValue()).orElseGet(Sets::set)))
-				.filter(entry -> entry.getValue().size() == 1)
-				.map(entry -> meta(entry.getKey(), entry.getValue().iterator().next()));
-
-		return and(Stream.concat(metas, fields).collect(toList()));
-	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,7 +111,7 @@ public final class Throttler implements Wrapper {
 	 * @throws NullPointerException if either {@code task} or {@code view} is null
 	 */
 	public Throttler(final Value task, final Value view) {
-		this(task, view, Throttler::entity);
+		this(task, view, _Combos::entity);
 	}
 
 	/**
@@ -360,22 +231,11 @@ public final class Throttler implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private <V extends Collection<Statement>> V expand(final IRI focus, final Shape shape, final V model) {
-
-		model.addAll(shape // add implied statements
-				.map(new Outliner(focus)) // shape already redacted for convey mode
-				.collect(toList())
-		);
-
-		return model;
-	}
-
-
 	/**
 	 * Retrieves a reachable network from a statement source.
 	 *
 	 * @param resource the resource whose reachable network is to be retrieved
-	 * @param model the statement source the description is to be retrieved from
+	 * @param model    the statement source the description is to be retrieved from
 	 *
 	 * @return the reachable network of {@code focus} retrieved from {@code model}
 	 *
@@ -418,8 +278,8 @@ public final class Throttler implements Wrapper {
 	 * Retrieves a shape envelope from a statement source.
 	 *
 	 * @param resource the resource whose envelope is to be retrieved
-	 * @param shape the shape whose envelope is to be retrieved
-	 * @param model the statement source the description is to be retrieved from
+	 * @param shape    the shape whose envelope is to be retrieved
+	 * @param model    the statement source the description is to be retrieved from
 	 *
 	 * @return the {@code shape} envelope of {@code focus} retrieved from {@code model}
 	 *
@@ -430,66 +290,14 @@ public final class Throttler implements Wrapper {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private <V extends Collection<Statement>> V expand(final IRI focus, final Shape shape, final V model) {
 
-	private static final class ContainerTraverser extends Traverser<Shape> {
+		model.addAll(shape // add implied statements
+				.map(new Outliner(focus)) // shape already redacted for convey mode
+				.collect(toList())
+		);
 
-		@Override public Shape probe(final Shape shape) {
-			return shape;
-		}
-
-
-		@Override public Shape probe(final Field field) {
-			return field.getIRI().equals(LDP.CONTAINS) ? and() : field;
-		}
-
-
-		@Override public Shape probe(final And and) {
-			return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
-		}
-
-		@Override public Shape probe(final Or or) {
-			return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
-		}
-
-		@Override public Shape probe(final When when) {
-			return when(
-					when.getTest(),
-					when.getPass().map(this),
-					when.getFail().map(this)
-			);
-		}
-
-	}
-
-	private static final class ResourceTraverser extends Traverser<Shape> {
-
-		@Override public Shape probe(final Shape shape) {
-			return and();
-		}
-
-
-		@Override public Shape probe(final Field field) {
-			return field.getIRI().equals(LDP.CONTAINS) ? field.getShape() : and();
-		}
-
-
-		@Override public Shape probe(final And and) {
-			return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
-		}
-
-		@Override public Shape probe(final Or or) {
-			return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
-		}
-
-		@Override public Shape probe(final When when) {
-			return when(
-					when.getTest(),
-					when.getPass().map(this),
-					when.getFail().map(this)
-			);
-		}
-
+		return model;
 	}
 
 }

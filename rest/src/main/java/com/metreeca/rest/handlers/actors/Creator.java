@@ -186,7 +186,7 @@ public final class Creator extends Delegator {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper throttler() {
-		return new Throttler(Form.create, Form.detail, Throttler::resource);
+		return new Throttler(Form.create, Form.detail, _Combos::resource);
 	}
 
 	private Handler creator() {

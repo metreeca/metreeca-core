@@ -90,8 +90,8 @@ public final class Generator extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.relate, Form.digest, Throttler::entity),
-				new Throttler(Form.relate, Form.detail, Throttler::resource)
+				new Throttler(Form.relate, Form.digest, _Combos::entity),
+				new Throttler(Form.relate, Form.detail, _Combos::resource)
 		);
 	}
 

@@ -35,14 +35,10 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.form.Shape.filter;
 import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.rest.Message.link;
@@ -50,7 +46,8 @@ import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.handlers.actors._Profile.anchor;
+import static com.metreeca.rest.handlers.actors._Combos.container;
+import static com.metreeca.rest.handlers.actors._Combos.resource;
 
 
 /**
@@ -164,8 +161,8 @@ public final class Relator extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.relate, Form.digest, Throttler::entity),
-				new Throttler(Form.relate, Form.detail, Throttler::resource)
+				new Throttler(Form.relate, Form.digest, _Combos::entity),
+				new Throttler(Form.relate, Form.detail, _Combos::resource)
 		);
 	}
 
@@ -186,7 +183,7 @@ public final class Relator extends Delegator {
 						.status(Response.NotImplemented)
 						.cause("resource filtered retrieval not supported")
 
-				) : request.query(and(shape, filter().then(all(item)))).fold(
+				) : request.query(_Combos.resource(item, shape)).fold(
 
 						query -> {
 
@@ -228,13 +225,13 @@ public final class Relator extends Delegator {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return request.query(anchor(item, ((Function<Shape, Shape>)Throttler::resource).apply(shape))).fold(
+				return request.query(_Combos.container(item, resource(shape))).fold(
 
 						query -> {
 
 							final Collection<Statement> matches=engine.relate(item, query);
 
-							if ( filtered ) {
+							if ( filtered ) { // matches only
 
 								return response
 										.status(OK)
@@ -255,7 +252,7 @@ public final class Relator extends Delegator {
 										}))
 										.body(rdf(), matches);
 
-							} else { // retrieve container description
+							} else { // include container description
 
 								// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
@@ -264,7 +261,7 @@ public final class Relator extends Delegator {
 										.shape(shape)
 										.body(rdf(), concat(
 												matches,
-												engine.relate(item, edges(and(((Function<Shape, Shape>)Throttler::container).apply(shape), filter().then(all(item)))))
+												engine.relate(item, edges(_Combos.resource(item, container(shape))))
 										));
 
 							}

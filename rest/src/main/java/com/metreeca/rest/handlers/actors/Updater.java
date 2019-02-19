@@ -99,8 +99,8 @@ public final class Updater extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.update, Form.detail, Throttler::container),
-				new Throttler(Form.update, Form.detail, Throttler::resource)
+				new Throttler(Form.update, Form.detail, _Combos::container),
+				new Throttler(Form.update, Form.detail, _Combos::resource)
 		);
 	}
 
