@@ -51,7 +51,7 @@ import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
-import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 

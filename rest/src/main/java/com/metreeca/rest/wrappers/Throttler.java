@@ -32,7 +32,7 @@ import java.util.function.Function;
 
 import static com.metreeca.form.probes.Evaluator.empty;
 import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;

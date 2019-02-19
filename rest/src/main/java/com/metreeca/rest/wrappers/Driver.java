@@ -27,7 +27,7 @@ import org.eclipse.rdf4j.model.vocabulary.LDP;
 import java.util.Optional;
 
 import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.shapes.Memo.memo;
+import static com.metreeca.form.shapes.Memoizing.memoizing;
 import static com.metreeca.rest.bodies.TextBody.text;
 
 
@@ -93,7 +93,7 @@ public final class Driver implements Wrapper {
 			throw new NullPointerException("null shape");
 		}
 
-		this.shape=memo(shape.map(new Optimizer())); // shape is going to be reused for each request
+		this.shape=memoizing(shape.map(new Optimizer())); // shape is going to be reused for each request
 	}
 
 

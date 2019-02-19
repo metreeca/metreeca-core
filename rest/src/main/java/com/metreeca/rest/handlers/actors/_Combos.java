@@ -41,7 +41,7 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
-import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.shapes.Or.or;

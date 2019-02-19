@@ -23,7 +23,7 @@ import com.metreeca.form.shapes.*;
 import java.util.function.Function;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.shapes.Or.or;
 
 import static java.lang.Boolean.FALSE;

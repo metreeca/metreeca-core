@@ -35,7 +35,7 @@ import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.tray.Tray.tool;
 
