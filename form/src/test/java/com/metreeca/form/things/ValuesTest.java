@@ -231,6 +231,11 @@ public final class ValuesTest {
 
 	//// RDF Codecs ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static String turtle(final String rdf) {
+		return TurtlePrefixes+"\n\n"+rdf; // !!! avoid prefix clashes
+	}
+
+
 	public static Model decode(final String rdf) {
 		return decode(rdf, Base);
 	}
@@ -259,7 +264,7 @@ public final class ValuesTest {
 
 			parser.setPreserveBNodeIDs(true);
 			parser.setRDFHandler(collector);
-			parser.parse(new StringReader(format.equals(RDFFormat.TURTLE) ? TurtlePrefixes+"\n\n"+rdf : rdf), base);
+			parser.parse(new StringReader(format.equals(RDFFormat.TURTLE) ? turtle(rdf) : rdf), base);
 
 			return new LinkedHashModel(collector.getStatements());
 
