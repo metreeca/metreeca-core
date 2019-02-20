@@ -33,6 +33,15 @@ import virtuoso.rdf4j.driver.VirtuosoRepository;
  * VirtuosoL graph store.
  *
  * <p>Manages task execution on an <a href="https://virtuoso.openlinksw.com">Virtuoso</a> repository.</p>
+ *
+ * <p><strong>Warning</strong> / Be aware of the following issues with Virtuoso, which could affect custom SPARQL-based
+ * code:</p>
+ *
+ * <ul>
+ * <li>aggregate {@code count()} is reported as an {@code xsd:int} value rather than {@code csd:integer};</li>
+ * <li>string literals in SPARQL code are parsed as RDF 1.0 plain string literals rather than RDF 1.1 {@code xsd:string}
+ * literals.</li>
+ * </ul>
  */
 public final class Virtuoso extends Graph {
 
