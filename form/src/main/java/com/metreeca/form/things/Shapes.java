@@ -61,8 +61,9 @@ import static java.util.stream.Collectors.toList;
  * ldp:contains} {@linkplain Field fields}.</p>
  *
  * <p>The LDP profile of the container is identified by its {@code rdf:type} and LDP properties, as inferred either
- * from {@linkplain Meta metadata} annotations or {@linkplain Field field} constraints in the combo shape, defaulting to
- * the <em>Basic</em> profile if no metadata is available:</p>
+ * from
+ * {@linkplain Meta metadata} annotations or {@linkplain Field field} constraints in the combo shape, defaulting to the
+ * <em>Basic</em> profile if no metadata is available:</p>
  *
  * <table summary="container profiles">
  *
@@ -127,7 +128,7 @@ public final class Shapes {
 
 	private static final Function<Shape, Function<Resource, Shape>> profile=memoizable(shape -> {
 
-		final Map<IRI, Value> metadata=metas(metadata(shape));
+		final Map<IRI, Value> metadata=metas(shape);
 		final Value type=metadata.get(RDF.TYPE);
 
 		return LDP.BASIC_CONTAINER.equals(type) ? basic()
@@ -267,7 +268,8 @@ public final class Shapes {
 	 * @param shape     the shape to be anchored to {@code container}
 	 *
 	 * @return a shape extending the input {@code shape} with filtering-only constraints connecting focus resources to
-	 * the anchoring {@code container} as required by its LDP profile
+	 * the anchoring {@code container} as required by the LDP container profile identified using {@linkplain Meta
+	 * metadata} annotations
 	 *
 	 * @throws NullPointerException if either {@code container} or {@code shape} is null
 	 */
@@ -298,21 +300,19 @@ public final class Shapes {
 		if ( direct != null ) {
 
 			return direct instanceof IRI && target instanceof Resource ?
-					target.equals(LDP.CONTAINER)
-							? container -> field(inverse((IRI)direct), container)
-							: container -> field(inverse((IRI)direct), target)
+					 container -> field(inverse((IRI)direct), target.equals(LDP.CONTAINER) ?container : target)
 					: container -> and();
 
 		} else if ( inverse != null ) {
 
-			return inverse instanceof IRI
+			return inverse instanceof IRI && target instanceof Resource
 					? container -> field((IRI)inverse, target.equals(LDP.CONTAINER) ? container : target)
 					: container -> and();
 
 		} else {
 
 			return target instanceof Resource
-					? container -> field(inverse(LDP.MEMBER), target.equals(LDP.CONTAINER) ? container : (Resource)target)
+					? container -> field(inverse(LDP.MEMBER), target.equals(LDP.CONTAINER) ? container : target)
 					: container -> and();
 
 		}
