@@ -83,8 +83,10 @@ abstract class GraphProcessorTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testUploadDataset() { // make sure the test dataset is actually loaded…
-		exec(() -> assertThat(graph("construct where { ?office a :Office }")).isNotEmpty());
+	@Test void testUploadDataset() {
+		exec(() -> assertThat(graph("construct where { ?office a :Office }"))
+				.as("test dataset is actually loaded")
+				.isNotEmpty());
 	}
 
 }
