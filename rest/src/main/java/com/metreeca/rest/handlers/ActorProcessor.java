@@ -15,8 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
+import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Snippets;
 import com.metreeca.form.things.Snippets.Snippet;
 import com.metreeca.form.things.Values;
@@ -25,9 +29,11 @@ import com.metreeca.tray.sys.Trace;
 import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.tray.Tray.tool;
@@ -36,7 +42,20 @@ import static java.lang.Math.max;
 import static java.lang.String.format;
 
 
-abstract class GraphProcessor {
+abstract class ActorProcessor {
+
+	static final Function<Shape, Shape> convey=memoizable(s -> s
+			.map(new Redactor(Form.mode, Form.convey))
+			.map(new Optimizer())
+	);
+
+	static final Function<Shape, Shape> filter=memoizable(s -> s
+			.map(new Redactor(Form.mode, Form.filter))
+			.map(new Optimizer())
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Trace trace=tool(Trace.Factory);
 

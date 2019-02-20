@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
@@ -49,7 +49,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.*;
 
 
-final class GraphValidator extends GraphProcessor implements Shape.Probe<Focus> {
+final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> {
 
 	private final RepositoryConnection connection;
 
@@ -57,7 +57,7 @@ final class GraphValidator extends GraphProcessor implements Shape.Probe<Focus> 
 	private final Collection<Statement> model;
 
 
-	GraphValidator(
+	ActorValidator(
 			final RepositoryConnection connection,
 			final Collection<Value> focus,
 			final Collection<Statement> model
@@ -312,7 +312,7 @@ final class GraphValidator extends GraphProcessor implements Shape.Probe<Focus> 
 
 			// validate the field shape on the new focus set
 
-			final Focus report=shape.map(new GraphValidator(connection, focus, model));
+			final Focus report=shape.map(new ActorValidator(connection, focus, model));
 
 			// identifies the values in the new focus set referenced in report frames
 

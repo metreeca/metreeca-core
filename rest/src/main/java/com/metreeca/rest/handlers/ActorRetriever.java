@@ -15,10 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.*;
-import com.metreeca.form.probes.*;
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -45,7 +45,6 @@ import java.util.stream.Stream;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
-import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Snippets.*;
 import static com.metreeca.form.things.Values.*;
@@ -53,21 +52,7 @@ import static com.metreeca.form.things.Values.*;
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
 
-final class GraphRetriever extends GraphProcessor implements Query.Probe<Collection<Statement>> {
-
-	private static final Function<Shape, Shape> convey=memoizable(s -> s
-			.map(new Redactor(Form.mode, Form.convey))
-			.map(new Optimizer())
-	);
-
-	private static final Function<Shape, Shape> filter=memoizable(s -> s
-			.map(new Redactor(Form.mode, Form.filter))
-			.map(new Pruner())
-			.map(new Optimizer())
-	);
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+final class ActorRetriever extends ActorProcessor implements Query.Probe<Collection<Statement>> {
 
 	private final RepositoryConnection connection;
 
@@ -75,7 +60,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 	private final boolean labelled;
 
 
-	GraphRetriever(final RepositoryConnection connection, final Resource resource, final boolean labelled) {
+	ActorRetriever(final RepositoryConnection connection, final Resource resource, final boolean labelled) {
 		this.connection=connection;
 		this.resource=resource;
 		this.labelled=labelled;

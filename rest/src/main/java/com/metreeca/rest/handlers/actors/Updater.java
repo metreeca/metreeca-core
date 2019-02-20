@@ -20,13 +20,18 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
+import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.engines.GraphEngine;
-import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
+
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+
+import java.util.Collection;
 
 import javax.json.JsonValue;
 
@@ -84,11 +89,9 @@ import static com.metreeca.tray.Tray.tool;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Updater extends Delegator {
+public final class Updater extends Actor {
 
 	private final Trace trace=tool(Trace.Factory);
-
-	private final _Engine engine=new GraphEngine();
 
 
 	public Updater() {
@@ -106,34 +109,35 @@ public final class Updater extends Delegator {
 	}
 
 	private Handler updater() {
-		return request -> request.container()? request.reply(
+		return request -> request.container() ? request.reply(
 
 				new Failure().status(Response.NotImplemented).cause("container updating not supported")
 
 		) : request.body(rdf()).fold(
 
-				model -> request.reply(response -> engine
+				rdf -> {
 
-						.update(
-								request.item(),
-								resource(request.item(), request.shape()),
-								trace.trace(this, model)
-						)
+					final IRI item=request.item();
+					final Shape shape=resource(item, request.shape());
+					final Collection<Statement> model=trace.trace(this, rdf);
 
-						.map(focus -> focus.assess(Issue.Level.Error) // shape violations
+					return request.reply(response -> update(item, shape, model)
 
-								? response.map(new Failure()
-								.status(Response.UnprocessableEntity)
-								.error(Failure.DataInvalid)
-								.trace(focus))
+							.map(focus -> focus.assess(Issue.Level.Error) // shape violations
 
-								: response.status(Response.NoContent)
+									? response.map(new Failure()
+									.status(Response.UnprocessableEntity)
+									.error(Failure.DataInvalid)
+									.trace(focus))
 
-						)
+									: response.status(Response.NoContent)
 
-						.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
+							)
 
-				),
+							.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
+
+					);
+				},
 
 				request::reply
 

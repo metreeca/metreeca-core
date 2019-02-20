@@ -25,8 +25,7 @@ import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.engines.GraphEngine;
-import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
@@ -130,16 +129,13 @@ import static com.metreeca.rest.handlers.actors._Shapes.resource;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Relator extends Delegator {
+public final class Relator extends Actor {
 
 	private static final Pattern RepresentationPattern=Pattern
 			.compile("\\s*return\\s*=\\s*representation\\s*;\\s*include\\s*=\\s*\"(?<representation>[^\"]*)\"\\s*");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final _Engine engine=new GraphEngine();
-
 
 	public Relator() {
 		delegate(relator().with(annotator()).with(throttler()));
@@ -187,7 +183,7 @@ public final class Relator extends Delegator {
 
 						query -> {
 
-							final Collection<Statement> model=engine.relate(item, query);
+							final Collection<Statement> model=relate(item, query);
 
 							return response
 
@@ -229,7 +225,7 @@ public final class Relator extends Delegator {
 
 						query -> {
 
-							final Collection<Statement> matches=engine.relate(item, query);
+							final Collection<Statement> matches=relate(item, query);
 
 							if ( filtered ) { // matches only
 
@@ -261,7 +257,7 @@ public final class Relator extends Delegator {
 										.shape(shape)
 										.body(rdf(), concat(
 												matches,
-												engine.relate(item, edges(resource(item, container(shape))))
+												relate(item, edges(resource(item, container(shape))))
 										));
 
 							}

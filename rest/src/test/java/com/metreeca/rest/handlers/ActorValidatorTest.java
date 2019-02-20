@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.Field;
@@ -66,7 +66,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphValidatorTest extends GraphProcessorTest {
+final class ActorValidatorTest extends ActorProcessorTest {
 
 	private static final IRI x=item("x");
 	private static final IRI y=item("y");
@@ -86,7 +86,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 	private Focus validate(final Shape shape, final Collection<Statement> model) {
 		return tool(Graph.Factory).query(connection -> {
-			return field(RDF.VALUE, shape).map(new GraphValidator(connection, set(RDF.NIL), model));
+			return field(RDF.VALUE, shape).map(new ActorValidator(connection, set(RDF.NIL), model));
 		});
 	}
 

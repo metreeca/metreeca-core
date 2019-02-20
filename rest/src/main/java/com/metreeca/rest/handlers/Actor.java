@@ -15,13 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.*;
-import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Outliner;
-import com.metreeca.form.probes.Redactor;
-import com.metreeca.rest.handlers.actors._Engine;
+import com.metreeca.rest.Request;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -31,7 +29,6 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Focus.focus;
@@ -39,7 +36,6 @@ import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
 import static com.metreeca.tray.Tray.tool;
@@ -49,57 +45,51 @@ import static java.util.stream.Collectors.toSet;
 
 
 /**
- * Graph-based engine.
+ * LDP resource actor.
  *
- * <p>Manages CRUD operations on linked data resources stored in the system {@linkplain Graph graph}.</p>
+ * <p>Handles  CRUD operations on linked data resources stored in the system {@linkplain Graph graph} and identified by
+ * the request {@linkplain Request#item() focus item}.</p>
  */
-public final class GraphEngine implements _Engine {
-
-	private static final Function<Shape, Shape> convey=memoizable(s -> s
-			.map(new Redactor(Form.mode, Form.convey))
-			.map(new Optimizer())
-	);
-
-	private static final Function<Shape, Shape> filter=memoizable(s -> s
-			.map(new Redactor(Form.mode, Form.filter))
-			.map(new Optimizer())
-	);
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+public abstract class Actor extends Delegator {
 
 	private final Graph graph=tool(Graph.Factory);
 
 
-	@Override public Collection<Statement> relate(final IRI resource, final Query query) {
+	//// CRUD Engine (methods preserved as future factoring point for Engine interface) ////////////////////////////////
 
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
-
+	/**
+	 * Relates a resource.
+	 *
+	 * @param resource the IRI identifying the resource whose description is to be retrieved
+	 * @param query    the query defining the details of {@code resource} to be retrieved;
+	 *
+	 * @return the description of {@code resource} matched by {@code query}; empty if a matching description for {@code
+	 * resource} was not found;  related resources matched by {@code query} are linked to {@code resource} with the
+	 * {@code ldp:contains} property
+	 *
+	 * @throws NullPointerException          if either {@code resource} or {@code query} is {@code null}
+	 * @throws UnsupportedOperationException if resource retrieval is not supported by this engine
+	 */
+	protected Collection<Statement> relate(final IRI resource, final Query query) {
 		return graph.query(connection -> {
-			return query.map(new GraphRetriever(connection, resource, true));
+			return query.map(new ActorRetriever(connection, resource, true));
 		});
 	}
 
-	@Override public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
+	/**
+	 * Creates a resource.
+	 *
+	 * @param resource the IRI identifying the resource whose description is to be created
+	 * @param shape    the validation shape for the description of the resource;
+	 * @param model    the description for {@code resource} to be created
+	 *
+	 * @return an optional validation report for the operation; empty a description for {@code resource} is already
+	 * present
+	 *
+	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
+	 * @throws UnsupportedOperationException if resource creation is not supported by this engine
+	 */
+	protected Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
 			return Optional.of(resource)
@@ -117,7 +107,7 @@ public final class GraphEngine implements _Engine {
 
 						if ( !focus.assess(Issue.Level.Error) ) {
 
-							connection.add(outline(reserved, shape));
+							connection.add(anchor(reserved, shape));
 							connection.add(model);
 
 						}
@@ -127,23 +117,22 @@ public final class GraphEngine implements _Engine {
 					});
 
 		});
-
 	}
 
-	@Override public Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
+	/**
+	 * Updates a resource.
+	 *
+	 * @param resource the IRI identifying the resource whose description is to be updated
+	 * @param shape    the validation shape for the description of the resource
+	 * @param model    the updated description for {@code resource}
+	 *
+	 * @return an optional validation report for the operation; empty if a description for {@code resource} was not
+	 * found
+	 *
+	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
+	 * @throws UnsupportedOperationException if resource updating is not supported by this engine
+	 */
+	protected Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
 		return graph.update(connection -> {
 			return retrieve(connection, resource, shape).map(current -> {
 
@@ -162,16 +151,19 @@ public final class GraphEngine implements _Engine {
 		});
 	}
 
-	@Override public Optional<Focus> delete(final IRI resource, final Shape shape) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
+	/**
+	 * Deletes a resource.
+	 *
+	 * @param resource the IRI identifying the resource whose description is to be deleted
+	 * @param shape    the validation shape for the description of the resource
+	 *
+	 * @return an optional IRI identifying the deleted resource; empty if a description for {@code resource} was not
+	 * found
+	 *
+	 * @throws NullPointerException          if either {@code resource} or {@code shape} is {@code null}
+	 * @throws UnsupportedOperationException if resource deletion is not supported by this engine
+	 */
+	protected Optional<Focus> delete(final IRI resource, final Shape shape) {
 		return graph.update(connection -> {
 
 			// !!! merge retrieve/remove operations into a single SPARQL update txn
@@ -179,7 +171,7 @@ public final class GraphEngine implements _Engine {
 
 			return retrieve(connection, resource, shape).map(current -> {
 
-				connection.remove(outline(resource, shape));
+				connection.remove(anchor(resource, shape));
 				connection.remove(current);
 
 				return focus(set(), set(frame(resource)));
@@ -192,8 +184,8 @@ public final class GraphEngine implements _Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Iterable<Statement> outline(final Resource resource, final Shape shape) {
-		return shape.map(filter).map(new Outliner(resource)).collect(toList());
+	private Iterable<Statement> anchor(final Resource resource, final Shape shape) {
+		return shape.map(ActorProcessor.filter).map(new Outliner(resource)).collect(toList());
 	}
 
 	private Optional<Collection<Statement>> retrieve(
@@ -201,7 +193,7 @@ public final class GraphEngine implements _Engine {
 	) {
 		return Optional.of(edges(shape))
 
-				.map(query -> query.map(new GraphRetriever(connection, resource, false)))
+				.map(query -> query.map(new ActorRetriever(connection, resource, false)))
 
 				.filter(current -> !current.isEmpty());
 	}
@@ -210,10 +202,10 @@ public final class GraphEngine implements _Engine {
 			final Resource resource, final Shape shape, final Collection<Statement> model
 	) {
 
-		final Shape target=shape.map(convey);
+		final Shape target=shape.map(ActorProcessor.convey);
 
 		final Focus focus=target // validate against shape
-				.map(new GraphValidator(connection, set(resource), model));
+				.map(new ActorValidator(connection, set(resource), model));
 
 		final Collection<Statement> envelope=pass(target)
 				? description(resource, false, model) // collect resource cbd

@@ -20,10 +20,10 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
+import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.engines.GraphEngine;
-import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -113,7 +113,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Creator extends Delegator {
+public final class Creator extends Actor {
 
 	/**
 	 * Creates a random UUID-based slug generator.
@@ -150,8 +150,6 @@ public final class Creator extends Delegator {
 	private final Object lock=new Object();
 
 	private final BiFunction<Request, Collection<Statement>, String> slug;
-
-	private final _Engine engine=new GraphEngine();
 
 
 	/**
@@ -192,10 +190,10 @@ public final class Creator extends Delegator {
 	private Handler creator() {
 		return request -> request.container() ? request.body(rdf()).fold(
 
-				model -> {
+				rdf -> {
 					synchronized ( lock ) { // attempt to serialize slug operations from multiple txns
 
-						final String name=slug.apply(request, model);
+						final String name=slug.apply(request, rdf);
 
 						if ( name == null ) {
 							throw new NullPointerException("null resource name");
@@ -208,15 +206,12 @@ public final class Creator extends Delegator {
 						final IRI container=request.item();
 						final IRI resource=iri(request.stem(), name);
 
-						return request.reply(response -> engine
+						final Shape shape=container(container, request.shape());
+						final Collection<Statement> model=rewrite(resource, container, trace.trace(this, rdf));
 
-								// !!! recognize txns failures due to conflicting slugs and report as 409 Conflict
+						// !!! recognize txns failures due to conflicting slugs and report as 409 Conflict
 
-								.create(
-										resource,
-										container(container, request.shape()),
-										rewrite(resource, container, trace.trace(this, model))
-								)
+						return request.reply(response -> create(resource, shape, model)
 
 								.map(focus -> focus.assess(Level.Error) // shape violations
 

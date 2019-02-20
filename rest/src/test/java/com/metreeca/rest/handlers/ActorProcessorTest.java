@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
@@ -37,7 +37,7 @@ import static com.metreeca.tray.rdf.Graph.READ_ONLY;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 
 
-abstract class GraphProcessorTest {
+abstract class ActorProcessorTest {
 
 	protected void exec(final Runnable... tasks) {
 		new Tray()

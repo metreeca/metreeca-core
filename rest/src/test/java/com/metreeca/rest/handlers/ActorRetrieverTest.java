@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Query;
@@ -77,13 +77,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphRetrieverTest extends GraphProcessorTest {
+final class ActorRetrieverTest extends ActorProcessorTest {
 
 	private Collection<Statement> query(final Query query) {
 		return tool(Graph.Factory).query(connection -> {
 			return query
 
-					.map(new GraphRetriever(connection, Form.root, true))
+					.map(new ActorRetriever(connection, Form.root, true))
 
 					.stream()
 

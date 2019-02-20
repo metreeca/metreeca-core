@@ -19,11 +19,13 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.engines.GraphEngine;
-import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
+
+import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.handlers.actors._Shapes.resource;
@@ -67,10 +69,7 @@ import static com.metreeca.rest.handlers.actors._Shapes.resource;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Deleter extends Delegator {
-
-	private final _Engine engine=new GraphEngine();
-
+public final class Deleter extends Actor {
 
 	public Deleter() {
 		delegate(deleter().with(throttler()));
@@ -86,19 +85,23 @@ public final class Deleter extends Delegator {
 	}
 
 	private Handler deleter() {
-		return request -> request.container()? request.reply(
+		return request -> {
 
-				new Failure().status(Response.NotImplemented).cause("container deletion not supported")
+			final IRI item=request.item();
+			final Shape shape=resource(item, request.shape());
 
-		) : request.reply(response -> engine
+			return request.container() ? request.reply(
 
-				.delete(request.item(), resource(request.item(), request.shape()))
+					new Failure().status(Response.NotImplemented).cause("container deletion not supported")
 
-				.map(iri -> response.status(Response.NoContent))
+			) : request.reply(response -> delete(item, shape)
 
-				.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
+					.map(iri -> response.status(Response.NoContent))
 
-		);
+					.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
+
+			);
+		};
 	}
 
 }
