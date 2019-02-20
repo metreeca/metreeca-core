@@ -21,6 +21,7 @@ import com.metreeca.form.*;
 import com.metreeca.form.probes.Outliner;
 import com.metreeca.rest.Request;
 import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -38,6 +39,8 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
+import static com.metreeca.rest.handlers.ActorProcessor.convey;
+import static com.metreeca.rest.handlers.ActorProcessor.filter;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.stream.Collectors.toList;
@@ -53,6 +56,7 @@ import static java.util.stream.Collectors.toSet;
 public abstract class Actor extends Delegator {
 
 	private final Graph graph=tool(Graph.Factory);
+	private final Trace trace=tool(Trace.Factory);
 
 
 	//// CRUD Engine (methods preserved to possibly support extraction of Engine interface) ////////////////////////////
@@ -72,7 +76,7 @@ public abstract class Actor extends Delegator {
 	 */
 	protected Collection<Statement> relate(final IRI resource, final Query query) {
 		return graph.query(connection -> {
-			return query.map(new ActorRetriever(connection, resource, true));
+			return query.map(new ActorRetriever(trace, connection, resource, true));
 		});
 	}
 
@@ -185,7 +189,7 @@ public abstract class Actor extends Delegator {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Iterable<Statement> anchor(final Resource resource, final Shape shape) {
-		return shape.map(ActorProcessor.filter).map(new Outliner(resource)).collect(toList());
+		return shape.map(filter).map(new Outliner(resource)).collect(toList());
 	}
 
 	private Optional<Collection<Statement>> retrieve(
@@ -193,7 +197,7 @@ public abstract class Actor extends Delegator {
 	) {
 		return Optional.of(edges(shape))
 
-				.map(query -> query.map(new ActorRetriever(connection, resource, false)))
+				.map(query -> query.map(new ActorRetriever(trace, connection, resource, false)))
 
 				.filter(current -> !current.isEmpty());
 	}
@@ -202,10 +206,10 @@ public abstract class Actor extends Delegator {
 			final Resource resource, final Shape shape, final Collection<Statement> model
 	) {
 
-		final Shape target=shape.map(ActorProcessor.convey);
+		final Shape target=shape.map(convey);
 
 		final Focus focus=target // validate against shape
-				.map(new ActorValidator(connection, set(resource), model));
+				.map(new ActorValidator(trace, connection, set(resource), model));
 
 		final Collection<Statement> envelope=pass(target)
 				? description(resource, false, model) // collect resource cbd

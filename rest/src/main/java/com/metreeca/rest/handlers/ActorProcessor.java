@@ -36,7 +36,6 @@ import java.util.stream.Stream;
 import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Math.max;
 import static java.lang.String.format;
@@ -57,7 +56,10 @@ abstract class ActorProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Trace trace=tool(Trace.Factory);
+	private final Trace trace;
+
+
+	ActorProcessor(final Trace trace) {this.trace=trace;}
 
 
 	//// Tracing ///////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@ package com.metreeca.rest.handlers;
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
+import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -40,6 +41,7 @@ import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Snippets.source;
 import static com.metreeca.form.things.Values.*;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
@@ -58,10 +60,13 @@ final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> 
 
 
 	ActorValidator(
+			final Trace trace,
 			final RepositoryConnection connection,
 			final Collection<Value> focus,
 			final Collection<Statement> model
 	) {
+
+		super(trace);
 
 		this.connection=connection;
 
@@ -312,7 +317,7 @@ final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> 
 
 			// validate the field shape on the new focus set
 
-			final Focus report=shape.map(new ActorValidator(connection, focus, model));
+			final Focus report=shape.map(new ActorValidator(tool(Trace.Factory), connection, focus, model));
 
 			// identifies the values in the new focus set referenced in report frames
 

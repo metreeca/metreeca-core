@@ -22,6 +22,7 @@ import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
 import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.sys.Trace;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Statement;
@@ -83,7 +84,7 @@ final class ActorRetrieverTest extends ActorProcessorTest {
 		return tool(Graph.Factory).query(connection -> {
 			return query
 
-					.map(new ActorRetriever(connection, Form.root, true))
+					.map(new ActorRetriever(tool(Trace.Factory), connection, Form.root, true))
 
 					.stream()
 

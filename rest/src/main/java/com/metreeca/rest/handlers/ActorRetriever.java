@@ -25,6 +25,7 @@ import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Structures;
 import com.metreeca.form.things.Values;
+import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -60,7 +61,15 @@ final class ActorRetriever extends ActorProcessor implements Query.Probe<Collect
 	private final boolean labelled;
 
 
-	ActorRetriever(final RepositoryConnection connection, final Resource resource, final boolean labelled) {
+	ActorRetriever(
+			final Trace trace,
+			final RepositoryConnection connection,
+			final Resource resource,
+			final boolean labelled
+	) {
+
+		super(trace);
+
 		this.connection=connection;
 		this.resource=resource;
 		this.labelled=labelled;

@@ -21,6 +21,7 @@ import com.metreeca.form.*;
 import com.metreeca.form.shapes.Field;
 import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -86,7 +87,7 @@ final class ActorValidatorTest extends ActorProcessorTest {
 
 	private Focus validate(final Shape shape, final Collection<Statement> model) {
 		return tool(Graph.Factory).query(connection -> {
-			return field(RDF.VALUE, shape).map(new ActorValidator(connection, set(RDF.NIL), model));
+			return field(RDF.VALUE, shape).map(new ActorValidator(tool(Trace.Factory), connection, set(RDF.NIL), model));
 		});
 	}
 
