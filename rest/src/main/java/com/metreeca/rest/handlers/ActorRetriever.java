@@ -15,16 +15,17 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.*;
-import com.metreeca.form.probes.*;
+import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
+import com.metreeca.form.things.Structures;
 import com.metreeca.form.things.Values;
-import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -48,34 +49,36 @@ import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.Snippets.*;
 import static com.metreeca.form.things.Values.*;
-import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
 
-final class GraphRetriever extends GraphProcessor {
+final class ActorRetriever extends ActorProcessor implements Query.Probe<Collection<Statement>> {
 
-	private final Graph graph=tool(Graph.Factory);
+	private final RepositoryConnection connection;
+
+	private final Resource resource;
+	private final boolean labelled;
 
 
-	Collection<Statement> retrieve(final Resource focus, final Query query) {
-		return graph.query(connection -> {
-			return query.map(new Query.Probe<Collection<Statement>>() {
+	ActorRetriever(
+			final Trace trace,
+			final RepositoryConnection connection,
+			final Resource resource,
+			final boolean labelled
+	) {
 
-				@Override public Collection<Statement> probe(final Edges edges) { return edges(connection, focus, edges); }
+		super(trace);
 
-				@Override public Collection<Statement> probe(final Stats stats) { return stats(connection, focus, stats); }
-
-				@Override public Collection<Statement> probe(final Items items) { return items(connection, focus, items); }
-
-			});
-		});
+		this.connection=connection;
+		this.resource=resource;
+		this.labelled=labelled;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> edges(final RepositoryConnection connection, final Resource focus, final Edges edges) {
+	@Override public Collection<Statement> probe(final Edges edges) {
 
 		final Shape shape=edges.getShape();
 		final List<Order> orders=edges.getOrders();
@@ -89,8 +92,8 @@ final class GraphRetriever extends GraphProcessor {
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
-		final Shape pattern=shape.map(ConveyCompiler);
-		final Shape selector=shape.map(FilterCompiler);
+		final Shape pattern=shape.map(convey);
+		final Shape selector=shape.map(filter);
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
 
@@ -121,7 +124,7 @@ final class GraphRetriever extends GraphProcessor {
 								.sorted()
 								.forEachOrdered(id -> source.accept(" ?"+id)),
 
-						filter(selector, orders, offset, limit),
+						selector(selector, orders, offset, limit),
 						pattern(pattern),
 
 						sorters(root, orders), // !!! (€) don't extract if already present in pattern
@@ -137,23 +140,29 @@ final class GraphRetriever extends GraphProcessor {
 
 				if ( match != null ) {
 
-					if ( !match.equals(focus) ) {
-						model.add(statement(focus, LDP.CONTAINS, match));
+					if ( !match.equals(resource) ) {
+						model.add(statement(resource, LDP.CONTAINS, match));
 					}
 
-					template.forEach(statement -> {
+					if ( template.isEmpty() ) { // wildcard shape => symmetric+labelled concise bounded description
 
-						final Resource subject=statement.getSubject();
-						final Value object=statement.getObject();
+						model.addAll(Structures.description((Resource)match, labelled, connection));
 
-						final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
-						final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
+					} else {
+						template.forEach(statement -> {
 
-						if ( source instanceof Resource && target != null ) {
-							model.add(statement((Resource)source, statement.getPredicate(), target));
-						}
+							final Resource subject=statement.getSubject();
+							final Value object=statement.getObject();
 
-					});
+							final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
+							final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
+
+							if ( source instanceof Resource && target != null ) {
+								model.add(statement((Resource)source, statement.getPredicate(), target));
+							}
+
+						});
+					}
 
 				}
 
@@ -164,7 +173,7 @@ final class GraphRetriever extends GraphProcessor {
 		return model;
 	}
 
-	private Collection<Statement> stats(final RepositoryConnection connection, final Resource focus, final Stats stats) {
+	@Override public Collection<Statement> probe(final Stats stats) {
 
 		final Shape shape=stats.getShape();
 		final List<IRI> path=stats.getPath();
@@ -175,7 +184,7 @@ final class GraphRetriever extends GraphProcessor {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		final Shape selector=shape.map(FilterCompiler);
+		final Shape selector=shape.map(filter);
 
 		final Object source=var(selector);
 		final Object target=path.isEmpty() ? source : var();
@@ -227,7 +236,7 @@ final class GraphRetriever extends GraphProcessor {
 
 				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-				if ( type != null ) { model.add(focus, Form.stats, type); }
+				if ( type != null ) { model.add(resource, Form.stats, type); }
 				if ( type != null && count != null ) { model.add(type, Form.count, literal(count)); }
 				if ( type != null && min != null ) { model.add(type, Form.min, min); }
 				if ( type != null && max != null ) { model.add(type, Form.max, max); }
@@ -240,7 +249,7 @@ final class GraphRetriever extends GraphProcessor {
 
 		}));
 
-		model.add(focus, Form.count, literal(counts.stream()
+		model.add(resource, Form.count, literal(counts.stream()
 				.filter(Objects::nonNull)
 				.reduce(BigInteger.ZERO, BigInteger::add)
 		));
@@ -248,24 +257,24 @@ final class GraphRetriever extends GraphProcessor {
 		mins.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.LT) ? x : y)
-				.ifPresent(min -> model.add(focus, Form.min, min));
+				.ifPresent(min -> model.add(resource, Form.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
-				.ifPresent(max -> model.add(focus, Form.max, max));
+				.ifPresent(max -> model.add(resource, Form.max, max));
 
 		return model;
 	}
 
-	private Collection<Statement> items(final RepositoryConnection connection, final Resource focus, final Items items) {
+	@Override public Collection<Statement> probe(final Items items) {
 
 		final Shape shape=items.getShape();
 		final List<IRI> path=items.getPath();
 
 		final Model model=new LinkedHashModel();
 
-		final Shape selector=shape.map(FilterCompiler);
+		final Shape selector=shape.map(filter);
 
 		final Object source=var(selector);
 		final Object target=path.isEmpty() ? source : var();
@@ -317,7 +326,7 @@ final class GraphRetriever extends GraphProcessor {
 
 				final BNode item=bnode();
 
-				if ( item != null ) { model.add(focus, Form.items, item); }
+				if ( item != null ) { model.add(resource, Form.items, item); }
 				if ( item != null && value != null ) { model.add(item, Form.value, value); }
 				if ( item != null && count != null ) {
 					model.add(item, Form.count, literal(integer(count).orElse(BigInteger.ZERO)));
@@ -337,7 +346,7 @@ final class GraphRetriever extends GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static Snippet filter(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
+	private static Snippet selector(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
 		return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : snippet(
 
 				"{ select {root} {\n"
@@ -365,11 +374,6 @@ final class GraphRetriever extends GraphProcessor {
 
 	}
 
-
-	private static Snippet pattern(final Shape shape) {
-		return shape.map(new PatternProbe(shape));
-	}
-
 	private static Snippet roots(final Shape shape) { // root universal constraints
 		return all(shape)
 				.map(values -> values(shape, values))
@@ -378,6 +382,10 @@ final class GraphRetriever extends GraphProcessor {
 
 	private static Snippet filters(final Shape shape) {
 		return shape.map(new FilterProbe(shape));
+	}
+
+	private static Snippet pattern(final Shape shape) {
+		return shape.map(new PatternProbe(shape));
 	}
 
 	private static Snippet sorters(final Object root, final Collection<Order> orders) {
@@ -474,55 +482,6 @@ final class GraphRetriever extends GraphProcessor {
 					when.getPass().map(this),
 					when.getFail().map(this)
 			);
-		}
-
-	}
-
-	private static final class PatternProbe extends Traverser<Snippet> {
-
-		// !!! (€) remove optionals if term is required or if exists a filter on the same path
-
-		private final Shape shape;
-
-
-		private PatternProbe(final Shape shape) {
-			this.shape=shape;
-		}
-
-
-		@Override public Snippet probe(final Guard guard) {
-			throw new UnsupportedOperationException("partially redacted shape");
-		}
-
-
-		@Override public Snippet probe(final Field field) {
-
-			final IRI iri=field.getIRI();
-			final Shape shape=field.getShape();
-
-			return snippet( // (€) optional unless universal constraints are present
-
-					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
-
-					snippet(
-							edge(var(this.shape), iri, var(shape)), "\n",
-							pattern(shape)
-					)
-
-			);
-		}
-
-
-		@Override public Snippet probe(final And and) {
-			return snippet(and.getShapes().stream().map(s -> s.map(this)));
-		}
-
-		@Override public Snippet probe(final Or or) {
-			return snippet(or.getShapes().stream().map(s -> s.map(this)));
-		}
-
-		@Override public Snippet probe(final When when) {
-			throw new UnsupportedOperationException("conditional shape");
 		}
 
 	}
@@ -678,6 +637,55 @@ final class GraphRetriever extends GraphProcessor {
 
 		@Override public Snippet probe(final When when) {
 			throw new UnsupportedOperationException("conditional pattern"); // !!! tbi
+		}
+
+	}
+
+	private static final class PatternProbe extends Traverser<Snippet> {
+
+		// !!! (€) remove optionals if term is required or if exists a filter on the same path
+
+		private final Shape shape;
+
+
+		private PatternProbe(final Shape shape) {
+			this.shape=shape;
+		}
+
+
+		@Override public Snippet probe(final Guard guard) {
+			throw new UnsupportedOperationException("partially redacted shape");
+		}
+
+
+		@Override public Snippet probe(final Field field) {
+
+			final IRI iri=field.getIRI();
+			final Shape shape=field.getShape();
+
+			return snippet( // (€) optional unless universal constraints are present
+
+					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
+
+					snippet(
+							edge(var(this.shape), iri, var(shape)), "\n",
+							pattern(shape)
+					)
+
+			);
+		}
+
+
+		@Override public Snippet probe(final And and) {
+			return snippet(and.getShapes().stream().map(s -> s.map(this)));
+		}
+
+		@Override public Snippet probe(final Or or) {
+			return snippet(or.getShapes().stream().map(s -> s.map(this)));
+		}
+
+		@Override public Snippet probe(final When when) {
+			throw new UnsupportedOperationException("conditional shape");
 		}
 
 	}

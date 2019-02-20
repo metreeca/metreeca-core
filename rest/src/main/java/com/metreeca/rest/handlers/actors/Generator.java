@@ -19,6 +19,7 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Delegator;
@@ -36,8 +37,6 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.wrappers.Throttler.entity;
-import static com.metreeca.rest.wrappers.Throttler.resource;
 
 
 /**
@@ -92,8 +91,8 @@ public final class Generator extends Delegator {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.relate, Form.digest, entity()),
-				new Throttler(Form.relate, Form.detail, resource())
+				new Throttler(Form.relate, Form.digest, Shapes::entity),
+				new Throttler(Form.relate, Form.detail, Shapes::resource)
 		);
 	}
 

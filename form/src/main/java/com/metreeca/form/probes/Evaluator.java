@@ -20,7 +20,10 @@ package com.metreeca.form.probes;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 
+import java.util.function.Function;
+
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.shapes.Or.or;
 
 import static java.lang.Boolean.FALSE;
@@ -37,7 +40,7 @@ public final class Evaluator extends Traverser<Boolean> {
 	private static final Shape pass=and();
 	private static final Shape fail=or();
 
-	private static final Shape.Probe<Boolean> instance=new Evaluator();
+	private static final Function<Shape, Boolean> instance=memoizable(shape -> shape.map(new Evaluator()));
 
 
 	/**

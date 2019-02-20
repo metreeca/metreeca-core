@@ -20,7 +20,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.Values;
-import com.metreeca.form.truths.JSONAssert;
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -66,6 +66,74 @@ final class CreatorTest {
 		return request -> request.body(input(), () -> Codecs.input(new StringReader(rdf)));
 	}
 
+
+	@Nested final class Resource {
+
+		private Request simple() {
+			return new Request()
+					.roles(Manager)
+					.method(Request.POST)
+					.base(Base)
+					.path("/employees/9999");
+		}
+
+
+		@Nested final class Simple {
+
+			@Test void testNotImplemented() {
+				exec(() -> new Creator()
+
+						.handle(simple())
+
+						.accept(response -> {
+
+							assertThat(response)
+									.hasStatus(Response.NotImplemented)
+									.hasBody(json(), json -> assertThat(json)
+											.hasField("cause")
+									);
+
+							assertThat(graph())
+									.as("graph unchanged")
+									.isEmpty();
+
+						})
+				);
+			}
+
+		}
+
+		@Nested final class Shaped {
+
+			private Request shaped() {
+				return simple().shape(Employee);
+			}
+
+
+			@Test void testNotImplemented() {
+				exec(() -> new Creator()
+
+						.handle(shaped())
+
+						.accept(response -> {
+
+							assertThat(response)
+									.hasStatus(Response.NotImplemented)
+									.hasBody(json(), json -> assertThat(json)
+											.hasField("cause")
+									);
+
+							assertThat(graph())
+									.as("graph unchanged")
+									.isEmpty();
+
+						})
+				);
+			}
+
+		}
+
+	}
 
 	@Nested final class Container {
 
@@ -200,7 +268,7 @@ final class CreatorTest {
 			@Test void testConflictingSlug() {
 				exec(() -> {
 
-					final Creator creator=new Creator((request, model) -> "slug");
+					final Handler creator=new Creator((request, model) -> "slug");
 
 					creator.handle(simple()).accept(response -> {});
 
@@ -415,73 +483,6 @@ final class CreatorTest {
 
 	}
 
-	@Nested final class Resource {
-
-		private Request simple() {
-			return new Request()
-					.roles(Manager)
-					.method(Request.POST)
-					.base(Base)
-					.path("/employees/9999");
-		}
-
-
-		@Nested final class Simple {
-
-			@Test void testNotImplemented() {
-				exec(() -> new Creator()
-
-						.handle(simple())
-
-						.accept(response -> {
-
-							assertThat(response)
-									.hasStatus(Response.NotImplemented)
-									.hasBody(json(), json -> JSONAssert.assertThat(json)
-											.hasField("cause")
-									);
-
-							assertThat(graph())
-									.as("graph unchanged")
-									.isEmpty();
-
-						})
-				);
-			}
-
-		}
-
-		@Nested final class Shaped {
-
-			private Request shaped() {
-				return simple().shape(Employee);
-			}
-
-
-			@Test void testNotImplemented() {
-				exec(() -> new Creator()
-
-						.handle(shaped())
-
-						.accept(response -> {
-
-							assertThat(response)
-									.hasStatus(Response.NotImplemented)
-									.hasBody(json(), json -> JSONAssert.assertThat(json)
-											.hasField("cause")
-									);
-
-							assertThat(graph())
-									.as("graph unchanged")
-									.isEmpty();
-
-						})
-				);
-			}
-
-		}
-
-	}
 
 	@Nested final class Slugs {
 

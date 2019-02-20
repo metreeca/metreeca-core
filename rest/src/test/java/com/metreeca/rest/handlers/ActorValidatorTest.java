@@ -15,11 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.engines;
+package com.metreeca.rest.handlers;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.Field;
 import com.metreeca.form.truths.ModelAssert;
+import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -30,7 +32,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.form.FocusAssert.assertThat;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
@@ -49,12 +50,14 @@ import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.MinLength.minLength;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Pattern.pattern;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.integer;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,7 +67,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphValidatorTest extends GraphProcessorTest {
+final class ActorValidatorTest extends ActorProcessorTest {
 
 	private static final IRI x=item("x");
 	private static final IRI y=item("y");
@@ -83,7 +86,9 @@ final class GraphValidatorTest extends GraphProcessorTest {
 	}
 
 	private Focus validate(final Shape shape, final Collection<Statement> model) {
-		return new GraphValidator().validate(RDF.NIL, field(RDF.VALUE, shape), model);
+		return tool(Graph.Factory).query(connection -> {
+			return field(RDF.VALUE, shape).map(new ActorValidator(tool(Trace.Factory), connection, set(RDF.NIL), model));
+		});
 	}
 
 
@@ -125,8 +130,8 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=field(RDF.VALUE, all(y));
 
-			assertThat(validate(shape, "<x>", "<x> rdf:value <y>")).isValid();
-			assertThat(validate(shape, "<x>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<x>", "<x> rdf:value <y>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<x>")).isNotValid();
 
 		});
 	}
@@ -136,8 +141,8 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=field(inverse(RDF.VALUE), all(y));
 
-			assertThat(validate(shape, "<x>", "<y> rdf:value <x>")).isValid();
-			assertThat(validate(shape, "<x>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<x>", "<y> rdf:value <x>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<x>")).isNotValid();
 
 		});
 	}
@@ -154,7 +159,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Focus focus=validate(shape, model);
 
-			assertThat(focus).isValid();
+			FocusAssert.assertThat(focus).isValid();
 			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
 		});
@@ -169,7 +174,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Focus focus=validate(shape, model);
 
-			assertThat(focus).isValid();
+			FocusAssert.assertThat(focus).isValid();
 			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
 		});
@@ -184,7 +189,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Focus focus=validate(shape, model);
 
-			assertThat(focus).isValid();
+			FocusAssert.assertThat(focus).isValid();
 			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
 		});
@@ -202,7 +207,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Focus focus=validate(shape, model);
 
-			assertThat(focus).isValid();
+			FocusAssert.assertThat(focus).isValid();
 			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
 		});
@@ -222,7 +227,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Focus focus=validate(shape, model);
 
-			assertThat(focus).isValid();
+			FocusAssert.assertThat(focus).isValid();
 			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
 		});
@@ -243,7 +248,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Focus focus=validate(shape, model);
 
-			assertThat(focus).isValid();
+			FocusAssert.assertThat(focus).isValid();
 			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
 		});
@@ -266,7 +271,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Focus focus=validate(shape, model);
 
-			assertThat(focus).isValid();
+			FocusAssert.assertThat(focus).isValid();
 			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
 		});
@@ -287,22 +292,22 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Focus focus=validate(shape, model);
 
-			assertThat(focus).isValid();
+			FocusAssert.assertThat(focus).isValid();
 			ModelAssert.assertThat(focus.outline().collect(toList())).isIsomorphicTo(model);
 
 		});
 	}
 
 
-	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Constraints ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testValidateMinCount() {
 		exec(() -> {
 
 			final Shape shape=minCount(2);
 
-			assertThat(validate(shape, "1, 2, 3")).isValid();
-			assertThat(validate(shape, "1")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "1, 2, 3")).isValid();
+			FocusAssert.assertThat(validate(shape, "1")).isNotValid();
 
 		});
 	}
@@ -312,8 +317,8 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=maxCount(2);
 
-			assertThat(validate(shape, "1, 2")).isValid();
-			assertThat(validate(shape, "1, 2, 3")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "1, 2")).isValid();
+			FocusAssert.assertThat(validate(shape, "1, 2, 3")).isNotValid();
 
 		});
 	}
@@ -323,10 +328,10 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=in(x, y);
 
-			assertThat(validate(shape, "<x>, <y>")).isValid();
-			assertThat(validate(shape, "<x>, <y>, <z>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<x>, <y>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<x>, <y>, <z>")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -336,10 +341,10 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=all(x, y);
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
-			assertThat(validate(shape, "<x>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<x>")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isNotValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isNotValid();
 
 		});
 	}
@@ -349,10 +354,10 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=any(x, y);
 
-			assertThat(validate(shape, "<x>")).isValid();
-			assertThat(validate(shape, "<z>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<x>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<z>")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isNotValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isNotValid();
 
 		});
 	}
@@ -361,34 +366,34 @@ final class GraphValidatorTest extends GraphProcessorTest {
 	@Test void testValidateDatatype() {
 		exec(() -> {
 
-			assertThat(validate(datatype(Form.ValueType), "<x>")).isValid();
-			assertThat(validate(datatype(Form.ValueType), "_:x")).isValid();
-			assertThat(validate(datatype(Form.ValueType), "1")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.ValueType), "<x>")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.ValueType), "_:x")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.ValueType), "1")).isValid();
 
-			assertThat(validate(datatype(Form.ResourceType), "<x>")).isValid();
-			assertThat(validate(datatype(Form.ResourceType), "_:x")).isValid();
-			assertThat(validate(datatype(Form.ResourceType), "1")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(Form.ResourceType), "<x>")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.ResourceType), "_:x")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.ResourceType), "1")).isNotValid();
 
-			assertThat(validate(datatype(Form.BNodeType), "_:x")).isValid();
-			assertThat(validate(datatype(Form.BNodeType), "1")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(Form.BNodeType), "_:x")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.BNodeType), "1")).isNotValid();
 
-			assertThat(validate(datatype(Form.IRIType), "<x>")).isValid();
-			assertThat(validate(datatype(Form.IRIType), "_:x")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(Form.IRIType), "<x>")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.IRIType), "_:x")).isNotValid();
 
-			assertThat(validate(datatype(Form.LiteralType), "'x'")).isValid();
-			assertThat(validate(datatype(Form.LiteralType), "1")).isValid();
-			assertThat(validate(datatype(Form.LiteralType), "_:x")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(Form.LiteralType), "'x'")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.LiteralType), "1")).isValid();
+			FocusAssert.assertThat(validate(datatype(Form.LiteralType), "_:x")).isNotValid();
 
-			assertThat(validate(datatype(XMLSchema.STRING), "'text'")).isValid();
-			assertThat(validate(datatype(XMLSchema.STRING), "_:x")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(XMLSchema.STRING), "'text'")).isValid();
+			FocusAssert.assertThat(validate(datatype(XMLSchema.STRING), "_:x")).isNotValid();
 
-			assertThat(validate(datatype(RDF.LANGSTRING), "'text'@en")).isValid();
-			assertThat(validate(datatype(RDF.LANGSTRING), "_:x")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(RDF.LANGSTRING), "'text'@en")).isValid();
+			FocusAssert.assertThat(validate(datatype(RDF.LANGSTRING), "_:x")).isNotValid();
 
-			assertThat(validate(datatype(XMLSchema.BOOLEAN), "true")).isValid();
-			assertThat(validate(datatype(XMLSchema.BOOLEAN), "_:x")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(XMLSchema.BOOLEAN), "true")).isValid();
+			FocusAssert.assertThat(validate(datatype(XMLSchema.BOOLEAN), "_:x")).isNotValid();
 
-			assertThat(validate(datatype(Form.IRIType))).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(datatype(Form.IRIType))).as("empty focus").isValid();
 
 		});
 	}
@@ -400,13 +405,13 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			// validate using type info retrieved from model
 
-			assertThat(validate(shape, "<employees/9999>", "<employees/9999> a :Employee")).isValid();
-			assertThat(validate(shape, "<offices/9999>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<employees/9999>", "<employees/9999> a :Employee")).isValid();
+			FocusAssert.assertThat(validate(shape, "<offices/9999>")).isNotValid();
 
 			// validate using type info retrieved from graph
 
-			assertThat(validate(shape, "<employees/1370>")).isValid();
-			assertThat(validate(shape, "<offices/1>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<employees/1370>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<offices/1>")).isNotValid();
 
 		});
 	}
@@ -417,11 +422,11 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=minExclusive(literal(1));
 
-			assertThat(validate(shape, "2")).isValid();
-			assertThat(validate(shape, "1")).isNotValid();
-			assertThat(validate(shape, "0")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "2")).isValid();
+			FocusAssert.assertThat(validate(shape, "1")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "0")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -431,11 +436,11 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=maxExclusive(literal(10));
 
-			assertThat(validate(shape, "2")).isValid();
-			assertThat(validate(shape, "10")).isNotValid();
-			assertThat(validate(shape, "100")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "2")).isValid();
+			FocusAssert.assertThat(validate(shape, "10")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "100")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -445,11 +450,11 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=minInclusive(literal(1));
 
-			assertThat(validate(shape, "2")).isValid();
-			assertThat(validate(shape, "1")).isValid();
-			assertThat(validate(shape, "0")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "2")).isValid();
+			FocusAssert.assertThat(validate(shape, "1")).isValid();
+			FocusAssert.assertThat(validate(shape, "0")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -459,11 +464,11 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=maxInclusive(literal(10));
 
-			assertThat(validate(shape, "2")).isValid();
-			assertThat(validate(shape, "10")).isValid();
-			assertThat(validate(shape, "100")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "2")).isValid();
+			FocusAssert.assertThat(validate(shape, "10")).isValid();
+			FocusAssert.assertThat(validate(shape, "100")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -474,13 +479,13 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=pattern(".*\\.org");
 
-			assertThat(validate(shape, "<http://exampe.org>")).isValid();
-			assertThat(validate(shape, "<http://exampe.com>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<http://exampe.org>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<http://exampe.com>")).isNotValid();
 
-			assertThat(validate(shape, "'example.org'")).isValid();
-			assertThat(validate(shape, "'example.com'")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "'example.org'")).isValid();
+			FocusAssert.assertThat(validate(shape, "'example.com'")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -490,13 +495,13 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=like("ex.org");
 
-			assertThat(validate(shape, "<http://exampe.org/>")).isValid();
-			assertThat(validate(shape, "<http://exampe.com/>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<http://exampe.org/>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<http://exampe.com/>")).isNotValid();
 
-			assertThat(validate(shape, "'example.org'")).isValid();
-			assertThat(validate(shape, "'example.com'")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "'example.org'")).isValid();
+			FocusAssert.assertThat(validate(shape, "'example.com'")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -506,13 +511,13 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=minLength(3);
 
-			assertThat(validate(shape, "100")).isValid();
-			assertThat(validate(shape, "99")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "100")).isValid();
+			FocusAssert.assertThat(validate(shape, "99")).isNotValid();
 
-			assertThat(validate(shape, "'100'")).isValid();
-			assertThat(validate(shape, "'99'")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "'100'")).isValid();
+			FocusAssert.assertThat(validate(shape, "'99'")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -522,13 +527,13 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=maxLength(2);
 
-			assertThat(validate(shape, "99")).isValid();
-			assertThat(validate(shape, "100")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "99")).isValid();
+			FocusAssert.assertThat(validate(shape, "100")).isNotValid();
 
-			assertThat(validate(shape, "'99'")).isValid();
-			assertThat(validate(shape, "'100'")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "'99'")).isValid();
+			FocusAssert.assertThat(validate(shape, "'100'")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isValid();
 
 		});
 	}
@@ -539,10 +544,10 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=and(any(x), any(y));
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
-			assertThat(validate(shape, "<x>, <z>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<x>, <z>")).isNotValid();
 
-			assertThat(validate(shape)).as("empty focus").isNotValid();
+			FocusAssert.assertThat(validate(shape)).as("empty focus").isNotValid();
 
 		});
 	}
@@ -552,8 +557,8 @@ final class GraphValidatorTest extends GraphProcessorTest {
 
 			final Shape shape=or(all(x, y), all(x, z));
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
-			assertThat(validate(shape, "<y>, <z>")).isNotValid();
+			FocusAssert.assertThat(validate(shape, "<x>, <y>, <z>")).isValid();
+			FocusAssert.assertThat(validate(shape, "<y>, <z>")).isNotValid();
 
 		});
 	}

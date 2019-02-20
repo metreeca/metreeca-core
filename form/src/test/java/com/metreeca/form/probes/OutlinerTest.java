@@ -20,6 +20,7 @@ package com.metreeca.form.probes;
 import com.metreeca.form.Shape;
 
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 
@@ -37,6 +39,18 @@ import static java.util.stream.Collectors.toSet;
 
 
 final class OutlinerTest {
+
+	@Test void testOutlineFields() {
+
+		assertThat(outline(field(RDF.VALUE, RDF.REST), RDF.FIRST))
+				.as("direct field")
+				.isEqualTo(decode("rdf:first rdf:value rdf:rest."));
+
+		assertThat(outline(field(inverse(RDF.VALUE), RDF.REST), RDF.FIRST))
+				.as("inverse field")
+				.isEqualTo(decode("rdf:rest rdf:value rdf:first."));
+
+	}
 
 	@Test void testOutlineClasses() {
 		assertThat(outline(and(all(RDF.FIRST), clazz(RDFS.RESOURCE))))
@@ -71,8 +85,8 @@ final class OutlinerTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> outline(final Shape shape) {
-		return shape.map(new Outliner()).collect(toSet());
+	private Collection<Statement> outline(final Shape shape, final Value... sources) {
+		return shape.map(new Outliner(sources)).collect(toSet());
 	}
 
 }

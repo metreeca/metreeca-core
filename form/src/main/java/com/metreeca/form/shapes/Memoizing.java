@@ -29,7 +29,7 @@ import java.util.function.Function;
  *
  * <p>Memoizes the results of {@linkplain #memoizable(Function) memoizable} shape mappers.</p>
  */
-@SuppressWarnings("unchecked") public final class Memo implements Shape {
+@SuppressWarnings("unchecked") public final class Memoizing implements Shape {
 
 	/**
 	 * Creates a memoizing shape.
@@ -41,7 +41,7 @@ import java.util.function.Function;
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public static Shape memo(final Shape shape) { return new Memo(shape); }
+	public static Shape memoizing(final Shape shape) { return new Memoizing(shape); }
 
 
 	/**
@@ -71,7 +71,7 @@ import java.util.function.Function;
 	private final ConcurrentHashMap<Function<Shape, ?>, Object> memos=new ConcurrentHashMap<>();
 
 
-	private Memo(final Shape shape) {
+	private Memoizing(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -95,7 +95,7 @@ import java.util.function.Function;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Memo && shape.equals(((Memo)object).shape);
+		return this == object || object instanceof Memoizing && shape.equals(((Memoizing)object).shape);
 	}
 
 	@Override public int hashCode() {

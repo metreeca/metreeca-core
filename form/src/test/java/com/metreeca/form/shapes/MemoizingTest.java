@@ -24,20 +24,20 @@ import org.junit.jupiter.api.Test;
 import java.util.function.Function;
 
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Memo.memo;
-import static com.metreeca.form.shapes.Memo.memoizable;
+import static com.metreeca.form.shapes.Memoizing.memoizing;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class MemoTest {
+final class MemoizingTest {
 
 	@Test void testHandleMemoizableMappers() {
 
 		final Function<Shape, Object> mapper=shape -> new Object();
 		final Function<Shape, Object> memoer=memoizable(mapper);
 
-		final Shape memo=memo(and());
+		final Shape memo=memoizing(and());
 
 		assertThat(memo.map(memoer)).isSameAs(memo.map(memoer));
 
@@ -47,7 +47,7 @@ final class MemoTest {
 
 		final Function<Shape, Object> mapper=shape -> new Object();
 
-		final Shape memo=memo(and());
+		final Shape memo=memoizing(and());
 
 		assertThat(memo.map(mapper)).isNotSameAs(memo.map(mapper));
 
