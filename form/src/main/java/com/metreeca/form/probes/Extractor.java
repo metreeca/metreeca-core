@@ -20,9 +20,7 @@ package com.metreeca.form.probes;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -45,11 +43,11 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Extractor extends Traverser<Stream<Statement>> {
 
-	private final Collection<Value> focus;
+	private final Collection<Resource> focus;
 	private final Iterable<Statement> model;
 
 
-	public Extractor(final Iterable<Statement> model, final Collection<Value> focus) {
+	public Extractor(final Iterable<Statement> model, final Collection<? extends Resource> focus) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -82,8 +80,11 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 				.filter(s -> focus.contains(source.apply(s)) && iri.equals(s.getPredicate()))
 				.collect(toList());
 
-		final Set<Value> focus=restricted.stream()
+		final Set<Resource> focus=restricted
+				.stream()
 				.map(target)
+				.filter(v -> v instanceof Resource)
+				.map( v -> (Resource)v)
 				.collect(toSet());
 
 		return Stream.concat(restricted.stream(), field.getShape().map(new Extractor(model, focus)));

@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toCollection;
 /**
  * RDF structure utilities.
  *
- * <p>manages retrieval of complex RDF structures from statement sources.</p>
+ * <p>Manages retrieval of complex RDF structures from statement sources.</p>
  */
 public final class Structures {
 
@@ -174,7 +174,7 @@ public final class Structures {
 	/**
 	 * Retrieves a reachable network from a repository.
 	 *
-	 * @param resource the resource whose reachable network is to be retrieved
+	 * @param resource   the resource whose reachable network is to be retrieved
 	 * @param connection the connection to the repository the reachable network is to be retrieved from
 	 *
 	 * @return the reachable network of {@code resource} retrieved from {@code model}
@@ -236,7 +236,8 @@ public final class Structures {
 	 * @param shape    the shape whose envelope is to be retrieved
 	 * @param model    the statement source the shape envelope is to be retrieved from
 	 *
-	 * @return the {@code shape} envelope of {@code resource} retrieved from {@code model}
+	 * @return the {@code shape} envelope of {@code resource} retrieved from {@code model}, that is the subset of its
+	 * reachable network that is compatible with {@code shape}
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
