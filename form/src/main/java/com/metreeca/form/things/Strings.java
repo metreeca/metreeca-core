@@ -97,7 +97,8 @@ public final class Strings {
 	}
 
 	public static String indent(final Object object, final boolean trailing) {
-		return object == null ? null : object.toString().replaceAll((trailing ? "(\n)" : "(^|\n)")+"([^\n])", "$1\t$2");
+		return object == null ? null : object.toString()
+				.replaceAll((trailing ? "(\n)" : "(^|\n)")+"([^\n])", "$1\t$2");
 	}
 
 

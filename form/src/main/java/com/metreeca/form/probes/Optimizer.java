@@ -51,6 +51,9 @@ public final class Optimizer extends Traverser<Shape> {
 	}
 
 
+	// !!! optimize datatypes (remove form:value, merge super/subtypes)
+
+
 	@Override public Shape probe(final Field field) {
 
 		final IRI iri=field.getIRI();

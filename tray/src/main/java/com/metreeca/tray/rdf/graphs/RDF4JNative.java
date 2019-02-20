@@ -19,9 +19,6 @@ package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
@@ -35,7 +32,8 @@ import java.io.File;
  */
 public final class RDF4JNative extends Graph {
 
-	private final SailRepository repository;
+	// ;(rdf4j) SERIALIZABLE isolation level prevents transaction commitments and leaks memory like a sieve…
+	// https://github.com/eclipse/rdf4j/issues/1031
 
 
 	/**
@@ -56,25 +54,7 @@ public final class RDF4JNative extends Graph {
 			throw new IllegalArgumentException("plain file at storage folder path ["+storage+"]");
 		}
 
-		this.repository=new SailRepository(new NativeStore(storage));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override protected Repository repository() {
-		return repository;
-	}
-
-	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT}
-	 */
-	@Override protected IsolationLevel isolation() {
-
-		// !!! ;(rdf4j) SERIALIZABLE prevents transaction commitments and leaks memory like a sieve…
-		// !!! see https://github.com/eclipse/rdf4j/issues/1031
-
-		return IsolationLevels.SNAPSHOT;
+		repository(new SailRepository(new NativeStore(storage)));
 	}
 
 }

@@ -40,9 +40,6 @@ public final class And implements Shape {
 	private static final And empty=new And(set());
 
 
-	public static Shape pass() { return empty;}
-
-
 	public static And and() { return empty; }
 
 	@SafeVarargs public static  <S extends Shape> And and(final S... shapes) {

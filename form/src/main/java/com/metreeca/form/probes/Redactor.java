@@ -17,21 +17,21 @@
 
 package com.metreeca.form.probes;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
+import static com.metreeca.form.probes.Evaluator.fail;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Sets.set;
 
 import static java.util.Collections.disjoint;
@@ -45,44 +45,39 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Redactor extends Traverser<Shape> {
 
-	private final Map<IRI, Set<? extends Value>> variables;
+	private final IRI axis;
+	private final Set<Value> values;
 
 
-	public Redactor(final IRI axis, final Value... values) {
-		this(map(entry(axis, set(values))));
+	public Redactor(final IRI axis, final Value... values) { this(axis, set(values)); }
+
+	public Redactor(final IRI axis, final Set<Value> values) {
+
+		if ( axis == null ) {
+			throw new NullPointerException("null axis");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		this.axis=axis;
+		this.values=new HashSet<>(values);
 	}
-
-	public Redactor(final Map<IRI, Set<? extends Value>> variables) {
-
-		if ( variables == null ) {
-			throw new NullPointerException("null variables");
-		}
-
-		if ( variables.containsKey(null) ) {
-			throw new NullPointerException("null variable");
-		}
-
-		if ( variables.containsValue(null) ) {
-			throw new NullPointerException("null variable values");
-		}
-
-		this.variables=new LinkedHashMap<>(variables); // !!! clone map values
-	}
-
-
-	@Override public Shape probe(final Shape shape) { return shape; }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Override public Shape probe(final Shape shape) { return shape; }
+
+
 	@Override public Shape probe(final Guard guard) {
 
-		final Set<? extends Value> actual=variables.get(guard.getAxis());
 		final Set<? extends Value> accepted=guard.getValues();
 
-		return actual == null ? guard // ignore undefined variables
-				: actual.contains(Form.any) || !disjoint(accepted, actual) ? and()
-				: or();
+		return axis.equals(guard.getAxis())
+				? values.isEmpty() || !disjoint(accepted, values) ? pass() : fail()
+				: guard; // ignore unrelated variables
 	}
 
 

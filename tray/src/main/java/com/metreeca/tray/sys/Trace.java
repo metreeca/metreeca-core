@@ -78,7 +78,7 @@ public abstract class Trace {
 				&& System.getProperty("java.util.logging.config.class") == null
 				&& !"Production".equals(System.getProperty("com.google.appengine.runtime.environment")) ) {
 
-			final java.util.logging.Level level=java.util.logging.Level.INFO;
+			final java.util.logging.Level level=Logger.getLogger("").getLevel(); // preserve log level
 
 			LogManager.getLogManager().reset();
 
@@ -157,8 +157,16 @@ public abstract class Trace {
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries
 	 * @param message the message for the trace entry
 	 */
-	public void error(final Object source, final String message) {
-		entry(Level.Error, source, () -> message, null);
+	public void error(final Object source, final String message) { error(source, () -> message); }
+
+	/**
+	 * Adds an error trace entry.
+	 *
+	 * @param source  the source object for the trace entry or {@code null} for global trace entries
+	 * @param message the message supplier for the trace entry
+	 */
+	public void error(final Object source, final Supplier<String> message) {
+		entry(Level.Error, source, message, null);
 	}
 
 	/**
@@ -168,8 +176,17 @@ public abstract class Trace {
 	 * @param message the message for the trace entry
 	 * @param cause   the throwable that caused the traced exceptional condition
 	 */
-	public final void error(final Object source, final String message, final Throwable cause) {
-		entry(Level.Error, source, () -> message, cause);
+	public final void error(final Object source, final String message, final Throwable cause) { error(source, () -> message, cause); }
+
+	/**
+	 * Adds an exceptional error trace entry.
+	 *
+	 * @param source  the source object for the trace entry or {@code null} for global trace entries
+	 * @param message the message supplier for the trace entry
+	 * @param cause   the throwable that caused the traced exceptional condition
+	 */
+	public final void error(final Object source, final Supplier<String> message, final Throwable cause) {
+		entry(Level.Error, source, message, cause);
 	}
 
 	/**
@@ -178,8 +195,16 @@ public abstract class Trace {
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries
 	 * @param message the message for the trace entry
 	 */
-	public final void warning(final Object source, final String message) {
-		entry(Level.Warning, source, () -> message, null);
+	public final void warning(final Object source, final String message) { warning(source, () -> message); }
+
+	/**
+	 * Adds a warning trace entry.
+	 *
+	 * @param source  the source object for the trace entry or {@code null} for global trace entries
+	 * @param message the message supplier for the trace entry
+	 */
+	public final void warning(final Object source, final Supplier<String> message) {
+		entry(Level.Warning, source, message, null);
 	}
 
 	/**
@@ -189,8 +214,17 @@ public abstract class Trace {
 	 * @param message the message for the trace entry
 	 * @param cause   the throwable that caused the traced exceptional condition
 	 */
-	public final void warning(final Object source, final String message, final Throwable cause) {
-		entry(Level.Warning, source, () -> message, cause);
+	public final void warning(final Object source, final String message, final Throwable cause) { warning(source, () -> message, cause); }
+
+	/**
+	 * Adds an exceptional warning trace entry.
+	 *
+	 * @param source  the source object for the trace entry or {@code null} for global trace entries
+	 * @param message the message supplier for the trace entry
+	 * @param cause   the throwable that caused the traced exceptional condition
+	 */
+	public final void warning(final Object source, final Supplier<String> message, final Throwable cause) {
+		entry(Level.Warning, source, message, cause);
 	}
 
 	/**
@@ -199,8 +233,16 @@ public abstract class Trace {
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries
 	 * @param message the message for the trace entry
 	 */
-	public final void info(final Object source, final String message) {
-		entry(Level.Info, source, () -> message, null);
+	public final void info(final Object source, final String message) { info(source, () -> message); }
+
+	/**
+	 * Adds an info trace entry.
+	 *
+	 * @param source  the source object for the trace entry or {@code null} for global trace entries
+	 * @param message the message supplier for the trace entry
+	 */
+	public final void info(final Object source, final Supplier<String> message) {
+		entry(Level.Info, source, message, null);
 	}
 
 	/**
@@ -209,20 +251,42 @@ public abstract class Trace {
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries
 	 * @param message the message for the trace entry
 	 */
-	public final void debug(final Object source, final String message) {
-		entry(Level.Debug, source, () -> message, null);
-	}
+	public final void debug(final Object source, final String message) { debug(source, () -> message); }
 
 	/**
 	 * Adds a debug trace entry.
 	 *
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries
-	 * @param model the RDF model to be included in the trace entry; ignored if null
-	 * @param <V> the type of the statement source
+	 * @param message the message supplier for the trace entry
+	 */
+	public final void debug(final Object source, final Supplier<String> message) {
+		entry(Level.Debug, source, message, null);
+	}
+
+
+	/**
+	 * Adds a trace entry.
+	 *
+	 * @param level   the logging level for the trace entry
+	 * @param source  the source object for the trace entry or {@code null} for global trace entries; may be a
+	 *                human-readable string label
+	 * @param message the message supplier for the trace entry
+	 * @param cause   the throwable that caused the traced exceptional condition or {@code null} if immaterial
+	 */
+	public abstract void entry(final Level level,
+			final Object source, final Supplier<String> message, final Throwable cause);
+
+
+	/**
+	 * Adds a debug trace entry.
+	 *
+	 * @param source the source object for the trace entry or {@code null} for global trace entries
+	 * @param model  the RDF model to be included in the trace entry; ignored if null
+	 * @param <V>    the type of the statement source
 	 *
 	 * @return the provided {@code model}
 	 */
-	public <V extends Iterable<Statement>> V debug(final Object source, final V model) {
+	public <V extends Iterable<Statement>> V trace(final Object source, final V model) {
 
 		if ( model != null ) {
 			entry(Level.Debug, source, () -> {
@@ -242,19 +306,6 @@ public abstract class Trace {
 
 		return model;
 	}
-
-
-	/**
-	 * Adds a trace entry.
-	 *
-	 * @param level   the logging level for the trace entry
-	 * @param source  the source object for the trace entry or {@code null} for global trace entries; may be a
-	 *                human-readable string label
-	 * @param message the message supplier for the trace entry
-	 * @param cause   the throwable that caused the traced exceptional condition or {@code null} if immaterial
-	 */
-	public abstract void entry(final Level level,
-			final Object source, final Supplier<String> message, final Throwable cause);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

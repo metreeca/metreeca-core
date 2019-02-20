@@ -19,9 +19,6 @@ package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
@@ -35,14 +32,11 @@ import java.io.File;
  */
 public final class RDF4JMemory extends Graph {
 
-	private final SailRepository repository;
-
-
 	/**
 	 * Creates an ephemeral RDF4J memory graph.
 	 */
 	public RDF4JMemory() {
-		this.repository=new SailRepository(new MemoryStore());
+		repository(new SailRepository(new MemoryStore()));
 	}
 
 	/**
@@ -63,21 +57,7 @@ public final class RDF4JMemory extends Graph {
 			throw new IllegalArgumentException("plain file at storage folder path ["+storage+"]");
 		}
 
-		this.repository=new SailRepository(new MemoryStore(storage));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override protected Repository repository() {
-		return repository;
-	}
-
-	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT})
-	 */
-	@Override protected IsolationLevel isolation() {
-		return IsolationLevels.SNAPSHOT;
+		repository(new SailRepository(new MemoryStore(storage)));
 	}
 
 }

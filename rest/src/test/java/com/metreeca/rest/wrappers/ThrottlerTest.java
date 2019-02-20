@@ -19,7 +19,6 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Cleaner;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.ValuesTest;
@@ -30,7 +29,6 @@ import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
@@ -38,31 +36,20 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.form.Shape.relate;
-import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.And.pass;
 import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
-import static com.metreeca.form.shapes.Meta.metas;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.form.things.ValuesTest.Employee;
+import static com.metreeca.form.things.ValuesTest.Salesman;
+import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.wrappers.Throttler.container;
-import static com.metreeca.rest.wrappers.Throttler.entity;
-import static com.metreeca.rest.wrappers.Throttler.resource;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static java.util.stream.Collectors.toSet;
 
 
 final class ThrottlerTest {
@@ -82,7 +69,7 @@ final class ThrottlerTest {
 	@Nested final class Simple {
 
 		private Throttler throttler() {
-			return new Throttler(Form.any, Form.any);
+			return new Throttler(RDF.NIL, RDF.NIL);
 		}
 
 		private Handler handler(final Collection<Statement> model) {
@@ -140,7 +127,7 @@ final class ThrottlerTest {
 
 		private final IRI task=Form.relate;
 		private final IRI view=Form.detail;
-		private final IRI role=ValuesTest.Salesman;
+		private final IRI role=Salesman;
 
 
 		private Throttler throttler() {
@@ -166,11 +153,12 @@ final class ThrottlerTest {
 					.handle(request())
 
 					.accept(response -> assertThat(response.request().shape())
-							.isEqualTo(shape.map(new Redactor(map(
-									entry(Form.task, set(task)),
-									entry(Form.view, set(view)),
-									entry(Form.role, set(role))
-							))).map(new Optimizer()))
+							.isEqualTo(shape
+									.map(new Redactor(Form.task, task))
+									.map(new Redactor(Form.view, view))
+									.map(new Redactor(Form.role, role))
+									.map(new Optimizer())
+							)
 					)
 			);
 		}
@@ -279,11 +267,12 @@ final class ThrottlerTest {
 					.handle(request())
 
 					.accept(response -> assertThat(response.request().shape())
-							.isEqualTo(shape.map(new Redactor(map(
-									entry(Form.task, set(task)),
-									entry(Form.view, set(view)),
-									entry(Form.role, set(role))
-							))).map(new Optimizer()))
+							.isEqualTo(shape
+									.map(new Redactor(Form.task, task))
+									.map(new Redactor(Form.view, view))
+									.map(new Redactor(Form.role, role))
+									.map(new Optimizer())
+							)
 					)
 			);
 		}
@@ -299,174 +288,10 @@ final class ThrottlerTest {
 							.hasStatus(Response.OK)
 							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.as("extended with implied statements and trimmed")
-									.isIsomorphicTo(decode("<> a :Employee; :email 'tino.faussone@example.com'."))
+									.isIsomorphicTo(decode("<> :email 'tino.faussone@example.com'."))
 							)
 					)
 			);
-
-		}
-
-	}
-
-	@Nested final class Splitters {
-
-		private final Shape Container=and(relate().then(
-				field(RDF.TYPE, LDP.DIRECT_CONTAINER),
-				field(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-				field(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-				),
-				field(RDFS.LABEL, Textual),
-				field(RDFS.COMMENT, Textual)
-		);
-
-
-		@Nested final class Entity {
-
-			@Test void testForwardAndAnnotateComboShape() {
-				assertThat(entity().apply(Employees))
-
-						.satisfies(shape -> assertThat(fields(shape).keySet())
-								.as("all fields retained")
-								.isEqualTo(fields(Employees.map(new Optimizer())).keySet())
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						)
-
-						.satisfies(shape -> assertThat(shape
-										.map(new Redactor(Form.role, Form.none))
-										.map(new Cleaner())
-										.map(new Optimizer())
-								)
-										.as("role-based authorization preserved")
-										.isEqualTo(pass())
-						);
-			}
-
-			@Test void testForwardAndAnnotateContainerShape() {
-				assertThat(entity().apply(Container))
-
-						.satisfies(shape -> assertThat(fields(shape))
-								.as("only container fields retained")
-								.isEqualTo(fields(Container.map(new Optimizer())))
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						);
-			}
-
-			@Test void testForwardResourceShape() {
-				assertThat(entity().apply(Employee))
-						.as("only resource shape found")
-						.isEqualTo(Employee.map(new Optimizer()));
-			}
-
-		}
-
-		@Nested final class Resource {
-
-			@Test void testExtractAndAnnotateResourceShapeFromComboShape() {
-				assertThat(resource().apply(Employees))
-
-						.satisfies(shape -> assertThat(fields(shape))
-								.as("only resource fields retained")
-								.isEqualTo(fields(Employee.map(new Optimizer())))
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						);
-			}
-
-			@Test void testForwardAndAnnotateContainerShape() {
-				assertThat(resource().apply(Container))
-
-						.satisfies(shape -> assertThat(fields(shape))
-								.as("only container fields retained")
-								.isEqualTo(fields(Container.map(new Optimizer())))
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						);
-			}
-
-			@Test void testForwardResourceShape() {
-				assertThat(resource().apply(Employee))
-						.as("only resource shape found")
-						.isEqualTo(Employee.map(new Optimizer()));
-			}
-
-			@Test void testPreserveExistingAnnotations() {
-
-				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
-
-				assertThat(resource().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
-
-			}
-
-		}
-
-		@Nested final class Container {
-
-			@Test void testExtractAndAnnotateContainerShapeFromComboShape() {
-				assertThat(container().apply(Employees))
-
-						.satisfies(shape -> assertThat(fields(shape).keySet())
-								.as("only container fields retained")
-								.isEqualTo(fields(Employees)
-										.keySet().stream()
-										.filter(iri -> !iri.equals(LDP.CONTAINS))
-										.collect(toSet())
-								)
-						)
-
-						.satisfies(shape -> assertThat(metas(shape))
-								.as("annotated with container properties")
-								.containsOnly(
-										entry(RDF.TYPE, LDP.DIRECT_CONTAINER),
-										entry(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-										entry(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
-								)
-						);
-			}
-
-			@Test void testIgnoreResourceShape() {
-				assertThat(container().apply(Employee))
-						.as("no container shape found")
-						.isEqualTo(pass());
-
-			}
-
-			@Test void testPreserveExistingAnnotations() {
-
-				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER), field(LDP.CONTAINS, required()));
-
-				assertThat(container().apply(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
-
-			}
 
 		}
 

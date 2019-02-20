@@ -42,10 +42,10 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.rest.bodies.ReaderBody.reader;
+import static com.metreeca.rest.bodies.WriterBody.writer;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
@@ -362,7 +362,7 @@ public abstract class Gateway implements ServletContextListener {
 				//
 				//			updated.add(part
 				//
-				//					.body(InputFormat.Format, () -> {
+				//					.body(InputBody.Body, () -> {
 				//						try {
 				//							return item.getInputStream();
 				//						} catch ( final IOException e ) {
@@ -370,7 +370,7 @@ public abstract class Gateway implements ServletContextListener {
 				//						}
 				//					})
 				//
-				//					.body(ReaderFormat.Format, () -> { // !!! from input using part/request encoding
+				//					.body(ReaderBody.Body, () -> { // !!! from input using part/request encoding
 				//						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 				//					}));
 				//
@@ -387,7 +387,7 @@ public abstract class Gateway implements ServletContextListener {
 				//}
 				//
 				//for (final Map.Entry<String, List<Message<?>>> part : parts.entrySet()) {
-				//	// !!! request.body(_Parts,Format, ___)// !!! request.part(part.getKey(), part.getValue());
+				//	// !!! request.body(_Parts,Body, ___)// !!! request.part(part.getKey(), part.getValue());
 				//}
 
 				// !!! set input/reader format from main body part

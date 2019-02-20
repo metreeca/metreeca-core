@@ -19,20 +19,24 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.wrappers.Throttler.entity;
-import static com.metreeca.rest.wrappers.Throttler.resource;
+import static com.metreeca.form.things.Shapes.resource;
 
 
 /**
  * LDP resource deleter.
  *
- * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item() focus item}.</p>
+ * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item() focus
+ * item}, according to the following operating modes.</p>
  *
  * <p>If the request target is a {@linkplain Request#container() container}:</p>
  *
@@ -41,7 +45,7 @@ import static com.metreeca.rest.wrappers.Throttler.resource;
  * <li>the request is reported with a {@linkplain Response#NotImplemented} status code.</li>
  *
  * </ul>
-*
+ *
  * <p>If the request includes an expected {@linkplain Request#shape() resource shape}:</p>
  *
  * <ul>
@@ -76,21 +80,29 @@ public final class Deleter extends Actor {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.delete, Form.detail, entity()),
-				new Throttler(Form.delete, Form.detail, resource())
+				new Throttler(Form.delete, Form.detail, Shapes::entity),
+				new Throttler(Form.delete, Form.detail, Shapes::resource)
 		);
 	}
 
 	private Handler deleter() {
-		return request -> request.reply(response -> engine(request.shape())
+		return request -> {
 
-				.delete(request.item())
+			final IRI item=request.item();
+			final Shape shape=resource(item, request.shape());
 
-				.map(iri -> response.status(Response.NoContent))
+			return request.container() ? request.reply(
 
-				.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
+					new Failure().status(Response.NotImplemented).cause("container deletion not supported")
 
-		);
+			) : request.reply(response -> delete(item, shape)
+
+					.map(iri -> response.status(Response.NoContent))
+
+					.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
+
+			);
+		};
 	}
 
 }

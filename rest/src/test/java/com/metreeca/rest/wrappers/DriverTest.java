@@ -29,11 +29,12 @@ import static com.metreeca.form.Shape.optional;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Memoizing.memoizing;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.bodies.TextBody.text;
 
 
 final class DriverTest {
@@ -83,7 +84,9 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertThat(request).hasShape(TestShape);
+					assertThat(request)
+							.as("memoizing shape")
+							.hasShape(memoizing(TestShape));
 
 					return request.reply(response -> response.header("link", "existing"));
 

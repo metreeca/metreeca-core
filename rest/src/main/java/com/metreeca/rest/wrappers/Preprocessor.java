@@ -21,7 +21,7 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Wrapper;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -32,7 +32,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -41,7 +41,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * RDF preprocessor.
  *
- * <p>Processes request {@linkplain RDFFormat RDF} payloads.</p>
+ * <p>Processes request {@linkplain RDFBody RDF} payloads.</p>
  */
 public final class Preprocessor implements Wrapper {
 
@@ -51,11 +51,11 @@ public final class Preprocessor implements Wrapper {
 	/**
 	 * Creates an RDF preprocessor.
 	 *
-	 * <p>Filters are chained in the specified order and executed on incoming requests and their {@linkplain RDFFormat
+	 * <p>Filters are chained in the specified order and executed on incoming requests and their {@linkplain RDFBody
 	 * RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
 	 * @param filters the request RDF preprocessing filters to be inserted; ech filter takes as argument an incoming
-	 *                request and its {@linkplain RDFFormat RDF} payload and must return a non-null RDF model; filters
+	 *                request and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model; filters
 	 *                based on SPARQL Query/Update scripts may be created using {@link Connector} factory methods
 	 *
 	 * @throws NullPointerException if {@code filters} is null or contains null values
@@ -69,11 +69,11 @@ public final class Preprocessor implements Wrapper {
 	/**
 	 * Creates an RDF preprocessor.
 	 *
-	 * <p>Filters are chained in the specified order and executed on incoming requests and their {@linkplain RDFFormat
+	 * <p>Filters are chained in the specified order and executed on incoming requests and their {@linkplain RDFBody
 	 * RDF} payload, if one is present, or ignored, otherwise.</p> *
 	 *
 	 * @param filters the request RDF preprocessing filters to be inserted; ech filter takes as argument an incoming
-	 *                request and its {@linkplain RDFFormat RDF} payload and must return a non-null RDF model; filters
+	 *                request and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model; filters
 	 *                based on SPARQL Query/Update scripts may be created using {@link Connector} factory methods
 	 *
 	 * @throws NullPointerException if {@code filters} is null or contains null values

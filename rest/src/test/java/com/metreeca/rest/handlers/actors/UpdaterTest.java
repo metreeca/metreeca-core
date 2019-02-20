@@ -35,10 +35,10 @@ import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.JSONAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.JSONBody.json;
 
 
 final class UpdaterTest {
@@ -56,9 +56,62 @@ final class UpdaterTest {
 	}
 
 
+	@Nested final class Container {
+
+		private Request simple() {
+			return new Request()
+					.roles(Manager)
+					.method(Request.POST)
+					.base(Base)
+					.path("/employees/")
+					.map(body("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>. <> rdfs:label 'Updated!'."));
+		}
+
+		@Nested final class Simple {
+
+			@Test void testUpdate() {
+				exec(() -> new Updater()
+
+						.handle(simple())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
+
+		}
+
+		@Nested final class Shaped {
+
+			private Request shaped() {
+				return simple().shape(Employees);
+			}
+
+			@Test void testUpdate() {
+				exec(() -> new Updater()
+
+						.handle(shaped())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
+
+		}
+
+	}
+
 	@Nested final class Resource {
 
-		private Request request() {
+		private Request simple() {
 			return new Request()
 					.roles(Manager)
 					.method(Request.POST)
@@ -79,7 +132,7 @@ final class UpdaterTest {
 			@Test void testUpdate() {
 				exec(() -> new Updater()
 
-						.handle(request())
+						.handle(simple())
 
 						.accept(response -> {
 
@@ -109,7 +162,7 @@ final class UpdaterTest {
 			@Test void testMalformedData() {
 				exec(() -> new Updater()
 
-						.handle(request().map(body("!!!")))
+						.handle(simple().map(body("!!!")))
 
 						.accept(response -> {
 
@@ -129,7 +182,7 @@ final class UpdaterTest {
 			@Test void testExceedingData() {
 				exec(() -> new Updater()
 
-						.handle(request().map(body("@prefix : <http://example.com/terms#>. <>"
+						.handle(simple().map(body("@prefix : <http://example.com/terms#>. <>"
 								+" :forename 'Tino' ;"
 								+" :surname 'Faussone' ;"
 								+" :office <offices/1> . <offices/1> :value 'exceeding' ."
@@ -155,15 +208,15 @@ final class UpdaterTest {
 
 		@Nested final class Shaped {
 
-			private Request request() {
-				return Resource.this.request().shape(Employees);
+			private Request shaped() {
+				return simple().shape(Employees);
 			}
 
 
 			@Test void testUpdate() {
 				exec(() -> new Updater()
 
-						.handle(request())
+						.handle(shaped())
 
 						.accept(response -> {
 
@@ -193,7 +246,7 @@ final class UpdaterTest {
 			@Test void testUnauthorized() {
 				exec(() -> new Updater()
 
-						.handle(request().roles(Form.none))
+						.handle(shaped().roles(Form.none))
 
 						.accept(response -> {
 
@@ -211,7 +264,7 @@ final class UpdaterTest {
 			@Test void testForbidden() {
 				exec(() -> new Updater()
 
-						.handle(request().user(RDF.NIL).roles(Form.none))
+						.handle(shaped().user(RDF.NIL).roles(Form.none))
 
 						.accept(response -> {
 
@@ -229,7 +282,7 @@ final class UpdaterTest {
 			@Test void testMalformedData() {
 				exec(() -> new Updater()
 
-						.handle(request().map(body("!!!")))
+						.handle(shaped().map(body("!!!")))
 
 						.accept(response -> {
 
@@ -248,7 +301,7 @@ final class UpdaterTest {
 			@Test void testInvalidData() {
 				exec(() -> new Updater()
 
-						.handle(request().map(body("@prefix : <http://example.com/terms#>. <employees/1370>"
+						.handle(shaped().map(body("@prefix : <http://example.com/terms#>. <employees/1370>"
 								+":forename 'Tino';"
 								+":surname 'Faussone';"
 								+":email 'tfaussone@example.com' ;"
@@ -272,7 +325,7 @@ final class UpdaterTest {
 			@Test void testRestrictedData() {
 				exec(() -> new Updater()
 
-						.handle(request().roles(Salesman))
+						.handle(shaped().roles(Salesman))
 
 						.accept(response -> {
 
@@ -289,33 +342,6 @@ final class UpdaterTest {
 						}));
 			}
 
-		}
-
-	}
-
-	@Nested final class Container {
-
-		private Request request() {
-			return new Request()
-					.roles(Manager)
-					.method(Request.POST)
-					.base(Base)
-					.path("/employees/")
-					.map(body("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>. <> rdfs:label 'Updated!'."));
-		}
-
-		@Test void testUpdate() {
-			exec(() -> new Updater()
-
-					.handle(request())
-
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.NotImplemented)
-							.hasBody(json(), json -> assertThat(json)
-									.hasField("cause")
-							)
-					)
-			);
 		}
 
 	}

@@ -17,7 +17,9 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import org.junit.jupiter.api.Test;
 
@@ -49,14 +51,18 @@ final class RouterTest {
 
 	@Test void testCheckPaths() {
 
-		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new Router()
-				.path("one", handler(100))
-		);
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.as("malformed path")
+				.isThrownBy(() -> new Router()
+						.path("one", handler(100))
+				);
 
-		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new Router()
-				.path("/one", handler(100))
-				.path("/one", handler(100))
-		);
+		assertThatExceptionOfType(IllegalStateException.class)
+				.as("existing path")
+				.isThrownBy(() -> new Router()
+						.path("/one", handler(100))
+						.path("/one", handler(100))
+				);
 
 	}
 
@@ -68,7 +74,9 @@ final class RouterTest {
 				.handle(request("/two"))
 
 				.accept(response -> assertThat(response)
-						.as("request ignored").hasStatus(0));
+						.as("request ignored")
+						.hasStatus(0)
+				);
 	}
 
 
@@ -104,18 +112,32 @@ final class RouterTest {
 
 	}
 
-	@Test void testMatchesSubtreePath() {
+	@Test void testMatchesChildrenPath() {
 
 		final Router router=new Router().path("/one/*", handler());
 
 		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(0));
+				.hasStatus(0)
+		);
 
 		router.handle(request("/one/")).accept(response -> assertThat(response)
-				.hasStatus(0));
+				.hasStatus(0)
+		);
 
 		router.handle(request("/one/two")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("path", "/one/two"));
+				.hasStatus(Response.OK)
+				.hasHeader("path", "/one/two")
+		);
+
+		router.handle(request("/one/two/")).accept(response -> assertThat(response)
+				.hasStatus(Response.OK)
+				.hasHeader("path", "/one/two/")
+		);
+
+		router.handle(request("/one/two/three")).accept(response -> assertThat(response)
+				.hasStatus(0)
+				.doesNotHaveHeader("path")
+		);
 
 	}
 
@@ -132,7 +154,7 @@ final class RouterTest {
 
 	}
 
-	@Test void testMatchesRootSubtreePath() {
+	@Test void testMatchesRootChildrenPath() {
 
 		final Router router=new Router().path("/*", handler());
 

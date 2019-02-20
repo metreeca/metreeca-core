@@ -21,7 +21,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -49,7 +49,7 @@ import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.*;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -67,10 +67,10 @@ import static java.util.stream.Collectors.toMap;
  *
  * <li>request {@linkplain Request#user() user}, {@linkplain Request#roles() roles}, {@linkplain Request#base() base},
  * {@linkplain Request#query() query}, {@linkplain Request#parameters() parameters}, {@linkplain Request#headers()
- * headers}, {@linkplain Message#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
+ * headers}, {@linkplain Message#shape() shape} and {@link RDFBody} {@linkplain Request#body(Body) body};</li>
  *
  * <li>response {@linkplain Request#item() focus item}, {@linkplain Request#headers() headers}, {@linkplain
- * Message#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
+ * Message#shape() shape} and {@link RDFBody} {@linkplain Request#body(Body) body};</li>
  *
  * </ul>
  *

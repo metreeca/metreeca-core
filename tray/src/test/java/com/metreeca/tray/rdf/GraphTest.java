@@ -19,67 +19,56 @@
 package com.metreeca.tray.rdf;
 
 
-import org.eclipse.rdf4j.query.resultio.text.tsv.SPARQLResultsTSVWriter;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import com.metreeca.tray.rdf.graphs.RDF4JMemory;
+
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
 
-final class GraphTest {
+import static com.metreeca.form.things.ValuesTest.construct;
+import static com.metreeca.form.things.ValuesTest.export;
+import static com.metreeca.form.things.ValuesTest.select;
+import static com.metreeca.tray.Tray.tool;
 
-	@Test void testUpdateVisibilityWithinTransaction() { // !!! automate using assertions
-
-		final Repository repository=new SailRepository(new MemoryStore());
-
-		//final Repository repository=new SailRepository(new NativeStore(new File("data/work")));
-		//final Repository repository=new HTTPRepository("http://localhost:7200/repositories/work"); // graphdb
-		//final Repository repository=new SPARQLRepository("http://localhost:9999/blazegraph/namespace/work/sparql"); // blazegraph
-
-		//final Repository repository=new StardogRepository(ConnectionConfiguration
-		//		.from("http://localhost:5820/work")
-		//		.credentials("admin", "admin"));
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-		repository.initialize();
+public final class GraphTest {
 
-		try (final RepositoryConnection connection=repository.getConnection()) {
+	public static Model graph(final Resource... contexts) {
+		return tool(Graph.Factory).query(connection -> { return export(connection, contexts); });
+	}
 
-			connection.clear();
+	public static Runnable graph(final Iterable<Statement> model, final Resource... contexts) {
+		return () -> tool(Graph.Factory).update(connection -> { connection.add(model, contexts); });
+	}
 
-			connection.begin();
 
-			//try {
-			//	connection.add(Rio.parse(new StringReader("<test:x> <test:y> <test:z>."), "", RDFFormat.TURTLE));
-			//} catch ( final IOException e ) {
-			//	throw new UncheckedIOException(e);
-			//}
 
-			//connection.prepareUpdate(""
-			//		+"insert data { <test:x> <test:y> <test:z> };\n"
-			//		+"insert { <test:w> ?p ?o } where { <test:x> ?p ?o };"
-			//).execute();
+	public static Model graph(final String sparql) {
+		return tool(Graph.Factory).query(connection -> { return construct(connection, sparql); });
+	}
 
-			connection.prepareUpdate("insert data { <test:x> <test:y> <test:z> }").execute();
-			connection.prepareUpdate("insert { <test:w> ?p ?o } where { <test:x> ?p ?o };").execute();
+	public static List<Map<String, Value>> tuples(final String sparql) {
+		return tool(Graph.Factory).query(connection -> { return select(connection, sparql); });
+	}
 
-			System.out.println("---");
 
-			connection.prepareTupleQuery("select * { ?s ?p ?o } limit 10").
-					evaluate(new SPARQLResultsTSVWriter(System.out));
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			//connection.commit();
-			connection.rollback();
+	@Test void testPreventUpdateTransactionsOnReadOnlyRepositories() {
+		try (final RDF4JMemory graph=new RDF4JMemory()) {
 
-			System.out.println("---");
+			assertThatThrownBy(() ->
 
-			connection.prepareTupleQuery("select * { ?s ?p ?o } limit 10").
-					evaluate(new SPARQLResultsTSVWriter(System.out));
+					graph.isolation(Graph.READ_ONLY).update(connection -> {})
+
+			).isInstanceOf(RepositoryReadOnlyException.class);
 
 		}
-
-		repository.shutDown();
 	}
 
 }

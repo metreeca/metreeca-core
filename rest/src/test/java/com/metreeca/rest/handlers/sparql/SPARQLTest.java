@@ -20,10 +20,10 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Values;
 import com.metreeca.form.truths.JSONAssert;
-import com.metreeca.rest.HandlerAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.GraphTest;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -40,8 +40,8 @@ import javax.json.JsonValue;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,7 +61,7 @@ final class SPARQLTest {
 		final Tray tray=new Tray();
 
 		for (final Collection<Statement> dataset : datasets) {
-			tray.exec(HandlerAssert.graph(dataset, RDF.NIL));
+			tray.exec(GraphTest.graph(dataset, RDF.NIL));
 		}
 
 		return tray;
@@ -465,7 +465,7 @@ final class SPARQLTest {
 							.hasStatus(Response.OK)
 							.hasBody(json(), json -> JSONAssert.assertThat(json).satisfies(hasBooleanValue(true)));
 
-					assertThat(HandlerAssert.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
+					assertThat(GraphTest.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
 
 				}));
 	}
@@ -481,7 +481,7 @@ final class SPARQLTest {
 							.hasStatus(Response.OK)
 							.hasBody(json(), json -> JSONAssert.assertThat(json).satisfies(hasBooleanValue(true)));
 
-					assertThat(HandlerAssert.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
+					assertThat(GraphTest.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
 
 				}));
 	}
@@ -520,7 +520,7 @@ final class SPARQLTest {
 							.hasStatus(Response.OK)
 							.hasBody(json(), json -> JSONAssert.assertThat(json).satisfies(hasBooleanValue(true)));
 
-					assertThat(HandlerAssert.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
+					assertThat(GraphTest.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
 
 				}));
 	}
@@ -536,7 +536,7 @@ final class SPARQLTest {
 							.hasStatus(Response.OK)
 							.hasBody(json(), json -> JSONAssert.assertThat(json).satisfies(hasBooleanValue(true)));
 
-					assertThat(HandlerAssert.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
+					assertThat(GraphTest.graph()).satisfies(hasObjects(RDF.FIRST, RDF.REST));
 
 				}));
 	}

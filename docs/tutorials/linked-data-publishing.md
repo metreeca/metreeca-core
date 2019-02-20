@@ -209,9 +209,10 @@ Requests are forwarded to a registered handler if their path matches the associa
 
 | pattern     | matching paths                                        | handling mode                                                |
 | ----------- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| /           | /                                                     | root / matches only root resource                            |
 | `/<path>`   | `/<path>`<br />`/<path>/`                             | exact / matches path exactly, ignoring trailing slashes      |
 | `/<path>/`  | `/<path>`<br />`/<path>/`<br />`/<path>/…/<resource>` | prefix / matches any path sharing the given path prefix, ignoring trailing slashes |
-| `/<path>/*` | `/<path>/…/<resource>`                                | subtree / matches any path sharing the given prefix with an non-empty suffix |
+| `/<path>/*` | `/<path>/<resource>`<br />`/<path>/<resource>/`       | children / matches any immediately nested path sharing the given prefix, ignoring trailing slashes |
 
 Lexicographically longer and preceding paths take precedence over shorter and following ones.
 
@@ -235,7 +236,7 @@ If the index doesn't contain a matching handler, no action is performed giving t
 
 <p class="warning">Only LDP Basic and Direct Containers are currently supported</p>
 
-If a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the graph neighbourhood of the target target item(s)  identified by the model after redaction according to the request user roles and to actor-specific task,  mode and view parameters.
+If a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the graph neighbourhood of the target target item(s)  matched by the model after redaction according to the request user roles and to actor-specific task,  mode and view parameters.
 
 If no shape model is associated to the request, CRUD operations are performed on the (labelled) [symmetric concise bounded description](https://www.w3.org/Submission/CBD/) of the target item(s).
 
@@ -302,12 +303,15 @@ public final class Products extends Delegator {
 
 				.path("/", new Worker()
 						.get(new Relator())
-						.post(new Creator()))
+						.post(new Creator())
+                )
 
 				.path("/*", new Worker()
 						.get(new Relator())
 						.put(new Updater())
-						.delete(new Deleter()))
+						.delete(new Deleter())
+                )
+                
 		));
 	}
     
