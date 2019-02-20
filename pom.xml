@@ -352,19 +352,6 @@
 
 				</configuration>
 
-				<executions>
-					<execution>
-
-						<id>collect-module-reports</id>
-						<phase>post-site</phase>
-
-						<goals>
-							<goal>stage</goal>
-						</goals>
-
-					</execution>
-				</executions>
-
 			</plugin>
 
 		</plugins>
@@ -510,19 +497,8 @@
 							<checkinComment>Deploy v${project.version} docs</checkinComment>
 						</configuration>
 
-						<executions>
-							<execution>
-
-								<id>deploy-docs</id>
-								<inherited>false</inherited>
-								<phase>site-deploy</phase>
-
-								<goals>
-									<goal>publish-scm</goal>
-								</goals>
-
-							</execution>
-						</executions>
+						<!-- manual execution -->
+						<!-- https://maven.apache.org/plugins/maven-scm-publish-plugin/examples/multi-module-configuration.html -->
 
 					</plugin>
 

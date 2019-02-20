@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="site-deploy" type="MavenRunConfiguration" factoryName="Maven" singleton="true">
+  <configuration default="false" name="site-preview" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
@@ -14,7 +14,6 @@
               <option value="validate" />
               <option value="post-site" />
               <option value="site:stage" />
-              <option value="scm-publish:publish-scm" />
             </list>
           </option>
           <option name="pomFileName" />
