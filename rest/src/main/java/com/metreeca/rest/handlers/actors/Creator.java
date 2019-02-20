@@ -21,6 +21,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Shape;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Actor;
@@ -40,7 +41,7 @@ import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Response.NotImplemented;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.handlers.actors._Shapes.container;
+import static com.metreeca.form.things.Shapes.container;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.repository.util.Connections.getStatement;
@@ -184,7 +185,7 @@ public final class Creator extends Actor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper throttler() {
-		return new Throttler(Form.create, Form.detail, _Shapes::resource);
+		return new Throttler(Form.create, Form.detail, Shapes::resource);
 	}
 
 	private Handler creator() {

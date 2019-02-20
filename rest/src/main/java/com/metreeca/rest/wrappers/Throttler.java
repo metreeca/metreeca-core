@@ -23,7 +23,7 @@ import com.metreeca.form.probes.*;
 import com.metreeca.form.things.Structures;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.handlers.actors._Shapes;
+import com.metreeca.form.things.Shapes;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -112,7 +112,7 @@ public final class Throttler implements Wrapper {
 	 * @throws NullPointerException if either {@code task} or {@code view} is null
 	 */
 	public Throttler(final Value task, final Value view) {
-		this(task, view, _Shapes::entity);
+		this(task, view, Shapes::entity);
 	}
 
 	/**

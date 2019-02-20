@@ -21,6 +21,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
 import com.metreeca.form.Shape;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Actor;
@@ -37,7 +38,7 @@ import javax.json.JsonValue;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.handlers.actors._Shapes.resource;
+import static com.metreeca.form.things.Shapes.resource;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -103,8 +104,8 @@ public final class Updater extends Actor {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.update, Form.detail, _Shapes::container),
-				new Throttler(Form.update, Form.detail, _Shapes::resource)
+				new Throttler(Form.update, Form.detail, Shapes::container),
+				new Throttler(Form.update, Form.detail, Shapes::resource)
 		);
 	}
 

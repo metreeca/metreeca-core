@@ -20,6 +20,7 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
@@ -28,7 +29,7 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.handlers.actors._Shapes.resource;
+import static com.metreeca.form.things.Shapes.resource;
 
 
 /**
@@ -79,8 +80,8 @@ public final class Deleter extends Actor {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.delete, Form.detail, _Shapes::entity),
-				new Throttler(Form.delete, Form.detail, _Shapes::resource)
+				new Throttler(Form.delete, Form.detail, Shapes::entity),
+				new Throttler(Form.delete, Form.detail, Shapes::resource)
 		);
 	}
 

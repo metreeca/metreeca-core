@@ -15,13 +15,16 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.form.things;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Outliner;
 import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.truths.ModelAssert;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -31,23 +34,28 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.Shape.relate;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.Meta.metas;
 import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Shapes.container;
+import static com.metreeca.form.things.Shapes.entity;
+import static com.metreeca.form.things.Shapes.resource;
 import static com.metreeca.form.things.ValuesTest.*;
-import static com.metreeca.rest.handlers.actors._Shapes.container;
-import static com.metreeca.rest.handlers.actors._Shapes.entity;
-import static com.metreeca.rest.handlers.actors._Shapes.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-@Nested final class _ShapesTest {
+@Nested final class ShapesTest {
+
+	public static final IRI resource=item("employees/1370");
+
 
 	@Nested final class Splitters {
 
@@ -204,6 +212,75 @@ import static java.util.stream.Collectors.toSet;
 
 				assertThat(container(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
+			}
+
+		}
+
+	}
+
+	@Nested final class Mergers {
+
+		private Shape redact(final Shape shape) {
+			return shape
+					.map(new Redactor(Form.task))
+					.map(new Redactor(Form.view))
+					.map(new Redactor(Form.mode))
+					.map(new Redactor(Form.role))
+					.map(new Optimizer());
+		}
+
+
+		@Nested final class Resource {
+
+			@Test void testAnchorToResource() {
+				assertThat(all(redact(resource(resource, Employee))))
+						.isPresent()
+						.hasValueSatisfying(values -> assertThat(values)
+								.containsOnly(resource)
+						);
+			}
+
+		}
+
+		@Nested final class Container {
+
+			private final IRI container=item("employees");
+
+
+			@Test void testAnchorToBasicContainer() {
+
+				final Shape basic=redact(container(container, and(
+						field(LDP.CONTAINS, Employee)
+				)));
+
+				ModelAssert.assertThat(basic.map(new Outliner(resource)).collect(toList()))
+						.hasStatement(container,LDP.CONTAINS, resource );
+			}
+
+			@Test void testAnchorToDirectContainer() {
+
+				final Shape direct=redact(container(container, and(
+						meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
+						meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
+						meta(LDP.MEMBERSHIP_RESOURCE, term("Employee")),
+						field(LDP.CONTAINS, Employee)
+				)));
+
+				ModelAssert.assertThat(direct.map(new Outliner(resource)).collect(toList()))
+						.hasStatement(resource,RDF.TYPE, term("Employee") );
+			}
+
+			@Test void testAnchorToDirectContainerUsingFields() {
+
+				final Shape direct=redact(container(container, and(
+						field(RDF.TYPE, LDP.DIRECT_CONTAINER),
+						field(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
+						field(LDP.MEMBERSHIP_RESOURCE, term("Employee")),
+						field(LDP.CONTAINS, Employee)
+				)));
+
+				ModelAssert.assertThat(direct.map(new Outliner(resource)).collect(toList()))
+						.hasStatement(resource,RDF.TYPE, term("Employee") );
 			}
 
 		}

@@ -23,6 +23,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Actor;
@@ -45,8 +46,8 @@ import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.handlers.actors._Shapes.container;
-import static com.metreeca.rest.handlers.actors._Shapes.resource;
+import static com.metreeca.form.things.Shapes.container;
+import static com.metreeca.form.things.Shapes.resource;
 
 
 /**
@@ -65,8 +66,8 @@ import static com.metreeca.rest.handlers.actors._Shapes.resource;
  * view;</li>
  *
  * <li>the response {@linkplain RDFBody RDF body} includes the RDF description of the container as matched by the
- * {@linkplain _Shapes#container(Shape) container section} of redacted shape, linked using the {@code ldp:contains}
- * property to the RDF description of the container items matched by the {@linkplain _Shapes#resource(Shape) resource
+ * {@linkplain Shapes#container(Shape) container section} of redacted shape, linked using the {@code ldp:contains}
+ * property to the RDF description of the container items matched by the {@linkplain Shapes#resource(Shape) resource
  * section} of redacted shape;</li>
  *
  * <li>contained items are selected as required by the LDP container profile {@linkplain
@@ -157,8 +158,8 @@ public final class Relator extends Actor {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.relate, Form.digest, _Shapes::entity),
-				new Throttler(Form.relate, Form.detail, _Shapes::resource)
+				new Throttler(Form.relate, Form.digest, Shapes::entity),
+				new Throttler(Form.relate, Form.detail, Shapes::resource)
 		);
 	}
 

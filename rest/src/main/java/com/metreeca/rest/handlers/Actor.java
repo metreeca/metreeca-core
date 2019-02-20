@@ -55,7 +55,7 @@ public abstract class Actor extends Delegator {
 	private final Graph graph=tool(Graph.Factory);
 
 
-	//// CRUD Engine (methods preserved as future factoring point for Engine interface) ////////////////////////////////
+	//// CRUD Engine (methods preserved to possibly support extraction of Engine interface) ////////////////////////////
 
 	/**
 	 * Relates a resource.

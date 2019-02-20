@@ -15,13 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers.actors;
+package com.metreeca.form.things;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Sets;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -55,8 +54,56 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Shape utilities.
+ *
+ * <p>Supports splitting/merging of combo shapes describing LDP containers and associated resources.</p>
+ *
+ * <p>In combo shapes a <em>container</em> shape is connected to a set of <em>resource</em> shapes through {@code
+ * ldp:contains} {@linkplain Field fields}.</p>
+ *
+ * <p>The LDP profile of the container is identified by its {@code rdf:type} and LDP properties, as inferred either
+ * from {@linkplain Meta metadata} annotations or {@linkplain Field field} constraints in the combo shape, defaulting to
+ * the <em>Basic</em> profile if no metadata is available:</p>
+ *
+ * <table summary="container profiles">
+ *
+ * <tr>
+ * <th>{@code rdf:type}</th>
+ * <th>container profile</th>
+ * <th>container properties</th>
+ * </tr>
+ *
+ * <tr>
+ * <td>{@code ldp:BasicContainer}</td>
+ * <td><a href="https://www.w3.org/TR/ldp/#ldpbc">Basic</a></td>
+ * <td>–</td>
+ * </tr>
+ *
+ * <tr>
+ * <td>{@code ldp:DirectContainer}</td>
+ * <td><a href="https://www.w3.org/TR/ldp/#ldpdc">Direct</a></td>
+ * <td><ul>
+ * <li>{@code ldp:hasMemberRelation}</li>
+ * <li>{@code ldp:isMemberOfRelation}</li>
+ * <li>{@code ldp:membershipResource}</li>
+ * </ul></td>
+ * </tr>
+ *
+ * <tr>
+ * <td>{@code ldp:IndirectContainer}</td>
+ * <td><a href="https://www.w3.org/TR/ldp/#ldpic">Indirect</a> </td>
+ * <td><ul>
+ * <li><em>all Direct properties</em></li>
+ * <li>{@code ldp:insertedContentRelation}</li>
+ * </ul></td>
+ * </tr>
+ *
+ * </table>
+ *
+ * <p><strong>Warning</strong> / Only Basic/Direct profiles are currently supported.</p>
+ *
+ * @see <a href="https://www.w3.org/TR/ldp/">Linked Data Platform 1.0</a>
  */
-public final class _Shapes {
+public final class Shapes {
 
 	private static final Set<IRI> ContainerMetadata=set(
 			RDF.TYPE,
@@ -80,7 +127,7 @@ public final class _Shapes {
 
 	private static final Function<Shape, Function<Resource, Shape>> profile=memoizable(shape -> {
 
-		final Map<IRI, Value> metadata=metas(shape);
+		final Map<IRI, Value> metadata=metas(metadata(shape));
 		final Value type=metadata.get(RDF.TYPE);
 
 		return LDP.BASIC_CONTAINER.equals(type) ? basic()
@@ -90,14 +137,14 @@ public final class _Shapes {
 	});
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Splitters /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the entity section of a shape.
 	 *
 	 * @param shape the shape whose entity section is to be retrieved
 	 *
-	 * @return the input {@code shape}
+	 * @return the input {@code shape} extended with annotations for LDP container properties
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -115,8 +162,8 @@ public final class _Shapes {
 	 *
 	 * @param shape the shape whose container section is to be retrieved
 	 *
-	 * @return the input {@code shape} pruned of {@linkplain LDP#CONTAINS ldp:contains} fields, if at least one is
-	 * actually included; an empty shape, otherwise
+	 * @return the input {@code shape} extended with annotations for LDP container properties and pruned of {@linkplain
+	 * LDP#CONTAINS ldp:contains} fields, if at least one is actually included; an empty shape, otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -135,7 +182,8 @@ public final class _Shapes {
 	 * @param shape the shape whose resource section is to be retrieved
 	 *
 	 * @return the conjunction of the shapes associated to {@linkplain LDP#CONTAINS ldp:contains} fields in the input
-	 * {@code shape}, if at least one is actually included; the source {@code shape}, otherwise
+	 * {@code shape}, if at least one is actually included; the source {@code shape}, otherwise; extended with
+	 * annotations for LDP container properties in either cases
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -186,8 +234,19 @@ public final class _Shapes {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Mergers ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Creates an anchored resource shape.
+	 *
+	 * @param resource the  resource the shape must be anchored to
+	 * @param shape    the shape to be anchored to {@code resource}
+	 *
+	 * @return a shape extending the input {@code shape} with a filtering-only constraint stating that the focus is
+	 * expected to include the anchoring {@code resource}
+	 *
+	 * @throws NullPointerException if either {@code resource} or {@code shape} is null
+	 */
 	public static Shape resource(final Resource resource, final Shape shape) {
 
 		if ( resource == null ) {
@@ -201,6 +260,17 @@ public final class _Shapes {
 		return and(shape, filter().then(all(resource)));
 	}
 
+	/**
+	 * Creates an anchored container shape.
+	 *
+	 * @param container the  container the shape must be anchored to
+	 * @param shape     the shape to be anchored to {@code container}
+	 *
+	 * @return a shape extending the input {@code shape} with filtering-only constraints connecting focus resources to
+	 * the anchoring {@code container} as required by its LDP profile
+	 *
+	 * @throws NullPointerException if either {@code container} or {@code shape} is null
+	 */
 	public static Shape container(final Resource container, final Shape shape) {
 
 		if ( container == null ) {
@@ -251,7 +321,7 @@ public final class _Shapes {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private _Shapes() {} // utility
+	private Shapes() {} // utility
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
