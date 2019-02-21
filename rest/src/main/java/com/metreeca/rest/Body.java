@@ -51,8 +51,8 @@ public interface Body<V> {
 	 *
 	 * @param message the message the structured body managed by this body format is to be retrieved from
 	 *
-	 * @return a value result providing access to the structured body managed by this body format, if it was possible to
-	 * derive one from {@code message}; an error result providing access to the processing failure, otherwise
+	 * @return a value providing access to the structured body managed by this body format, if it was possible to derive
+	 * one from {@code message}; an error providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */

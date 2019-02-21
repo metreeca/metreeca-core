@@ -24,6 +24,7 @@ import org.eclipse.rdf4j.model.IRI;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -53,6 +54,7 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {
 
+	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b");
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 
 
@@ -142,6 +144,19 @@ public abstract class Message<T extends Message<T>> {
 		return Stream.of(headers("accept"), headers("content-type"))
 				.flatMap(Collection::stream)
 				.anyMatch(value -> HTMLPattern.matcher(value).find());
+	}
+
+	/**
+	 * Retrieves the character encoding of this message.
+	 *
+	 * @return the character encoding set in the {@code Content-Type} header of this message; empty if this message
+	 * doesn't include a  {@code Content-Type} header or if no character encoding is explicitly set
+	 */
+	public Optional<String> charset() {
+		return header("Content-Type")
+				.map(CharsetPattern::matcher)
+				.filter(Matcher::find)
+				.map(matcher -> matcher.group("charset"));
 	}
 
 

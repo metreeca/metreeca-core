@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static java.util.Collections.emptySet;
 
 
-final class MessageTest {
+public final class MessageTest {
 
 	//// Headers ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -131,7 +131,7 @@ final class MessageTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TestMessage extends Message<TestMessage> {
+	public static final class TestMessage extends Message<TestMessage> {
 
 		private final Request request=new Request();
 

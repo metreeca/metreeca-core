@@ -17,10 +17,13 @@
 
 package com.metreeca.rest.bodies;
 
-import com.metreeca.rest.Body;
+import com.metreeca.form.things.Codecs;
+import com.metreeca.rest.*;
 
 import java.io.Reader;
 import java.util.function.Supplier;
+
+import static com.metreeca.rest.bodies.InputBody.input;
 
 
 /**
@@ -44,5 +47,17 @@ public final class ReaderBody implements Body<Supplier<Reader>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private ReaderBody() {}
+
+	/**
+	 * @return a value providing access to a reader supplier converting from the {@linkplain InputBody raw binary input
+	 * body} of {@code message} using the character encoding specified in its {@code Content-Type} header or the
+	 * {@linkplain Codecs#UTF8 default charset} if none is specified; an error  providing access to the processing
+	 * failure, otherwise
+	 */
+	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
+		return message.body(input()).value(supplier -> () ->
+				Codecs.reader(supplier.get(), message.charset().orElse(Codecs.UTF8.name()))
+		);
+	}
 
 }
