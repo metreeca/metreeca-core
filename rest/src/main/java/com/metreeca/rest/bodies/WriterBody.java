@@ -17,17 +17,19 @@
 
 package com.metreeca.rest.bodies;
 
-import com.metreeca.rest.*;
+import com.metreeca.form.things.Codecs;
+import com.metreeca.rest.Body;
+import com.metreeca.rest.Message;
 
-import java.io.Writer;
+import java.io.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.bodies.OutputBody.output;
 
 
 /**
- * Raw textual output body format.
+ * Textual output body format.
  */
 public final class WriterBody implements Body<Consumer<Supplier<Writer>>> {
 
@@ -35,13 +37,13 @@ public final class WriterBody implements Body<Consumer<Supplier<Writer>>> {
 
 
 	/**
-	 * The default MIME type for textual outbound raw message bodies.
+	 * The default MIME type for outbound textual message bodies.
 	 */
 	private static final String MIME="text/plain";
 
 
 	/**
-	 * Retrieves the raw textual output body format.
+	 * Retrieves the textual output body format.
 	 *
 	 * @return the singleton textual output body format instance
 	 */
@@ -58,17 +60,30 @@ public final class WriterBody implements Body<Consumer<Supplier<Writer>>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return a result providing access to a consumer taking no action on the supplied writer provider
-	 */
-	@Override public Result<Consumer<Supplier<Writer>>, Failure> get(final Message<?> message) {
-		return Value(target -> {});
-	}
-
-	/**
-	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
+	 * Configures a message to hold a textual output body.
+	 *
+	 * <p>Configures the {@linkplain OutputBody raw binary output body} of {@code message} to write the textual message
+	 * body to the accepted output stream using the character encoding specified in its {@code Content-Type} header or
+	 * the {@linkplain Codecs#UTF8 default charset} if none is specified.</p>
+	 *
+	 * <p>Sets the {@code Content-Type} header of {@code message} to {@link #MIME}, if not already set.</p>
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.header("~Content-Type", MIME);
+		return message
+
+				.header("~Content-Type", MIME)
+
+				.pipe(output(), binary -> message.body(writer()).value(textual -> source -> {
+
+					try (final OutputStream output=source.get()) {
+
+						textual.accept(() -> Codecs.writer(output, message.charset().orElse(Codecs.UTF8.name())));
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+
+				}));
 	}
 
 }

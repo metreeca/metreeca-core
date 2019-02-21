@@ -17,23 +17,23 @@
 
 package com.metreeca.rest.bodies;
 
-import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.MessageTest.TestMessage;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
+import java.io.*;
 
-import static com.metreeca.rest.bodies.InputBody.input;
-import static com.metreeca.rest.bodies.ReaderBody.reader;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.rest.bodies.WriterBody.writer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-final class ReaderBodyTest {
+final class WriterBodyTest {
 
-	@Test void testReadFromInputUsingCharset() {
+	@Test void testWriteToOutputUsingCharset() {
 
 		final String text="ça va";
 		final String charset="ISO-8859-1";
@@ -41,20 +41,36 @@ final class ReaderBodyTest {
 		new TestMessage()
 
 				.header("Content-Type", "text/plain; charset="+charset)
-				.body(input(), () -> Codecs.input(new StringReader(text), charset))
 
-				.body(reader())
+				.body(writer(), supplier -> {
+					try (final Writer writer=supplier.get()) {
+						writer.write(text);
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				})
+
+				.body(output())
 
 				.fold(
 
-						value -> assertThat(Codecs.text(value.get()))
-								.as("read using provided charset")
-								.isEqualTo(text),
+						value -> {
+							try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
+
+								value.accept(() -> buffer);
+
+								return assertThat(buffer.toByteArray())
+										.as("written using provided charset")
+										.isEqualTo(text.getBytes(charset));
+
+							} catch ( final IOException unexpected ) {
+								throw new UncheckedIOException(unexpected);
+							}
+						},
 
 						error -> fail(error.toString())
 
 				);
 	}
-
 
 }
