@@ -44,8 +44,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.OutputBody.output;
-import static com.metreeca.rest.bodies.ReaderBody.reader;
-import static com.metreeca.rest.bodies.WriterBody.writer;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
@@ -53,6 +51,7 @@ import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipar
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.list;
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -87,6 +86,15 @@ public abstract class Gateway implements ServletContextListener {
 	private final Function<Tray, Handler> loader;
 
 
+	/**
+	 * Creates a new J2EE gateway.
+	 *
+	 * @param pattern the URL pattern matching requests paths to be handled by the new gateway
+	 * @param loader  the handler loader; the loader is passed a configurable tool tray and is expected to return a
+	 *                non-null resource handler
+	 *
+	 * @throws NullPointerException if either {@code pattern} or {@code loader} is null
+	 */
 	protected Gateway(final String pattern, final Function<Tray, Handler> loader) {
 
 		if ( pattern == null ) {
@@ -110,13 +118,16 @@ public abstract class Gateway implements ServletContextListener {
 
 		try {
 
-			context.addFilter(Gateway.class.getName(), new GatewayFilter(loader.apply(tray
+			final Handler handler=requireNonNull(loader.apply(tray
 
 					.set(Storage.Factory, () -> storage(context))
 					.set(Loader.Factory, () -> loader(context))
 					.set(Upload, () -> upload(context))
 
-			))).addMappingForUrlPatterns(null, false, pattern);
+			), "null resource handler");
+
+			context.addFilter(Gateway.class.getName(), new GatewayFilter(handler))
+					.addMappingForUrlPatterns(null, false, pattern);
 
 		} catch ( final Throwable t ) {
 
@@ -289,23 +300,13 @@ public abstract class Gateway implements ServletContextListener {
 
 			if ( items.isEmpty() ) {
 
-				return request
-
-						.body(input(), () -> {
-							try {
-								return http.getInputStream();
-							} catch ( final IOException e ) {
-								throw new UncheckedIOException(e);
-							}
-						})
-
-						.body(reader(), () -> {
-							try {
-								return http.getReader();
-							} catch ( final IOException e ) {
-								throw new UncheckedIOException(e);
-							}
-						});
+				return request.body(input(), () -> {
+					try {
+						return http.getInputStream();
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 
 			} else {
 
@@ -398,11 +399,15 @@ public abstract class Gateway implements ServletContextListener {
 		}
 
 		private void response(final HttpServletResponse http, final Response response) {
-			if ( response.status() != 0 ) {
+			if ( response.status() > 0 ) { // only if actually processed
 
 				http.setStatus(response.status());
 
-				response.headers().forEach((name, values) -> values.forEach(value -> http.addHeader(name, value)));
+				response.headers().forEach((name, values) ->
+						values.forEach(value -> http.addHeader(name, value))
+				);
+
+				// ignore missing response bodies // !!! handle other body retrieval errors
 
 				response.body(output()).value().ifPresent(consumer -> consumer.accept(() -> {
 					try {
@@ -412,15 +417,7 @@ public abstract class Gateway implements ServletContextListener {
 					}
 				}));
 
-				response.body(writer()).value().ifPresent(consumer -> consumer.accept(() -> {
-					try {
-						return http.getWriter();
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}));
-
-				if ( response.status() > 0 && !http.isCommitted() ) { // flush if not already committed by bodies
+				if ( !http.isCommitted() ) { // flush if not already committed by bodies
 					try {
 						http.flushBuffer();
 					} catch ( final IOException e ) {
