@@ -24,8 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.rest.bodies.WriterBody.writer;
 
 
 /**

@@ -23,7 +23,6 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
@@ -37,6 +36,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQueries;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -103,11 +103,12 @@ public final class Values {
 
 	//// Accessors /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static boolean is(final Value value, final IRI type) {
-		return value != null && type(value).equals(type)
-				|| value instanceof Resource && Form.ResourceType.equals(type) // abstract resource datatype
-				|| value instanceof Literal && Form.LiteralType.equals(type) // abstract literal datatype
-				|| value instanceof Literal && RDFS.LITERAL.equals(type); // abstract resource datatype using rdfs: IRI
+	public static boolean is(final Value value, final IRI datatype) {
+		return value != null && (type(value).equals(datatype)
+				|| Form.ValueType.equals(datatype)
+				|| value instanceof Resource && Form.ResourceType.equals(datatype)
+				|| value instanceof Literal && Form.LiteralType.equals(datatype)
+		);
 	}
 
 	/**
@@ -127,6 +128,14 @@ public final class Values {
 		}
 
 		return !(iri instanceof Inverse);
+	}
+
+
+	public static Predicate<Statement> pattern(final Value subject, final Value predicate, final Value object) {
+		return statement
+				-> (subject == null || subject.equals(statement.getSubject()))
+				&& (predicate == null || predicate.equals(statement.getPredicate()))
+				&& (object == null || object.equals(statement.getObject()));
 	}
 
 
@@ -453,53 +462,61 @@ public final class Values {
 
 	///// Converters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static String iri(final Value value) {
-		return value instanceof IRI ? value.stringValue() : null;
+	public static Optional<String> iri(final Value value) {
+		return value instanceof IRI ? Optional.of(value.stringValue()) : Optional.empty();
 	}
 
 
-	public static BigInteger integer(final Value value) {
-		return value instanceof Literal ? ((Literal)value).integerValue() : null;
+	public static Optional<BigInteger> integer(final Value value) {
+		try {
+			return value instanceof Literal ? Optional.of(((Literal)value).integerValue()) : Optional.empty();
+		} catch ( final NumberFormatException e ) {
+			return Optional.empty();
+		}
 	}
 
-	public static BigDecimal decimal(final Value value) {
-		return value instanceof Literal ? ((Literal)value).decimalValue() : null;
+	public static Optional<BigDecimal> decimal(final Value value) {
+		try {
+			return value instanceof Literal ? Optional.of(((Literal)value).decimalValue()) : Optional.empty();
+		} catch ( final NumberFormatException e ) {
+			return Optional.empty();
+		}
 	}
 
 
-	public static Instant instant(final Value value) {
+	public static Optional<Instant> instant(final Value value) {
 
-		return value instanceof Literal ? instant((Literal)value) : null;
+		return value instanceof Literal ? instant((Literal)value) : Optional.empty();
 
 	}
 
-	public static Instant instant(final Literal literal) {
+	public static Optional<Instant> instant(final Literal literal) {
 		if ( literal == null ) {
 
-			return null;
+			return Optional.empty();
 
 		} else if ( literal.getDatatype().equals(XMLSchema.DATETIME) ) {
 
 			final DateTimeFormatter formatter=DateTimeFormatter.ISO_DATE_TIME;
 			final TemporalAccessor accessor=formatter.parse(literal.stringValue());
 
-			return Instant.from(accessor.isSupported(ChronoField.INSTANT_SECONDS)
+			return Optional.of(Instant.from(accessor.isSupported(ChronoField.INSTANT_SECONDS)
 					? Instant.from(accessor)
-					: LocalDateTime.from(accessor).atZone(ZoneId.systemDefault()));
+					: LocalDateTime.from(accessor).atZone(ZoneId.systemDefault())));
 
 		} else { // !!! review
 			throw new UnsupportedOperationException("unsupported temporal datatype ["+literal.getDatatype()+"]");
 		}
 	}
 
-	public static LocalDate localDate(final Value value) {
-		return value instanceof Literal ? localDate((Literal)value) : null;
+	public static Optional<LocalDate> localDate(final Value value) {
+		return value instanceof Literal ? localDate((Literal)value) : Optional.empty();
 	}
 
-	public static LocalDate localDate(final Literal value) { // !!! review/complete
-		return value != null && value.getDatatype().equals(XMLSchema.DATETIME)
+	public static Optional<LocalDate> localDate(final Literal value) { // !!! review/complete
+		return Optional.ofNullable(value != null && value.getDatatype().equals(XMLSchema.DATETIME)
 				? ISO_LOCAL_DATE_TIME.parse(value.stringValue()).query(TemporalQueries.localDate())
-				: null; // !!! review
+				: null); // !!! review
 	}
 
 

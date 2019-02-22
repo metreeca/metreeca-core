@@ -12,7 +12,9 @@
             <list>
               <option value="clean" />
               <option value="validate" />
-              <option value="site-deploy" />
+              <option value="post-site" />
+              <option value="site:stage" />
+              <option value="scm-publish:publish-scm" />
             </list>
           </option>
           <option name="pomFileName" />

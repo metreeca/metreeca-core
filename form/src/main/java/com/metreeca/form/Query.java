@@ -21,6 +21,8 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 
+import java.util.function.Function;
+
 
 /**
  * Shape-driven linked data query.
@@ -28,6 +30,15 @@ import com.metreeca.form.queries.Stats;
 public interface Query {
 
 	public <V> V map(final Probe<V> probe);
+
+	public default <V> V map(final Function<Query, V> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return mapper.apply(this);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -26,7 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.bodies.OutputBody.output;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.Arrays.asList;

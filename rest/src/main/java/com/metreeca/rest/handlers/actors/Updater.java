@@ -20,19 +20,25 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Issue;
+import com.metreeca.form.Shape;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+
+import java.util.Collection;
+
 import javax.json.JsonValue;
 
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.wrappers.Throttler.container;
-import static com.metreeca.rest.wrappers.Throttler.resource;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.form.things.Shapes.resource;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -40,7 +46,7 @@ import static com.metreeca.tray.Tray.tool;
  * LDP resource updater.
  *
  * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item() focus
- * item}.</p>
+ * item}, according to the following operating modes.</p>
  *
  * <p>If the request target is a {@linkplain Request#container() container}:</p>
  *
@@ -57,7 +63,7 @@ import static com.metreeca.tray.Tray.tool;
  * <li>the resource shape is extracted and redacted taking into account request user {@linkplain Request#roles()
  * roles}, {@link Form#update} task, {@link Form#convey} mode and {@link Form#detail} view</li>
  *
- * <li>the request {@link RDFFormat RDF body} is expected to contain an RDF description of the resource to be updated
+ * <li>the request {@link RDFBody RDF body} is expected to contain an RDF description of the resource to be updated
  * matched by the redacted resource shape; statements outside this envelope are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</li>
  *
@@ -70,7 +76,7 @@ import static com.metreeca.tray.Tray.tool;
  *
  * <ul>
  *
- * <li>the request {@link RDFFormat RDF body} is expected to contain a symmetric concise bounded description of the
+ * <li>the request {@link RDFBody RDF body} is expected to contain a symmetric concise bounded description of the
  * resource to be updated; statements outside this envelope are reported with a {@linkplain
  * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element;</li>
  *
@@ -98,32 +104,41 @@ public final class Updater extends Actor {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.update, Form.detail, container()),
-				new Throttler(Form.update, Form.detail, resource())
+				new Throttler(Form.update, Form.detail, Shapes::container),
+				new Throttler(Form.update, Form.detail, Shapes::resource)
 		);
 	}
 
 	private Handler updater() {
-		return request -> request.body(rdf()).fold(
+		return request -> request.container() ? request.reply(
 
-				model -> request.reply(response -> engine(request.shape())
+				new Failure().status(Response.NotImplemented).cause("container updating not supported")
 
-						.update(request.item(), trace.debug(this, model))
+		) : request.body(rdf()).fold(
 
-						.map(focus -> focus.assess(Issue.Level.Error) // shape violations
+				rdf -> {
 
-								? response.map(new Failure()
-								.status(Response.UnprocessableEntity)
-								.error(Failure.DataInvalid)
-								.trace(focus))
+					final IRI item=request.item();
+					final Shape shape=resource(item, request.shape());
+					final Collection<Statement> model=trace.trace(this, rdf);
 
-								: response.status(Response.NoContent)
+					return request.reply(response -> update(item, shape, model)
 
-						)
+							.map(focus -> focus.assess(Issue.Level.Error) // shape violations
 
-						.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
+									? response.map(new Failure()
+									.status(Response.UnprocessableEntity)
+									.error(Failure.DataInvalid)
+									.trace(focus))
 
-				),
+									: response.status(Response.NoContent)
+
+							)
+
+							.orElseGet(() -> response.status(Response.NotFound)) // !!! 410 Gone if previously known
+
+					);
+				},
 
 				request::reply
 

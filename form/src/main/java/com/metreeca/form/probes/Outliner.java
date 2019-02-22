@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.statement;
 
 import static java.util.Arrays.asList;
@@ -84,7 +85,7 @@ public final class Outliner extends Inspector<Stream<Statement>> {
 				all(shape).map(targets -> targets.stream().flatMap(target -> sources.stream().flatMap(source -> direct(iri)
 
 						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
-						: target instanceof Resource ? Stream.of(statement((Resource)target, iri, source)) : Stream.empty()
+						: target instanceof Resource ? Stream.of(statement((Resource)target, inverse(iri), source)) : Stream.empty()
 
 				))).orElse(Stream.empty()),
 

@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Request.GET;
 import static com.metreeca.rest.Request.POST;
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.bodies.TextBody.text;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;

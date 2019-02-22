@@ -19,9 +19,6 @@ package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.http.HTTPRepository;
 
 
@@ -31,9 +28,6 @@ import org.eclipse.rdf4j.repository.http.HTTPRepository;
  * <p>Manages task execution on a remote RDF4J {@link HTTPRepository}.</p>
  */
 public final class RDF4JRemote extends Graph {
-
-	private final HTTPRepository repository;
-
 
 	/**
 	 * Creates an RDF4J remote graph.
@@ -49,7 +43,7 @@ public final class RDF4JRemote extends Graph {
 			throw new NullPointerException("null url");
 		}
 
-		this.repository=new HTTPRepository(url);
+		repository(new HTTPRepository(url));
 	}
 
 
@@ -76,6 +70,8 @@ public final class RDF4JRemote extends Graph {
 			throw new NullPointerException("null pwd");
 		}
 
+		final HTTPRepository repository=(HTTPRepository)repository();
+
 		if ( repository.isInitialized() ) {
 			throw new IllegalStateException("active repository");
 		}
@@ -85,20 +81,6 @@ public final class RDF4JRemote extends Graph {
 		}
 
 		return this;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override protected Repository repository() {
-		return repository;
-	}
-
-	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT})
-	 */
-	@Override protected IsolationLevel isolation() {
-		return IsolationLevels.SNAPSHOT;
 	}
 
 }

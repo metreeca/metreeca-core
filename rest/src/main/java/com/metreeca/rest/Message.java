@@ -18,7 +18,7 @@
 package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.And;
+import com.metreeca.form.probes.Evaluator;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -27,7 +27,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.Value;
@@ -45,8 +45,8 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
  *
- * <p>Messages are associated with possibly multiple {@linkplain #body(Format) body} representations managed by message
- * body {@linkplain Format formats}.</p>
+ * <p>Messages are associated with possibly multiple {@linkplain #body(Body) body} representations managed by message
+ * body {@linkplain Body formats}.</p>
  *
  * @param <T> the self-bounded message type supporting fluent setters
  */
@@ -86,8 +86,8 @@ public abstract class Message<T extends Message<T>> {
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
-	private final Map<Format<?>, Object> cache=new HashMap<>();
-	private final Map<Format<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
+	private final Map<Body<?>, Object> cache=new HashMap<>();
+	private final Map<Body<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
 
 
 	private T self() { return (T)this; }
@@ -339,7 +339,7 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the linked data shape.
 	 *
-	 * @return the linked data shape associated to this message; defaults to the {@linkplain And#pass() wildcard}
+	 * @return the linked data shape associated to this message; defaults to the {@linkplain Evaluator#pass() wildcard}
 	 * shape
 	 */
 	public Shape shape() {
@@ -370,27 +370,27 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves a body representation.
 	 *
-	 * @param format the body format managing the body representation to be retrieved
-	 * @param <V>    the type of the body representation managed by {@code format}
+	 * @param body the body format managing the body representation to be retrieved
+	 * @param <V>  the type of the body representation managed by {@code body}
 	 *
-	 * @return a result providing access to the body representation managed by {@code format}, if one was successfully
-	 * retrieved from this message; a result providing access to the format processing failure, otherwise
+	 * @return a result providing access to the body representation managed by {@code body}, if one was successfully
+	 * retrieved from this message; a result providing access to the body processing failure, otherwise
 	 *
-	 * @throws NullPointerException if {@code format} is null
+	 * @throws NullPointerException if {@code body} is null
 	 */
-	public <V> Result<V, Failure> body(final Format<V> format) {
+	public <V> Result<V, Failure> body(final Body<V> body) {
 
-		if ( format == null ) {
-			throw new NullPointerException("null format");
+		if ( body == null ) {
+			throw new NullPointerException("null body");
 		}
 
-		final V cached=(V)cache.get(format);
+		final V cached=(V)cache.get(body);
 
-		return cached != null ? Value(cached) : pipes.getOrDefault(format, format::get).apply(self()).value(
+		return cached != null ? Value(cached) : pipes.getOrDefault(body, body::get).apply(self()).value(
 
 				value -> {
 
-					cache.put(format, value);
+					cache.put(body, value);
 
 					return (V)value;
 
@@ -403,22 +403,22 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures a body representation.
 	 *
-	 * <p>Future calls to {@link #body(Format)} with the same format will return the specified value, rather than the
-	 * value {@linkplain Format#get(Message) retrieved} from this message by format.</p>
+	 * <p>Future calls to {@link #body(Body)} with the same body format will return the specified value, rather than
+	 * the value {@linkplain Body#get(Message) retrieved} from this message by body.</p>
 	 *
-	 * @param format the body format managing the body representation to be configured
-	 * @param value  the body representation to be associated with {@code format}
-	 * @param <V>    the type of the body representation managed by {@code format}
+	 * @param body  the body format managing the body representation to be configured
+	 * @param value the body representation to be associated with {@code body}
+	 * @param <V>   the type of the body representation managed by {@code body}
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException  if either {@code format} or {@code value} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
+	 * @throws NullPointerException  if either {@code body} or {@code value} is null
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
 	 */
-	public <V> T body(final Format<V> format, final V value) {
+	public <V> T body(final Body<V> body, final V value) {
 
-		if ( format == null ) {
-			throw new NullPointerException("null format");
+		if ( body == null ) {
+			throw new NullPointerException("null body");
 		}
 
 		if ( value == null ) {
@@ -429,33 +429,33 @@ public abstract class Message<T extends Message<T>> {
 			throw new IllegalStateException("message body already retrieved");
 		}
 
-		pipes.put(format, message -> Value(value));
+		pipes.put(body, message -> Value(value));
 
-		return format.set(self());
+		return body.set(self());
 	}
 
 
 	/**
 	 * Process a body representation.
 	 *
-	 * <p>Future calls to {@link #body(Format)} with the same format will pipe the value either explicitly {@linkplain
-	 * #body(Format, Object) set} or {@linkplain Format#get(Message) retrieved} on demand by the format through a
+	 * <p>Future calls to {@link #body(Body)} with the same body format will pipe the value either explicitly
+	 * {@linkplain #body(Body, Object) set} or {@linkplain Body#get(Message) retrieved} on demand by the body through a
 	 * result-returning processing function.</p>
 	 *
 	 * <p><strong>Warning</strong> / Processing is performed on demand, as final consumer eventually retrieves the
 	 * processed message body: if {@code mapper} relies on information retrieved from the message, its current state
 	 * must be memoized, before it's possibly altered by downstream wrappers.</p>
 	 *
-	 * @param format the body format managing the body representation to be processed
+	 * @param body   the body format managing the body representation to be processed
 	 * @param mapper the value processing function
-	 * @param <V>    the type of the body representation managed by {@code format}
+	 * @param <V>    the type of the body representation managed by {@code body}
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException  if either {@code format} or {@code mapper} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
+	 * @throws NullPointerException  if either {@code body} or {@code mapper} is null
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
 	 */
-	public <V> T pipe(final Format<V> format, final Function<V, Result<V, Failure>> mapper) {
+	public <V> T pipe(final Body<V> body, final Function<V, Result<V, Failure>> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -465,8 +465,8 @@ public abstract class Message<T extends Message<T>> {
 			throw new IllegalStateException("message body already retrieved");
 		}
 
-		pipes.compute(format, (_format, getter) -> message ->
-				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)format::get)
+		pipes.compute(body, (_format, getter) -> message ->
+				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)body::get)
 						.apply(message).fold(value -> mapper.apply((V)value), Result::Error)
 		);
 

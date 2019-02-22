@@ -32,9 +32,7 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.*;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.*;
@@ -48,9 +46,9 @@ import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;

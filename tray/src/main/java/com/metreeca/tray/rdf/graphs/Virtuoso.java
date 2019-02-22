@@ -19,13 +19,10 @@ package com.metreeca.tray.rdf.graphs;
 
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
@@ -36,17 +33,23 @@ import virtuoso.rdf4j.driver.VirtuosoRepository;
  * VirtuosoL graph store.
  *
  * <p>Manages task execution on an <a href="https://virtuoso.openlinksw.com">Virtuoso</a> repository.</p>
+ *
+ * <p><strong>Warning</strong> / Be aware of the following issues with Virtuoso, which could affect custom SPARQL-based
+ * code:</p>
+ *
+ * <ul>
+ * <li>aggregate {@code count()} is reported as an {@code xsd:int} value rather than {@code csd:integer};</li>
+ * <li>string literals in SPARQL code are parsed as RDF 1.0 plain string literals rather than RDF 1.1 {@code xsd:string}
+ * literals.</li>
+ * </ul>
  */
 public final class Virtuoso extends Graph {
-
-	private final VirtuosoRepository repository;
-
 
 	/**
 	 * Creates a Virtuoso graph.
 	 *
 	 * @param url  the <a href="http://docs.openlinksw.com/virtuoso/jdbcurl4mat/">JDBC URL</a> of a remote Virtuoso
-	 *             server
+	 *             server (e.g. {@code jdbc:virtuoso://localhost:1111/})
 	 * @param usr  the username of the account on the remote Virtuoso server
 	 * @param pwd  the password of the account on the remote Virtuoso server
 	 * @param dflt the IRI of the default graph for update operations on the remote Virtuoso server
@@ -71,7 +74,7 @@ public final class Virtuoso extends Graph {
 			throw new NullPointerException("null default graph IRI");
 		}
 
-		this.repository=new VirtuosoRepository(url, usr, pwd, dflt.toString()) {
+		repository(new VirtuosoRepository(url, usr, pwd, dflt.toString()) {
 
 			// ;(virtuoso) define default update graph in the preamble
 			// https://github.com/openlink/virtuoso-opensource/issues/417
@@ -102,21 +105,7 @@ public final class Virtuoso extends Graph {
 				};
 			}
 
-		};
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override protected Repository repository() {
-		return repository;
-	}
-
-	/**
-	 * @return {@inheritDoc} ({@link IsolationLevels#SNAPSHOT})
-	 */
-	@Override protected IsolationLevel isolation() {
-		return IsolationLevels.SNAPSHOT;
+		});
 	}
 
 }

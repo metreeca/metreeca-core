@@ -17,11 +17,15 @@
 
 package com.metreeca.tray.rdf;
 
-import com.metreeca.tray.rdf.graphs.RDF4JMemory;
-
 import org.eclipse.rdf4j.IsolationLevel;
+import org.eclipse.rdf4j.IsolationLevels;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,11 +45,28 @@ import static java.util.Objects.requireNonNull;
 public abstract class Graph implements AutoCloseable {
 
 	/**
+	 * Read-only isolation level.
+	 *
+	 * <p>Disables update transactions.</p>
+	 */
+	public static final IsolationLevel READ_ONLY=new IsolationLevel() {
+
+		@Override public boolean isCompatibleWith(final IsolationLevel level) { return equals(level); }
+
+		@Override public IRI getURI() { return RDF.NIL; }
+
+		@Override public String toString() { return "READ_ONLY"; }
+
+	};
+
+	/**
 	 * Graph factory.
 	 *
 	 * <p>By default creates a graph backed by a RDF4J Memory store with no persistence.</p>
 	 */
-	public static final Supplier<Graph> Factory=RDF4JMemory::new;
+	public static final Supplier<Graph> Factory=() -> new Graph() {{
+		repository(new SailRepository(new MemoryStore()));
+	}};
 
 
 	private static final ThreadLocal<RepositoryConnection> context=new ThreadLocal<>();
@@ -53,30 +74,87 @@ public abstract class Graph implements AutoCloseable {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private Repository repository;
+	private IsolationLevel isolation=IsolationLevels.SNAPSHOT;
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	/**
 	 * Retrieves the backing RDF repository.
 	 *
-	 * @return the backing RDF repository for this graph store; will be initializated and shut down as required by the
-	 * calling code
+	 * @return the backing RDF repository for this graph store; {@code null} if the backing RDF repository was not
+	 * {@linkplain #repository(Repository) configured}
 	 */
-	protected abstract Repository repository();
+	protected Repository repository() {
+		return repository;
+	}
+
+	/**
+	 * Configures the backing RDF repository.
+	 *
+	 * @param repository the backing RDF repository for this graph store; will be initializated and shut down as
+	 *                   required by the calling code
+	 *
+	 * @return this graph store
+	 *
+	 * @throws NullPointerException if {@code repository} is null
+	 */
+	protected Graph repository(final Repository repository) {
+
+		if ( repository == null ) {
+			throw new NullPointerException("null repository");
+		}
+
+		this.repository=repository;
+
+		return this;
+	}
+
 
 	/**
 	 * Retrieves the transaction isolation level.
 	 *
-	 * @return the isolation level for transactions on connection managed by this graph store
+	 * @return the isolation level for transactions on connection managed by this graph store; defaults to {@link
+	 * IsolationLevels#SNAPSHOT} if not {@linkplain #isolation(IsolationLevel) configured}
 	 */
-	protected abstract IsolationLevel isolation();
+	public IsolationLevel isolation() {
+		return isolation;
+	}
+
+	/**
+	 * Configures the transaction isolation level.
+	 *
+	 * @param isolation the isolation level for transactions on connection managed by this graph store
+	 *
+	 * @return this graph store
+	 *
+	 * @throws NullPointerException if {@code isolation} is null
+	 */
+	public Graph isolation(final IsolationLevel isolation) {
+
+		if ( isolation == null ) {
+			throw new NullPointerException("null isolation");
+		}
+
+		this.isolation=isolation;
+
+		return this;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public void close() {
+		try {
 
-		final Repository repository=repository();
+			if ( repository != null && repository.isInitialized() ) { repository.shutDown(); }
 
-		if ( repository.isInitialized() ) {
-			repository.shutDown();
+		} finally {
+
+			repository=null;
+
 		}
 	}
 
@@ -133,9 +211,9 @@ public abstract class Graph implements AutoCloseable {
 	 * Executes a task inside a transaction on this graph store.
 	 *
 	 * <p>If a transaction is not already active on the shared repository connection, begins one at the {@linkplain
-	 * #isolation() isolation} level required by this store and commits it on successful task completion; if the task
-	 * throws an exception, the transaction is rolled back and the exception rethrown; in either case,  no action is
-	 * taken if the transaction was already terminated inside the task.</p>
+	 * #isolation(IsolationLevel) isolation} level required by this store and commits it on successful task completion;
+	 * if the task throws an exception, the transaction is rolled back and the exception rethrown; in either case,  no
+	 * action is taken if the transaction was already terminated inside the task.</p>
 	 *
 	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
 	 *             store
@@ -163,9 +241,9 @@ public abstract class Graph implements AutoCloseable {
 	 * Executes a task inside a transaction on this graph store.
 	 *
 	 * <p>If a transaction is not already active on the shared repository connection, begins one at the {@linkplain
-	 * #isolation() isolation} level required by this store and commits it on successful task completion; if the task
-	 * throws an exception, the transaction is rolled back and the exception rethrown; in either case no action is
-	 * taken if the transaction was already closed inside the task.</p>
+	 * #isolation(IsolationLevel) isolation} level required by this store and commits it on successful task completion;
+	 * if the task throws an exception, the transaction is rolled back and the exception rethrown; in either case no
+	 * action is taken if the transaction was already closed inside the task.</p>
 	 *
 	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
 	 *             store
@@ -187,6 +265,10 @@ public abstract class Graph implements AutoCloseable {
 				return task.apply(connection);
 
 			} else {
+
+				if ( connection.getIsolationLevel().equals(READ_ONLY) ) {
+					throw new RepositoryReadOnlyException("isolation level set to "+READ_ONLY);
+				}
 
 				try {
 
@@ -213,7 +295,7 @@ public abstract class Graph implements AutoCloseable {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private <R> R exec(final Function<RepositoryConnection, R> task) {
+	private <V> V exec(final Function<RepositoryConnection, V> task) {
 
 		final RepositoryConnection shared=context.get();
 
@@ -223,13 +305,15 @@ public abstract class Graph implements AutoCloseable {
 
 		} else {
 
-			final Repository repository=repository();
+			if ( repository == null ) {
+				throw new IllegalStateException("undefined repository");
+			}
 
 			if ( !repository.isInitialized() ) { repository.initialize(); }
 
 			try (final RepositoryConnection connection=repository.getConnection()) {
 
-				connection.setIsolationLevel(isolation());
+				connection.setIsolationLevel(isolation);
 
 				context.set(connection);
 

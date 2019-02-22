@@ -37,6 +37,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.metreeca.form.codecs.BaseCodec.aliases;
@@ -46,6 +47,7 @@ import static com.metreeca.form.codecs.JSON.object;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -54,12 +56,20 @@ import static java.util.stream.Collectors.toList;
 
 public final class JSONWriter extends AbstractRDFWriter {
 
+	private static final Function<Shape, Shape> ShapeCompiler=memoizable(s -> s
+			.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
+			.map(new Optimizer())
+			.map(new Inferencer()) // infer implicit constraints to drive json shorthands
+			.map(new Optimizer())
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Writer writer;
 
 	private final Model model=new LinkedHashModel();
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public JSONWriter(final OutputStream stream) {
 
@@ -103,12 +113,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 			final Resource focus=getWriterConfig().get(JSONCodec.Focus);
 			final Shape shape=getWriterConfig().get(JSONCodec.Shape);
 
-			final Shape driver=(shape == null) ? null : shape
-
-					.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
-					.map(new Optimizer())
-					.map(new Inferencer()) // infer implicit constraints to drive json shorthands
-					.map(new Optimizer());
+			final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
 
 			final Predicate<Resource> trail=resource -> false;
 

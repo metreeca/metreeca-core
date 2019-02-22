@@ -21,7 +21,7 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.Wrapper;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -32,7 +32,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -41,7 +41,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * RDF postprocessor.
  *
- * <p>Processes response {@linkplain RDFFormat RDF} payloads.</p>
+ * <p>Processes response {@linkplain RDFBody RDF} payloads.</p>
  */
 public final class Postprocessor implements Wrapper {
 
@@ -52,10 +52,10 @@ public final class Postprocessor implements Wrapper {
 	 * Creates an RDF preprocessor.
 	 *
 	 * <p>Filters are chained in the specified order and executed on {@linkplain Response#success() successful}
-	 * outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is present, or ignored, otherwise.</p>
+	 * outgoing responses and their {@linkplain RDFBody RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
 	 * @param filters the response RDF postprocessing filters to be inserted; each filter takes as argument a successful
-	 *                outgoing response and its {@linkplain RDFFormat RDF} payload and must return a non-null RDF model;
+	 *                outgoing response and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model;
 	 *                filters based on SPARQL Query/Update scripts may be created using {@link Connector} factory
 	 *                methods
 	 *
@@ -71,11 +71,11 @@ public final class Postprocessor implements Wrapper {
 	 * Inserts a response RDF postprocessing filters.
 	 *
 	 * <p>The filters is chained after previously inserted postprocessing filters and executed on {@linkplain
-	 * Response#success() successful} outgoing responses and their {@linkplain RDFFormat RDF} payload, if one is
+	 * Response#success() successful} outgoing responses and their {@linkplain RDFBody RDF} payload, if one is
 	 * present, or ignored, otherwise.</p>
 	 *
 	 * @param filters the response RDF postprocessing filters to be inserted; each filter takes as argument a successful
-	 *                outgoing response and its {@linkplain RDFFormat RDF} payload and must return a non-null RDF model;
+	 *                outgoing response and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model;
 	 *                filters based on SPARQL Query/Update scripts may be created using {@link Connector} factory
 	 *                methods
 	 *

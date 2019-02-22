@@ -34,10 +34,12 @@ import static com.metreeca.form.things.Values.statement;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
- * Value shape validation report.
+ * Shape value validation report.
  */
 public final class Frame {
 
@@ -127,6 +129,37 @@ public final class Frame {
 
 		return issues.stream().anyMatch(issue -> issue.assess(limit))
 				|| fields.values().stream().anyMatch(trace -> trace.assess(limit));
+	}
+
+	/**
+	 * Removes issues and fields below a target severity level.
+	 *
+	 * @param limit the minimum severity level to be retained
+	 *
+	 * @return a copy of this report retaining only issues and fields reaching the severity {@code limit}
+	 *
+	 * @throws NullPointerException if {@code limit} is null
+	 */
+	public Frame prune(final Issue.Level limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		return new Frame(value,
+
+				issues.stream()
+						.filter(issue -> issue.assess(limit))
+						.collect(toSet()),
+
+				fields.entrySet().stream()
+						.filter(entry -> entry.getValue().assess(limit))
+						.collect(toMap(
+								Map.Entry::getKey,
+								e -> e.getValue().prune(limit)
+						))
+
+		);
 	}
 
 	/**

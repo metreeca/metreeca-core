@@ -100,7 +100,7 @@
 	<properties>
 
 		<java.version>1.8</java.version>
-		<rdf4j.version>2.4.4</rdf4j.version>
+		<rdf4j.version>2.4.5</rdf4j.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -127,7 +127,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
+		<dependency> <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 			<version>3.11.1</version>
@@ -352,19 +352,6 @@
 
 				</configuration>
 
-				<executions>
-					<execution>
-
-						<id>collect-module-reports</id>
-						<phase>post-site</phase>
-
-						<goals>
-							<goal>stage</goal>
-						</goals>
-
-					</execution>
-				</executions>
-
 			</plugin>
 
 		</plugins>
@@ -510,19 +497,8 @@
 							<checkinComment>Deploy v${project.version} docs</checkinComment>
 						</configuration>
 
-						<executions>
-							<execution>
-
-								<id>deploy-docs</id>
-								<inherited>false</inherited>
-								<phase>site-deploy</phase>
-
-								<goals>
-									<goal>publish-scm</goal>
-								</goals>
-
-							</execution>
-						</executions>
+						<!-- manual execution -->
+						<!-- https://maven.apache.org/plugins/maven-scm-publish-plugin/examples/multi-module-configuration.html -->
 
 					</plugin>
 

@@ -40,9 +40,6 @@ public final class Or implements Shape {
 	private static final Or empty=new Or(set());
 
 
-	public static Shape fail() { return empty; }
-
-
 	public static Or or() {
 		return empty;
 	}
