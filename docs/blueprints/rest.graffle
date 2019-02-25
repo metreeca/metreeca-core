@@ -205,7 +205,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-02-05 09:55:06 +0000</string>
+	<string>2019-02-25 12:19:22 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro Bollini</string>
 	<key>MovementHandleVisible</key>
@@ -320,6 +320,8 @@
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -421,6 +423,8 @@
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -535,6 +539,8 @@
 								</dict>
 								<key>Font</key>
 								<string>HelveticaNeue-Bold</string>
+								<key>Size</key>
+								<real>16</real>
 							</dict>
 							<key>ID</key>
 							<integer>70</integer>
@@ -702,6 +708,8 @@
 								</dict>
 								<key>Font</key>
 								<string>HelveticaNeue-Bold</string>
+								<key>Size</key>
+								<real>16</real>
 							</dict>
 							<key>ID</key>
 							<integer>64</integer>
@@ -1365,6 +1373,8 @@
 								</dict>
 								<key>Font</key>
 								<string>HelveticaNeue-Bold</string>
+								<key>Size</key>
+								<real>16</real>
 							</dict>
 							<key>ID</key>
 							<integer>46</integer>
@@ -1499,6 +1509,8 @@
 								</dict>
 								<key>Font</key>
 								<string>HelveticaNeue-Bold</string>
+								<key>Size</key>
+								<real>16</real>
 							</dict>
 							<key>ID</key>
 							<integer>43</integer>
@@ -1644,6 +1656,8 @@ map(mapper):Responder}</string>
 								</dict>
 								<key>Font</key>
 								<string>HelveticaNeue-Bold</string>
+								<key>Size</key>
+								<real>16</real>
 							</dict>
 							<key>ID</key>
 							<integer>40</integer>
@@ -1696,6 +1710,8 @@ map(mapper):Responder}</string>
 								</dict>
 								<key>Font</key>
 								<string>HelveticaNeue-Bold</string>
+								<key>Size</key>
+								<real>16</real>
 							</dict>
 							<key>ID</key>
 							<integer>73</integer>
@@ -1801,6 +1817,8 @@ wrap(:Handler):Handler}</string>
 								</dict>
 								<key>Font</key>
 								<string>HelveticaNeue-Bold</string>
+								<key>Size</key>
+								<real>16</real>
 							</dict>
 							<key>ID</key>
 							<integer>37</integer>
@@ -2829,6 +2847,8 @@ body(:Format&lt;V&gt;, V)}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -2906,6 +2926,8 @@ body(:Format&lt;V&gt;, V)}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -2989,6 +3011,8 @@ body(:Format&lt;V&gt;, V)}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -3054,6 +3078,8 @@ who is responsible for deleting containing triples?}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -3137,6 +3163,8 @@ who is responsible for deleting containing triples?}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -3184,20 +3212,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>39</integer>
 					<key>Style</key>
@@ -3251,20 +3265,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>38</integer>
 					<key>Style</key>
@@ -3316,20 +3316,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>37</integer>
 					<key>Style</key>
@@ -3381,20 +3367,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>36</integer>
 					<key>Style</key>
@@ -3449,20 +3421,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>35</integer>
 					<key>Style</key>
@@ -3517,20 +3475,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>33</integer>
 					<key>Style</key>
@@ -3585,20 +3529,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>31</integer>
 					<key>Style</key>
@@ -3655,6 +3585,8 @@ who is responsible for deleting containing triples?}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -3740,6 +3672,8 @@ who is responsible for deleting containing triples?}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -3825,6 +3759,8 @@ who is responsible for deleting containing triples?}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -3920,6 +3856,8 @@ who is responsible for deleting containing triples?}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -4012,20 +3950,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>26</integer>
 					<key>Style</key>
@@ -4080,20 +4004,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>25</integer>
 					<key>Magnets</key>
@@ -4152,20 +4062,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>24</integer>
 					<key>Style</key>
@@ -4217,20 +4113,6 @@ who is responsible for deleting containing triples?}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>21</integer>
 					<key>Style</key>
@@ -4286,20 +4168,6 @@ ldp:isMemberOfRelation &lt;relation&gt; }</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>20</integer>
 					<key>Style</key>
@@ -4355,20 +4223,6 @@ ldp:isMemberOfRelation &lt;relation&gt; }</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>18</integer>
 					<key>Style</key>
@@ -4422,20 +4276,6 @@ ldp:isMemberOfRelation &lt;relation&gt; }</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>17</integer>
 					<key>Style</key>
@@ -4487,20 +4327,6 @@ ldp:isMemberOfRelation &lt;relation&gt; }</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>15</integer>
 					<key>Style</key>
@@ -4553,20 +4379,6 @@ ldp:IndirectContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>13</integer>
 					<key>Style</key>
@@ -4619,20 +4431,6 @@ ldp:DirectContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>12</integer>
 					<key>Style</key>
@@ -4685,20 +4483,6 @@ ldp:BasicContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>11</integer>
 					<key>Style</key>
@@ -4750,20 +4534,6 @@ ldp:BasicContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>10</integer>
 					<key>Style</key>
@@ -4815,20 +4585,6 @@ ldp:BasicContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>9</integer>
 					<key>Magnets</key>
@@ -4887,20 +4643,6 @@ ldp:BasicContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>8</integer>
 					<key>Magnets</key>
@@ -4959,20 +4701,6 @@ ldp:BasicContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>7</integer>
 					<key>Magnets</key>
@@ -5031,20 +4759,6 @@ ldp:BasicContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>6</integer>
 					<key>Style</key>
@@ -5202,8 +4916,6 @@ ldp:BasicContainer}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -5258,20 +4970,6 @@ ldp:BasicContainer}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>16</integer>
 					<key>Style</key>
@@ -5325,20 +5023,6 @@ side effects}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>13</integer>
 					<key>Style</key>
@@ -5392,20 +5076,6 @@ side effects}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>12</integer>
 					<key>Style</key>
@@ -5464,8 +5134,6 @@ side effects}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -5525,8 +5193,6 @@ side effects}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -5566,8 +5232,9 @@ side effects}</string>
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs24 \cf0 Wrapper\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f1 \uc0\u8942 
+\f1 \cf0 \uc0\u8942 
 \f0 \
 Wrapper}</string>
 						<key>VerticalPad</key>
@@ -5590,8 +5257,6 @@ Wrapper}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -5646,20 +5311,6 @@ Wrapper}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>7</integer>
 					<key>Style</key>
@@ -5720,8 +5371,6 @@ shape redaction}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -5776,20 +5425,6 @@ shape redaction}</string>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue-Light</string>
-						<key>Size</key>
-						<real>9</real>
-					</dict>
 					<key>ID</key>
 					<integer>2</integer>
 					<key>Style</key>
@@ -5904,7 +5539,7 @@ shape redaction}</string>
 		<key>CurrentSheet</key>
 		<integer>2</integer>
 		<key>Frame</key>
-		<string>{{0, 0}, {1440, 828}}</string>
+		<string>{{0, 0}, {1440, 853}}</string>
 		<key>ShowInfo</key>
 		<false/>
 		<key>Sidebar</key>
@@ -5914,10 +5549,10 @@ shape redaction}</string>
 		<key>Sidebar_Tab</key>
 		<integer>2</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, 0}, {805.5, 537}}</string>
+		<string>{{0, -8.0000000000000409}, {806, 553.07112970711285}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
-			<string>com.omnigroup.OmniGraffle.inspectorGroup.properties</string>
+			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
 		</array>
 		<key>ZoomValues</key>
 		<array>

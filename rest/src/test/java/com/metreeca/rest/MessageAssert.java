@@ -20,8 +20,11 @@ package com.metreeca.rest;
 import com.metreeca.form.Shape;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.Assertions;
+import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static com.metreeca.form.probes.Evaluator.pass;
@@ -29,11 +32,24 @@ import static com.metreeca.rest.bodies.DataBody.data;
 import static com.metreeca.rest.bodies.TextBody.text;
 import static com.metreeca.tray.sys.Trace.clip;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
 public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Message<T>> extends AbstractAssert<A, T> {
+
+	@SuppressWarnings("unchecked") public static <T extends Message<T>> MessageAssert<?, ?> assertThat(final Message<?> message) {
+
+		final class WorkAssert extends MessageAssert<WorkAssert, T> {
+
+			private WorkAssert(final T actual) { super(actual, WorkAssert.class); }
+
+		}
+
+		return new WorkAssert((T)message);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected MessageAssert(final T actual, final Class<A> type) {
 		super(actual, type);
@@ -41,6 +57,18 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public A hasItem(final IRI item) {
+
+		isNotNull();
+
+		if ( !Objects.equals(actual.item(), item)) {
+			failWithMessage("expected message to have <%s> item but has <%s>", actual.item(), item);
+		}
+
+		return myself;
+	}
+
 
 	public A hasHeader(final String name) {
 
@@ -53,7 +81,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		final Collection<String> values=actual.headers(name);
 
 		if ( values.isEmpty() ) {
-			failWithMessage("expected response to have <%s> headers but has none", name);
+			failWithMessage("expected message to have <%s> headers but has none", name);
 		}
 
 		return myself;
@@ -114,7 +142,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		assertThat(actual.headers(name))
+		Assertions.assertThat(actual.headers(name))
 				.as("<%sh> message headers", name)
 				.containsExactly(values);
 
@@ -201,7 +229,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 				},
 
 				error -> fail(
-						"expected response to have a <%s> body but was unable to retrieve one (%s)",
+						"expected message to have a <%s> body but was unable to retrieve one (%s)",
 						body.getClass().getSimpleName(), error
 				)
 		);
@@ -239,7 +267,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		isNotNull();
 
 		return actual.body(body).fold(
-				value -> fail("expected response to have no <%s> body but has one"),
+				value -> fail("expected message to have no <%s> body but has one"),
 				error -> myself
 		);
 	}

@@ -480,7 +480,7 @@ public abstract class Message<T extends Message<T>> {
 			throw new IllegalStateException("message body already retrieved");
 		}
 
-		pipes.compute(body, (_format, getter) -> message ->
+		pipes.compute(body, (_body, getter) -> message ->
 				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)body::get)
 						.apply(message).fold(value -> mapper.apply((V)value), Result::Error)
 		);
