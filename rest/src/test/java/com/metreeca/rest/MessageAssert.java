@@ -63,7 +63,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		isNotNull();
 
 		if ( !Objects.equals(actual.item(), item)) {
-			failWithMessage("expected message to have <%s> item but has <%s>", actual.item(), item);
+			failWithMessage("expected message to have <%s> item but has <%s>", item, actual.item());
 		}
 
 		return myself;

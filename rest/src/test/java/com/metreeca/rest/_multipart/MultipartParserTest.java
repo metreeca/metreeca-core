@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
 
 import static com.metreeca.form.things.Codecs.UTF8;
@@ -42,7 +43,7 @@ import static java.util.stream.Collectors.toList;
 
 final class MultipartParserTest {
 
-	private Collection<Message<?>> parts(final String content) throws IOException {
+	private Collection<Message<?>> parts(final String content) throws IOException, ParseException {
 
 		final Map<String, Message<?>> parts=new LinkedHashMap<>();
 
@@ -70,13 +71,13 @@ final class MultipartParserTest {
 
 	@Nested final class Splitting {
 
-		private List<String> parts(final String content) throws IOException {
+		private List<String> parts(final String content) throws IOException, ParseException {
 			return MultipartParserTest.this.parts(content).stream()
 					.map(message -> message.body(text()).value().orElse(""))
 					.collect(toList());
 		}
 
-		@Test void testIgnoreFrame() throws IOException {
+		@Test void testIgnoreFrame() throws IOException, ParseException {
 
 			assertThat(parts("")).isEmpty();
 
@@ -85,7 +86,7 @@ final class MultipartParserTest {
 
 		}
 
-		@Test void testSplitParts() throws IOException {
+		@Test void testSplitParts() throws IOException, ParseException {
 
 			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("canonical")
@@ -105,7 +106,7 @@ final class MultipartParserTest {
 
 		}
 
-		@Test void testIgnorePreamble() throws IOException {
+		@Test void testIgnorePreamble()  throws IOException, ParseException {
 
 			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("missing")
@@ -117,7 +118,7 @@ final class MultipartParserTest {
 
 		}
 
-		@Test void testIgnoreEpilogue() throws IOException {
+		@Test void testIgnoreEpilogue()  throws IOException, ParseException {
 
 			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("missing")
@@ -133,7 +134,7 @@ final class MultipartParserTest {
 
 	@Nested final class Headers {
 
-		@Test void testParseHeaders() throws IOException {
+		@Test void testParseHeaders() throws IOException, ParseException {
 			assertThat(parts("--boundary\nsingle: value\nmultiple: one\nmultiple: two\n\ncontent"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> assertThat(message)
@@ -143,7 +144,7 @@ final class MultipartParserTest {
 					);
 		}
 
-		@Test void testHandleEmptyHeaders() throws IOException {
+		@Test void testHandleEmptyHeaders() throws IOException, ParseException {
 			assertThat(parts("--boundary\nempty:\n\ncontent"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> assertThat(message)
@@ -152,7 +153,7 @@ final class MultipartParserTest {
 					);
 		}
 
-		@Test void testHandleEOFInHeaders() throws IOException {
+		@Test void testHandleEOFInHeaders() throws IOException, ParseException {
 			assertThat(parts("--boundary\nsingle: value"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> assertThat(message)
@@ -162,15 +163,15 @@ final class MultipartParserTest {
 
 		@Test void testRejectMalformedHeaders() {
 
-			assertThatExceptionOfType(IllegalStateException.class)
+			assertThatExceptionOfType(ParseException.class)
 					.as("spaces before colon")
 					.isThrownBy(() -> parts("--boundary\nheader : value\n\ncontent"));
 
-			assertThatExceptionOfType(IllegalStateException.class)
+			assertThatExceptionOfType(ParseException.class)
 					.as("malformed name")
 					.isThrownBy(() -> parts("--boundary\nhea der: value\n\ncontent"));
 
-			assertThatExceptionOfType(IllegalStateException.class)
+			assertThatExceptionOfType(ParseException.class)
 					.as("malformed value")
 					.isThrownBy(() -> parts("--boundary\nhea der: val\rue\n\ncontent"));
 

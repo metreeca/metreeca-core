@@ -19,17 +19,19 @@ package com.metreeca.rest._multipart;
 
 import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.util.function.Supplier;
 
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.rest.Body.Missing;
 import static com.metreeca.rest.MessageAssert.assertThat;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest._multipart.MultipartBody.multipart;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.ReaderBody.reader;
@@ -42,10 +44,10 @@ final class MultipartBodyTest {
 
 	@Nested final class Input {
 
-		private final String type="multipart/form-data;boundary=\"boundary\"";
+		private final String type="multipart/form-data; boundary=\"boundary\"";
 
 		private Supplier<InputStream> content() {
-			return () -> Codecs.input(new StringReader("\n"
+			return content("\n"
 					+"preamble\n"
 					+"\n"
 					+"--boundary\n"
@@ -56,14 +58,21 @@ final class MultipartBodyTest {
 					+"\n"
 					+"<> rdf:value rdf.nil.\n"
 					+"\n"
-					+"--boundary\\ttrailing garbage\n"
+					+"--boundary\t\t\n"
 					+"Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\n"
 					+"\n"
 					+"text\n"
 					+"--boundary--\n"
 					+"\n"
 					+"\n"
-					+"epilogue\n"));
+					+"epilogue\n"
+			);
+		}
+
+		private Supplier<InputStream> content(final String content) {
+			return () -> new ByteArrayInputStream(
+					content.replace("\n", "\r\n").getBytes(Codecs.UTF8)
+			);
 		}
 
 
@@ -71,7 +80,7 @@ final class MultipartBodyTest {
 			new Request()
 
 					.header("Content-Type", "plain/test")
-					.body(reader(), () -> new StringReader("body"))
+					.body(input(), content())
 
 					.body(multipart())
 
@@ -119,8 +128,25 @@ final class MultipartBodyTest {
 
 		// !!! main merging
 		// !!! main part rewriting
+
+		@Test void testRejectMalformedPayloads() {
+			new Request()
+
+					.header("Content-Type", "multipart/data")
+					.body(input(), content())
+
+					.body(multipart())
+
+					.use(
+							parts -> fail("unexpected multipart body"),
+							error -> new Request().reply(error).accept(response -> assertThat(response)
+									.as("missing boundary parameter")
+									.hasStatus(Response.BadRequest)
+							)
+					);
+		}
+
 		// !!! size/number limits
-		// !!! storage threshold
 
 	}
 

@@ -17,14 +17,27 @@
 
 package com.metreeca.rest._multipart;
 
+import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
+
+import org.eclipse.rdf4j.model.IRI;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.InputBody.input;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -32,6 +45,20 @@ import static com.metreeca.rest.bodies.InputBody.input;
  * (MIME) Part Two: Media Types - § 5.1.  Multipart Media Type</a>
  */
 public final class MultipartBody implements Body<Map<String, Message<?>>> {
+
+	private static final Pattern BoundaryPattern=Pattern.compile(parameter("boundary"));
+	private static final Pattern NamePattern=Pattern.compile(parameter("name"));
+	private static final Pattern ItemPattern=Pattern.compile(parameter("filename"));
+
+
+	private static String parameter(final String name) {
+		return format(";\\s*(?i:%s)\\s*=\\s*(?:\"(?<quoted>[^\"]*)\"|(?<simple>[^;\\s]*))", name);
+	}
+
+	private String parameter(final Matcher matcher) {
+		return Optional.ofNullable(matcher.group("quoted")).orElseGet(() -> matcher.group("simple"));
+	}
+
 
 	private static final MultipartBody Instance=new MultipartBody();
 
@@ -49,31 +76,107 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Result<Map<String, Message<?>>, Failure> get(final Message<?> message) {
-		return message.body(input()).value(source -> {
+		return message.header("Content-Type")
 
-			// !!! check for multipart/*
+				.filter(type -> type.startsWith("multipart/"))
 
-			final String boundary="boundary"; // !!! compute from content-type
+				.map(type -> message.body(input()).<Result<Map<String, Message<?>>, Failure>>fold(
 
-			final Map<String, Message<?>> parts=new LinkedHashMap<>();
+						source -> {
 
-			try {
+							final String boundary=message
+									.header("Content-Type")
+									.map(BoundaryPattern::matcher)
+									.filter(Matcher::find)
+									.map(this::parameter)
+									.orElse("");
 
-				new MultipartParser(source.get(), boundary, (entries, stream) -> {
+							final Map<String, Message<?>> parts=new LinkedHashMap<>();
 
-					throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+							try {
 
-				}).parse();
+								new MultipartParser(source.get(), boundary, (headers, body) -> {
 
-			} catch ( final IllegalStateException e ) {
-				throw e; // !!! handle parsing errors
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
+									final Optional<String> disposition=headers
+											.stream()
+											.filter(entry ->
+													entry.getKey().equalsIgnoreCase("Content-Disposition")
+											)
+											.map(Map.Entry::getValue)
+											.findFirst();
 
-			return parts;
+									final String name=disposition
+											.map(NamePattern::matcher)
+											.filter(Matcher::find)
+											.map(this::parameter)
+											.filter(match -> !parts.containsKey(match))
+											.orElseGet(() -> format("part%d", parts.size()));
 
-		});
+									final IRI item=disposition
+											.map(ItemPattern::matcher)
+											.filter(Matcher::find)
+											.map(this::parameter)
+											.map(s -> iri("file:"+s))
+											.orElseGet(Values::iri);
+
+									parts.put(name, new Part(item, message.request())
+
+											.headers((Map<String, List<String>>)headers.stream().collect(groupingBy(
+													Map.Entry::getKey,
+													LinkedHashMap::new,
+													mapping(Map.Entry::getValue, toList())
+											)))
+
+											.body(input(), () -> body)
+
+									);
+
+								}).parse();
+
+							} catch ( final ParseException e ) {
+
+								return Error(new Failure().status(Response.BadRequest).cause(e));
+
+							} catch ( final IOException e ) {
+
+								throw new UncheckedIOException(e);
+
+							}
+
+							return Value(parts);
+
+						},
+
+						Result::Error
+
+				))
+
+				.orElseGet(() -> Error(Missing));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class Part extends Message<Part> {
+
+		private final IRI item;
+		private final Request request;
+
+
+		private Part(final IRI item, final Request request) {
+			this.item=item;
+			this.request=request;
+		}
+
+
+		@Override public IRI item() {
+			return item;
+		}
+
+		@Override public Request request() {
+			return request;
+		}
+
 	}
 
 }

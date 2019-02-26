@@ -20,6 +20,7 @@ package com.metreeca.rest._multipart;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ final class MultipartParser {
 
 	@FunctionalInterface private static interface State {
 
-		public State next(final Type type);
+		public State next(final Type type) throws ParseException;
 
 	}
 
@@ -72,13 +73,6 @@ final class MultipartParser {
 			final BiConsumer<List<Map.Entry<String, String>>, InputStream> handler
 	) {
 
-		if ( boundary.isEmpty() ) {
-			throw new IllegalArgumentException("empty boundary");
-		}
-
-		if ( boundary.length() > 70 ) {
-			throw new IllegalArgumentException("illegal boundary");
-		}
 
 		this.input=input;
 
@@ -91,7 +85,15 @@ final class MultipartParser {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void parse() throws IOException {
+	void parse() throws IOException, ParseException {
+
+		if ( opening.length == 2 ) {
+			throw new ParseException("empty boundary", 0);
+		}
+
+		if ( opening.length > 70+2 ) {
+			throw new ParseException("illegal boundary", 0);
+		}
 
 		for (Type type=Type.Empty; type != Type.EOF; state=state.next(type=read())) {}
 
@@ -100,7 +102,7 @@ final class MultipartParser {
 
 	//// States ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private State preamble(final Type type) {
+	private State preamble(final Type type) throws ParseException {
 		return type == Type.Empty ? skip(this::preamble)
 				: type == Type.Data ? skip(this::preamble)
 				: type == Type.Open ? skip(this::part)
@@ -109,7 +111,7 @@ final class MultipartParser {
 				: error("unexpected chunk type {"+type+"}");
 	}
 
-	private State part(final Type type) {
+	private State part(final Type type) throws ParseException {
 		return type == Type.Empty ? skip(this::body)
 				: type == Type.Data ? header(this::part)
 				: type == Type.Open ? report(this::part)
@@ -118,7 +120,7 @@ final class MultipartParser {
 				: error("unexpected chunk type {"+type+"}");
 	}
 
-	private State body(final Type type) {
+	private State body(final Type type) throws ParseException {
 		return type == Type.Empty ? this::body
 				: type == Type.Data ? this::body
 				: type == Type.Open ? report(this::part)
@@ -134,7 +136,7 @@ final class MultipartParser {
 
 	//// Actions ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private State header(final State next) {
+	private State header(final State next) throws ParseException {
 		try {
 
 			final int eol=size > 2 && buffer[size-2] == '\r' && buffer[size-1] == '\n' ? size-2 : size;
@@ -186,7 +188,9 @@ final class MultipartParser {
 
 		} finally {
 
+			size=0;
 			buffer=new byte[InitialBuffer];
+
 			headers=new ArrayList<>();
 
 		}
@@ -204,18 +208,18 @@ final class MultipartParser {
 		}
 	}
 
-	private State error(final String message) {
+	private State error(final String message) throws ParseException {
 		try {
 
-			throw new IllegalStateException(message);
+			throw new ParseException(message, 0);
 
 		} finally {
 
 			state=null;
 
 			size=0;
-
 			buffer=null;
+
 			headers=null;
 
 		}
