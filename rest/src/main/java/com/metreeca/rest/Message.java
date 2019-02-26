@@ -419,7 +419,7 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures a body representation.
 	 *
 	 * <p>Future calls to {@link #body(Body)} with the same body format will return the specified value, rather than
-	 * the value {@linkplain Body#get(Message) retrieved} from this message by body.</p>
+	 * the value {@linkplain Body#get(Message) retrieved} from this message by the body format.</p>
 	 *
 	 * @param body  the body format managing the body representation to be configured
 	 * @param value the body representation to be associated with {@code body}
@@ -449,20 +449,56 @@ public abstract class Message<T extends Message<T>> {
 		return body.set(self());
 	}
 
+	/**
+	 * Configures a body representation.
+	 *
+	 * <p>Future calls to {@link #body(Body)} with the same body format will return a value generated from this
+	 * message, rather than the value {@linkplain Body#get(Message) retrieved} from this message by the body format.</p>
+	 *
+	 * @param body      the body format managing the body representation to be configured
+	 * @param generator the value generating function; takes as argument this message and must return either a result
+	 *                  with the generated body representation or an error reporting a processing failure
+	 * @param <V>       the type of the body representation managed by {@code body}
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException  if either {@code body} or {@code generator} is null
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
+	 */
+	public <V> T body(final Body<V> body, final Function<T, Result<V, Failure>> generator) {
+
+		if ( body == null ) {
+			throw new NullPointerException("null body");
+		}
+
+		if ( generator == null ) {
+			throw new NullPointerException("null generator");
+		}
+
+		if ( !cache.isEmpty() ) {
+			throw new IllegalStateException("message body already retrieved");
+		}
+
+		pipes.put(body, message -> requireNonNull(generator.apply((T)message), "null generated result"));
+
+		return body.set(self());
+	}
+
 
 	/**
 	 * Process a body representation.
 	 *
 	 * <p>Future calls to {@link #body(Body)} with the same body format will pipe the value either explicitly
-	 * {@linkplain #body(Body, Object) set} or {@linkplain Body#get(Message) retrieved} on demand by the body through a
-	 * result-returning processing function.</p>
+	 * {@linkplain #body(Body, Object) set} or {@linkplain Body#get(Message) retrieved} on demand by the body format
+	 * through a mapping function function.</p>
 	 *
 	 * <p><strong>Warning</strong> / Processing is performed on demand, as final consumer eventually retrieves the
 	 * processed message body: if {@code mapper} relies on information retrieved from the message, its current state
 	 * must be memoized, before it's possibly altered by downstream wrappers.</p>
 	 *
 	 * @param body   the body format managing the body representation to be processed
-	 * @param mapper the value processing function
+	 * @param mapper the value mapping function; takes as argument the original body representation and must return
+	 *               either a result with the mapped representation or an error reporting a processing failure
 	 * @param <V>    the type of the body representation managed by {@code body}
 	 *
 	 * @return this message
@@ -481,8 +517,10 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		pipes.compute(body, (_body, getter) -> message ->
-				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)body::get)
-						.apply(message).fold(value -> mapper.apply((V)value), Result::Error)
+				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)body::get).apply(message).fold(
+						value -> requireNonNull(mapper.apply((V)value), "null mapped value"),
+						Result::Error
+				)
 		);
 
 		return self();

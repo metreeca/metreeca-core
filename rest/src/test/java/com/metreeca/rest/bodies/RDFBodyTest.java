@@ -23,6 +23,9 @@ import com.metreeca.rest.Request;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
+import java.util.function.Supplier;
+
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
@@ -40,7 +43,7 @@ final class RDFBodyTest {
 	}
 
 	@Test void testHandleEmptyInput() {
-		new Request().body(input(), Codecs::input).body(rdf()).fold(
+		new Request().body(input(), (Supplier<InputStream>)Codecs::input).body(rdf()).fold(
 				value -> assertThat(value).isEmpty(),
 				error -> fail("unexpected error {"+error+"}")
 		);

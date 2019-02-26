@@ -81,10 +81,10 @@ public final class TextBody implements Body<String> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.pipe(writer(), consumer -> message.body(text()).value(bytes -> target -> {
+		return message.body(writer(), text().map(text -> target -> {
 			try (final Writer output=target.get()) {
 
-				output.write(bytes);
+				output.write(text);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

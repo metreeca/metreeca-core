@@ -120,7 +120,7 @@ public final class JSONBody implements Body<JsonObject> {
 	@Override public <T extends Message<T>> T set(final T message) {
 		return message
 				.header("content-type", MIME)
-				.pipe(writer(), consumer -> message.body(json()).value(json -> target -> {
+				.body(writer(), json().map(json -> target -> {
 					try (
 							final Writer writer=target.get();
 							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)

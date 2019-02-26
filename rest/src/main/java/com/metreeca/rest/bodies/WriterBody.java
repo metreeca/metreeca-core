@@ -73,11 +73,11 @@ public final class WriterBody implements Body<Consumer<Supplier<Writer>>> {
 
 				.header("~Content-Type", MIME)
 
-				.pipe(output(), binary -> message.body(writer()).value(textual -> source -> {
+				.body(output(), writer().map(writer -> source -> {
 
 					try (final OutputStream output=source.get()) {
 
-						textual.accept(() -> Codecs.writer(output, message.charset().orElse(Codecs.UTF8.name())));
+						writer.accept(() -> Codecs.writer(output, message.charset().orElse(Codecs.UTF8.name())));
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
