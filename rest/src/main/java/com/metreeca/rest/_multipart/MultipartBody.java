@@ -21,6 +21,7 @@ import com.metreeca.rest.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.metreeca.rest.bodies.InputBody.input;
@@ -54,13 +55,23 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 			final String boundary="boundary"; // !!! compute from content-type
 
+			final Map<String, Message<?>> parts=new LinkedHashMap<>();
+
 			try {
-				return new MultipartInput(message, source.get(), boundary).parse();
+
+				new MultipartParser(source.get(), boundary, (entries, stream) -> {
+
+					throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+				}).parse();
+
 			} catch ( final IllegalStateException e ) {
 				throw e; // !!! handle parsing errors
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
+
+			return parts;
 
 		});
 	}

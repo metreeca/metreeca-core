@@ -205,7 +205,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-02-25 12:19:22 +0000</string>
+	<string>2019-02-26 12:48:24 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro Bollini</string>
 	<key>MovementHandleVisible</key>
@@ -4916,11 +4916,15 @@ ldp:BasicContainer}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
 					<key>ID</key>
 					<integer>17</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -4972,6 +4976,8 @@ ldp:BasicContainer}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>16</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5025,6 +5031,8 @@ side effects}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>13</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5078,6 +5086,8 @@ side effects}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>12</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5134,11 +5144,15 @@ side effects}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
 					<key>ID</key>
 					<integer>11</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5193,11 +5207,15 @@ side effects}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
 					<key>ID</key>
 					<integer>10</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5257,11 +5275,15 @@ Wrapper}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
 					<key>ID</key>
 					<integer>9</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5313,6 +5335,8 @@ Wrapper}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>7</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5371,11 +5395,15 @@ shape redaction}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
 					<key>ID</key>
 					<integer>4</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5427,6 +5455,8 @@ shape redaction}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>2</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5480,6 +5510,18 @@ shape redaction}</string>
 			<false/>
 			<key>Layers</key>
 			<array>
+				<dict>
+					<key>Artboards</key>
+					<false/>
+					<key>Lock</key>
+					<false/>
+					<key>Name</key>
+					<string>Layer 2</string>
+					<key>Print</key>
+					<true/>
+					<key>View</key>
+					<true/>
+				</dict>
 				<dict>
 					<key>Artboards</key>
 					<false/>
@@ -5552,7 +5594,7 @@ shape redaction}</string>
 		<string>{{0, -8.0000000000000409}, {806, 553.07112970711285}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
-			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
+			<string>com.omnigroup.OmniGraffle.inspectorGroup.properties</string>
 		</array>
 		<key>ZoomValues</key>
 		<array>

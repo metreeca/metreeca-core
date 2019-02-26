@@ -18,50 +18,67 @@
 package com.metreeca.rest._multipart;
 
 import com.metreeca.rest.Message;
-import com.metreeca.rest.Request;
+import com.metreeca.rest.MessageTest.TestMessage;
+import com.metreeca.rest.bodies.InputBody;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
-import static com.metreeca.form.things.Codecs.input;
+import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.rest.MessageAssert.assertThat;
 import static com.metreeca.rest.bodies.TextBody.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
 
-final class MultipartInputTest {
+final class MultipartParserTest {
 
 	private Collection<Message<?>> parts(final String content) throws IOException {
-		return new MultipartInput(
-				new Request(),
-				input(new StringReader(content.replace("\n", "\r\n"))),
-				"boundary"
-		).parse().values();
+
+		final Map<String, Message<?>> parts=new LinkedHashMap<>();
+
+		new MultipartParser(
+				new ByteArrayInputStream(content.replace("\n", "\r\n").getBytes(UTF8)),
+				"boundary",
+				(headers, body) -> {
+
+					final Map<String, List<String>> map=headers.stream().collect(groupingBy(
+							Map.Entry::getKey,
+							LinkedHashMap::new,
+							mapping(Map.Entry::getValue, toList())
+					));
+
+					parts.put("part"+parts.size(), new TestMessage()
+							.headers(map)
+							.body(InputBody.input(), () -> body)
+					);
+				}
+		).parse();
+
+		return parts.values();
 	}
 
 
 	@Nested final class Splitting {
 
 		private List<String> parts(final String content) throws IOException {
-			return MultipartInputTest.this.parts(content).stream()
+			return MultipartParserTest.this.parts(content).stream()
 					.map(message -> message.body(text()).value().orElse(""))
 					.collect(toList());
 		}
 
-
 		@Test void testIgnoreFrame() throws IOException {
 
 			assertThat(parts("")).isEmpty();
-			assertThat(parts("--boundary--")).isEmpty();
 
 			assertThat(parts("preamble\n--boundary--")).isEmpty();
 			assertThat(parts("--boundary--\nepilogue")).isEmpty();
@@ -106,7 +123,7 @@ final class MultipartInputTest {
 					.as("missing")
 					.containsExactly("content");
 
-			assertThat(parts("--boundary\n\ncontent\n--boundary-- trailing\ngarbage"))
+			assertThat(parts("--boundary\n\ncontent\n--boundary--\n trailing\ngarbage"))
 					.as("ignored")
 					.containsExactly("content");
 
@@ -126,21 +143,37 @@ final class MultipartInputTest {
 					);
 		}
 
+		@Test void testHandleEmptyHeaders() throws IOException {
+			assertThat(parts("--boundary\nempty:\n\ncontent"))
+					.isNotEmpty()
+					.hasOnlyOneElementSatisfying(message -> assertThat(message)
+							.hasHeaders("empty")
+							.hasBody(text(), text -> assertThat(text).isEqualTo("content"))
+					);
+		}
 
-		@Test void testHandleEOFInHeader() {
-
-			assertThatExceptionOfType(IllegalStateException.class)
-					.as("in name")
-					.isThrownBy(() -> parts("--boundary\nheader"));
-
-			assertThatExceptionOfType(IllegalStateException.class)
-					.as("in value")
-					.isThrownBy(() -> parts("--boundary\nheader: value"));
+		@Test void testHandleEOFInHeaders() throws IOException {
+			assertThat(parts("--boundary\nsingle: value"))
+					.isNotEmpty()
+					.hasOnlyOneElementSatisfying(message -> assertThat(message)
+							.hasHeaders("single", "value")
+					);
 		}
 
 		@Test void testRejectMalformedHeaders() {
+
 			assertThatExceptionOfType(IllegalStateException.class)
+					.as("spaces before colon")
 					.isThrownBy(() -> parts("--boundary\nheader : value\n\ncontent"));
+
+			assertThatExceptionOfType(IllegalStateException.class)
+					.as("malformed name")
+					.isThrownBy(() -> parts("--boundary\nhea der: value\n\ncontent"));
+
+			assertThatExceptionOfType(IllegalStateException.class)
+					.as("malformed value")
+					.isThrownBy(() -> parts("--boundary\nhea der: val\rue\n\ncontent"));
+
 		}
 
 	}
