@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._multipart;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
@@ -23,16 +23,19 @@ import com.metreeca.rest.*;
 import org.eclipse.rdf4j.model.IRI;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
@@ -164,7 +167,7 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 											.map(s -> iri("file:"+s))
 											.orElseGet(Values::iri);
 
-									parts.put(name, new Part(item, message.request())
+									parts.put(name, message.link(item)
 
 											.headers((Map<String, List<String>>)headers.stream().collect(groupingBy(
 													Map.Entry::getKey,
@@ -199,6 +202,75 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 				.orElseGet(() -> Error(Missing));
 	}
 
+	@Override public <T extends Message<T>> T set(final T message) {
+
+		final byte[] bytes="-+0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes(UTF8);
+
+		final byte[] dashes="--".getBytes(UTF8);
+		final byte[] crlf="\r\n".getBytes(UTF8);
+		final byte[] colon=": ".getBytes(UTF8);
+
+		final String type=message.header("Content-Type").orElse("multipart/mixed");
+
+		final byte[] boundary;
+
+		final Matcher matcher=BoundaryPattern.matcher(type);
+
+		if ( matcher.find() ) {
+
+			boundary=parameter(matcher).getBytes(UTF8);
+
+		} else {
+
+			new Random().nextBytes(boundary=new byte[70]);
+
+			for (int i=0; i < boundary.length; i++) {
+				boundary[i]=bytes[(boundary[i]&0xFF)%bytes.length];
+			}
+
+			message.header("Content-Type", format("%s; boundary=\"%s\"", type, new String(boundary, UTF8)));
+
+		}
+
+		return message.body(output(), multipart().map(multipart -> target -> {
+			try (final OutputStream out=target.get()) {
+
+				for (final Message<?> part : multipart.values()) {
+
+					out.write(dashes);
+					out.write(boundary);
+					out.write(crlf);
+
+					for (final Map.Entry<String, Collection<String>> header : part.headers().entrySet()) {
+
+						final String name=header.getKey();
+
+						for (final String value : header.getValue()) {
+							out.write(name.getBytes(UTF8));
+							out.write(colon);
+							out.write(value.getBytes(UTF8));
+							out.write(crlf);
+						}
+					}
+
+					out.write(crlf);
+
+					part.body(output()).value().ifPresent(output -> output.accept(() -> out)); // !!! handle errors
+
+					out.write(crlf);
+				}
+
+				out.write(dashes);
+				out.write(boundary);
+				out.write(dashes);
+				out.write(crlf);
+
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		}));
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -208,31 +280,6 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 	@Override public int hashCode() {
 		return MultipartBody.class.hashCode();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class Part extends Message<Part> {
-
-		private final IRI item;
-		private final Request request;
-
-
-		private Part(final IRI item, final Request request) {
-			this.item=item;
-			this.request=request;
-		}
-
-
-		@Override public IRI item() {
-			return item;
-		}
-
-		@Override public Request request() {
-			return request;
-		}
-
 	}
 
 }

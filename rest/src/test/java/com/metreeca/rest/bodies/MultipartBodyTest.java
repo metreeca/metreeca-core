@@ -15,12 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._multipart;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -28,13 +29,15 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.function.Supplier;
 
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.rest.Body.Missing;
 import static com.metreeca.rest.MessageAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest._multipart.MultipartBody.multipart;
 import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.MultipartBody.multipart;
 import static com.metreeca.rest.bodies.ReaderBody.reader;
+import static com.metreeca.rest.bodies.TextBody.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -146,6 +149,41 @@ final class MultipartBodyTest {
 	}
 
 	@Nested final class Output {
+
+		@Test void testGenerateRandomBoundary() {
+			new Request().reply(response -> response
+
+					.status(Response.OK)
+					.body(multipart(), map())
+
+			).accept(response -> assertThat(response)
+
+					.has(new Condition<>(
+							r -> r.header("Content-Type").filter(s -> s.contains("; boundary=")).isPresent(),
+							"multipart boundary set"
+					))
+
+
+			);
+		}
+
+		@Test void testPreserveCustomBoundary() {
+			new Request().reply(response -> response
+
+					.status(Response.OK)
+					.header("Content-Type", "multipart/form-data; boundary=1234567890")
+					.body(multipart(), map())
+
+			).accept(response -> assertThat(response)
+
+					.hasHeader("Content-Type", "multipart/form-data; boundary=1234567890")
+
+					.hasBody(text(), text -> assertThat(text)
+							.contains("--1234567890--")
+					)
+
+			);
+		}
 
 	}
 

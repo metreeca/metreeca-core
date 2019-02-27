@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._multipart;
+package com.metreeca.rest.bodies;
 
 import com.metreeca.rest.Message;
 import com.metreeca.rest.MessageTest.TestMessage;

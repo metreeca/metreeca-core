@@ -19,7 +19,7 @@ package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Evaluator;
-import com.metreeca.rest._multipart.MultipartBody;
+import com.metreeca.rest.bodies.MultipartBody;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -184,6 +184,25 @@ public abstract class Message<T extends Message<T>> {
 		pipes.putAll(message.pipes);
 
 		return self();
+	}
+
+	/**
+	 * Creates a linked message.
+	 *
+	 * @param item the IRI identifying the {@linkplain #item() focus item} of the new linked message
+	 *
+	 * @return a new linked message with a focus item identified by {@code item} and the same {@linkplain #request()
+	 * originating request} as this message
+	 *
+	 * @throws NullPointerException if {@code item} is null
+	 */
+	public Message<?> link(final IRI item) {
+
+		if ( item == null ) {
+			throw new NullPointerException("null item");
+		}
+
+		return new Part(item, this);
 	}
 
 
@@ -595,6 +614,31 @@ public abstract class Message<T extends Message<T>> {
 				.filter(value -> !value.isEmpty())
 				.distinct()
 				.collect(toList());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class Part extends Message<Part> {
+
+		private final IRI item;
+		private final Request request;
+
+
+		private Part(final IRI item, final Message<?> message) {
+			this.item=item;
+			this.request=message.request();
+		}
+
+
+		@Override public IRI item() {
+			return item;
+		}
+
+		@Override public Request request() {
+			return request;
+		}
+
 	}
 
 }

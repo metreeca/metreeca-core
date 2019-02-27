@@ -48,7 +48,7 @@ import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest._multipart.MultipartBody.multipart;
+import static com.metreeca.rest.bodies.MultipartBody.multipart;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.OutputBody.output;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
