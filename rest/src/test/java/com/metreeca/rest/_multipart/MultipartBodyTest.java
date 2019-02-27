@@ -44,7 +44,7 @@ final class MultipartBodyTest {
 
 	@Nested final class Input {
 
-		private final String type="multipart/form-data; boundary=\"boundary\"";
+		private static final String type="multipart/form-data; boundary=\"boundary\"";
 
 		private Supplier<InputStream> content() {
 			return content("\n"
@@ -142,10 +142,6 @@ final class MultipartBodyTest {
 							)
 					);
 		}
-
-
-		// !!! main merging
-		// !!! main part rewriting
 
 	}
 

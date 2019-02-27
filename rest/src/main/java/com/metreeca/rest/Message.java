@@ -19,6 +19,7 @@ package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Evaluator;
+import com.metreeca.rest._multipart.MultipartBody;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -95,6 +96,8 @@ public abstract class Message<T extends Message<T>> {
 	private T self() { return (T)this; }
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Retrieves the focus item IRI of this message.
 	 *
@@ -129,6 +132,58 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		return requireNonNull(mapper.apply(self()), "null mapper return value");
+	}
+
+	/**
+	 * Merge a message into this message.
+	 *
+	 * <p>Mainly intended to be used inside wrappers to lift for further downstream processing the main message part in
+	 * {@linkplain MultipartBody multipart} requests, as for instance in:</p>
+	 *
+	 * <pre>{@code handler -> request -> request.body(multipart(1000, 10_000)).fold(
+	 *
+	 *     parts -> Optional.ofNullable(parts.get("main"))
+	 *
+	 *         .map(main -> {
+	 *
+	 *           ... // process ancillary body parts
+	 *
+	 *           return handler.handle(request.merge(main));
+	 *
+	 *         })
+	 *
+	 *         .orElseGet(() -> request.reply(new Failure()
+	 *             .status(BadRequest)
+	 *             .cause("missing main body part")
+	 *         )),
+	 *
+	 *     request::reply
+	 *
+	 * )}</pre>
+	 *
+	 * @param message the source message to be merged into this message
+	 *
+	 * @return this message modified as follows:
+	 * <ul>
+	 * <li>source message headers are copied to this message overriding existing values;</li>
+	 * <li>source message body representations are copied to this message overriding existing values;</li>
+	 * <li>body representations cached in this message are discarded</li>
+	 * </ul>
+	 *
+	 * @throws NullPointerException if {@code message} is null
+	 */
+	public T merge(final Message<?> message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		headers.putAll(message.headers); // value lists are read-only
+
+		cache.clear();
+		pipes.putAll(message.pipes);
+
+		return self();
 	}
 
 
@@ -453,7 +508,8 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures a body representation.
 	 *
 	 * <p>Future calls to {@link #body(Body)} with the same body format will return a value generated from this
-	 * message, rather than the value {@linkplain Body#get(Message) retrieved} from this message by the body format.</p>
+	 * message, rather than the value {@linkplain Body#get(Message) retrieved} from this message by the body
+	 * format.</p>
 	 *
 	 * @param body      the body format managing the body representation to be configured
 	 * @param generator the value generating function; takes as argument this message and must return either a result
