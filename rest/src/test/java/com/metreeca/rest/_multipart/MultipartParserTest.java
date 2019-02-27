@@ -19,18 +19,20 @@ package com.metreeca.rest._multipart;
 
 import com.metreeca.rest.Message;
 import com.metreeca.rest.MessageTest.TestMessage;
-import com.metreeca.rest.bodies.InputBody;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.*;
+import java.util.Map.Entry;
 
 import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.rest.MessageAssert.assertThat;
+import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.TextBody.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,27 +45,28 @@ import static java.util.stream.Collectors.toList;
 
 final class MultipartParserTest {
 
+	private InputStream content(final String content) {
+		return new ByteArrayInputStream(content.replace("\n", "\r\n").getBytes(UTF8));
+	}
+
 	private Collection<Message<?>> parts(final String content) throws IOException, ParseException {
 
 		final Map<String, Message<?>> parts=new LinkedHashMap<>();
 
-		new MultipartParser(
-				new ByteArrayInputStream(content.replace("\n", "\r\n").getBytes(UTF8)),
-				"boundary",
-				(headers, body) -> {
+		new MultipartParser(1000, 1000, content(content), "boundary", (headers, body) -> {
 
-					final Map<String, List<String>> map=headers.stream().collect(groupingBy(
-							Map.Entry::getKey,
-							LinkedHashMap::new,
-							mapping(Map.Entry::getValue, toList())
-					));
+			final Map<String, List<String>> map=headers.stream().collect(groupingBy(
+					Entry::getKey,
+					LinkedHashMap::new,
+					mapping(Entry::getValue, toList())
+			));
 
-					parts.put("part"+parts.size(), new TestMessage()
-							.headers(map)
-							.body(InputBody.input(), () -> body)
-					);
-				}
-		).parse();
+			parts.put("part"+parts.size(), new TestMessage()
+					.headers(map)
+					.body(input(), () -> body)
+			);
+
+		}).parse();
 
 		return parts.values();
 	}
@@ -106,7 +109,7 @@ final class MultipartParserTest {
 
 		}
 
-		@Test void testIgnorePreamble()  throws IOException, ParseException {
+		@Test void testIgnorePreamble() throws IOException, ParseException {
 
 			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("missing")
@@ -118,7 +121,7 @@ final class MultipartParserTest {
 
 		}
 
-		@Test void testIgnoreEpilogue()  throws IOException, ParseException {
+		@Test void testIgnoreEpilogue() throws IOException, ParseException {
 
 			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("missing")
@@ -181,15 +184,28 @@ final class MultipartParserTest {
 
 	@Nested final class Limits {
 
-		@Test void testEnforceSizeLimits() {
+		private MultipartParser parser(final int part, final int body, final String content) {
+			return new MultipartParser(part, body, content(content), "boundary", (headers, _body) -> {});
+		}
+
+
+		@Test void testEnforceBodySizeLimits() {
+
+			assertThatExceptionOfType(ParseException.class)
+					.as("body size exceeded")
+					.isThrownBy(() -> parser(5, 25,
+							"--boundary\n\none\n--boundary\n\ntwo\n--boundary--"
+					).parse());
 
 		}
 
-		@Test void testEnforceCountLimits() {
+		@Test void testEnforcePartSizeLimits() {
 
-		}
-
-		@Test void testEnforceHeaderLimits() {
+			assertThatExceptionOfType(ParseException.class)
+					.as("parts size exceeded")
+					.isThrownBy(() -> parser(10, 1000,
+							"--boundary\n\nshort\n--boundary\n\nlong content\n--boundary--"
+					).parse());
 
 		}
 

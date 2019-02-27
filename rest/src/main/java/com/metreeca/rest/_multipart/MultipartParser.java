@@ -34,14 +34,13 @@ import static java.util.Arrays.binarySearch;
 
 final class MultipartParser {
 
-	private static final int InitialBuffer=1000;
-
 	private static final byte[] TokenChars="!#$%&'*+-.^_`|~".getBytes(UTF8);
 
 
 	private enum Type {
 		Empty, Data, Open, Close, EOF
 	}
+
 
 
 	@FunctionalInterface private static interface State {
@@ -53,6 +52,12 @@ final class MultipartParser {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private final int partLimit;
+	private final int bodyLimit;
+
+	private final int bufferStart;
+	private final int bufferScale;
+
 	private final InputStream input;
 
 	private final byte[] opening;
@@ -62,17 +67,26 @@ final class MultipartParser {
 
 	private State state=this::preamble;
 
-	private int size;
-	private byte[] buffer=new byte[InitialBuffer];
+	private int part;
+	private int body;
+
+	private int last;
+	private byte[] buffer;
 
 	private List<Map.Entry<String, String>> headers=new ArrayList<>();
 
 
 	MultipartParser(
+			final int part, final int body,
 			final InputStream input, final String boundary,
 			final BiConsumer<List<Map.Entry<String, String>>, InputStream> handler
 	) {
 
+		this.partLimit=part;
+		this.bodyLimit=body;
+
+		this.bufferScale=10;
+		this.bufferStart=100;
 
 		this.input=input;
 
@@ -80,6 +94,8 @@ final class MultipartParser {
 		this.closing=("--"+boundary+"--").getBytes(UTF8);
 
 		this.handler=handler;
+
+		this.buffer=new byte[bufferStart];
 	}
 
 
@@ -88,11 +104,11 @@ final class MultipartParser {
 	void parse() throws IOException, ParseException {
 
 		if ( opening.length == 2 ) {
-			throw new ParseException("empty boundary", 0);
+			throw new ParseException("empty boundary", body);
 		}
 
 		if ( opening.length > 70+2 ) {
-			throw new ParseException("illegal boundary", 0);
+			throw new ParseException("illegal boundary", body);
 		}
 
 		for (Type type=Type.Empty; type != Type.EOF; state=state.next(type=read())) {}
@@ -139,7 +155,7 @@ final class MultipartParser {
 	private State header(final State next) throws ParseException {
 		try {
 
-			final int eol=size > 2 && buffer[size-2] == '\r' && buffer[size-1] == '\n' ? size-2 : size;
+			final int eol=last > 2 && buffer[last-2] == '\r' && buffer[last-1] == '\n' ? last-2 : last;
 
 			int colon=0;
 
@@ -160,8 +176,8 @@ final class MultipartParser {
 			}
 
 			for (int i=value; i < eol; ++i) {
-				if ( !printable(buffer[i] )) {
-					return error("malformed header value {" +new String(buffer, 0, eol, UTF8)+ "}");
+				if ( !printable(buffer[i]) ) {
+					return error("malformed header value {"+new String(buffer, 0, eol, UTF8)+"}");
 				}
 			}
 
@@ -174,7 +190,7 @@ final class MultipartParser {
 
 		} finally {
 
-			size=0;
+			last=0;
 
 		}
 	}
@@ -182,14 +198,16 @@ final class MultipartParser {
 	private State report(final State next) {
 		try {
 
-			handler.accept(headers, new ByteArrayInputStream(buffer, 0, size));
+			handler.accept(headers, new ByteArrayInputStream(buffer, 0, last));
 
 			return next;
 
 		} finally {
 
-			size=0;
-			buffer=new byte[InitialBuffer];
+			part=0;
+
+			last=0;
+			buffer=new byte[bufferStart];
 
 			headers=new ArrayList<>();
 
@@ -203,7 +221,7 @@ final class MultipartParser {
 
 		} finally {
 
-			size=0;
+			last=0;
 
 		}
 	}
@@ -211,13 +229,13 @@ final class MultipartParser {
 	private State error(final String message) throws ParseException {
 		try {
 
-			throw new ParseException(message, 0);
+			throw new ParseException(message, body);
 
 		} finally {
 
 			state=null;
 
-			size=0;
+			last=0;
 			buffer=null;
 
 			headers=null;
@@ -231,36 +249,44 @@ final class MultipartParser {
 	/**
 	 * @return the next CRLF-terminated input chunk
 	 */
-	private Type read() throws IOException {
+	private Type read() throws IOException, ParseException {
 
-		final int head=size;
+		final int head=last;
 
 		int cr=0;
 		int lf=0;
 
-		for (int c; !(cr == '\r' && lf == '\n') && (c=input.read()) >= 0; cr=lf, lf=c) {
+		for (int c; !(cr == '\r' && lf == '\n') && (c=input.read()) >= 0; cr=lf, lf=c, ++part, ++body, ++last) {
 
-			if ( size == buffer.length ) { // extend the buffer
+			if ( part >= partLimit ) {
+				throw new ParseException("part size limit exceeded {"+partLimit+"}", body);
+			}
 
-				final byte[] buffer=new byte[this.buffer.length*2];
+			if ( body >= partLimit ) {
+				throw new ParseException("body size limit exceeded {"+bodyLimit+"}", body);
+			}
+
+			if ( last == buffer.length ) { // extend the buffer
+
+				final byte[] buffer=new byte[bufferScale*this.buffer.length];
 
 				System.arraycopy(this.buffer, 0, buffer, 0, this.buffer.length);
 
 				this.buffer=buffer;
 			}
 
-			buffer[this.size++]=(byte)c;
+			buffer[last]=(byte)c;
 
 		}
 
-		final Type type=(head == size) ? Type.EOF
-				: (head+2 == size && cr == '\r' && lf == '\n') ? Type.Empty
+		final Type type=(head == last) ? Type.EOF
+				: (head+2 == last && cr == '\r' && lf == '\n') ? Type.Empty
 				: boundary(head, opening) ? Type.Open
 				: boundary(head, closing) ? Type.Close
 				: Type.Data;
 
 		if ( type == Type.Open || type == Type.Close ) {
-			size=(head >= 2) ? head-2 : head; // ignore boundary chunks and leading CRLF terminators
+			last=(head >= 2) ? head-2 : head; // ignore boundary chunks and leading CRLF terminators
 		}
 
 		return type;
@@ -276,11 +302,11 @@ final class MultipartParser {
 	 */
 	private boolean boundary(final int head, final byte... boundary) {
 
-		for (int i=head, j=0; i < size && j < boundary.length; ++i, ++j) {
+		for (int i=head, j=0; i < last && j < boundary.length; ++i, ++j) {
 			if ( buffer[i] != boundary[j] ) { return false; }
 		}
 
-		for (int j=head+boundary.length; j < size; ++j) {
+		for (int j=head+boundary.length; j < last; ++j) {
 			if ( !space(buffer[j]) ) { return false; }
 		}
 
@@ -291,36 +317,36 @@ final class MultipartParser {
 	//// Character Classes /////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @param b the character to be tested
+	 * @param c the character to be tested
 	 *
-	 * @return {@code true}, if {@code b} is a printable character; {@code false}, otherwise
+	 * @return {@code true}, if {@code c} is a whitespace character; {@code false}, otherwise
 	 */
-	private boolean printable(final byte b) {
-		return b >= 32 && b <= 126 ;
+	private boolean space(final byte c) {
+		return c == ' ' || c == '\t' || c == '\r' || c == '\n';
 	}
 
 	/**
-	 * @param b the character to be tested
+	 * @param c the character to be tested
 	 *
-	 * @return {@code true}, if {@code b} is a whitespace character; {@code false}, otherwise
+	 * @return {@code true}, if {@code c} is a printable character; {@code false}, otherwise
 	 */
-	private boolean space(final byte b) {
-		return b == ' ' || b == '\t' || b == '\r' || b == '\n';
+	private boolean printable(final byte c) {
+		return c >= 32 && c <= 126;
 	}
 
 	/**
-	 * @param b the character to be tested
+	 * @param c the character to be tested
 	 *
-	 * @return {@code true}, if {@code b} is a token character; {@code false}, otherwise
+	 * @return {@code true}, if {@code c} is a token character; {@code false}, otherwise
 	 *
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.6">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
 	 * Message Syntax and Routing - § 3.2.6.  Field Value Components</a>
 	 */
-	private boolean token(final byte b) { //
-		return b >= 'a' && b <= 'z'
-				|| b >= 'A' && b <= 'Z'
-				|| b >= '0' && b <= '0'
-				|| binarySearch(TokenChars, b) >= 0;
+	private boolean token(final byte c) {
+		return c >= 'a' && c <= 'z'
+				|| c >= 'A' && c <= 'Z'
+				|| c >= '0' && c <= '0'
+				|| binarySearch(TokenChars, c) >= 0;
 	}
 
 }

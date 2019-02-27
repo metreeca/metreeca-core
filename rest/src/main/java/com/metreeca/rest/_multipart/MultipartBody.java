@@ -64,6 +64,21 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 
 	public static MultipartBody multipart() {
+
+
+		//if ( part <= 0 ) {
+		//	throw new IllegalArgumentException("illegal part size limit ["+part+"]");
+		//}
+		//
+		//if ( body <= 0 ) {
+		//	throw new IllegalArgumentException("illegal body size limit ["+body+"]");
+		//}
+		//
+		//if ( part > body ) {
+		//	throw new IllegalArgumentException("illegal part ["+part+"]");
+		//}
+
+
 		return Instance;
 	}
 
@@ -95,7 +110,7 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 							try {
 
-								new MultipartParser(source.get(), boundary, (headers, body) -> {
+								new MultipartParser(0, 0, source.get(), boundary, (headers, body) -> {
 
 									final Optional<String> disposition=headers
 											.stream()
