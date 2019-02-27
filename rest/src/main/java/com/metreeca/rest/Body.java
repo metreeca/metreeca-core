@@ -18,7 +18,11 @@
 package com.metreeca.rest;
 
 
+import java.util.function.Function;
+
 import static com.metreeca.rest.Result.Error;
+
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -36,6 +40,30 @@ public interface Body<V> {
 	public static final Failure Missing=new Failure().status(Response.UnsupportedMediaType);
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Maps this body format.
+	 *
+	 * @param mapper the value mapping function; must return a non-null value
+	 * @param <T>    the type of the target message for the body format generator
+	 * @param <R>    the type of the value returned by {@code mapper}
+	 *
+	 * @return a body format {@linkplain Message#body(Body, Function) generator} applying {@code mapper} to the values
+	 * retrieved from a message by this body format
+	 *
+	 * @throws NullPointerException if {@code mapper} is null
+	 */
+	public default <T extends Message<T>, R> Function<T, Result<R, Failure>> map(final Function<V, R> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return message -> requireNonNull(message.body(this).value(mapper), "null mapped value");
+	}
+
+
 	/**
 	 * Retrieves a structured body from a message.
 	 *
@@ -51,8 +79,8 @@ public interface Body<V> {
 	 *
 	 * @param message the message the structured body managed by this body format is to be retrieved from
 	 *
-	 * @return a value result providing access to the structured body managed by this body format, if it was possible to
-	 * derive one from {@code message}; an error result providing access to the processing failure, otherwise
+	 * @return a value providing access to the structured body managed by this body format, if it was possible to derive
+	 * one from {@code message}; an error providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */

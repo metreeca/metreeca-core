@@ -45,6 +45,7 @@ public final class Response extends Message<Response> {
 	public static final int NotFound=404; // https://tools.ietf.org/html/rfc7231#section-6.5.4
 	public static final int MethodNotAllowed=405; // https://tools.ietf.org/html/rfc7231#section-6.5.5
 	public static final int Conflict=409; // https://tools.ietf.org/html/rfc7231#section-6.5.8
+	public static final int PayloadTooLarge=413; // https://tools.ietf.org/html/rfc7231#section-6.5.11
 	public static final int UnsupportedMediaType=415; // https://tools.ietf.org/html/rfc7231#section-6.5.13
 	public static final int UnprocessableEntity=422; // https://tools.ietf.org/html/rfc4918#section-11.2
 
@@ -80,6 +81,8 @@ public final class Response extends Message<Response> {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Retrieves the focus item IRI of this response.
 	 *
@@ -102,7 +105,7 @@ public final class Response extends Message<Response> {
 	}
 
 
-	/////////////////////////////////////////////////////////////////// ̰///////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Checks if this response is successful.

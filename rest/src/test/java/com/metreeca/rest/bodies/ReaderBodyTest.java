@@ -15,33 +15,46 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest;
+package com.metreeca.rest.bodies;
+
+import com.metreeca.form.things.Codecs;
+import com.metreeca.rest.MessageTest.TestMessage;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.StringReader;
+
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.ReaderBody.reader;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import static java.util.Collections.emptySet;
 
+final class ReaderBodyTest {
 
-final class RequestTest {
+	@Test void testReadFromInputUsingCharset() {
 
-	@Test void testParametersIgnoreEmptyHeaders() {
+		final String text="ça va";
+		final String charset="ISO-8859-1";
 
-		final Request request=new Request()
-				.parameters("parameter", emptySet());
+		new TestMessage()
 
-		assertThat(request.parameters().entrySet()).isEmpty();
+				.header("Content-Type", "text/plain; charset="+charset)
+				.body(input(), () -> Codecs.input(new StringReader(text), charset))
+
+				.body(reader())
+
+				.fold(
+
+						value -> assertThat(Codecs.text(value.get()))
+								.as("read using provided charset")
+								.isEqualTo(text),
+
+						error -> fail(error.toString())
+
+				);
 	}
 
-	@Test void testParametersOverwritesValues() {
-
-		final Request request=new Request()
-				.parameter("parameter", "one")
-				.parameter("parameter", "two");
-
-		assertThat(request.parameters("parameter")).containsExactly("two");
-
-	}
 
 }

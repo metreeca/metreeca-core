@@ -182,7 +182,7 @@ public final class RDFBody implements Body<Collection<Statement>> {
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
 				)
 
-				.pipe(output(), consumer -> message.body(rdf()).value(rdf -> target -> {
+				.body(output(), rdf().map(rdf -> target -> {
 					try (final OutputStream output=target.get()) {
 
 						final Shape shape=message.shape();

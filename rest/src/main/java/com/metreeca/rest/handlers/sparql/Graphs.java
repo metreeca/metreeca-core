@@ -239,7 +239,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
-								.cause("I/O while reading RDF payload: see server logs for more detail")
+								.cause("I/O while reading RDF payload: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -261,7 +261,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to update graph: see server logs for more detail")
+								.cause("unable to update graph: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -314,7 +314,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to delete graph: see server logs for more detail")
+								.cause("unable to delete graph: see server logs for details")
 						).accept(consumer);
 
 					}
@@ -378,7 +378,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
-								.cause("I/O while reading RDF payload: see server logs for more detail")
+								.cause("I/O while reading RDF payload: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -400,7 +400,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to update graph: see server logs for more detail")
+								.cause("unable to update graph: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
