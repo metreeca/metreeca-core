@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.PayloadTooLarge;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.InputBody.input;
@@ -183,7 +185,10 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 							} catch ( final ParseException e ) {
 
-								return Error(new Failure().status(Response.BadRequest).cause(e));
+								return Error(new Failure()
+										.status(e.getMessage().contains("size limit") ? PayloadTooLarge : BadRequest)
+										.cause(e)
+								);
 
 							} catch ( final IOException e ) {
 
