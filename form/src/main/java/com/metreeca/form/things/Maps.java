@@ -68,7 +68,7 @@ public final class Maps {
 	// https://stackoverflow.com/questions/24630963/java-8-nullpointerexception-in-collectors-tomap
 
 	private static <K, V> Map<K, V> collect(final Stream<Map.Entry<? extends K, ? extends V>> stream) {
-		return unmodifiableMap(stream.filter(Objects::nonNull).collect(HashMap::new, (map, entry) -> {
+		return unmodifiableMap(stream.filter(Objects::nonNull).collect(LinkedHashMap::new, (map, entry) -> {
 
 			final K key=entry.getKey();
 			final V value=entry.getValue();
@@ -79,7 +79,7 @@ public final class Maps {
 				throw new IllegalStateException(String.format("value collision {%s} -> {%s}", key, value));
 			}
 
-		}, HashMap::putAll));
+		}, LinkedHashMap::putAll));
 	}
 
 
