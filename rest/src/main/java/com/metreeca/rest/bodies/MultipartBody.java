@@ -53,6 +53,12 @@ import static java.util.stream.Collectors.toList;
  */
 public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
+	private static final byte[] Dashes="--".getBytes(UTF8);
+	private static final byte[] CRLF="\r\n".getBytes(UTF8);
+	private static final byte[] Colon=": ".getBytes(UTF8);
+
+	private static final byte[] BoundaryChars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(UTF8);
+
 	private static final Pattern BoundaryPattern=Pattern.compile(parameter("boundary"));
 	private static final Pattern NamePattern=Pattern.compile(parameter("name"));
 	private static final Pattern ItemPattern=Pattern.compile(parameter("filename"));
@@ -66,6 +72,8 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 		return Optional.ofNullable(matcher.group("quoted")).orElseGet(() -> matcher.group("simple"));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final MultipartBody Instance=new MultipartBody(0, 0); // write-only instance
 
@@ -209,28 +217,24 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 	@Override public <T extends Message<T>> T set(final T message) {
 
-		final byte[] bytes="-+0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes(UTF8);
+		final String type=message
+				.header("Content-Type") // custom value
+				.orElse("multipart/mixed"); // fallback value
 
-		final byte[] dashes="--".getBytes(UTF8);
-		final byte[] crlf="\r\n".getBytes(UTF8);
-		final byte[] colon=": ".getBytes(UTF8);
-
-		final String type=message.header("Content-Type").orElse("multipart/mixed");
-
-		final byte[] boundary;
+		final byte[] boundary; // compute boundary
 
 		final Matcher matcher=BoundaryPattern.matcher(type);
 
-		if ( matcher.find() ) {
+		if ( matcher.find() ) { // custom boundary set in content-type header
 
 			boundary=parameter(matcher).getBytes(UTF8);
 
-		} else {
+		} else { // generate random boundary and update content-type definition
 
 			new Random().nextBytes(boundary=new byte[70]);
 
 			for (int i=0; i < boundary.length; i++) {
-				boundary[i]=bytes[(boundary[i]&0xFF)%bytes.length];
+				boundary[i]=BoundaryChars[(boundary[i]&0xFF)%BoundaryChars.length];
 			}
 
 			message.header("Content-Type", format("%s; boundary=\"%s\"", type, new String(boundary, UTF8)));
@@ -242,9 +246,9 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 				for (final Message<?> part : multipart.values()) {
 
-					out.write(dashes);
+					out.write(Dashes);
 					out.write(boundary);
-					out.write(crlf);
+					out.write(CRLF);
 
 					for (final Map.Entry<String, Collection<String>> header : part.headers().entrySet()) {
 
@@ -252,23 +256,23 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 						for (final String value : header.getValue()) {
 							out.write(name.getBytes(UTF8));
-							out.write(colon);
+							out.write(Colon);
 							out.write(value.getBytes(UTF8));
-							out.write(crlf);
+							out.write(CRLF);
 						}
 					}
 
-					out.write(crlf);
+					out.write(CRLF);
 
 					part.body(output()).value().ifPresent(output -> output.accept(() -> out)); // !!! handle errors
 
-					out.write(crlf);
+					out.write(CRLF);
 				}
 
-				out.write(dashes);
+				out.write(Dashes);
 				out.write(boundary);
-				out.write(dashes);
-				out.write(crlf);
+				out.write(Dashes);
+				out.write(CRLF);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

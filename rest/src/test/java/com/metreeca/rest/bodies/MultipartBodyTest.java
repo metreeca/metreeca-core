@@ -18,17 +18,21 @@
 package com.metreeca.rest.bodies;
 
 import com.metreeca.form.things.Codecs;
+import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
 import org.assertj.core.api.Condition;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.rest.Body.Missing;
@@ -79,20 +83,6 @@ final class MultipartBodyTest {
 		}
 
 
-		@Test void testIgnoreUnrelatedContentTypes() {
-			new Request()
-
-					.header("Content-Type", "plain/test")
-					.body(input(), content())
-
-					.body(multipart())
-
-					.fold(
-							parts -> fail("unexpected multipart body"),
-							error -> assertThat(error).isEqualTo(Missing)
-					);
-		}
-
 		@Test void testParseMultipartBodies() {
 			new Request()
 
@@ -129,6 +119,42 @@ final class MultipartBodyTest {
 					);
 		}
 
+		@Test void testCacheIdempotentResults() {
+
+			final Request request=new Request()
+					.header("Content-Type", type)
+					.body(input(), content());
+
+			final Map<String, Message<?>> one=request
+					.body(multipart(250, 1000))
+					.value()
+					.orElseGet(() -> fail("missing multipart body"));
+
+			final Map<String, Message<?>> two=request
+					.body(multipart())
+					.value()
+					.orElseGet(() -> fail("missing multipart body"));
+
+			assertThat(one)
+					.as("idempotent")
+					.isSameAs(two);
+		}
+
+
+		@Test void testIgnoreUnrelatedContentTypes() {
+			new Request()
+
+					.header("Content-Type", "plain/test")
+					.body(input(), content())
+
+					.body(multipart())
+
+					.fold(
+							parts -> fail("unexpected multipart body"),
+							error -> assertThat(error).isEqualTo(Missing)
+					);
+		}
+
 		@Test void testRejectMalformedPayloads() {
 			new Request()
 
@@ -154,7 +180,10 @@ final class MultipartBodyTest {
 			new Request().reply(response -> response
 
 					.status(Response.OK)
-					.body(multipart(), map())
+					.body(multipart(), map(
+							entry("one", response.link(RDF.FIRST).body(text(), "one")),
+							entry("two", response.link(RDF.FIRST).body(text(), "two"))
+					))
 
 			).accept(response -> assertThat(response)
 
