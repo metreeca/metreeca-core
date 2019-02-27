@@ -185,8 +185,11 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(json(), json ->
-								JSONAssert.assertThat(json).satisfies(hasBooleanValue(true)))));
+						.hasBody(json(), json -> JSONAssert.assertThat(json)
+								.satisfies(hasBooleanValue(true))
+						)
+				)
+		);
 	}
 
 	@Test void testPrivateAuthenticatedPOSTBooleanQuery() {

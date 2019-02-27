@@ -58,8 +58,8 @@ public final class ReaderBody implements Body<Supplier<Reader>> {
 	 * failure, otherwise
 	 */
 	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
-		return message.body(input()).value(supplier -> () ->
-				Codecs.reader(supplier.get(), message.charset().orElse(Codecs.UTF8.name()))
+		return message.body(input()).value(input -> () ->
+				Codecs.reader(input.get(), message.charset().orElse(Codecs.UTF8.name()))
 		);
 	}
 
