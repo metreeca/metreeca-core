@@ -97,7 +97,7 @@ final class MultipartBodyTest {
 
 					.body(input(), content())
 
-					.body(multipart())
+					.body(multipart(250, 1000))
 
 					.fold(
 
@@ -126,9 +126,6 @@ final class MultipartBodyTest {
 					);
 		}
 
-		// !!! main merging
-		// !!! main part rewriting
-
 		@Test void testRejectMalformedPayloads() {
 			new Request()
 
@@ -146,7 +143,9 @@ final class MultipartBodyTest {
 					);
 		}
 
-		// !!! size/number limits
+
+		// !!! main merging
+		// !!! main part rewriting
 
 	}
 

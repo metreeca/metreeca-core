@@ -41,6 +41,8 @@ import static java.util.stream.Collectors.toList;
 
 
 /**
+ * Multipart body format.
+ *
  * @see <a href="https://tools.ietf.org/html/rfc2046#section-5.1">RFC 2046 - Multipurpose Internet Mail Extensions
  * (MIME) Part Two: Media Types - § 5.1.  Multipart Media Type</a>
  */
@@ -60,32 +62,60 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 	}
 
 
-	private static final MultipartBody Instance=new MultipartBody();
+	private static final MultipartBody Instance=new MultipartBody(0, 0); // write-only instance
 
 
+	/**
+	 * Retrieves a write-only multipart body format.
+	 *
+	 * @return a write-only multipart body format with part/body size limit set to 0, intended for configuring multipart
+	 * response bodies
+	 */
 	public static MultipartBody multipart() {
-
-
-		//if ( part <= 0 ) {
-		//	throw new IllegalArgumentException("illegal part size limit ["+part+"]");
-		//}
-		//
-		//if ( body <= 0 ) {
-		//	throw new IllegalArgumentException("illegal body size limit ["+body+"]");
-		//}
-		//
-		//if ( part > body ) {
-		//	throw new IllegalArgumentException("illegal part ["+part+"]");
-		//}
-
-
 		return Instance;
+	}
+
+	/**
+	 * Retrieves a multipart body format.
+	 *
+	 * @param part the size limit for individual message parts; includes boundary and headers and applies also to
+	 *             message preamble and epilogue
+	 * @param body the size limit for the complete message body
+	 *
+	 * @return a write-only multipart body format with part/body size limit set to 0, intended for configuring multipart
+	 * response bodies
+	 *
+	 * @throws IllegalArgumentException if either {@code part} or {@code body} is less than 0 or if {@code part} is
+	 *                                  greater than {@code body}
+	 */
+	public static MultipartBody multipart(final int part, final int body) {
+
+		if ( part < 0 ) {
+			throw new IllegalArgumentException("negative part size limit");
+		}
+
+		if ( body < 0 ) {
+			throw new IllegalArgumentException("negative body size limit");
+		}
+
+		if ( part > body ) {
+			throw new IllegalArgumentException("part size limit greater than body size limit");
+		}
+
+		return new MultipartBody(part, body);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private MultipartBody() {}
+	private final int part;
+	private final int body;
+
+
+	private MultipartBody(final int part, final int body) {
+		this.part=part;
+		this.body=body;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +140,7 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 							try {
 
-								new MultipartParser(0, 0, source.get(), boundary, (headers, body) -> {
+								new MultipartParser(part, body, source.get(), boundary, (headers, content) -> {
 
 									final Optional<String> disposition=headers
 											.stream()
@@ -142,7 +172,7 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 													mapping(Map.Entry::getValue, toList())
 											)))
 
-											.body(input(), () -> body)
+											.body(input(), () -> content)
 
 									);
 
@@ -167,6 +197,17 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 				))
 
 				.orElseGet(() -> Error(Missing));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public boolean equals(final Object object) {
+		return object instanceof MultipartBody;
+	}
+
+	@Override public int hashCode() {
+		return MultipartBody.class.hashCode();
 	}
 
 

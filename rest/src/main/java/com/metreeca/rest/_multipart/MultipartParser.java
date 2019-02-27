@@ -262,7 +262,7 @@ final class MultipartParser {
 				throw new ParseException("part size limit exceeded {"+partLimit+"}", body);
 			}
 
-			if ( body >= partLimit ) {
+			if ( body >= bodyLimit ) {
 				throw new ParseException("body size limit exceeded {"+bodyLimit+"}", body);
 			}
 
