@@ -30,6 +30,7 @@ import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -191,7 +192,9 @@ public final class RDFBody implements Body<Collection<Statement>> {
 
 					try (final OutputStream output=target.get()) {
 
-						final RDFWriter writer=factory.getWriter(output, base);  // relativize IRIs wrt request base
+						final String host=URI.create(base).resolve("/").toString();
+
+						final RDFWriter writer=factory.getWriter(output, host);  // relativize IRIs wrt request host
 
 						writer.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
 						writer.set(JSONCodec.Focus, focus);

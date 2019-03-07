@@ -63,18 +63,18 @@ final class RDFBodyTest {
 	@Test void testConfigureWriterBaseIRI() {
 		new Request()
 
-				.base(ValuesTest.Base)
+				.base(ValuesTest.Base+"context/")
 				.path("/container/")
 
 				.reply(response -> response
 						.status(Response.OK)
 						.shape(field(LDP.CONTAINS, datatype(Form.IRIType)))
-						.body(rdf(), decode("</container/> ldp:contains </container/x>, </container/y>."))
+						.body(rdf(), decode("</context/container/> ldp:contains </context/container/x>."))
 				)
 
 				.accept(response -> ResponseAssert.assertThat(response)
 						.hasBody(text(), text -> Assertions.assertThat(text)
-								.contains("@base <" +response.request().base()+ ">")
+								.contains("@base <" +ValuesTest.Base+ ">")
 						)
 				);
 	}
