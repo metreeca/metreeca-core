@@ -27,6 +27,7 @@ import com.metreeca.form.things.ValuesTest;
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -41,6 +42,8 @@ import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.function.BiFunction;
 
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
@@ -283,37 +286,36 @@ final class JSONParserTest extends JSONCodecTest {
 
 	@Test void testResolveRelativeIRIs() {
 
-		assertThat(rdf(
-				object(field("this", "x"), field(value, "http://example.com/y")),
+		final BiFunction<String, String, Collection<Statement>> value=(s, o) -> rdf(
+				object(field("this", s), field(JSONCodecTest.value, o)),
 				null,
-				Field.field(RDF.VALUE, datatype(Form.IRIType))
-		))
+				Field.field(RDF.VALUE, datatype(Form.IRIType)),
+				ValuesTest.Base+"relative/"
+		);
+
+		assertThat(value.apply("x", "http://example.com/y"))
 				.as("base relative subject")
-				.isEqualTo(decode("<x> rdf:value <y> ."));
+				.isEqualTo(decode("<http://example.com/relative/x> rdf:value <y> ."));
 
-		assertThat(rdf(
-				object(field("this", "/x"), field(value, "http://example.com/y")),
-				null,
-				Field.field(RDF.VALUE, datatype(Form.IRIType))
-		))
-				.as("root-relative subject")
-				.isEqualTo(decode("<x> rdf:value <y>."));
+		assertThat(value.apply("/x", "http://example.com/y"))
+				.as("root relative subject")
+				.isEqualTo(decode("<http://example.com/x> rdf:value <y>."));
 
-		assertThat(rdf(
-				object(field("this", "http://example.com/x"), field(value, "y")),
-				null,
-				Field.field(RDF.VALUE, datatype(Form.IRIType))
-		))
+		assertThat(value.apply("http://example.com/absolute/x", "http://example.com/y"))
+				.as("absolute subject")
+				.isEqualTo(decode("<http://example.com/absolute/x> rdf:value <y>."));
+
+		assertThat(value.apply("http://example.com/x", "y"))
 				.as("base relative object")
-				.isEqualTo(decode("<x> rdf:value <y> ."));
+				.isEqualTo(decode("<x> rdf:value <http://example.com/relative/y> ."));
 
-		assertThat(rdf(
-				object(field("this", "http://example.com/x"), field(value, "/z")),
-				null,
-				Field.field(RDF.VALUE, datatype(Form.IRIType))
-		))
-				.as("root-relative object")
-				.isEqualTo(decode("<x> rdf:value <http://example.com/z>."));
+		assertThat(value.apply("http://example.com/x", "/y"))
+				.as("root relative object")
+				.isEqualTo(decode("<x> rdf:value <http://example.com/y>."));
+
+		assertThat(value.apply("http://example.com/x", "http://example.com/absolute/y"))
+				.as("absolute object")
+				.isEqualTo(decode("<x> rdf:value <http://example.com/absolute/y>."));
 
 	}
 
@@ -442,7 +444,9 @@ final class JSONParserTest extends JSONCodecTest {
 		return rdf(json, focus, null);
 	}
 
-	private Model rdf(final Object json, final Resource focus, final Shape shape) {
+	private Model rdf(final Object json, final Resource focus, final Shape shape) {return rdf(json, focus, shape, ValuesTest.Base);}
+
+	private Model rdf(final Object json, final Resource focus, final Shape shape, final String base) {
 		try (final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString())) {
 
 			final StatementCollector collector=new StatementCollector();
@@ -462,7 +466,7 @@ final class JSONParserTest extends JSONCodecTest {
 
 			parser.setRDFHandler(collector);
 
-			parser.parse(reader, ValuesTest.Base);
+			parser.parse(reader, base);
 
 			return new LinkedHashModel(collector.getStatements());
 
