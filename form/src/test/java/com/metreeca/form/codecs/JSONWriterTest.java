@@ -25,6 +25,7 @@ import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.rio.RDFWriter;
@@ -34,19 +35,26 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import javax.json.*;
 
+import static com.metreeca.form.Shape.multiple;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Meta.alias;
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.things.ValuesTest.item;
+import static com.metreeca.form.truths.JSONAssert.assertThat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -243,6 +251,31 @@ final class JSONWriterTest extends JSONCodecTest {
 	}
 
 
+	//// IRIs //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testRelativizeProvedIRIs() {
+
+		final JsonStructure json=json(
+				decode("</container/> rdf:value </container/>; ldp:contains </container/x>, </container/y>."),
+				item("/container/"),
+				and(
+						Field.field(RDF.VALUE, and(required(), datatype(Form.IRIType))), // test back references
+						Field.field(LDP.CONTAINS, and(multiple(), datatype(Form.IRIType)))
+				)
+		);
+
+		assertThat(json)
+				.isEqualTo(Json.createObjectBuilder(map(
+						entry("this", "/container/"),
+						entry("value", "/container/"),
+						entry("contains", list(
+								"/container/x",
+								"/container/y"
+						))
+				)).build());
+	}
+
+
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testConsiderDisjunctiveDefinitions() {
@@ -368,7 +401,7 @@ final class JSONWriterTest extends JSONCodecTest {
 	private JsonStructure json(final Iterable<Statement> model, final Resource focus, final Shape shape) {
 		try (final StringWriter buffer=new StringWriter(1000)) {
 
-			final RDFWriter writer=new JSONWriter(buffer);
+			final RDFWriter writer=new JSONWriter(buffer, ValuesTest.Base);
 
 			writer.set(JSONCodec.Focus, focus);
 			writer.set(JSONCodec.Shape, shape);
@@ -379,6 +412,8 @@ final class JSONWriterTest extends JSONCodecTest {
 				return reader.read();
 			}
 
+		} catch ( final URISyntaxException e ) {
+			throw new RuntimeException(e);
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}

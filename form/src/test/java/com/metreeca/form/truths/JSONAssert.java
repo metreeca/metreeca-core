@@ -67,6 +67,32 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 		));
 	}
 
+	public JSONAssert hasField(final String name, final boolean value) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return isObject().satisfies(new Condition<>(
+				json -> json.asJsonObject().getBoolean(name) == value,
+				"expected <%s> to have field <%s> with value <%s>",
+				actual, name, value
+		));
+	}
+
+	public JSONAssert hasField(final String name, final String value) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return isObject().satisfies(new Condition<>(
+				json -> json.asJsonObject().getString(name).equals(value),
+				"expected <%s> to have field <%s> with value <%s>",
+				actual, name, value
+		));
+	}
+
 	public JSONAssert hasField(final String name, final JsonValue value) {
 
 		if ( name == null ) {
@@ -79,19 +105,6 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 
 		return isObject().satisfies(new Condition<>(
 				json -> value.equals(json.asJsonObject().getValue(name)),
-				"expected <%s> to have field <%s> with value <%s>",
-				actual, name, value
-		));
-	}
-
-	public JSONAssert hasField(final String name, final boolean value) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return isObject().satisfies(new Condition<>(
-				json -> json.asJsonObject().getBoolean(name) == value,
 				"expected <%s> to have field <%s> with value <%s>",
 				actual, name, value
 		));
