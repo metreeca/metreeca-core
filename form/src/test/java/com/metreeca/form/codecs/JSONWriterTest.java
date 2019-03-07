@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 import javax.json.*;
@@ -76,7 +75,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testNamedObjects() {
 		assertThat((Object)json(array(object(
-				field("this", "http://example.com/x"),
+				field("this", "/x"),
 				field(value, array("x"))
 		)))).as("named objects").isEqualTo(json(decode("<x> rdf:value 'x'.")));
 	}
@@ -112,7 +111,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testWriteOnlyFocusNode() {
 		assertThat((Object)json(object(
-				field("this", "http://example.com/x"),
+				field("this", "/x"),
 				field(value, array("x"))
 		))).as("focus node only").isEqualTo(json(
 				decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
@@ -134,15 +133,15 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testExpandSharedTrees() {
 		assertThat((Object)json(object(
-				field("this", "http://example.com/x"),
+				field("this", "/x"),
 				field(value, array(
 						object(
-								field("this", "http://example.com/w"),
-								field(value, array(object(field("this", "http://example.com/z"))))
+								field("this", "/w"),
+								field(value, array(object(field("this", "/z"))))
 						),
 						object(
-								field("this", "http://example.com/y"),
-								field(value, array(object(field("this", "http://example.com/z"))))
+								field("this", "/y"),
+								field(value, array(object(field("this", "/z"))))
 						)
 				))
 		))).as("expanded shared trees").isEqualTo(json(
@@ -153,11 +152,11 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testHandleNamedLoops() {
 		assertThat((Object)json(object(
-				field("this", "http://example.com/x"),
+				field("this", "/x"),
 				field(value, array(
 						object(
-								field("this", "http://example.com/y"),
-								field(value, array(object(field("this", "http://example.com/x"))))
+								field("this", "/y"),
+								field(value, array(object(field("this", "/x"))))
 						)
 				))
 		))).as("named loops").isEqualTo(json(
@@ -296,9 +295,9 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testWriteNamedReverseLinks() {
 		assertThat((Object)json(object(
-				field("this", "http://example.com/x"),
+				field("this", "/x"),
 				field("valueOf", array(object(
-						field("this", "http://example.com/y")
+						field("this", "/y")
 				)))
 		))).as("named reverse links").isEqualTo(json(
 				decode("<y> rdf:value <x> ."),
@@ -412,8 +411,6 @@ final class JSONWriterTest extends JSONCodecTest {
 				return reader.read();
 			}
 
-		} catch ( final URISyntaxException e ) {
-			throw new RuntimeException(e);
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}

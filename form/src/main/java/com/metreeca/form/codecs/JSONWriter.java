@@ -22,8 +22,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.things.Values;
 
-import org.eclipse.rdf4j.common.net.ParsedIRI;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -33,10 +33,11 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RioSetting;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFWriter;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -68,49 +69,32 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final ParsedIRI base;
+	private final String base;
 	private final Writer writer;
 
 	private final Model model=new LinkedHashModel();
 
 
 	public JSONWriter(final OutputStream stream) {
-
-		if ( stream == null ) {
-			throw new NullPointerException("null stream");
-		}
-
-		this.base=null;
-		this.writer=writer(stream);
+		this(stream, null);
 	}
 
-	public JSONWriter(final OutputStream stream, final String base) throws URISyntaxException {
-
-		if ( stream == null ) {
-			throw new NullPointerException("null stream");
-		}
-
-		this.base=(base == null) ? null : new ParsedIRI(base);
-		this.writer=writer(stream);
+	public JSONWriter(final OutputStream stream, final String base) {
+		this(writer(stream), base);
 	}
+
 
 	public JSONWriter(final Writer writer) {
-
-		if ( writer == null ) {
-			throw new NullPointerException("null writer");
-		}
-
-		this.base=null;
-		this.writer=writer;
+		this(writer, null);
 	}
 
-	public JSONWriter(final Writer writer, final String base) throws URISyntaxException {
+	public JSONWriter(final Writer writer, final String base) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
 		}
 
-		this.base=(base == null) ? null : new ParsedIRI(base);
+		this.base=(base != null && Values.RootIRIPattern.matcher(base).matches()) ? base : null;
 		this.writer=writer;
 	}
 
@@ -309,8 +293,8 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String relativize(final String id) { // preserve leading slash for root base
-		return base.getPath().equals("/")? "/"+base.relativize(id) : base.relativize(id);
+	private String relativize(final String iri) {
+		return base != null && iri.startsWith(base) ? iri.substring(base.length()-1) : iri;
 	}
 
 }
