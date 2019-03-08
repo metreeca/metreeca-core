@@ -32,7 +32,9 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFParser;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -93,7 +95,8 @@ public final class JSONParser extends AbstractRDFParser {
 	}
 
 
-	@Override public void parse(final InputStream in, final String baseURI) throws RDFParseException, RDFHandlerException {
+	@Override public void parse(final InputStream in, final String baseURI)
+			throws RDFParseException, RDFHandlerException {
 
 		if ( in == null ) {
 			throw new NullPointerException("null input stream");

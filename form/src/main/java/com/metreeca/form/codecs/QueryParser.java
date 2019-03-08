@@ -373,7 +373,7 @@ import static java.util.stream.Collectors.toList;
 		return Datatype.datatype(shape)
 
 				.map(datatype -> datatype.equals(Form.IRIType) && object instanceof String ?
-						iri(base == null ? (String)object : base.resolve((String)object).toString())
+						iri(resolve((String)object))
 						: value(object)
 				)
 
@@ -390,7 +390,7 @@ import static java.util.stream.Collectors.toList;
 	}
 
 	private Value value(final Shape shape, final Map<String, Object> object) {
-		return iri(object.get("this").toString());
+		return iri(resolve(object.get("this").toString()));
 	}
 
 
@@ -455,6 +455,13 @@ import static java.util.stream.Collectors.toList;
 
 		return edges;
 
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private String resolve(final String iri) {
+		return base == null ? iri : base.resolve(iri).toString();
 	}
 
 }
