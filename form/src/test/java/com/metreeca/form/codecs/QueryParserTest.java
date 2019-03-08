@@ -225,8 +225,8 @@ final class QueryParserTest {
 
 
 		edges("{ 'filter': { '!': [] } }", shape, edges -> assertThat(edges.getShape())
-				.as("universal (empty)")
-				.isEqualTo(filter(shape, all()))
+				.as("ignore empty universal")
+				.isEqualTo(filter(shape, and()))
 		);
 
 		edges("{ 'filter': { '!': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
@@ -244,8 +244,8 @@ final class QueryParserTest {
 
 
 		edges("{ 'filter': { '?': [] } }", shape, edges -> assertThat(edges.getShape())
-				.as("existential (empty)")
-				.isEqualTo(filter(shape, any()))
+				.as("ignore empty existential")
+				.isEqualTo(filter(shape, and()))
 		);
 
 		edges("{ 'filter': { '?': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())

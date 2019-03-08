@@ -65,14 +65,14 @@ import static java.util.stream.Collectors.toList;
 		}
 
 		this.shape=shape;
-		this.base=base == null? null : URI.create(base);
+		this.base=base == null ? null : URI.create(base);
 	}
 
 
 	/**
 	 * Parses a JSON object encoding a query.
 	 *
-	 * @param json the JSON object encodinf a shape-driven linked data query
+	 * @param json the JSON object encoding a shape-driven linked data query
 	 *
 	 * @return the parsed query
 	 *
@@ -326,15 +326,21 @@ import static java.util.stream.Collectors.toList;
 	}
 
 	private Shape all(final Shape shape, final Object value) {
-		return value != null
-				? All.all(values(shape, value))
-				: error("value is null");
+		if ( value == null ) { return error("value is null"); } else {
+
+			final Collection<Value> values=values(shape, value);
+
+			return values.isEmpty() ? and() : All.all(values);
+		}
 	}
 
 	private Shape any(final Shape shape, final Object value) {
-		return value != null
-				? Any.any(values(shape, value))
-				: error("value is null");
+		if ( value == null ) { return error("value is null"); } else {
+
+			final Collection<Value> values=values(shape, value);
+
+			return values.isEmpty() ? and() : Any.any(values);
+		}
 	}
 
 
@@ -366,7 +372,7 @@ import static java.util.stream.Collectors.toList;
 	private Value value(final Shape shape, final Object object) {
 		return Datatype.datatype(shape)
 
-				.map(datatype -> datatype.equals(Form.IRIType) && object instanceof String?
+				.map(datatype -> datatype.equals(Form.IRIType) && object instanceof String ?
 						iri(base == null ? (String)object : base.resolve((String)object).toString())
 						: value(object)
 				)
