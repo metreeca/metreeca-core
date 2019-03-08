@@ -18,7 +18,7 @@
 package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
-import com.metreeca.form.truths.JSONAssert;
+import com.metreeca.form.truths.JsonAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -109,7 +109,7 @@ final class RelatorTest {
 
 						.accept(response -> assertThat(response)
 								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> JSONAssert.assertThat(json)
+								.hasBody(json(), json -> JsonAssert.assertThat(json)
 										.hasField("cause")
 								)
 						)
@@ -193,7 +193,7 @@ final class RelatorTest {
 
 										.hasStatus(Response.NotImplemented)
 
-										.hasBody(json(), json -> JSONAssert.assertThat(json)
+										.hasBody(json(), json -> JsonAssert.assertThat(json)
 												.hasField("cause")
 										)
 
@@ -469,7 +469,7 @@ final class RelatorTest {
 
 						.accept(response -> assertThat(response)
 								.hasStatus(Response.UnprocessableEntity)
-								.hasBody(json(), json -> JSONAssert.assertThat(json)
+								.hasBody(json(), json -> JsonAssert.assertThat(json)
 										.hasField("error")
 								)
 						)

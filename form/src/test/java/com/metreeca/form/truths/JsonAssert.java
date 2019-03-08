@@ -24,23 +24,23 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 
 
-public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
+public final class JsonAssert extends AbstractAssert<JsonAssert, JsonValue> {
 
-	public static JSONAssert assertThat(final JsonValue json) {
-		return new JSONAssert(json);
+	public static JsonAssert assertThat(final JsonValue json) {
+		return new JsonAssert(json);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSONAssert(final JsonValue actual) {
-		super(actual, JSONAssert.class);
+	private JsonAssert(final JsonValue actual) {
+		super(actual, JsonAssert.class);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public JSONAssert isObject() {
+	public JsonAssert isObject() {
 
 		isNotNull();
 
@@ -54,7 +54,7 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 	}
 
 
-	public JSONAssert hasField(final String name) {
+	public JsonAssert hasField(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -67,7 +67,7 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 		));
 	}
 
-	public JSONAssert hasField(final String name, final boolean value) {
+	public JsonAssert hasField(final String name, final boolean value) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -80,7 +80,7 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 		));
 	}
 
-	public JSONAssert hasField(final String name, final String value) {
+	public JsonAssert hasField(final String name, final String value) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -93,7 +93,7 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 		));
 	}
 
-	public JSONAssert hasField(final String name, final JsonValue value) {
+	public JsonAssert hasField(final String name, final JsonValue value) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
