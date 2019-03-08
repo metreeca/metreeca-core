@@ -17,7 +17,10 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Order;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -36,21 +39,11 @@ import javax.json.JsonException;
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.codecs.BaseCodec.aliases;
-import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Any.any;
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
-import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
-import static com.metreeca.form.shapes.MaxLength.maxLength;
-import static com.metreeca.form.shapes.MinCount.minCount;
-import static com.metreeca.form.shapes.MinExclusive.minExclusive;
-import static com.metreeca.form.shapes.MinInclusive.minInclusive;
-import static com.metreeca.form.shapes.MinLength.minLength;
-import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Field.fields;
-import static com.metreeca.form.things.Values.*;
+import static com.metreeca.form.things.Values.format;
+import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.Values.literal;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
@@ -108,9 +101,11 @@ import static java.util.stream.Collectors.toList;
 		final Shape merged=filter == null ? shape
 				: and(shape, Shape.filter().then(filter)); // mark as filtering only >> don't include in results
 
-		return stats != null ? Stats.stats(merged, stats)
-				: items != null ? Items.items(merged, items)
-				: Edges.edges(merged, order, offset, limit);
+		final Shape optimized=merged.map(new Optimizer());
+
+		return stats != null ? Stats.stats(optimized, stats)
+				: items != null ? Items.items(optimized, items)
+				: Edges.edges(optimized, order, offset, limit);
 
 	}
 
@@ -132,122 +127,11 @@ import static java.util.stream.Collectors.toList;
 		return query.containsKey("filter") ? Optional
 
 				.ofNullable(query.get("filter"))
-				.map(v -> v instanceof Map ? ((Map<String, Object>)v) : error("filter is not an object"))
+				.map(v -> v instanceof Map ? (Map<String, Object>)v : error("filter is not an object"))
 
-				.map(object -> filters(object, shape))
+				.map(object -> shape(shape, object))
 				.orElseGet(() -> error("filter is null")) : null;
 
-	}
-
-	private Shape filters(final Map<String, Object> object, final Shape shape) {
-
-		final List<Shape> filters=object.entrySet().stream()
-				.map(entry -> filter(entry.getKey(), entry.getValue(), shape))
-				.collect(toList());
-
-		return filters.size() == 1 ? filters.get(0) : and(filters);
-	}
-
-	private Shape filter(final String key, final Object value, final Shape shape) {
-
-		if ( key.equals(">>") ) {
-
-			return value instanceof Number ? minCount(((Number)value).intValue()) : error("length is not a number");
-
-		} else if ( key.equals("<<") ) {
-
-			return value instanceof Number ? maxCount(((Number)value).intValue()) : error("length is not a number");
-
-		} else if ( key.equals(">") ) {
-
-			return value != null ? minExclusive(object(value)) : error("value is null");
-
-		} else if ( key.equals("<") ) {
-
-			return value != null ? maxExclusive(object(value)) : error("value is null");
-
-		} else if ( key.equals(">=") ) {
-
-			return value != null ? minInclusive(object(value)) : error("value is null");
-
-		} else if ( key.equals("<=") ) {
-
-			return value != null ? maxInclusive(object(value)) : error("value is null");
-
-		} else if ( key.equals("~") ) {
-
-			return value instanceof String ? like((String)value) : error("pattern is not a string");
-
-		} else if ( key.equals("*") ) {
-
-			return value instanceof String ? pattern((String)value) : error("pattern is not a string");
-
-		} else if ( key.equals(">#") ) {
-
-			return value instanceof Number ? minLength(((Number)value).intValue()) : error("length is not a number");
-
-		} else if ( key.equals("#<") ) {
-
-			return value instanceof Number ? maxLength(((Number)value).intValue()) : error("length is not a number");
-
-		} else if ( key.equals("@") ) {
-
-			return value instanceof String ? Clazz.clazz(iri((String)value)) : error("class IRI is not a string");
-
-		} else if ( key.equals("^") ) {
-
-			return value instanceof String ? datatype(iri((String)value)) : error("datatype IRI is not a string");
-
-		} else if ( key.equals("?") ) {
-
-			return value != null ? existential(objects(value)) : error("value is null");
-
-		} else if ( key.equals("!") ) {
-
-			return value != null ? universal(objects(value)) : error("value is null");
-
-		} else {
-
-			return nested(shape, path(key, shape),
-					value instanceof Map ? (Map<String, Object>)value : singletonMap("?", value));
-
-		}
-
-	}
-
-
-	private Shape like(final String pattern) {
-		return pattern.isEmpty() ? and() : Like.like(pattern);
-	}
-
-	private Shape pattern(final String pattern) {
-		return pattern.isEmpty() ? and() : Pattern.pattern(pattern);
-	}
-
-
-	private Shape existential(final Collection<Value> objects) {
-		return objects.isEmpty() ? and() : any(objects);
-	}
-
-	private Shape universal(final Collection<Value> objects) {
-		return objects.isEmpty() ? and() : all(objects);
-	}
-
-	private Shape range(final Collection<Value> objects) {
-		return objects.isEmpty() ? and() : In.in(objects);
-	}
-
-
-	private Shape nested(final Shape shape, final List<IRI> path, final Map<String, Object> object) {
-		if ( path.isEmpty() ) { return filters(object, shape); } else {
-
-			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
-
-			final IRI head=path.get(0);
-			final List<IRI> tail=path.subList(1, path.size());
-
-			return field(head, nested(fields.get(head), tail, object));
-		}
 	}
 
 
@@ -322,19 +206,163 @@ import static java.util.stream.Collectors.toList;
 	}
 
 
+	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Shape shape(final Shape shape, final Map<String, Object> object) {
+		return and(object
+				.entrySet()
+				.stream()
+				.map(entry -> shape(entry.getKey(), shape, entry.getValue()))
+				.collect(toList())
+		);
+	}
+
+	private Shape shape(final String key, final Shape shape, final Object value) {
+
+		switch ( key ) {
+
+			case "^": return datatype(value);
+			case "@": return clazz(value);
+
+			case ">": return minExclusive(value);
+			case "<": return maxExclusive(value);
+			case ">=": return minInclusive(value);
+			case "<=": return maxInclusive(value);
+
+			case ">#": return minLength(value);
+			case "#<": return maxLength(value);
+			case "*": return pattern(value);
+			case "~": return like(value);
+
+			case ">>": return minCount(value);
+			case "<<": return maxCount(value);
+			case "?": return any(value);
+			case "!": return all(value);
+
+			default:
+
+				return field(shape, path(key, shape),
+						value instanceof Map ? (Map<String, Object>)value : singletonMap("?", value));
+
+		}
+
+	}
+
+
+	private Shape datatype(final Object value) {
+		return value instanceof String
+				? Datatype.datatype(iri((String)value))
+				: error("datatype IRI is not a string");
+	}
+
+	private Shape clazz(final Object value) {
+		return value instanceof String
+				? Clazz.clazz(iri((String)value))
+				: error("class IRI is not a string");
+	}
+
+
+	private Shape minExclusive(final Object value) {
+		return value != null
+				? MinExclusive.minExclusive(value(value))
+				: error("value is null");
+	}
+
+	private Shape maxExclusive(final Object value) {
+		return value != null
+				? MaxExclusive.maxExclusive(value(value))
+				: error("value is null");
+	}
+
+	private Shape minInclusive(final Object value) {
+		return value != null
+				? MinInclusive.minInclusive(value(value))
+				: error("value is null");
+	}
+
+	private Shape maxInclusive(final Object value) {
+		return value != null
+				? MaxInclusive.maxInclusive(value(value))
+				: error("value is null");
+	}
+
+
+	private Shape minLength(final Object value) {
+		return value instanceof Number
+				? MinLength.minLength(((Number)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape maxLength(final Object value) {
+		return value instanceof Number
+				? MaxLength.maxLength(((Number)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape pattern(final Object value) {
+		return value instanceof String
+				? ((String)value).isEmpty() ? and() : Pattern.pattern((String)value)
+				: error("pattern is not a string");
+	}
+
+	private Shape like(final Object value) {
+		return value instanceof String
+				? ((String)value).isEmpty() ? and() : Like.like((String)value)
+				: error("pattern is not a string");
+	}
+
+
+	private Shape minCount(final Object value) {
+		return value instanceof Number
+				? MinCount.minCount(((Number)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape maxCount(final Object value) {
+		return value instanceof Number
+				? MaxCount.maxCount(((Number)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape all(final Object value) {
+		return value != null
+				? values(value).isEmpty() ? and() : All.all(values(value))
+				: error("value is null");
+	}
+
+	private Shape any(final Object value) {
+		return value != null
+				? values(value).isEmpty() ? and() : Any.any(values(value))
+				: error("value is null");
+	}
+
+
+	private Shape field(final Shape shape, final List<IRI> path, final Map<String, Object> object) {
+		if ( path.isEmpty() ) { return shape(shape, object); } else {
+
+			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
+
+			final IRI head=path.get(0);
+			final List<IRI> tail=path.subList(1, path.size());
+
+			return Field.field(head, field(fields.get(head), tail, object));
+		}
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Value> objects(final Object object) {
-		return object instanceof List ? objects((List<Object>)object)
-				: singleton(object(object));
+	private Collection<Value> values(final Object object) {
+		return object instanceof Collection ? values((Collection<Object>)object)
+				: singleton(value(object));
 	}
 
-	private Collection<Value> objects(final Collection<Object> array) {
-		return array.stream().map(this::object).collect(toList());
+	private Collection<Value> values(final Collection<Object> array) {
+		return array.stream().map(this::value).collect(toList());
 	}
 
-	private Value object(final Object object) {
-		return object instanceof Map ? object((Map<String, Object>)object)
+	private Value value(final Object object) {
+		return object instanceof Map ? value((Map<String, Object>)object)
 				: object instanceof BigDecimal ? literal((BigDecimal)object)
 				: object instanceof BigInteger ? literal((BigInteger)object)
 				: object instanceof Number ? literal(((Number)object).doubleValue())
@@ -342,7 +370,7 @@ import static java.util.stream.Collectors.toList;
 				: null;
 	}
 
-	private Value object(final Map<String, Object> object) {
+	private Value value(final Map<String, Object> object) {
 		return iri(object.get("this").toString());
 	}
 

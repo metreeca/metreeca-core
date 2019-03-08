@@ -17,8 +17,10 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
@@ -286,14 +288,27 @@ final class QueryParserTest {
 	}
 
 
-	@Test void testResolveRootRelativeIRIs() {
+	@Test void testHandleInlinedProvedIRIs() {
 
-		final Shape shape=and();
+		final Shape shape=datatype(Form.IRIType);
 
-		edges("{ 'filter': { '!': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }",
+		edges("{ 'filter': { '!': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } }",
 				shape, edges -> assertThat(edges.getShape())
 						.as("universal (singleton)")
 						.isEqualTo(filter(shape, all(RDF.FIRST)))
+		);
+
+	}
+
+	@Test void testResolveRootRelativeIRIs() {
+
+		final Shape shape=datatype(Form.IRIType);
+
+		edges("{ 'filter': { '!': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } }",
+				shape, edges -> assertThat(edges.getShape())
+						.as("universal (singleton)")
+						.isEqualTo(filter(shape, all(RDF.FIRST)))
+				// !!! , RDF.NAMESPACE
 		);
 
 	}
@@ -493,7 +508,7 @@ final class QueryParserTest {
 	}
 
 	private Shape filter(final Shape shape, final Shape filter) {
-		return and(shape, Shape.filter().then(filter));
+		return and(shape, Shape.filter().then(filter)).map(new Optimizer());
 	}
 
 }
