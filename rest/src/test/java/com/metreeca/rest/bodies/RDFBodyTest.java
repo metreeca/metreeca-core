@@ -74,7 +74,7 @@ final class RDFBodyTest {
 
 				.accept(response -> ResponseAssert.assertThat(response)
 						.hasBody(text(), text -> Assertions.assertThat(text)
-								.contains("@base <" +ValuesTest.Base+ ">")
+								.contains("@base <" +ValuesTest.Base+"context/container/"+ ">")
 						)
 				);
 	}

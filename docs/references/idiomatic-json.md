@@ -63,13 +63,21 @@ if there is no back-reference from a nested object, the `this` id field may be l
 <blank> ::= {  <property>(, <property>)* }
 ```
 
-If the term may be proved to be blank and there is no back-reference from a nested object, the `this` id field may be omitted.
+If the term may be proved to be blank and there is no back-link from a nested object, the `this` id field may be omitted.
+
+### Back-Links
 
 ```
 <blank> ::= { "this": "_:<id>" }
 ```
 
-If the object is a back-reference to an enclosing object, only the `this` id field is included.
+If the term is a back-link to an enclosing blank node, only the `this` id field is included.
+
+```
+<blank> ::= "_:<id>"
+```
+
+If the term may be proved to be  a back-reference to an enclosing blank node reference, the node id may be inlined.
 
 ## IRI References
 
@@ -91,11 +99,19 @@ If the term may be proved to be a constant known IRI reference, the `this` id fi
 
 If the term may be proved to be an IRI reference without properties, the IRI may be inlined.
 
+### Back-Links
+
 ```
 <iri> ::= { "this": "<iri>" }
 ```
 
-If the object is a back-reference to an enclosing object, only the `this` id field is included.
+If the term is a back-reference to an enclosing object, only the `this` id field is included.
+
+```
+<iri> ::= "<iri>"
+```
+
+If the term may be proved to be  a back-reference to an enclosing IRI reference, the IRI may be inlined.
 
 ### Parsing
 
