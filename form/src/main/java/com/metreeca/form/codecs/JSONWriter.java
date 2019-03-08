@@ -41,6 +41,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 
 import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.codecs.JSON.encode;
@@ -94,7 +95,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 			throw new NullPointerException("null writer");
 		}
 
-		this.base=(base != null && Values.RootIRIPattern.matcher(base).matches()) ? base : null;
+		this.base=root(base);
 		this.writer=writer;
 	}
 
@@ -292,6 +293,16 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private String root(final CharSequence base) {
+		if ( base == null ) { return null; } else {
+
+			final Matcher matcher=Values.IRIPattern.matcher(base);
+
+			return matcher.matches() ? matcher.group("schemeall")+matcher.group("hostall")+"/" : null;
+
+		}
+	}
 
 	private String relativize(final String iri) {
 		return base != null && iri.startsWith(base) ? iri.substring(base.length()-1) : iri;

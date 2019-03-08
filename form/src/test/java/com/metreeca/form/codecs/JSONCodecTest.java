@@ -17,6 +17,8 @@
 
 package com.metreeca.form.codecs;
 
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -34,7 +36,7 @@ import static com.metreeca.form.things.Values.format;
 
 public abstract class JSONCodecTest {
 
-	protected static final String value="http://www.w3.org/1999/02/22-rdf-syntax-ns#value";
+	protected static final String value=RDF.VALUE.stringValue();
 
 
 	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,6 +122,15 @@ public abstract class JSONCodecTest {
 		}
 
 		return builder.build();
+	}
+
+
+	@SafeVarargs public static JsonObject _json(final Map.Entry<String, Object>... fields) {
+		return _json(map(fields));
+	}
+
+	public static JsonObject _json(final Map<String, Object> map) {
+		return Json.createObjectBuilder(map).build();
 	}
 
 

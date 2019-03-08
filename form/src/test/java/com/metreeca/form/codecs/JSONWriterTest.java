@@ -23,6 +23,7 @@ import com.metreeca.form.shapes.Field;
 import com.metreeca.form.shapes.Or;
 import com.metreeca.form.things.ValuesTest;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -110,7 +111,7 @@ final class JSONWriterTest extends JSONCodecTest {
 	//// Focus /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testWriteOnlyFocusNode() {
-		assertThat((Object)json(object(
+		assertThat((Object)_json(object(
 				field("this", "/x"),
 				field(value, array("x"))
 		))).as("focus node only").isEqualTo(json(
@@ -121,7 +122,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testHandleUnknownFocusNode() {
 		assertEquivalent("unknown focus",
-				json(object()),
+				_json(object()),
 				json(
 						decode("<x> rdf:value 'x' . <y> rdf:value 'y' ."),
 						bnode()
@@ -132,7 +133,7 @@ final class JSONWriterTest extends JSONCodecTest {
 	//// Shared References /////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testExpandSharedTrees() {
-		assertThat((Object)json(object(
+		assertThat((Object)_json(object(
 				field("this", "/x"),
 				field(value, array(
 						object(
@@ -151,7 +152,7 @@ final class JSONWriterTest extends JSONCodecTest {
 	}
 
 	@Test void testHandleNamedLoops() {
-		assertThat((Object)json(object(
+		assertThat((Object)_json(object(
 				field("this", "/x"),
 				field(value, array(
 						object(
@@ -166,7 +167,7 @@ final class JSONWriterTest extends JSONCodecTest {
 	}
 
 	@Test void testHandleBlankLoops() {
-		assertThat((Object)json(object(
+		assertThat((Object)_json(object(
 				field("this", "_:x"),
 				field(value, array(
 						object(
@@ -186,7 +187,7 @@ final class JSONWriterTest extends JSONCodecTest {
 	@Test void testAliasFields() {
 
 		assertEquivalent("direct inferred",
-				json(object(field("value", array(object())))),
+				_json(object(field("value", array(object())))),
 				json(
 						decode("_:x rdf:value _:y ."),
 						bnode("x"),
@@ -194,7 +195,7 @@ final class JSONWriterTest extends JSONCodecTest {
 				));
 
 		assertEquivalent("inverse inferred",
-				json(object(field("valueOf", array(object())))),
+				_json(object(field("valueOf", array(object())))),
 				json(
 						decode("_:y rdf:value _:x ."),
 						bnode("x"),
@@ -202,7 +203,7 @@ final class JSONWriterTest extends JSONCodecTest {
 				));
 
 		assertEquivalent("user-defined",
-				json(object(field("alias", array(object())))),
+				_json(object(field("alias", array(object())))),
 				json(
 						decode("_:x rdf:value _:y ."),
 						bnode("x"),
@@ -214,7 +215,7 @@ final class JSONWriterTest extends JSONCodecTest {
 	@Test void testAliasNestedFields() {
 
 		assertEquivalent("aliased nested field",
-				json(object(field("value", array(object(field("alias", array(object()))))))),
+				_json(object(field("value", array(object(field("alias", array(object()))))))),
 				json(
 						decode("_:x rdf:value [rdf:value _:y] ."),
 						bnode("x"),
@@ -225,7 +226,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testHandleAliasClashes() {
 		assertEquivalent("clashing aliases",
-				json(object(
+				_json(object(
 						field(value, array(object())),
 						field(ValuesTest.term("value").stringValue(), array(object()))
 				)),
@@ -241,7 +242,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testIgnoreReservedAliases() {
 		assertEquivalent("reserved alias",
-				json(object(field("value", array(object())))),
+				_json(object(field("value", array(object())))),
 				json(
 						decode("_:x rdf:value _:y ."),
 						bnode("x"),
@@ -254,24 +255,41 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testRelativizeProvedIRIs() {
 
+		final IRI focus=item("/container/");
+
 		final JsonStructure json=json(
-				decode("</container/> rdf:value </container/>; ldp:contains </container/x>, </container/y>."),
-				item("/container/"),
-				and(
-						Field.field(RDF.VALUE, and(required(), datatype(Form.IRIType))), // test back references
-						Field.field(LDP.CONTAINS, and(multiple(), datatype(Form.IRIType)))
-				)
+				decode("</container/> ldp:contains </container/x>, </container/y>."),
+				focus,
+				Field.field(LDP.CONTAINS, and(multiple(), datatype(Form.IRIType))),
+				focus.stringValue()
 		);
 
 		assertThat(json)
-				.isEqualTo(Json.createObjectBuilder(map(
+				.isEqualTo(_json(
 						entry("this", "/container/"),
-						entry("value", "/container/"),
 						entry("contains", list(
 								"/container/x",
 								"/container/y"
 						))
-				)).build());
+				));
+	}
+
+	@Test void testRelativizeProvedIRIBackReferences() {
+
+		final IRI focus=item("/container/");
+
+		final JsonStructure json=json(
+				decode("</container/> rdf:value </container/>."),
+				focus,
+				Field.field(RDF.VALUE, and(required(), datatype(Form.IRIType))),
+				focus.stringValue()
+		);
+
+		assertThat(json)
+				.isEqualTo(_json(map(
+						entry("this", "/container/"),
+						entry("value", "/container/")
+				)));
 	}
 
 
@@ -279,7 +297,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testConsiderDisjunctiveDefinitions() {
 		assertEquivalent("simplified literal with known datatype",
-				json(object(
+				_json(object(
 						field("first", "x"),
 						field("rest", "y")
 				)),
@@ -294,7 +312,7 @@ final class JSONWriterTest extends JSONCodecTest {
 	}
 
 	@Test void testWriteNamedReverseLinks() {
-		assertThat((Object)json(object(
+		assertThat((Object)_json(object(
 				field("this", "/x"),
 				field("valueOf", array(object(
 						field("this", "/y")
@@ -308,7 +326,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testWriteBlankReverseLinks() {
 		assertEquivalent("blank reverse links",
-				json(object(field("valueOf", array(object())))),
+				_json(object(field("valueOf", array(object())))),
 				json(
 						decode("_:y rdf:value _:x ."),
 						bnode("x"),
@@ -318,7 +336,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testOmitNullValues() {
 		assertEquivalent("omitted empty array",
-				json(object()),
+				_json(object()),
 				json(
 						decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
@@ -329,7 +347,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testOmitEmptyArrays() {
 		assertEquivalent("omitted empty array",
-				json(object()),
+				_json(object()),
 				json(
 						decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
@@ -340,7 +358,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testWriteObjectInsteadOfArrayIfNotRepeatable() {
 		assertEquivalent("simplified unrepeatable value",
-				json(object(field("value", "x"))),
+				_json(object(field("value", "x"))),
 				json(
 						decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
@@ -350,7 +368,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testInlineProvedLeafIRIs() {
 		assertEquivalent("simplified leaf IRI",
-				json(object(field("value", RDF.NIL.stringValue()))),
+				_json(object(field("value", RDF.NIL.stringValue()))),
 				json(
 						decode("_:focus rdf:value rdf:nil."),
 						bnode("focus"),
@@ -360,7 +378,7 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testInlineProvedTypedLiterals() {
 		assertEquivalent("simplified literal with known datatype",
-				json(object(field("value", "2016-08-11"))),
+				_json(object(field("value", "2016-08-11"))),
 				json(
 						decode("_:focus rdf:value '2016-08-11'^^xsd:date."),
 						bnode("focus"),
@@ -370,13 +388,13 @@ final class JSONWriterTest extends JSONCodecTest {
 
 	@Test void testOmitThisForUnreferencedProvedBlanks() {
 
-		assertThat((Object)json(object(field("value", array(object()))))).as("unreferenced proved blank").isEqualTo(json(
+		assertThat((Object)_json(object(field("value", array(object()))))).as("unreferenced proved blank").isEqualTo(json(
 				decode("_:x rdf:value _:y ."),
 				bnode("x"),
 				and(datatype(Form.BNodeType), Field.field(RDF.VALUE, datatype(Form.BNodeType)))
 		));
 
-		assertThat((Object)json(object(
+		assertThat((Object)_json(object(
 				field("this", "_:x"),
 				field("value", array(object(field("this", "_:x"))))))).as("back-referenced proved blank").isEqualTo(json(
 				decode("_:x rdf:value _:x ."),
@@ -398,9 +416,13 @@ final class JSONWriterTest extends JSONCodecTest {
 	}
 
 	private JsonStructure json(final Iterable<Statement> model, final Resource focus, final Shape shape) {
+		return json(model, focus, shape, ValuesTest.Base);
+	}
+
+	private JsonStructure json(final Iterable<Statement> model, final Resource focus, final Shape shape, final String base) {
 		try (final StringWriter buffer=new StringWriter(1000)) {
 
-			final RDFWriter writer=new JSONWriter(buffer, ValuesTest.Base);
+			final RDFWriter writer=new JSONWriter(buffer, base);
 
 			writer.set(JSONCodec.Focus, focus);
 			writer.set(JSONCodec.Shape, shape);

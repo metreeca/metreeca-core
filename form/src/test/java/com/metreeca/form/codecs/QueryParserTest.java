@@ -159,63 +159,142 @@ final class QueryParserTest {
 
 	@Test void testParseSimpleFilters() {
 
-		edges("{ 'filter': { '>>': 1 } }", shape, edges -> assertThat(filter(shape, minCount(1))).as("min count").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { '>>': 1 } }", shape, edges -> assertThat(edges.getShape())
+				.as("min count")
+				.isEqualTo(filter(shape, minCount(1)))
+		);
 
-		edges("{ 'filter': { '<<': 1 } }", shape, edges -> assertThat(filter(shape, maxCount(1))).as("max count").isEqualTo(edges.getShape()));
-
-
-		edges("{ 'filter': { '>=': 1 } }", shape, edges -> assertThat(filter(shape, minInclusive(One))).as("min inclusive").isEqualTo(edges.getShape()));
-
-		edges("{ 'filter': { '<=': 1 } }", shape, edges -> assertThat(filter(shape, maxInclusive(One))).as("max inclusive").isEqualTo(edges.getShape()));
-
-		edges("{ 'filter': { '>': 1 } }", shape, edges -> assertThat(filter(shape, MinExclusive.minExclusive(One))).as("min exclusive").isEqualTo(edges.getShape()));
-
-		edges("{ 'filter': { '<': 1 } }", shape, edges -> assertThat(filter(shape, maxExclusive(One))).as("max exclusive").isEqualTo(edges.getShape()));
-
-		edges("{ 'filter': { '~': 'words' } }", shape, edges -> assertThat(filter(shape, like("words"))).as("like").isEqualTo(edges.getShape()));
-
-		edges("{ 'filter': { '*': 'pattern' } }", shape, edges -> assertThat(filter(shape, pattern("pattern"))).as("pattern").isEqualTo(edges.getShape()));
-
-		edges("{ 'filter': { '>#': 123 } }", shape, edges -> assertThat(filter(shape, MinLength.minLength(123))).as("min length").isEqualTo(edges.getShape()));
-
-		edges("{ 'filter': { '#<': 123 } }", shape, edges -> assertThat(filter(shape, maxLength(123))).as("max length").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { '<<': 1 } }", shape, edges -> assertThat(edges.getShape())
+				.as("max count")
+				.isEqualTo(filter(shape, maxCount(1)))
+		);
 
 
-		edges("{ 'filter': { '@': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' } }", shape, edges -> assertThat(filter(shape, clazz(RDF.NIL))).as("class").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { '>=': 1 } }", shape, edges -> assertThat(edges.getShape())
+				.as("min inclusive")
+				.isEqualTo(filter(shape, minInclusive(One)))
+		);
 
-		edges("{ 'filter': { '^': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' } }", shape, edges -> assertThat(filter(shape, datatype(RDF.NIL))).as("type").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { '<=': 1 } }", shape, edges -> assertThat(edges.getShape())
+				.as("max inclusive")
+				.isEqualTo(filter(shape, maxInclusive(One)))
+		);
+
+		edges("{ 'filter': { '>': 1 } }", shape, edges -> assertThat(edges.getShape())
+				.as("min exclusive")
+				.isEqualTo(filter(shape, MinExclusive.minExclusive(One)))
+		);
+
+		edges("{ 'filter': { '<': 1 } }", shape, edges -> assertThat(edges.getShape())
+				.as("max exclusive")
+				.isEqualTo(filter(shape, maxExclusive(One)))
+		);
+
+		edges("{ 'filter': { '~': 'words' } }", shape, edges -> assertThat(edges.getShape())
+				.as("like")
+				.isEqualTo(filter(shape, like("words")))
+		);
+
+		edges("{ 'filter': { '*': 'pattern' } }", shape, edges -> assertThat(edges.getShape())
+				.as("pattern")
+				.isEqualTo(filter(shape, pattern("pattern")))
+		);
+
+		edges("{ 'filter': { '>#': 123 } }", shape, edges -> assertThat(edges.getShape())
+				.as("min length")
+				.isEqualTo(filter(shape, MinLength.minLength(123)))
+		);
+
+		edges("{ 'filter': { '#<': 123 } }", shape, edges -> assertThat(edges.getShape())
+				.as("max length")
+				.isEqualTo(filter(shape, maxLength(123)))
+		);
 
 
-		edges("{ 'filter': { '?': [] } }", shape, edges -> assertThat(filter(shape, and())).as("existential (empty)").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { '@': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' } }", shape, edges -> assertThat(edges.getShape())
+				.as("class")
+				.isEqualTo(filter(shape, clazz(RDF.NIL)))
+		);
 
-		edges("{ 'filter': { '?': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(filter(shape, any(RDF.FIRST))).as("existential (singleton)").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { '^': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' } }", shape, edges -> assertThat(edges.getShape())
+				.as("type")
+				.isEqualTo(filter(shape, datatype(RDF.NIL)))
+		);
+
+
+		edges("{ 'filter': { '?': [] } }", shape, edges -> assertThat(edges.getShape())
+				.as("existential (empty)")
+				.isEqualTo(filter(shape, and()))
+		);
+
+		edges("{ 'filter': { '?': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
+				.as("existential (singleton)")
+				.isEqualTo(filter(shape, any(RDF.FIRST)))
+		);
 
 		edges("{ 'filter': { '?': [\n"
 				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
 				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
-				+"] } }", shape, edges -> assertThat(filter(shape, any(RDF.FIRST, RDF.REST))).as("existential (multiple)").isEqualTo(edges.getShape()));
+				+"] } }", shape, edges -> assertThat(edges.getShape())
+				.as("existential (multiple)")
+				.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
+		);
 
 
-		edges("{ 'filter': { '!': [] } }", shape, edges -> assertThat(filter(shape, and())).as("universal (empty)").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { '!': [] } }", shape, edges -> assertThat(edges.getShape())
+				.as("universal (empty)")
+				.isEqualTo(filter(shape, and()))
+		);
 
-		edges("{ 'filter': { '!': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(filter(shape, all(RDF.FIRST))).as("universal (singleton)").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { '!': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
+				.as("universal (singleton)")
+				.isEqualTo(filter(shape, all(RDF.FIRST)))
+		);
 
 		edges("{ 'filter': { '!': [\n"
 				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
 				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
-				+"] } }", shape, edges -> assertThat(filter(shape, all(RDF.FIRST, RDF.REST))).as("universal (multiple)").isEqualTo(edges.getShape()));
+				+"] } }", shape, edges -> assertThat(edges.getShape())
+				.as("universal (multiple)")
+				.isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
+		);
 
 	}
 
 	@Test void testParseStructuredFilters() {
 
-		edges("{\n\t'filter': {}\n}", shape, edges -> assertThat(filter(shape, and())).as("empty filter").isEqualTo(edges.getShape()));
+		edges("{\n\t'filter': {}\n}", shape, edges -> assertThat(edges.getShape())
+				.as("empty filter")
+				.isEqualTo(filter(shape, and()))
+		);
 
-		edges("{ 'filter': { 'first.rest': { '>=': 1 } } }", shape, edges -> assertThat(filter(shape, field(RDF.FIRST, field(RDF.REST, minInclusive(One))))).as("nested filter").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { 'first.rest': { '>=': 1 } } }", shape, edges -> assertThat(edges.getShape())
+				.as("nested filter")
+				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, minInclusive(One)))))
+		);
 
-		edges("{ 'filter': { 'first.rest': 1 } }", shape, edges -> assertThat(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One))))).as("nested filter singleton shorthand").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { 'first.rest': 1 } }", shape, edges -> assertThat(edges.getShape())
+				.as("nested filter singleton shorthand")
+				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One)))))
+		);
 
-		edges("{ 'filter': { 'first.rest': [1, 10] } }", shape, edges -> assertThat(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten))))).as("nested filter multiple shorthand").isEqualTo(edges.getShape()));
+		edges("{ 'filter': { 'first.rest': [1, 10] } }", shape, edges -> assertThat(edges.getShape())
+				.as("nested filter multiple shorthand")
+				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten)))))
+		);
+
+	}
+
+
+	@Test void testResolveRootRelativeIRIs() {
+
+		final Shape shape=and();
+
+		edges("{ 'filter': { '!': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }",
+				shape, edges -> assertThat(edges.getShape())
+						.as("universal (singleton)")
+						.isEqualTo(filter(shape, all(RDF.FIRST)))
+		);
 
 	}
 

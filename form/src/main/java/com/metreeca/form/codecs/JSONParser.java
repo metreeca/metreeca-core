@@ -93,8 +93,7 @@ public final class JSONParser extends AbstractRDFParser {
 	}
 
 
-	@Override public void parse(final InputStream in, final String baseURI)
-			throws IOException, RDFParseException, RDFHandlerException {
+	@Override public void parse(final InputStream in, final String baseURI) throws RDFParseException, RDFHandlerException {
 
 		if ( in == null ) {
 			throw new NullPointerException("null input stream");

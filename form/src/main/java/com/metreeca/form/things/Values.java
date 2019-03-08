@@ -58,22 +58,17 @@ public final class Values {
 	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^[^:/?#]+:.+$");
 
 	/**
-	 * A pattern matching root IRIs.
-	 */
-	public static final Pattern RootIRIPattern=Pattern.compile("^[^:/?#]+:(?://[^/?#]*)?/$");
-
-	/**
 	 * A pattern matching IRI components.
 	 *
 	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
 	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
 	 */
 	public static final Pattern IRIPattern=Pattern.compile("^"
-			+ "((?<scheme>[^:/?#]+):)?"
-			+ "(//(?<host>[^/?#]*))?"
+			+ "(?<schemeall>(?<scheme>[^:/?#]+):)?"
+			+ "(?<hostall>//(?<host>[^/?#]*))?"
 			+ "(?<path>[^?#]*)"
-			+ "(\\?(?<query>[^#]*))?"
-			+ "(#(?<fragment>.*))?"
+			+ "(?<queryall>\\?(?<query>[^#]*))?"
+			+ "(?<fragmentall>#(?<fragment>.*))?"
 			+"$"
 	);
 

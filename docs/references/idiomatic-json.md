@@ -73,8 +73,6 @@ If the object is a back-reference to an enclosing object, only the `this` id fie
 
 ## IRI References
 
-During parsing operations, all `<iri>` refences are resolved against the base URI provided to the parser, which for HTTP REST operations equals the URI of the target resource.
-
 ```
 <iri> ::= { "this" : "<iri>" (, <property>)* }
 ```
@@ -98,6 +96,14 @@ If the term may be proved to be an IRI reference without properties, the IRI may
 ```
 
 If the object is a back-reference to an enclosing object, only the `this` id field is included.
+
+### Parsing
+
+When parsing, relative `<iri>` references are resolved against the base URI provided to the [parser](...javadocs/com/metreeca/form/codecs/JSONParser.html), which for HTTP REST operations equals the IRI of the request [item](../javadocs/com/metreeca/rest/Request.html#item--).
+
+### Writing
+
+When writing, local `<iri>` references are relativized as root-relative IRIs against the base URI provided to the [writer](...javadocs/com/metreeca/form/codecs/JSONWRiter.html), which for HTTP REST operations equals the root IRI of the response [item](.../javadocs/com/metreeca/rest/Response.html#item--).
 
 ## Term Properties
 
