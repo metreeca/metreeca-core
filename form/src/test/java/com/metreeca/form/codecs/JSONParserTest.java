@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
@@ -234,6 +235,40 @@ final class JSONParserTest {
 		)))
 				.as("named loops")
 				.isEqualTo(decode("_:x rdf:value [rdf:value _:x] ."));
+	}
+
+	@Test void testInlineProvedIRIBackReferences() {
+		assertThat(rdf(
+
+				map(
+						entry("this", "http://example.com/x"),
+						entry(value, "http://example.com/x")
+				),
+
+				null,
+
+				field(RDF.VALUE, and(required(), datatype(Form.IRIType)))
+
+		))
+				.as("inlined IRI back-reference")
+				.isIsomorphicTo(decode("<x> rdf:value <x>."));
+	}
+
+	@Test void testInlineProvedBnodeBackReferences() {
+		assertThat(rdf(
+
+				map(
+						entry("this", "_:x"),
+						entry(value, "_:x")
+				),
+
+				null,
+
+				field(RDF.VALUE, and(required(), datatype(Form.BNodeType)))
+
+		))
+				.as("inlined IRI back-reference")
+				.isIsomorphicTo(decode("_:x rdf:value _:x ."));
 	}
 
 
