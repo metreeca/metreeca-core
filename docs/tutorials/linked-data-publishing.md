@@ -20,19 +20,24 @@ A Maven project with the code for the complete demo app is available on [GitHub]
 To get started, set up a Java 1.8 project, adding required dependencies for the Metreeca/Link [adapter](../javadocs/) for the target deployment server. In this tutorial we will deploy to a Servlet 3.1 container like Tomcat 8,  so using Maven:
 
 ```xml
+<groupId>com.example</groupId>
+<artifactId>demo</artifactId>
+<version>0.0-SNAPSHOT</version>
+<packaging>war</packaging>
+
 <dependencies>
 
     <dependency>
-    <groupId>com.metreeca</groupId>
-    <artifactId>j2ee</artifactId>
-    <version>${project.version}</version>
+        <groupId>com.metreeca</groupId>
+        <artifactId>j2ee</artifactId>
+        <version>${project.version}</version>
     </dependency>
 
     <dependency>
-    <groupId>javax.servlet</groupId>
-    <artifactId>javax.servlet-api</artifactId>
-    <version>3.1.0</version>
-    <scope>provided</scope>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.1.0</version>
+        <scope>provided</scope>
     </dependency>
 
 </dependencies>
