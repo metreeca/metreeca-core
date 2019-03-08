@@ -3,17 +3,17 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Copyright © 2013-2019 Metreeca srl. All rights reserved.
 
-  This file is part of Metreeca.
+  This file is part of the Metreeca Linked Data Platform.
 
-  Metreeca is free software: you can redistribute it and/or modify it under the terms
-  of the GNU Affero General Public License as published by the Free Software Foundation,
+  The Metreeca Linked Data Platform is free software: you can redistribute it and/or modify it under
+  the terms of the GNU Affero General Public License as published by the Free Software Foundation,
   either version 3 of the License, or(at your option) any later version.
 
-  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  The Metreeca Linked Data Platform is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License along with Metreeca.
+  You should have received a copy of the GNU Affero General Public License along with the Metreeca Linked Data Platform.
   If not, see <http://www.gnu.org/licenses/>.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
@@ -113,10 +113,10 @@
 
 	<dependencies> <!-- shared testing dependencies -->
 
-		<dependency>
+		<dependency> <!-- https://search.maven.org/artifact/org.junit.jupiter/junit-jupiter-engine/ -->
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.3.1</version>
+			<version>5.4.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -127,17 +127,17 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency> <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+		<dependency> <!-- https://search.maven.org/artifact/org.assertj/assertj-core/ -->
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.11.1</version>
+			<version>3.12.1</version>
 			<scope>test</scope>
 		</dependency>
 
-		<dependency> <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+		<dependency> <!-- https://search.maven.org/artifact/org.slf4j/slf4j-simple/ -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.25</version>
+			<version>1.7.26</version>
 			<scope>test</scope>
 		</dependency>
 
