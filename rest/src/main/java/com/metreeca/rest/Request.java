@@ -204,7 +204,7 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return Value(new QueryParser(shape).parse(decode(query())));
+			return Value(new QueryParser(shape, item().stringValue()).parse(decode(query())));
 
 		} catch ( final JsonException e ) {
 

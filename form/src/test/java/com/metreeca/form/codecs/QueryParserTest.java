@@ -224,28 +224,9 @@ final class QueryParserTest {
 		);
 
 
-		edges("{ 'filter': { '?': [] } }", shape, edges -> assertThat(edges.getShape())
-				.as("existential (empty)")
-				.isEqualTo(filter(shape, and()))
-		);
-
-		edges("{ 'filter': { '?': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
-				.as("existential (singleton)")
-				.isEqualTo(filter(shape, any(RDF.FIRST)))
-		);
-
-		edges("{ 'filter': { '?': [\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
-				+"] } }", shape, edges -> assertThat(edges.getShape())
-				.as("existential (multiple)")
-				.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
-		);
-
-
 		edges("{ 'filter': { '!': [] } }", shape, edges -> assertThat(edges.getShape())
 				.as("universal (empty)")
-				.isEqualTo(filter(shape, and()))
+				.isEqualTo(filter(shape, all()))
 		);
 
 		edges("{ 'filter': { '!': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
@@ -259,6 +240,25 @@ final class QueryParserTest {
 				+"] } }", shape, edges -> assertThat(edges.getShape())
 				.as("universal (multiple)")
 				.isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
+		);
+
+
+		edges("{ 'filter': { '?': [] } }", shape, edges -> assertThat(edges.getShape())
+				.as("existential (empty)")
+				.isEqualTo(filter(shape, any()))
+		);
+
+		edges("{ 'filter': { '?': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
+				.as("existential (singleton)")
+				.isEqualTo(filter(shape, any(RDF.FIRST)))
+		);
+
+		edges("{ 'filter': { '?': [\n"
+				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
+				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
+				+"] } }", shape, edges -> assertThat(edges.getShape())
+				.as("existential (multiple)")
+				.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
 		);
 
 	}
@@ -298,17 +298,40 @@ final class QueryParserTest {
 						.isEqualTo(filter(shape, all(RDF.FIRST)))
 		);
 
+		edges("{ 'filter': { '!': ["
+						+"'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',"
+						+"'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'"
+						+"] } }",
+				shape, edges -> assertThat(edges.getShape())
+						.as("universal (singleton)")
+						.isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
+		);
+
+		edges("{ 'filter': { '?': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } }",
+				shape, edges -> assertThat(edges.getShape())
+						.as("universal (singleton)")
+						.isEqualTo(filter(shape, any(RDF.FIRST)))
+		);
+
+		edges("{ 'filter': { '?': ["
+						+"'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',"
+						+"'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'"
+						+"] } }",
+				shape, edges -> assertThat(edges.getShape())
+						.as("universal (singleton)")
+						.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
+		);
+
 	}
 
 	@Test void testResolveRootRelativeIRIs() {
 
 		final Shape shape=datatype(Form.IRIType);
 
-		edges("{ 'filter': { '!': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } }",
+		edges("{ 'filter': { '!': '/1999/02/22-rdf-syntax-ns#first' } }",
 				shape, edges -> assertThat(edges.getShape())
 						.as("universal (singleton)")
 						.isEqualTo(filter(shape, all(RDF.FIRST)))
-				// !!! , RDF.NAMESPACE
 		);
 
 	}
@@ -502,7 +525,7 @@ final class QueryParserTest {
 
 
 	private void test(final String json, final Shape shape, final Query.Probe<Boolean> probe) {
-		assertThat(new QueryParser(shape).parse(json.replace('\'', '"')).map(probe))
+		assertThat(new QueryParser(shape, RDF.NAMESPACE).parse(json.replace('\'', '"')).map(probe))
 				.as("query processed")
 				.isTrue();
 	}

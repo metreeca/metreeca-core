@@ -17,9 +17,7 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Order;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
+import com.metreeca.form.*;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
@@ -31,6 +29,7 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
 
@@ -56,15 +55,17 @@ import static java.util.stream.Collectors.toList;
 
 
 	private final Shape shape;
+	private final URI base;
 
 
-	public QueryParser(final Shape shape) {
+	public QueryParser(final Shape shape, final String base) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
 		this.shape=shape;
+		this.base=base == null? null : URI.create(base);
 	}
 
 
@@ -78,7 +79,7 @@ import static java.util.stream.Collectors.toList;
 	 * @throws NullPointerException   if {@code json} is null
 	 * @throws JsonException          if {@code json} is malformed
 	 * @throws NoSuchElementException if the query encoded by {@code json} referes to data outside the {@linkplain
-	 *                                #QueryParser(Shape) parser shape}
+	 *                                #QueryParser(Shape, String) parser shape}
 	 */
 	public Query parse(final String json) throws JsonException {
 
@@ -212,22 +213,22 @@ import static java.util.stream.Collectors.toList;
 		return and(object
 				.entrySet()
 				.stream()
-				.map(entry -> shape(entry.getKey(), shape, entry.getValue()))
+				.map(entry -> shape(shape, entry.getKey(), entry.getValue()))
 				.collect(toList())
 		);
 	}
 
-	private Shape shape(final String key, final Shape shape, final Object value) {
+	private Shape shape(final Shape shape, final String key, final Object value) {
 
 		switch ( key ) {
 
 			case "^": return datatype(value);
 			case "@": return clazz(value);
 
-			case ">": return minExclusive(value);
-			case "<": return maxExclusive(value);
-			case ">=": return minInclusive(value);
-			case "<=": return maxInclusive(value);
+			case ">": return minExclusive(shape, value);
+			case "<": return maxExclusive(shape, value);
+			case ">=": return minInclusive(shape, value);
+			case "<=": return maxInclusive(shape, value);
 
 			case ">#": return minLength(value);
 			case "#<": return maxLength(value);
@@ -236,8 +237,8 @@ import static java.util.stream.Collectors.toList;
 
 			case ">>": return minCount(value);
 			case "<<": return maxCount(value);
-			case "?": return any(value);
-			case "!": return all(value);
+			case "!": return all(shape, value);
+			case "?": return any(shape, value);
 
 			default:
 
@@ -262,27 +263,27 @@ import static java.util.stream.Collectors.toList;
 	}
 
 
-	private Shape minExclusive(final Object value) {
+	private Shape minExclusive(final Shape shape, final Object value) {
 		return value != null
-				? MinExclusive.minExclusive(value(value))
+				? MinExclusive.minExclusive(value(shape, value))
 				: error("value is null");
 	}
 
-	private Shape maxExclusive(final Object value) {
+	private Shape maxExclusive(final Shape shape, final Object value) {
 		return value != null
-				? MaxExclusive.maxExclusive(value(value))
+				? MaxExclusive.maxExclusive(value(shape, value))
 				: error("value is null");
 	}
 
-	private Shape minInclusive(final Object value) {
+	private Shape minInclusive(final Shape shape, final Object value) {
 		return value != null
-				? MinInclusive.minInclusive(value(value))
+				? MinInclusive.minInclusive(value(shape, value))
 				: error("value is null");
 	}
 
-	private Shape maxInclusive(final Object value) {
+	private Shape maxInclusive(final Shape shape, final Object value) {
 		return value != null
-				? MaxInclusive.maxInclusive(value(value))
+				? MaxInclusive.maxInclusive(value(shape, value))
 				: error("value is null");
 	}
 
@@ -324,15 +325,15 @@ import static java.util.stream.Collectors.toList;
 				: error("length is not a number");
 	}
 
-	private Shape all(final Object value) {
+	private Shape all(final Shape shape, final Object value) {
 		return value != null
-				? values(value).isEmpty() ? and() : All.all(values(value))
+				? All.all(values(shape, value))
 				: error("value is null");
 	}
 
-	private Shape any(final Object value) {
+	private Shape any(final Shape shape, final Object value) {
 		return value != null
-				? values(value).isEmpty() ? and() : Any.any(values(value))
+				? Any.any(values(shape, value))
 				: error("value is null");
 	}
 
@@ -352,17 +353,29 @@ import static java.util.stream.Collectors.toList;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Value> values(final Object object) {
-		return object instanceof Collection ? values((Collection<Object>)object)
-				: singleton(value(object));
+	private Collection<Value> values(final Shape shape, final Object object) {
+		return object instanceof Collection ? values(shape, (Collection<Object>)object)
+				: singleton(value(shape, object));
 	}
 
-	private Collection<Value> values(final Collection<Object> array) {
-		return array.stream().map(this::value).collect(toList());
+	private Collection<Value> values(final Shape shape, final Collection<Object> array) {
+		return array.stream().map(o -> value(shape, (Object)o)).collect(toList());
+	}
+
+
+	private Value value(final Shape shape, final Object object) {
+		return Datatype.datatype(shape)
+
+				.map(datatype -> datatype.equals(Form.IRIType) && object instanceof String?
+						iri(base == null ? (String)object : base.resolve((String)object).toString())
+						: value(object)
+				)
+
+				.orElseGet(() -> value(object));
 	}
 
 	private Value value(final Object object) {
-		return object instanceof Map ? value((Map<String, Object>)object)
+		return object instanceof Map ? value(shape, (Map<String, Object>)object)
 				: object instanceof BigDecimal ? literal((BigDecimal)object)
 				: object instanceof BigInteger ? literal((BigInteger)object)
 				: object instanceof Number ? literal(((Number)object).doubleValue())
@@ -370,7 +383,7 @@ import static java.util.stream.Collectors.toList;
 				: null;
 	}
 
-	private Value value(final Map<String, Object> object) {
+	private Value value(final Shape shape, final Map<String, Object> object) {
 		return iri(object.get("this").toString());
 	}
 
