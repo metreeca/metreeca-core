@@ -31,14 +31,13 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.function.Function;
 
-import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
-import static com.metreeca.form.truths.JSONAssert.assertThat;
+import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 
 
 final class UpdaterTest {
@@ -52,62 +51,9 @@ final class UpdaterTest {
 
 
 	private Function<Request, Request> body(final String rdf) {
-		return request -> request.body(input(), () -> Codecs.input(new StringReader(rdf)));
+		return request -> request.body(input(), () -> Codecs.input(new StringReader(turtle(rdf))));
 	}
 
-
-	@Nested final class Container {
-
-		private Request simple() {
-			return new Request()
-					.roles(Manager)
-					.method(Request.POST)
-					.base(Base)
-					.path("/employees/")
-					.map(body("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>. <> rdfs:label 'Updated!'."));
-		}
-
-		@Nested final class Simple {
-
-			@Test void testUpdate() {
-				exec(() -> new Updater()
-
-						.handle(simple())
-
-						.accept(response -> assertThat(response)
-								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> assertThat(json)
-										.hasField("cause")
-								)
-						)
-				);
-			}
-
-		}
-
-		@Nested final class Shaped {
-
-			private Request shaped() {
-				return simple().shape(Employees);
-			}
-
-			@Test void testUpdate() {
-				exec(() -> new Updater()
-
-						.handle(shaped())
-
-						.accept(response -> assertThat(response)
-								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> assertThat(json)
-										.hasField("cause")
-								)
-						)
-				);
-			}
-
-		}
-
-	}
 
 	@Nested final class Resource {
 
@@ -117,7 +63,7 @@ final class UpdaterTest {
 					.method(Request.POST)
 					.base(Base)
 					.path("/employees/1370") // Gerard Hernandez
-					.map(body("@prefix : <http://example.com/terms#> . <>"
+					.map(body("<>"
 							+":forename 'Tino';"
 							+":surname 'Faussone';"
 							+":email 'tfaussone@example.com';"
@@ -142,9 +88,8 @@ final class UpdaterTest {
 
 							assertThat(graph())
 
-									.as("graph updated")
-
-									.hasSubset(decode("@prefix : <http://example.com/terms#> . </employees/1370>"
+									.as("updated values inserted")
+									.hasSubset(decode("</employees/1370>"
 											+":forename 'Tino';"
 											+":surname 'Faussone';"
 											+":email 'tfaussone@example.com';"
@@ -152,8 +97,11 @@ final class UpdaterTest {
 											+":seniority 5 ."
 									))
 
-									.doesNotHaveStatement(item("employees/1370"), term("forename"), literal("Gerard"))
-									.doesNotHaveStatement(item("employees/1370"), term("surname"), literal("Hernandez"));
+									.as("previous values removed")
+									.doesNotHaveSubset(decode("</employees/1370>"
+											+":forename 'Gerard';"
+											+":surname 'Hernandez'."
+									));
 
 						}));
 			}
@@ -182,7 +130,7 @@ final class UpdaterTest {
 			@Test void testExceedingData() {
 				exec(() -> new Updater()
 
-						.handle(simple().map(body("@prefix : <http://example.com/terms#>. <>"
+						.handle(simple().map(body("<>"
 								+" :forename 'Tino' ;"
 								+" :surname 'Faussone' ;"
 								+" :office <offices/1> . <offices/1> :value 'exceeding' ."
@@ -226,8 +174,7 @@ final class UpdaterTest {
 
 							assertThat(graph())
 
-									.as("graph updated")
-
+									.as("updated values inserted")
 									.hasSubset(decode("</employees/1370>"
 											+":forename 'Tino';"
 											+":surname 'Faussone';"
@@ -236,8 +183,12 @@ final class UpdaterTest {
 											+":seniority 5 ."
 									))
 
-									.doesNotHaveStatement(item("employees/1370"), term("forename"), literal("Gerard"))
-									.doesNotHaveStatement(item("employees/1370"), term("surname"), literal("Hernandez"));
+
+									.as("previous values removed")
+									.doesNotHaveSubset(decode("</employees/1370>"
+											+":forename 'Gerard';"
+											+":surname 'Hernandez'."
+									));
 
 						}));
 			}
@@ -301,7 +252,7 @@ final class UpdaterTest {
 			@Test void testInvalidData() {
 				exec(() -> new Updater()
 
-						.handle(shaped().map(body("@prefix : <http://example.com/terms#>. <employees/1370>"
+						.handle(shaped().map(body("<employees/1370>"
 								+":forename 'Tino';"
 								+":surname 'Faussone';"
 								+":email 'tfaussone@example.com' ;"
@@ -340,6 +291,61 @@ final class UpdaterTest {
 									.isIsomorphicTo(small());
 
 						}));
+			}
+
+		}
+
+	}
+
+	@Nested final class Container {
+
+		private Request simple() {
+			return new Request()
+					.roles(Manager)
+					.method(Request.POST)
+					.base(Base)
+					.path("/employees/")
+					.map(body("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>. <> rdfs:label 'Updated!'."));
+		}
+
+
+		@Nested final class Simple {
+
+			@Test void testNotImplemented() {
+				exec(() -> new Updater()
+
+						.handle(simple())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
+
+		}
+
+		@Nested final class Shaped {
+
+			private Request shaped() {
+				return simple().shape(Employees);
+			}
+
+
+			@Test void testNotImplemented() {
+				exec(() -> new Updater()
+
+						.handle(shaped())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
 			}
 
 		}

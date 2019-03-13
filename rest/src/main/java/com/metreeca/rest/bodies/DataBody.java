@@ -83,10 +83,10 @@ public final class DataBody implements Body<byte[]> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <T extends Message<T>> T set(final T message) {
-		return message.pipe(output(), consumer -> message.body(data()).value(bytes -> target -> {
+		return message.body(output(), data().map(data -> target -> {
 			try (final OutputStream output=target.get()) {
 
-				output.write(bytes);
+				output.write(data);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

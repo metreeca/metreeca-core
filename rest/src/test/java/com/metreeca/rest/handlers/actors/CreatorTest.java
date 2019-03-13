@@ -45,7 +45,7 @@ import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
-import static com.metreeca.form.truths.JSONAssert.assertThat;
+import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.truths.ValueAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -63,7 +63,7 @@ final class CreatorTest {
 
 
 	private Function<Request, Request> body(final String rdf) {
-		return request -> request.body(input(), () -> Codecs.input(new StringReader(rdf)));
+		return request -> request.body(input(), () -> Codecs.input(new StringReader(turtle(rdf))));
 	}
 
 
@@ -143,7 +143,7 @@ final class CreatorTest {
 					.method(Request.POST)
 					.base(Base)
 					.path("/employees/")
-					.map(body("@prefix : <http://example.com/terms#>. <>"
+					.map(body("<>"
 							+" :forename 'Tino' ;"
 							+" :surname 'Faussone' ;"
 							+" :email 'tfaussone@classicmodelcars.com' ;"
@@ -153,7 +153,7 @@ final class CreatorTest {
 		}
 
 
-		@Nested final class Simple {
+		@Nested final class Simple { // containers are virtual => no unknown error
 
 			@Test void testCreate() {
 				exec(() -> new Creator()
@@ -162,7 +162,11 @@ final class CreatorTest {
 
 						.accept(response -> {
 
-							final IRI location=response
+							final IRI container=response
+									.request()
+									.item();
+
+							final IRI resource=response
 									.header("Location")
 									.map(Values::iri)
 									.orElse(null);
@@ -171,21 +175,21 @@ final class CreatorTest {
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
-							assertThat(location)
+							assertThat(resource)
 									.as("resource created with IRI stemmed on request focus")
-									.hasNamespace(response.request().item().stringValue());
+									.hasNamespace(container.stringValue());
 
 							assertThat(graph())
 									.as("resource description stored into the graph")
 									.hasSubset(
-											statement(location, term("forename"), literal("Tino")),
-											statement(location, term("surname"), literal("Faussone"))
+											statement(resource, term("forename"), literal("Tino")),
+											statement(resource, term("surname"), literal("Faussone"))
 									);
 
 							assertThat(graph())
 									.as("basic container connected to resource description")
 									.hasSubset(
-											statement(response.request().item(), LDP.CONTAINS, location)
+											statement(container, LDP.CONTAINS, resource)
 									);
 
 						}));
@@ -219,6 +223,7 @@ final class CreatorTest {
 			}
 
 
+
 			@Test void testMalformedData() {
 				exec(() -> new Creator()
 
@@ -243,7 +248,7 @@ final class CreatorTest {
 			@Test void testExceedingData() {
 				exec(() -> new Creator()
 
-						.handle(simple().map(body("@prefix : <http://example.com/terms#>. <>"
+						.handle(simple().map(body("<>"
 								+" :forename 'Tino' ;"
 								+" :surname 'Faussone' ;"
 								+" :office <offices/1> . <offices/1> :value 'exceeding' ."
@@ -290,7 +295,7 @@ final class CreatorTest {
 
 		}
 
-		@Nested final class Shaped {
+		@Nested final class Shaped { // containers are virtual => no unknown error
 
 			private Request shaped() {
 				return simple().shape(Employees);
@@ -417,7 +422,7 @@ final class CreatorTest {
 			@Test void testInvalidData() {
 				exec(() -> new Creator()
 
-						.handle(shaped().map(body("@prefix : <http://example.com/terms#>. <>"
+						.handle(shaped().map(body("<>"
 								+" :forename 'Tino' ;"
 								+" :surname 'Faussone'. "
 						)))

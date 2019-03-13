@@ -22,6 +22,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -32,13 +33,15 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RioSetting;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFWriter;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 
 import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.codecs.JSON.encode;
@@ -48,6 +51,7 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Memoizing.memoizable;
+import static com.metreeca.form.things.Codecs.writer;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -66,29 +70,37 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private final String base;
 	private final Writer writer;
 
 	private final Model model=new LinkedHashModel();
 
 
 	public JSONWriter(final OutputStream stream) {
-
-		if ( stream == null ) {
-			throw new NullPointerException("null stream");
-		}
-
-		this.writer=new OutputStreamWriter(stream, Charset.forName("UTF-8"));
+		this(stream, null);
 	}
 
+	public JSONWriter(final OutputStream stream, final String base) {
+		this(writer(stream), base);
+	}
+
+
 	public JSONWriter(final Writer writer) {
+		this(writer, null);
+	}
+
+	public JSONWriter(final Writer writer, final String base) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
 		}
 
+		this.base=root(base);
 		this.writer=writer;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public RDFFormat getRDFFormat() {
 		return JSONCodec.JSONFormat;
@@ -162,13 +174,13 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 		if ( datatype.filter(iri -> iri.equals(Form.IRIType)).isPresent() && fields.isEmpty() ) {
 
-			return id; // inline proved leaf IRI
+			return relativize(id); // inline proved leaf IRI
 
 		} else {
 
 			final Map<Object, Object> object=new LinkedHashMap<>();
 
-			object.put("this", resource instanceof BNode ? "_:"+id : id);
+			object.put("this", resource instanceof BNode ? "_:"+id : relativize(id));
 
 			if ( !trail.test(resource) ) { // not a back-reference to an enclosing copy of self -> include fields
 
@@ -277,6 +289,23 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 	private Object json(final Literal literal, final IRI datatype) {
 		return object(field("text", literal.stringValue()), field("type", datatype.stringValue()));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private String root(final CharSequence base) {
+		if ( base == null ) { return null; } else {
+
+			final Matcher matcher=Values.IRIPattern.matcher(base);
+
+			return matcher.matches() ? matcher.group("schemeall")+matcher.group("hostall")+"/" : null;
+
+		}
+	}
+
+	private String relativize(final String iri) {
+		return base != null && iri.startsWith(base) ? iri.substring(base.length()-1) : iri;
 	}
 
 }

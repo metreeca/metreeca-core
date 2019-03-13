@@ -18,7 +18,7 @@
 package com.metreeca.rest.handlers.actors;
 
 
-import com.metreeca.form.truths.JSONAssert;
+import com.metreeca.form.truths.JsonAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -46,58 +46,6 @@ final class DeleterTest {
 	}
 
 
-	@Nested final class Container {
-
-		private Request simple() {
-			return new Request()
-					.roles(Manager)
-					.method(Request.DELETE)
-					.base(Base)
-					.path("/employees/");
-		}
-
-		@Nested final class Simple {
-
-			@Test void testNotImplemented() {
-				exec(() -> new Deleter()
-
-						.handle(simple())
-
-						.accept(response -> assertThat(response)
-								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> JSONAssert.assertThat(json)
-										.hasField("cause")
-								)
-						)
-				);
-			}
-
-		}
-
-		@Nested final class Shaped {
-
-			private Request shaped() {
-				return simple().shape(Employees);
-			}
-
-			@Test void testNotImplemented() {
-				exec(() -> new Deleter()
-
-						.handle(shaped())
-
-						.accept(response -> assertThat(response)
-								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> JSONAssert.assertThat(json)
-										.hasField("cause")
-								)
-						)
-				);
-			}
-
-		}
-
-	}
-
 	@Nested final class Resource {
 
 		private Request simple() {
@@ -106,10 +54,6 @@ final class DeleterTest {
 					.method(Request.DELETE)
 					.base(Base)
 					.path("/employees/1370");
-		}
-
-		private Request shaped() {
-			return simple().shape(Employee);
 		}
 
 
@@ -162,6 +106,11 @@ final class DeleterTest {
 		}
 
 		@Nested final class Shaped {
+
+			private Request shaped() {
+				return simple().shape(Employee);
+			}
+
 
 			@Test void testDelete() {
 				exec(() -> new Deleter()
@@ -233,6 +182,60 @@ final class DeleterTest {
 									.isIsomorphicTo(Dataset);
 
 						}));
+			}
+
+		}
+
+	}
+
+	@Nested final class Container {
+
+		private Request simple() {
+			return new Request()
+					.roles(Manager)
+					.method(Request.DELETE)
+					.base(Base)
+					.path("/employees/");
+		}
+
+
+		@Nested final class Simple {
+
+			@Test void testNotImplemented() {
+				exec(() -> new Deleter()
+
+						.handle(simple())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> JsonAssert.assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
+
+		}
+
+		@Nested final class Shaped {
+
+			private Request shaped() {
+				return simple().shape(Employees);
+			}
+
+
+			@Test void testNotImplemented() {
+				exec(() -> new Deleter()
+
+						.handle(shaped())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> JsonAssert.assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
 			}
 
 		}

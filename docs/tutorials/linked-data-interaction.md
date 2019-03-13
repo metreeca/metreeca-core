@@ -57,17 +57,20 @@ Link: <http://localhost:8080/products/S18_3140?specs>;
 		rel=http://www.w3.org/ns/ldp#constrainedBy
 Content-Type: text/turtle;charset=UTF-8
 
-<http://localhost:8080/products/S18_3140> a <http://localhost:8080/terms#Product>;
-  <http://localhost:8080/terms#code> "S18_3140";
-  <http://localhost:8080/terms#line> <http://localhost:8080/product-lines/vintage-cars>;
-  <http://localhost:8080/terms#scale> "1:18";
-  <http://localhost:8080/terms#sell> 136.59;
-  <http://localhost:8080/terms#stock> 3913;
-  <http://localhost:8080/terms#vendor> "Unimax Art Galleries";
-  <http://www.w3.org/2000/01/rdf-schema#comment> "Features opening trunk,  working steering system";
+
+@base <http://localhost:8080/products/S18_3140> .
+
+<> a </terms#Product>;
+  </terms#code> "S18_3140";
+  </terms#line> </product-lines/vintage-cars>;
+  </terms#scale> "1:18";
+  </terms#sell> 136.59;
+  </terms#stock> 3913;
+  </terms#vendor> "Unimax Art Galleries";
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Features opening trunk,…";
   <http://www.w3.org/2000/01/rdf-schema#label> "1903 Ford Model A" .
 
-<http://localhost:8080/product-lines/vintage-cars> <http://www.w3.org/2000/01/rdf-schema#label> "Vintage Cars" .
+</product-lines/vintage-cars> <http://www.w3.org/2000/01/rdf-schema#label> "Vintage Cars" .
 ```
 
 Standard content negotiation is supported, so you may ask for resource descriptions in a suitable RDF concrete syntax ([Turtle](https://www.w3.org/TR/turtle/), [N-Triples](https://www.w3.org/TR/n-triples/), [RDF/XML](https://www.w3.org/TR/rdf-syntax-grammar/), …) specifying the associated MIME type in the `Accept` HTTP request header.
@@ -86,28 +89,29 @@ Content-Type: application/rdf+xml
 
 <?xml version="1.0" encoding="UTF-8"?>
 <rdf:RDF
-        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xml:base="http://localhost:8080/products/S18_3140">
 
-<rdf:Description rdf:about="http://localhost:8080/products/S18_3140">
-        <rdf:type rdf:resource="http://localhost:8080/terms#Product"/>
+<rdf:Description rdf:about="">
+        <rdf:type rdf:resource="/terms#Product"/>
         <label xmlns="http://www.w3.org/2000/01/rdf-schema#">1903 Ford Model A</label>
-        <comment xmlns="http://www.w3.org/2000/01/rdf-schema#">Features opening trunk,  working steering system</comment>
+        <comment xmlns="http://www.w3.org/2000/01/rdf-schema#">Features opening trunk, …</comment>
         <code xmlns="http://localhost:8080/terms#">S18_3140</code>
-        <line xmlns="http://localhost:8080/terms#" rdf:resource="http://localhost:8080/product-lines/vintage-cars"/>
+        <line xmlns="http://localhost:8080/terms#" rdf:resource="/product-lines/vintage-cars"/>
 </rdf:Description>
 
-<rdf:Description rdf:about="http://localhost:8080/product-lines/vintage-cars">
+<rdf:Description rdf:about="/product-lines/vintage-cars">
         <label xmlns="http://www.w3.org/2000/01/rdf-schema#">Vintage Cars</label>
 </rdf:Description>
 
-<rdf:Description rdf:about="http://localhost:8080/products/S18_3140">
+<rdf:Description rdf:about="">
         <scale xmlns="http://localhost:8080/terms#">1:18</scale>
         <vendor xmlns="http://localhost:8080/terms#">Unimax Art Galleries</vendor>
         <stock xmlns="http://localhost:8080/terms#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3913</stock>
         <sell xmlns="http://localhost:8080/terms#" rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">136.59</sell>
 </rdf:Description>
 
-</rdf:RDF>   
+</rdf:RDF>
 ```
 
 JSON-based formats are especially convenient for front-end development: beside the standardised  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialisation, Metreeca supports a simpler [idiomatic](../references/idiomatic-json.md) JSON-based format, which streamlines resource descriptions taking into account the constraints described in the associated linked data models.
@@ -127,13 +131,13 @@ Link: <http://localhost:8080/products/S18_3140?specs>;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "http://localhost:8080/products/S18_3140",
-    "type": "http://localhost:8080/terms#Product",
+    "this": "/products/S18_3140",
+    "type": "/terms#Product",
     "label": "1903 Ford Model A",
     "comment": "Features opening trunk,  working steering system",
     "code": "S18_3140",
     "line": {
-        "this": "http://localhost:8080/product-lines/vintage-cars",
+        "this": "/product-lines/vintage-cars",
         "label": "Vintage Cars"
     },
     "scale": "1:18",
@@ -156,7 +160,7 @@ HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "http://localhost:8080/products/S18_3140",
+    "this": "/products/S18_3140",
     
     ⋮
     
@@ -187,16 +191,16 @@ Link: <http://localhost:8080/products/?specs>;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "http://localhost:8080/products/",
+    "this": "/products/",
     "contains": [
         {
-            "this": "http://localhost:8080/products/S10_1678",
-            "type": "http://localhost:8080/terms#Product",
+            "this": "/products/S10_1678",
+            "type": "/terms#Product",
             "label": "1969 Harley Davidson Ultimate Chopper",
-            "comment": "This replica features working kickstand, front suspension, gear-shift lever, footbrake lever, drive chain, wheels and steering. All parts are particularly delicate due to their precise scale and require special care and attention.",
+            "comment": "This replica features working kickstand, front suspension,…",
             "code": "S10_1678",
             "line": {
-                "this": "http://localhost:8080/product-lines/motorcycles",
+                "this": "/product-lines/motorcycles",
                 "label": "Motorcycles"
             },
             "scale": "1:10",
@@ -231,7 +235,7 @@ Preference-Applied: return=representation;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "http://localhost:8080/products/",
+    "this": "/products/",
 }
 ```
 
@@ -294,7 +298,7 @@ Note that the `line` property is included in a shorthand form, as it is inferred
     "vendor": "Autoart Studio Design",
     "buy": 87.0,
     "price": 99.0,
-    "line": "http://localhost:8080/product-lines/motorcycles" 
+    "line": "/product-lines/motorcycles" 
 }
 EOF
 
@@ -366,7 +370,7 @@ Submitted data is automatically matched against the allowed envelope specified i
     "vendor": "Autoart Studio Design",
     "buy": 87.0,
     "price": 99.0,
-    "line": "http://localhost:8080/product-lines/motorcycles" 
+    "line": "/product-lines/motorcycles" 
 }
 EOF
 
@@ -390,7 +394,7 @@ Note that  server-managed properties like `demo:code` and `demo:stock` are omitt
 {
     "label": "1903 Ford Model A",
     "comment": "Features opening trunk,  working steering system",
-    "line": "http://localhost:8080/product-lines/vintage-cars",
+    "line": "/product-lines/vintage-cars",
     "scale": "1:18",
     "vendor": "Unimax Art Galleries",
     "buy": 68.3,
@@ -442,16 +446,16 @@ HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "http://localhost:8080/products/",
+    "this": "/products/",
     "contains": [
         {
-            "this": "http://localhost:8080/products/S10_1949",
-            "type": "http://localhost:8080/terms#Product",
+            "this": "/products/S10_1949",
+            "type": "/terms#Product",
             "label": "1952 Alpine Renault 1300",
-            "comment": "Turnable front wheels; steering function; detailed interior; detailed engine; opening hood; opening trunk; opening doors; and detailed chassis.",
+            "comment": "Turnable front wheels; steering function; detailed interior; …",
             "code": "S10_1949",
             "line": {
-                "this": "http://localhost:8080/product-lines/classic-cars",
+                "this": "/product-lines/classic-cars",
                 "label": "Classic Cars"
             },
             "scale": "1:10",
@@ -507,7 +511,7 @@ HTTP/2 200 OK
 Content-Type: application/json
 
 {
-    "this": "http://localhost:8080/products",
+    "this": "/products",
     "count": 10,
     "min": 44.8,
     "max": 214.3,
@@ -546,7 +550,7 @@ Content-Type: application/json
         {
             "count": 6,
             "value": {
-                "this": "http://localhost:8080/product-lines/classic-cars",
+                "this": "/product-lines/classic-cars",
                 "label": "Classic Cars",
                 "comment": "Unique, diecast airplane and helicopter replicas…"
             }
@@ -554,7 +558,7 @@ Content-Type: application/json
         {
             "count": 1,
             "value": {
-                "this": "http://localhost:8080/product-lines/planes",
+                "this": "/product-lines/planes",
                 "label": "Planes",
                 "comment": "Model trains are a rewarding hobby for enthusiasts of all ages…"
             }

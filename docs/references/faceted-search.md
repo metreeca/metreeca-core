@@ -110,7 +110,7 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format 
         
         ">#": <object>, // minLength
         "#<": <object>, // maxLength
-                
+        
         "*": "pattern", // pattern (regular expression matching)
         "~": "keywords", // like (stemmed word search)
     

@@ -55,7 +55,22 @@ public final class Values {
 	/**
 	 * A pattern matching absolute IRIs.
 	 */
-	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^\\w+:\\S+$");
+	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^[^:/?#]+:.+$");
+
+	/**
+	 * A pattern matching IRI components.
+	 *
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
+	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
+	 */
+	public static final Pattern IRIPattern=Pattern.compile("^"
+			+ "(?<schemeall>(?<scheme>[^:/?#]+):)?"
+			+ "(?<hostall>//(?<host>[^/?#]*))?"
+			+ "(?<path>[^?#]*)"
+			+ "(?<queryall>\\?(?<query>[^#]*))?"
+			+ "(?<fragmentall>#(?<fragment>.*))?"
+			+"$"
+	);
 
 
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization

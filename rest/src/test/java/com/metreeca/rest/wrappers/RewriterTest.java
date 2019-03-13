@@ -22,9 +22,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.Codecs;
 import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -33,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Optional;
 
 import javax.json.Json;
 
@@ -41,11 +40,17 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Codecs.encode;
+import static com.metreeca.form.things.JsonValues.object;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.RequestAssert.assertThat;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.bodies.MultipartBody.multipart;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.OutputBody.output;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
@@ -108,7 +113,7 @@ final class RewriterTest {
 							.as("rewritten header")
 							.containsExactly("request="+internal("request"));
 
-					return request.reply(response -> response.status(Response.OK)
+					return request.reply(response -> response.status(OK)
 							.header("response", "response="+internal("response")));
 
 				}))
@@ -147,7 +152,7 @@ final class RewriterTest {
 							.as("rewritten encoded query")
 							.isEqualTo(encode(internal("request").toString()));
 
-					return request.reply(response -> response.status(Response.OK));
+					return request.reply(response -> response.status(OK));
 
 				}))
 
@@ -172,7 +177,7 @@ final class RewriterTest {
 					));
 
 					return request.reply(response -> response
-							.status(Response.OK)
+							.status(OK)
 							.shape(request.shape()));
 
 				}))
@@ -211,7 +216,7 @@ final class RewriterTest {
 							error -> fail("missing RDF payload")
 					);
 
-					return request.reply(response -> response.status(Response.OK)
+					return request.reply(response -> response.status(OK)
 							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
 
@@ -247,7 +252,7 @@ final class RewriterTest {
 							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
 					return request.reply(response -> response.
-							status(Response.OK)
+							status(OK)
 							.shape(TestShape)
 							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
@@ -263,11 +268,11 @@ final class RewriterTest {
 						.shape(TestShape)
 
 						.body(input(), () -> new ByteArrayInputStream(
-								Json.createObjectBuilder()
-										.add("p", "o")
-										.build()
+								object(entry("p", "o"))
 										.toString()
-										.getBytes(Codecs.UTF8))))
+										.getBytes(Codecs.UTF8)
+						))
+				)
 
 
 				.accept(response -> {
@@ -281,16 +286,78 @@ final class RewriterTest {
 
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
 										.as("rewritten response json")
-										.isEqualTo(Json.createObjectBuilder()
-												.add("this", External+"s")
-												.add("p", External+"o")
-												.build());
+										.isEqualTo(object(
+												entry("this", "/s"),
+												entry("p", "/o")
+										));
 
 							},
 							error -> fail("missing output body")
 					);
 
 				});
+	}
+
+
+	@Test void testMergedMainPartRewriting() {
+		new Tray()
+
+				.get(() -> new Rewriter(Internal)
+
+						.wrap((Wrapper)handler -> request -> request.body(multipart(150, 300)).fold(
+
+								parts -> Optional.ofNullable(parts.get("main"))
+
+										.map(main -> {
+
+											assertThat(parts.keySet())
+													.containsExactly("main", "file");
+
+											return handler.handle(request.merge(main));
+
+										})
+
+										.orElseGet(() -> request.reply(new Failure()
+												.status(BadRequest)
+												.cause("missing main body part")
+										)),
+
+								request::reply
+
+						))
+
+						.wrap((Handler)request -> {
+
+							assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
+									.isIsomorphicTo(internal("s", "p", "o"))
+							);
+
+							return request.reply(response -> response.status(OK));
+
+						})
+				)
+
+				.handle(new Request()
+
+						.base(External)
+						.path("/s")
+
+						.header("Content-Type", "multipart/form-data; boundary=\"boundary\"")
+
+						.body(input(), () -> new ByteArrayInputStream(("--boundary\n"
+								+"Content-Disposition: form-data; name=\"main\"\n"
+								+"Content-Type: text/turtle\n"
+								+"\n"
+								+"<> <app://external/p> <app://external/o> .\n"
+								+"\n"
+								+"--boundary\t\t\n"
+								+"Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\n"
+								+"\n"
+								+"text\n"
+								+"--boundary--\n"
+						).replace("\n", "\r\n").getBytes(Codecs.UTF8))))
+
+				.accept(response -> assertThat(response).hasStatus(OK));
 	}
 
 }

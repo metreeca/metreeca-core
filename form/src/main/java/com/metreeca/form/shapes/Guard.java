@@ -113,8 +113,10 @@ public final class Guard implements Shape {
 	}
 
 	@Override public String toString() {
-		return "guard("+format(axis)+",\n"
-				+values.stream().map(v -> indent(format(v))).collect(joining(",\n"))+"\n)";
+		return "guard("+format(axis)+(values.isEmpty() ? "" : values.stream()
+				.map(v -> indent(format(v)))
+				.collect(joining(",\n", ":\n", "\n"))
+		)+")";
 	}
 
 }

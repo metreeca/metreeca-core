@@ -32,7 +32,9 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFParser;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -52,6 +54,7 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.Memoizing.memoizable;
+import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 
@@ -93,7 +96,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 
 	@Override public void parse(final InputStream in, final String baseURI)
-			throws IOException, RDFParseException, RDFHandlerException {
+			throws RDFParseException, RDFHandlerException {
 
 		if ( in == null ) {
 			throw new NullPointerException("null input stream");
@@ -103,7 +106,7 @@ public final class JSONParser extends AbstractRDFParser {
 			throw new NullPointerException("null base URI");
 		}
 
-		parse(new InputStreamReader(in, "UTF-8"), baseURI);
+		parse(new InputStreamReader(in, UTF8), baseURI);
 	}
 
 	@Override public void parse(final Reader reader, final String baseURI)

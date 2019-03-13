@@ -97,6 +97,8 @@ public abstract class Graph implements AutoCloseable {
 	 * @param repository the backing RDF repository for this graph store; will be initializated and shut down as
 	 *                   required by the calling code
 	 *
+	 * @return this graph store
+	 *
 	 * @throws NullPointerException if {@code repository} is null
 	 */
 	protected Graph repository(final Repository repository) {
@@ -125,6 +127,8 @@ public abstract class Graph implements AutoCloseable {
 	 * Configures the transaction isolation level.
 	 *
 	 * @param isolation the isolation level for transactions on connection managed by this graph store
+	 *
+	 * @return this graph store
 	 *
 	 * @throws NullPointerException if {@code isolation} is null
 	 */

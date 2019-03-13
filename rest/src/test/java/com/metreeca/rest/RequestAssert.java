@@ -18,50 +18,69 @@
 package com.metreeca.rest;
 
 
+import com.metreeca.form.things.Codecs;
+
+import java.io.*;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.TextBody.text;
+
+
 public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
 
 	public static RequestAssert assertThat(final Request request) {
 
-		// !!! reporting
+		if ( request != null ) {
 
-		//if ( request != null ) {
-		//
-		//	final ResponseAssert.Cache cache=new ResponseAssert.Cache(request);
-		//
-		//	if ( !request.body(input()).get().isPresent() ) {
-		//		request.body(input()).set(cache::input); // cache binary body
-		//	}
-		//
-		//	if ( !request.body(reader()).get().isPresent() ) {
-		//		request.body(reader()).set(cache::reader); // cache textual body
-		//	}
-		//
-		//	final StringBuilder builder=new StringBuilder(2500);
-		//
-		//	builder.append(request.status()).append('\n');
-		//
-		//	request.headers().forEach((name, values) -> values.forEach(value ->
-		//			builder.append(name).append(": ").append(value).append('\n')
-		//	));
-		//
-		//	builder.append('\n');
-		//
-		//	request.body(TextBody.text()).use(text -> {
-		//		if ( !text.isEmpty() ) {
-		//
-		//			final int limit=builder.capacity();
-		//
-		//			builder.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮").append("\n\n");
-		//		}
-		//	});
-		//
-		//	Logger.getLogger(request.getClass().getName()).log(
-		//			request.success() ? Level.INFO : Level.WARNING,
-		//			builder.toString(),
-		//			request.cause().orElse(null)
-		//	);
-		//
-		//}
+			request.pipe(input(), input -> Result.Value(new Supplier<InputStream>() { // cache input
+
+				private byte[] data;
+
+				@Override public InputStream get() {
+
+					if ( data == null ) {
+						try (final InputStream in=input.get()) {
+							data=Codecs.data(in);
+						} catch ( final IOException e ) {
+							throw new UncheckedIOException(e);
+						}
+					}
+
+					return new ByteArrayInputStream(data);
+				}
+
+			}));
+
+			final StringBuilder builder=new StringBuilder(2500);
+
+			builder.append(request.method()).append(' ').append(request.item()).append('\n');
+
+			request.headers().forEach((name, values) -> values.forEach(value ->
+					builder.append(name).append(": ").append(value).append('\n')
+			));
+
+			builder.append('\n');
+
+			request.body(text()).value().ifPresent(text -> {
+				if ( !text.isEmpty() ) {
+
+					final int limit=builder.capacity();
+
+					builder
+							.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮")
+							.append("\n\n");
+				}
+			});
+
+			Logger.getLogger(request.getClass().getName()).log(
+					Level.INFO,
+					builder.toString()
+			);
+
+		}
 
 		return new RequestAssert(request);
 	}

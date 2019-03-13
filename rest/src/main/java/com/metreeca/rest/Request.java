@@ -76,6 +76,8 @@ public final class Request extends Message<Request> {
 	private final Map<String, List<String>> parameters=new LinkedHashMap<>();
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Retrieves the focus item IRI of this request.
 	 *
@@ -202,7 +204,7 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return Value(new QueryParser(shape).parse(decode(query())));
+			return Value(new QueryParser(shape, item().stringValue()).parse(decode(query())));
 
 		} catch ( final JsonException e ) {
 
