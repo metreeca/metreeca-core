@@ -1,0 +1,83 @@
+<!--
+  ~ Copyright © 2019 Metreeca srl. All rights reserved.
+  -->
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8">
+
+        <title>…</title>
+
+        <script type="application/javascript">
+
+			function load() {
+				fetch("${base}")
+
+						.then(response => response.status/100 === 2 ?
+								response.text() : Promise.reject(`status ${response.status}`)
+						)
+
+						.then(loader => // transform relative links into absolute ones
+								loader.replace(/\b(src|href)=(['"])([^'"]*)\2/g, function ($0, $1, $2, $3) {
+									return `${$1}=${$2}${new URL($3, new URL("${base}", location.href))}${$2}`
+								})
+						)
+
+						.then(loader => // load target document
+								document.documentElement.innerHTML=new DOMParser()
+										.parseFromString(loader, "text/html").documentElement.innerHTML
+						)
+
+						.then(loader => // execute scripts ;(scripts loaded with innerHTML are not executed by default)
+
+								(function load(scripts, index) {
+
+											if ( index < scripts.length ) { // more scripts > execute next synchronously
+
+												const script=scripts[index];
+
+												const clone=Array.from(script.getAttributeNames())
+
+														.reduce(function (clone, attribute) {
+
+															clone.setAttribute(attribute, script.getAttribute(attribute));
+
+															return clone;
+
+														}, document.createElement(script.tagName));
+
+												clone.onload=() => load(scripts, index+1);
+
+												script.parentElement.replaceChild(clone, script);
+
+											} else { // done > execute loading callback
+
+												if ( window.onload ) { window.onload() }
+
+											}
+
+										}
+
+								)(document.getElementsByTagName("script"), 0)
+						)
+
+						.catch(reason => alert(`;-( unable to load application / ${reason} )`));
+
+			}
+
+
+        </script>
+
+    </head>
+
+    <body onload="load()">
+
+        <noscript>:-( no javascript, no app… </noscript>
+
+    </body>
+
+</html>

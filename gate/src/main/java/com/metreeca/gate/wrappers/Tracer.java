@@ -53,7 +53,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
  *          :time "timestamp"^^xsd:dateTime;    # ms-precision timestamp
  * }</pre>
  */
-public final class Tracer implements Wrapper {
+@Deprecated public final class Tracer implements Wrapper {
 
 	private IRI task=RDF.NIL;
 	private String update="";

@@ -17,7 +17,6 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.form.things.Codecs;
 import com.metreeca.gate.Roster;
 import com.metreeca.gate.RosterTest;
 import com.metreeca.rest.*;
@@ -26,8 +25,7 @@ import com.metreeca.tray.Tray;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.bodies.TextBody.text;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,6 +38,7 @@ final class BearerTest {
 	private Tray tray() {
 		return new Tray().set(Roster.Factory, RosterTest.MockRoster::new);
 	}
+
 
 	private Handler bearer(final Handler handler) {
 		return new Bearer().wrap(handler);
@@ -59,7 +58,7 @@ final class BearerTest {
 
 				.handle(new Request()
 						.method(Request.GET)
-						.body(reader(), Codecs::reader))
+				)
 
 				.accept(response -> {
 
