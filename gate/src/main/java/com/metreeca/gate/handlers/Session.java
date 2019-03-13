@@ -17,6 +17,7 @@
 
 package com.metreeca.gate.handlers;
 
+import com.metreeca.gate.Permit;
 import com.metreeca.gate.Roster;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
@@ -210,7 +211,7 @@ final class Session implements Handler {
 				&& Arrays.stream(fields).allMatch(field -> payload.get(field) instanceof JsonString);
 	}
 
-	private JsonObject ticket(final Roster.Permit permit) { // !!! review user/roles reporting
+	private JsonObject ticket(final Permit permit) { // !!! review user/roles reporting
 		return Json.createObjectBuilder()
 
 				.add("label", permit.label())

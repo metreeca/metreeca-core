@@ -17,12 +17,13 @@
 
 package com.metreeca.gate.rosters;
 
+import com.metreeca.gate.Permit;
 import com.metreeca.gate.Roster;
 
 
-public final class KeyRoster implements Roster {  // !!! hardwired super-user
+@Deprecated public final class KeyRoster implements Roster {  // !!! hardwired super-user
 
-	@Override public Roster.Permit profile(final String alias) {
+	@Override public Permit profile(final String alias) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 

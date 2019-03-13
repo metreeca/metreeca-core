@@ -27,6 +27,11 @@ import java.util.function.Supplier;
  */
 public interface Digest {
 
+	/**
+	 * Digest factory.
+	 *
+	 * <p>By default throws an exception reporting the secret digest as undefined.</p>
+	 */
 	public static Supplier<Digest> Factory=() -> { throw new IllegalStateException("undefined digest tool"); };
 
 

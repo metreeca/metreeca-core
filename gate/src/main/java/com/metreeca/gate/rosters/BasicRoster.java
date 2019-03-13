@@ -21,7 +21,7 @@ package com.metreeca.gate.rosters;
 // Salvage key handling and logout to KeyRoster
 
 
-public final class BasicRoster {
+@Deprecated public final class BasicRoster {
 
 	//private static final String SysAdm="admin"; // !!! configurable?
 	//

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.metreeca.gate.Roster.permit;
+import static com.metreeca.gate.Permit.permit;
 
 
 public final class RosterTest {
