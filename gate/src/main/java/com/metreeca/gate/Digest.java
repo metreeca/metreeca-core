@@ -17,21 +17,39 @@
 
 package com.metreeca.gate;
 
-import com.metreeca.gate.digests.PBKDF2Digest;
-
 import java.util.function.Supplier;
 
 
 /**
  * Secret digest.
+ *
+ * <p>Digests and verifies secrets.</p>
  */
-public abstract class Digest {
+public interface Digest {
 
-	public static final Supplier<Digest> Factory=PBKDF2Digest::new; // !!! auto-verify switch on digest tag
+	public static Supplier<Digest> Factory=() -> { throw new IllegalStateException("undefined digest tool"); };
 
 
-	public abstract String digest(final String secret);
+	/**
+	 * Digests a secret.
+	 *
+	 * @param secret the secret to be digested
+	 * @return the digest derived from {@code secret}
+	 *
+	 * @throws NullPointerException if {@code secret} is null
+	 */
+	public String digest(final String secret);
 
-	public abstract boolean verify(final String secret, final String digest) throws IllegalArgumentException;
+	/**
+	 * Verifies a secret.
+	 *
+	 * @param secret the secret to be verified
+	 * @param digest the digest derived from the expected secret
+	 * @return {@code true} if {@code secret} matches the expected {@code digest}; {@code false} otherwise
+	 *
+	 * @throws NullPointerException if either {@code secret} or {@code digest} is null
+	 * @throws IllegalArgumentException if {@code digest} is non a valid digest representation
+	 */
+	public boolean verify(final String secret, final String digest) throws IllegalArgumentException;
 
 }
