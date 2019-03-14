@@ -5,7 +5,6 @@
 package com.metreeca.gate;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -30,7 +29,7 @@ public final class Permit {
 	private final String digest;
 
 	private final IRI user;
-	private final Set<Value> roles;
+	private final Set<IRI> roles;
 
 	private final JsonObject profile;
 
@@ -42,7 +41,7 @@ public final class Permit {
 	 * @param digest  an opaque value uniquely identifying the state of the user at the time the permit was created;
 	 *                must change on credential and account status updates
 	 * @param user    an IRI uniquely identifying the user
-	 * @param roles   a set of values uniquely identifying the roles attributed to the user
+	 * @param roles   a set of IRIs uniquely identifying the roles attributed to the user
 	 * @param profile a profile for the user, including information useful for handling front-end activities, such as
 	 *                name, picture and operational roles
 	 *
@@ -50,7 +49,7 @@ public final class Permit {
 	 */
 	public Permit(
 			final String handle, final String digest,
-			final IRI user, final Collection<Value> roles,
+			final IRI user, final Collection<IRI> roles,
 			final JsonObject profile
 	) {
 
@@ -114,9 +113,9 @@ public final class Permit {
 	/**
 	 * Retrieves the permit user roles.
 	 *
-	 * @return a set of values uniquely identifying the roles attributed to the permit user
+	 * @return a set of IRIs uniquely identifying the roles attributed to the permit user
 	 */
-	public Set<Value> roles() {
+	public Set<IRI> roles() {
 		return unmodifiableSet(roles);
 	}
 

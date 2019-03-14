@@ -51,7 +51,7 @@ public final class Redactor extends Traverser<Shape> {
 
 	public Redactor(final IRI axis, final Value... values) { this(axis, set(values)); }
 
-	public Redactor(final IRI axis, final Set<Value> values) {
+	public Redactor(final IRI axis, final Set<? extends Value> values) {
 
 		if ( axis == null ) {
 			throw new NullPointerException("null axis");
