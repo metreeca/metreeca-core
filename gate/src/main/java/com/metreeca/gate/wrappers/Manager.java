@@ -42,7 +42,6 @@ import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.gate.Coffer.coffer;
 import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.Result.Error;
@@ -387,12 +386,12 @@ public final class Manager implements Wrapper {
 					.map(Values::iri)
 					.orElseThrow(IllegalArgumentException::new);
 
-			final Set<Value> roles=Optional
+			final Set<IRI> roles=Optional
 					.ofNullable(claims.get("roles", List.class))
 					.map(list -> (List<String>)list)
 					.map(Collection::stream)
 					.orElseThrow(IllegalArgumentException::new)
-					.map(o -> literal((String)o))
+					.map(Values::iri)
 					.collect(toSet());
 
 			return Optional.of(new Session(
@@ -419,7 +418,7 @@ public final class Manager implements Wrapper {
 		private final String digest;
 
 		private final IRI user;
-		private final Set<Value> roles;
+		private final Set<IRI> roles;
 
 
 		private Session(final Permit permit) {
@@ -433,7 +432,7 @@ public final class Manager implements Wrapper {
 		private Session(
 				final long issued,
 				final String handle, final String digest,
-				final IRI user, final Set<Value> roles
+				final IRI user, final Set<IRI> roles
 		) {
 
 			this.handle=handle;
@@ -456,7 +455,7 @@ public final class Manager implements Wrapper {
 
 		private IRI user() { return user; }
 
-		private Set<Value> roles() { return roles; }
+		private Set<IRI> roles() { return roles; }
 
 	}
 
