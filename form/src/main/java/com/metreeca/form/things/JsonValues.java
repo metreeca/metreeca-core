@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.json.*;
 
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 
 
@@ -51,7 +52,11 @@ public final class JsonValues {
 
 
 	public static JsonArray array() {
-		return JsonValue.EMPTY_JSON_ARRAY;
+		return array(JsonValue.EMPTY_JSON_ARRAY);
+	}
+
+	public static JsonArray array(final JsonArray array) {
+		return array;
 	}
 
 	public static JsonArray array(final Object... items) {
@@ -64,7 +69,11 @@ public final class JsonValues {
 
 
 	public static JsonObject object() {
-		return JsonValue.EMPTY_JSON_OBJECT;
+		return object(JsonValue.EMPTY_JSON_OBJECT);
+	}
+
+	public static JsonObject object(final JsonObject object) {
+		return object;
 	}
 
 	@SafeVarargs public static JsonObject object(final Map.Entry<String, Object>... fields) {
@@ -73,6 +82,11 @@ public final class JsonValues {
 
 	public static JsonObject object(final Map<String, Object> map) {
 		return Json.createObjectBuilder(map).build();
+	}
+
+
+	public static Map.Entry<String, Object> field(final String name, final Object value) {
+		return entry(name, value);
 	}
 
 

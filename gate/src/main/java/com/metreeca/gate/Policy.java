@@ -24,6 +24,8 @@ import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import static java.lang.Math.abs;
+
 
 /**
  * Secret policy.
@@ -33,11 +35,13 @@ import java.util.regex.Pattern;
 @FunctionalInterface public interface Policy {
 
 	/**
-	 * Policy factory.
+	 * Retrieves the default policy factory.
 	 *
-	 * <p>By default throws an exception reporting the secret policy as undefined.</p>
+	 * @return the default policy factory, which throws an exception reporting the tool as undefined
 	 */
-	public static Supplier<Policy> Factory=() -> { throw new IllegalStateException("undefined policy tool"); };
+	public static Supplier<Policy> policy() {
+		return () -> { throw new IllegalStateException("undefined policy tool"); };
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,15 +87,6 @@ import java.util.regex.Pattern;
 	}
 
 
-	public static BiFunction<String, String, Long> stopwords() {
-		return (handle, secret) -> Pattern.compile("\\W+")
-				.splitAsStream(handle.toUpperCase(Locale.ROOT))
-				.filter(s -> !s.isEmpty())
-				.filter(s -> secret.toUpperCase(Locale.ROOT).contains(s))
-				.count();
-	}
-
-
 	public static BiFunction<String, String, Long> uppercases() {
 		return characters(Character::isUpperCase);
 	}
@@ -126,6 +121,36 @@ import java.util.regex.Pattern;
 
 	public static BiFunction<String, String, Long> characters(final IntPredicate classifier) {
 		return (handle, secret) -> secret.chars().filter(classifier).count();
+	}
+
+
+
+	public static BiFunction<String, String, Long> stopwords() {
+		return (handle, secret) -> Pattern.compile("\\W+")
+				.splitAsStream(handle.toUpperCase(Locale.ROOT))
+				.filter(s -> !s.isEmpty())
+				.filter(s -> secret.toUpperCase(Locale.ROOT).contains(s))
+				.count();
+	}
+
+	public static BiFunction<String, String, Long> sequences(final int length) {
+		return (handle, secret) -> {
+
+			long count=0L;
+
+			for (int s=0, e=1, l=secret.length(); e <= l; ++e) {
+				if ( e == l || abs(secret.charAt(e)-secret.charAt(e-1)) > 1 ) {
+
+					if ( e-s >= length) { ++ count; }
+
+					s=e;
+				}
+
+			}
+
+			return count;
+
+		};
 	}
 
 

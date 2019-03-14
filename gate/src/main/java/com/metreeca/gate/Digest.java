@@ -28,17 +28,22 @@ import java.util.function.Supplier;
 public interface Digest {
 
 	/**
-	 * Digest factory.
+	 * Retrieves the default digest factory.
 	 *
-	 * <p>By default throws an exception reporting the secret digest as undefined.</p>
+	 * @return the default digest factory, which throws an exception reporting the digest as undefined
 	 */
-	public static Supplier<Digest> Factory=() -> { throw new IllegalStateException("undefined digest tool"); };
+	public static Supplier<Digest> digest() {
+		return () -> { throw new IllegalStateException("undefined digest tool"); };
+	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Digests a secret.
 	 *
 	 * @param secret the secret to be digested
+	 *
 	 * @return the digest derived from {@code secret}
 	 *
 	 * @throws NullPointerException if {@code secret} is null
@@ -50,9 +55,10 @@ public interface Digest {
 	 *
 	 * @param secret the secret to be verified
 	 * @param digest the digest derived from the expected secret
+	 *
 	 * @return {@code true} if {@code secret} matches the expected {@code digest}; {@code false} otherwise
 	 *
-	 * @throws NullPointerException if either {@code secret} or {@code digest} is null
+	 * @throws NullPointerException     if either {@code secret} or {@code digest} is null
 	 * @throws IllegalArgumentException if {@code digest} is non a valid digest representation
 	 */
 	public boolean verify(final String secret, final String digest) throws IllegalArgumentException;

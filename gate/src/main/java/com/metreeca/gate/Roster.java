@@ -17,46 +17,42 @@
 
 package com.metreeca.gate;
 
+import com.metreeca.rest.Result;
+
 import java.util.function.Supplier;
 
 
 /**
  * User roster.
+ *
+ * <p>Authenticates users and manages user credentials.</p>
  */
 public interface Roster {
 
 	/**
-	 * Roster factory.
+	 * Retrieves the default roster factory.
 	 *
-	 * <p>By default throws an exception reporting the user roster as undefined.</p>
+	 * @return the default roster factory, which throws an exception reporting the tool as undefined
 	 */
-	public static Supplier<Roster> Factory=() -> { throw new IllegalStateException("undefined roster tool"); };
+	public static Supplier<Roster> roster() {
+		return () -> { throw new IllegalStateException("undefined roster tool"); };
+	}
 
 
-	public static String CredentialsRejected="credentials-rejected"; // unknown user or invalid secret
-	public static String CredentialsDisabled="credentials-disabled";
-	public static String CredentialsPending="credentials-pending";
-	public static String CredentialsExpired="credentials-expired";
+	public static String CredentialsInvalid="credentials-invalid"; // invalid handle or secret
 	public static String CredentialsIllegal="credentials-illegal"; // secret unacceptable by policy
 
-	public static String CredentialsLocked="credentials-locked"; // account locked by system
+	public static String CredentialsExpired="credentials-expired"; // expired secret
+	public static String CredentialsPending="credentials-pending"; // account to be activated
+	public static String CredentialsRevoked="credentials-revoked"; // account revoked or locked
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Permit profile(final String alias);
+	public Result<Permit, String> lookup(final String handle);
 
+	public Result<Permit, String> lookup(final String handle, final String secret);
 
-	public Permit acquire(final String alias, final String secret);
-
-	public Permit acquire(final String alias, final String secret, final String update);
-
-
-	public Permit refresh(final String alias);
-
-	public Permit release(final String alias);
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public Result<Permit, String> lookup(final String handle, final String secret, final String update);
 
 }

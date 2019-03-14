@@ -7,8 +7,6 @@ package com.metreeca.gate;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.function.BiFunction;
-
 import static com.metreeca.gate.Policy.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,27 +39,6 @@ final class PolicyTest {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	private BiFunction<String, String, Long> sequences(final int length) {
-		return (handle, secret) -> {
-
-			long count=0L;
-
-			for (int s=0, e=1, l=secret.length(); e <= l; ++e) {
-				if ( e == l || abs(secret.charAt(e)-secret.charAt(e-1)) > 1 ) {
-
-					if ( e-s >= length) { ++ count; }
-
-					s=e;
-				}
-
-			}
-
-			return count;
-
-		};
-	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@ import javax.crypto.spec.PBEKeySpec;
 /**
  * PBKDF2 secret digest.
  *
- * @see <a href="https://tools.ietf.org/html/rfc8018#section-5.2">RFCF 8018  PKCS #5: Password-Based Cryptography
+ * @see <a href="https://tools.ietf.org/html/rfc8018#section-5.2">RFCF 8018 PKCS #5: Password-Based Cryptography
  * Specification Version 2.1 - § 5.2 PBKDF2</a>
  */
 public final class PBKDF2Digest implements Digest {
