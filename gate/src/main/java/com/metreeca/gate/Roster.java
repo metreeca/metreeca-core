@@ -21,7 +21,6 @@ import com.metreeca.rest.Result;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 
@@ -52,7 +51,7 @@ public interface Roster {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Optional<IRI> resolve(final String handle);
+	public Result<IRI, String> resolve(final String handle);
 
 
 	public Result<Permit, String> lookup(final IRI user);

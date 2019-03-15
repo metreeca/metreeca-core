@@ -104,8 +104,11 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 		}
 
 
-		@Override public Optional<IRI> resolve(final String handle) {
-			return Optional.of(user(handle)).filter(user2secret::containsKey);
+		@Override public Result<IRI, String> resolve(final String handle) {
+			return Optional.of(user(handle))
+					.filter(user2secret::containsKey)
+					.map(Result::<IRI, String>Value)
+					.orElseGet(() -> Error(CredentialsIllegal));
 		}
 
 

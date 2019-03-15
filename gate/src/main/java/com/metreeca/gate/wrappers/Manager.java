@@ -43,7 +43,6 @@ import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.gate.Coffer.coffer;
-import static com.metreeca.gate.Roster.CredentialsInvalid;
 import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.bodies.JSONBody.json;
@@ -133,8 +132,8 @@ public final class Manager implements Wrapper {
 	 *
 	 * @param path the root relative path of the virtual session endpoint
 	 * @param soft the soft session duration (ms); after the soft duration has expired the session is automatically
-	 *             extended on further activity, provided the {@linkplain Permit#hash() hash} of the user permit
-	 *             didn't change since the session was opened
+	 *             extended on further activity, provided the {@linkplain Permit#hash() hash} of the user permit didn't
+	 *             change since the session was opened
 	 * @param hard the hard session duration (ms); after the hard duration has expired the session is closed, unless
 	 *             automatically extended
 	 *
@@ -325,14 +324,14 @@ public final class Manager implements Wrapper {
 
 	private Result<Permit, Failure> signon(final JsonObject ticket) {
 		return roster.resolve(ticket.getString("handle"))
-				.map(user -> roster.verify(user, ticket.getString("secret")).error(Manager::forbidden))
-				.orElseGet(() -> Error(forbidden(CredentialsInvalid)));
+				.process(user -> roster.verify(user, ticket.getString("secret")))
+				.error(Manager::forbidden);
 	}
 
 	private Result<Permit, Failure> update(final JsonObject ticket) {
 		return roster.resolve(ticket.getString("handle"))
-				.map(user -> roster.verify(user, ticket.getString("secret"), ticket.getString("update")).error(Manager::forbidden))
-				.orElseGet(() -> Error(forbidden(CredentialsInvalid)));
+				.process(user -> roster.verify(user, ticket.getString("secret"), ticket.getString("update")))
+				.error(Manager::forbidden);
 	}
 
 
