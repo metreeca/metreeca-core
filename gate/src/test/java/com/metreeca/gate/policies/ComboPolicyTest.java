@@ -3,22 +3,21 @@
  */
 
 
-package com.metreeca.gate;
+package com.metreeca.gate.policies;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.gate.Policy.*;
+import static com.metreeca.gate.policies.ComboPolicy.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.lang.Character.UnicodeBlock.BASIC_LATIN;
-import static java.lang.Math.abs;
 
 
-final class PolicyTest {
+final class ComboPolicyTest {
 
 	private boolean verify(final String secret) {
-		return all(
+		return new ComboPolicy(
 
 				only(block(BASIC_LATIN)),
 
