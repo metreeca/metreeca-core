@@ -17,6 +17,8 @@
 
 package com.metreeca.gate;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.function.Supplier;
 
 
@@ -42,7 +44,7 @@ import java.util.function.Supplier;
 	/**
 	 * Verifies a secret.
 	 *
-	 * @param handle a handle identifying the user the secret belongs to
+	 * @param user a handle identifying the user the secret belongs to
 	 * @param secret the secret to be verified
 	 *
 	 * @return {@code true}, if {@code secret} conforms to the well-formedness rules defined by this policy; {@code
@@ -50,6 +52,6 @@ import java.util.function.Supplier;
 	 *
 	 * @throws NullPointerException if either {@code handle} or {@code secret} is null
 	 */
-	public boolean verify(final String handle, final String secret);
+	public boolean verify(final IRI user, final String secret);
 
 }

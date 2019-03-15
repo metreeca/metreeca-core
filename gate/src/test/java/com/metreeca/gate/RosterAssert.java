@@ -94,7 +94,9 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 		return item("users/"+handle);
 	}
 
-	public static final class MockRoster implements Roster {
+
+	public static final class MockRoster implements Roster
+	{
 
 		private final Map<IRI, String> user2secret;
 
@@ -112,12 +114,6 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 		}
 
 
-		@Override public Result<Permit, String> lookup(final IRI user) {
-			return Optional.ofNullable(user2secret.get(user))
-					.map(secret -> Result.<Permit, String>Value(permit(user, secret)))
-					.orElseGet(() -> Error(CredentialsIllegal));
-		}
-
 		@Override public Result<Permit, String> verify(final IRI user, final String secret) {
 			return secret.equals(user2secret.get(user))
 					? Value(permit(user, secret))
@@ -130,13 +126,20 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 					: Error(CredentialsIllegal);
 		}
 
-		@Override public Result<Permit, String> update(final IRI user, final String update) {
-			return user2secret.computeIfPresent(user, (_user, _secret) -> update) != null
-					? Value(permit(user, update))
+
+		@Override public Result<Permit, String> lookup(final IRI user) {
+			return Optional.ofNullable(user2secret.get(user))
+					.map(secret -> Result.<Permit, String>Value(permit(user, secret)))
+					.orElseGet(() -> Error(CredentialsIllegal));
+		}
+
+		@Override public Result<Permit, String> insert(final IRI user, final String secret) {
+			return user2secret.computeIfPresent(user, (_user, _secret) -> secret) != null
+					? Value(permit(user, secret))
 					: Error(CredentialsIllegal);
 		}
 
-		@Override public Result<Permit, String> delete(final IRI user) {
+		@Override public Result<Permit, String> remove(final IRI user) {
 			return Optional.ofNullable(user2secret.remove(user))
 					.map(secret -> Result.<Permit, String>Value(permit(user, secret)))
 					.orElseGet(() -> Error(CredentialsIllegal));

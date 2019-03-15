@@ -5,8 +5,12 @@
 
 package com.metreeca.gate.policies;
 
+
 import org.junit.jupiter.api.Test;
 
+import java.util.regex.Pattern;
+
+import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.gate.policies.ComboPolicy.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +23,7 @@ final class ComboPolicyTest {
 	private boolean verify(final String secret) {
 		return new ComboPolicy(
 
-				only(block(BASIC_LATIN)),
+				only(blocks(BASIC_LATIN)),
 
 				between(8, 32, characters()),
 
@@ -29,11 +33,11 @@ final class ComboPolicyTest {
 				contains(specials()),
 
 				no(controls()),
-				no(stopwords()),
+				no(stopwords(user -> Pattern.compile("\\W+").splitAsStream("tino.faussone@example.com"))),
 
 				no(sequences(3))
 
-		).verify("tino.faussone@example.com", secret);
+		).verify(item("users/faussone"), secret);
 	}
 
 

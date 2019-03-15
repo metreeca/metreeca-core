@@ -349,6 +349,7 @@ public final class ValuesTest {
 		}
 	}
 
+
 	public static Model export(final RepositoryConnection connection, final Resource... contexts) {
 
 		final Model model=new TreeModel();

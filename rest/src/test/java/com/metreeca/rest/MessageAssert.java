@@ -196,7 +196,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	public A hasBody(final Body<?> format) {
 
 		if ( format == null ) {

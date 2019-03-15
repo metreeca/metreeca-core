@@ -54,14 +54,15 @@ public interface Roster {
 	public Result<IRI, String> resolve(final String handle);
 
 
-	public Result<Permit, String> lookup(final IRI user);
-
 	public Result<Permit, String> verify(final IRI user, final String secret);
 
 	public Result<Permit, String> verify(final IRI user, final String secret, final String update);
 
-	public Result<Permit, String> update(final IRI user, final String update);
 
-	public Result<Permit, String> delete(final IRI user);
+	public Result<Permit, String> lookup(final IRI user);
+
+	public Result<Permit, String> insert(final IRI user, final String secret);
+
+	public Result<Permit, String> remove(final IRI user);
 
 }
