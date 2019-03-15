@@ -43,6 +43,7 @@ import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.gate.Coffer.coffer;
+import static com.metreeca.gate.Roster.CredentialsInvalid;
 import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.bodies.JSONBody.json;
@@ -72,13 +73,25 @@ public final class Manager implements Wrapper {
 	public static final long Hours=60*Minutes;
 	public static final long Days=24*Hours;
 
+	public static final String TicketMalformed="ticket-malformed";
+	public static final String SessionExpired="session-expired";
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final SignatureAlgorithm algorithm=SignatureAlgorithm.HS512;
 
 	private static final Pattern BearerPattern=Pattern.compile("\\s*Bearer\\s*(?<token>\\S*)\\s*");
 
-	private static final Failure TicketMalformed=new Failure().status(Response.BadRequest).error("ticket-malformed");
-	private static final Failure RequestRejected=new Failure().status(Response.Forbidden);
+
+	private static Failure malformed(final String error) {
+		return new Failure().status(Response.BadRequest).error(error);
+	}
+
+	private static Failure forbidden(final String error) {
+		return new Failure().status(Response.Forbidden).error(error);
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -120,7 +133,7 @@ public final class Manager implements Wrapper {
 	 *
 	 * @param path the root relative path of the virtual session endpoint
 	 * @param soft the soft session duration (ms); after the soft duration has expired the session is automatically
-	 *             extended on further activity, provided the {@linkplain Permit#digest() hash} of the user permit
+	 *             extended on further activity, provided the {@linkplain Permit#hash() hash} of the user permit
 	 *             didn't change since the session was opened
 	 * @param hard the hard session duration (ms); after the hard duration has expired the session is closed, unless
 	 *             automatically extended
@@ -196,11 +209,11 @@ public final class Manager implements Wrapper {
 			final long now=currentTimeMillis();
 			final String authorization=request.header("Authorization").orElse("");
 
-			return Optional.of(BearerPattern.matcher(authorization)).filter(Matcher::matches)
+			return token(authorization)
 
 					// bearer token > authenticate
 
-					.map(matcher -> session(matcher.group("token"))
+					.map(token -> session(token)
 
 							// authenticated > authorize and handle request
 
@@ -227,13 +240,13 @@ public final class Manager implements Wrapper {
 
 
 	private Responder reject(final Request request) {
-		return request.reply(RequestRejected);
+		return request.reply(forbidden(SessionExpired));
 	}
 
 	private Responder extend(final Request request, final Handler handler, final Session session) {
-		return permit(session.handle()).fold( // try to update the permit
+		return permit(session.user()).fold( // try to update the permit
 
-				permit -> session.digest().equals(permit.digest()) ? // account not modified
+				permit -> session.hash().equals(permit.hash()) ? // account not modified
 
 						// handle the request
 
@@ -249,7 +262,7 @@ public final class Manager implements Wrapper {
 										: response
 								)
 
-						: request.reply(RequestRejected), // account modified
+						: request.reply(forbidden(SessionExpired)), // account modified
 
 				request::reply
 
@@ -294,12 +307,9 @@ public final class Manager implements Wrapper {
 
 	//// Permit Retrieval //////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Result<Permit, Failure> permit(final String handle) {
-		return roster.lookup(
-
-				handle
-
-		).error(RequestRejected::error);
+	private Result<Permit, Failure> permit(final IRI user) {
+		return roster.lookup(user)
+				.error(Manager::forbidden);
 	}
 
 	private Result<Permit, Failure> permit(final JsonObject ticket) {
@@ -307,33 +317,33 @@ public final class Manager implements Wrapper {
 
 				? ticket.keySet().equals(set("handle", "secret")) ? signon(ticket)
 				: ticket.keySet().equals(set("handle", "secret", "update")) ? update(ticket)
-				: Error(TicketMalformed)
+				: Error(malformed(TicketMalformed))
 
-				: Error(TicketMalformed);
+				: Error(malformed(TicketMalformed));
 
 	}
 
 	private Result<Permit, Failure> signon(final JsonObject ticket) {
-		return roster.lookup(
-
-				ticket.getString("handle"),
-				ticket.getString("secret")
-
-		).error(RequestRejected::error);
+		return roster.resolve(ticket.getString("handle"))
+				.map(user -> roster.verify(user, ticket.getString("secret")).error(Manager::forbidden))
+				.orElseGet(() -> Error(forbidden(CredentialsInvalid)));
 	}
 
 	private Result<Permit, Failure> update(final JsonObject ticket) {
-		return roster.lookup(
-
-				ticket.getString("handle"),
-				ticket.getString("secret"),
-				ticket.getString("update")
-
-		).error(RequestRejected::error);
+		return roster.resolve(ticket.getString("handle"))
+				.map(user -> roster.verify(user, ticket.getString("secret"), ticket.getString("update")).error(Manager::forbidden))
+				.orElseGet(() -> Error(forbidden(CredentialsInvalid)));
 	}
 
 
 	//// Token Codecs //////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Optional<String> token(final CharSequence authorization) {
+		return Optional
+				.of(BearerPattern.matcher(authorization))
+				.filter(Matcher::matches)
+				.map(matcher -> matcher.group("token"));
+	}
 
 	private String bearer(final Permit permit) {
 		return format("Bearer %s", token(new Session(permit)));
@@ -346,8 +356,7 @@ public final class Manager implements Wrapper {
 				.setClaims(map(
 
 						entry("issued", session.issued()),
-						entry("handle", session.handle()),
-						entry("digest", session.digest()),
+						entry("hash", session.hash()),
 
 						entry("user", session.user().stringValue()),
 						entry("roles", session.roles().stream().map(Value::stringValue).collect(toList()))
@@ -359,7 +368,6 @@ public final class Manager implements Wrapper {
 				.compressWith(CompressionCodecs.GZIP)
 				.compact();
 	}
-
 
 	private Optional<Session> session(final String token) {
 		try {
@@ -373,12 +381,8 @@ public final class Manager implements Wrapper {
 					.ofNullable(claims.get("issued", Long.class))
 					.orElseThrow(IllegalArgumentException::new);
 
-			final String handle=Optional
-					.ofNullable(claims.get("handle", String.class))
-					.orElseThrow(IllegalArgumentException::new);
-
-			final String digest=Optional
-					.ofNullable(claims.get("digest", String.class))
+			final String hash=Optional
+					.ofNullable(claims.get("hash", String.class))
 					.orElseThrow(IllegalArgumentException::new);
 
 			final IRI user=Optional
@@ -395,8 +399,7 @@ public final class Manager implements Wrapper {
 					.collect(toSet());
 
 			return Optional.of(new Session(
-					issued,
-					handle, digest,
+					issued, hash,
 					user, roles
 			));
 
@@ -413,9 +416,7 @@ public final class Manager implements Wrapper {
 	private static final class Session {
 
 		private final long issued;
-
-		private final String handle;
-		private final String digest;
+		private final String hash;
 
 		private final IRI user;
 		private final Set<IRI> roles;
@@ -423,34 +424,28 @@ public final class Manager implements Wrapper {
 
 		private Session(final Permit permit) {
 			this(
-					currentTimeMillis(),
-					permit.handle(), permit.digest(),
+					currentTimeMillis(), permit.hash(),
 					permit.user(), permit.roles()
 			);
 		}
 
 		private Session(
-				final long issued,
-				final String handle, final String digest,
+				final long issued, final String hash,
 				final IRI user, final Set<IRI> roles
 		) {
 
-			this.handle=handle;
-			this.digest=digest;
+			this.hash=hash;
+			this.issued=issued;
 
 			this.user=user;
 			this.roles=roles;
 
-			this.issued=issued;
 		}
 
 
 		private long issued() { return issued; }
 
-
-		private String handle() { return handle; }
-
-		private String digest() { return digest; }
+		private String hash() { return hash; }
 
 
 		private IRI user() { return user; }

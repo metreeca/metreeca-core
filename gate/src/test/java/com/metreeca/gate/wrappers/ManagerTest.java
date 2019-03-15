@@ -35,6 +35,7 @@ import static com.metreeca.form.things.JsonValues.field;
 import static com.metreeca.form.things.JsonValues.object;
 import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.gate.Roster.roster;
+import static com.metreeca.gate.RosterAssert.user;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.tray.Tray.tool;
@@ -117,8 +118,8 @@ final class ManagerTest {
 										);
 
 								RosterAssert.assertThat(tool(roster()))
-										.hasUser("faussone", "new-secret")
-										.doesNotHaveUser("faussone", "faussone");
+										.hasUser(user("faussone"), "new-secret")
+										.doesNotHaveUser(user("faussone"), "faussone");
 
 							}
 					)

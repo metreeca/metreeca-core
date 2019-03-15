@@ -25,8 +25,7 @@ import static java.util.Collections.unmodifiableSet;
  */
 public final class Permit {
 
-	private final String handle;
-	private final String digest;
+	private final String hash;
 
 	private final IRI user;
 	private final Set<IRI> roles;
@@ -37,8 +36,7 @@ public final class Permit {
 	/**
 	 * Creates a user permit.
 	 *
-	 * @param handle  the opaque handle used to identify the user in the roster
-	 * @param digest  an opaque value uniquely identifying the state of the user at the time the permit was created;
+	 * @param hash  an opaque value uniquely identifying the state of the user at the time the permit was created;
 	 *                must change on credential and account status updates
 	 * @param user    an IRI uniquely identifying the user
 	 * @param roles   a set of IRIs uniquely identifying the roles attributed to the user
@@ -48,12 +46,12 @@ public final class Permit {
 	 * @throws NullPointerException if any of the arguments is null or contains null values
 	 */
 	public Permit(
-			final String handle, final String digest,
+			final String hash,
 			final IRI user, final Collection<IRI> roles,
 			final JsonObject profile
 	) {
 
-		if ( digest == null ) {
+		if ( hash == null ) {
 			throw new NullPointerException("null hash");
 		}
 
@@ -69,8 +67,7 @@ public final class Permit {
 			throw new NullPointerException("null profile");
 		}
 
-		this.handle=handle;
-		this.digest=digest;
+		this.hash=hash;
 
 		this.user=user;
 		this.roles=set(roles);
@@ -82,22 +79,13 @@ public final class Permit {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves the permit handle.
-	 *
-	 * @return the opaque handle used to identify the permit user in the roster
-	 */
-	public String handle() {
-		return handle;
-	}
-
-	/**
-	 * Retrieves the permit digest.
+	 * Retrieves the permit hash.
 	 *
 	 * @return an opaque value uniquely identifying the state of the user at the time the permit was create; will change
 	 * on credential and account status updates
 	 */
-	public String digest() {
-		return digest;
+	public String hash() {
+		return hash;
 	}
 
 

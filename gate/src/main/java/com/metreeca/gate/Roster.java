@@ -19,6 +19,9 @@ package com.metreeca.gate;
 
 import com.metreeca.rest.Result;
 
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.Optional;
 import java.util.function.Supplier;
 
 
@@ -49,10 +52,17 @@ public interface Roster {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Result<Permit, String> lookup(final String handle);
+	public Optional<IRI> resolve(final String handle);
 
-	public Result<Permit, String> lookup(final String handle, final String secret);
 
-	public Result<Permit, String> lookup(final String handle, final String secret, final String update);
+	public Result<Permit, String> lookup(final IRI user);
+
+	public Result<Permit, String> verify(final IRI user, final String secret);
+
+	public Result<Permit, String> verify(final IRI user, final String secret, final String update);
+
+	public Result<Permit, String> update(final IRI user, final String update);
+
+	public Result<Permit, String> delete(final IRI user);
 
 }
