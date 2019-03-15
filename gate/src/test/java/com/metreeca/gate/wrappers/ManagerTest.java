@@ -198,32 +198,6 @@ final class ManagerTest {
 		}
 
 
-		@Test void testFallThroughToOtherSchemes() {
-			exec(() -> manager()
-
-					.wrap((Request request) -> request.reply(response -> response
-							.status(Response.Unauthorized)
-							.header("WWW-Authenticate", "Custom"))
-					)
-
-					.handle(new Request()
-							.method(Request.GET)
-							.header("Authorization", "Custom secret")
-					)
-
-					.accept(response -> assertThat(response)
-
-							.as("error reported")
-							.hasStatus(Response.Unauthorized)
-
-							.as("fall-through challenge included")
-							.hasHeader("WWW-Authenticate", "Custom")
-
-					)
-			);
-		}
-
-
 		@Nested final class Anonymous {
 
 			@Test void testGranted() {

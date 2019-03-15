@@ -30,8 +30,6 @@ import org.eclipse.rdf4j.model.Value;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
@@ -79,8 +77,6 @@ public final class Manager implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final SignatureAlgorithm algorithm=SignatureAlgorithm.HS512;
-
-	private static final Pattern BearerPattern=Pattern.compile("\\s*Bearer\\s*(?<token>\\S*)\\s*");
 
 
 	private static Failure malformed(final String error) {
@@ -171,8 +167,7 @@ public final class Manager implements Wrapper {
 	@Override public Handler wrap(final Handler handler) {
 		return handler
 				.with(endpoint())
-				.with(challenger())
-				.with(authenticator());
+				.with(bearer());
 	}
 
 
@@ -185,79 +180,31 @@ public final class Manager implements Wrapper {
 		return handler -> request -> request.path().equals(path) ? endpoint.handle(request) : handler.handle(request);
 	}
 
-	/**
-	 * @return a wrapper adding authentication challenge to unauthorized responses, unless already provided by nested
-	 * authorization schemes
-	 */
-	private Wrapper challenger() {
-		return handler -> request -> handler.handle(request).map(response ->
-				response.status() == Response.Unauthorized && response.headers("WWW-Authenticate").isEmpty()
-						? response.header("WWW-Authenticate", format("Bearer realm=\"%s\"", request.base()))
-						: response
-		);
-	}
-
-	/**
-	 * @return a wrapper managing token-based authentication
-	 */
-	private Wrapper authenticator() {
-		return handler -> request -> {
-
-			// !!! handle token in form/query parameter (https://tools.ietf.org/html/rfc6750#section-2)
-
-			final long now=currentTimeMillis();
-			final String authorization=request.header("Authorization").orElse("");
-
-			return token(authorization)
-
-					// bearer token > authenticate
-
-					.map(token -> session(token)
-
-							// authenticated > authorize and handle request
-
-							.map(session -> (now >= session.issued()+hard) ? reject(request)
-									: (now >= session.issued()+soft) ? extend(request, handler, session)
-									: handle(request, handler, session))
-
-							// not authenticated > report error
-
-							.orElseGet(() -> request.reply(response -> response
-									.status(Response.Unauthorized)
-									.header("WWW-Authenticate", format(
-											"Bearer realm=\"%s\", error=\"invalid_token\"", response.request().base()
-									))
-							))
-
-					)
-
-					// no bearer token > fall-through to other authorization schemes
-
-					.orElseGet(() -> handler.handle(request));
-		};
+	private Wrapper bearer() {
+		return new Bearer((now, token) -> session(token).map(session
+				-> (now >= session.issued()+hard) ? reject()
+				: (now >= session.issued()+soft) ? extend(session)
+				: handle(session)
+		));
 	}
 
 
-	private Responder reject(final Request request) {
-		return request.reply(forbidden(SessionExpired));
+	private Wrapper reject() {
+		return handler -> request -> request.reply(forbidden(SessionExpired));
 	}
 
-	private Responder extend(final Request request, final Handler handler, final Session session) {
-		return permit(session.user()).fold( // try to update the permit
+	private Wrapper extend(final Session session) {
+		return handler -> request -> permit(session.user()).fold( // try to update the permit
 
 				permit -> session.hash().equals(permit.hash()) ? // account not modified
 
-						// handle the request
-
-						handler.handle(request
+						handler.handle(request// handle the request
 								.user(permit.user())
 								.roles(permit.roles())
 						)
 
-								// generate a new token for the extended session
-
-								.map(response -> response.success()
-										? response.header("Authorization", bearer(permit))
+								.map(response -> response.success() // generate a new token for the extended session
+										? response.header("Authorization", authorization(permit))
 										: response
 								)
 
@@ -268,8 +215,8 @@ public final class Manager implements Wrapper {
 		);
 	}
 
-	private Responder handle(final Request request, final Handler handler, final Session session) {
-		return handler
+	private Wrapper handle(final Session session) {
+		return handler -> request -> handler
 
 				.handle(request
 						.user(session.user())
@@ -291,7 +238,7 @@ public final class Manager implements Wrapper {
 				ticket -> permit(ticket).fold(
 
 						permit -> response.status(Response.Created)
-								.header("Authorization", bearer(permit))
+								.header("Authorization", authorization(permit))
 								.body(json(), permit.profile()),
 
 						response::map
@@ -312,39 +259,36 @@ public final class Manager implements Wrapper {
 	}
 
 	private Result<Permit, Failure> permit(final JsonObject ticket) {
-		return ticket.values().stream().allMatch(value -> value instanceof JsonString)
+		return Optional.of(ticket)
 
-				? ticket.keySet().equals(set("handle", "secret")) ? signon(ticket)
-				: ticket.keySet().equals(set("handle", "secret", "update")) ? update(ticket)
-				: Error(malformed(TicketMalformed))
+				.filter(t -> t.values().stream().allMatch(value -> value instanceof JsonString))
 
-				: Error(malformed(TicketMalformed));
+				.flatMap(t -> t.keySet().equals(set("handle", "secret")) ? Optional.of(signon(ticket))
+						: ticket.keySet().equals(set("handle", "secret", "update")) ? Optional.of(update(ticket))
+						: Optional.empty()
+				)
 
+				.map(result -> result.error(Manager::forbidden))
+
+				.orElseGet(() -> Error(malformed(TicketMalformed)));
 	}
 
-	private Result<Permit, Failure> signon(final JsonObject ticket) {
-		return roster.resolve(ticket.getString("handle"))
-				.process(user -> roster.verify(user, ticket.getString("secret")))
-				.error(Manager::forbidden);
+	private Result<Permit, String> signon(final JsonObject ticket) {
+		return roster.resolve(ticket.getString("handle")).process(user -> roster.verify(
+				user, ticket.getString("secret")
+		));
 	}
 
-	private Result<Permit, Failure> update(final JsonObject ticket) {
-		return roster.resolve(ticket.getString("handle"))
-				.process(user -> roster.verify(user, ticket.getString("secret"), ticket.getString("update")))
-				.error(Manager::forbidden);
+	private Result<Permit, String> update(final JsonObject ticket) {
+		return roster.resolve(ticket.getString("handle")).process(user -> roster.verify(
+				user, ticket.getString("secret"), ticket.getString("update")
+		));
 	}
 
 
 	//// Token Codecs //////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Optional<String> token(final CharSequence authorization) {
-		return Optional
-				.of(BearerPattern.matcher(authorization))
-				.filter(Matcher::matches)
-				.map(matcher -> matcher.group("token"));
-	}
-
-	private String bearer(final Permit permit) {
+	private String authorization(final Permit permit) {
 		return format("Bearer %s", token(new Session(permit)));
 	}
 
