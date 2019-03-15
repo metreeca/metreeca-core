@@ -194,31 +194,37 @@ public final class Manager implements Wrapper {
 	}
 
 	private Wrapper extend(final Session session) {
-		return handler -> request -> permit(session.user()).fold( // try to update the permit
+		return handler -> request -> permit(session.user()) // try to update the permit
 
-				permit -> session.hash().equals(permit.hash()) ? // account not modified
+				.process(permit -> // make sure the account was not modified
+						session.hash().equals(permit.hash()) ? Result.Value(permit) : Error(SessionExpired)
+				)
 
-						handler.handle(request// handle the request
-								.user(permit.user())
-								.roles(permit.roles())
-						)
+				.fold(
+
+						permit -> handler
+
+								.handle(request // authenticate and handle the request
+										.user(permit.user())
+										.roles(permit.roles())
+								)
 
 								.map(response -> response.success() // generate a new token for the extended session
 										? response.header("Authorization", authorization(permit))
 										: response
-								)
+								),
 
-						: request.reply(forbidden(SessionExpired)), // account modified
+						error -> request
 
-				request::reply
+								.reply(forbidden(error))
 
-		);
+				);
 	}
 
 	private Wrapper handle(final Session session) {
 		return handler -> request -> handler
 
-				.handle(request
+				.handle(request // authenticate and handle the request
 						.user(session.user())
 						.roles(session.roles())
 				)
@@ -233,17 +239,11 @@ public final class Manager implements Wrapper {
 	//// Endpoint Methods //////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Handler create() {
-		return request -> request.reply(response -> request.body(json()).fold(
+		return request -> request.reply(response -> request.body(json()).process(this::permit).fold(
 
-				ticket -> permit(ticket).fold(
-
-						permit -> response.status(Response.Created)
-								.header("Authorization", authorization(permit))
-								.body(json(), permit.profile()),
-
-						response::map
-
-				),
+				permit -> response.status(Response.Created)
+						.header("Authorization", authorization(permit))
+						.body(json(), permit.profile()),
 
 				response::map
 
@@ -253,9 +253,8 @@ public final class Manager implements Wrapper {
 
 	//// Permit Retrieval //////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Result<Permit, Failure> permit(final IRI user) {
-		return roster.lookup(user)
-				.error(Manager::forbidden);
+	private Result<Permit, String> permit(final IRI user) {
+		return roster.lookup(user);
 	}
 
 	private Result<Permit, Failure> permit(final JsonObject ticket) {
