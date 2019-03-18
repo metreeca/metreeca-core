@@ -55,7 +55,10 @@ import static java.util.stream.Collectors.toSet;
 /**
  * Single page app session manager.
  *
- * <p>Manages session lifecycle using permits issued by shared {@link Roster#roster() roster} tool.</p>
+ * <p>Manages the lifecycle of JWT-based sessions using permits issued by shared {@link Roster#roster() roster} tool.</p>
+ *
+ * @see <a href="">https://jwt.io/</a>
+ * @see <a href="https://github.com/jwtk/jjwt">https://github.com/jwtk/jjwt</a>
  */
 public final class Manager implements Wrapper {
 
