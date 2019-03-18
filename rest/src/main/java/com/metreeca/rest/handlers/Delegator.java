@@ -32,6 +32,22 @@ public abstract class Delegator implements Handler {
 
 
 	/**
+	 * Retrieves the delegate handler.
+	 *
+	 * @return the handler request processing is delegated to
+	 *
+	 * @throws IllegalStateException if the delegate handler wasn't {@linkplain #delegate(Handler) configured}
+	 */
+	protected Handler delegate() {
+
+		if ( delegate == null ) {
+			throw new IllegalStateException("undefined delegate");
+		}
+
+		return delegate;
+	}
+
+	/**
 	 * Configures the delegate handler.
 	 *
 	 * @param delegate the handler request processing is delegated to
@@ -46,10 +62,6 @@ public abstract class Delegator implements Handler {
 			throw new NullPointerException("null delegate");
 		}
 
-		if ( this.delegate != null ) {
-			throw new IllegalStateException("delegate already defined");
-		}
-
 		this.delegate=delegate;
 
 		return this;
@@ -59,21 +71,11 @@ public abstract class Delegator implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler with(final Wrapper wrapper) {
-
-		if ( delegate == null ) {
-			throw new NullPointerException("undefined delegate");
-		}
-
-		return delegate.with(wrapper);
+		return delegate().with(wrapper);
 	}
 
 	@Override public Responder handle(final Request request) {
-
-		if ( delegate == null ) {
-			throw new NullPointerException("undefined delegate");
-		}
-
-		return delegate.handle(request);
+		return delegate().handle(request);
 	}
 
 }

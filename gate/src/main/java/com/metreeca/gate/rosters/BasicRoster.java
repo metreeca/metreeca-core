@@ -31,10 +31,10 @@ import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 /**
  * Basic user roster.
  *
- * <p>Manages user credentials stored in the shared {@link Graph#Factory roster} tool using the shared {@link
+ * <p>Manages user credentials stored in the shared {@link Graph#Factory graph} tool using the shared {@link
  * Digest#digest() digest} and {@link Policy#policy() policy} tools.</p>
  */
-public final class BaseRoster implements Roster {
+public final class BasicRoster implements Roster {
 
 	private static MessageDigest hashing() {
 		try {
@@ -56,7 +56,7 @@ public final class BaseRoster implements Roster {
 	private final Policy policy=tool(policy());
 
 
-	public BaseRoster(
+	public BasicRoster(
 			final BiFunction<RepositoryConnection, String, Optional<IRI>> resolver,
 			final BiFunction<RepositoryConnection, IRI, Optional<Permit>> profiler
 	) {

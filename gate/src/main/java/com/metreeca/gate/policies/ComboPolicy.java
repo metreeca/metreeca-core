@@ -9,7 +9,6 @@ import com.metreeca.gate.Policy;
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -22,9 +21,10 @@ import static java.util.Arrays.stream;
 /**
  * Combo policy.
  *
- * <p>Verifies secret conformance to a set of delegated policies.</p>
+ * <p>Delegates secret conformance verification to a delegate {@linkplain #delegate(Policy) delegate} policy, possibly
+ * assembled as a combination of other policies.</p>
  */
-public final class ComboPolicy implements Policy {
+public abstract class ComboPolicy implements Policy {
 
 	public static Policy all(final Policy... policies) {
 		return (user, secret) -> stream(policies).allMatch(policy -> policy.verify(user, secret));
@@ -136,7 +136,7 @@ public final class ComboPolicy implements Policy {
 			for (int s=0, e=1, l=secret.length(); e <= l; ++e) {
 				if ( e == l || abs(secret.charAt(e)-secret.charAt(e-1)) > 1 ) {
 
-					if ( e-s >= length) { ++ count; }
+					if ( e-s >= length ) { ++count; }
 
 					s=e;
 				}
@@ -151,29 +151,50 @@ public final class ComboPolicy implements Policy {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Policy delegate;
+	private Policy delegate;
 
 
 	/**
-	 * Creates a new combo policy
-	 * @param policies the set of delegated policies veriried secrets must conform to
+	 * Retrieves the delegate policy.
 	 *
-	 * @throws NullPointerException if {@code policies} is null or contains null values
+	 * @return the policy credential validation is delegated to
+	 *
+	 * @throws IllegalStateException if the delegate policy wasn't {@linkplain #delegate(Policy) configured}
 	 */
-	public ComboPolicy(final Policy... policies) {
+	protected Policy delegate() {
 
-		if ( policies == null || stream(policies).anyMatch(Objects::isNull)) {
-			throw new NullPointerException("null policies");
+		if ( delegate == null ) {
+			throw new IllegalStateException("undefined delegate");
 		}
 
-		this.delegate=all(policies);
+		return delegate;
+	}
+
+	/**
+	 * Configures the delegate policy.
+	 *
+	 * @param delegate the policy credential validation is delegated to
+	 *
+	 * @return this combo policy
+	 *
+	 * @throws NullPointerException if {@code delegate} is null
+	 */
+	protected ComboPolicy delegate(final Policy delegate) {
+
+		if ( delegate == null ) {
+			throw new NullPointerException("null delegate");
+		}
+
+		this.delegate=delegate;
+
+		return this;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean verify(final IRI user, final String secret) {
-		return delegate.verify(user, secret);
+		return delegate().verify(user, secret);
 	}
 
 }

@@ -38,7 +38,7 @@ import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 
-final class BaseRosterTest {
+final class BasicRosterTest {
 
 	private static final IRI Hernandez=item("employees/1370");
 
@@ -57,8 +57,8 @@ final class BaseRosterTest {
 	}
 
 
-	private BaseRoster roster() {
-		return new BaseRoster(this::resolve, this::profile);
+	private BasicRoster roster() {
+		return new BasicRoster(this::resolve, this::profile);
 	}
 
 
@@ -127,7 +127,7 @@ final class BaseRosterTest {
 	@Test void testVerify() {
 		exec(() -> {
 
-			final BaseRoster roster=roster();
+			final BasicRoster roster=roster();
 
 			assertThat(roster.insert(Hernandez, "secret"))
 					.as("secret inserted")
@@ -151,7 +151,7 @@ final class BaseRosterTest {
 	@Test void testUpdate() {
 		exec(() -> {
 
-			final BaseRoster roster=roster();
+			final BasicRoster roster=roster();
 
 			final Result<Permit, String> inserted=roster.insert(Hernandez, "secret");
 
@@ -189,7 +189,7 @@ final class BaseRosterTest {
 	@Test void testUpdateInvalid() {
 		exec(() -> {
 
-			final BaseRoster roster=roster();
+			final BasicRoster roster=roster();
 
 			assertThat(roster.insert(Hernandez, "secret"))
 					.as("secret inserted")
@@ -208,7 +208,7 @@ final class BaseRosterTest {
 	@Test void testLookup() {
 		exec(() -> {
 
-			final BaseRoster roster=roster();
+			final BasicRoster roster=roster();
 
 			assertThat(roster.insert(Hernandez, "secret"))
 					.as("secret inserted")
@@ -232,7 +232,7 @@ final class BaseRosterTest {
 	@Test void testInsert() {
 		exec(() -> {
 
-			final BaseRoster roster=roster();
+			final BasicRoster roster=roster();
 
 			assertThat(roster.insert(Hernandez, "secret"))
 					.as("secret inserted")
@@ -252,7 +252,7 @@ final class BaseRosterTest {
 	@Test void testInsertInvalid() {
 		exec(() -> {
 
-			final BaseRoster roster=roster();
+			final BasicRoster roster=roster();
 
 			assertThat(roster.insert(Hernandez, "SECRET"))
 					.as("illegal secret rejected")
@@ -264,7 +264,7 @@ final class BaseRosterTest {
 	@Test void testRemove() {
 		exec(() -> {
 
-			final BaseRoster roster=roster();
+			final BasicRoster roster=roster();
 
 			assertThat(roster.insert(Hernandez, "secret"))
 					.as("secret inserted")
