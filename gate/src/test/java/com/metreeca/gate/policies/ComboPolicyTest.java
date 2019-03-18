@@ -21,7 +21,7 @@ import static java.lang.Character.UnicodeBlock.BASIC_LATIN;
 final class ComboPolicyTest {
 
 	private boolean verify(final String secret) {
-		return new ComboPolicy(
+		return all(
 
 				only(blocks(BASIC_LATIN)),
 
@@ -39,9 +39,6 @@ final class ComboPolicyTest {
 
 		).verify(item("users/faussone"), secret);
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
