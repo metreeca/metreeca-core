@@ -152,12 +152,8 @@ public final class Manager implements Wrapper {
 			throw new IllegalArgumentException("not a root relative path <"+path+">");
 		}
 
-		if ( soft <= 0 ) {
-			throw new IllegalArgumentException("illegal soft duration <"+soft+">");
-		}
-
-		if ( hard <= 0 ) {
-			throw new IllegalArgumentException("illegal hard duration <"+hard+">");
+		if ( soft <= 0 || hard <= 0 || soft > hard ) {
+			throw new IllegalArgumentException("illegal durations <"+soft+"/"+hard+">");
 		}
 
 		this.path=path;
