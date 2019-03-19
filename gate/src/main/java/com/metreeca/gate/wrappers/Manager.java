@@ -69,9 +69,11 @@ public final class Manager implements Wrapper {
 	public static final String KeyCofferId=Manager.class.getName().toLowerCase(Locale.ROOT)+".key";
 
 
-	public static final long Minutes=60*1000;
+	public static final long Seconds=1000;
+	public static final long Minutes=60*Seconds;
 	public static final long Hours=60*Minutes;
 	public static final long Days=24*Hours;
+	public static final long Weeks=7*Days;
 
 	public static final String TicketMalformed="ticket-malformed";
 	public static final String SessionExpired="session-expired";
