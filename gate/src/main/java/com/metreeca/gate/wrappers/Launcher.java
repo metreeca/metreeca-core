@@ -65,7 +65,8 @@ public final class Launcher implements Wrapper {
 	@Override public Handler wrap(final Handler handler) {
 		return request -> consumer -> handler.handle(request).accept(response -> {
 
-			if ( !request.path().equals(path) && request.interactive() && !response.interactive() ) {
+			if ( !request.path().equals(path) && request.interactive()
+					&& response.status() != 0 && !response.interactive() ) {
 
 				response.request().reply(loader -> loader
 
