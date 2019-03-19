@@ -19,7 +19,6 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.gate.Digest.digest;
 import static com.metreeca.gate.Policy.policy;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
@@ -52,7 +51,7 @@ public final class BasicRoster implements Roster {
 
 	private final Graph graph=tool(Graph.Factory);
 
-	private final Digest digest=tool(digest());
+	private final Digest digest=tool(Digest.digest());
 	private final Policy policy=tool(policy());
 
 
@@ -95,50 +94,41 @@ public final class BasicRoster implements Roster {
 	@Override public Result<Permit, String> verify(final IRI user, final String secret) {
 		return graph.query(connection -> {
 
-			return secret(user, secret).process(s -> profile(user, secret));
+			return digest(user, secret).process(_digest -> profile(user, _digest));
 
 		});
 	}
 
 	@Override public Result<Permit, String> verify(final IRI user, final String secret, final String update) {
-		return graph.update(connection -> policy.verify(user, update)
-
-				? secret(user, secret)
-
-				.process(s -> profile(user, update))
-
-				.value(permit -> {
-
-					connection.remove(user, Gate.secret, null);
-					connection.add(user, Gate.secret, literal(digest.digest(update)));
-
-					return permit;
-
-				})
-
-				: Error(CredentialsIllegal));
+		return digest(user, secret).process(_digest -> insert(user, update));
 	}
 
 
 	@Override public Result<Permit, String> lookup(final IRI user) {
-		return secret(user).process(secret -> profile(user, secret));
+		return digest(user).process(_digest -> profile(user, _digest));
 	}
 
 	@Override public Result<Permit, String> insert(final IRI user, final String secret) {
-		return graph.update(connection -> policy.verify(user, secret)
+		return graph.update(connection -> {
 
-				? profile(user, secret)
+			return Optional.of(secret)
 
-				.value(permit -> {
+					.filter(_secret -> policy.verify(user, secret))
 
-					connection.remove(user, Gate.secret, null);
-					connection.add(user, Gate.secret, literal(digest.digest(secret)));
+					.map(_secret -> digest.digest(secret))
 
-					return permit;
+					.map(_digest -> profile(user, _digest).value(permit -> {
 
-				})
+						connection.remove(user, Gate.secret, null);
+						connection.add(user, Gate.secret, literal(_digest));
 
-				: Error(CredentialsIllegal));
+						return permit;
+
+					}))
+
+					.orElseGet(() -> Error(CredentialsIllegal));
+
+		});
 	}
 
 	@Override public Result<Permit, String> remove(final IRI user) {
@@ -158,7 +148,7 @@ public final class BasicRoster implements Roster {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Result<String, String> secret(final Resource user) {
+	private Result<String, String> digest(final Resource user) {
 		return graph.query(connection -> {
 			return stream(connection.getStatements(user, Gate.secret, null))
 
@@ -172,22 +162,22 @@ public final class BasicRoster implements Roster {
 		});
 	}
 
-	private Result<String, String> secret(final Resource user, final String secret) {
-		return secret(user).process(expected ->
-				digest.verify(secret, expected) ? Value(secret) : Error(CredentialsInvalid)
+	private Result<String, String> digest(final Resource user, final String secret) {
+		return digest(user).process(digest ->
+				this.digest.verify(secret, digest) ? Value(digest) : Error(CredentialsInvalid)
 		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Result<Permit, String> profile(final IRI user, final String secret) {
+	private Result<Permit, String> profile(final IRI user, final String digest) {
 		return graph.query(connection -> {
 
 			return profiler.apply(connection, user)
 
 					.map(permit -> new Permit(
-							hash(permit.hash(), secret),
+							hash(permit.hash(), digest),
 							permit.user(),
 							permit.roles(),
 							permit.profile()

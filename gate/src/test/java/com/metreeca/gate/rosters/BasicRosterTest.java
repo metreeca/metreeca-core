@@ -17,6 +17,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.metreeca.form.things.JsonValues.object;
 import static com.metreeca.form.things.Sets.set;
@@ -283,6 +284,42 @@ final class BasicRosterTest {
 					.hasError(CredentialsInvalid);
 
 		});
+	}
+
+
+	@Test void testGenerateHashes() {
+		exec(() -> {
+
+			final BasicRoster roster=roster();
+
+			final Function<Result<Permit, String>, Permit> value=result ->
+					result.value().orElseThrow(() -> new RuntimeException("missing value"));
+
+			final String inserted=value.apply(roster.insert(Hernandez, "secret")).hash();
+
+			assertThat(inserted)
+
+					.as("stable lookup hash after insert")
+					.isEqualTo(value.apply(roster.lookup(Hernandez)).hash())
+
+					.as("stable verify hash after insert")
+					.isEqualTo(value.apply(roster.verify(Hernandez, "secret")).hash());
+
+			final String updated=value.apply(roster.verify(Hernandez, "secret", "update")).hash();
+
+			assertThat(updated)
+
+					.as("hash changed on update")
+					.isNotEqualTo(inserted)
+
+					.as("stable lookup hash after update")
+					.isEqualTo(value.apply(roster.lookup(Hernandez)).hash())
+
+					.as("stable verify hash after update")
+					.isEqualTo(value.apply(roster.verify(Hernandez, "update")).hash());
+
+		});
+
 	}
 
 }
