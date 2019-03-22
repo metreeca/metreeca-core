@@ -59,7 +59,11 @@ abstract class ActorProcessor {
 	private final Trace trace;
 
 
-	ActorProcessor(final Trace trace) {this.trace=trace;}
+	ActorProcessor(final Trace trace) {
+
+		this.trace=trace;
+
+	}
 
 
 	//// Tracing ///////////////////////////////////////////////////////////////////////////////////////////////////////
