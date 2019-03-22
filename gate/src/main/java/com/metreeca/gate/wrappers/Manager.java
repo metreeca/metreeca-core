@@ -210,9 +210,8 @@ public final class Manager implements Wrapper {
 										.roles(permit.roles())
 								)
 
-								.map(response -> response.success() // generate a new token for the extended session
-										? response.header("Authorization", authorization(permit))
-										: response
+								.map(response -> // generate a new token for the extended session
+										response.header("Authorization", authorization(permit))
 								),
 
 						error -> request
@@ -230,9 +229,8 @@ public final class Manager implements Wrapper {
 						.roles(session.roles())
 				)
 
-				.map(response -> response.success() // present again the current token
-						? response.header("Authorization", request.header("Authorization").orElse(""))
-						: response
+				.map(response -> // present again the current token
+						response.header("Authorization", request.header("Authorization").orElse(""))
 				);
 	}
 
