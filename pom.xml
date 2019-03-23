@@ -95,6 +95,8 @@
 		<module>tray</module>
 		<module>form</module>
 
+		<module>kits</module>
+
 	</modules>
 
 	<properties>

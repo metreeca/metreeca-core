@@ -18,48 +18,26 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.metreeca</groupId>
-		<artifactId>link</artifactId>
-		<version>0.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.metreeca</groupId>
+        <artifactId>link</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>rest</artifactId>
-	<version>0.0.0-SNAPSHOT</version>
+    <artifactId>kits</artifactId>
+    <version>0.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<name>Metreeca REST API Framework</name>
-	<description>A concise REST framework for linked data APIs.</description>
+    <name>Metreeca Adapter Kits</name>
+    <description>Adapter kits for third-party platforms.</description>
 
-	<dependencies>
+    <modules>
 
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>tray</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
-		</dependency>
+    </modules>
 
-		<!-- testing -->
-
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>tray</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>form</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-	</dependencies>
 
 </project>
