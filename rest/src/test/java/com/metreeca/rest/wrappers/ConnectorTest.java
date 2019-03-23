@@ -56,7 +56,7 @@ final class ConnectorTest {
 	@Nested final class Connection {
 
 		private Wrapper wrapper(final Consumer<RepositoryConnection> task) {
-			return handler -> request -> consumer -> tool(Graph.Factory).query(connection -> {
+			return handler -> request -> consumer -> tool(Graph.graph()).query(connection -> {
 
 				task.accept(connection);
 
@@ -66,7 +66,7 @@ final class ConnectorTest {
 		}
 
 		private Handler handler(final Consumer<RepositoryConnection> task) {
-			return request -> consumer -> tool(Graph.Factory).query(connection -> {
+			return request -> consumer -> tool(Graph.graph()).query(connection -> {
 
 				task.accept(connection);
 
@@ -139,7 +139,7 @@ final class ConnectorTest {
 
 						assertThat(response).satisfies(processed());
 
-						tool(Graph.Factory).query(connection -> {
+						tool(Graph.graph()).query(connection -> {
 							assertThat(connection.hasStatement(data, true))
 									.as("transaction committed").isTrue();
 						});
@@ -164,7 +164,7 @@ final class ConnectorTest {
 
 						assertThat(response).satisfies(processed());
 
-						tool(Graph.Factory).query(connection -> {
+						tool(Graph.graph()).query(connection -> {
 							assertThat(connection.hasStatement(data, true))
 									.as("transaction rolled back").isFalse();
 						});

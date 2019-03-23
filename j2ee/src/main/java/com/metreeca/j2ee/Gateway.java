@@ -103,8 +103,8 @@ public abstract class Gateway implements ServletContextListener {
 
 			final Handler handler=requireNonNull(loader.apply(tray
 
-					.set(Storage.Factory, () -> storage(context))
-					.set(Loader.Factory, () -> loader(context))
+					.set(Storage.storage(), () -> storage(context))
+					.set(Loader.loader(), () -> loader(context))
 
 			), "null resource handler");
 
@@ -117,7 +117,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				t.printStackTrace(new PrintWriter(message));
 
-				tray.get(Trace.Factory).error(this, "error during initialization: "+message);
+				tray.get(Trace.trace()).error(this, "error during initialization: "+message);
 
 				context.log("error during initialization", t);
 

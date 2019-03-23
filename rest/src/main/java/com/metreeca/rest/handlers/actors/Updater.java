@@ -85,14 +85,14 @@ import static com.metreeca.tray.Tray.tool;
  *
  * </ul>
  *
- * <p>Regardless of the operating mode, RDF data is updated in the system {@linkplain Graph#Factory graph}
+ * <p>Regardless of the operating mode, RDF data is updated in the system {@linkplain Graph#graph() graph}
  * database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
 public final class Updater extends Actor {
 
-	private final Trace trace=tool(Trace.Factory);
+	private final Trace trace=tool(Trace.trace());
 
 
 	public Updater() {

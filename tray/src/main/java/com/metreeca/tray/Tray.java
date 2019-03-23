@@ -183,7 +183,7 @@ public final class Tray {
 		synchronized ( tools ) {
 			try {
 
-				final Trace trace=get(Trace.Factory); // !!! make sure trace is not released before other tools
+				final Trace trace=get(Trace.trace()); // !!! make sure trace is not released before other tools
 
 				for (final Map.Entry<Supplier<?>, Object> entry : tools.entrySet()) {
 

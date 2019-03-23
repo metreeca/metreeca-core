@@ -125,7 +125,7 @@ import static com.metreeca.form.things.Shapes.resource;
  *
  * </ul>
  *
- * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
+ * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#graph() graph}
  * database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>

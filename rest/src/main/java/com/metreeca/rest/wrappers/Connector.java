@@ -39,7 +39,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 /**
  * Graph connection manager.
  *
- * <p>Executes wrapped handlers inside a shared connection to the the system {@linkplain Graph#Factory graph
+ * <p>Executes wrapped handlers inside a shared connection to the the system { ̰ graph
  * database}.</p>
  *
  * <p>If the incoming request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single
@@ -82,7 +82,7 @@ public final class Connector implements Wrapper {
 
 		}
 
-		final Graph graph=tool(Graph.Factory);
+		final Graph graph=tool(Graph.graph());
 
 		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.update(connection -> {
 
@@ -131,7 +131,7 @@ public final class Connector implements Wrapper {
 
 		}
 
-		final Graph graph=tool(Graph.Factory);
+		final Graph graph=tool(Graph.graph());
 
 		return update.isEmpty() ? (message, model) -> model : (message, model) -> graph.update(connection -> {
 
@@ -293,7 +293,7 @@ public final class Connector implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Graph graph=tool(Graph.Factory);
+	private final Graph graph=tool(Graph.graph());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

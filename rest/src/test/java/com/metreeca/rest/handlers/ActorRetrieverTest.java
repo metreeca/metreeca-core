@@ -81,10 +81,10 @@ import static java.util.stream.Collectors.toList;
 final class ActorRetrieverTest extends ActorProcessorTest {
 
 	private Collection<Statement> query(final Query query) {
-		return tool(Graph.Factory).query(connection -> {
+		return tool(Graph.graph()).query(connection -> {
 			return query
 
-					.map(new ActorRetriever(tool(Trace.Factory), connection, Form.root, true))
+					.map(new ActorRetriever(tool(Trace.trace()), connection, Form.root, true))
 
 					.stream()
 

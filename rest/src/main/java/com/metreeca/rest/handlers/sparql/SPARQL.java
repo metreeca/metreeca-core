@@ -48,7 +48,7 @@ import static java.lang.Boolean.parseBoolean;
  * SPARQL 1.1 Query/Update endpoint handler.
  *
  * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
- * Graph#Factory graph database}.</p>
+ * Graph#graph() graph database}.</p>
  *
  * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
  * role}, unless otherwise {@linkplain #publik(boolean) specified}; update operations are always restricted to users in
@@ -61,7 +61,7 @@ public final class SPARQL extends Delegator {
 	private int timeout=60; // endpoint operations timeout [s]
 	private boolean publik; // public availability of the endpoint
 
-	private final Graph graph=tool(Graph.Factory);
+	private final Graph graph=tool(Graph.graph());
 
 
 	public SPARQL() {

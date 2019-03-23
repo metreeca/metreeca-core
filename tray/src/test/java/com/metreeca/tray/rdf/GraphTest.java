@@ -39,21 +39,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public final class GraphTest {
 
 	public static Model graph(final Resource... contexts) {
-		return tool(Graph.Factory).query(connection -> { return export(connection, contexts); });
+		return tool(Graph.graph()).query(connection -> { return export(connection, contexts); });
 	}
 
 	public static Runnable graph(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> tool(Graph.Factory).update(connection -> { connection.add(model, contexts); });
+		return () -> tool(Graph.graph()).update(connection -> { connection.add(model, contexts); });
 	}
 
 
 
 	public static Model graph(final String sparql) {
-		return tool(Graph.Factory).query(connection -> { return construct(connection, sparql); });
+		return tool(Graph.graph()).query(connection -> { return construct(connection, sparql); });
 	}
 
 	public static List<Map<String, Value>> tuples(final String sparql) {
-		return tool(Graph.Factory).query(connection -> { return select(connection, sparql); });
+		return tool(Graph.graph()).query(connection -> { return select(connection, sparql); });
 	}
 
 
