@@ -17,29 +17,25 @@
   If not, see <http://www.gnu.org/licenses/>.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.metreeca</groupId>
-        <artifactId>link</artifactId>
+        <artifactId>kits</artifactId>
         <version>0.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>kits</artifactId>
+    <artifactId>gae</artifactId>
     <version>0.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
 
-    <name>Metreeca Adapter Kits</name>
-    <description>Adapter kits for third-party platforms.</description>
+    <name>Metreeca GAE Adapter Kits</name>
+    <description>Adapter kit for Google App Engine.</description>
 
-    <modules>
+    <dependencies>
 
-        <module>gae</module>
-
-    </modules>
-
+    </dependencies>
 
 </project>

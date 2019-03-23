@@ -9,6 +9,7 @@
         <module name="_gate" />
         <module name="_utow" />
         <module name="form" />
+        <module name="gae" />
         <module name="j2ee" />
         <module name="rest" />
         <module name="tray" />
@@ -31,6 +32,7 @@
       <module name="demo" target="1.8" />
       <module name="fore" target="1.8" />
       <module name="form" target="1.8" />
+      <module name="gae" target="1.8" />
       <module name="j2ee" target="1.8" />
       <module name="jeep" target="1.8" />
       <module name="kits" target="1.8" />
