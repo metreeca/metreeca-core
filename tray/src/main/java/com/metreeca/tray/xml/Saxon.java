@@ -50,13 +50,15 @@ public final class Saxon {
 	 */
 	private static final String XSLTVersion="2.0";
 
+
 	/**
-	 * Saxon XML processor factory.
+	 * Retrieves the default Saxon processor factory.
 	 *
-	 * <p>The default processor acquired through this factory retrieves system resources from the classpath through
-	 * {@link ClassLoader#getResourceAsStream(String)}.</p>
+	 * @return the default Saxon processo factory
 	 */
-	public static final Supplier<Saxon> Factory=Saxon::new;
+	public static Supplier<Saxon> saxon() {
+		return Saxon::new;
+	}
 
 
 	private static final String identity=Codecs.text(Saxon.class, ".xsl");

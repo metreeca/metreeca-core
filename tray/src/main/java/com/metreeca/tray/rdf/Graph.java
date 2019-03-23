@@ -59,14 +59,17 @@ public abstract class Graph implements AutoCloseable {
 
 	};
 
+
 	/**
-	 * Graph factory.
+	 * Retrieves the default graph factory.
 	 *
-	 * <p>By default creates a graph backed by a RDF4J Memory store with no persistence.</p>
+	 * @return the default graph factory, which creates graphs backed by a RDF4J Memory store with no persistence
 	 */
-	public static final Supplier<Graph> Factory=() -> new Graph() {{
-		repository(new SailRepository(new MemoryStore()));
-	}};
+	public static Supplier<Graph> graph() {
+		return () -> new Graph() {{
+			repository(new SailRepository(new MemoryStore()));
+		}};
+	}
 
 
 	private static final ThreadLocal<RepositoryConnection> context=new ThreadLocal<>();

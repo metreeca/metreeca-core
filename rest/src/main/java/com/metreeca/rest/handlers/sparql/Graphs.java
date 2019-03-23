@@ -57,7 +57,7 @@ import static java.lang.String.format;
 /**
  * SPARQL 1.1 Graph Store endpoint handler.
  *
- * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain Graph#Factory
+ * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain Graph#graph()
  * graph database}</p>*
  *
  * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
@@ -77,8 +77,8 @@ public final class Graphs extends Delegator {
 
 	private boolean publik; // public availability of the endpoint
 
-	private final Graph graph=tool(Graph.Factory);
-	private final Trace trace=tool(Trace.Factory);
+	private final Graph graph=tool(Graph.graph());
+	private final Trace trace=tool(Trace.trace());
 
 
 	public Graphs() {

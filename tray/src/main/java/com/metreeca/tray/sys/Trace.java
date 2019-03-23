@@ -65,38 +65,40 @@ public abstract class Trace {
 
 
 	/**
-	 * Trace factory.
+	 * Retrieves the default trace factory.
 	 *
-	 * <p>The default trace log acquired through this factory logs trace records through the the standard {@linkplain
-	 * LogManager Java logging} facilities.</p>
+	 * @return the default trace factory, which logs trace records through the the standard {@linkplain LogManager Java
+	 * logging} facilities
 	 */
-	public static final Supplier<Trace> Factory=() -> {
+	public static Supplier<Trace> trace() {
+		return () -> {
 
-		// logging not configured: reset and load compact console configuration ;(unless on GAE)
+			// logging not configured: reset and load compact console configuration ;(unless on GAE)
 
-		if ( System.getProperty("java.util.logging.config.file") == null
-				&& System.getProperty("java.util.logging.config.class") == null
-				&& !"Production".equals(System.getProperty("com.google.appengine.runtime.environment")) ) {
+			if ( System.getProperty("java.util.logging.config.file") == null
+					&& System.getProperty("java.util.logging.config.class") == null
+					&& !"Production".equals(System.getProperty("com.google.appengine.runtime.environment")) ) {
 
-			final java.util.logging.Level level=Logger.getLogger("").getLevel(); // preserve log level
+				final java.util.logging.Level level=Logger.getLogger("").getLevel(); // preserve log level
 
-			LogManager.getLogManager().reset();
+				LogManager.getLogManager().reset();
 
-			final ConsoleHandler handler=new ConsoleHandler();
+				final ConsoleHandler handler=new ConsoleHandler();
 
-			handler.setLevel(level);
-			handler.setFormatter(new ConsoleFormatter());
+				handler.setLevel(level);
+				handler.setFormatter(new ConsoleFormatter());
 
-			final Logger logger=Logger.getLogger("");
+				final Logger logger=Logger.getLogger("");
 
-			logger.setLevel(level);
-			logger.addHandler(handler);
+				logger.setLevel(level);
+				logger.addHandler(handler);
 
-		}
+			}
 
-		return new SystemTrace();
+			return new SystemTrace();
 
-	};
+		};
+	}
 
 
 	/**

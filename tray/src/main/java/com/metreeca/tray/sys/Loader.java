@@ -30,19 +30,22 @@ import java.util.function.Supplier;
 @FunctionalInterface public interface Loader {
 
 	/**
-	 * Loader factory.
+	 * Retrieves the default loader factory.
 	 *
-	 * <p>The default loader acquired through this factory retrieves system resources from the classpath through {@link
-	 * ClassLoader#getResourceAsStream(String)}.</p>
+	 * @return the default loader factory, which retrieves system resources from the classpath through {@link
+	 * ClassLoader#getResourceAsStream(String)}
 	 */
-	public static Supplier<Loader> Factory=() -> path -> {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+	public static Supplier<Loader> loader() {
+		return () -> path -> {
 
-		return Optional.ofNullable(Loader.class.getClassLoader().getResourceAsStream(path));
-	};
+			if ( path == null ) {
+				throw new NullPointerException("null path");
+			}
+
+			return Optional.ofNullable(Loader.class.getClassLoader().getResourceAsStream(path));
+		};
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -39,16 +39,18 @@ import static java.util.UUID.nameUUIDFromBytes;
 public final class Store {
 
 	/**
-	 * Store factory.
+	 * Retrieves the default store factory.
 	 *
-	 * <p>By default creates an uncustomized store.</p>
+	 * @return the default store factory, which creates a vanilla store with no customization
 	 */
-	public static final Supplier<Store> Factory=Store::new;
+	public static Supplier<Store> store() {
+		return Store::new;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private File storage=tool(Storage.Factory).area("store"); // the root storage folder for the blob store
+	private File storage=tool(Storage.storage()).area("store"); // the root storage folder for the blob store
 
 	private final Object lock=new Object(); // store access lock
 

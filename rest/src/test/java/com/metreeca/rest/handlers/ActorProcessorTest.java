@@ -48,7 +48,7 @@ abstract class ActorProcessorTest {
 
 				.exec(() -> {
 
-					final Graph graph=tool(Graph.Factory); // expect pre-loaded dataset if read-only
+					final Graph graph=tool(Graph.graph()); // expect pre-loaded dataset if read-only
 
 					if ( graph.isolation().isCompatibleWith(IsolationLevels.NONE) ) {
 						graph.update(connection -> {

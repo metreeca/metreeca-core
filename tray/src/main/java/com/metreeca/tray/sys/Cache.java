@@ -46,16 +46,19 @@ public final class Cache {
 
 
 	/**
-	 * Cache factory.
+	 * Retrieves the default cache factory.
 	 *
-	 * <p>By default creates an uncustomized cache.</p>
+	 * @return the default cache factory, which creates a vanilla cache with no customization
 	 */
-	public static final Supplier<Cache> Factory=Cache::new;
+
+	public static Supplier<Cache> cache() {
+		return Cache::new;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Store store=new Store().storage(tool(Storage.Factory).area("cache")); // delegate blob store
+	private Store store=new Store().storage(tool(Storage.storage()).area("cache")); // delegate blob store
 
 	private final Map<String, BiConsumer<URL, Blob>> fetchers=new HashMap<>(); // URL schema to fetcher
 
@@ -222,7 +225,7 @@ public final class Cache {
 	 */
 	public static final class FileFetcher implements BiConsumer<URL, Blob> {
 
-		private final Trace trace=tool(Trace.Factory);
+		private final Trace trace=tool(Trace.trace());
 
 		@Override public void accept(final URL url, final Blob blob) { // !!! metadata?
 			try {
@@ -260,7 +263,7 @@ public final class Cache {
 
 		private final Map<String, String> headers=new LinkedHashMap<>();
 
-		private final Trace trace=tool(Trace.Factory);
+		private final Trace trace=tool(Trace.trace());
 
 
 		/**

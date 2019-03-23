@@ -86,8 +86,8 @@ final class ActorValidatorTest extends ActorProcessorTest {
 	}
 
 	private Focus validate(final Shape shape, final Collection<Statement> model) {
-		return tool(Graph.Factory).query(connection -> {
-			return field(RDF.VALUE, shape).map(new ActorValidator(tool(Trace.Factory), connection, set(RDF.NIL), model));
+		return tool(Graph.graph()).query(connection -> {
+			return field(RDF.VALUE, shape).map(new ActorValidator(tool(Trace.trace()), connection, set(RDF.NIL), model));
 		});
 	}
 

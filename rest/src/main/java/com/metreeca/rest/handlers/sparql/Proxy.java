@@ -46,7 +46,7 @@ public final class Proxy implements Handler {
 	private static final int timeoutRead=60; // [s]
 
 
-	private final Trace trace=tool(Trace.Factory);
+	private final Trace trace=tool(Trace.trace());
 
 	private final Handler delegate=new Worker()
 			.get(this::process)

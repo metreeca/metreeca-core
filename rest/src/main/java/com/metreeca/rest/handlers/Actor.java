@@ -55,8 +55,8 @@ import static java.util.stream.Collectors.toSet;
  */
 public abstract class Actor extends Delegator {
 
-	private final Graph graph=tool(Graph.Factory);
-	private final Trace trace=tool(Trace.Factory);
+	private final Graph graph=tool(Graph.graph());
+	private final Trace trace=tool(Trace.trace());
 
 
 	//// CRUD Engine (methods preserved to possibly support extraction of Engine interface) ////////////////////////////

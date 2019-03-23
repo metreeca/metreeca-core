@@ -29,19 +29,20 @@ import java.util.function.Supplier;
 @FunctionalInterface public interface Storage {
 
 	/**
-	 * Storage factory.
+	 * Retrieves the default storage factory.
 	 *
-	 * <p>The default storage acquired through this factory provides access to files stored in the current working
-	 * directory of the process in the host filesystem.</p>
+	 * @return the default storage factory, which provides access to files stored in the current working directory of the process in the host filesystem
 	 */
-	public static Supplier<Storage> Factory=() -> name -> {
+	public static Supplier<Storage> storage() {
+		return () -> name -> {
 
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
+			if ( name == null ) {
+				throw new NullPointerException("null name");
+			}
 
-		return new File(System.getProperty("user.dir"));
-	};
+			return new File(System.getProperty("user.dir"));
+		};
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
