@@ -271,6 +271,10 @@
 									<title>REST API Framework</title>
 									<packages>com.metreeca.rest*</packages>
 								</group>
+								<!--<group>
+									<title>REST IAM Framework</title>
+									<packages>com.metreeca.gate*</packages>
+								</group>-->
 								<group>
 									<title>Shapes Framework</title>
 									<packages>com.metreeca.form*</packages>

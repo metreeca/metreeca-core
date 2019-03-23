@@ -40,7 +40,7 @@ import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.gate.Coffer.coffer;
+import static com.metreeca.tray.sys.Vault.vault;
 import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.bodies.JSONBody.json;
@@ -105,7 +105,7 @@ public final class Manager implements Wrapper {
 
 	private final Roster roster=tool(roster());
 
-	private final Key key=tool(coffer())
+	private final Key key=tool(vault())
 
 			.get(KeyCofferId)
 
