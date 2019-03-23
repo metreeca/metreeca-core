@@ -23,16 +23,16 @@ To get started, set up a Java 1.8 project, adding required dependencies for the 
 <dependencies>
 
     <dependency>
-    <groupId>com.metreeca</groupId>
-    <artifactId>j2ee</artifactId>
-    <version>${project.version}</version>
+	    <groupId>com.metreeca</groupId>
+	    <artifactId>j2ee</artifactId>
+	    <version>${project.version}</version>
     </dependency>
 
     <dependency>
-    <groupId>javax.servlet</groupId>
-    <artifactId>javax.servlet-api</artifactId>
-    <version>3.1.0</version>
-    <scope>provided</scope>
+	    <groupId>javax.servlet</groupId>
+	    <artifactId>javax.servlet-api</artifactId>
+	    <version>3.1.0</version>
+	    <scope>provided</scope>
     </dependency>
 
 </dependencies>
