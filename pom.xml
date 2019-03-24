@@ -280,6 +280,10 @@
 									<title>Tooling Framework</title>
 									<packages>com.metreeca.tray*</packages>
 								</group>
+								<group>
+									<title>Tooling Kits</title>
+									<packages>com.metreeca.kits*</packages>
+								</group>
 							</groups>
 
 							<excludePackageNames/> <!-- colon-separated patterns -->

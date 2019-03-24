@@ -32,7 +32,7 @@
 	<artifactId>tray</artifactId>
 
 	<name>Metreeca Tooling Framework</name>
-	<description>A pluggable shared services location framework.</description>
+	<description>A pluggable services location framework.</description>
 
 	<dependencies>
 
