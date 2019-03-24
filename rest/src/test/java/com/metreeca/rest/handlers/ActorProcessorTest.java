@@ -21,7 +21,7 @@ import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.rdf.graphs.RDF4JRemote;
 import com.metreeca.tray.rdf.graphs.RDF4JSPARQL;
-import com.metreeca.tray.rdf.graphs.Virtuoso;
+import com.metreeca.virtuoso.Virtuoso;
 
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.vocabulary.RDF;

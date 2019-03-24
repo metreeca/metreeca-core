@@ -37,6 +37,8 @@
 
 	<modules>
 
+		<module>virtuoso</module>
+
 	</modules>
 
 	<dependencies>
