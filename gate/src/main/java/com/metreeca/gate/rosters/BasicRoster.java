@@ -23,6 +23,7 @@ import static com.metreeca.gate.Policy.policy;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.rdf.Graph.graph;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
@@ -30,7 +31,7 @@ import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 /**
  * Basic user roster.
  *
- * <p>Manages user credentials stored in the shared {@link Graph#Factory graph} tool using the shared {@link
+ * <p>Manages user credentials stored in the shared {@link Graph#graph() graph} tool using the shared {@link
  * Digest#digest() digest} and {@link Policy#policy() policy} tools.</p>
  */
 public final class BasicRoster implements Roster {
@@ -49,7 +50,7 @@ public final class BasicRoster implements Roster {
 	private final BiFunction<RepositoryConnection, String, Optional<IRI>> resolver;
 	private final BiFunction<RepositoryConnection, IRI, Optional<Permit>> profiler;
 
-	private final Graph graph=tool(Graph.Factory);
+	private final Graph graph=tool(graph());
 
 	private final Digest digest=tool(Digest.digest());
 	private final Policy policy=tool(policy());

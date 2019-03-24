@@ -90,9 +90,9 @@
 	<modules>
 
 		<module>j2ee</module>
-		<module>gate</module>
 
 		<module>rest</module>
+		<module>gate</module>
 		<module>form</module>
 		<module>tray</module>
 
@@ -273,10 +273,10 @@
 									<title>REST API Framework</title>
 									<packages>com.metreeca.rest*</packages>
 								</group>
-								<!--<group>
+								<group>
 									<title>REST IAM Framework</title>
 									<packages>com.metreeca.gate*</packages>
-								</group>-->
+								</group>
 								<group>
 									<title>Shapes Framework</title>
 									<packages>com.metreeca.form*</packages>
