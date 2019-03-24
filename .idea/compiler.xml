@@ -10,6 +10,7 @@
         <module name="_utow" />
         <module name="form" />
         <module name="j2ee" />
+        <module name="rdf4j" />
         <module name="rest" />
         <module name="stardog" />
         <module name="tray" />
@@ -43,6 +44,7 @@
       <module name="mill" target="1.8" />
       <module name="mill (1)" target="1.8" />
       <module name="node" target="1.8" />
+      <module name="rdf4j" target="1.8" />
       <module name="rest" target="1.8" />
       <module name="self" target="1.8" />
       <module name="spec" target="1.8" />

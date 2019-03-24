@@ -19,7 +19,6 @@
 package com.metreeca.tray.rdf;
 
 
-import com.metreeca.tray.rdf.graphs.RDF4JMemory;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
@@ -60,7 +59,7 @@ public final class GraphTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testPreventUpdateTransactionsOnReadOnlyRepositories() {
-		try (final RDF4JMemory graph=new RDF4JMemory()) {
+		try (final Graph graph=Graph.graph().get()) {
 
 			assertThatThrownBy(() ->
 

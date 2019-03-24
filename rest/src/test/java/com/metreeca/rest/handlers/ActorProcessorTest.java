@@ -17,11 +17,11 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.rdf4j.RDF4JRemote;
+import com.metreeca.rdf4j.RDF4JSPARQL;
 import com.metreeca.stardog.Stardog;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.rdf.graphs.RDF4JRemote;
-import com.metreeca.tray.rdf.graphs.RDF4JSPARQL;
 import com.metreeca.virtuoso.Virtuoso;
 
 import com.complexible.stardog.api.ConnectionConfiguration;

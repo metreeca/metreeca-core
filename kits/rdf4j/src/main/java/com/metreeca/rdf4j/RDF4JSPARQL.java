@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.tray.rdf.graphs;
+package com.metreeca.rdf4j;
 
 import com.metreeca.tray.rdf.Graph;
 
