@@ -92,8 +92,8 @@
 		<module>j2ee</module>
 
 		<module>rest</module>
-		<module>tray</module>
 		<module>form</module>
+		<module>tray</module>
 
 		<module>kits</module>
 
@@ -102,7 +102,7 @@
 	<properties>
 
 		<java.version>1.8</java.version>
-		<rdf4j.version>2.4.5</rdf4j.version>
+		<rdf4j.version>2.5.0</rdf4j.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -279,6 +279,10 @@
 								<group>
 									<title>Tooling Framework</title>
 									<packages>com.metreeca.tray*</packages>
+								</group>
+								<group>
+									<title>Tooling Kits</title>
+									<packages>com.metreeca.kits*</packages>
 								</group>
 							</groups>
 

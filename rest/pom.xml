@@ -60,6 +60,28 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>rdf4j</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>stardog</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>virtuoso</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+
+
 	</dependencies>
 
 </project>

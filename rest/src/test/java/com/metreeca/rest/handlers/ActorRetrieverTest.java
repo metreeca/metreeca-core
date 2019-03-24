@@ -21,7 +21,9 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
+import com.metreeca.kits.stardog.Stardog;
 import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.rdf.GraphTest;
 import com.metreeca.tray.sys.Trace;
 
 import org.assertj.core.api.Assertions;
@@ -70,7 +72,6 @@ import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.tray.rdf.GraphTest.tuples;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -99,6 +100,22 @@ final class ActorRetrieverTest extends ActorProcessorTest {
 
 					.collect(toList());
 		});
+	}
+
+	private List<Statement> graph(final String sparql) {
+		return GraphTest.graph(sparql)
+
+				.stream()
+
+				// ;(stardog) statement from default context explicitly tagged
+
+				.map(statement -> Stardog.Default.equals(statement.getContext()) ? statement(
+						statement.getSubject(),
+						statement.getPredicate(),
+						statement.getObject()
+				) : statement)
+
+				.collect(toList());
 	}
 
 
@@ -237,7 +254,7 @@ final class ActorRetrieverTest extends ActorProcessorTest {
 
 					stats(clazz(term("Employee")))
 
-			)).isIsomorphicTo((Collection<Statement>)graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -265,7 +282,7 @@ final class ActorRetrieverTest extends ActorProcessorTest {
 
 					stats(all(item("employees/1370")), term("account"))
 
-			)).isIsomorphicTo((Collection<Statement>)graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -302,7 +319,7 @@ final class ActorRetrieverTest extends ActorProcessorTest {
 
 					items(clazz(term("Employee")))
 
-			)).isIsomorphicTo((Collection<Statement>)graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -586,7 +603,7 @@ final class ActorRetrieverTest extends ActorProcessorTest {
 
 					edges(field(RDFS.LABEL, like("ger bo")))
 
-			)).isIsomorphicTo(graph( // ;(virtuoso) xsd:string != string
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"

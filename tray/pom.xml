@@ -32,7 +32,7 @@
 	<artifactId>tray</artifactId>
 
 	<name>Metreeca Tooling Framework</name>
-	<description>A pluggable shared services location framework.</description>
+	<description>A pluggable services location framework.</description>
 
 	<dependencies>
 
@@ -42,19 +42,27 @@
 			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
+
 		<dependency>
-			<groupId>virtuoso.openlinksw.com</groupId>
-			<artifactId>rdf4j-provider</artifactId>
-			<version>2.2-20180514</version>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-repository-sail</artifactId>
+			<version>${rdf4j.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>virtuoso.openlinksw.com</groupId>
-			<artifactId>jdbc-driver</artifactId>
-			<version>4.0</version>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-sail-memory</artifactId>
+			<version>${rdf4j.version}</version>
 		</dependency>
 
-		<dependency> <!-- !!! factor (inserting as dependency in back module creates a cyclic dependency -->
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-turtle</artifactId>
+			<version>${rdf4j.version}</version>
+		</dependency>
+
+
+		<dependency>
 			<groupId>com.metreeca</groupId>
 			<artifactId>form</artifactId>
 			<version>0.0.0-SNAPSHOT</version>
@@ -63,95 +71,5 @@
 		</dependency>
 
 	</dependencies>
-
-	<build>
-		<plugins>
-
-			<plugin> <!-- http://maven.apache.org/plugins/maven-install-plugin/install-file-mojo.html -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>2.5.1</version>
-
-				<executions>
-
-					<execution>
-
-						<!-- install virtuoso RDF4J provider in the local maven repository -->
-						<!-- download stable jars from http://vos.openlinksw.com/owiki/wiki/VOS/VOSDownload#For%20RDF4J%202.x -->
-						<!-- download develop jars from https://github.com/openlink/virtuoso-opensource/tree/develop/7/binsrc/rdf4j -->
-
-						<id>install-virtuoso-rdf4j-provider</id>
-						<phase>validate</phase>
-
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-
-						<configuration>
-
-							<file>lib/virtuoso-rdf4j-2.2-20180514.jar</file>
-							<pomFile>lib/virtuoso-rdf4j-2.2-20180514.pom.xml</pomFile>
-
-						</configuration>
-
-					</execution>
-
-					<execution>
-
-						<id>install-virtuoso-jdbc-driver</id>
-						<phase>validate</phase>
-
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-
-						<configuration>
-
-							<file>lib/virtuoso-jdbc-4.0.jar</file>
-							<pomFile>lib/virtuoso-jdbc-4.0.pom.xml</pomFile>
-
-						</configuration>
-
-					</execution>
-
-				</executions>
-
-			</plugin>
-
-			<plugin> <!-- https://maven.apache.org/plugins/maven-dependency-plugin -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.1</version>
-
-				<executions>
-					<execution>
-
-						<!-- copy local dependencies to the main jar -->
-
-						<id>copy-dependencies</id>
-						<phase>prepare-package</phase>
-
-						<goals>
-							<goal>unpack-dependencies</goal>
-						</goals>
-
-						<configuration>
-
-							<includeGroupIds>virtuoso.openlinksw.com</includeGroupIds>
-							<includeScope>runtime</includeScope>
-
-							<outputDirectory>${project.build.directory}/classes/</outputDirectory>
-
-						</configuration>
-
-					</execution>
-				</executions>
-
-			</plugin>
-
-		</plugins>
-	</build>
 
 </project>

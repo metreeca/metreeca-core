@@ -16,7 +16,7 @@
  */
 
 /**
- * Graph stores.
+ * Stardog tools.
  */
 
-package com.metreeca.tray.rdf.graphs;
+package com.metreeca.kits.stardog;
