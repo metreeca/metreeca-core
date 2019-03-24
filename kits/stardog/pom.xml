@@ -24,32 +24,34 @@
 
 	<parent>
 		<groupId>com.metreeca</groupId>
-		<artifactId>link</artifactId>
+		<artifactId>kits</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>kits</artifactId>
+	<artifactId>stardog</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
 
-	<name>Metreeca Tooling Kits</name>
-	<description>Adapter kits for third-party service providers.</description>
+	<name>Metreeca Stardog Tooling Kit</name>
+	<description>Adapter kit for Stardog.</description>
 
-	<modules>
-
-		<module>stardog</module>
-		<module>virtuoso</module>
-
-	</modules>
 
 	<dependencies>
 
 		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>tray</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
+			<groupId>com.complexible.stardog.rdf4j</groupId>
+			<artifactId>stardog-rdf4j</artifactId>
+			<version>6.1.1</version>
 		</dependency>
 
 	</dependencies>
+
+	<repositories>
+
+		<repository>
+			<id>stardog-public</id>
+			<url>http://maven.stardog.com</url>
+		</repository>
+
+	</repositories>
 
 </project>

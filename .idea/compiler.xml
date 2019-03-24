@@ -11,6 +11,7 @@
         <module name="form" />
         <module name="j2ee" />
         <module name="rest" />
+        <module name="stardog" />
         <module name="tray" />
         <module name="virtuoso" />
       </profile>
@@ -46,6 +47,7 @@
       <module name="self" target="1.8" />
       <module name="spec" target="1.8" />
       <module name="spec (1)" target="1.8" />
+      <module name="stardog" target="1.8" />
       <module name="tool" target="1.8" />
       <module name="tray" target="1.8" />
       <module name="tray (1)" target="1.8" />

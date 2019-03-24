@@ -30,7 +30,7 @@ import virtuoso.rdf4j.driver.VirtuosoRepository;
 
 
 /**
- * VirtuosoL graph store.
+ * Virtuoso graph store.
  *
  * <p>Manages task execution on an <a href="https://virtuoso.openlinksw.com">Virtuoso</a> repository.</p>
  *
