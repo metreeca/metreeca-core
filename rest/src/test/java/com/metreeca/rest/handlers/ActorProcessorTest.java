@@ -17,12 +17,14 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.kits.rdf4j.RDF4JRemote;
+import com.metreeca.kits.rdf4j.RDF4JSPARQL;
+import com.metreeca.kits.stardog.Stardog;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.rdf.graphs.RDF4JRemote;
-import com.metreeca.tray.rdf.graphs.RDF4JSPARQL;
-import com.metreeca.tray.rdf.graphs.Virtuoso;
+import com.metreeca.kits.virtuoso.Virtuoso;
 
+import com.complexible.stardog.api.ConnectionConfiguration;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
@@ -44,6 +46,7 @@ abstract class ActorProcessorTest {
 
 				//.set(Graph.Factory, this::graphdb)
 				//.set(Graph.Factory, this::virtuoso)
+				//.set(Graph.Factory, this::stardog)
 				//.set(Graph.Factory, this::dydra)
 
 				.exec(() -> {
@@ -75,6 +78,16 @@ abstract class ActorProcessorTest {
 	private Graph virtuoso() {
 		return new Virtuoso("jdbc:virtuoso://localhost:1111/", "dba", "dba", iri(Base));
 	}
+
+	private Graph stardog() {
+		return new Stardog(ConnectionConfiguration
+				.from("http://localhost:5820/birt-small")
+				.credentials("admin", "admin")
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Graph dydra() {
 		return new RDF4JSPARQL("https://dydra.com/metreeca/birt-small/sparql").isolation(READ_ONLY);
