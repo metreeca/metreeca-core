@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.tray.rdf.graphs;
+package com.metreeca.kits.rdf4j;
 
 import com.metreeca.tray.rdf.Graph;
 
@@ -39,10 +39,7 @@ import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
  * <p>Note that setting the isolation level to anything different from {@code IsolationLevels.NONE} will cause a runtime
  * exception on update transactions.</p>
  */
-public final class RDF4JSPARQL extends Graph {
-
-	// ;( namespace ops silently ignored
-
+public final class RDF4JSPARQL extends Graph { 	// ;( namespace ops silently ignored
 
 	{ isolation(READ_ONLY); } // ;( no transaction support
 

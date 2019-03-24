@@ -17,7 +17,7 @@ A Maven project with the code for the complete demo app is available on [GitHub]
 
 # Getting Started
 
-To get started, set up a Java 1.8 project, adding required dependencies for the Metreeca/Link [adapter](../javadocs/) for the target deployment server. In this tutorial we will deploy to a Servlet 3.1 container like Tomcat 8,  so using Maven:
+To get started, set up a Java 1.8 project, adding required dependencies for the Metreeca/Link [adapters](../javadocs/) for the target deployment server and the target graph storage option. In this tutorial we will deploy to a Servlet 3.1 container with a RDF4J Memory store,  so using Maven:
 
 ```xml
 <dependencies>
@@ -29,36 +29,51 @@ To get started, set up a Java 1.8 project, adding required dependencies for the 
     </dependency>
 
     <dependency>
+	    <groupId>com.metreeca</groupId>
+	    <artifactId>rdf4j</artifactId>
+	    <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <version>3.1.0</version>
         <scope>provided</scope>
     </dependency>
-
+  
 </dependencies>
 ```
 
-Then define a minimal server stub looks like:
+Then define a minimal server stub like:
 
 ```java
 import com.metreeca.j2ee.Gateway;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.wrappers.Server;
+import com.metreeca.kits.rdf4j.RDF4JMemory;
 
 import javax.servlet.annotation.WebListener;
+
+import static com.metreeca.tray.rdf.Graph.graph;
 
 
 @WebListener public final class Demo extends Gateway {
 
 	public Demo() {
-		super("/*", tray -> tray.get(() -> new Server()
+		super("/*", tray -> tray
+          
+          .set(graph(), RDF4JMemory::new)
+          
+         .get(() -> new Server()
+              
+              .wrap((Request request) -> request.reply(response ->
+                  response.status(Response.OK))
+              )
 
-				.wrap((Request request) -> request.reply(response ->
-						response.status(Response.OK))
-				)
-
-		));
+          )
+          
+    );
 	}
 
 }
@@ -135,18 +150,20 @@ public final class BIRT implements Runnable {
 ```java
 public Demo() {
 	super("/*", tray -> tray
-
-			.exec(new BIRT())
-
-			.get(() -> new Server()
-                 
-					.wrap(new Rewriter(BIRT.Base))
-
-					.wrap((Request request) -> request.reply(response ->
-							response.status(Response.OK))
-					)
-
-			)
+        
+        .set(Graph.Factory, RDF4JMemory::new)
+        
+        .exec(new BIRT())
+        
+        .get(() -> new Server()
+             
+             .wrap(new Rewriter(BIRT.Base))
+             
+             .wrap((Request request) -> request.reply(response ->
+             		response.status(Response.OK))
+             )
+        
+        )
 	);
 }
 ```

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.tray.rdf.graphs;
+package com.metreeca.kits.virtuoso;
 
 import com.metreeca.tray.rdf.Graph;
 
@@ -30,7 +30,7 @@ import virtuoso.rdf4j.driver.VirtuosoRepository;
 
 
 /**
- * VirtuosoL graph store.
+ * Virtuoso graph store.
  *
  * <p>Manages task execution on an <a href="https://virtuoso.openlinksw.com">Virtuoso</a> repository.</p>
  *
