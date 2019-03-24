@@ -16,7 +16,7 @@
  */
 
 /**
- * RDF4J storage tools.
+ * Stardog tools.
  */
 
-package com.metreeca.rdf4j;
+package com.metreeca.kits.stardog;

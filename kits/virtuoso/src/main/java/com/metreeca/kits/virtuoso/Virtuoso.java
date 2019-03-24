@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.virtuoso;
+package com.metreeca.kits.virtuoso;
 
 import com.metreeca.tray.rdf.Graph;
 

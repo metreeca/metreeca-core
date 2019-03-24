@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.stardog;
+package com.metreeca.kits.stardog;
 
 import com.metreeca.tray.rdf.Graph;
 

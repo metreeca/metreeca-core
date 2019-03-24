@@ -16,7 +16,7 @@
  */
 
 /**
- * Stardog tools.
+ * OpenLink Virtuoso tools.
  */
 
-package com.metreeca.stardog;
+package com.metreeca.kits.virtuoso;

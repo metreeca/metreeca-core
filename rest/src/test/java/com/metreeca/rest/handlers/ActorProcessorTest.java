@@ -17,12 +17,12 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rdf4j.RDF4JRemote;
-import com.metreeca.rdf4j.RDF4JSPARQL;
-import com.metreeca.stardog.Stardog;
+import com.metreeca.kits.rdf4j.RDF4JRemote;
+import com.metreeca.kits.rdf4j.RDF4JSPARQL;
+import com.metreeca.kits.stardog.Stardog;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.virtuoso.Virtuoso;
+import com.metreeca.kits.virtuoso.Virtuoso;
 
 import com.complexible.stardog.api.ConnectionConfiguration;
 import org.eclipse.rdf4j.IsolationLevels;

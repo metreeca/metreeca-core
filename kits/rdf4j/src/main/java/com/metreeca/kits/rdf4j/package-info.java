@@ -16,7 +16,7 @@
  */
 
 /**
- * OpenLink Virtuoso tools.
+ * RDF4J storage tools.
  */
 
-package com.metreeca.virtuoso;
+package com.metreeca.kits.rdf4j;

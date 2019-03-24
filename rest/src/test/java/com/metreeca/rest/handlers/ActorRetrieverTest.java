@@ -21,7 +21,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
-import com.metreeca.stardog.Stardog;
+import com.metreeca.kits.stardog.Stardog;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.rdf.GraphTest;
 import com.metreeca.tray.sys.Trace;
