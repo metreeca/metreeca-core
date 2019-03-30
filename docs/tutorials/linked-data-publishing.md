@@ -63,7 +63,7 @@ import static com.metreeca.tray.rdf.Graph.graph;
 	public Demo() {
 		super("/*", tray -> tray
           
-          .set(graph(), RDF4JMemory::new)
+         .set(graph(), () -> new RDF4JMemory())
           
          .get(() -> new Server()
               
@@ -73,7 +73,7 @@ import static com.metreeca.tray.rdf.Graph.graph;
 
           )
           
-    );
+     );
 	}
 
 }
@@ -95,7 +95,7 @@ The [tray](../javadocs/?com/metreeca/tray/Tray.html) argument handled to the app
 public Demo() {
 	super("/*", tray -> tray
 
-			.set(Graph.Factory, RDF4JMemory::new)
+      .set(graph(), () -> new RDF4JMemory())
 
 			.exec(() -> tool(Graph.Factory).update(connection -> {
                 try {
@@ -119,7 +119,7 @@ public Demo() {
 }
 ```
 
-Here we are customizing the system-wide [graph](../javadocs/?com/metreeca/tray/rdf/Graph.html) database as an ephemeral heap-based RDF4J store, initializing it with the BIRT dataset.
+Here we are customizing the system-wide [graph](../javadocs/?com/metreeca/tray/rdf/Graph.html) database as an ephemeral heap-based RDF4J store, initializing it on demand with the BIRT dataset. The framework includes other adapters for major RDF storage solutions: explore the [Tooling Kits](../javadocs/) package group  in the API reference to find your one and don't forget to include the Maven dependency specified in the package docs.
 
 The static [Tray.tool()](../javadocs/com/metreeca/tray/Tray.html#tool-java.util.function.Supplier-) service locator method provides access to shared tools inside tray initialisation tasks and wrapper/handlers constructors.
 
@@ -179,7 +179,7 @@ Requests are dispatched to their final handlers through a hierarchy of wrappers 
 ```java
 () -> new Server()
 
-    	.wrap(new Rewriter().base(BIRT.Base))
+    .wrap(new Rewriter().base(BIRT.Base))
 
 		.wrap(new Router()
 
