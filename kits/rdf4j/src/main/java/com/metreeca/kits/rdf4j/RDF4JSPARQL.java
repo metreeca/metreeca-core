@@ -33,7 +33,7 @@ import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
  * configuration, like:</p>
  *
  * <pre>{@code
- * tray.set(Graph.Factory, () -> new RDF4JSPARQL().isolation(IsolationLevels.NONE);
+ * tray.set(Graph.graph(), () -> new RDF4JSPARQL().isolation(IsolationLevels.NONE);
  * }</pre>
  *
  * <p>Note that setting the isolation level to anything different from {@code IsolationLevels.NONE} will cause a runtime
