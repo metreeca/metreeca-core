@@ -19,5 +19,5 @@ References
 - [Shape Specification Language](references/spec-language.md)
 - [REST Faceted Search API](references/faceted-search.md)
 - [Idiomatic RDF/JSON Serialization](references/idiomatic-json.md)
-- [FAQs and Known Issues](faqs.md)
+<!-- - [FAQs and Known Issues](faqs.md) -->
 
