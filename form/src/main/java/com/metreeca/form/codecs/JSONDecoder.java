@@ -19,7 +19,7 @@ package com.metreeca.form.codecs;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Datatype;
+import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -27,28 +27,34 @@ import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
 
 import java.net.URI;
-import java.util.Collection;
+import java.util.*;
+import java.util.regex.Matcher;
 
 import javax.json.*;
 
+import static com.metreeca.form.codecs.BaseCodec.aliases;
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.things.Values.format;
 import static com.metreeca.form.things.Values.iri;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 
 
-final class JSONDecoder {
+public final class JSONDecoder implements JSONCodec {
+
+	private static final java.util.regex.Pattern StepPatten
+			=java.util.regex.Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final URI base;
 
 
-	JSONDecoder(final String base) {
-
-		if ( base == null ) {
-			throw new NullPointerException("null base");
-		}
-
-		this.base=base.isEmpty() ? null : URI.create(base);
+	public JSONDecoder(final String base) {
+		this.base=(base == null) ? null : URI.create(base);
 	}
 
 
@@ -59,19 +65,232 @@ final class JSONDecoder {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Collection<Value> values(final Shape shape, final JsonValue object) {
-		return object instanceof JsonArray ? values(shape, (JsonArray)object)
+	public Shape shape(final Shape shape, final JsonObject object) {
+		return and(object
+				.entrySet()
+				.stream()
+				.map(entry -> shape(shape, entry.getKey(), entry.getValue()))
+				.collect(toList())
+		);
+	}
+
+
+	private Shape shape(final Shape shape, final String key, final JsonValue value) {
+
+		switch ( key ) {
+
+			case "^": return datatype(value);
+			case "@": return clazz(value);
+
+			case ">": return minExclusive(shape, value);
+			case "<": return maxExclusive(shape, value);
+			case ">=": return minInclusive(shape, value);
+			case "<=": return maxInclusive(shape, value);
+
+			case ">#": return minLength(value);
+			case "#<": return maxLength(value);
+			case "*": return pattern(value);
+			case "~": return like(value);
+
+			case ">>": return minCount(value);
+			case "<<": return maxCount(value);
+			case "!": return all(shape, value);
+			case "?": return any(shape, value);
+
+			default:
+
+				return field(shape, path(shape, key), value instanceof JsonObject ?
+						(JsonObject)value : Json.createObjectBuilder().add("?", value).build()
+				);
+
+		}
+
+	}
+
+
+	private Shape datatype(final JsonValue value) {
+		return value instanceof JsonString
+				? Datatype.datatype(iri(((JsonString)value).getString()))
+				: error("datatype IRI is not a string");
+	}
+
+	private Shape clazz(final JsonValue value) {
+		return value instanceof JsonString
+				? Clazz.clazz(iri(((JsonString)value).getString()))
+				: error("class IRI is not a string");
+	}
+
+
+	private Shape minExclusive(final Shape shape, final JsonValue value) {
+		return value != null
+				? MinExclusive.minExclusive(value(shape, value))
+				: error("value is null");
+	}
+
+	private Shape maxExclusive(final Shape shape, final JsonValue value) {
+		return value != null
+				? MaxExclusive.maxExclusive(value(shape, value))
+				: error("value is null");
+	}
+
+	private Shape minInclusive(final Shape shape, final JsonValue value) {
+		return value != null
+				? MinInclusive.minInclusive(value(shape, value))
+				: error("value is null");
+	}
+
+	private Shape maxInclusive(final Shape shape, final JsonValue value) {
+		return value != null
+				? MaxInclusive.maxInclusive(value(shape, value))
+				: error("value is null");
+	}
+
+
+	private Shape minLength(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MinLength.minLength(((JsonNumber)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape maxLength(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MaxLength.maxLength(((JsonNumber)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape pattern(final JsonValue value) {
+		return value instanceof JsonString
+				? ((JsonString)value).getString().isEmpty() ? and() : Pattern.pattern(((JsonString)value).getString())
+				: error("pattern is not a string");
+	}
+
+	private Shape like(final JsonValue value) {
+		return value instanceof JsonString
+				? ((JsonString)value).getString().isEmpty() ? and() : Like.like(((JsonString)value).getString())
+				: error("pattern is not a string");
+	}
+
+
+	private Shape minCount(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MinCount.minCount(((JsonNumber)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape maxCount(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MaxCount.maxCount(((JsonNumber)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape all(final Shape shape, final JsonValue value) {
+		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
+
+			final Collection<Value> values=values(shape, value);
+
+			return values.isEmpty() ? and() : All.all(values);
+		}
+	}
+
+	private Shape any(final Shape shape, final JsonValue value) {
+		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
+
+			final Collection<Value> values=values(shape, value);
+
+			return values.isEmpty() ? and() : Any.any(values);
+		}
+	}
+
+
+	private Shape field(final Shape shape, final List<IRI> path, final JsonObject object) {
+		if ( path.isEmpty() ) { return shape(shape, object); } else {
+
+			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
+
+			final IRI head=path.get(0);
+			final List<IRI> tail=path.subList(1, path.size());
+
+			return Field.field(head, field(fields.get(head), tail, object));
+		}
+	}
+
+
+	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public List<IRI> path(final Shape shape, final String path) {
+
+		final Collection<String> steps=new ArrayList<>();
+
+		final Matcher matcher=StepPatten.matcher(path);
+
+		final int length=path.length();
+
+		int last=0;
+
+		while ( matcher.lookingAt() ) {
+			steps.add(matcher.group(1));
+			matcher.region(last=matcher.end(), length);
+		}
+
+		if ( last != length ) {
+			throw new IllegalArgumentException("malformed path ["+path+"]");
+		}
+
+		return path(shape, steps);
+	}
+
+
+	private List<IRI> path(final Shape shape, final Iterable<String> steps) {
+
+		final List<IRI> edges=new ArrayList<>();
+
+		Shape reference=shape;
+
+		for (final String step : steps) {
+
+			final Map<IRI, com.metreeca.form.Shape> fields=fields(reference);
+			final Map<IRI, String> aliases=aliases(reference);
+
+			final Map<String, IRI> index=new HashMap<>();
+
+			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
+
+			for (final IRI edge : fields.keySet()) {
+				index.put(format(edge), edge); // inside angle brackets
+				index.put(edge.toString(), edge); // naked IRI
+			}
+
+			for (final Map.Entry<IRI, String> entry : aliases.entrySet()) {
+				index.put(entry.getValue(), entry.getKey());
+			}
+
+			final IRI edge=index.get(step);
+
+			if ( edge == null ) {
+				throw new NoSuchElementException("unknown path step ["+step+"]");
+			}
+
+			edges.add(edge);
+			reference=fields.get(edge);
+
+		}
+
+		return edges;
+
+	}
+
+
+	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Collection<Value> values(final Shape shape, final JsonValue object) {
+		return object instanceof JsonArray
+				? object.asJsonArray().stream().map(o -> value(shape, o)).collect(toList())
 				: singleton(value(shape, object));
 	}
 
-	private Collection<Value> values(final Shape shape, final JsonArray array) {
-		return array.stream().map(o -> value(shape, o)).collect(toList());
-	}
-
-
-	Value value(final Shape shape, final JsonValue object) {
+	public Value value(final Shape shape, final JsonValue object) {
 		return Datatype.datatype(shape)
 
 				.map(datatype -> datatype.equals(Form.IRIType) && object instanceof JsonString ?
@@ -80,6 +299,7 @@ final class JSONDecoder {
 
 				.orElseGet(() -> value(object));
 	}
+
 
 	private Value value(final JsonValue value) {
 		return value instanceof JsonObject ? resource((JsonObject)value)

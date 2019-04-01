@@ -32,6 +32,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 
+
 public interface JSONCodec {
 
 	/**
@@ -40,32 +41,35 @@ public interface JSONCodec {
 	 * The file extension {@code .json} is recommend for JSON documents. The media type is {@code application/json}. The
 	 * character encoding is {@code UTF-8}.
 	 */
-	public static final RDFFormat JSONFormat=new RDFFormat("JSON",
+	RDFFormat JSONFormat=new RDFFormat("JSON",
 			asList("application/json", "text/json"),
 			Charset.forName("UTF-8"),
 			singletonList("json"),
 			iri("http://www.json.org/"),
 			RDFFormat.NO_NAMESPACES,
-			RDFFormat.NO_CONTEXTS);
+			RDFFormat.NO_CONTEXTS
+	);
 
 	/**
 	 * Sets the focus resource for codecs.
 	 *
 	 * <p>Defaults to {@code null}.</p>
 	 */
-	public static final RioSetting<Resource> Focus=new RioSettingImpl<>(
-			JSONCodec.class.getName()+"#Focus", "Resource focus", null);
+	RioSetting<Resource> Focus=new RioSettingImpl<>(
+			JSONCodec.class.getName()+"#Focus", "Resource focus", null
+	);
 
 	/**
 	 * Sets the expected shape for the resources handled by codecs.
 	 *
 	 * <p>Defaults to {@code null}.</p>
 	 */
-	public static final RioSetting<com.metreeca.form.Shape> Shape=new RioSettingImpl<>(
-			JSONCodec.class.getName()+"#Shape", "Resource shape", null);
+	RioSetting<com.metreeca.form.Shape> Shape=new RioSettingImpl<>(
+			JSONCodec.class.getName()+"#Shape", "Resource shape", null
+	);
 
 
-	public static final Collection<String> Reserved=new HashSet<>(singleton(
+	Collection<String> Reserved=new HashSet<>(singleton(
 			"this"
 	));
 
