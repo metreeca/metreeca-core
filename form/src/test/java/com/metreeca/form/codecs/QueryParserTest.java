@@ -32,6 +32,7 @@ import com.metreeca.form.things.Values;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
@@ -97,44 +98,44 @@ final class QueryParserTest {
 	@Test void testParsePaths() {
 
 		stats("{ 'stats': '' }", shape, stats -> assertThat(stats.getPath())
-				.as("empty path")
-				.isEqualTo(Lists.<IRI>list()));
+				                                         .as("empty path")
+				                                         .isEqualTo(Lists.<IRI>list()));
 
 		stats("{ 'stats': '"+RDF.FIRST+"' }", shape, stats -> assertThat(stats.getPath())
-				.as("direct naked iri")
-				.isEqualTo(list(RDF.FIRST)));
+				                                                      .as("direct naked iri")
+				                                                      .isEqualTo(list(RDF.FIRST)));
 
 		stats("{ 'stats': '^"+RDF.FIRST+"' }", shape, stats -> assertThat(stats.getPath())
-				.as("inverse naked iri")
-				.isEqualTo(list(inverse(RDF.FIRST))));
+				                                                       .as("inverse naked iri")
+				                                                       .isEqualTo(list(inverse(RDF.FIRST))));
 
 		stats("{ 'stats': '<"+RDF.FIRST+">' }", shape, stats -> assertThat(stats.getPath())
-				.as("direct brackets iri")
-				.isEqualTo(list(RDF.FIRST)));
+				                                                        .as("direct brackets iri")
+				                                                        .isEqualTo(list(RDF.FIRST)));
 
 		stats("{ 'stats': '^<"+RDF.FIRST+">' }", shape, stats -> assertThat(stats.getPath())
-				.as("inverse brackets iri")
-				.isEqualTo(list(inverse(RDF.FIRST))));
+				                                                         .as("inverse brackets iri")
+				                                                         .isEqualTo(list(inverse(RDF.FIRST))));
 
 		stats("{ 'stats': '<"+RDF.FIRST+">/<"+RDF.REST+">' }", shape, stats -> assertThat(stats.getPath())
-				.as("iri slash path")
-				.isEqualTo(list(RDF.FIRST, RDF.REST)));
+				                                                                       .as("iri slash path")
+				                                                                       .isEqualTo(list(RDF.FIRST, RDF.REST)));
 
 		stats("{ 'stats': 'first' }", shape, stats -> assertThat(stats.getPath())
-				.as("direct alias")
-				.isEqualTo(list(RDF.FIRST)));
+				                                              .as("direct alias")
+				                                              .isEqualTo(list(RDF.FIRST)));
 
 		stats("{ 'stats': 'firstOf' }", shape, stats -> assertThat(stats.getPath())
-				.as("inverse alias")
-				.isEqualTo(list(inverse(RDF.FIRST))));
+				                                                .as("inverse alias")
+				                                                .isEqualTo(list(inverse(RDF.FIRST))));
 
 		stats("{ 'stats': 'first/rest' }", shape, stats -> assertThat(stats.getPath())
-				.as("alias slash path")
-				.isEqualTo(list(RDF.FIRST, RDF.REST)));
+				                                                   .as("alias slash path")
+				                                                   .isEqualTo(list(RDF.FIRST, RDF.REST)));
 
 		stats("{ 'stats': 'firstOf.rest' }", shape, stats -> assertThat(stats.getPath())
-				.as("alias dot path")
-				.isEqualTo(list(inverse(RDF.FIRST), RDF.REST)));
+				                                                     .as("alias dot path")
+				                                                     .isEqualTo(list(inverse(RDF.FIRST), RDF.REST)));
 
 	}
 
@@ -162,103 +163,103 @@ final class QueryParserTest {
 	@Test void testParseSimpleFilters() {
 
 		edges("{ 'filter': { '>>': 1 } }", shape, edges -> assertThat(edges.getShape())
-				.as("min count")
-				.isEqualTo(filter(shape, minCount(1)))
+				                                                   .as("min count")
+				                                                   .isEqualTo(filter(shape, minCount(1)))
 		);
 
 		edges("{ 'filter': { '<<': 1 } }", shape, edges -> assertThat(edges.getShape())
-				.as("max count")
-				.isEqualTo(filter(shape, maxCount(1)))
+				                                                   .as("max count")
+				                                                   .isEqualTo(filter(shape, maxCount(1)))
 		);
 
 
 		edges("{ 'filter': { '>=': 1 } }", shape, edges -> assertThat(edges.getShape())
-				.as("min inclusive")
-				.isEqualTo(filter(shape, minInclusive(One)))
+				                                                   .as("min inclusive")
+				                                                   .isEqualTo(filter(shape, minInclusive(One)))
 		);
 
 		edges("{ 'filter': { '<=': 1 } }", shape, edges -> assertThat(edges.getShape())
-				.as("max inclusive")
-				.isEqualTo(filter(shape, maxInclusive(One)))
+				                                                   .as("max inclusive")
+				                                                   .isEqualTo(filter(shape, maxInclusive(One)))
 		);
 
 		edges("{ 'filter': { '>': 1 } }", shape, edges -> assertThat(edges.getShape())
-				.as("min exclusive")
-				.isEqualTo(filter(shape, MinExclusive.minExclusive(One)))
+				                                                  .as("min exclusive")
+				                                                  .isEqualTo(filter(shape, MinExclusive.minExclusive(One)))
 		);
 
 		edges("{ 'filter': { '<': 1 } }", shape, edges -> assertThat(edges.getShape())
-				.as("max exclusive")
-				.isEqualTo(filter(shape, maxExclusive(One)))
+				                                                  .as("max exclusive")
+				                                                  .isEqualTo(filter(shape, maxExclusive(One)))
 		);
 
 		edges("{ 'filter': { '~': 'words' } }", shape, edges -> assertThat(edges.getShape())
-				.as("like")
-				.isEqualTo(filter(shape, like("words")))
+				                                                        .as("like")
+				                                                        .isEqualTo(filter(shape, like("words")))
 		);
 
 		edges("{ 'filter': { '*': 'pattern' } }", shape, edges -> assertThat(edges.getShape())
-				.as("pattern")
-				.isEqualTo(filter(shape, pattern("pattern")))
+				                                                          .as("pattern")
+				                                                          .isEqualTo(filter(shape, pattern("pattern")))
 		);
 
 		edges("{ 'filter': { '>#': 123 } }", shape, edges -> assertThat(edges.getShape())
-				.as("min length")
-				.isEqualTo(filter(shape, MinLength.minLength(123)))
+				                                                     .as("min length")
+				                                                     .isEqualTo(filter(shape, MinLength.minLength(123)))
 		);
 
 		edges("{ 'filter': { '#<': 123 } }", shape, edges -> assertThat(edges.getShape())
-				.as("max length")
-				.isEqualTo(filter(shape, maxLength(123)))
+				                                                     .as("max length")
+				                                                     .isEqualTo(filter(shape, maxLength(123)))
 		);
 
 
 		edges("{ 'filter': { '@': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' } }", shape, edges -> assertThat(edges.getShape())
-				.as("class")
-				.isEqualTo(filter(shape, clazz(RDF.NIL)))
+				                                                                                                 .as("class")
+				                                                                                                 .isEqualTo(filter(shape, clazz(RDF.NIL)))
 		);
 
 		edges("{ 'filter': { '^': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' } }", shape, edges -> assertThat(edges.getShape())
-				.as("type")
-				.isEqualTo(filter(shape, datatype(RDF.NIL)))
+				                                                                                                 .as("type")
+				                                                                                                 .isEqualTo(filter(shape, datatype(RDF.NIL)))
 		);
 
 
 		edges("{ 'filter': { '!': [] } }", shape, edges -> assertThat(edges.getShape())
-				.as("ignore empty universal")
-				.isEqualTo(filter(shape, and()))
+				                                                   .as("ignore empty universal")
+				                                                   .isEqualTo(filter(shape, and()))
 		);
 
 		edges("{ 'filter': { '!': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
-				.as("universal (singleton)")
-				.isEqualTo(filter(shape, all(RDF.FIRST)))
+				                                                                                                               .as("universal (singleton)")
+				                                                                                                               .isEqualTo(filter(shape, all(RDF.FIRST)))
 		);
 
 		edges("{ 'filter': { '!': [\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
-				+"] } }", shape, edges -> assertThat(edges.getShape())
-				.as("universal (multiple)")
-				.isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
+				      +"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
+				      +"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
+				      +"] } }", shape, edges -> assertThat(edges.getShape())
+						                                .as("universal (multiple)")
+						                                .isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
 		);
 
 
 		edges("{ 'filter': { '?': [] } }", shape, edges -> assertThat(edges.getShape())
-				.as("ignore empty existential")
-				.isEqualTo(filter(shape, and()))
+				                                                   .as("ignore empty existential")
+				                                                   .isEqualTo(filter(shape, and()))
 		);
 
 		edges("{ 'filter': { '?': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
-				.as("existential (singleton)")
-				.isEqualTo(filter(shape, any(RDF.FIRST)))
+				                                                                                                               .as("existential (singleton)")
+				                                                                                                               .isEqualTo(filter(shape, any(RDF.FIRST)))
 		);
 
 		edges("{ 'filter': { '?': [\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
-				+"] } }", shape, edges -> assertThat(edges.getShape())
-				.as("existential (multiple)")
-				.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
+				      +"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
+				      +"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
+				      +"] } }", shape, edges -> assertThat(edges.getShape())
+						                                .as("existential (multiple)")
+						                                .isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
 		);
 
 	}
@@ -266,23 +267,23 @@ final class QueryParserTest {
 	@Test void testParseStructuredFilters() {
 
 		edges("{\n\t'filter': {}\n}", shape, edges -> assertThat(edges.getShape())
-				.as("empty filter")
-				.isEqualTo(filter(shape, and()))
+				                                              .as("empty filter")
+				                                              .isEqualTo(filter(shape, and()))
 		);
 
 		edges("{ 'filter': { 'first.rest': { '>=': 1 } } }", shape, edges -> assertThat(edges.getShape())
-				.as("nested filter")
-				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, minInclusive(One)))))
+				                                                                     .as("nested filter")
+				                                                                     .isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, minInclusive(One)))))
 		);
 
 		edges("{ 'filter': { 'first.rest': 1 } }", shape, edges -> assertThat(edges.getShape())
-				.as("nested filter singleton shorthand")
-				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One)))))
+				                                                           .as("nested filter singleton shorthand")
+				                                                           .isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One)))))
 		);
 
 		edges("{ 'filter': { 'first.rest': [1, 10] } }", shape, edges -> assertThat(edges.getShape())
-				.as("nested filter multiple shorthand")
-				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten)))))
+				                                                                 .as("nested filter multiple shorthand")
+				                                                                 .isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten)))))
 		);
 
 	}
@@ -294,32 +295,66 @@ final class QueryParserTest {
 
 		edges("{ 'filter': { '!': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } }",
 				shape, edges -> assertThat(edges.getShape())
-						.as("universal (singleton)")
-						.isEqualTo(filter(shape, all(RDF.FIRST)))
+						                .as("universal (singleton)")
+						                .isEqualTo(filter(shape, all(RDF.FIRST)))
 		);
 
 		edges("{ 'filter': { '!': ["
-						+"'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',"
-						+"'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'"
-						+"] } }",
+				      +"'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',"
+				      +"'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'"
+				      +"] } }",
 				shape, edges -> assertThat(edges.getShape())
-						.as("universal (singleton)")
-						.isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
+						                .as("universal (singleton)")
+						                .isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
 		);
 
 		edges("{ 'filter': { '?': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } }",
 				shape, edges -> assertThat(edges.getShape())
-						.as("universal (singleton)")
-						.isEqualTo(filter(shape, any(RDF.FIRST)))
+						                .as("universal (singleton)")
+						                .isEqualTo(filter(shape, any(RDF.FIRST)))
 		);
 
 		edges("{ 'filter': { '?': ["
-						+"'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',"
-						+"'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'"
-						+"] } }",
+				      +"'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',"
+				      +"'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'"
+				      +"] } }",
 				shape, edges -> assertThat(edges.getShape())
-						.as("universal (singleton)")
-						.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
+						                .as("universal (singleton)")
+						                .isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
+		);
+
+	}
+
+	@Test void testHandleNestedInlineProvedIRIs() {
+
+		final Shape shape=field(RDF.VALUE, datatype(Form.IRIType));
+
+		edges("{ 'filter': { 'value': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } }",
+				shape, edges -> assertThat(edges.getShape())
+						                .as("universal (singleton)")
+						                .isEqualTo(filter(shape, field(RDF.VALUE, any(RDF.FIRST))))
+		);
+
+		edges("{ 'filter': { 'value': ["
+				      +"'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',"
+				      +"'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'"
+				      +"] } }",
+				shape, edges -> assertThat(edges.getShape())
+						                .as("universal (singleton)")
+						                .isEqualTo(filter(shape, field(RDF.VALUE, any(RDF.FIRST, RDF.REST))))
+		);
+
+	}
+
+
+	@Disabled @Test void testHandleSingletonIRI() {
+
+		final Shape shape=field(RDF.VALUE, datatype(Form.IRIType));
+
+		edges("{ 'filter': { 'value': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }",
+				shape, edges -> assertThat(edges.getShape())
+						                .as("universal (singleton)")
+						                .isEqualTo(filter(shape, field(RDF.VALUE, any(RDF.FIRST))))
 		);
 
 	}
@@ -330,8 +365,8 @@ final class QueryParserTest {
 
 		edges("{ 'filter': { '!': '/1999/02/22-rdf-syntax-ns#first' } }",
 				shape, edges -> assertThat(edges.getShape())
-						.as("universal (singleton)")
-						.isEqualTo(filter(shape, all(RDF.FIRST)))
+						                .as("universal (singleton)")
+						                .isEqualTo(filter(shape, all(RDF.FIRST)))
 		);
 
 	}
@@ -389,35 +424,35 @@ final class QueryParserTest {
 	@Test void testRejectReferencesOutsideShapeEnvelope() {
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				stats("{ 'stats': 'nil' }", shape, stats -> {})
+				                                                                   stats("{ 'stats': 'nil' }", shape, stats -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				stats("{ 'stats': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", shape, stats -> {})
+				                                                                   stats("{ 'stats': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", shape, stats -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ 'items': 'nil' }", shape, items -> {})
+				                                                                   items("{ 'items': 'nil' }", shape, items -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ 'items': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", shape, items -> {})
+				                                                                   items("{ 'items': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", shape, items -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				edges("{ 'filter': { 'nil': { '>=': 1 } } }", shape, edges -> {})
+				                                                                   edges("{ 'filter': { 'nil': { '>=': 1 } } }", shape, edges -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				edges("{ 'filter': { 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil': { '>=': 1 } } }", shape, edges -> {})
+				                                                                   edges("{ 'filter': { 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil': { '>=': 1 } } }", shape, edges -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				edges("{ 'order': 'nil' }", shape, edges -> {})
+				                                                                   edges("{ 'order': 'nil' }", shape, edges -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				edges("{ 'order': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", shape, edges -> {})
+				                                                                   edges("{ 'order': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", shape, edges -> {})
 		);
 
 	}
@@ -425,35 +460,35 @@ final class QueryParserTest {
 	@Test void testRejectReferencesForEmptyShape() {
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				stats("{ 'stats': 'first' }", pass(), stats -> {})
+				                                                                   stats("{ 'stats': 'first' }", pass(), stats -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				stats("{ 'stats': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' }", pass(), stats -> {})
+				                                                                   stats("{ 'stats': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' }", pass(), stats -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ 'items': 'first' }", pass(), items -> {})
+				                                                                   items("{ 'items': 'first' }", pass(), items -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ 'items': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' }", pass(), items -> {})
+				                                                                   items("{ 'items': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' }", pass(), items -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				edges("{ 'filter': { 'first': { '>=': 1 } } }", pass(), edges -> {})
+				                                                                   edges("{ 'filter': { 'first': { '>=': 1 } } }", pass(), edges -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				edges("{ 'filter': { 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first': { '>=': 1 } } }", pass(), edges -> {})
+				                                                                   edges("{ 'filter': { 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first': { '>=': 1 } } }", pass(), edges -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				edges("{ 'order': 'nil' }", pass(), edges -> {})
+				                                                                   edges("{ 'order': 'nil' }", pass(), edges -> {})
 		);
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				edges("{ 'order': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", pass(), edges -> {})
+				                                                                   edges("{ 'order': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", pass(), edges -> {})
 		);
 
 	}

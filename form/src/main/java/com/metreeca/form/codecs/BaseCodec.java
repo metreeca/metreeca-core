@@ -17,7 +17,8 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Form;
+import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Maps;
@@ -32,7 +33,6 @@ import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.direct;
 
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toSet;
 final class BaseCodec { // !! review/optimize
 
 	static Map<IRI, String> aliases(final Shape shape) {
-		return aliases(shape, emptySet());
+		return aliases(shape, JSONCodec.Reserved);
 	}
 
 	static Map<IRI, String> aliases(final Shape shape, final Collection<String> reserved) {
