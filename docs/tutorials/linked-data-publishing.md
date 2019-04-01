@@ -13,7 +13,7 @@ We will walk through the REST API development process focusing on the task of pu
 
 You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl` or `wget`.
 
-A Maven project with the code for the complete demo app is available on [GitHub](https://github.com/metreeca/demo/tree/tutorial): clone or [download](https://github.com/metreeca/demo/archive/tutorial.zip) it to your workspace and open in your favorite IDE. If you are working with IntelliJ IDEA you may just use the `Demo` pre-configured run configuration to deploy and update the local server instance.
+A Maven project with the code for the complete demo app is available on [GitHub](https://github.com/metreeca/demo): clone or [download](https://github.com/metreeca/demo/archive/master.zip) it to your workspace and open in your favorite IDE. If you are working with IntelliJ IDEA you may just use the `Demo` pre-configured run configuration to deploy and update the local server instance.
 
 # Getting Started
 
