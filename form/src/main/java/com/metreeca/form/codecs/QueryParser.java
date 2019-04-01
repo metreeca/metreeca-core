@@ -17,7 +17,9 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.*;
+import com.metreeca.form.Order;
+import com.metreeca.form.Query;
+import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
@@ -27,13 +29,11 @@ import com.metreeca.form.shapes.*;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
+import java.io.StringReader;
 import java.util.*;
 import java.util.regex.Matcher;
 
-import javax.json.JsonException;
+import javax.json.*;
 
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
@@ -42,20 +42,20 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.things.Values.format;
 import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.literal;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 
-@SuppressWarnings("unchecked") public final class QueryParser {
+public final class QueryParser {
 
 	private static final java.util.regex.Pattern StepPatten
 			=java.util.regex.Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");
 
 
 	private final Shape shape;
-	private final URI base;
+	private final JSONDecoder decoder;
 
 
 	public QueryParser(final Shape shape, final String base) {
@@ -64,8 +64,13 @@ import static java.util.stream.Collectors.toList;
 			throw new NullPointerException("null shape");
 		}
 
+		if ( base == null ) {
+			throw new NullPointerException("null base");
+		}
+
 		this.shape=shape;
-		this.base=base == null ? null : URI.create(base);
+		this.decoder=new JSONDecoder(base);
+
 	}
 
 
@@ -87,7 +92,7 @@ import static java.util.stream.Collectors.toList;
 			throw new NullPointerException("null json");
 		}
 
-		final Map<String, Object> query=query(json);
+		final JsonObject query=query(json);
 
 		final Shape filter=filter(query);
 
@@ -111,69 +116,72 @@ import static java.util.stream.Collectors.toList;
 	}
 
 
-	private Map<String, Object> query(final String json) {
-		return Optional
-				.of(json)
+	private JsonObject query(final String json) {
+		return Optional.of(json)
 				.filter(v -> !v.isEmpty())
-				.map(JSON::decode)
-				.map(v -> v instanceof Map ? (Map<String, Object>)v : error("query is not a json object"))
-				.orElseGet(JSON::object);
+				.map(v -> Json.createReader(new StringReader(v)).readValue())
+				.map(v -> v instanceof JsonObject ? (JsonObject)v : decoder.error("filter is not an object"))
+				.orElse(JsonValue.EMPTY_JSON_OBJECT);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape filter(final Map<String, Object> query) {
+	private Shape filter(final JsonObject query) {
 
 		return query.containsKey("filter") ? Optional
 
 				.ofNullable(query.get("filter"))
-				.map(v -> v instanceof Map ? (Map<String, Object>)v : error("filter is not an object"))
+				.map(v -> v instanceof JsonObject ? (JsonObject)v : decoder.error("filter is not an object"))
 
 				.map(object -> shape(shape, object))
-				.orElseGet(() -> error("filter is null")) : null;
+				.orElseGet(() -> decoder.error("filter is null")) : null;
 
 	}
 
 
-	private List<IRI> stats(final Map<String, Object> query) {
+	private List<IRI> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("stats"))
-				.map(v -> v instanceof String ? (String)v : error("stats field is not a string"))
-				.map((path) -> path(path, shape))
+				.map(v -> v instanceof JsonString ? (JsonString)v : decoder.error("stats field is not a string"))
+				.map((path) -> path(path.getString(), shape))
 				.orElse(null);
 	}
 
-	private List<IRI> items(final Map<String, Object> query) {
+	private List<IRI> items(final JsonObject query) {
 		return Optional.ofNullable(query.get("items"))
-				.map(v -> v instanceof String ? (String)v : error("items field is not a string"))
-				.map((path) -> path(path, shape))
+				.map(v -> v instanceof JsonString ? (JsonString)v : decoder.error("items field is not a string"))
+				.map(path -> path(path.getString(), shape))
 				.orElse(null);
 	}
 
 
-	private List<Order> order(final Map<String, Object> query) {
+	private List<Order> order(final JsonObject query) {
 		return Optional
 				.ofNullable(query.get("order"))
 				.map(this::order)
 				.orElse(emptyList());
 	}
 
-	private List<Order> order(final Object object) {
-		return object instanceof String ? criteria((String)object)
-				: object instanceof Collection ? criteria((Collection<?>)object)
-				: error("order field is neither a string nor an array of strings");
+	private List<Order> order(final JsonValue object) {
+		return object instanceof JsonString ? criteria((JsonString)object)
+				: object instanceof JsonArray ? criteria((JsonArray)object)
+				: decoder.error("order field is neither a string nor an array of strings");
 	}
 
 
-	private List<Order> criteria(final Collection<?> object) {
+	private List<Order> criteria(final JsonArray object) {
 		return object.stream()
-				.map(v -> v instanceof String ? (String)v : error("order criterion is not a string"))
+				.map(v -> v instanceof JsonString ? (JsonString)v : decoder.error("order criterion is not a string"))
 				.map(this::criterion)
 				.collect(toList());
 	}
 
-	private List<Order> criteria(final String object) {
-		return singletonList(criterion(object));
+	private List<Order> criteria(final JsonString object) {
+		return singletonList(criterion(object.getString()));
+	}
+
+	private Order criterion(final JsonString criterion) {
+		return criterion(criterion.getString());
 	}
 
 	private Order criterion(final String criterion) {
@@ -183,33 +191,28 @@ import static java.util.stream.Collectors.toList;
 	}
 
 
-	private int offset(final Map<String, Object> query) {
+	private int offset(final JsonObject query) {
 		return Optional
 				.ofNullable(query.get("offset"))
-				.map(v -> v instanceof Number ? (Number)v : error("offset not a number"))
-				.map(v -> v.intValue() >= 0 ? v : error("negative offset"))
-				.orElse(0)
-				.intValue();
+				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : decoder.error("offset not a number"))
+				.map(JsonNumber::intValue)
+				.map(v ->v >= 0 ? v : decoder.error("negative offset"))
+				.orElse(0);
 	}
 
-	private int limit(final Map<String, Object> query) {
+	private int limit(final JsonObject query) {
 		return Optional
 				.ofNullable(query.get("limit"))
-				.map(v -> v instanceof Number ? (Number)v : error("limit is not a number"))
-				.map(v -> v.intValue() >= 0 ? v : error("negative limit"))
-				.orElse(0)
-				.intValue();
-	}
-
-
-	private <V> V error(final String message) {
-		throw new JsonException(message);
+				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : decoder.error("limit is not a number"))
+				.map(JsonNumber::intValue)
+				.map(v -> v >= 0 ? v : decoder.error("negative limit"))
+				.orElse(0);
 	}
 
 
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape(final Shape shape, final Map<String, Object> object) {
+	private Shape shape(final Shape shape, final JsonObject object) {
 		return and(object
 				.entrySet()
 				.stream()
@@ -218,7 +221,7 @@ import static java.util.stream.Collectors.toList;
 		);
 	}
 
-	private Shape shape(final Shape shape, final String key, final Object value) {
+	private Shape shape(final Shape shape, final String key, final JsonValue value) {
 
 		switch ( key ) {
 
@@ -242,109 +245,110 @@ import static java.util.stream.Collectors.toList;
 
 			default:
 
-				return field(shape, path(key, shape),
-						value instanceof Map ? (Map<String, Object>)value : singletonMap("?", value));
+				return field(shape, path(key, shape), value instanceof JsonObject ?
+						(JsonObject)value : Json.createObjectBuilder().add("?", value).build()
+				);
 
 		}
 
 	}
 
 
-	private Shape datatype(final Object value) {
-		return value instanceof String
-				? Datatype.datatype(iri((String)value))
-				: error("datatype IRI is not a string");
+	private Shape datatype(final JsonValue value) {
+		return value instanceof JsonString
+				? Datatype.datatype(iri(((JsonString)value).getString()))
+				: decoder.error("datatype IRI is not a string");
 	}
 
-	private Shape clazz(final Object value) {
-		return value instanceof String
-				? Clazz.clazz(iri((String)value))
-				: error("class IRI is not a string");
+	private Shape clazz(final JsonValue value) {
+		return value instanceof JsonString
+				? Clazz.clazz(iri(((JsonString)value).getString()))
+				: decoder.error("class IRI is not a string");
 	}
 
 
-	private Shape minExclusive(final Shape shape, final Object value) {
+	private Shape minExclusive(final Shape shape, final JsonValue value) {
 		return value != null
-				? MinExclusive.minExclusive(value(shape, value))
-				: error("value is null");
+				? MinExclusive.minExclusive(decoder.value(shape, value))
+				: decoder.error("value is null");
 	}
 
-	private Shape maxExclusive(final Shape shape, final Object value) {
+	private Shape maxExclusive(final Shape shape, final JsonValue value) {
 		return value != null
-				? MaxExclusive.maxExclusive(value(shape, value))
-				: error("value is null");
+				? MaxExclusive.maxExclusive(decoder.value(shape, value))
+				: decoder.error("value is null");
 	}
 
-	private Shape minInclusive(final Shape shape, final Object value) {
+	private Shape minInclusive(final Shape shape, final JsonValue value) {
 		return value != null
-				? MinInclusive.minInclusive(value(shape, value))
-				: error("value is null");
+				? MinInclusive.minInclusive(decoder.value(shape, value))
+				: decoder.error("value is null");
 	}
 
-	private Shape maxInclusive(final Shape shape, final Object value) {
+	private Shape maxInclusive(final Shape shape, final JsonValue value) {
 		return value != null
-				? MaxInclusive.maxInclusive(value(shape, value))
-				: error("value is null");
+				? MaxInclusive.maxInclusive(decoder.value(shape, value))
+				: decoder.error("value is null");
 	}
 
 
-	private Shape minLength(final Object value) {
-		return value instanceof Number
-				? MinLength.minLength(((Number)value).intValue())
-				: error("length is not a number");
+	private Shape minLength(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MinLength.minLength(((JsonNumber)value).intValue())
+				: decoder.error("length is not a number");
 	}
 
-	private Shape maxLength(final Object value) {
-		return value instanceof Number
-				? MaxLength.maxLength(((Number)value).intValue())
-				: error("length is not a number");
+	private Shape maxLength(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MaxLength.maxLength(((JsonNumber)value).intValue())
+				: decoder.error("length is not a number");
 	}
 
-	private Shape pattern(final Object value) {
-		return value instanceof String
-				? ((String)value).isEmpty() ? and() : Pattern.pattern((String)value)
-				: error("pattern is not a string");
+	private Shape pattern(final JsonValue value) {
+		return value instanceof JsonString
+				? ((JsonString)value).getString().isEmpty() ? and() : Pattern.pattern(((JsonString)value).getString())
+				: decoder.error("pattern is not a string");
 	}
 
-	private Shape like(final Object value) {
-		return value instanceof String
-				? ((String)value).isEmpty() ? and() : Like.like((String)value)
-				: error("pattern is not a string");
+	private Shape like(final JsonValue value) {
+		return value instanceof JsonString
+				? ((JsonString)value).getString().isEmpty() ? and() : Like.like(((JsonString)value).getString())
+				: decoder.error("pattern is not a string");
 	}
 
 
-	private Shape minCount(final Object value) {
-		return value instanceof Number
-				? MinCount.minCount(((Number)value).intValue())
-				: error("length is not a number");
+	private Shape minCount(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MinCount.minCount(((JsonNumber)value).intValue())
+				: decoder.error("length is not a number");
 	}
 
-	private Shape maxCount(final Object value) {
-		return value instanceof Number
-				? MaxCount.maxCount(((Number)value).intValue())
-				: error("length is not a number");
+	private Shape maxCount(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MaxCount.maxCount(((JsonNumber)value).intValue())
+				: decoder.error("length is not a number");
 	}
 
-	private Shape all(final Shape shape, final Object value) {
-		if ( value == null ) { return error("value is null"); } else {
+	private Shape all(final Shape shape, final JsonValue value) {
+		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return decoder.error("value is null"); } else {
 
-			final Collection<Value> values=values(shape, value);
+			final Collection<Value> values=decoder.values(shape, value);
 
 			return values.isEmpty() ? and() : All.all(values);
 		}
 	}
 
-	private Shape any(final Shape shape, final Object value) {
-		if ( value == null ) { return error("value is null"); } else {
+	private Shape any(final Shape shape, final JsonValue value) {
+		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return decoder.error("value is null"); } else {
 
-			final Collection<Value> values=values(shape, value);
+			final Collection<Value> values=decoder.values(shape, value);
 
 			return values.isEmpty() ? and() : Any.any(values);
 		}
 	}
 
 
-	private Shape field(final Shape shape, final List<IRI> path, final Map<String, Object> object) {
+	private Shape field(final Shape shape, final List<IRI> path, final JsonObject object) {
 		if ( path.isEmpty() ) { return shape(shape, object); } else {
 
 			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
@@ -354,43 +358,6 @@ import static java.util.stream.Collectors.toList;
 
 			return Field.field(head, field(fields.get(head), tail, object));
 		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Collection<Value> values(final Shape shape, final Object object) {
-		return object instanceof Collection ? values(shape, (Collection<Object>)object)
-				: singleton(value(shape, object));
-	}
-
-	private Collection<Value> values(final Shape shape, final Collection<Object> array) {
-		return array.stream().map(o -> value(shape, (Object)o)).collect(toList());
-	}
-
-
-	private Value value(final Shape shape, final Object object) {
-		return Datatype.datatype(shape)
-
-				.map(datatype -> datatype.equals(Form.IRIType) && object instanceof String ?
-						iri(resolve((String)object))
-						: value(object)
-				)
-
-				.orElseGet(() -> value(object));
-	}
-
-	private Value value(final Object object) {
-		return object instanceof Map ? value(shape, (Map<String, Object>)object)
-				: object instanceof BigDecimal ? literal((BigDecimal)object)
-				: object instanceof BigInteger ? literal((BigInteger)object)
-				: object instanceof Number ? literal(((Number)object).doubleValue())
-				: object != null ? literal(object.toString())
-				: null;
-	}
-
-	private Value value(final Shape shape, final Map<String, Object> object) {
-		return iri(resolve(object.get("this").toString()));
 	}
 
 
@@ -455,13 +422,6 @@ import static java.util.stream.Collectors.toList;
 
 		return edges;
 
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private String resolve(final String iri) {
-		return base == null ? iri : base.resolve(iri).toString();
 	}
 
 }
