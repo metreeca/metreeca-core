@@ -46,7 +46,6 @@ import java.util.stream.Stream;
 import javax.json.*;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
@@ -328,7 +327,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 			} else if ( shape != null ) {
 
-				final Map<String, IRI> aliases=aliases(shape, JSONCodec.Reserved)
+				final Map<String, IRI> aliases=new JSONCodec() {}.aliases(shape) // !!! ;-(
 						.entrySet().stream()
 						.collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 

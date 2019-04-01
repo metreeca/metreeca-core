@@ -32,7 +32,6 @@ import java.util.regex.Matcher;
 
 import javax.json.*;
 
-import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.things.Values.format;
@@ -42,7 +41,7 @@ import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 
 
-public final class JSONDecoder implements JSONCodec {
+public final class JSONDecoder extends JSONCodec {
 
 	private static final java.util.regex.Pattern StepPatten
 			=java.util.regex.Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");

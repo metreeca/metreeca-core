@@ -33,7 +33,6 @@ import java.util.regex.Matcher;
 
 import javax.json.*;
 
-import static com.metreeca.form.codecs.BaseCodec.aliases;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
@@ -41,7 +40,7 @@ import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 
 
-public final class JSONEncoder implements JSONCodec {
+public final class JSONEncoder extends JSONCodec {
 
 	private final String base;
 
@@ -124,7 +123,7 @@ public final class JSONEncoder implements JSONCodec {
 
 				} else { // write direct/inverse fields as specified by the shape
 
-					final Map<IRI, String> aliases=aliases(shape, JSONCodec.Reserved);
+					final Map<IRI, String> aliases=aliases(shape);
 
 					for (final Map.Entry<IRI, Shape> entry : fields.entrySet()) {
 
