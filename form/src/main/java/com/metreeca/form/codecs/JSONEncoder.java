@@ -60,7 +60,6 @@ public final class JSONEncoder implements JSONCodec {
 	}
 
 
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private JsonValue json(final Model model, final Shape shape, final Collection<? extends Value> values, final Predicate<Resource> trail) {

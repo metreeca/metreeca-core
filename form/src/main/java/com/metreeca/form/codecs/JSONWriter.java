@@ -54,6 +54,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 
 	private static final JsonWriterFactory writers=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));
 
+
 	private static final Function<Shape, Shape> ShapeCompiler=memoizable(s -> s
 			.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
 			.map(new Optimizer())

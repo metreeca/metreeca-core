@@ -71,13 +71,13 @@ public final class JSONDecoder implements JSONCodec {
 		return and(object
 				.entrySet()
 				.stream()
-				.map(entry -> shape(entry.getValue(), entry.getKey(), shape))
+				.map(entry -> shape(entry.getKey(), entry.getValue(), shape))
 				.collect(toList())
 		);
 	}
 
 
-	private Shape shape(final JsonValue value, final String key, final Shape shape) {
+	private Shape shape(final String key, final JsonValue value, final Shape shape) {
 
 		switch ( key ) {
 
@@ -101,8 +101,11 @@ public final class JSONDecoder implements JSONCodec {
 
 			default:
 
-				return field(shape, path(key, shape), value instanceof JsonObject ?
-						(JsonObject)value : Json.createObjectBuilder().add("?", value).build()
+				return field(
+						value instanceof JsonObject ? (JsonObject)value
+								: Json.createObjectBuilder().add("?", value).build(),
+						shape,
+						path(key, shape)
 				);
 
 		}
@@ -125,25 +128,25 @@ public final class JSONDecoder implements JSONCodec {
 
 	private Shape minExclusive(final JsonValue value, final Shape shape) {
 		return value != null
-				? MinExclusive.minExclusive(value(shape, value))
+				? MinExclusive.minExclusive(value(value, shape))
 				: error("value is null");
 	}
 
 	private Shape maxExclusive(final JsonValue value, final Shape shape) {
 		return value != null
-				? MaxExclusive.maxExclusive(value(shape, value))
+				? MaxExclusive.maxExclusive(value(value, shape))
 				: error("value is null");
 	}
 
 	private Shape minInclusive(final JsonValue value, final Shape shape) {
 		return value != null
-				? MinInclusive.minInclusive(value(shape, value))
+				? MinInclusive.minInclusive(value(value, shape))
 				: error("value is null");
 	}
 
 	private Shape maxInclusive(final JsonValue value, final Shape shape) {
 		return value != null
-				? MaxInclusive.maxInclusive(value(shape, value))
+				? MaxInclusive.maxInclusive(value(value, shape))
 				: error("value is null");
 	}
 
@@ -188,7 +191,7 @@ public final class JSONDecoder implements JSONCodec {
 	private Shape all(final JsonValue value, final Shape shape) {
 		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
 
-			final Collection<Value> values=values(shape, value);
+			final Collection<Value> values=values(value, shape);
 
 			return values.isEmpty() ? and() : All.all(values);
 		}
@@ -197,14 +200,14 @@ public final class JSONDecoder implements JSONCodec {
 	private Shape any(final JsonValue value, final Shape shape) {
 		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
 
-			final Collection<Value> values=values(shape, value);
+			final Collection<Value> values=values(value, shape);
 
 			return values.isEmpty() ? and() : Any.any(values);
 		}
 	}
 
 
-	private Shape field(final Shape shape, final List<IRI> path, final JsonObject object) {
+	private Shape field(final JsonObject object, final Shape shape, final List<IRI> path) {
 		if ( path.isEmpty() ) { return shape(object, shape); } else {
 
 			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
@@ -212,7 +215,7 @@ public final class JSONDecoder implements JSONCodec {
 			final IRI head=path.get(0);
 			final List<IRI> tail=path.subList(1, path.size());
 
-			return Field.field(head, field(fields.get(head), tail, object));
+			return Field.field(head, field(object, fields.get(head), tail));
 		}
 	}
 
@@ -284,20 +287,20 @@ public final class JSONDecoder implements JSONCodec {
 
 	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Collection<Value> values(final Shape shape, final JsonValue object) {
-		return object instanceof JsonArray
-				? object.asJsonArray().stream().map(o -> value(shape, o)).collect(toList())
-				: singleton(value(shape, object));
+	public Collection<Value> values(final JsonValue value, final Shape shape) {
+		return value instanceof JsonArray
+				? value.asJsonArray().stream().map(o -> value(o, shape)).collect(toList())
+				: singleton(value(value, shape));
 	}
 
-	public Value value(final Shape shape, final JsonValue object) {
+	public Value value(final JsonValue value, final Shape shape) {
 		return Datatype.datatype(shape)
 
-				.map(datatype -> datatype.equals(Form.IRIType) && object instanceof JsonString ?
-						iri(resolve(((JsonString)object).getString())) : value(object)
+				.map(datatype -> datatype.equals(Form.IRIType) && value instanceof JsonString ?
+						iri(resolve(((JsonString)value).getString())) : value(value)
 				)
 
-				.orElseGet(() -> value(object));
+				.orElseGet(() -> value(value));
 	}
 
 
@@ -305,8 +308,8 @@ public final class JSONDecoder implements JSONCodec {
 		return value instanceof JsonObject ? resource((JsonObject)value)
 				: value instanceof JsonString ? literal((JsonString)value)
 				: value instanceof JsonNumber ? literal((JsonNumber)value)
-				: value .equals(JsonValue.TRUE)? Values.literal(true)
-				: value .equals(JsonValue.FALSE)? Values.literal(false)
+				: value.equals(JsonValue.TRUE) ? Values.literal(true)
+				: value.equals(JsonValue.FALSE) ? Values.literal(false)
 				: error("unsupported JSON value <"+value+">");
 	}
 

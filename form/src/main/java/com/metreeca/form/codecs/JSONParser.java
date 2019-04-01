@@ -23,7 +23,6 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
-import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -35,8 +34,6 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFParser;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URI;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -46,7 +43,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import javax.json.JsonException;
+import javax.json.*;
 import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.form.codecs.BaseCodec.aliases;
@@ -57,12 +54,16 @@ import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.literal;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 
 
 public final class JSONParser extends AbstractRDFParser {
+
+	private static final JsonReaderFactory readers=Json.createReaderFactory(null);
+
 
 	private static final Pattern EdgePattern
 			=Pattern.compile("(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:.*)>)");
@@ -131,7 +132,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 		try {
 
-			parse(JSON.decode(reader), baseURI, focus, driver).count(); // consume values
+			values(readers.createReader(reader).readValue(), driver, focus, baseURI).count(); // consume values
 
 		} catch ( final JsonParsingException e ) {
 
@@ -153,23 +154,23 @@ public final class JSONParser extends AbstractRDFParser {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Stream<Value> parse(final Object json, final String base, final Resource focus, final Shape shape) {
-		return json == null ? Stream.empty()
+	private Stream<Value> values(final JsonValue json, final Shape shape, final Resource focus, final String base) {
+		return json.equals(JsonValue.NULL) ? Stream.empty()
 
-				: json instanceof Collection<?> ? parse((Collection<?>)json, base, focus, shape)
-				: json instanceof Map<?, ?> ? parse((Map<?, ?>)json, base, focus, shape)
+				: json instanceof JsonArray ? values(json.asJsonArray(), shape, focus, base)
+				: json instanceof JsonObject ? values(json.asJsonObject(), shape, focus, base)
 
 				: focus != null ? Stream.empty()
 
-				: parse(json, base, shape);
+				: values(json, shape, base);
 	}
 
 
-	private Stream<Value> parse(final Collection<?> array, final String base, final Resource focus, final Shape shape) {
-		return array.stream().flatMap(object -> parse(object, base, focus, shape));
+	private Stream<Value> values(final JsonArray array, final Shape shape, final Resource focus, final String base) {
+		return array.stream().flatMap(object -> values(object, shape, focus, base));
 	}
 
-	private Stream<Value> parse(final Map<?, ?> object, final String base, final Resource focus, final Shape shape) { // !!! refactor
+	private Stream<Value> values(final JsonObject object, final Shape shape, final Resource focus, final String base) { // !!! refactor
 
 		final Resource source=resource(object, base) // non-null id
 				.orElseGet(() -> blank(object) // null id
@@ -183,15 +184,15 @@ public final class JSONParser extends AbstractRDFParser {
 
 		} else if ( source != null ) { // resource
 
-			for (final Map.Entry<?, ?> entry : object.entrySet()) {
+			for (final Map.Entry<String, JsonValue> entry : object.entrySet()) {
 
 				final String label=entry.getKey().toString();
-				final Object value=entry.getValue();
+				final JsonValue value=entry.getValue();
 
 				if ( !label.equals("this") ) {
 
 					final IRI property=property(label, base, shape);
-					final Stream<Value> targets=parse(value, base, null, fields(shape).get(property));
+					final Stream<Value> targets=values(value, fields(shape).get(property), null, base);
 
 					if ( rdfHandler != null ) {
 						targets.forEachOrdered(target -> {
@@ -219,14 +220,14 @@ public final class JSONParser extends AbstractRDFParser {
 
 		} else if ( !object.isEmpty() ) { // literal
 
-			final Object text=object.get("text");
-			final Object type=object.get("type");
-			final Object lang=object.get("lang");
+			final JsonValue text=object.get("text");
+			final JsonValue type=object.get("type");
+			final JsonValue lang=object.get("lang");
 
-			if ( text instanceof String ) {
+			if ( text instanceof JsonString ) {
 
-				return type instanceof String ? Stream.of(createLiteral((String)text, null, createIRI(base, (String)type)))
-						: lang instanceof String ? Stream.of(createLiteral((String)text, (String)lang, null))
+				return type instanceof JsonString ? Stream.of(createLiteral(((JsonString)text).getString(), null, createIRI(base, ((JsonString)type).getString())))
+						: lang instanceof JsonString ? Stream.of(createLiteral(((JsonString)text).getString(), ((JsonString)lang).getString(), null))
 						: error("literal type/lang fields are missing or not strings");
 
 			} else {
@@ -242,75 +243,27 @@ public final class JSONParser extends AbstractRDFParser {
 	}
 
 
-	private Stream<Value> parse(final Object json, final String base, final Shape shape) {
+	private Stream<Value> values(final JsonValue json, final Shape shape, final String base) {
 
-		final IRI type=datatype(shape).orElse(null);
+		return json.equals(JsonValue.TRUE) ? values(true)
+				: json.equals(JsonValue.FALSE) ? values(false)
 
-		return json instanceof Boolean ? parse((Boolean)json, type)
+				: json instanceof JsonNumber ? Stream.of(
+				((JsonNumber)json).isIntegral() ?
+						literal(((JsonNumber)json).bigIntegerValue()) : literal(((JsonNumber)json).bigDecimalValue()))
 
-				: json instanceof BigDecimal ? parse((BigDecimal)json, type)
-				: json instanceof BigInteger ? parse((BigInteger)json, type)
-				: json instanceof Long ? parse((Long)json, type)
-				: json instanceof Integer ? parse((Integer)json, type)
-				: json instanceof Short ? parse((Short)json, type)
-				: json instanceof Byte ? parse((Byte)json, type)
 
-				: json instanceof Double ? parse((Double)json, type)
-				: json instanceof Float ? parse((Float)json, type)
+				: json instanceof JsonString? values(((JsonString)json).getString(), base, datatype(shape).orElse(null))
 
-				: parse(json.toString(), base, type);
+				: error("unsupported JSON value <" +json+ ">");
 	}
 
-	// !!! complete type conversions (JSON.decode will emit only BigDecimal/BigInteger/Double)
-
-	private Stream<Value> parse(final Boolean value, final IRI type) {
+	private Stream<Value> values(final Boolean value) {
 		return Stream.of(createLiteral(value.toString(), null, XMLSchema.BOOLEAN));
 	}
 
-	private Stream<Value> parse(final BigDecimal value, final IRI type) {
-		return type == null || type.equals(XMLSchema.DECIMAL)
-				? Stream.of(createLiteral(value.toPlainString(), null, XMLSchema.DECIMAL))
-				: XMLSchema.DOUBLE.equals(type) ? parse(value.doubleValue(), null)
-				: error("unable to promote big decimal value to "+Values.format(type));
-	}
 
-	private Stream<Value> parse(final BigInteger value, final IRI type) {
-		return type == null || type.equals(XMLSchema.INTEGER)
-				? Stream.of(createLiteral(value.toString(), null, XMLSchema.INTEGER))
-				: XMLSchema.DECIMAL.equals(type) ? parse(new BigDecimal(value), null)
-				: XMLSchema.DOUBLE.equals(type) ? parse(value.doubleValue(), null)
-				: error("unable to promote big integer value to "+Values.format(type));
-	}
-
-	private Stream<Value> parse(final Long value, final IRI type) {
-		return Stream.of(createLiteral(value.toString(), null, XMLSchema.LONG));
-	}
-
-	private Stream<Value> parse(final Integer value, final IRI type) {
-		return Stream.of(createLiteral(value.toString(), null, XMLSchema.INT));
-	}
-
-	private Stream<Value> parse(final Short value, final IRI type) {
-		return Stream.of(createLiteral(value.toString(), null, XMLSchema.SHORT));
-	}
-
-	private Stream<Value> parse(final Byte value, final IRI type) {
-		return Stream.of(createLiteral(value.toString(), null, XMLSchema.BYTE));
-	}
-
-	private Stream<Value> parse(final Double value, final IRI type) {
-		return type == null || type.equals(XMLSchema.DOUBLE)
-				? Stream.of(createLiteral(DoubleFormat.format(value), null, XMLSchema.DOUBLE))
-				: XMLSchema.DECIMAL.equals(type) ? parse(new BigDecimal(value), null)
-				: error("unable to promote double value to "+Values.format(type));
-	}
-
-	private Stream<Value> parse(final Float value, final IRI type) {
-		return Stream.of(createLiteral(DoubleFormat.format(value), null, XMLSchema.FLOAT));
-	}
-
-
-	private Stream<Value> parse(final String string, final String base, final IRI type) {
+	private Stream<Value> values(final String string, final String base, final IRI type) {
 		return Stream.of(type == null ? createLiteral(string, null, null)
 				: type.equals(Form.ResourceType) ? createResource(base, string)
 				: type.equals(Form.IRIType) ? createIRI(base, string)
@@ -321,14 +274,14 @@ public final class JSONParser extends AbstractRDFParser {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Optional<Resource> resource(final Map<?, ?> object, final String base) {
+	private Optional<Resource> resource(final JsonObject object, final String base) {
 		return Optional.ofNullable(object.get("this"))
-				.map(id -> id instanceof String ? (String)id
+				.map(id -> id instanceof JsonString ? ((JsonString)id).getString()
 						: error("'this' identifier field is not a string"))
 				.map(id -> createResource(base, id));
 	}
 
-	private Optional<Resource> blank(final Map<?, ?> object) {
+	private Optional<Resource> blank(final JsonObject object) {
 		return object.containsKey("this")
 				? Optional.of(createNode())
 				: Optional.empty();
