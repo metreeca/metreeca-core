@@ -60,34 +60,34 @@ public final class JSONDecoder implements JSONCodec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	<V> V error(final String message) {
+	public <V> V error(final String message) {
 		throw new JsonException(message);
 	}
 
 
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Shape shape(final Shape shape, final JsonObject object) {
+	public Shape shape(final JsonObject object, final Shape shape) {
 		return and(object
 				.entrySet()
 				.stream()
-				.map(entry -> shape(shape, entry.getKey(), entry.getValue()))
+				.map(entry -> shape(entry.getValue(), entry.getKey(), shape))
 				.collect(toList())
 		);
 	}
 
 
-	private Shape shape(final Shape shape, final String key, final JsonValue value) {
+	private Shape shape(final JsonValue value, final String key, final Shape shape) {
 
 		switch ( key ) {
 
 			case "^": return datatype(value);
 			case "@": return clazz(value);
 
-			case ">": return minExclusive(shape, value);
-			case "<": return maxExclusive(shape, value);
-			case ">=": return minInclusive(shape, value);
-			case "<=": return maxInclusive(shape, value);
+			case ">": return minExclusive(value, shape);
+			case "<": return maxExclusive(value, shape);
+			case ">=": return minInclusive(value, shape);
+			case "<=": return maxInclusive(value, shape);
 
 			case ">#": return minLength(value);
 			case "#<": return maxLength(value);
@@ -96,12 +96,12 @@ public final class JSONDecoder implements JSONCodec {
 
 			case ">>": return minCount(value);
 			case "<<": return maxCount(value);
-			case "!": return all(shape, value);
-			case "?": return any(shape, value);
+			case "!": return all(value, shape);
+			case "?": return any(value, shape);
 
 			default:
 
-				return field(shape, path(shape, key), value instanceof JsonObject ?
+				return field(shape, path(key, shape), value instanceof JsonObject ?
 						(JsonObject)value : Json.createObjectBuilder().add("?", value).build()
 				);
 
@@ -123,25 +123,25 @@ public final class JSONDecoder implements JSONCodec {
 	}
 
 
-	private Shape minExclusive(final Shape shape, final JsonValue value) {
+	private Shape minExclusive(final JsonValue value, final Shape shape) {
 		return value != null
 				? MinExclusive.minExclusive(value(shape, value))
 				: error("value is null");
 	}
 
-	private Shape maxExclusive(final Shape shape, final JsonValue value) {
+	private Shape maxExclusive(final JsonValue value, final Shape shape) {
 		return value != null
 				? MaxExclusive.maxExclusive(value(shape, value))
 				: error("value is null");
 	}
 
-	private Shape minInclusive(final Shape shape, final JsonValue value) {
+	private Shape minInclusive(final JsonValue value, final Shape shape) {
 		return value != null
 				? MinInclusive.minInclusive(value(shape, value))
 				: error("value is null");
 	}
 
-	private Shape maxInclusive(final Shape shape, final JsonValue value) {
+	private Shape maxInclusive(final JsonValue value, final Shape shape) {
 		return value != null
 				? MaxInclusive.maxInclusive(value(shape, value))
 				: error("value is null");
@@ -185,7 +185,7 @@ public final class JSONDecoder implements JSONCodec {
 				: error("length is not a number");
 	}
 
-	private Shape all(final Shape shape, final JsonValue value) {
+	private Shape all(final JsonValue value, final Shape shape) {
 		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
 
 			final Collection<Value> values=values(shape, value);
@@ -194,7 +194,7 @@ public final class JSONDecoder implements JSONCodec {
 		}
 	}
 
-	private Shape any(final Shape shape, final JsonValue value) {
+	private Shape any(final JsonValue value, final Shape shape) {
 		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
 
 			final Collection<Value> values=values(shape, value);
@@ -205,7 +205,7 @@ public final class JSONDecoder implements JSONCodec {
 
 
 	private Shape field(final Shape shape, final List<IRI> path, final JsonObject object) {
-		if ( path.isEmpty() ) { return shape(shape, object); } else {
+		if ( path.isEmpty() ) { return shape(object, shape); } else {
 
 			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
 
@@ -219,7 +219,7 @@ public final class JSONDecoder implements JSONCodec {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public List<IRI> path(final Shape shape, final String path) {
+	public List<IRI> path(final String path, final Shape shape) {
 
 		final Collection<String> steps=new ArrayList<>();
 
@@ -238,11 +238,11 @@ public final class JSONDecoder implements JSONCodec {
 			throw new IllegalArgumentException("malformed path ["+path+"]");
 		}
 
-		return path(shape, steps);
+		return path(steps, shape);
 	}
 
 
-	private List<IRI> path(final Shape shape, final Iterable<String> steps) {
+	private List<IRI> path(final Iterable<String> steps, final Shape shape) {
 
 		final List<IRI> edges=new ArrayList<>();
 

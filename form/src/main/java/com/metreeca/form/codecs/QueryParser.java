@@ -127,7 +127,7 @@ public final class QueryParser {
 				.ofNullable(query.get("filter"))
 				.map(v -> v instanceof JsonObject ? v.asJsonObject() : decoder.error("filter is not an object"))
 
-				.map(object -> decoder.shape(shape, object))
+				.map(object -> decoder.shape(object, shape))
 				.orElseGet(() -> decoder.error("filter is null")) : null;
 
 	}
@@ -136,14 +136,14 @@ public final class QueryParser {
 	private List<IRI> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("stats"))
 				.map(v -> v instanceof JsonString ? (JsonString)v : decoder.error("stats field is not a string"))
-				.map((path) -> decoder.path(shape, path.getString()))
+				.map((path) -> decoder.path(path.getString(), shape))
 				.orElse(null);
 	}
 
 	private List<IRI> items(final JsonObject query) {
 		return Optional.ofNullable(query.get("items"))
 				.map(v -> v instanceof JsonString ? (JsonString)v : decoder.error("items field is not a string"))
-				.map(path -> decoder.path(shape, path.getString()))
+				.map(path -> decoder.path(path.getString(), shape))
 				.orElse(null);
 	}
 
@@ -178,9 +178,9 @@ public final class QueryParser {
 	}
 
 	private Order criterion(final String criterion) {
-		return criterion.startsWith("+") ? increasing(decoder.path(shape, criterion.substring(1)))
-				: criterion.startsWith("-") ? decreasing(decoder.path(shape, criterion.substring(1)))
-				: increasing(decoder.path(shape, criterion));
+		return criterion.startsWith("+") ? increasing(decoder.path(criterion.substring(1), shape))
+				: criterion.startsWith("-") ? decreasing(decoder.path(criterion.substring(1), shape))
+				: increasing(decoder.path(criterion, shape));
 	}
 
 

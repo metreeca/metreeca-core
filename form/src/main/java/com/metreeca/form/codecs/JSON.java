@@ -17,18 +17,15 @@
 
 package com.metreeca.form.codecs;
 
-import java.io.*;
-import java.math.BigDecimal;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.util.*;
 
 import javax.json.Json;
 import javax.json.JsonException;
-import javax.json.stream.*;
-
-import static java.util.Collections.singletonMap;
-
-import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParserFactory;
 
 
 /**
@@ -39,29 +36,7 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
  */
 @Deprecated final class JSON {
 
-	private static final JsonParserFactory parsers=Json
-			.createParserFactory(null);
-
-	private static final JsonGeneratorFactory generators=Json
-			.createGeneratorFactory(singletonMap(PRETTY_PRINTING, true));
-
-
-	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@SafeVarargs public static Map<String, Object> object(final Map.Entry<String, Object>... fields) {
-
-		final Map<String, Object> object=new LinkedHashMap<>();
-
-		for (final Map.Entry<String, Object> field : fields) {
-			object.put(field.getKey(), field.getValue());
-		}
-
-		return object;
-	}
-
-	public static Map.Entry<String, Object> field(final String label, final Object value) {
-		return new AbstractMap.SimpleEntry<>(label, value);
-	}
+	private static final JsonParserFactory parsers=Json.createParserFactory(null);
 
 
 	//// Decoder ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,113 +120,6 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 			}
 		}
-	}
-
-
-	//// Encoder ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static String encode(final Object object) throws JsonException {
-
-		if ( object == null ) {
-			throw new NullPointerException("null object");
-		}
-
-		return encode(object, new StringWriter()).toString();
-	}
-
-	public static <W extends Writer> W encode(final Object object, final W writer) throws JsonException {
-
-		if ( object == null ) {
-			throw new NullPointerException("null object");
-		}
-
-		if ( writer == null ) {
-			throw new NullPointerException("null writer");
-		}
-
-		try (final JsonGenerator generator=generators.createGenerator(writer)) {
-			write(generator, null, object);
-		}
-
-		return writer;
-	}
-
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final Object value) {
-		return value instanceof Map<?, ?> ? write(generator, name, (Map<?, ?>)value)
-				: value instanceof Iterable<?> ? write(generator, name, (Iterable<?>)value)
-				: value instanceof Boolean ? write(generator, name, (Boolean)value)
-				: value instanceof Integer ? write(generator, name, (Integer)value)
-				: value instanceof Long ? write(generator, name, (Long)value)
-				: value instanceof Float ? write(generator, name, (Float)value)
-				: value instanceof Double ? write(generator, name, (Double)value)
-				: value instanceof BigInteger ? write(generator, name, (BigInteger)value)
-				: value instanceof BigDecimal ? write(generator, name, (BigDecimal)value)
-				: value != null ? write(generator, name, value.toString())
-				: generator.writeNull(name);
-	}
-
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final Map<?, ?> value) {
-
-		if ( name == null ) {
-			generator.writeStartObject();
-		} else {
-			generator.writeStartObject(name);
-		}
-
-		for (final Map.Entry<?, ?> entry : value.entrySet()) {
-			write(generator, String.valueOf(entry.getKey()), entry.getValue());
-		}
-
-		return generator.writeEnd();
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final Iterable<?> value) {
-
-		if ( name == null ) {
-			generator.writeStartArray();
-		} else {
-			generator.writeStartArray(name);
-		}
-
-		for (final Object item : value) {
-			write(generator, null, item);
-		}
-
-		return generator.writeEnd();
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final Boolean value) {
-		return name == null ? generator.write(value) : generator.write(name, value);
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final Integer value) {
-		return name == null ? generator.write(value) : generator.write(name, value);
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final Long value) {
-		return name == null ? generator.write(value) : generator.write(name, value);
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final Float value) {
-		return name == null ? generator.write(value) : generator.write(name, value);
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final Double value) {
-		return name == null ? generator.write(value) : generator.write(name, value);
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final BigInteger value) {
-		return name == null ? generator.write(value) : generator.write(name, value);
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final BigDecimal value) {
-		return name == null ? generator.write(value) : generator.write(name, value);
-	}
-
-	private static JsonGenerator write(final JsonGenerator generator, final String name, final String value) {
-		return name == null ? generator.write(value) : generator.write(name, value);
 	}
 
 
