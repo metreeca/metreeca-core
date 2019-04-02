@@ -230,7 +230,7 @@
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.0</version>
 
 				<configuration>
 
@@ -261,7 +261,7 @@
 
 						<configuration>
 
-							<reportOutputDirectory>${project.build.directory}/generated-docs</reportOutputDirectory>
+							<reportOutputDirectory>${project.basedir}/docs/javadocs</reportOutputDirectory>
 							<destDir>javadocs</destDir>
 
 							<groups>
@@ -301,53 +301,6 @@
 
 			</plugin>
 
-			<plugin> <!-- report https://maven.apache.org/plugins/maven-resources-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
-
-				<executions>
-					<execution>
-
-						<id>copy-version-docs</id>
-						<phase>post-site</phase>
-						<inherited>false</inherited>
-
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-
-						<configuration>
-
-							<outputDirectory>${project.build.directory}/docs/</outputDirectory>
-							<overwrite>true</overwrite>
-
-							<resources>
-
-								<resource> <!-- static docs -->
-									<directory>${project.basedir}/docs/</directory>
-									<filtering>true</filtering>
-									<excludes> <!-- ignore local jekyll testing leftovers -->
-										<exclude>_site/**/*</exclude>
-										<exclude>.jekyll-metadata</exclude>
-										<exclude>Gemfile.lock</exclude>
-									</excludes>
-								</resource>
-
-								<resource> <!-- generated docs -->
-									<directory>${project.build.directory}/generated-docs</directory>
-									<filtering>true</filtering>
-								</resource>
-
-							</resources>
-
-						</configuration>
-
-					</execution>
-				</executions>
-
-			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-site-plugin -->
 
@@ -359,7 +312,7 @@
 
 					<skipDeploy>true</skipDeploy> <!-- ;( manual deployment -->
 
-					<stagingDirectory>${maven.multiModuleProjectDirectory}/target/docs/reports</stagingDirectory>
+					<stagingDirectory>${maven.multiModuleProjectDirectory}/docs/reports</stagingDirectory>
 
 				</configuration>
 
@@ -490,26 +443,6 @@
 							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
-
-					</plugin>
-
-					<plugin> <!-- http://maven.apache.org/plugins/maven-scm-publish-plugin/ -->
-
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-scm-publish-plugin</artifactId>
-						<version>3.0.0</version>
-
-						<configuration>
-							<pubScmUrl>scm:git:https://github.com/metreeca/link.git</pubScmUrl>
-							<scmBranch>gh-pages</scmBranch>
-							<serverId>github</serverId>
-							<content>${project.build.directory}/docs</content>
-							<siteOutputEncoding>${project.build.sourceEncoding}</siteOutputEncoding>
-							<checkinComment>Deploy v${project.version} docs</checkinComment>
-						</configuration>
-
-						<!-- manual execution -->
-						<!-- https://maven.apache.org/plugins/maven-scm-publish-plugin/examples/multi-module-configuration.html -->
 
 					</plugin>
 
