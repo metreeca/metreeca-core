@@ -169,7 +169,6 @@ public final class JSONEncoder extends JSONCodec {
 					: datatype.equals(XMLSchema.STRING) ? json(literal.stringValue())
 					: datatype.equals(XMLSchema.INTEGER) ? json(literal.integerValue())
 					: datatype.equals(XMLSchema.DECIMAL) ? json(literal.decimalValue())
-					: datatype.equals(XMLSchema.DOUBLE) ? json(literal.doubleValue())
 					: datatype.equals(RDF.LANGSTRING) ? json(literal, literal.getLanguage().orElse(""))
 					: datatype(shape).isPresent() ? Json.createValue(literal.stringValue()) // only lexical value if type is known
 					: json(literal, datatype);
@@ -193,10 +192,6 @@ public final class JSONEncoder extends JSONCodec {
 	}
 
 	private JsonValue json(final BigDecimal value) {
-		return Json.createValue(value);
-	}
-
-	private JsonValue json(final double value) {
 		return Json.createValue(value);
 	}
 

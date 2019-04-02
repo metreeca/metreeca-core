@@ -85,7 +85,11 @@ public final class QueryParser {
 			throw new NullPointerException("null json");
 		}
 
-		final JsonObject query=query(json);
+		final JsonObject query=Optional.of(json)
+				.filter(v -> !v.isEmpty())
+				.map(v -> Json.createReader(new StringReader(v)).readValue())
+				.map(v -> v instanceof JsonObject ? (JsonObject)v : decoder.error("filter is not an object"))
+				.orElse(JsonValue.EMPTY_JSON_OBJECT);
 
 		final Shape filter=filter(query);
 
@@ -106,15 +110,6 @@ public final class QueryParser {
 				: items != null ? Items.items(optimized, items)
 				: Edges.edges(optimized, order, offset, limit);
 
-	}
-
-
-	private JsonObject query(final String json) {
-		return Optional.of(json)
-				.filter(v -> !v.isEmpty())
-				.map(v -> Json.createReader(new StringReader(v)).readValue())
-				.map(v -> v instanceof JsonObject ? (JsonObject)v : decoder.error("filter is not an object"))
-				.orElse(JsonValue.EMPTY_JSON_OBJECT);
 	}
 
 

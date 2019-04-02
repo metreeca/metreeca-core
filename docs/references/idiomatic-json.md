@@ -1,6 +1,6 @@
 ---
-title:     Idiomatic RDF/JSON Serialization Reference
-excerpt:    Idiomatic RDF/JSON serialization format codecs and grammar
+title:		Idiomatic RDF/JSON Serialization Reference
+excerpt:	Idiomatic RDF/JSON serialization format codecs and grammar
 ---
 
 Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the framework supports a simpler idiomatic JSON‑based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language.md#shapes).
@@ -156,27 +156,26 @@ The `this` label is reserved for system use.
 In the more general form, literals are serialized as JSON objects including the literal lexical representation and either the literal datatype IRI or the literal language tag.
 
 ```
-"boolean"^^xsd:boolean ::= <boolean>
-```
-
-Typed `xsd:boolean` literals ar serialized as JSON boolean values.
-
-```
 "<text>"             ::= "<text>"
 "<text>"^^xsd:string ::= "<text>
 ```
 
-Simple literals and typed `xsd:string` literals ar serialized as JSON string values.
+Simple literals and typed `xsd:string` literals are serialized as JSON string values.
 
 ```
 "<integer>"^^xsd:integer ::= <integer> # no decimal part
 "<decimal>"^^xsd:decimal ::= <decimal> # decimal part
-"<float>"^^xsd:float     ::= <float> # exponent notation
 
 "<number>"^^<type> ::= { "text": "<number>", "type": "<type>" } # explicit type
 ```
 
-Typed `xsd:integer`, `xsd:decimal` and `xsd:float` literals ar serialized as JSON numeric values using type-specific number formats. Other typed numeric literals are serialized in the extended form.
+Typed `xsd:integer` and `xsd:decimal` literals are serialized as JSON numeric values using type-specific number formats. Other typed numeric literals are serialized in the extended form.
+
+```
+"boolean"^^xsd:boolean ::= <boolean>
+```
+
+Typed `xsd:boolean` literals are serialized as JSON boolean values.
 
 	"<text>"^^<type> ::= "<text>"
 

@@ -101,7 +101,6 @@ final class JSONWriterTest  {
 		assertEquivalent("string", values.apply("string"), write(decode("[] rdf:value 'string' .")));
 		assertEquivalent("integer", values.apply(BigInteger.ONE), write(decode("[] rdf:value 1 .")));
 		assertEquivalent("decimal", values.apply(new BigDecimal("1.0")), write(decode("[] rdf:value 1.0 .")));
-		assertEquivalent("double", values.apply(1.0), write(decode("[] rdf:value 1e0 .")));
 
 		assertEquivalent("numeric",
 				values.apply(map(entry("text", "1"), entry("type", XMLSchema.INT.stringValue()))),

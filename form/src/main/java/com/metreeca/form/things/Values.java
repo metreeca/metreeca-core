@@ -234,7 +234,7 @@ public final class Values {
 			throw new NullPointerException("null id");
 		}
 
-		return factory.createBNode(id);
+		return factory.createBNode(id.startsWith("_:")? id.substring(2) : id);
 	}
 
 
