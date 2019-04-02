@@ -32,7 +32,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
-import java.util.Map;
 import java.util.function.Function;
 
 import javax.json.Json;
@@ -42,6 +41,8 @@ import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Codecs.UTF8;
+
+import static java.util.function.Function.identity;
 
 
 public final class JSONParser extends AbstractRDFParser {
@@ -111,10 +112,10 @@ public final class JSONParser extends AbstractRDFParser {
 
 				new Decoder(baseURI)
 
-						.values(readers.createReader(reader).readValue(), driver)
-						.entrySet().stream()
-						.filter(entry -> focus == null || entry.getKey().equals(focus))
-						.flatMap(Map.Entry::getValue)
+						.values(readers.createReader(reader).readValue(), driver, focus)
+						.values()
+						.stream()
+						.flatMap(identity())
 						.forEachOrdered(rdfHandler::handleStatement);
 
 			} catch ( final JsonParsingException e ) {
@@ -143,6 +144,9 @@ public final class JSONParser extends AbstractRDFParser {
 			super(baseURI);
 		}
 
+		@Override protected Resource bnode() {
+			return createNode();
+		}
 
 		@Override protected Resource bnode(final String id) {
 			return createNode(id);

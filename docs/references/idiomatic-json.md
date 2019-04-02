@@ -54,10 +54,9 @@ Blank nodes descriptions are serialized as JSON objects including a JSON field f
 
 ```
 <blank> ::= {  "this" : "" (, <property>)* }
-<blank> ::= {  "this" : null (, <property>)* }
 ```
 
-if there is no back-reference from a nested object, the `this` id field may be left empty or null.
+if there is no back-reference from a nested object, the `this` id field may be left empty.
 
 ```
 <blank> ::= {  <property>(, <property>)* }

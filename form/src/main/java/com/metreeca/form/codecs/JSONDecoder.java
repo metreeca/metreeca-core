@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.toMap;
 
 public abstract class JSONDecoder extends JSONCodec {
 
-	private static final java.util.regex.Pattern StepPatten
+	private static final java.util.regex.Pattern StepPatten // !!! merge w/ EdgePattern
 			=java.util.regex.Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");
 
 	private static final java.util.regex.Pattern EdgePattern
@@ -63,6 +63,10 @@ public abstract class JSONDecoder extends JSONCodec {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	protected Resource bnode() {
+		return Values.bnode();
+	}
 
 	protected Resource bnode(final String id) {
 		return Values.bnode(id);
@@ -152,25 +156,25 @@ public abstract class JSONDecoder extends JSONCodec {
 
 	private Shape minExclusive(final JsonValue value, final Shape shape) {
 		return value != null
-				? MinExclusive.minExclusive(value(value, shape).getKey())
+				? MinExclusive.minExclusive(value(value, shape, null).getKey())
 				: error("value is null");
 	}
 
 	private Shape maxExclusive(final JsonValue value, final Shape shape) {
 		return value != null
-				? MaxExclusive.maxExclusive(value(value, shape).getKey())
+				? MaxExclusive.maxExclusive(value(value, shape, null).getKey())
 				: error("value is null");
 	}
 
 	private Shape minInclusive(final JsonValue value, final Shape shape) {
 		return value != null
-				? MinInclusive.minInclusive(value(value, shape).getKey())
+				? MinInclusive.minInclusive(value(value, shape, null).getKey())
 				: error("value is null");
 	}
 
 	private Shape maxInclusive(final JsonValue value, final Shape shape) {
 		return value != null
-				? MaxInclusive.maxInclusive(value(value, shape).getKey())
+				? MaxInclusive.maxInclusive(value(value, shape, null).getKey())
 				: error("value is null");
 	}
 
@@ -215,7 +219,7 @@ public abstract class JSONDecoder extends JSONCodec {
 	private Shape all(final JsonValue value, final Shape shape) {
 		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
 
-			final Collection<Value> values=values(value, shape).keySet();
+			final Collection<Value> values=values(value, shape, null).keySet();
 
 			return values.isEmpty() ? and() : All.all(values);
 		}
@@ -224,7 +228,7 @@ public abstract class JSONDecoder extends JSONCodec {
 	private Shape any(final JsonValue value, final Shape shape) {
 		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
 
-			final Collection<Value> values=values(value, shape).keySet();
+			final Collection<Value> values=values(value, shape, null).keySet();
 
 			return values.isEmpty() ? and() : Any.any(values);
 		}
@@ -311,38 +315,37 @@ public abstract class JSONDecoder extends JSONCodec {
 
 	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Map<Value, Stream<Statement>> values(final JsonValue value, final Shape shape) {
+	public Map<Value, Stream<Statement>> values(final JsonValue value, final Shape shape, final Resource focus) {
 		return (value instanceof JsonArray
 
-				? value.asJsonArray().stream().map(v -> value(v, shape))
-				: Stream.of(value(value, shape))
+				? value.asJsonArray().stream().map(v -> value(v, shape, focus))
+				: Stream.of(value(value, shape, focus))
 
-		).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+		).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, Stream::concat));
 	}
 
-	public Map.Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape) {
-		return value instanceof JsonArray ? value(value.asJsonArray(), shape)
-				: value instanceof JsonObject ? value(value.asJsonObject(), shape)
+	public Map.Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape, final Resource focus) {
+		return value instanceof JsonArray ? value(value.asJsonArray(), shape, focus)
+				: value instanceof JsonObject ? value(value.asJsonObject(), shape, focus)
 				: value instanceof JsonString ? value((JsonString)value, shape)
 				: value instanceof JsonNumber ? value((JsonNumber)value, shape)
 				: value.equals(JsonValue.TRUE) ? entry(Values.True, Stream.empty())
 				: value.equals(JsonValue.FALSE) ? entry(Values.False, Stream.empty())
 				: error("unsupported JSON value <"+value+">");
-
 	}
 
 
-	private Map.Entry<Value, Stream<Statement>> value(final JsonArray array, final Shape shape) {
+	private Map.Entry<Value, Stream<Statement>> value(final JsonArray array, final Shape shape, final Resource focus) {
 		return error("unsupported JSON value <"+array+">");
 	}
 
-	private Map.Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape) {
+	private Map.Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape, final Resource focus) {
 
 		final IRI datatype=Datatype.datatype(shape).orElse(null);
 
-		return Form.IRIType.equals(datatype) ? iri(object, shape)
-				: Form.BNodeType.equals(datatype) ? bnode(object, shape)
-				: Form.ResourceType.equals(datatype) || object.containsKey("this") ? resource(object, shape)
+		return Form.IRIType.equals(datatype) ? iri(object, shape, focus)
+				: Form.BNodeType.equals(datatype) ? bnode(object, shape, focus)
+				: Form.ResourceType.equals(datatype) || object.containsKey("this") || focus != null ? resource(object, shape, focus)
 				: literal(object, shape);
 	}
 
@@ -362,9 +365,9 @@ public abstract class JSONDecoder extends JSONCodec {
 				bnode(underscore ? lexical.substring(2) : lexical)
 
 				: Form.IRIType.equals(datatype) ?
-				Values.iri(underscore ? lexical : resolve(lexical))
+				iri(underscore ? lexical : resolve(lexical))
 
-				: Values.literal(lexical, datatype);
+				: literal(lexical, datatype);
 
 		return entry(value, Stream.empty());
 	}
@@ -395,31 +398,48 @@ public abstract class JSONDecoder extends JSONCodec {
 
 	//// Resources /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map.Entry<Value, Stream<Statement>> resource(final JsonObject object, final Shape shape) {
+	private Map.Entry<Value, Stream<Statement>> resource(final JsonObject object, final Shape shape, final Resource focus) {
 
-		final JsonValue iri=object.get("this");
+		final Resource thiz=id(object.get("this"));
 
-		return iri instanceof JsonString && !((JsonString)iri).getString().startsWith("_:") ?
-				iri(object, shape) : bnode(object, shape);
+		return focus instanceof IRI || thiz instanceof IRI ?
+				iri(object, shape, focus) : bnode(object, shape, focus);
 	}
 
-	private Map.Entry<Value, Stream<Statement>> bnode(final JsonObject object, final Shape shape) {
-		return properties(object, shape, Optional.ofNullable(object.get("this"))
-				.filter(id -> id instanceof JsonString)
-				.map(id -> ((JsonString)id).getString())
-				.map(id -> bnode(id.startsWith("_:") ? id.substring(2) : id))
-				.orElseGet(() -> error("'this' identifier field is not a string"))
-		);
+	private Map.Entry<Value, Stream<Statement>> bnode(final JsonObject object, final Shape shape, final Resource focus) {
+
+		final Resource thiz=id(object.get("this"));
+
+		return focus != null
+
+				? thiz == null || thiz.equals(focus)
+				? properties(object, shape, focus)
+				: entry(focus, Stream.empty())
+
+				: thiz == null
+				? properties(object, shape, bnode())
+
+				: thiz instanceof BNode
+				? properties(object, shape, thiz)
+
+				: error("'this' identifier field missing or not a bnode id string");
 	}
 
-	private Map.Entry<Value, Stream<Statement>> iri(final JsonObject object, final Shape shape) {
-		return properties(object, shape, Optional.ofNullable(object.get("this"))
-				.filter(id -> id instanceof JsonString)
-				.map(id -> ((JsonString)id).getString())
-				.map(this::resolve)
-				.map(this::iri)
-				.orElseGet(() -> error("'this' identifier field is not a string"))
-		);
+	private Map.Entry<Value, Stream<Statement>> iri(final JsonObject object, final Shape shape, final Resource focus) {
+
+		final Resource thiz=id(object.get("this"));
+
+		return focus != null
+
+				? focus instanceof IRI && (thiz == null || thiz.equals(focus))
+				? properties(object, shape, focus)
+				: entry(focus, Stream.empty())
+
+				: thiz instanceof IRI
+				? properties(object, shape, thiz)
+
+				: error("'this' identifier field missing or not an iri string");
+
 	}
 
 
@@ -436,7 +456,7 @@ public abstract class JSONDecoder extends JSONCodec {
 
 					final IRI property=property(label, shape);
 
-					return values(value, fields.get(property)).entrySet().stream().flatMap(entry -> {
+					return values(value, fields.get(property), null).entrySet().stream().flatMap(entry -> {
 
 						final Value target=entry.getKey();
 						final Stream<Statement> model=entry.getValue();
@@ -530,6 +550,16 @@ public abstract class JSONDecoder extends JSONCodec {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Resource id(final JsonValue id) {
+
+		return id == null ? null : Optional.of(id)
+				.filter(v -> id instanceof JsonString)
+				.map(v -> ((JsonString)id).getString())
+				.map(v -> v.isEmpty() ? bnode() : v.startsWith("_:") ? bnode(v.substring(2)) : iri(resolve(v)))
+				.orElseGet(() -> error("'this' identifier field is not a string"));
+
+	}
 
 	private String resolve(final String iri) {
 		return base == null ? iri : base.resolve(iri).toString(); // !!! null base => absolute IRI
