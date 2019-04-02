@@ -65,7 +65,7 @@ final class JSONDecoderTest {
 
 	private Map<Value, Collection<Statement>> values(final JsonValue value, final Shape shape) {
 
-		return new JSONDecoder(ValuesTest.Base)
+		return new JSONDecoder(ValuesTest.Base) {}
 				.values(value, shape)
 				.entrySet()
 				.stream()
@@ -81,7 +81,7 @@ final class JSONDecoderTest {
 
 	private Map.Entry<Value, Collection<Statement>> value(final JsonValue value, final Shape shape) {
 
-		final Map.Entry<Value, Stream<Statement>> entry=new JSONDecoder(ValuesTest.Base).value(value, shape);
+		final Map.Entry<Value, Stream<Statement>> entry=new JSONDecoder(ValuesTest.Base) {}.value(value, shape);
 
 		return entry(entry.getKey(), entry.getValue().collect(toList()));
 	}

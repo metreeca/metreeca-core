@@ -23,7 +23,6 @@ import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.net.URI;
@@ -44,35 +43,49 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 
-public final class JSONDecoder extends JSONCodec {
+public abstract class JSONDecoder extends JSONCodec {
+
+	private static final java.util.regex.Pattern StepPatten
+			=java.util.regex.Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");
 
 	private static final java.util.regex.Pattern EdgePattern
 			=java.util.regex.Pattern.compile("(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:.*)>)");
-
-	private static final java.util.regex.Pattern StepPatten
-			=java.util.regex.Pattern.compile("(?:^|[./])("+EdgePattern+")");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final URI base;
-	private final ValueFactory factory;
 
 
-	public JSONDecoder(final String base) {
-		this(base, null);
-	}
-
-	public JSONDecoder(final String base, final ValueFactory factory) {
+	protected JSONDecoder(final String base) {
 		this.base=(base == null) ? null : URI.create(base);
-		this.factory=(factory == null) ? SimpleValueFactory.getInstance() : factory;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public <V> V error(final String message) {
-		throw new JsonException(message); // !!! error reporter
+	protected Resource bnode(final String id) {
+		return Values.bnode(id);
+	}
+
+	protected IRI iri(final String iri) {
+		return Values.iri(iri);
+	}
+
+	protected Literal literal(final String text, final IRI type) {
+		return Values.literal(text, type);
+	}
+
+	protected Literal literal(final String text, final String lang) {
+		return Values.literal(text, lang);
+	}
+
+	protected Statement statement(final Resource subject, final IRI predicate, final Value object) {
+		return Values.statement(subject, predicate, object);
+	}
+
+	protected <V> V error(final String message) {
+		throw new JsonException(message);
 	}
 
 
@@ -125,13 +138,14 @@ public final class JSONDecoder extends JSONCodec {
 
 	private Shape datatype(final JsonValue value) {
 		return value instanceof JsonString
-				? Datatype.datatype(factory.createIRI(resolve(((JsonString)value).getString())))
+				? Datatype.datatype(iri(resolve(((JsonString)value).getString())))
 				: error("datatype IRI is not a string");
 	}
 
+
 	private Shape clazz(final JsonValue value) {
 		return value instanceof JsonString
-				? Clazz.clazz(factory.createIRI(resolve(((JsonString)value).getString())))
+				? Clazz.clazz(iri(resolve(((JsonString)value).getString())))
 				: error("class IRI is not a string");
 	}
 
@@ -342,10 +356,10 @@ public final class JSONDecoder extends JSONCodec {
 		final Value value
 
 				=Form.ResourceType.equals(datatype) ?
-				underscore ? factory.createBNode(lexical.substring(2)) : factory.createIRI(resolve(lexical))
+				underscore ? bnode(lexical.substring(2)) : iri(resolve(lexical))
 
 				: Form.BNodeType.equals(datatype) ?
-				factory.createBNode(underscore ? lexical.substring(2) : lexical)
+				bnode(underscore ? lexical.substring(2) : lexical)
 
 				: Form.IRIType.equals(datatype) ?
 				Values.iri(underscore ? lexical : resolve(lexical))
@@ -393,7 +407,7 @@ public final class JSONDecoder extends JSONCodec {
 		return properties(object, shape, Optional.ofNullable(object.get("this"))
 				.filter(id -> id instanceof JsonString)
 				.map(id -> ((JsonString)id).getString())
-				.map(id -> factory.createBNode(id.startsWith("_:") ? id.substring(2) : id))
+				.map(id -> bnode(id.startsWith("_:") ? id.substring(2) : id))
 				.orElseGet(() -> error("'this' identifier field is not a string"))
 		);
 	}
@@ -403,7 +417,7 @@ public final class JSONDecoder extends JSONCodec {
 				.filter(id -> id instanceof JsonString)
 				.map(id -> ((JsonString)id).getString())
 				.map(this::resolve)
-				.map(factory::createIRI)
+				.map(this::iri)
 				.orElseGet(() -> error("'this' identifier field is not a string"))
 		);
 	}
@@ -427,8 +441,8 @@ public final class JSONDecoder extends JSONCodec {
 						final Value target=entry.getKey();
 						final Stream<Statement> model=entry.getValue();
 
-						final Statement edge=direct(property) ? factory.createStatement(source, property, target)
-								: target instanceof Resource ? factory.createStatement((Resource)target, inverse(property), source)
+						final Statement edge=direct(property) ? statement(source, property, target)
+								: target instanceof Resource ? statement((Resource)target, inverse(property), source)
 								: error(String.format("target for inverse property is not a resource [%s: %s]", label, entry));
 
 						return Stream.concat(Stream.of(edge), model);
@@ -452,13 +466,13 @@ public final class JSONDecoder extends JSONCodec {
 
 			if ( naked != null ) {
 
-				final IRI iri=factory.createIRI(resolve(naked));
+				final IRI iri=iri(resolve(naked));
 
 				return inverse ? inverse(iri) : iri;
 
 			} else if ( bracketed != null ) {
 
-				final IRI iri=factory.createIRI(resolve(bracketed));
+				final IRI iri=iri(resolve(bracketed));
 
 				return inverse ? inverse(iri) : iri;
 
@@ -507,29 +521,11 @@ public final class JSONDecoder extends JSONCodec {
 	}
 
 	private Map.Entry<Value, Stream<Statement>> typed(final JsonString text, final JsonString type) {
-		return entry(
-
-				factory.createLiteral(
-						text.getString(),
-						factory.createIRI(type.getString())
-				),
-
-				Stream.empty()
-
-		);
+		return entry(literal(text.getString(), iri(type.getString())), Stream.empty());
 	}
 
 	private Map.Entry<Value, Stream<Statement>> tagged(final JsonString text, final JsonString lang) {
-		return entry(
-
-				factory.createLiteral(
-						text.getString(),
-						lang.getString()
-				),
-
-				Stream.empty()
-
-		);
+		return entry(literal(text.getString(), lang.getString()), Stream.empty());
 	}
 
 

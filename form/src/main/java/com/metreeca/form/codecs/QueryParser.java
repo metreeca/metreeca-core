@@ -43,25 +43,20 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 
-public final class QueryParser {
+public final class QueryParser extends JSONDecoder {
 
 	private final Shape shape;
-	private final JSONDecoder decoder;
 
 
 	public QueryParser(final Shape shape, final String base) {
+
+		super(base);
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( base == null ) {
-			throw new NullPointerException("null base");
-		}
-
 		this.shape=shape;
-		this.decoder=new JSONDecoder(base);
-
 	}
 
 
@@ -88,7 +83,7 @@ public final class QueryParser {
 		final JsonObject query=Optional.of(json)
 				.filter(v -> !v.isEmpty())
 				.map(v -> Json.createReader(new StringReader(v)).readValue())
-				.map(v -> v instanceof JsonObject ? (JsonObject)v : decoder.error("filter is not an object"))
+				.map(v -> v instanceof JsonObject ? (JsonObject)v : ((JSONDecoder)this).error("filter is not an object"))
 				.orElse(JsonValue.EMPTY_JSON_OBJECT);
 
 		final Shape filter=filter(query);
@@ -102,7 +97,7 @@ public final class QueryParser {
 		final int limit=limit(query);
 
 		final Shape merged=filter == null ? shape
-				: and(shape, Shape.filter().then(filter)); // mark as filtering only >> don't include in results
+				: and(shape, com.metreeca.form.Shape.filter().then(filter)); // mark as filtering only >> don't include in results
 
 		final Shape optimized=merged.map(new Optimizer());
 
@@ -120,25 +115,25 @@ public final class QueryParser {
 		return query.containsKey("filter") ? Optional
 
 				.ofNullable(query.get("filter"))
-				.map(v -> v instanceof JsonObject ? v.asJsonObject() : decoder.error("filter is not an object"))
+				.map(v -> v instanceof JsonObject ? v.asJsonObject() : ((JSONDecoder)this).error("filter is not an object"))
 
-				.map(object -> decoder.shape(object, shape))
-				.orElseGet(() -> decoder.error("filter is null")) : null;
+				.map(object -> this.shape(object, shape))
+				.orElseGet(() -> ((JSONDecoder)this).error("filter is null")) : null;
 
 	}
 
 
 	private List<IRI> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("stats"))
-				.map(v -> v instanceof JsonString ? (JsonString)v : decoder.error("stats field is not a string"))
-				.map((path) -> decoder.path(path.getString(), shape))
+				.map(v -> v instanceof JsonString ? (JsonString)v : ((JSONDecoder)this).error("stats field is not a string"))
+				.map((path) -> this.path(path.getString(), shape))
 				.orElse(null);
 	}
 
 	private List<IRI> items(final JsonObject query) {
 		return Optional.ofNullable(query.get("items"))
-				.map(v -> v instanceof JsonString ? (JsonString)v : decoder.error("items field is not a string"))
-				.map(path -> decoder.path(path.getString(), shape))
+				.map(v -> v instanceof JsonString ? (JsonString)v : ((JSONDecoder)this).error("items field is not a string"))
+				.map(path -> this.path(path.getString(), shape))
 				.orElse(null);
 	}
 
@@ -153,13 +148,13 @@ public final class QueryParser {
 	private List<Order> order(final JsonValue object) {
 		return object instanceof JsonString ? criteria((JsonString)object)
 				: object instanceof JsonArray ? criteria((JsonArray)object)
-				: decoder.error("order field is neither a string nor an array of strings");
+				: ((JSONDecoder)this).error("order field is neither a string nor an array of strings");
 	}
 
 
 	private List<Order> criteria(final JsonArray object) {
 		return object.stream()
-				.map(v -> v instanceof JsonString ? (JsonString)v : decoder.error("order criterion is not a string"))
+				.map(v -> v instanceof JsonString ? (JsonString)v : ((JSONDecoder)this).error("order criterion is not a string"))
 				.map(this::criterion)
 				.collect(toList());
 	}
@@ -173,27 +168,27 @@ public final class QueryParser {
 	}
 
 	private Order criterion(final String criterion) {
-		return criterion.startsWith("+") ? increasing(decoder.path(criterion.substring(1), shape))
-				: criterion.startsWith("-") ? decreasing(decoder.path(criterion.substring(1), shape))
-				: increasing(decoder.path(criterion, shape));
+		return criterion.startsWith("+") ? increasing(this.path(criterion.substring(1), shape))
+				: criterion.startsWith("-") ? decreasing(this.path(criterion.substring(1), shape))
+				: increasing(this.path(criterion, shape));
 	}
 
 
 	private int offset(final JsonObject query) {
 		return Optional
 				.ofNullable(query.get("offset"))
-				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : decoder.error("offset not a number"))
+				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : ((JSONDecoder)this).error("offset not a number"))
 				.map(JsonNumber::intValue)
-				.map(v ->v >= 0 ? v : decoder.error("negative offset"))
+				.map(v ->v >= 0 ? v : ((JSONDecoder)this).error("negative offset"))
 				.orElse(0);
 	}
 
 	private int limit(final JsonObject query) {
 		return Optional
 				.ofNullable(query.get("limit"))
-				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : decoder.error("limit is not a number"))
+				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : ((JSONDecoder)this).error("limit is not a number"))
 				.map(JsonNumber::intValue)
-				.map(v -> v >= 0 ? v : decoder.error("negative limit"))
+				.map(v -> v >= 0 ? v : ((JSONDecoder)this).error("negative limit"))
 				.orElse(0);
 	}
 
