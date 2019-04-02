@@ -11,6 +11,7 @@
           <option name="goals">
             <list>
               <option value="versions:display-dependency-updates" />
+              <option value="versions:display-plugin-updates" />
             </list>
           </option>
           <option name="pomFileName" />

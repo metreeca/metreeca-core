@@ -1,3 +1,6 @@
+---
+---
+
 Metreeca/Link is an open source [RDF4J](http://rdf4j.org)-based Java framework enabling rapid development of RESTful linked data services.
 
 Its engine automatically converts declarative high-level domain models defined with [SHACL](https://www.w3.org/TR/shacl/) and [SPARQL](https://www.w3.org/TR/sparql11-overview/) into extended linked data APIs supporting faceted search, data validation and fine‑grained role‑based read/write access control rules.
