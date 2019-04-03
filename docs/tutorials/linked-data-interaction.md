@@ -131,13 +131,13 @@ Link: <http://localhost:8080/products/S18_3140?specs>;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "/products/S18_3140",
+    "_this": "/products/S18_3140",
     "type": "/terms#Product",
     "label": "1903 Ford Model A",
     "comment": "Features opening trunk,  working steering system",
     "code": "S18_3140",
     "line": {
-        "this": "/product-lines/vintage-cars",
+        "_this": "/product-lines/vintage-cars",
         "label": "Vintage Cars"
     },
     "scale": "1:18",
@@ -160,11 +160,11 @@ HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "/products/S18_3140",
+    "_this": "/products/S18_3140",
     
     ⋮
     
-	"stock": 3913,
+    "stock": 3913,
     "price": 136.59,
     "buy": 68.3 # << buy price included only if authorized
 }
@@ -191,16 +191,16 @@ Link: <http://localhost:8080/products/?specs>;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "/products/",
+    "_this": "/products/",
     "contains": [
         {
-            "this": "/products/S10_1678",
+            "_this": "/products/S10_1678",
             "type": "/terms#Product",
             "label": "1969 Harley Davidson Ultimate Chopper",
             "comment": "This replica features working kickstand, front suspension,…",
             "code": "S10_1678",
             "line": {
-                "this": "/product-lines/motorcycles",
+                "_this": "/product-lines/motorcycles",
                 "label": "Motorcycles"
             },
             "scale": "1:10",
@@ -235,7 +235,7 @@ Preference-Applied: return=representation;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "/products/",
+    "_this": "/products/",
 }
 ```
 
@@ -446,16 +446,16 @@ HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "/products/",
+    "_this": "/products/",
     "contains": [
         {
-            "this": "/products/S10_1949",
+            "_this": "/products/S10_1949",
             "type": "/terms#Product",
             "label": "1952 Alpine Renault 1300",
             "comment": "Turnable front wheels; steering function; detailed interior; …",
             "code": "S10_1949",
             "line": {
-                "this": "/product-lines/classic-cars",
+                "_this": "/product-lines/classic-cars",
                 "label": "Classic Cars"
             },
             "scale": "1:10",
@@ -511,13 +511,13 @@ HTTP/2 200 OK
 Content-Type: application/json
 
 {
-    "this": "/products",
+    "_this": "/products",
     "count": 10,
     "min": 44.8,
     "max": 214.3,
     "stats": [
         {
-            "this": "http://www.w3.org/2001/XMLSchema#decimal",
+            "_this": "http://www.w3.org/2001/XMLSchema#decimal",
             "count": 10,
             "min": 44.8,
             "max": 214.3
@@ -545,12 +545,12 @@ HTTP/2 200 OK
 Content-Type: application/json
 
 {
-    "this": "http://localhost:8080/products",
+    "_this": "http://localhost:8080/products",
     "items": [
         {
             "count": 6,
             "value": {
-                "this": "/product-lines/classic-cars",
+                "_this": "/product-lines/classic-cars",
                 "label": "Classic Cars",
                 "comment": "Unique, diecast airplane and helicopter replicas…"
             }
@@ -558,7 +558,7 @@ Content-Type: application/json
         {
             "count": 1,
             "value": {
-                "this": "/product-lines/planes",
+                "_this": "/product-lines/planes",
                 "label": "Planes",
                 "comment": "Model trains are a rewarding hobby for enthusiasts of all ages…"
             }

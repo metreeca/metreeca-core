@@ -352,10 +352,10 @@ HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "http://localhost:8080/products/S18_4409",
+    "_this": "http://localhost:8080/products/S18_4409",
     "type": [
         {
-            "this": "http://localhost:8080/terms#Product"
+            "_this": "http://localhost:8080/terms#Product"
         }
     ],
     "label": [
@@ -461,13 +461,13 @@ HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "http://localhost:8080/products/S18_4409",
+    "_this": "http://localhost:8080/products/S18_4409",
     "type": "http://localhost:8080/terms#Product",
     "label": "1932 Alfa Romeo 8C2300 Spider Sport",
     "comment": "This 1:18 scale precision die cast replica features…",
     "code": "S18_4409",
     "line": {
-        "this": "http://localhost:8080/product-lines/vintage-cars",
+        "_this": "http://localhost:8080/product-lines/vintage-cars",
         "label": "Vintage Cars"
     },
     "scale": "1:18",
@@ -537,7 +537,7 @@ HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 
 {
-    "this": "http://localhost:8080/products/S18_4409",
+    "_this": "http://localhost:8080/products/S18_4409",
     
     ⋮
     
