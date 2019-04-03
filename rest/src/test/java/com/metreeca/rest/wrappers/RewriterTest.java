@@ -287,7 +287,7 @@ final class RewriterTest {
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
 										.as("rewritten response json")
 										.isEqualTo(object(
-												entry("this", "/s"),
+												entry("_this", "/s"),
 												entry("p", "/o")
 										));
 

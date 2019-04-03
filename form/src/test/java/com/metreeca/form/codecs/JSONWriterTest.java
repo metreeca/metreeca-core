@@ -76,7 +76,6 @@ final class JSONWriterTest  {
 		assertThat(write(decode("_:x rdf:value 'x'.")))
 				.as("blank objects")
 				.isEqualTo(array(map(
-						entry("this", "_:x"),
 						entry(value, list("x"))
 				)));
 	}
@@ -85,7 +84,7 @@ final class JSONWriterTest  {
 		assertThat(write(decode("<x> rdf:value 'x'.")))
 				.as("named objects")
 				.isEqualTo(array(map(
-						entry("this", "/x"),
+						entry("_this", "/x"),
 						entry(value, list("x"))
 				)));
 	}
@@ -93,7 +92,7 @@ final class JSONWriterTest  {
 	@Test void testTypedObjects() {
 
 		final Function<Object, JsonValue> values=(v) -> array(union(
-				map(entry("this", format(bnode()))),
+				map(entry("_this", format(bnode()))),
 				map(entry(value, list(v)))
 		));
 
@@ -103,19 +102,19 @@ final class JSONWriterTest  {
 		assertEquivalent("decimal", values.apply(new BigDecimal("1.0")), write(decode("[] rdf:value 1.0 .")));
 
 		assertEquivalent("numeric",
-				values.apply(map(entry("text", "1"), entry("type", XMLSchema.INT.stringValue()))),
+				values.apply(map(entry("_this", "1"), entry("_type", XMLSchema.INT.stringValue()))),
 				write(decode("[] rdf:value '1'^^xsd:int .")));
 
 		assertEquivalent("custom",
-				values.apply(map(entry("text", "text"), entry("type", ValuesTest.term("type").stringValue()))),
+				values.apply(map(entry("_this", "text"), entry("_type", ValuesTest.term("type").stringValue()))),
 				write(decode("[] rdf:value 'text'^^:type .")));
 
 		assertEquivalent("tagged",
-				values.apply(map(entry("text", "text"), entry("lang", "en"))),
+				values.apply(map(entry("_this", "text"), entry("_type", "@en"))),
 				write(decode("[] rdf:value 'text'@en .")));
 
 		assertEquivalent("malformed",
-				values.apply(map(entry("text", "malformed"), entry("type", XMLSchema.BOOLEAN.stringValue()))),
+				values.apply(map(entry("_this", "malformed"), entry("_type", XMLSchema.BOOLEAN.stringValue()))),
 				write(decode("[] rdf:value 'malformed'^^xsd:boolean .")));
 
 	}
@@ -130,7 +129,7 @@ final class JSONWriterTest  {
 		))
 				.as("focus node only")
 				.isEqualTo(object(map(
-						entry("this", "/x"),
+						entry("_this", "/x"),
 						entry(value, list("x"))
 				)));
 	}
@@ -154,13 +153,13 @@ final class JSONWriterTest  {
 		))
 				.as("expanded shared trees")
 				.isEqualTo(object(map(
-						entry("this", "/x"),
+						entry("_this", "/x"),
 						entry(value, list(map(
-								entry("this", "/w"),
-								entry(value, list(map(entry("this", "/z"))))
+								entry("_this", "/w"),
+								entry(value, list(map(entry("_this", "/z"))))
 						), map(
-								entry("this", "/y"),
-								entry(value, list(map(entry("this", "/z"))))
+								entry("_this", "/y"),
+								entry(value, list(map(entry("_this", "/z"))))
 						)))
 				)));
 	}
@@ -172,10 +171,10 @@ final class JSONWriterTest  {
 		))
 				.as("named loops")
 				.isEqualTo(object(map(
-						entry("this", "/x"),
+						entry("_this", "/x"),
 						entry(value, list(map(
-								entry("this", "/y"),
-								entry(value, list(map(entry("this", "/x"))))
+								entry("_this", "/y"),
+								entry(value, list(map(entry("_this", "/x"))))
 						)))
 				)));
 	}
@@ -187,10 +186,9 @@ final class JSONWriterTest  {
 		))
 				.as("named loops")
 				.isEqualTo(object(map(
-						entry("this", "_:x"),
+						entry("_this", "_:x"),
 						entry(value, list(map(
-								entry("this", "_:y"),
-								entry(value, list(map(entry("this", "_:x"))))
+								entry(value, list(map(entry("_this", "_:x"))))
 						)))
 				)));
 	}
@@ -260,7 +258,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:x rdf:value _:y ."),
 						bnode("x"),
-						Field.field(RDF.VALUE, alias("this"))
+						Field.field(RDF.VALUE, alias("_this"))
 				));
 	}
 
@@ -280,7 +278,7 @@ final class JSONWriterTest  {
 
 		assertThat(json)
 				.isEqualTo(object(
-						entry("this", "/container/"),
+						entry("_this", "/container/"),
 						entry("contains", list(
 								"/container/x",
 								"/container/y"
@@ -301,7 +299,7 @@ final class JSONWriterTest  {
 
 		assertThat(json)
 				.isEqualTo(object(map(
-						entry("this", "/container/"),
+						entry("_this", "/container/"),
 						entry("value", "/container/")
 				)));
 	}
@@ -333,9 +331,9 @@ final class JSONWriterTest  {
 		))
 				.as("named reverse links")
 				.isEqualTo(object(map(
-						entry("this", "/x"),
+						entry("_this", "/x"),
 						entry("valueOf", list(map(
-								entry("this", "/y")
+								entry("_this", "/y")
 						)))
 				)));
 	}
@@ -419,8 +417,9 @@ final class JSONWriterTest  {
 		))
 				.as("back-referenced proved blank")
 				.isEqualTo(object(map(
-						entry("this", "_:x"),
-						entry("value", list(map(entry("this", "_:x")))))));
+						entry("_this", "_:x"),
+						entry("value", list("_:x")))
+				));
 
 	}
 
@@ -494,7 +493,7 @@ final class JSONWriterTest  {
 			final String key=entry.getKey();
 			final JsonValue value=entry.getValue();
 
-			if ( !(key.equals("this") && value instanceof JsonString && ((JsonString)value).getString().startsWith("_:")) ) {
+			if ( !(key.equals("_this") && value instanceof JsonString && ((JsonString)value).getString().startsWith("_:")) ) {
 				builder.add(key, strip(value));
 			}
 		}

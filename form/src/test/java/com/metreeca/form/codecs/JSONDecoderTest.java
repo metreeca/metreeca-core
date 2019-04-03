@@ -48,6 +48,7 @@ import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.*;
+import static com.metreeca.form.things.ValuesTest.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -118,11 +119,11 @@ final class JSONDecoderTest {
 
 		@Test void testResource() {
 
-			assertThat(value(object(entry("this", "_:id"))))
+			assertThat(value(object(entry("_this", "_:id"))))
 					.isEqualTo(value(bnode("id")));
 
-			assertThat(value(object(entry("this", "id"))))
-					.isEqualTo(value(iri(ValuesTest.Base, "id")));
+			assertThat(value(object(entry("_this", "id"))))
+					.isEqualTo(value(item("id")));
 
 		}
 
@@ -131,7 +132,7 @@ final class JSONDecoderTest {
 			final IRI id=iri(ValuesTest.Base, "id");
 
 			final Function<String, JsonObject> object=path -> object(
-					entry("this", "id"),
+					entry("_this", "id"),
 					entry(String.format(path, RDF.VALUE), RDF.NIL.stringValue())
 			);
 
@@ -159,12 +160,12 @@ final class JSONDecoderTest {
 
 
 		@Test void testTypedLiteral() {
-			assertThat(value(object(entry("text", "2019-04-02"), entry("type", XMLSchema.DATE.stringValue()))))
+			assertThat(value(object(entry("_this", "2019-04-02"), entry("_type", XMLSchema.DATE.stringValue()))))
 					.isEqualTo(value(literal("2019-04-02", XMLSchema.DATE)));
 		}
 
 		@Test void testTaggedLiteral() {
-			assertThat(value(object(entry("text", "string"), entry("lang", "en"))))
+			assertThat(value(object(entry("_this", "string"), entry("_type", "@en"))))
 					.isEqualTo(value(literal("string", "en")));
 		}
 
@@ -173,7 +174,7 @@ final class JSONDecoderTest {
 	@Nested final class Strings {
 
 		@Test void testString() {
-			assertThat(value(createValue("text"))).isEqualTo(value(literal("text")));
+			assertThat(value(createValue("_this"))).isEqualTo(value(literal("_this")));
 		}
 
 		@Test void testTypedString() {
@@ -191,9 +192,6 @@ final class JSONDecoderTest {
 			assertThat(value(createValue("id"), datatype(Form.BNodeType)))
 					.isEqualTo(value(bnode("id")));
 
-
-			assertThat(value(createValue("_:id"), datatype(Form.IRIType)))
-					.isEqualTo(value(iri("_:id")));
 
 			assertThat(value(createValue("id"), datatype(Form.IRIType)))
 					.isEqualTo(value(iri(ValuesTest.Base, "id")));

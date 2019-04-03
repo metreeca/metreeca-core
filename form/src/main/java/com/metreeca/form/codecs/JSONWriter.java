@@ -121,7 +121,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 			final Shape shape=getWriterConfig().get(JSONCodec.Shape);
 
 			final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
-			final JsonValue json=new JSONEncoder(base).json(model, driver, focus);
+			final JsonValue json=new JSONEncoder(base) {}.json(model, driver, focus);
 
 			try {
 

@@ -9,8 +9,6 @@ Codecs for this serialization make heavy use of reasoning over linked data shape
 
 <p class="note">This serialization format is intended to simplify front-end development by converting RDF descriptions to/from idiomatic JSON objects structured according to the conventions a JavaScript developer would expect from a typical REST/JSON API. Unlike JSON-LD,  it doesn't cater to roundtrip de/serialization of RDF payloads without access to the target shape.</p>
 
-<p class="note">Reformulation of the idiomatic JSON format as an application-specific JSON-LD profile is being explored.</p>
-
 # RDF4J Codecs
 
 The [shapes library](../javadocs/com/metreeca/form/package-summary.html) automatically [registers](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/common/lang/service/ServiceRegistry.html)  idiomatic JSON codecs with the RDF4J framework, using the `application/json` MIME type and the [JSON](../javadocs/com/metreeca/form/codecs/JSONCodec.html) RDF4J [RDF format](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFFormat.html).
@@ -48,49 +46,44 @@ RDF terms are serialized to different JSON value patterns according to their kin
 
 ## Blank Nodes
 
-	<blank> ::= {  "this" : "_:<id>" (, <property>)* }
+	<blank> ::= {  "_this" : "_:<id>" (, <property>)* }
 
 Blank nodes descriptions are serialized as JSON objects including a JSON field for the node identifier and a JSON field for each exposed node property.
 
 ```
-<blank> ::= {  "this" : "" (, <property>)* }
+<blank> ::= {  "_this" : "" (, <property>)* }
+<blank> ::= { [<property> (, <property>)*] }
 ```
 
-if there is no back-reference from a nested object, the `this` id field may be left empty.
-
-```
-<blank> ::= {  <property>(, <property>)* }
-```
-
-If the term may be proved to be blank and there is no back-link from a nested object, the `this` id field may be omitted.
+If there is no back-reference from a nested object, the `_this` id field may be left empty or omitted.
 
 ### Back-Links
 
 ```
-<blank> ::= { "this": "_:<id>" }
+<blank> ::= { "_this": "_:<id>" }
 ```
 
-If the term is a back-link to an enclosing blank node, only the `this` id field is included.
+If the term is a back-link to an enclosing blank node, only the `_this` id field is included.
 
 ```
 <blank> ::= "_:<id>"
 ```
 
-If the term may be proved to be  a back-reference to an enclosing blank node reference, the node id may be inlined.
+If the term may be proved to be  a back-reference to an enclosing resource, the node id may be inlined.
 
 ## IRI References
 
 ```
-<iri> ::= { "this" : "<iri>" (, <property>)* }
+<iri> ::= { "_this" : "<iri>" (, <property>)* }
 ```
 
 IRI reference descriptions are serialized as JSON objects including a JSON field for the term IRI and a JSON field for each exposed term property.
 
 ```
-<iri> ::= {  <property>(, <property>)* }
+<iri> ::= { [<property> (, <property>)*] }
 ```
 
-If the term may be proved to be a constant known IRI reference, the `this` id field may be omitted.
+If the term may be proved to be a constant known IRI reference, the `_this` id field may be omitted.
 
 ```
 <iri> ::= "<iri>"
@@ -101,16 +94,16 @@ If the term may be proved to be an IRI reference without properties, the IRI may
 ### Back-Links
 
 ```
-<iri> ::= { "this": "<iri>" }
+<iri> ::= { "_this": "<iri>" }
 ```
 
-If the term is a back-reference to an enclosing object, only the `this` id field is included.
+If the term is a back-reference to an enclosing object, only the `_this` id field is included.
 
 ```
 <iri> ::= "<iri>"
 ```
 
-If the term may be proved to be  a back-reference to an enclosing IRI reference, the IRI may be inlined.
+If the term may be proved to be  a back-reference to an enclosing resource, the IRI may be inlined.
 
 ### Parsing
 
@@ -143,13 +136,13 @@ Predicate IRIs are represented as strings, in either plain or angle bracket nota
 
 If a shape is provided to the codec, predicate IRIs are reported in a shortened form using user-defined or system-inferred  [aliases](spec-language.md#annotations). Predicate IRIs with clashing aliases are written in full using the angle bracket notation.
 
-The `this` label is reserved for system use.
+<p class="warning"><code>_this</code> and <code>_type</code> labels are reserved for system use.</p>
 
 ## Literals
 
 ```
-"<text>"^^<type> ::= { "text": "<text>", "type": "<type>" }
-"<text>"@<lang>  ::= { "text": "<text>", "lang": "<lang>" }
+"<text>"^^<type> ::= { "_this": "<text>", "_type": "<type>" }
+"<text>"@<lang>  ::= { "_this": "<text>", "_type": "@<lang>" }
 ```
 
 In the more general form, literals are serialized as JSON objects including the literal lexical representation and either the literal datatype IRI or the literal language tag.
@@ -165,7 +158,7 @@ Simple literals and typed `xsd:string` literals are serialized as JSON string va
 "<integer>"^^xsd:integer ::= <integer> # no decimal part
 "<decimal>"^^xsd:decimal ::= <decimal> # decimal part
 
-"<number>"^^<type> ::= { "text": "<number>", "type": "<type>" } # explicit type
+"<number>"^^<type> ::= { "_this": "<number>", "_type": "<type>" } # explicit type
 ```
 
 Typed `xsd:integer` and `xsd:decimal` literals are serialized as JSON numeric values using type-specific number formats. Other typed numeric literals are serialized in the extended form.

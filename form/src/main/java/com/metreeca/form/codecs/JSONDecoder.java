@@ -17,9 +17,7 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.*;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -28,28 +26,33 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.json.*;
 
-import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.Form.BNodeType;
+import static com.metreeca.form.Form.IRIType;
+import static com.metreeca.form.Form.ResourceType;
+import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.format;
 import static com.metreeca.form.things.Values.inverse;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 
 public abstract class JSONDecoder extends JSONCodec {
 
-	private static final java.util.regex.Pattern StepPatten // !!! merge w/ EdgePattern
-			=java.util.regex.Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");
+	private static final JsonString Default=Json.createValue("");
 
-	private static final java.util.regex.Pattern EdgePattern
-			=java.util.regex.Pattern.compile("(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:.*)>)");
+	private static final Pattern StepPatten // !!! merge w/ EdgePattern
+			=Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");
+
+	private static final Pattern EdgePattern
+			=Pattern.compile("(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:.*)>)");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,18 +65,27 @@ public abstract class JSONDecoder extends JSONCodec {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	protected String resolve(final String iri) {
+		return base == null ? iri : base.resolve(iri).toString();
+	}
+
+
+	protected Resource resource(final String id) {
+		return id.isEmpty() ? Values.bnode() : id.startsWith("_:") ? Values.bnode(id.substring(2)) : Values.iri(resolve(id));
+	}
 
 	protected Resource bnode() {
 		return Values.bnode();
 	}
 
 	protected Resource bnode(final String id) {
-		return Values.bnode(id);
+		return id.isEmpty() ? Values.bnode() : id.startsWith("_:") ? Values.bnode(id.substring(2)) : Values.bnode(id);
 	}
 
 	protected IRI iri(final String iri) {
-		return Values.iri(iri);
+		return iri.isEmpty() ? Values.iri() : Values.iri(resolve(iri));
 	}
 
 	protected Literal literal(final String text, final IRI type) {
@@ -93,164 +105,9 @@ public abstract class JSONDecoder extends JSONCodec {
 	}
 
 
-	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public Shape shape(final JsonObject object, final Shape shape) {
-		return and(object
-				.entrySet()
-				.stream()
-				.map(entry -> shape(entry.getKey(), entry.getValue(), shape))
-				.collect(toList())
-		);
-	}
-
-
-	private Shape shape(final String key, final JsonValue value, final Shape shape) {
-
-		switch ( key ) {
-
-			case "^": return datatype(value);
-			case "@": return clazz(value);
-
-			case ">": return minExclusive(value, shape);
-			case "<": return maxExclusive(value, shape);
-			case ">=": return minInclusive(value, shape);
-			case "<=": return maxInclusive(value, shape);
-
-			case ">#": return minLength(value);
-			case "#<": return maxLength(value);
-			case "*": return pattern(value);
-			case "~": return like(value);
-
-			case ">>": return minCount(value);
-			case "<<": return maxCount(value);
-			case "!": return all(value, shape);
-			case "?": return any(value, shape);
-
-			default:
-
-				return field(
-						path(key, shape), value instanceof JsonObject ? (JsonObject)value
-								: Json.createObjectBuilder().add("?", value).build(),
-						shape
-				);
-
-		}
-
-	}
-
-
-	private Shape datatype(final JsonValue value) {
-		return value instanceof JsonString
-				? Datatype.datatype(iri(resolve(((JsonString)value).getString())))
-				: error("datatype IRI is not a string");
-	}
-
-
-	private Shape clazz(final JsonValue value) {
-		return value instanceof JsonString
-				? Clazz.clazz(iri(resolve(((JsonString)value).getString())))
-				: error("class IRI is not a string");
-	}
-
-
-	private Shape minExclusive(final JsonValue value, final Shape shape) {
-		return value != null
-				? MinExclusive.minExclusive(value(value, shape, null).getKey())
-				: error("value is null");
-	}
-
-	private Shape maxExclusive(final JsonValue value, final Shape shape) {
-		return value != null
-				? MaxExclusive.maxExclusive(value(value, shape, null).getKey())
-				: error("value is null");
-	}
-
-	private Shape minInclusive(final JsonValue value, final Shape shape) {
-		return value != null
-				? MinInclusive.minInclusive(value(value, shape, null).getKey())
-				: error("value is null");
-	}
-
-	private Shape maxInclusive(final JsonValue value, final Shape shape) {
-		return value != null
-				? MaxInclusive.maxInclusive(value(value, shape, null).getKey())
-				: error("value is null");
-	}
-
-
-	private Shape minLength(final JsonValue value) {
-		return value instanceof JsonNumber
-				? MinLength.minLength(((JsonNumber)value).intValue())
-				: error("length is not a number");
-	}
-
-	private Shape maxLength(final JsonValue value) {
-		return value instanceof JsonNumber
-				? MaxLength.maxLength(((JsonNumber)value).intValue())
-				: error("length is not a number");
-	}
-
-	private Shape pattern(final JsonValue value) {
-		return value instanceof JsonString
-				? ((JsonString)value).getString().isEmpty() ? and() : Pattern.pattern(((JsonString)value).getString())
-				: error("pattern is not a string");
-	}
-
-	private Shape like(final JsonValue value) {
-		return value instanceof JsonString
-				? ((JsonString)value).getString().isEmpty() ? and() : Like.like(((JsonString)value).getString())
-				: error("pattern is not a string");
-	}
-
-
-	private Shape minCount(final JsonValue value) {
-		return value instanceof JsonNumber
-				? MinCount.minCount(((JsonNumber)value).intValue())
-				: error("length is not a number");
-	}
-
-	private Shape maxCount(final JsonValue value) {
-		return value instanceof JsonNumber
-				? MaxCount.maxCount(((JsonNumber)value).intValue())
-				: error("length is not a number");
-	}
-
-	private Shape all(final JsonValue value, final Shape shape) {
-		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
-
-			final Collection<Value> values=values(value, shape, null).keySet();
-
-			return values.isEmpty() ? and() : All.all(values);
-		}
-	}
-
-	private Shape any(final JsonValue value, final Shape shape) {
-		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
-
-			final Collection<Value> values=values(value, shape, null).keySet();
-
-			return values.isEmpty() ? and() : Any.any(values);
-		}
-	}
-
-
-	private Shape field(final List<IRI> path, final JsonObject object, final Shape shape) {
-		if ( path.isEmpty() ) { return shape(object, shape); } else {
-
-			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
-
-			final IRI head=path.get(0);
-			final List<IRI> tail=path.subList(1, path.size());
-
-			return Field.field(head, field(tail, object, fields.get(head)));
-		}
-	}
-
-
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public List<IRI> path(final String path, final Shape shape) {
+	protected List<IRI> path(final String path, final Shape shape) {
 
 		final Collection<String> steps=new ArrayList<>();
 
@@ -315,7 +172,7 @@ public abstract class JSONDecoder extends JSONCodec {
 
 	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Map<Value, Stream<Statement>> values(final JsonValue value, final Shape shape, final Resource focus) {
+	protected Map<Value, Stream<Statement>> values(final JsonValue value, final Shape shape, final Resource focus) {
 		return (value instanceof JsonArray
 
 				? value.asJsonArray().stream().map(v -> value(v, shape, focus))
@@ -324,7 +181,7 @@ public abstract class JSONDecoder extends JSONCodec {
 		).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, Stream::concat));
 	}
 
-	public Map.Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape, final Resource focus) {
+	protected Map.Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape, final Resource focus) {
 		return value instanceof JsonArray ? value(value.asJsonArray(), shape, focus)
 				: value instanceof JsonObject ? value(value.asJsonObject(), shape, focus)
 				: value instanceof JsonString ? value((JsonString)value, shape)
@@ -341,40 +198,47 @@ public abstract class JSONDecoder extends JSONCodec {
 
 	private Map.Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape, final Resource focus) {
 
-		final IRI datatype=Datatype.datatype(shape).orElse(null);
+		final String thiz=thiz(object);
+		final String type=type(object);
 
-		return Form.IRIType.equals(datatype) ? iri(object, shape, focus)
-				: Form.BNodeType.equals(datatype) ? bnode(object, shape, focus)
-				: Form.ResourceType.equals(datatype) || object.containsKey("this") || focus != null ? resource(object, shape, focus)
-				: literal(object, shape);
+		final String datatype=type.isEmpty()
+				? datatype(shape).map(Value::stringValue).orElse("")
+				: type;
+
+		final Value value=(thiz.isEmpty() && type.isEmpty() && focus != null) ? focus
+
+				: datatype.isEmpty() ? resource(thiz)
+
+				: datatype.equals(IRIType.stringValue()) ? iri(thiz)
+				: datatype.equals(BNodeType.stringValue()) ? bnode(thiz)
+				: datatype.equals(ResourceType.stringValue()) ? resource(thiz)
+
+				: datatype.startsWith("@") ? literal(thiz, type.substring(1))
+
+				: literal(thiz, iri(datatype));
+
+		return focus != null && !focus.equals(value)? entry(focus, Stream.empty())
+				: value instanceof Resource ? properties(object, shape, (Resource)value)
+				: entry(value, Stream.empty());
+
 	}
 
 	private Map.Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
 
-		final IRI datatype=Datatype.datatype(shape).orElse(XMLSchema.STRING);
+		final String text=string.getString();
+		final IRI type=datatype(shape).orElse(XMLSchema.STRING);
 
-		final String lexical=string.getString();
-		final boolean underscore=lexical.startsWith("_:");
-
-		final Value value
-
-				=Form.ResourceType.equals(datatype) ?
-				underscore ? bnode(lexical.substring(2)) : iri(resolve(lexical))
-
-				: Form.BNodeType.equals(datatype) ?
-				bnode(underscore ? lexical.substring(2) : lexical)
-
-				: Form.IRIType.equals(datatype) ?
-				iri(underscore ? lexical : resolve(lexical))
-
-				: literal(lexical, datatype);
+		final Value value=ResourceType.equals(type) ? resource(text)
+				: BNodeType.equals(type) ? bnode(text)
+				: IRIType.equals(type) ? iri(text)
+				: literal(text, type);
 
 		return entry(value, Stream.empty());
 	}
 
 	private Map.Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=Datatype.datatype(shape).orElse(null);
+		final IRI datatype=datatype(shape).orElse(null);
 
 		final Literal value
 
@@ -396,59 +260,12 @@ public abstract class JSONDecoder extends JSONCodec {
 	}
 
 
-	//// Resources /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Map.Entry<Value, Stream<Statement>> resource(final JsonObject object, final Shape shape, final Resource focus) {
-
-		final Resource thiz=id(object.get("this"));
-
-		return focus instanceof IRI || thiz instanceof IRI ?
-				iri(object, shape, focus) : bnode(object, shape, focus);
-	}
-
-	private Map.Entry<Value, Stream<Statement>> bnode(final JsonObject object, final Shape shape, final Resource focus) {
-
-		final Resource thiz=id(object.get("this"));
-
-		return focus != null
-
-				? thiz == null || thiz.equals(focus)
-				? properties(object, shape, focus)
-				: entry(focus, Stream.empty())
-
-				: thiz == null
-				? properties(object, shape, bnode())
-
-				: thiz instanceof BNode
-				? properties(object, shape, thiz)
-
-				: error("'this' identifier field missing or not a bnode id string");
-	}
-
-	private Map.Entry<Value, Stream<Statement>> iri(final JsonObject object, final Shape shape, final Resource focus) {
-
-		final Resource thiz=id(object.get("this"));
-
-		return focus != null
-
-				? focus instanceof IRI && (thiz == null || thiz.equals(focus))
-				? properties(object, shape, focus)
-				: entry(focus, Stream.empty())
-
-				: thiz instanceof IRI
-				? properties(object, shape, thiz)
-
-				: error("'this' identifier field missing or not an iri string");
-
-	}
-
-
 	private Map.Entry<Value, Stream<Statement>> properties(final JsonObject object, final Shape shape, final Resource source) {
 
 		final Map<IRI, Shape> fields=fields(shape);
 
 		return entry(source, object.entrySet().stream()
-				.filter(field -> !field.getKey().equals("this"))
+				.filter(field -> !Reserved.contains(field.getKey()))
 				.flatMap(field -> {
 
 					final String label=field.getKey();
@@ -523,46 +340,20 @@ public abstract class JSONDecoder extends JSONCodec {
 	}
 
 
-	//// Literals //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Map.Entry<Value, Stream<Statement>> literal(final JsonObject object, final Shape shape) {
-
-		final JsonValue text=object.get("text");
-		final JsonValue type=object.get("type");
-		final JsonValue lang=object.get("lang");
-
-		return text instanceof JsonString
-
-				? type instanceof JsonString ? typed((JsonString)text, (JsonString)type)
-				: lang instanceof JsonString ? tagged((JsonString)text, (JsonString)lang)
-				: error("literal type/lang fields are missing or not strings")
-
-				: error("literal text field is missing or not a string");
-	}
-
-	private Map.Entry<Value, Stream<Statement>> typed(final JsonString text, final JsonString type) {
-		return entry(literal(text.getString(), iri(type.getString())), Stream.empty());
-	}
-
-	private Map.Entry<Value, Stream<Statement>> tagged(final JsonString text, final JsonString lang) {
-		return entry(literal(text.getString(), lang.getString()), Stream.empty());
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Resource id(final JsonValue id) {
-
-		return id == null ? null : Optional.of(id)
-				.filter(v -> id instanceof JsonString)
-				.map(v -> ((JsonString)id).getString())
-				.map(v -> v.isEmpty() ? bnode() : v.startsWith("_:") ? bnode(v.substring(2)) : iri(resolve(v)))
-				.orElseGet(() -> error("'this' identifier field is not a string"));
-
+	private String thiz(final JsonObject object) {
+		return Optional.of(object.getOrDefault(This, Default))
+				.filter(value -> value instanceof JsonString)
+				.map(value -> ((JsonString)value).getString())
+				.orElseGet(() -> error("literal '_this' field is not a string"));
 	}
 
-	private String resolve(final String iri) {
-		return base == null ? iri : base.resolve(iri).toString(); // !!! null base => absolute IRI
+	private String type(final JsonObject object) {
+		return Optional.of(object.getOrDefault(Type, Default))
+				.filter(value -> value instanceof JsonString)
+				.map(value -> ((JsonString)value).getString())
+				.orElseGet(() -> error("literal '_type' field is not a string"));
 	}
 
 }

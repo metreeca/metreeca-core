@@ -24,20 +24,22 @@ import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
+import com.metreeca.form.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 
 import java.io.StringReader;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 import javax.json.*;
 
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.fields;
 
+import static java.util.Collections.disjoint;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -108,7 +110,7 @@ public final class QueryParser extends JSONDecoder {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Query Properties //////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape filter(final JsonObject query) {
 
@@ -190,6 +192,163 @@ public final class QueryParser extends JSONDecoder {
 				.map(JsonNumber::intValue)
 				.map(v -> v >= 0 ? v : ((JSONDecoder)this).error("negative limit"))
 				.orElse(0);
+	}
+
+
+
+	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Shape shape(final JsonObject object, final Shape shape) {
+		return and(object
+				.entrySet()
+				.stream()
+				.map(entry -> shape(entry.getKey(), entry.getValue(), shape))
+				.collect(toList())
+		);
+	}
+
+	private Shape shape(final String key, final JsonValue value, final Shape shape) {
+
+		switch ( key ) {
+
+			case "^": return datatype(value);
+			case "@": return clazz(value);
+
+			case ">": return minExclusive(value, shape);
+			case "<": return maxExclusive(value, shape);
+			case ">=": return minInclusive(value, shape);
+			case "<=": return maxInclusive(value, shape);
+
+			case ">#": return minLength(value);
+			case "#<": return maxLength(value);
+			case "*": return pattern(value);
+			case "~": return like(value);
+
+			case ">>": return minCount(value);
+			case "<<": return maxCount(value);
+			case "!": return all(value, shape);
+			case "?": return any(value, shape);
+
+			default:
+
+				return field(
+						path(key, shape),
+						value instanceof JsonObject && disjoint(value.asJsonObject().keySet(), Reserved)
+								? (JsonObject)value
+								: Json.createObjectBuilder().add("?", value).build(),
+						shape
+				);
+
+		}
+
+	}
+
+
+	private Shape datatype(final JsonValue value) {
+		return value instanceof JsonString
+				? Datatype.datatype(iri(resolve(((JsonString)value).getString())))
+				: error("datatype IRI is not a string");
+	}
+
+
+	private Shape clazz(final JsonValue value) {
+		return value instanceof JsonString
+				? Clazz.clazz(iri(resolve(((JsonString)value).getString())))
+				: error("class IRI is not a string");
+	}
+
+
+	private Shape minExclusive(final JsonValue value, final Shape shape) {
+		return value != null
+				? MinExclusive.minExclusive(value(value, shape, null).getKey())
+				: error("value is null");
+	}
+
+	private Shape maxExclusive(final JsonValue value, final Shape shape) {
+		return value != null
+				? MaxExclusive.maxExclusive(value(value, shape, null).getKey())
+				: error("value is null");
+	}
+
+	private Shape minInclusive(final JsonValue value, final Shape shape) {
+		return value != null
+				? MinInclusive.minInclusive(value(value, shape, null).getKey())
+				: error("value is null");
+	}
+
+	private Shape maxInclusive(final JsonValue value, final Shape shape) {
+		return value != null
+				? MaxInclusive.maxInclusive(value(value, shape, null).getKey())
+				: error("value is null");
+	}
+
+
+	private Shape minLength(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MinLength.minLength(((JsonNumber)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape maxLength(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MaxLength.maxLength(((JsonNumber)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape pattern(final JsonValue value) {
+		return value instanceof JsonString
+				? ((JsonString)value).getString().isEmpty() ? and() : Pattern.pattern(((JsonString)value).getString())
+				: error("pattern is not a string");
+	}
+
+	private Shape like(final JsonValue value) {
+		return value instanceof JsonString
+				? ((JsonString)value).getString().isEmpty() ? and() : Like.like(((JsonString)value).getString())
+				: error("pattern is not a string");
+	}
+
+
+	private Shape minCount(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MinCount.minCount(((JsonNumber)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape maxCount(final JsonValue value) {
+		return value instanceof JsonNumber
+				? MaxCount.maxCount(((JsonNumber)value).intValue())
+				: error("length is not a number");
+	}
+
+	private Shape all(final JsonValue value, final Shape shape) {
+		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
+
+			final Collection<Value> values=values(value, shape, null).keySet();
+
+			return values.isEmpty() ? and() : All.all(values);
+		}
+	}
+
+	private Shape any(final JsonValue value, final Shape shape) {
+		if ( value.getValueType() == JsonValue.ValueType.NULL ) { return error("value is null"); } else {
+
+			final Collection<Value> values=values(value, shape, null).keySet();
+
+			return values.isEmpty() ? and() : Any.any(values);
+		}
+	}
+
+
+	private Shape field(final List<IRI> path, final JsonObject object, final Shape shape) {
+		if ( path.isEmpty() ) { return shape(object, shape); } else {
+
+			final Map<IRI, Shape> fields=fields(shape); // !!! optimize (already explored during path parsing)
+
+			final IRI head=path.get(0);
+			final List<IRI> tail=path.subList(1, path.size());
+
+			return Field.field(head, field(tail, object, fields.get(head)));
+		}
 	}
 
 }

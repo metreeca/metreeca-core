@@ -134,11 +134,11 @@ final class JSONCodecTest {
 
 	@Test void testIgnoreReservedAliases() {
 
-		assertThat(aliases(field(iri(ValuesTest.Base, "this"))))
+		assertThat(aliases(field(iri(ValuesTest.Base, "_this"))))
 				.as("ignore reserved system-guessed aliases")
 				.isEmpty();
 
-		assertThat(aliases(field(RDF.VALUE, alias("this"))))
+		assertThat(aliases(field(RDF.VALUE, alias("_this"))))
 				.as("ignore reserved user-defined aliases")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 

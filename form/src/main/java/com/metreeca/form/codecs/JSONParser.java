@@ -23,6 +23,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Inferencer;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.rio.*;
@@ -149,11 +150,11 @@ public final class JSONParser extends AbstractRDFParser {
 		}
 
 		@Override protected Resource bnode(final String id) {
-			return createNode(id);
+			return id.isEmpty() ? createNode() : id.startsWith("_:") ? createNode(id.substring(2)) : createNode(id);
 		}
 
 		@Override protected IRI iri(final String iri) {
-			return createURI(iri);
+			return iri.isEmpty() ? Values.iri() : createURI(resolve(iri));
 		}
 
 		@Override protected Literal literal(final String text, final IRI type) {

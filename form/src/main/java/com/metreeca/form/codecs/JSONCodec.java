@@ -35,11 +35,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.iri;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -81,9 +84,10 @@ public abstract class JSONCodec {
 	);
 
 
-	private static final Collection<String> Reserved=new HashSet<>(singleton(
-			"this"
-	));
+	protected static final String This="_this";
+	protected static final String Type="_type";
+
+	protected static final Collection<String> Reserved=set(This, Type);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

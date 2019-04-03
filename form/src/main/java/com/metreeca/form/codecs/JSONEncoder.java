@@ -17,7 +17,6 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Values;
 
@@ -33,35 +32,43 @@ import java.util.regex.Matcher;
 
 import javax.json.*;
 
+import static com.metreeca.form.Form.BNodeType;
+import static com.metreeca.form.Form.IRIType;
+import static com.metreeca.form.Form.ResourceType;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.pattern;
+
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toSet;
 
 
-public final class JSONEncoder extends JSONCodec {
+public abstract class JSONEncoder extends JSONCodec {
 
 	private final String base;
 
 
-	public JSONEncoder(final String base) {
+	protected JSONEncoder(final CharSequence base) {
 		this.base=root(base);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public JsonValue json(final Model model, final Shape shape, final Resource focus) {
+	public JsonValue json(final Collection<Statement> model, final Shape shape, final Resource focus) {
 		return (focus != null)
 				? json(model, shape, focus, resource -> false)
-				: json(model, shape, model.subjects(), resource -> false);
+				: json(model, shape, subjects(model), resource -> false);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonValue json(final Model model, final Shape shape, final Collection<? extends Value> values, final Predicate<Resource> trail) {
+	private JsonValue json(final Collection<Statement> model,
+			final Shape shape, final Collection<? extends Value> values, final Predicate<Resource> trail) {
 		if ( shape != null && maxCount(shape).map(limit -> limit == 1).orElse(false) ) { // single subject
 
 			return values.isEmpty() ? JsonValue.EMPTY_JSON_OBJECT : json(model, shape, values.iterator().next(), trail);
@@ -77,89 +84,94 @@ public final class JSONEncoder extends JSONCodec {
 		}
 	}
 
-	private JsonValue json(final Model model, final Shape shape, final Value value, final Predicate<Resource> trail) {
+	private JsonValue json(final Collection<Statement> model,
+			final Shape shape, final Value value, final Predicate<Resource> trail) {
 		return value instanceof Resource ? json(model, shape, (Resource)value, trail)
-				: value instanceof Literal ? json(shape, (Literal)value)
+				: value instanceof Literal ? json((Literal)value, shape)
 				: null;
 	}
 
-	private JsonValue json(final Model model, final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
+	private JsonValue json(final Collection<Statement> model,
+			final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
 
 		final String id=resource.stringValue();
-		final Optional<IRI> datatype=datatype(shape);
+		final IRI datatype=datatype(shape).orElse(null);
 		final Map<IRI, Shape> fields=fields(shape);
 
-		if ( datatype.filter(iri -> iri.equals(Form.IRIType)).isPresent() && fields.isEmpty() ) {
+
+		if ( trail.test(resource)) { // a back-reference to an enclosing copy of self -> omit fields
+
+			return IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype)
+					? Json.createValue(id(resource))
+					: Json.createObjectBuilder().add(This, id(resource)).build();
+
+
+		} else if ( IRIType.equals(datatype) && fields.isEmpty() ) {
 
 			return Json.createValue(relativize(id)); // inline proved leaf IRI
 
 		} else {
 
-			final JsonObjectBuilder object=Json.createObjectBuilder();
+			final JsonObjectBuilder object=Json.createObjectBuilder().add(This, id(resource));
 
-			object.add("this", resource instanceof BNode ? "_:"+id : relativize(id));
+			final Collection<Resource> references=new ArrayList<>();
 
-			if ( !trail.test(resource) ) { // not a back-reference to an enclosing copy of self -> include fields
+			final Predicate<Resource> nestedTrail=reference -> {
 
-				final Collection<Resource> references=new ArrayList<>();
+				if ( reference.equals(resource) ) {
+					references.add(reference); // mark resource as back-referenced
+				}
 
-				final Predicate<Resource> nestedTrail=reference -> {
+				return reference.equals(resource) || trail.test(reference);
 
-					if ( reference.equals(resource) ) {
-						references.add(reference); // mark resource as back-referenced
-					}
+			};
 
-					return reference.equals(resource) || trail.test(reference);
+			if ( shape == null ) { // write all direct fields
 
-				};
+				for (final IRI predicate : predicates(model, resource)) {
+					object.add(predicate.stringValue(),
+							json(model, null, objects(model, resource, predicate), nestedTrail)
+					);
+				}
 
-				if ( shape == null ) { // write all direct fields
+			} else { // write direct/inverse fields as specified by the shape
 
-					for (final IRI predicate : model.filter(resource, null, null).predicates()) {
-						object.add(predicate.stringValue(),
-								json(model, null, model.filter(resource, predicate, null).objects(), nestedTrail)
-						);
-					}
+				final Map<IRI, String> aliases=aliases(shape);
 
-				} else { // write direct/inverse fields as specified by the shape
+				for (final Map.Entry<IRI, Shape> entry : fields.entrySet()) {
 
-					final Map<IRI, String> aliases=aliases(shape);
+					final IRI predicate=entry.getKey();
+					final boolean direct=direct(predicate);
 
-					for (final Map.Entry<IRI, Shape> entry : fields.entrySet()) {
+					final Shape nestedShape=entry.getValue();
 
-						final IRI predicate=entry.getKey();
-						final boolean direct=direct(predicate);
+					final String alias=Optional.ofNullable(aliases.get(entry.getKey()))
+							.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue());
 
-						final Shape nestedShape=entry.getValue();
+					final Collection<? extends Value> values=direct
+							? objects(model, resource, predicate)
+							: subjects(model, resource, inverse(predicate));
 
-						final String alias=Optional.ofNullable(aliases.get(entry.getKey()))
-								.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue());
+					if ( !values.isEmpty() ) { // omit null value and empty arrays
 
-						final Collection<? extends Value> values=direct
-								? model.filter(resource, predicate, null).objects()
-								: model.filter(null, inverse(predicate), resource).subjects();
-
-						if ( !values.isEmpty() ) { // omit null value and empty arrays
-
-							object.add(alias, json(model, nestedShape, values, nestedTrail));
-
-						}
+						object.add(alias, json(model, nestedShape, values, nestedTrail));
 
 					}
 
 				}
 
-				datatype // drop id field if proved to be a blank node without back-references
-						.filter(type -> type.equals(Form.BNodeType) && references.isEmpty())
-						.ifPresent(type -> object.remove("this"));
+			}
 
+			if ( resource instanceof BNode && references.isEmpty() ) {
+				object.remove(This); // drop id field for blank nodes without back-references
 			}
 
 			return object.build();
+
 		}
 	}
 
-	private JsonValue json(final Shape shape, final Literal literal) {
+	private JsonValue json(final Literal literal, final Shape shape) {
 
 		final IRI datatype=literal.getDatatype();
 
@@ -196,22 +208,27 @@ public final class JSONEncoder extends JSONCodec {
 	}
 
 
-	private JsonValue json(final Literal literal, final String lang) {
+	private JsonValue json(final Value literal, final String lang) {
 		return Json.createObjectBuilder()
-				.add("text", literal.stringValue())
-				.add("lang", lang)
+				.add(This, literal.stringValue())
+				.add(Type, "@"+lang)
 				.build();
 	}
 
-	private JsonValue json(final Literal literal, final IRI datatype) {
+	private JsonValue json(final Value literal, final Value datatype) {
 		return Json.createObjectBuilder()
-				.add("text", literal.stringValue())
-				.add("type", datatype.stringValue())
+				.add(This, literal.stringValue())
+				.add(Type, datatype.stringValue())
 				.build();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private String id(final Resource resource) {
+		return resource instanceof BNode ? "_:"+resource.stringValue() : relativize(resource.stringValue());
+	}
+
 
 	private String root(final CharSequence base) {
 		if ( base == null ) { return null; } else {
@@ -225,6 +242,34 @@ public final class JSONEncoder extends JSONCodec {
 
 	private String relativize(final String iri) {
 		return base != null && iri.startsWith(base) ? iri.substring(base.length()-1) : iri;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Set<Resource> subjects(final Collection<Statement> model) {
+		return model.stream().map(Statement::getSubject).collect(toCollection(LinkedHashSet::new));
+	}
+
+	private Set<IRI> predicates(final Collection<Statement> model, final Value resource) {
+		return model.stream()
+				.filter(pattern(resource, null, null))
+				.map(Statement::getPredicate)
+				.collect(toSet());
+	}
+
+	private Set<Resource> subjects(final Collection<Statement> model, final Value resource, final Value predicate) {
+		return model.stream()
+				.filter(pattern(null, predicate, resource))
+				.map(Statement::getSubject)
+				.collect(toSet());
+	}
+
+	private Set<Value> objects(final Collection<Statement> model, final Value resource, final Value predicate) {
+		return model.stream()
+				.filter(pattern(resource, predicate, null))
+				.map(Statement::getObject)
+				.collect(toSet());
 	}
 
 }

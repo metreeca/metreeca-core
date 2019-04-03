@@ -32,7 +32,6 @@ import com.metreeca.form.things.Values;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
@@ -230,14 +229,14 @@ final class QueryParserTest {
 				.isEqualTo(filter(shape, and()))
 		);
 
-		edges("{ 'filter': { '!': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
+		edges("{ 'filter': { '!': { '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
 				.as("universal (singleton)")
 				.isEqualTo(filter(shape, all(RDF.FIRST)))
 		);
 
 		edges("{ 'filter': { '!': [\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
+				+"\t{ '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
+				+"\t{ '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
 				+"] } }", shape, edges -> assertThat(edges.getShape())
 				.as("universal (multiple)")
 				.isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
@@ -249,14 +248,16 @@ final class QueryParserTest {
 				.isEqualTo(filter(shape, and()))
 		);
 
-		edges("{ 'filter': { '?': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }", shape, edges -> assertThat(edges.getShape())
+		edges("{ 'filter': { '?':"
+				+ "\t{ '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' }\n"
+				+ "} }", shape, edges -> assertThat(edges.getShape())
 				.as("existential (singleton)")
 				.isEqualTo(filter(shape, any(RDF.FIRST)))
 		);
 
 		edges("{ 'filter': { '?': [\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
-				+"\t{ 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
+				+"\t{ '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' },\n"
+				+"\t{ '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest' }\n"
 				+"] } }", shape, edges -> assertThat(edges.getShape())
 				.as("existential (multiple)")
 				.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
@@ -347,11 +348,11 @@ final class QueryParserTest {
 	}
 
 
-	@Disabled @Test void testHandleSingletonIRI() {
+	@Test void testHandleSingletonIRI() {
 
 		final Shape shape=field(RDF.VALUE, datatype(Form.IRIType));
 
-		edges("{ 'filter': { 'value': { 'this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }",
+		edges("{ 'filter': { 'value': { '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' } } }",
 				shape, edges -> assertThat(edges.getShape())
 						.as("universal (singleton)")
 						.isEqualTo(filter(shape, field(RDF.VALUE, any(RDF.FIRST))))

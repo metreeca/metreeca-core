@@ -120,9 +120,9 @@ public final class Values {
 
 	public static boolean is(final Value value, final IRI datatype) {
 		return value != null && (type(value).equals(datatype)
-				|| Form.ValueType.equals(datatype)
 				|| value instanceof Resource && Form.ResourceType.equals(datatype)
 				|| value instanceof Literal && Form.LiteralType.equals(datatype)
+				|| Form.ValueType.equals(datatype)
 		);
 	}
 
