@@ -312,7 +312,7 @@ public abstract class Graph implements AutoCloseable {
 				throw new IllegalStateException("undefined repository");
 			}
 
-			if ( !repository.isInitialized() ) { repository.initialize(); }
+			if ( !repository.isInitialized() ) { repository.init(); }
 
 			try (final RepositoryConnection connection=repository.getConnection()) {
 
