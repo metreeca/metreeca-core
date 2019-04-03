@@ -28,6 +28,7 @@ import com.metreeca.form.shapes.MinExclusive;
 import com.metreeca.form.shapes.MinLength;
 import com.metreeca.form.things.Lists;
 import com.metreeca.form.things.Values;
+import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -36,6 +37,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+
+import javax.json.JsonException;
 
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
@@ -134,6 +137,11 @@ final class QueryParserTest {
 				.as("alias dot path")
 				.isEqualTo(list(inverse(RDF.FIRST), RDF.REST)));
 
+	}
+
+	@Test void testRejectMalformedPaths() {
+		assertThatExceptionOfType(JsonException.class)
+				.isThrownBy(() -> new QueryParser(and(), ValuesTest.Base).parse("{\"order\":\"---\"}"));
 	}
 
 
@@ -247,8 +255,8 @@ final class QueryParserTest {
 		);
 
 		edges("{ 'filter': { '?':"
-				+ "\t{ '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' }\n"
-				+ "} }", shape, edges -> assertThat(edges.getShape())
+				+"\t{ '_this': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first' }\n"
+				+"} }", shape, edges -> assertThat(edges.getShape())
 				.as("existential (singleton)")
 				.isEqualTo(filter(shape, any(RDF.FIRST)))
 		);

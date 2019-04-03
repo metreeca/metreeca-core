@@ -221,7 +221,7 @@ public final class QueryParser extends JSONDecoder {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected List<IRI> path(final String path, final Shape shape) {
+	private List<IRI> path(final String path, final Shape shape) {
 
 		final Collection<String> steps=new ArrayList<>();
 
@@ -237,7 +237,7 @@ public final class QueryParser extends JSONDecoder {
 		}
 
 		if ( last != length ) {
-			throw new IllegalArgumentException("malformed path ["+path+"]");
+			throw new JsonException("malformed path ["+path+"]");
 		}
 
 		return path(steps, shape);
