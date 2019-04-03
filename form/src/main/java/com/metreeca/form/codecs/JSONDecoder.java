@@ -24,7 +24,8 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.net.URI;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -38,7 +39,6 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.direct;
-import static com.metreeca.form.things.Values.format;
 import static com.metreeca.form.things.Values.inverse;
 
 import static java.util.stream.Collectors.toMap;
@@ -47,9 +47,6 @@ import static java.util.stream.Collectors.toMap;
 public abstract class JSONDecoder extends JSONCodec {
 
 	private static final JsonString Default=Json.createValue("");
-
-	private static final Pattern StepPatten // !!! merge w/ EdgePattern
-			=Pattern.compile("(?:^|[./])(\\^?(?:\\w+:.*|\\w+|<[^>]*>))");
 
 	private static final Pattern EdgePattern
 			=Pattern.compile("(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:.*)>)");
@@ -102,71 +99,6 @@ public abstract class JSONDecoder extends JSONCodec {
 
 	protected <V> V error(final String message) {
 		throw new JsonException(message);
-	}
-
-
-	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	protected List<IRI> path(final String path, final Shape shape) {
-
-		final Collection<String> steps=new ArrayList<>();
-
-		final Matcher matcher=StepPatten.matcher(path);
-
-		final int length=path.length();
-
-		int last=0;
-
-		while ( matcher.lookingAt() ) {
-			steps.add(matcher.group(1));
-			matcher.region(last=matcher.end(), length);
-		}
-
-		if ( last != length ) {
-			throw new IllegalArgumentException("malformed path ["+path+"]");
-		}
-
-		return path(steps, shape);
-	}
-
-
-	private List<IRI> path(final Iterable<String> steps, final Shape shape) {
-
-		final List<IRI> edges=new ArrayList<>();
-
-		Shape reference=shape;
-
-		for (final String step : steps) {
-
-			final Map<IRI, com.metreeca.form.Shape> fields=fields(reference);
-			final Map<IRI, String> aliases=aliases(reference);
-
-			final Map<String, IRI> index=new HashMap<>();
-
-			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
-
-			for (final IRI edge : fields.keySet()) {
-				index.put(format(edge), edge); // inside angle brackets
-				index.put(edge.toString(), edge); // naked IRI
-			}
-
-			for (final Map.Entry<IRI, String> entry : aliases.entrySet()) {
-				index.put(entry.getValue(), entry.getKey());
-			}
-
-			final IRI edge=index.get(step);
-
-			if ( edge == null ) {
-				throw new NoSuchElementException("unknown path step ["+step+"]");
-			}
-
-			edges.add(edge);
-			reference=fields.get(edge);
-
-		}
-
-		return edges;
-
 	}
 
 

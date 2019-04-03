@@ -21,7 +21,7 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format 
 
 [Edges](../javadocs/com/metreeca/form/queries/Edges.html) queries return the RDF description of container items matching a set of facet filters.
 
-    <edges query> ::= { // all fields are optional
+    <edges query> ::= { // all fields are optional and nullable
         "filter": <filter>,        
         "order": <criterion> | [<criterion>,(<criterion>)*],
         "offset": <integer>,
@@ -42,7 +42,7 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format 
 ```
 <stats query> ::= {
     "stats": "<path>",
-      "filter": <filter> // optional
+    "filter": <filter> // optional and nullable
 }
 ```
 
@@ -75,8 +75,8 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format 
 [Items](../javadocs/com/metreeca/form/queries/Items.html) queries return an RDF report detailing option values and counts for a facet specified by a target property path, taking into account applied filters.
 
     <items query> ::= {
-        "filter": <filter>,
-        "items": "<path>" // optional
+        "items": "<path>",
+        "filter": <filter> // optional and nullable
     }
     
     <items response> ::= {

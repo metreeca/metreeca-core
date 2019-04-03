@@ -37,8 +37,6 @@ import org.junit.jupiter.api.Test;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
-import javax.json.JsonException;
-
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.probes.Evaluator.pass;
@@ -412,14 +410,16 @@ final class QueryParserTest {
 	}
 
 
-	@Test void testRejectNullFilters() {
-		assertThatExceptionOfType(JsonException.class)
-				.isThrownBy(() -> edges("{ 'filter': null }", shape, edges -> {}));
+	@Test void testIgnoreNullFilters() {
+
+		edges("{ 'filter': null }", shape, edges -> assertThat(edges.getShape()).isEqualTo(shape));
+
 	}
 
-	@Test void testRejectNullValues() {
-		assertThatExceptionOfType(JsonException.class)
-				.isThrownBy(() -> edges("{ 'filter': { 'first': null } }", shape, edges -> {}));
+	@Test void testIgnoreNullValues() {
+
+		edges("{ 'filter': { 'first': null } }", shape, edges -> assertThat(edges.getShape()).isEqualTo(shape));
+
 	}
 
 
