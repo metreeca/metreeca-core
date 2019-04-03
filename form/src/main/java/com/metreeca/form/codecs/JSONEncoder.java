@@ -49,7 +49,6 @@ import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.pattern;
 
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toSet;
 
 
 public abstract class JSONEncoder extends JSONCodec {
@@ -74,7 +73,7 @@ public abstract class JSONEncoder extends JSONCodec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public JsonValue json(final Collection<Statement> model, final Shape shape, final Resource focus) {
+	protected JsonValue json(final Collection<Statement> model, final Shape shape, final Resource focus) {
 
 		final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
 
@@ -121,12 +120,11 @@ public abstract class JSONEncoder extends JSONCodec {
 		final boolean inlineable=IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype);
 
 
-		if ( trail.test(resource)) { // a back-reference to an enclosing copy of self -> omit fields
+		if ( trail.test(resource) ) { // a back-reference to an enclosing copy of self -> omit fields
 
 			return inlineable
 					? Json.createValue(id(resource))
 					: Json.createObjectBuilder().add(This, id(resource)).build();
-
 
 		} else if ( inlineable && resource instanceof IRI && fields.isEmpty() ) { // inline proved leaf IRI
 
@@ -270,28 +268,30 @@ public abstract class JSONEncoder extends JSONCodec {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Set<Resource> subjects(final Collection<Statement> model) {
-		return model.stream().map(Statement::getSubject).collect(toCollection(LinkedHashSet::new));
+		return model.stream()
+				.map(Statement::getSubject)
+				.collect(toCollection(LinkedHashSet::new));
 	}
 
 	private Set<IRI> predicates(final Collection<Statement> model, final Value resource) {
 		return model.stream()
 				.filter(pattern(resource, null, null))
 				.map(Statement::getPredicate)
-				.collect(toSet());
+				.collect(toCollection(LinkedHashSet::new));
 	}
 
 	private Set<Resource> subjects(final Collection<Statement> model, final Value resource, final Value predicate) {
 		return model.stream()
 				.filter(pattern(null, predicate, resource))
 				.map(Statement::getSubject)
-				.collect(toSet());
+				.collect(toCollection(LinkedHashSet::new));
 	}
 
 	private Set<Value> objects(final Collection<Statement> model, final Value resource, final Value predicate) {
 		return model.stream()
 				.filter(pattern(resource, predicate, null))
 				.map(Statement::getObject)
-				.collect(toSet());
+				.collect(toCollection(LinkedHashSet::new));
 	}
 
 }
