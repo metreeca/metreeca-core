@@ -381,7 +381,7 @@ public abstract class Trace {
 
 			record.setLoggerName(logger);
 			record.setSourceClassName(logger);
-			record.setSourceMethodName("class"); // !!! support
+			// !!! record.setSourceMethodName(null); // !!! support
 			record.setThrown(cause);
 
 			Logger.getLogger(logger).log(record);
