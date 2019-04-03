@@ -91,13 +91,19 @@ final class InferencerTest {
 	@Test void testField() {
 
 		assertImplies("field subjects are resources",
-				Field.field(RDF.VALUE), datatype(Form.ResourceType));
+				field(RDF.VALUE), datatype(Form.ResourceType));
+
+		assertImplies("field subjects are iris if explicitly typed",
+				and(field(RDF.VALUE), datatype(Form.IRIType)), datatype(Form.IRIType));
 
 		assertImplies("reverse field objects are resources",
-				Field.field(inverse(RDF.VALUE)), datatype(Form.ResourceType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
+				field(inverse(RDF.VALUE)), datatype(Form.ResourceType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
+
+		assertImplies("reverse field objects are iris if explicitly typed",
+				field(inverse(RDF.VALUE), datatype(Form.IRIType)), datatype(Form.IRIType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
 
 		assertImplies("both subject and object of a rdf:type field are resources",
-				Field.field(RDF.TYPE), datatype(Form.ResourceType),
+				field(RDF.TYPE), datatype(Form.ResourceType),
 				(s, i) -> and(field(s.getIRI(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",
