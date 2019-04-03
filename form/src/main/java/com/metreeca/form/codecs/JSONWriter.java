@@ -17,11 +17,7 @@
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Inferencer;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -36,13 +32,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.function.Function;
 
 import javax.json.Json;
 import javax.json.JsonValue;
 import javax.json.JsonWriterFactory;
 
-import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Codecs.writer;
 
 import static java.util.Collections.singletonMap;
@@ -53,14 +47,6 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 public final class JSONWriter extends AbstractRDFWriter {
 
 	private static final JsonWriterFactory writers=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));
-
-
-	private static final Function<Shape, Shape> ShapeCompiler=memoizable(s -> s
-			.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
-			.map(new Optimizer())
-			.map(new Inferencer()) // infer implicit constraints to drive json shorthands
-			.map(new Optimizer())
-	);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,8 +106,7 @@ public final class JSONWriter extends AbstractRDFWriter {
 			final Resource focus=getWriterConfig().get(JSONCodec.Focus);
 			final Shape shape=getWriterConfig().get(JSONCodec.Shape);
 
-			final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
-			final JsonValue json=new JSONEncoder(base) {}.json(model, driver, focus);
+			final JsonValue json=new JSONEncoder(base) {}.json(model, shape, focus);
 
 			try {
 

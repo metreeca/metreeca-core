@@ -18,11 +18,7 @@
 package com.metreeca.form.codecs;
 
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Inferencer;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -33,14 +29,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
-import java.util.function.Function;
 
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.JsonReaderFactory;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Codecs.UTF8;
 
 import static java.util.function.Function.identity;
@@ -49,13 +43,6 @@ import static java.util.function.Function.identity;
 public final class JSONParser extends AbstractRDFParser {
 
 	private static final JsonReaderFactory readers=Json.createReaderFactory(null);
-
-	private static final Function<Shape, Shape> ShapeCompiler=memoizable(s -> s
-			.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
-			.map(new Optimizer())
-			.map(new Inferencer()) // infer implicit constraints to drive json shorthands
-			.map(new Optimizer())
-	);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,8 +90,6 @@ public final class JSONParser extends AbstractRDFParser {
 		final Resource focus=getParserConfig().get(JSONCodec.Focus);
 		final Shape shape=getParserConfig().get(JSONCodec.Shape);
 
-		final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
-
 		if ( rdfHandler != null ) {
 
 			rdfHandler.startRDF();
@@ -113,7 +98,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 				new Decoder(baseURI)
 
-						.values(readers.createReader(reader).readValue(), driver, focus)
+						.values(readers.createReader(reader).readValue(), shape, focus)
 						.values()
 						.stream()
 						.flatMap(identity())

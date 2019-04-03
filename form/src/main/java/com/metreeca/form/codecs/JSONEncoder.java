@@ -17,7 +17,11 @@
 
 package com.metreeca.form.codecs;
 
+import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
+import com.metreeca.form.probes.Inferencer;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -27,6 +31,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
@@ -38,6 +43,7 @@ import static com.metreeca.form.Form.ResourceType;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.fields;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
+import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Values.direct;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.pattern;
@@ -47,6 +53,16 @@ import static java.util.stream.Collectors.toSet;
 
 
 public abstract class JSONEncoder extends JSONCodec {
+
+	private static final Function<Shape, Shape> ShapeCompiler=memoizable(s -> s
+			.map(new Redactor(Form.mode, Form.convey)) // remove internal filtering shapes
+			.map(new Optimizer())
+			.map(new Inferencer()) // infer implicit constraints to drive json shorthands
+			.map(new Optimizer())
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final String base;
 
@@ -59,9 +75,12 @@ public abstract class JSONEncoder extends JSONCodec {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public JsonValue json(final Collection<Statement> model, final Shape shape, final Resource focus) {
+
+		final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
+
 		return (focus != null)
-				? json(model, shape, focus, resource -> false)
-				: json(model, shape, subjects(model), resource -> false);
+				? json(model, driver, focus, resource -> false)
+				: json(model, driver, subjects(model), resource -> false);
 	}
 
 
@@ -86,9 +105,11 @@ public abstract class JSONEncoder extends JSONCodec {
 
 	private JsonValue json(final Collection<Statement> model,
 			final Shape shape, final Value value, final Predicate<Resource> trail) {
+
 		return value instanceof Resource ? json(model, shape, (Resource)value, trail)
 				: value instanceof Literal ? json((Literal)value, shape)
 				: null;
+
 	}
 
 	private JsonValue json(final Collection<Statement> model,
