@@ -19,7 +19,6 @@ package com.metreeca.form.codecs;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Field;
 import com.metreeca.form.shapes.Or;
 import com.metreeca.form.things.ValuesTest;
 
@@ -45,6 +44,7 @@ import static com.metreeca.form.Shape.multiple;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
+import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.MaxCount.maxCount;
 import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.things.JsonValues.array;
@@ -203,7 +203,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:x rdf:value _:y ."),
 						bnode("x"),
-						Field.field(RDF.VALUE)
+						field(RDF.VALUE)
 				));
 
 		assertEquivalent("inverse inferred",
@@ -211,7 +211,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:y rdf:value _:x ."),
 						bnode("x"),
-						Field.field(inverse(RDF.VALUE))
+						field(inverse(RDF.VALUE))
 				));
 
 		assertEquivalent("user-defined",
@@ -219,7 +219,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:x rdf:value _:y ."),
 						bnode("x"),
-						Field.field(RDF.VALUE, alias("alias"))
+						field(RDF.VALUE, alias("alias"))
 				));
 
 	}
@@ -231,7 +231,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:x rdf:value [rdf:value _:y] ."),
 						bnode("x"),
-						Field.field(RDF.VALUE, Field.field(RDF.VALUE, alias("alias")))
+						field(RDF.VALUE, field(RDF.VALUE, alias("alias")))
 				));
 
 	}
@@ -246,8 +246,8 @@ final class JSONWriterTest  {
 						decode("_:x rdf:value _:y; :value _:z."),
 						bnode("x"),
 						and(
-								Field.field(RDF.VALUE),
-								Field.field(ValuesTest.term("value"))
+								field(RDF.VALUE),
+								field(ValuesTest.term("value"))
 						)
 				));
 	}
@@ -258,7 +258,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:x rdf:value _:y ."),
 						bnode("x"),
-						Field.field(RDF.VALUE, alias("_this"))
+						field(RDF.VALUE, alias("_this"))
 				));
 	}
 
@@ -272,7 +272,7 @@ final class JSONWriterTest  {
 		final JsonStructure json=write(
 				decode("</container/> ldp:contains </container/x>, </container/y>."),
 				focus,
-				Field.field(LDP.CONTAINS, and(multiple(), datatype(Form.IRIType))),
+				field(LDP.CONTAINS, and(multiple(), datatype(Form.IRIType))),
 				focus.stringValue()
 		);
 
@@ -293,7 +293,7 @@ final class JSONWriterTest  {
 		final JsonStructure json=write(
 				decode("</container/> rdf:value </container/>."),
 				focus,
-				Field.field(RDF.VALUE, and(required(), datatype(Form.IRIType))),
+				field(RDF.VALUE, and(required(), datatype(Form.IRIType))),
 				focus.stringValue()
 		);
 
@@ -317,8 +317,8 @@ final class JSONWriterTest  {
 						decode("_:focus rdf:first 'x'; rdf:rest 'y'."), // invalid shape (forces content on both branches)
 						bnode("focus"),
 						Or.or(
-								Field.field(RDF.FIRST, required()),
-								Field.field(RDF.REST, required())
+								field(RDF.FIRST, required()),
+								field(RDF.REST, required())
 						)
 				));
 	}
@@ -327,14 +327,12 @@ final class JSONWriterTest  {
 		assertThat(write(
 				decode("<y> rdf:value <x> ."),
 				iri("http://example.com/x"),
-				Field.field(inverse(RDF.VALUE))
+				field(inverse(RDF.VALUE))
 		))
 				.as("named reverse links")
 				.isEqualTo(object(map(
 						entry("_this", "/x"),
-						entry("valueOf", list(map(
-								entry("_this", "/y")
-						)))
+						entry("valueOf", list("/y"))
 				)));
 	}
 
@@ -344,7 +342,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:y rdf:value _:x ."),
 						bnode("x"),
-						Field.field(inverse(RDF.VALUE))
+						field(inverse(RDF.VALUE))
 				));
 	}
 
@@ -354,7 +352,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
-						Field.field(RDF.TYPE, required())
+						field(RDF.TYPE, required())
 				));
 
 	}
@@ -365,7 +363,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
-						Field.field(RDF.TYPE)
+						field(RDF.TYPE)
 				));
 
 	}
@@ -376,7 +374,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:focus rdf:value 'x'."),
 						bnode("focus"),
-						Field.field(RDF.VALUE, maxCount(1))
+						field(RDF.VALUE, maxCount(1))
 				));
 	}
 
@@ -386,7 +384,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:focus rdf:value rdf:nil."),
 						bnode("focus"),
-						Field.field(RDF.VALUE, and(datatype(Form.IRIType), maxCount(1)))
+						field(RDF.VALUE, and(datatype(Form.IRIType), maxCount(1)))
 				));
 	}
 
@@ -396,7 +394,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:focus rdf:value '2016-08-11'^^xsd:date."),
 						bnode("focus"),
-						Field.field(RDF.VALUE, and(datatype(XMLSchema.DATE), maxCount(1)))
+						field(RDF.VALUE, and(datatype(XMLSchema.DATE), maxCount(1)))
 				));
 	}
 
@@ -405,7 +403,7 @@ final class JSONWriterTest  {
 		assertThat(write(
 				decode("_:x rdf:value _:y ."),
 				bnode("x"),
-				and(datatype(Form.BNodeType), Field.field(RDF.VALUE, datatype(Form.BNodeType)))
+				and(datatype(Form.BNodeType), field(RDF.VALUE, datatype(Form.BNodeType)))
 		))
 				.as("unreferenced proved blank")
 				.isEqualTo(object(map(entry("value", list(map())))));
@@ -413,7 +411,7 @@ final class JSONWriterTest  {
 		assertThat(write(
 				decode("_:x rdf:value _:x ."),
 				bnode("x"),
-				and(datatype(Form.BNodeType), Field.field(RDF.VALUE, datatype(Form.BNodeType)))
+				and(datatype(Form.BNodeType), field(RDF.VALUE, datatype(Form.BNodeType)))
 		))
 				.as("back-referenced proved blank")
 				.isEqualTo(object(map(

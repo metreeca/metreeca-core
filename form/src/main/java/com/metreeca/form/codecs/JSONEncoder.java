@@ -115,21 +115,22 @@ public abstract class JSONEncoder extends JSONCodec {
 	private JsonValue json(final Collection<Statement> model,
 			final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
 
-		final String id=resource.stringValue();
 		final IRI datatype=datatype(shape).orElse(null);
 		final Map<IRI, Shape> fields=fields(shape);
+
+		final boolean inlineable=IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype);
 
 
 		if ( trail.test(resource)) { // a back-reference to an enclosing copy of self -> omit fields
 
-			return IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype)
+			return inlineable
 					? Json.createValue(id(resource))
 					: Json.createObjectBuilder().add(This, id(resource)).build();
 
 
-		} else if ( IRIType.equals(datatype) && fields.isEmpty() ) {
+		} else if ( inlineable && resource instanceof IRI && fields.isEmpty() ) { // inline proved leaf IRI
 
-			return Json.createValue(relativize(id)); // inline proved leaf IRI
+			return Json.createValue(id(resource));
 
 		} else {
 
