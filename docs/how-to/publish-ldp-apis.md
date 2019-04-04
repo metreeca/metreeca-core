@@ -184,7 +184,7 @@ Requests are dispatched to their final handlers through a hierarchy of wrappers 
 
 		.wrap(new Router()
 
-				.path("/products/", new Router()
+				.path("/products/**", new Router()
 						.path("/", new Worker()
 								.get(new Relator())
 								.post(new Creator())
@@ -221,20 +221,20 @@ Content-Type: text/turtle;charset=UTF-8
 
 ## Routers
 
-[Routers](../javadocs/?com/metreeca/rest/handlers/Router.html) dispatch requests on the basis of the [request path](../javadocs/com/metreeca/rest/Request.html#path--), taking into account the portion of the path already matched by wrapping routers.
+[Routers](../javadocs/?com/metreeca/rest/handlers/Router.html) dispatch requests on the basis of the [request path](../javadocs/com/metreeca/rest/Request.html#path--), ignoring the leading segment possibly already matched by wrapping routers.
 
-Requests are forwarded to a registered handler if their path matches the associated path pattern according to the following rules, in order of precedence.
+Requests are forwarded to a registered handler if their path is matched by an associated pattern defined by a sequence of steps according to the following rules:
 
-| pattern     | matching paths                                        | handling mode                                                |
-| ----------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| /           | /                                                     | root / matches only root resource                            |
-| `/<path>`   | `/<path>`<br />`/<path>/`                             | exact / matches path exactly, ignoring trailing slashes      |
-| `/<path>/`  | `/<path>`<br />`/<path>/`<br />`/<path>/…/<resource>` | prefix / matches any path sharing the given path prefix, ignoring trailing slashes |
-| `/<path>/*` | `/<path>/<resource>`<br />`/<path>/<resource>/`       | children / matches any immediately nested path sharing the given prefix, ignoring trailing slashes |
+| pattern step | matching path step   | definition                  |
+| ------------ | -------------------- | --------------------------- |
+| /            | /                    | matches only the empty step |
+| `/<step>`    | `/<step>`            | matches step verbatim       |
+| `/*`         | `/<step>`            | matches a single step       |
+| /**          | `/<step>[/<step>/…]` | matches one or more steps   |
 
-Lexicographically longer and preceding paths take precedence over shorter and following ones.
+Registered path patterns are tested in order of definition.
 
-If the index doesn't contain a matching handler, no action is performed giving the container adapter a fall-back opportunity to handle the request.
+If the router doesn't contain a matching handler, no action is performed giving the container adapter a fall-back opportunity to handle the request.
 
 ## Workers
 
@@ -523,7 +523,7 @@ private static boolean authorized(final Request request) {
 
     .wrap(new Router()
 
-            .path("/products/", new Products())
+            .path("/products/**", new Products())
 
     )
 ```

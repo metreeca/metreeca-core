@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
@@ -42,26 +41,34 @@ final class RouterTest {
 		);
 	}
 
-	private Handler handler(final int id) {
-		return request -> request.reply(response -> response.status(id));
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testCheckPaths() {
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
-				.as("malformed path")
+				.as("missing leading slash path")
 				.isThrownBy(() -> new Router()
-						.path("one", handler(100))
+						.path("path", handler())
+				);
+
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.as("malformed child segment")
+				.isThrownBy(() -> new Router()
+						.path("/pa*th", handler())
+				);
+
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.as("malformed descendant segment")
+				.isThrownBy(() -> new Router()
+						.path("/pa**th", handler())
 				);
 
 		assertThatExceptionOfType(IllegalStateException.class)
 				.as("existing path")
 				.isThrownBy(() -> new Router()
-						.path("/one", handler(100))
-						.path("/one", handler(100))
+						.path("/path", handler())
+						.path("/path", handler())
 				);
 
 	}
@@ -69,13 +76,13 @@ final class RouterTest {
 	@Test void testIgnoreUnknownPath() {
 		new Router()
 
-				.path("/one", handler(100))
+				.path("/path", handler())
 
-				.handle(request("/two"))
+				.handle(request("/unknown"))
 
 				.accept(response -> assertThat(response)
 						.as("request ignored")
-						.hasStatus(0)
+						.doesNotHaveHeader("path")
 				);
 	}
 
@@ -84,157 +91,70 @@ final class RouterTest {
 
 	@Test void testMatchesExactPath() {
 
-		final Router router=new Router().path("/one", handler());
+		final Router router=new Router().path("/path", handler());
 
-		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("path", "/one"));
+		router.handle(request("/path")).accept(response -> assertThat(response)
+				.hasHeader("path", "/path")
+		);
 
-		router.handle(request("/one/")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("path", "/one/"));
+		router.handle(request("/path/")).accept(response -> assertThat(response)
+				.doesNotHaveHeader("path")
+		);
 
-		router.handle(request("/one/two")).accept(response -> assertThat(response)
-				.hasStatus(0));
+		router.handle(request("/path/unknown")).accept(response -> assertThat(response)
+				.doesNotHaveHeader("path")
+		);
 
 	}
 
-	@Test void testMatchesPrefixPath() {
+	@Test void testMatchesChildPath() {
 
-		final Router router=new Router().path("/one/", handler());
+		final Router router=new Router().path("/head/*/tail", handler());
 
-		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("path", "/one"));
+		router.handle(request("/head/path/tail")).accept(response -> assertThat(response)
+				.hasHeader("path", "/head/path/tail")
+		);
 
-		router.handle(request("/one/")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("path", "/one/"));
+		router.handle(request("/head/tail")).accept(response -> assertThat(response)
+				.doesNotHaveHeader("path")
+		);
 
-		router.handle(request("/one/two")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("path", "/one/two"));
+		router.handle(request("/head/path/path/tail")).accept(response -> assertThat(response)
+				.doesNotHaveHeader("path")
+		);
 
 	}
 
-	@Test void testMatchesChildrenPath() {
+	@Test void testMatchesDescendantPath() {
 
-		final Router router=new Router().path("/one/*", handler());
+		final Router router=new Router().path("/head/**/tail", handler());
 
-		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(0)
+		router.handle(request("/head/path/tail")).accept(response -> assertThat(response)
+				.hasHeader("path", "/head/path/tail")
 		);
 
-		router.handle(request("/one/")).accept(response -> assertThat(response)
-				.hasStatus(0)
+		router.handle(request("/head/path/path/tail")).accept(response -> assertThat(response)
+				.hasHeader("path", "/head/path/path/tail")
 		);
 
-		router.handle(request("/one/two")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK)
-				.hasHeader("path", "/one/two")
-		);
-
-		router.handle(request("/one/two/")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK)
-				.hasHeader("path", "/one/two/")
-		);
-
-		router.handle(request("/one/two/three")).accept(response -> assertThat(response)
-				.hasStatus(0)
+		router.handle(request("/head/tail")).accept(response -> assertThat(response)
 				.doesNotHaveHeader("path")
 		);
 
 	}
 
 
-	@Test void testMatchesRootExactPath() {
-
-		final Router router=new Router().path("/", handler());
-
-		router.handle(request("/")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("path", "/"));
-
-		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(0));
-
-	}
-
-	@Test void testMatchesRootChildrenPath() {
-
-		final Router router=new Router().path("/*", handler());
-
-		router.handle(request("/")).accept(response -> assertThat(response)
-				.hasStatus(0));
-
-		router.handle(request("/one")).accept(response -> assertThat(response)
-				.hasStatus(Response.OK).hasHeader("path", "/one"));
-
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testMatchExactPathIgnoringTrailingSlashes() {
+	@Test void testPreferFirstMatch() {
 
 		final Router router=new Router()
 
-				.path("/one", handler(100))
-				.path("/two/", handler(200));// trailing slash
+				.path("/path", request -> request.reply(response -> response.status(100)))
+				.path("/**", request -> request.reply(response -> response.status(200)));
 
-		router.handle(request("/one")).accept(response ->
-				assertThat(response).as("exact match without trailing slash").hasStatus(100));
-
-		router.handle(request("/one/")).accept(response ->
-				assertThat(response).as("exact match with trailing slash").hasStatus(100));
-
-		router.handle(request("/two")).accept(response ->
-				assertThat(response).as("exact match without trailing slash").hasStatus(200));
-
-		router.handle(request("/two/")).accept(response ->
-				assertThat(response).as("exact match with trailing slash").hasStatus(200));
-
-		router.handle(request("/three/")).accept(response ->
-				assertThat(response).as("no match").hasStatus(0));
-	}
-
-	@Test void testPreferExactMatch() {
-
-		final int exact=100;
-		final int prefix=200;
-
-		final Router router=new Router()
-
-				.path("/one", handler(exact))
-				.path("/one/", handler(prefix));
-
-		router.handle(request("/one")).accept(response -> assertThat(response).hasStatus(exact));
-		router.handle(request("/one/")).accept(response -> assertThat(response).hasStatus(exact));
-		router.handle(request("/one/two")).accept(response -> assertThat(response).hasStatus(prefix));
-
-	}
-
-	@Test void testPreferLongestPrefix() {
-
-		final Router router=new Router()
-
-				.path("/one/*", handler(100))
-				.path("/one/two/*", handler(200));
-
-		router.handle(request("/one/zero")).accept(response ->
-				assertThat(response).as("prefix match").hasStatus(100));
-
-		router.handle(request("/one/two/zero")).accept(response ->
-				assertThat(response).as("longest prefix match").hasStatus(200));
-
-	}
-
-	@Test void testPreferLexicographicallyLesserPrefix() {
-
-		final Router router=new Router()
-
-				.path("/one/*", handler(100))
-				.path("/two/*", handler(200));// trailing slash
-
-		router.handle(request("/one/zero"))
-				.accept(response -> assertThat(response.status()).isEqualTo(100));
-
-		router.handle(request("/two/zero"))
-				.accept(response -> assertThat(response.status()).isEqualTo(200));
+		router.handle(request("/path")).accept(response -> assertThat(response).hasStatus(100));
+		router.handle(request("/path/path")).accept(response -> assertThat(response).hasStatus(200));
 
 	}
 
