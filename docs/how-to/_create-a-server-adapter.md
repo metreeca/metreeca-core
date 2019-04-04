@@ -1,6 +1,6 @@
 ---
 title: 		How To Create a Server Adapter
-excerpt:	Usability guidelines and other configuration tips
+excerpt:	???
 ---
 
 - the framework

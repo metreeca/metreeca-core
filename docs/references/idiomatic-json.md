@@ -3,7 +3,7 @@ title:		Idiomatic RDF/JSON Serialization Reference
 excerpt:	Idiomatic RDF/JSON serialization format codecs and grammar
 ---
 
-Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the framework supports a simpler idiomatic JSON‑based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language.md#shapes).
+Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the framework supports a simpler idiomatic JSON‑based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language#shapes).
 
 Codecs for this serialization make heavy use of reasoning over linked data shapes to **prove** useful features of the RDF payload, like the expected value for a property being a IRI reference or a required non-repeatable string.
 
@@ -134,9 +134,9 @@ If  the property value may be proved to be non-repeatable, it may be included as
 
 Predicate IRIs are represented as strings, in either plain or angle bracket notation. Predicate IRIs for inverse RDF properties are prefixed with a caret charatecter (`^`).
 
-If a shape is provided to the codec, predicate IRIs are reported in a shortened form using user-defined or system-inferred  [aliases](spec-language.md#annotations). Predicate IRIs with clashing aliases are written in full using the angle bracket notation.
+If a shape is provided to the codec, predicate IRIs are reported in a shortened form using user-defined or system-inferred  [aliases](spec-language#annotations). Predicate IRIs with clashing aliases are written in full using the angle bracket notation.
 
-<p class="warning"><code>_this</code> and <code>_type</code> labels are reserved for system use.</p>
+<p class="warning"><code>_this</code> and <code>_type</code> properties are reserved for system use.</p>
 
 ## Literals
 

@@ -1,6 +1,7 @@
 ---
-title:	    Publishing Model‑Driven Linked Data REST APIs
-excerpt:    Hands-on guided tour of model-driven linked data REST APIs publishing
+title:	        How-To Publish Model‑Driven Linked Data REST APIs
+excerpt:        Hands-on guided tour of model-driven linked data REST APIs publishing
+redirect_from: /tutorials/linked-data-publishing
 ---
 
 This example-driven tutorial introduces the main building blocks of the Metreeca/Link model-driven linked data framework. Basic familiarity with [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
@@ -25,13 +26,13 @@ To get started, set up a Java 1.8 project, adding required dependencies for the 
     <dependency>
         <groupId>com.metreeca</groupId>
         <artifactId>j2ee</artifactId>
-        <version>{{ site.github.latest_release.tag_name }}</version>
+        <version>{{ site.github.latest_release.tag_name | remove: "v" }}</version>
     </dependency>
 
     <dependency>
 	    <groupId>com.metreeca</groupId>
 	    <artifactId>rdf4j</artifactId>
-        <version>{{ site.github.latest_release.tag_name }}</version>
+        <version>{{ site.github.latest_release.tag_name | remove: "v" }}</version>
     </dependency>
 
     <dependency>
@@ -97,7 +98,7 @@ public Demo() {
 
       .set(graph(), () -> new RDF4JMemory())
 
-			.exec(() -> tool(Graph.Factory).update(connection -> {
+			.exec(() -> tool(graph()).update(connection -> {
                 try {
                     connection.add(
                         BIRT.class.getResourceAsStream("BIRT.ttl"),
@@ -132,7 +133,7 @@ public final class BIRT implements Runnable {
 	public static final String Namespace=Base+"terms#";
 
 	@Override public void run() {
-		tool(Graph.Factory).update(connection -> {
+		tool(graph()).update(connection -> {
             try {
                 connection.add(
                     getClass().getResourceAsStream("BIRT.ttl"), 
@@ -151,7 +152,7 @@ public final class BIRT implements Runnable {
 public Demo() {
 	super("/*", tray -> tray
         
-        .set(Graph.Factory, RDF4JMemory::new)
+        .set(graph(), RDF4JMemory::new)
         
         .exec(new BIRT())
         
@@ -251,7 +252,7 @@ If the index doesn't contain a matching handler, no action is performed giving t
 | [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html) | resource updating / updates the detailed RDF description of the target item |
 | [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
 
-<p class="warning">Only LDP Basic and Direct Containers are currently supported</p>
+<p class="warning">Only LDP Basic and Direct Containers are currently supported.</p>
 
 If a [shape](../javadocs/?com/metreeca/form/Shape.html) model is [associated](../javadocs/com/metreeca/rest/Message.html#shape--) to the request, CRUD operations are performed on the graph neighbourhood of the target target item(s)  matched by the model after redaction according to the request user roles and to actor-specific task,  mode and view parameters.
 
@@ -300,7 +301,7 @@ The [Delegator](../javadocs/?com/metreeca/rest/handlers/Delegator.html) abstract
 
 # Model-Driven Handlers
 
-The behaviour of standard resource action handlers can be fine-tuned using high-level declarative models that drive automatic fine‑grained role‑based read/write access control, faceted search,  incoming data validation and bidirectional conversion between RDF and [idiomatic](../references/idiomatic-json.md) JSON payloads, as demonstrated in the [REST APIs interaction tutorial](linked-data-interaction.md).
+The behaviour of standard resource action handlers can be fine-tuned using high-level declarative models that drive automatic fine‑grained role‑based read/write access control, faceted search,  incoming data validation and bidirectional conversion between RDF and [idiomatic](../references/idiomatic-json) JSON payloads, as demonstrated in the [REST APIs interaction tutorial](interact-with-ldp-apis).
 
 ## Defining Models
 
@@ -337,7 +338,7 @@ public final class Products extends Delegator {
 
 The [Driver](../javadocs/index.html?com/metreeca/rest/wrappers/Driver.html) wrapper associated a linked data model to incoming requests, driving the operations of nested actors and other model-aware handlers.
 
-Linked data models are defined with a [SHACL](https://www.w3.org/TR/shacl/)-based [specification language](../references/spec-language.md), assembling shape [building blocks](../references/spec-language.md#shapes) using a simple Java DSL.
+Linked data models are defined with a [SHACL](https://www.w3.org/TR/shacl/)-based [specification language](../references/spec-language), assembling shape [building blocks](../references/spec-language#shapes) using a simple Java DSL.
 
 <p class="note">Direct import of of SHACL specs is planned.</p>
 
@@ -481,13 +482,13 @@ The constraints in the extended model are leveraged by the engine in a number of
 
 ## Parameterizing Models
 
-The `convey` and `server` guards in the extended model also introduce the central concept of [parametric](../references/spec-language.md#parameters) model.
+The `convey` and `server` guards in the extended model also introduce the central concept of [parametric](../references/spec-language#parameters) model.
 
 The `convey` guard states that nested constraints are to be used only for extracting outgoing data and validating incoming data and not for selecting existing resources to be exposed as container items. Constraints defined outside the `convey` block, will be used for both operations.
 
 The `server` guard states that guarded properties are server-managed and will be considered only when retrieving or deleting resources, but won't be accepted as valid content on resource creation and updating.
 
-In the most general form, models may be parameterized on for different [axes](../references/spec-language.md#parameters). Constraints specified outside parametric sections are unconditionally enabled.
+In the most general form, models may be parameterized on for different [axes](../references/spec-language#parameters). Constraints specified outside parametric sections are unconditionally enabled.
 
 ## Controlling Access
 
@@ -580,7 +581,7 @@ private static final class ScaleSlug
     implements BiFunction<Request, Collection<Statement>, String>
 {
 
-	private final Graph graph=tool(Graph.Factory);
+	private final Graph graph=tool(graph());
 
 
 	@Override public String apply(final Request request, final Collection<Statement> model) {
@@ -642,5 +643,5 @@ Request and response RDF payloads may also be [pre](../javadocs/com/metreeca/res
 
 To complete your tour of the framework:
 
-- walk through the [interaction tutorial](linked-data-interaction.md) to learn how to interact with model-driven REST APIs to power client apps like the demo [online product catalog](https://demo.metreeca.com/apps/shop/);
+- walk through the [interaction tutorial](interact-with-ldp-apis) to learn how to interact with model-driven REST APIs to power client apps like the demo [online product catalog](https://demo.metreeca.com/apps/shop/);
 - explore the standard [library](../javadocs/?overview-summary.html) to learn how to develop your own custom wrappers and handlers and to extend your server with additional services like [SPARQL endpoints](../javadocs/?com/metreeca/rest/handlers/sparql/package-summary.html).
