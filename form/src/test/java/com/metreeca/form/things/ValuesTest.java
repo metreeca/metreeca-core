@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -96,20 +96,21 @@ public final class ValuesTest {
 
 	public static final Shape Employee=role(Manager, Salesman).then(
 
-			clazz(term("Employee")), // implies rdf:type :Employee
-
 			convey().then(
+
 					server().then(
 							field(RDF.TYPE, and(required(), datatype(Form.IRIType))),
 							field(RDFS.LABEL, Textual),
 							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
 					),
 					and(
+
 							field(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
 							field(term("surname"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
 							field(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
 							field(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
 					),
+
 					role(Manager).then(
 
 							field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
@@ -119,12 +120,19 @@ public final class ValuesTest {
 									optional(), datatype(Form.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							)),
+
 							field(term("subordinate"), and(
 									optional(), datatype(Form.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							))
 
-					))
+					)
+
+			),
+
+			delete().then(
+					field(term("office"))
+			)
 
 	);
 
@@ -223,6 +231,11 @@ public final class ValuesTest {
 
 	//// RDF Codecs ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static String turtle(final String rdf) {
+		return TurtlePrefixes+"\n\n"+rdf; // !!! avoid prefix clashes
+	}
+
+
 	public static Model decode(final String rdf) {
 		return decode(rdf, Base);
 	}
@@ -251,7 +264,7 @@ public final class ValuesTest {
 
 			parser.setPreserveBNodeIDs(true);
 			parser.setRDFHandler(collector);
-			parser.parse(new StringReader(format.equals(RDFFormat.TURTLE) ? TurtlePrefixes+"\n\n"+rdf : rdf), base);
+			parser.parse(new StringReader(format.equals(RDFFormat.TURTLE) ? turtle(rdf) : rdf), base);
 
 			return new LinkedHashModel(collector.getStatements());
 
@@ -336,6 +349,7 @@ public final class ValuesTest {
 		}
 	}
 
+
 	public static Model export(final RepositoryConnection connection, final Resource... contexts) {
 
 		final Model model=new TreeModel();
@@ -354,7 +368,7 @@ public final class ValuesTest {
 
 		final Repository repository=new SailRepository(new MemoryStore());
 
-		repository.initialize();
+		repository.init();
 
 		try (final RepositoryConnection connection=repository.getConnection()) {
 			for (final Iterable<Statement> dataset : datasets) {

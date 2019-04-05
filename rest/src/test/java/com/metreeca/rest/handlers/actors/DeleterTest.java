@@ -1,23 +1,24 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest.handlers.actors;
 
 
+import com.metreeca.form.truths.JsonAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -30,7 +31,8 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.Form.none;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.HandlerAssert.graph;
+import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 
 
@@ -44,140 +46,198 @@ final class DeleterTest {
 	}
 
 
-	private Request simple() {
-		return new Request()
-				.roles(Manager)
-				.method(Request.DELETE)
-				.base(Base)
-				.path("/employees/1370");
+	@Nested final class Resource {
+
+		private Request simple() {
+			return new Request()
+					.roles(Manager)
+					.method(Request.DELETE)
+					.base(Base)
+					.path("/employees/1370");
+		}
+
+
+		@Nested final class Simple {
+
+			@Test void testDelete() {
+				exec(() -> new Deleter()
+
+						.handle(simple())
+
+						.accept(response -> {
+
+							assertThat(response)
+									.hasStatus(Response.NoContent)
+									.doesNotHaveBody();
+
+							assertThat(graph("construct where { <employees/1370> ?p ?o }"))
+									.as("cell deleted")
+									.isEmpty();
+
+							assertThat(graph("construct where { ?s ?p <employees/1370> }"))
+									.as("inbound links removed")
+									.isEmpty();
+
+							assertThat(graph("construct where { <employees/1102> rdfs:label ?o }"))
+									.as("connected resources preserved")
+									.isNotEmpty();
+
+						}));
+			}
+
+
+			@Test void testUnknown() {
+				exec(() -> new Deleter()
+
+						.handle(simple().path("/unknown"))
+
+						.accept(response -> {
+
+							assertThat(response)
+									.hasStatus(Response.NotFound)
+									.doesNotHaveBody();
+
+							assertThat(graph())
+									.as("graph unchanged")
+									.isIsomorphicTo(Dataset);
+
+						}));
+			}
+		}
+
+		@Nested final class Shaped {
+
+			private Request shaped() {
+				return simple().shape(Employee);
+			}
+
+
+			@Test void testDelete() {
+				exec(() -> new Deleter()
+
+						.handle(shaped())
+
+						.accept(response -> {
+
+							assertThat(response)
+									.hasStatus(Response.NoContent)
+									.doesNotHaveBody();
+
+							assertThat(graph("construct where { <employees/1370> ?p ?o }"))
+									.isEmpty();
+
+						}));
+			}
+
+
+			@Test void testUnauthorized() {
+				exec(() -> new Deleter()
+
+						.handle(shaped().roles(none))
+
+						.accept(response -> {
+
+							assertThat(response)
+									.hasStatus(Response.Unauthorized)
+									.doesNotHaveBody();
+
+							assertThat(graph())
+									.as("graph unchanged")
+									.isIsomorphicTo(Dataset);
+
+						}));
+			}
+
+			@Test void testForbidden() {
+				exec(() -> new Deleter()
+
+						.handle(shaped().user(RDF.NIL).roles(none))
+
+						.accept(response -> {
+
+							assertThat(response)
+									.hasStatus(Response.Forbidden)
+									.doesNotHaveBody();
+
+							assertThat(graph())
+									.as("graph unchanged")
+									.isIsomorphicTo(Dataset);
+
+						}));
+			}
+
+			@Test void testUnknown() {
+				exec(() -> new Deleter()
+
+						.handle(shaped().path("/unknown"))
+
+						.accept(response -> {
+
+							assertThat(response)
+									.hasStatus(Response.NotFound)
+									.doesNotHaveBody();
+
+							assertThat(graph())
+									.as("graph unchanged")
+									.isIsomorphicTo(Dataset);
+
+						}));
+			}
+
+		}
+
 	}
 
-	private Request shaped() {
-		return simple()
-				.shape(Employee);
-	}
+	@Nested final class Container {
 
-
-	@Nested final class Simple {
-
-		@Test void testDelete() {
-			exec(() -> new Deleter()
-
-					.handle(simple())
-
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(Response.NoContent)
-								.doesNotHaveBody();
-
-						assertThat(graph("construct where { <employees/1370> ?p ?o }"))
-								.as("cell deleted")
-								.isEmpty();
-
-						assertThat(graph("construct where { ?s ?p <employees/1370> }"))
-								.as("inbound links removed")
-								.isEmpty();
-
-						assertThat(graph("construct where { <employees/1102> rdfs:label ?o }"))
-								.as("connected resources preserved")
-								.isNotEmpty();
-
-					}));
+		private Request simple() {
+			return new Request()
+					.roles(Manager)
+					.method(Request.DELETE)
+					.base(Base)
+					.path("/employees/");
 		}
 
 
-		@Test void testUnknown() {
-			exec(() -> new Deleter()
+		@Nested final class Simple {
 
-					.handle(simple().path("/unknown"))
+			@Test void testNotImplemented() {
+				exec(() -> new Deleter()
 
-					.accept(response -> {
+						.handle(simple())
 
-						assertThat(response)
-								.hasStatus(Response.NotFound)
-								.doesNotHaveBody();
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> JsonAssert.assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
 
-						assertThat(graph())
-								.as("graph unchanged")
-								.isIsomorphicTo(Dataset);
-
-					}));
-		}
-	}
-
-	@Nested final class Shaped {
-
-		@Test void testDelete() {
-			exec(() -> new Deleter()
-
-					.handle(shaped())
-
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(Response.NoContent)
-								.doesNotHaveBody();
-
-						assertThat(graph("construct where { <employees/1370> ?p ?o }"))
-								.isEmpty();
-
-					}));
 		}
 
+		@Nested final class Shaped {
 
-		@Test void testUnauthorized() {
-			exec(() -> new Deleter()
+			private Request shaped() {
+				return simple().shape(Employees);
+			}
 
-					.handle(shaped().roles(none))
 
-					.accept(response -> {
+			@Test void testNotImplemented() {
+				exec(() -> new Deleter()
 
-						assertThat(response)
-								.hasStatus(Response.Unauthorized)
-								.doesNotHaveBody();
+						.handle(shaped())
 
-						assertThat(graph())
-								.as("graph unchanged")
-								.isIsomorphicTo(Dataset);
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> JsonAssert.assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
 
-					}));
-		}
-
-		@Test void testForbidden() {
-			exec(() -> new Deleter()
-
-					.handle(shaped().user(RDF.NIL).roles(none))
-
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(Response.Forbidden)
-								.doesNotHaveBody();
-
-						assertThat(graph())
-								.as("graph unchanged")
-								.isIsomorphicTo(Dataset);
-
-					}));
-		}
-
-		@Test void testUnknown() {
-			exec(() -> new Deleter()
-
-					.handle(shaped().path("/unknown"))
-
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(Response.NotFound)
-								.doesNotHaveBody();
-
-						assertThat(graph())
-								.as("graph unchanged")
-								.isIsomorphicTo(Dataset);
-
-					}));
 		}
 
 	}

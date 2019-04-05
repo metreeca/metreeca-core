@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -46,16 +46,19 @@ public final class Cache {
 
 
 	/**
-	 * Cache factory.
+	 * Retrieves the default cache factory.
 	 *
-	 * <p>By default creates an uncustomized cache.</p>
+	 * @return the default cache factory, which creates a vanilla cache with no customization
 	 */
-	public static final Supplier<Cache> Factory=Cache::new;
+
+	public static Supplier<Cache> cache() {
+		return Cache::new;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Store store=new Store().storage(tool(Storage.Factory).area("cache")); // delegate blob store
+	private Store store=new Store().storage(tool(Storage.storage()).area("cache")); // delegate blob store
 
 	private final Map<String, BiConsumer<URL, Blob>> fetchers=new HashMap<>(); // URL schema to fetcher
 
@@ -222,7 +225,7 @@ public final class Cache {
 	 */
 	public static final class FileFetcher implements BiConsumer<URL, Blob> {
 
-		private final Trace trace=tool(Trace.Factory);
+		private final Trace trace=tool(Trace.trace());
 
 		@Override public void accept(final URL url, final Blob blob) { // !!! metadata?
 			try {
@@ -260,7 +263,7 @@ public final class Cache {
 
 		private final Map<String, String> headers=new LinkedHashMap<>();
 
-		private final Trace trace=tool(Trace.Factory);
+		private final Trace trace=tool(Trace.trace());
 
 
 		/**

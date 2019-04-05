@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -91,13 +91,19 @@ final class InferencerTest {
 	@Test void testField() {
 
 		assertImplies("field subjects are resources",
-				Field.field(RDF.VALUE), datatype(Form.ResourceType));
+				field(RDF.VALUE), datatype(Form.ResourceType));
+
+		assertImplies("field subjects are iris if explicitly typed",
+				and(field(RDF.VALUE), datatype(Form.IRIType)), datatype(Form.IRIType));
 
 		assertImplies("reverse field objects are resources",
-				Field.field(inverse(RDF.VALUE)), datatype(Form.ResourceType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
+				field(inverse(RDF.VALUE)), datatype(Form.ResourceType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
+
+		assertImplies("reverse field objects are iris if explicitly typed",
+				field(inverse(RDF.VALUE), datatype(Form.IRIType)), datatype(Form.IRIType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
 
 		assertImplies("both subject and object of a rdf:type field are resources",
-				Field.field(RDF.TYPE), datatype(Form.ResourceType),
+				field(RDF.TYPE), datatype(Form.ResourceType),
 				(s, i) -> and(field(s.getIRI(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",

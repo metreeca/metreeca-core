@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -23,7 +23,6 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
@@ -37,6 +36,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQueries;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -55,7 +55,22 @@ public final class Values {
 	/**
 	 * A pattern matching absolute IRIs.
 	 */
-	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^\\w+:\\S+$");
+	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^[^:/?#]+:.+$");
+
+	/**
+	 * A pattern matching IRI components.
+	 *
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
+	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
+	 */
+	public static final Pattern IRIPattern=Pattern.compile("^"
+			+ "(?<schemeall>(?<scheme>[^:/?#]+):)?"
+			+ "(?<hostall>//(?<host>[^/?#]*))?"
+			+ "(?<path>[^?#]*)"
+			+ "(?<queryall>\\?(?<query>[^#]*))?"
+			+ "(?<fragmentall>#(?<fragment>.*))?"
+			+"$"
+	);
 
 
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
@@ -103,11 +118,12 @@ public final class Values {
 
 	//// Accessors /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static boolean is(final Value value, final IRI type) {
-		return value != null && type(value).equals(type)
-				|| value instanceof Resource && Form.ResourceType.equals(type) // abstract resource datatype
-				|| value instanceof Literal && Form.LiteralType.equals(type) // abstract literal datatype
-				|| value instanceof Literal && RDFS.LITERAL.equals(type); // abstract resource datatype using rdfs: IRI
+	public static boolean is(final Value value, final IRI datatype) {
+		return value != null && (type(value).equals(datatype)
+				|| value instanceof Resource && Form.ResourceType.equals(datatype)
+				|| value instanceof Literal && Form.LiteralType.equals(datatype)
+				|| Form.ValueType.equals(datatype)
+		);
 	}
 
 	/**
@@ -127,6 +143,14 @@ public final class Values {
 		}
 
 		return !(iri instanceof Inverse);
+	}
+
+
+	public static Predicate<Statement> pattern(final Value subject, final Value predicate, final Value object) {
+		return statement
+				-> (subject == null || subject.equals(statement.getSubject()))
+				&& (predicate == null || predicate.equals(statement.getPredicate()))
+				&& (object == null || object.equals(statement.getObject()));
 	}
 
 
@@ -210,7 +234,7 @@ public final class Values {
 			throw new NullPointerException("null id");
 		}
 
-		return factory.createBNode(id);
+		return factory.createBNode(id.startsWith("_:")? id.substring(2) : id);
 	}
 
 
@@ -453,53 +477,61 @@ public final class Values {
 
 	///// Converters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static String iri(final Value value) {
-		return value instanceof IRI ? value.stringValue() : null;
+	public static Optional<String> iri(final Value value) {
+		return value instanceof IRI ? Optional.of(value.stringValue()) : Optional.empty();
 	}
 
 
-	public static BigInteger integer(final Value value) {
-		return value instanceof Literal ? ((Literal)value).integerValue() : null;
+	public static Optional<BigInteger> integer(final Value value) {
+		try {
+			return value instanceof Literal ? Optional.of(((Literal)value).integerValue()) : Optional.empty();
+		} catch ( final NumberFormatException e ) {
+			return Optional.empty();
+		}
 	}
 
-	public static BigDecimal decimal(final Value value) {
-		return value instanceof Literal ? ((Literal)value).decimalValue() : null;
+	public static Optional<BigDecimal> decimal(final Value value) {
+		try {
+			return value instanceof Literal ? Optional.of(((Literal)value).decimalValue()) : Optional.empty();
+		} catch ( final NumberFormatException e ) {
+			return Optional.empty();
+		}
 	}
 
 
-	public static Instant instant(final Value value) {
+	public static Optional<Instant> instant(final Value value) {
 
-		return value instanceof Literal ? instant((Literal)value) : null;
+		return value instanceof Literal ? instant((Literal)value) : Optional.empty();
 
 	}
 
-	public static Instant instant(final Literal literal) {
+	public static Optional<Instant> instant(final Literal literal) {
 		if ( literal == null ) {
 
-			return null;
+			return Optional.empty();
 
 		} else if ( literal.getDatatype().equals(XMLSchema.DATETIME) ) {
 
 			final DateTimeFormatter formatter=DateTimeFormatter.ISO_DATE_TIME;
 			final TemporalAccessor accessor=formatter.parse(literal.stringValue());
 
-			return Instant.from(accessor.isSupported(ChronoField.INSTANT_SECONDS)
+			return Optional.of(Instant.from(accessor.isSupported(ChronoField.INSTANT_SECONDS)
 					? Instant.from(accessor)
-					: LocalDateTime.from(accessor).atZone(ZoneId.systemDefault()));
+					: LocalDateTime.from(accessor).atZone(ZoneId.systemDefault())));
 
 		} else { // !!! review
 			throw new UnsupportedOperationException("unsupported temporal datatype ["+literal.getDatatype()+"]");
 		}
 	}
 
-	public static LocalDate localDate(final Value value) {
-		return value instanceof Literal ? localDate((Literal)value) : null;
+	public static Optional<LocalDate> localDate(final Value value) {
+		return value instanceof Literal ? localDate((Literal)value) : Optional.empty();
 	}
 
-	public static LocalDate localDate(final Literal value) { // !!! review/complete
-		return value != null && value.getDatatype().equals(XMLSchema.DATETIME)
+	public static Optional<LocalDate> localDate(final Literal value) { // !!! review/complete
+		return Optional.ofNullable(value != null && value.getDatatype().equals(XMLSchema.DATETIME)
 				? ISO_LOCAL_DATE_TIME.parse(value.stringValue()).query(TemporalQueries.localDate())
-				: null; // !!! review
+				: null); // !!! review
 	}
 
 

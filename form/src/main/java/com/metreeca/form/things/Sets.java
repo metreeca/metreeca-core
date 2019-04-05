@@ -1,35 +1,34 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.form.things;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.StreamSupport;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toSet;
 
 
+/**
+ * Set utilities.
+ */
 public final class Sets {
 
 	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,87 +42,45 @@ public final class Sets {
 	}
 
 	@SafeVarargs public static <V> Set<V> set(final V... items) {
-
-		if ( items == null ) {
-			throw new NullPointerException("null items");
-		}
-
-		return unmodifiableSet(new LinkedHashSet<>(asList(items)));
+		return items == null ? emptySet() : unmodifiableSet(Arrays
+				.stream(items)
+				.collect(toSet())
+		);
 	}
 
-	public static <V> Set<V> set(final Collection<V> items) {
-
-		if ( items == null ) {
-			throw new NullPointerException("null items");
-		}
-
-		return unmodifiableSet(new LinkedHashSet<>(items));
+	public static <V> Set<V> set(final Iterable<? extends V> items) {
+		return items == null ? emptySet() : unmodifiableSet(StreamSupport
+				.stream(items.spliterator(), false)
+				.collect(toSet())
+		);
 	}
 
 
 	//// Operators /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static <V> Set<V> union(final Set<V> x, final Set<V> y) {
-
-		if ( x == null ) {
-			throw new NullPointerException("null x");
-		}
-
-		if ( y == null ) {
-			throw new NullPointerException("null y");
-		}
-
-		final Set<V> union=new LinkedHashSet<>(x);
-
-		union.addAll(y);
-
-		return unmodifiableSet(union);
+	@SafeVarargs public static <V> Set<V> union(final Iterable<? extends V>... collections) {
+		return collections == null ? emptySet() : unmodifiableSet(Arrays
+				.stream(collections)
+				.filter(Objects::nonNull)
+				.flatMap(collection -> StreamSupport.stream(collection.spliterator(), false))
+				.collect(toSet())
+		);
 	}
 
-	@SafeVarargs public static <V> Set<V> union(final Collection<V>... collections) {
-
-		if ( collections == null ) {
-			throw new NullPointerException("null collections");
-		}
-
-		return unmodifiableSet((Set<V>)Stream.of(collections)
-				.map(collection -> requireNonNull(collection, "null collection"))
-				.flatMap(Collection::stream)
-				.collect(toCollection(LinkedHashSet::new)));
+	public static <V> Set<V> intersection(final Collection<? extends V> x, final Collection<? extends V> y) {
+		return x == null || y == null ? emptySet() : unmodifiableSet(x
+				.stream()
+				.filter(y::contains)
+				.collect(toSet())
+		);
 	}
 
-	public static <V> Set<V> intersection(final Set<V> x, final Set<V> y) {
-
-		if ( x == null ) {
-			throw new NullPointerException("null x");
-		}
-
-		if ( y == null ) {
-			throw new NullPointerException("null y");
-		}
-
-		final Set<V> intersection=new LinkedHashSet<>(x);
-
-		intersection.retainAll(y);
-
-		return unmodifiableSet(intersection);
-	}
-
-	public static <V> Set<V> complement(final Set<V> x, final Set<V> y) {
-
-		if ( x == null ) {
-			throw new NullPointerException("null x");
-		}
-
-		if ( y == null ) {
-			throw new NullPointerException("null y");
-		}
-
-		final Set<V> complement=new LinkedHashSet<>(x);
-
-		complement.removeAll(y);
-
-		return unmodifiableSet(complement);
+	public static <V> Set<V> complement(final Collection<? extends V> x, final Collection<? extends V> y) {
+		return x == null ? emptySet() : unmodifiableSet(x
+				.stream()
+				.filter(o -> y != null && !y.contains(o))
+				.collect(toSet())
+		);
 	}
 
 

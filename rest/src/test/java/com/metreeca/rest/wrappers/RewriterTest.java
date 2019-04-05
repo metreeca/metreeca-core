@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -22,9 +22,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.Codecs;
 import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -33,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Optional;
 
 import javax.json.Json;
 
@@ -41,16 +40,21 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Codecs.encode;
+import static com.metreeca.form.things.JsonValues.object;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.RequestAssert.assertThat;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.MultipartBody.multipart;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -111,7 +115,7 @@ final class RewriterTest {
 							.as("rewritten header")
 							.containsExactly("request="+internal("request"));
 
-					return request.reply(response -> response.status(Response.OK)
+					return request.reply(response -> response.status(OK)
 							.header("response", "response="+internal("response")));
 
 				}))
@@ -150,7 +154,7 @@ final class RewriterTest {
 							.as("rewritten encoded query")
 							.isEqualTo(encode(internal("request").toString()));
 
-					return request.reply(response -> response.status(Response.OK));
+					return request.reply(response -> response.status(OK));
 
 				}))
 
@@ -175,7 +179,7 @@ final class RewriterTest {
 					));
 
 					return request.reply(response -> response
-							.status(Response.OK)
+							.status(OK)
 							.shape(request.shape()));
 
 				}))
@@ -214,7 +218,7 @@ final class RewriterTest {
 							error -> fail("missing RDF payload")
 					);
 
-					return request.reply(response -> response.status(Response.OK)
+					return request.reply(response -> response.status(OK)
 							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
 
@@ -250,7 +254,7 @@ final class RewriterTest {
 							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
 					return request.reply(response -> response.
-							status(Response.OK)
+							status(OK)
 							.shape(TestShape)
 							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
@@ -266,11 +270,11 @@ final class RewriterTest {
 						.shape(TestShape)
 
 						.body(input(), () -> new ByteArrayInputStream(
-								Json.createObjectBuilder()
-										.add("p", "o")
-										.build()
+								object(entry("p", "o"))
 										.toString()
-										.getBytes(Codecs.UTF8))))
+										.getBytes(Codecs.UTF8)
+						))
+				)
 
 
 				.accept(response -> {
@@ -284,10 +288,10 @@ final class RewriterTest {
 
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
 										.as("rewritten response json")
-										.isEqualTo(Json.createObjectBuilder()
-												.add("this", External+"s")
-												.add("p", External+"o")
-												.build());
+										.isEqualTo(object(
+												entry("_this", "/s"),
+												entry("p", "/o")
+										));
 
 							},
 							error -> fail("missing output body")
@@ -297,31 +301,95 @@ final class RewriterTest {
 	}
 
 
+	@Test void testMergedMainPartRewriting() {
+		new Tray()
+
+				.get(() -> new Rewriter(Internal)
+
+						.wrap((Wrapper)handler -> request -> request.body(multipart(150, 300)).fold(
+
+								parts -> Optional.ofNullable(parts.get("main"))
+
+										.map(main -> {
+
+											assertThat(parts.keySet())
+													.containsExactly("main", "file");
+
+											return handler.handle(request.merge(main));
+
+										})
+
+										.orElseGet(() -> request.reply(new Failure()
+												.status(BadRequest)
+												.cause("missing main body part")
+										)),
+
+								request::reply
+
+						))
+
+						.wrap((Handler)request -> {
+
+							assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
+									.isIsomorphicTo(internal("s", "p", "o"))
+							);
+
+							return request.reply(response -> response.status(OK));
+
+						})
+				)
+
+				.handle(new Request()
+
+						.base(External)
+						.path("/s")
+
+						.header("Content-Type", "multipart/form-data; boundary=\"boundary\"")
+
+						.body(input(), () -> new ByteArrayInputStream(("--boundary\n"
+								+"Content-Disposition: form-data; name=\"main\"\n"
+								+"Content-Type: text/turtle\n"
+								+"\n"
+								+"<> <app://external/p> <app://external/o> .\n"
+								+"\n"
+								+"--boundary\t\t\n"
+								+"Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\n"
+								+"\n"
+								+"text\n"
+								+"--boundary--\n"
+						).replace("\n", "\r\n").getBytes(Codecs.UTF8))))
+
+				.accept(response -> assertThat(response).hasStatus(OK));
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testBodyFiltersShouldSeeInternalData() {
-		exec(() -> new Rewriter().base(Internal)
+		new Tray()
 
-				.wrap((Handler handler) -> (Request request) -> handler.handle(request)
-						.map(response -> response.pipe(rdf(), statements -> {
+				.exec(() -> new Rewriter(Internal)
 
-							// ;( assertThat(response).hasHeader("Location", Internal) causes SOE
+						.wrap((Handler handler) -> (Request request) -> handler.handle(request)
+								.map(response -> response.pipe(rdf(), statements -> {
 
-							assertThat(response.header("Location")).contains(Internal);
+									// ;( assertThat(response).hasHeader("Location", Internal) causes SOE
 
-							return Value(statements);
+									assertThat(response.header("Location")).contains(Internal);
 
-						}))
-				)
+									return Value(statements);
 
-				.wrap((Request request) -> request.reply(response -> response
-						.status(Response.OK)
-						.header("Location", Internal)
-						.body(rdf(), emptySet())))
+								}))
+						)
 
-				.handle(new Request().base(External))
+						.wrap((Request request) -> request.reply(response -> response
+								.status(Response.OK)
+								.header("Location", Internal)
+								.body(rdf(), emptySet())))
 
-				.accept(response -> assertThat(response).hasBodyThat(rdf())));
+						.handle(new Request().base(External))
+
+						.accept(response -> assertThat(response).hasBody(rdf())));
 	}
 
 }

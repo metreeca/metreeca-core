@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -34,6 +34,7 @@ public final class Response extends Message<Response> {
 	public static final int OK=200; // https://tools.ietf.org/html/rfc7231#section-6.3.1
 	public static final int Created=201; // https://tools.ietf.org/html/rfc7231#section-6.3.2
 	public static final int Accepted=202; // https://tools.ietf.org/html/rfc7231#section-6.3.3
+	public static final int NonAuthoritativeInformation=203; // https://tools.ietf.org/html/rfc7231#section-6.3.4
 	public static final int NoContent=204; // https://tools.ietf.org/html/rfc7231#section-6.3.5
 
 	public static final int MovedPermanently=301; // https://tools.ietf.org/html/rfc7231#section-6.4.2
@@ -45,6 +46,7 @@ public final class Response extends Message<Response> {
 	public static final int NotFound=404; // https://tools.ietf.org/html/rfc7231#section-6.5.4
 	public static final int MethodNotAllowed=405; // https://tools.ietf.org/html/rfc7231#section-6.5.5
 	public static final int Conflict=409; // https://tools.ietf.org/html/rfc7231#section-6.5.8
+	public static final int PayloadTooLarge=413; // https://tools.ietf.org/html/rfc7231#section-6.5.11
 	public static final int UnsupportedMediaType=415; // https://tools.ietf.org/html/rfc7231#section-6.5.13
 	public static final int UnprocessableEntity=422; // https://tools.ietf.org/html/rfc4918#section-11.2
 
@@ -80,6 +82,8 @@ public final class Response extends Message<Response> {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Retrieves the focus item IRI of this response.
 	 *
@@ -102,7 +106,7 @@ public final class Response extends Message<Response> {
 	}
 
 
-	/////////////////////////////////////////////////////////////////// ̰///////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Checks if this response is successful.

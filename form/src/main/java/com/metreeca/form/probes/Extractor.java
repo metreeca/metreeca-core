@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -20,9 +20,7 @@ package com.metreeca.form.probes;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.*;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -45,11 +43,11 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Extractor extends Traverser<Stream<Statement>> {
 
-	private final Collection<Value> focus;
+	private final Collection<Resource> focus;
 	private final Iterable<Statement> model;
 
 
-	public Extractor(final Iterable<Statement> model, final Collection<Value> focus) {
+	public Extractor(final Iterable<Statement> model, final Collection<? extends Resource> focus) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -82,8 +80,11 @@ public final class Extractor extends Traverser<Stream<Statement>> {
 				.filter(s -> focus.contains(source.apply(s)) && iri.equals(s.getPredicate()))
 				.collect(toList());
 
-		final Set<Value> focus=restricted.stream()
+		final Set<Resource> focus=restricted
+				.stream()
 				.map(target)
+				.filter(v -> v instanceof Resource)
+				.map( v -> (Resource)v)
 				.collect(toSet());
 
 		return Stream.concat(restricted.stream(), field.getShape().map(new Extractor(model, focus)));

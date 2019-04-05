@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.bodies.OutputBody.output;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;
@@ -48,7 +48,7 @@ import static java.lang.Boolean.parseBoolean;
  * SPARQL 1.1 Query/Update endpoint handler.
  *
  * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
- * Graph#Factory graph database}.</p>
+ * Graph#graph() graph database}.</p>
  *
  * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
  * role}, unless otherwise {@linkplain #publik(boolean) specified}; update operations are always restricted to users in
@@ -61,7 +61,7 @@ public final class SPARQL extends Delegator {
 	private int timeout=60; // endpoint operations timeout [s]
 	private boolean publik; // public availability of the endpoint
 
-	private final Graph graph=tool(Graph.Factory);
+	private final Graph graph=tool(Graph.graph());
 
 
 	public SPARQL() {

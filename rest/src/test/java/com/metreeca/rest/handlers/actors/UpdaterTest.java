@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -31,14 +31,13 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.function.Function;
 
-import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.ValuesTest.*;
-import static com.metreeca.form.truths.JSONAssert.assertThat;
+import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.HandlerAssert.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.tray.rdf.GraphTest.graph;
 
 
 final class UpdaterTest {
@@ -52,19 +51,19 @@ final class UpdaterTest {
 
 
 	private Function<Request, Request> body(final String rdf) {
-		return request -> request.body(input(), () -> Codecs.input(new StringReader(rdf)));
+		return request -> request.body(input(), () -> Codecs.input(new StringReader(turtle(rdf))));
 	}
 
 
 	@Nested final class Resource {
 
-		private Request request() {
+		private Request simple() {
 			return new Request()
 					.roles(Manager)
 					.method(Request.POST)
 					.base(Base)
 					.path("/employees/1370") // Gerard Hernandez
-					.map(body("@prefix : <http://example.com/terms#> . <>"
+					.map(body("<>"
 							+":forename 'Tino';"
 							+":surname 'Faussone';"
 							+":email 'tfaussone@example.com';"
@@ -79,7 +78,7 @@ final class UpdaterTest {
 			@Test void testUpdate() {
 				exec(() -> new Updater()
 
-						.handle(request())
+						.handle(simple())
 
 						.accept(response -> {
 
@@ -89,9 +88,8 @@ final class UpdaterTest {
 
 							assertThat(graph())
 
-									.as("graph updated")
-
-									.hasSubset(decode("@prefix : <http://example.com/terms#> . </employees/1370>"
+									.as("updated values inserted")
+									.hasSubset(decode("</employees/1370>"
 											+":forename 'Tino';"
 											+":surname 'Faussone';"
 											+":email 'tfaussone@example.com';"
@@ -99,8 +97,11 @@ final class UpdaterTest {
 											+":seniority 5 ."
 									))
 
-									.doesNotHaveStatement(item("employees/1370"), term("forename"), literal("Gerard"))
-									.doesNotHaveStatement(item("employees/1370"), term("surname"), literal("Hernandez"));
+									.as("previous values removed")
+									.doesNotHaveSubset(decode("</employees/1370>"
+											+":forename 'Gerard';"
+											+":surname 'Hernandez'."
+									));
 
 						}));
 			}
@@ -109,7 +110,7 @@ final class UpdaterTest {
 			@Test void testMalformedData() {
 				exec(() -> new Updater()
 
-						.handle(request().map(body("!!!")))
+						.handle(simple().map(body("!!!")))
 
 						.accept(response -> {
 
@@ -129,7 +130,7 @@ final class UpdaterTest {
 			@Test void testExceedingData() {
 				exec(() -> new Updater()
 
-						.handle(request().map(body("@prefix : <http://example.com/terms#>. <>"
+						.handle(simple().map(body("<>"
 								+" :forename 'Tino' ;"
 								+" :surname 'Faussone' ;"
 								+" :office <offices/1> . <offices/1> :value 'exceeding' ."
@@ -155,15 +156,15 @@ final class UpdaterTest {
 
 		@Nested final class Shaped {
 
-			private Request request() {
-				return Resource.this.request().shape(Employees);
+			private Request shaped() {
+				return simple().shape(Employees);
 			}
 
 
 			@Test void testUpdate() {
 				exec(() -> new Updater()
 
-						.handle(request())
+						.handle(shaped())
 
 						.accept(response -> {
 
@@ -173,8 +174,7 @@ final class UpdaterTest {
 
 							assertThat(graph())
 
-									.as("graph updated")
-
+									.as("updated values inserted")
 									.hasSubset(decode("</employees/1370>"
 											+":forename 'Tino';"
 											+":surname 'Faussone';"
@@ -183,8 +183,12 @@ final class UpdaterTest {
 											+":seniority 5 ."
 									))
 
-									.doesNotHaveStatement(item("employees/1370"), term("forename"), literal("Gerard"))
-									.doesNotHaveStatement(item("employees/1370"), term("surname"), literal("Hernandez"));
+
+									.as("previous values removed")
+									.doesNotHaveSubset(decode("</employees/1370>"
+											+":forename 'Gerard';"
+											+":surname 'Hernandez'."
+									));
 
 						}));
 			}
@@ -193,7 +197,7 @@ final class UpdaterTest {
 			@Test void testUnauthorized() {
 				exec(() -> new Updater()
 
-						.handle(request().roles(Form.none))
+						.handle(shaped().roles(Form.none))
 
 						.accept(response -> {
 
@@ -211,7 +215,7 @@ final class UpdaterTest {
 			@Test void testForbidden() {
 				exec(() -> new Updater()
 
-						.handle(request().user(RDF.NIL).roles(Form.none))
+						.handle(shaped().user(RDF.NIL).roles(Form.none))
 
 						.accept(response -> {
 
@@ -229,7 +233,7 @@ final class UpdaterTest {
 			@Test void testMalformedData() {
 				exec(() -> new Updater()
 
-						.handle(request().map(body("!!!")))
+						.handle(shaped().map(body("!!!")))
 
 						.accept(response -> {
 
@@ -248,7 +252,7 @@ final class UpdaterTest {
 			@Test void testInvalidData() {
 				exec(() -> new Updater()
 
-						.handle(request().map(body("@prefix : <http://example.com/terms#>. <employees/1370>"
+						.handle(shaped().map(body("<employees/1370>"
 								+":forename 'Tino';"
 								+":surname 'Faussone';"
 								+":email 'tfaussone@example.com' ;"
@@ -272,7 +276,7 @@ final class UpdaterTest {
 			@Test void testRestrictedData() {
 				exec(() -> new Updater()
 
-						.handle(request().roles(Salesman))
+						.handle(shaped().roles(Salesman))
 
 						.accept(response -> {
 
@@ -295,7 +299,7 @@ final class UpdaterTest {
 
 	@Nested final class Container {
 
-		private Request request() {
+		private Request simple() {
 			return new Request()
 					.roles(Manager)
 					.method(Request.POST)
@@ -304,18 +308,46 @@ final class UpdaterTest {
 					.map(body("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>. <> rdfs:label 'Updated!'."));
 		}
 
-		@Test void testUpdate() {
-			exec(() -> new Updater()
 
-					.handle(request())
+		@Nested final class Simple {
 
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.NotImplemented)
-							.hasBody(json(), json -> assertThat(json)
-									.hasField("cause")
-							)
-					)
-			);
+			@Test void testNotImplemented() {
+				exec(() -> new Updater()
+
+						.handle(simple())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
+
+		}
+
+		@Nested final class Shaped {
+
+			private Request shaped() {
+				return simple().shape(Employees);
+			}
+
+
+			@Test void testNotImplemented() {
+				exec(() -> new Updater()
+
+						.handle(shaped())
+
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.NotImplemented)
+								.hasBody(json(), json -> assertThat(json)
+										.hasField("cause")
+								)
+						)
+				);
+			}
+
 		}
 
 	}

@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -26,9 +26,9 @@ import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.Optional;
 
-import static com.metreeca.form.Shape.empty;
-import static com.metreeca.form.shapes.And.pass;
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.form.shapes.Memoizing.memoizing;
+import static com.metreeca.rest.bodies.TextBody.text;
 
 
 /**
@@ -84,7 +84,7 @@ public final class Driver implements Wrapper {
 	 * Creates a content driver.
 	 *
 	 * @param shape the shape driving the lifecycle of the linked data resources managed by the wrapped handler
-	 **
+	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
 	public Driver(final Shape shape) {
@@ -93,7 +93,7 @@ public final class Driver implements Wrapper {
 			throw new NullPointerException("null shape");
 		}
 
-		this.shape=shape.map(new Optimizer());
+		this.shape=memoizing(shape.map(new Optimizer())); // shape is going to be reused for each request
 	}
 
 
@@ -112,7 +112,7 @@ public final class Driver implements Wrapper {
 
 		// !!! handle HEAD requests on ?specs (delegate to Worker)
 
-		return !shape.equals(pass()) && request.method().equals(Request.GET) && request.query().equals(SpecsQuery)
+		return !pass(shape) && request.method().equals(Request.GET) && request.query().equals(SpecsQuery)
 
 				? Optional.of(request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", "text/plain")
@@ -123,11 +123,11 @@ public final class Driver implements Wrapper {
 
 
 	private Request before(final Request request) {
-		return shape.equals(pass()) ? request : request.shape(shape);
+		return request.shape(shape);
 	}
 
 	private Response after(final Response response) {
-		return shape.equals(pass()) ? response : response.header("+Link", String.format(
+		return pass(shape) ? response : response.header("+Link", String.format(
 				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, LDP.CONSTRAINED_BY
 		));
 	}

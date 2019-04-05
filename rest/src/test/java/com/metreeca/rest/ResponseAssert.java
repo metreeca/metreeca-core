@@ -1,33 +1,33 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest;
 
 import com.metreeca.form.things.Codecs;
-import com.metreeca.rest.formats.TextFormat;
 
 import java.io.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.rest.bodies.TextBody.text;
 
 
 public final class ResponseAssert extends MessageAssert<ResponseAssert, Response> {
@@ -36,15 +36,48 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 		if ( response != null ) {
 
-			final Cache cache=new Cache(response);
+			response.pipe(output(), output -> Result.Value(new Consumer<Supplier<OutputStream>>() { // cache output
 
-			if ( !response.body(input()).value().isPresent() ) {
-				response.body(input(), cache::input); // cache binary body
-			}
+				private byte[] data;
 
-			if ( !response.body(reader()).value().isPresent() ) {
-				response.body(reader(), cache::reader); // cache textual body
-			}
+				@Override public void accept(final Supplier<OutputStream> supplier) {
+
+					if ( data == null ) {
+
+						try (final ByteArrayOutputStream out=new ByteArrayOutputStream(1000)) {
+
+							output.accept(() -> out);
+
+							data=out.toByteArray();
+
+						} catch ( final IOException e ) {
+							throw new UncheckedIOException(e);
+						}
+					}
+
+					try (final OutputStream out=supplier.get()) {
+
+						Codecs.data(out, data);
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				}
+
+			}));
+
+			response.body(input(), output().map(output -> () -> { // make output readable for testing purposes
+				try (final ByteArrayOutputStream out=new ByteArrayOutputStream(1000)) {
+
+					output.accept(() -> out);
+
+					return new ByteArrayInputStream(out.toByteArray());
+
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+			}));
+
 
 			final StringBuilder builder=new StringBuilder(2500);
 
@@ -56,14 +89,16 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 			builder.append('\n');
 
-			response.body(TextFormat.text()).use(text -> {
+			response.body(text()).value().ifPresent(text -> {
 				if ( !text.isEmpty() ) {
 
 					final int limit=builder.capacity();
 
-					builder.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮").append("\n\n");
+					builder
+							.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮")
+							.append("\n\n");
 				}
-			}, failure -> {});
+			});
 
 			Logger.getLogger(response.getClass().getName()).log(
 					response.success() ? Level.INFO : Level.WARNING,
@@ -106,75 +141,6 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 		}
 
 		return this;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class Cache {
-
-		private final Response response;
-
-		private byte[] data;
-		private String text;
-
-
-		private Cache(final Response response) {
-			this.response=response;
-		}
-
-
-		private ByteArrayInputStream input() {
-
-			final byte[] data=data();
-			final String text=text();
-
-			return new ByteArrayInputStream(data.length == 0 ? text.getBytes(Codecs.UTF8) : data);
-		}
-
-		private StringReader reader() {
-
-			final String text=text();
-			final byte[] data=data();
-
-			return new StringReader(text.isEmpty() ? new String(data, Codecs.UTF8) : text);
-		}
-
-
-		private String text() {
-
-			if ( text == null ) {
-				try (final StringWriter buffer=new StringWriter()) {
-
-					response.body(writer()).use(consumer -> consumer.accept(() -> buffer), failure -> {});
-
-					text=buffer.toString();
-
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
-				}
-			}
-
-			return text;
-		}
-
-		private byte[] data() {
-
-			if ( data == null ) {
-				try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
-
-					response.body(output()).use(consumer -> consumer.accept(() -> buffer), failure -> {});
-
-					data=buffer.toByteArray();
-
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
-				}
-			}
-
-			return data;
-		}
-
 	}
 
 }

@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -29,11 +29,12 @@ import static com.metreeca.form.Shape.optional;
 import static com.metreeca.form.Shape.required;
 import static com.metreeca.form.Shape.role;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Memoizing.memoizing;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.bodies.TextBody.text;
 
 
 final class DriverTest {
@@ -83,7 +84,9 @@ final class DriverTest {
 
 				.wrap((Handler)request -> {
 
-					assertThat(request).hasShape(TestShape);
+					assertThat(request)
+							.as("memoizing shape")
+							.hasShape(memoizing(TestShape));
 
 					return request.reply(response -> response.header("link", "existing"));
 

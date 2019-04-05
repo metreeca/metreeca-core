@@ -1,24 +1,24 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest;
 
 import com.metreeca.form.*;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.rest.bodies.JSONBody;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -27,7 +27,7 @@ import java.util.function.Function;
 
 import javax.json.*;
 
-import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.things.Values.format;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.groupingBy;
  * HTTP processing failure.
  *
  * <p>Reports an error condition in an HTTP request processing operation; can be {@linkplain #apply(Response)
- * transferred} to the {@linkplain JSONFormat JSON} body of an HTTP response like:</p>
+ * transferred} to the {@linkplain JSONBody JSON} body of an HTTP response like:</p>
  *
  * <pre>{@code
  * <status>
@@ -198,7 +198,7 @@ public final class Failure implements Function<Response, Response> {
 		// !!! rewrite references to external base IRI
 		// !!! support other formats with content negotiation
 
-		return trace(json(focus));
+		return trace(json(focus.prune(Issue.Level.Warning)));
 	}
 
 
@@ -222,7 +222,7 @@ public final class Failure implements Function<Response, Response> {
 		return response
 				.status(status)
 				.cause(cause)
-				.body(JSONFormat.json(), ticket());
+				.body(JSONBody.json(), ticket());
 	}
 
 
@@ -315,7 +315,7 @@ public final class Failure implements Function<Response, Response> {
 	}
 
 	private JsonString json(final Issue issue) {
-		return Json.createValue(issue.getMessage()+(issue.getShape().equals(pass()) ? "" : " : "+issue.getShape()));
+		return Json.createValue(issue.getMessage()+(pass(issue.getShape()) ? "" : " : "+issue.getShape()));
 	}
 
 

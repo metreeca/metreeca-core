@@ -3,17 +3,17 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Copyright © 2013-2019 Metreeca srl. All rights reserved.
 
-  This file is part of Metreeca.
+  This file is part of Metreeca/Link.
 
-  Metreeca is free software: you can redistribute it and/or modify it under the terms
+  Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
   of the GNU Affero General Public License as published by the Free Software Foundation,
   either version 3 of the License, or(at your option) any later version.
 
-  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License along with Metreeca.
+  You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
   If not, see <http://www.gnu.org/licenses/>.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
@@ -24,7 +24,7 @@
 
 	<groupId>com.metreeca</groupId>
 	<artifactId>link</artifactId>
-	<version>0.0.0-SNAPSHOT</version>
+	<version>0.50.0</version>
 	<packaging>pom</packaging>
 
 	<name>Metreeca Linked Data Framework</name>
@@ -92,15 +92,18 @@
 		<module>j2ee</module>
 
 		<module>rest</module>
-		<module>tray</module>
+		<module>gate</module>
 		<module>form</module>
+		<module>tray</module>
+
+		<module>kits</module>
 
 	</modules>
 
 	<properties>
 
 		<java.version>1.8</java.version>
-		<rdf4j.version>2.4.4</rdf4j.version>
+		<rdf4j.version>2.5.0</rdf4j.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -127,10 +130,10 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
+		<dependency> <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.11.1</version>
+			<version>3.12.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -156,13 +159,42 @@
 
 		</resources>
 
+
 		<plugins>
+
+			<plugin> <!-- https://maven.apache.org/enforcer/maven-enforcer-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.0.0-M2</version>
+
+				<executions>
+					<execution>
+
+						<id>enforce-maven</id>
+
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.3</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+
+					</execution>
+				</executions>
+
+			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-compiler-plugin -->
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.0</version>
 
 				<configuration>
 
@@ -177,7 +209,7 @@
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.1</version>
 
 				<configuration>
 
@@ -227,7 +259,7 @@
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.0</version>
 
 				<configuration>
 
@@ -258,7 +290,7 @@
 
 						<configuration>
 
-							<reportOutputDirectory>${project.build.directory}/generated-docs</reportOutputDirectory>
+							<reportOutputDirectory>${project.basedir}/docs/javadocs</reportOutputDirectory>
 							<destDir>javadocs</destDir>
 
 							<groups>
@@ -271,12 +303,20 @@
 									<packages>com.metreeca.rest*</packages>
 								</group>
 								<group>
+									<title>REST IAM Framework</title>
+									<packages>com.metreeca.gate*</packages>
+								</group>
+								<group>
 									<title>Shapes Framework</title>
 									<packages>com.metreeca.form*</packages>
 								</group>
 								<group>
 									<title>Tooling Framework</title>
 									<packages>com.metreeca.tray*</packages>
+								</group>
+								<group>
+									<title>Tooling Kits</title>
+									<packages>com.metreeca.kits*</packages>
 								</group>
 							</groups>
 
@@ -290,53 +330,6 @@
 
 			</plugin>
 
-			<plugin> <!-- report https://maven.apache.org/plugins/maven-resources-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
-
-				<executions>
-					<execution>
-
-						<id>copy-version-docs</id>
-						<phase>post-site</phase>
-						<inherited>false</inherited>
-
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-
-						<configuration>
-
-							<outputDirectory>${project.build.directory}/docs/</outputDirectory>
-							<overwrite>true</overwrite>
-
-							<resources>
-
-								<resource> <!-- static docs -->
-									<directory>${project.basedir}/docs/</directory>
-									<filtering>true</filtering>
-									<excludes> <!-- ignore local jekyll testing leftovers -->
-										<exclude>_site/**/*</exclude>
-										<exclude>.jekyll-metadata</exclude>
-										<exclude>Gemfile.lock</exclude>
-									</excludes>
-								</resource>
-
-								<resource> <!-- generated docs -->
-									<directory>${project.build.directory}/generated-docs</directory>
-									<filtering>true</filtering>
-								</resource>
-
-							</resources>
-
-						</configuration>
-
-					</execution>
-				</executions>
-
-			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-site-plugin -->
 
@@ -348,22 +341,9 @@
 
 					<skipDeploy>true</skipDeploy> <!-- ;( manual deployment -->
 
-					<stagingDirectory>${maven.multiModuleProjectDirectory}/target/docs/reports</stagingDirectory>
+					<stagingDirectory>${maven.multiModuleProjectDirectory}/docs/reports</stagingDirectory>
 
 				</configuration>
-
-				<executions>
-					<execution>
-
-						<id>collect-module-reports</id>
-						<phase>post-site</phase>
-
-						<goals>
-							<goal>stage</goal>
-						</goals>
-
-					</execution>
-				</executions>
 
 			</plugin>
 
@@ -492,37 +472,6 @@
 							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
-
-					</plugin>
-
-					<plugin> <!-- http://maven.apache.org/plugins/maven-scm-publish-plugin/ -->
-
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-scm-publish-plugin</artifactId>
-						<version>3.0.0</version>
-
-						<configuration>
-							<pubScmUrl>scm:git:https://github.com/metreeca/link.git</pubScmUrl>
-							<scmBranch>gh-pages</scmBranch>
-							<serverId>github</serverId>
-							<content>${project.build.directory}/docs</content>
-							<siteOutputEncoding>${project.build.sourceEncoding}</siteOutputEncoding>
-							<checkinComment>Deploy v${project.version} docs</checkinComment>
-						</configuration>
-
-						<executions>
-							<execution>
-
-								<id>deploy-docs</id>
-								<inherited>false</inherited>
-								<phase>site-deploy</phase>
-
-								<goals>
-									<goal>publish-scm</goal>
-								</goals>
-
-							</execution>
-						</executions>
 
 					</plugin>
 

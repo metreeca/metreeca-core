@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -20,7 +20,7 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.form.Focus;
 import com.metreeca.form.Issue;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Statement;
 
@@ -30,7 +30,7 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Validating preprocessor.
  *
- * <p>Applies custom validation {@linkplain #Validator(Collection) rules} to the {@linkplain RDFFormat RDF payload} of
+ * <p>Applies custom validation {@linkplain #Validator(Collection) rules} to the {@linkplain RDFBody RDF payload} of
  * incoming requests.</p>
  */
 public final class Validator implements Wrapper {
@@ -59,7 +59,7 @@ public final class Validator implements Wrapper {
 	 * error}, the request fails with a {@link Response#UnprocessableEntity} status code; otherwise, the request is
 	 * routed to the wrapped handler.</p>
 	 *
-	 * @param rules the custom validation rules to be applied to the {@linkplain RDFFormat RDF payload} of incoming
+	 * @param rules the custom validation rules to be applied to the {@linkplain RDFBody RDF payload} of incoming
 	 *              requests
 	 *
 	 * @throws NullPointerException if {@code rules} is null or contains null values

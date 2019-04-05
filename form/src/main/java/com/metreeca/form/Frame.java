@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -34,10 +34,12 @@ import static com.metreeca.form.things.Values.statement;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
- * Value shape validation report.
+ * Shape value validation report.
  */
 public final class Frame {
 
@@ -127,6 +129,37 @@ public final class Frame {
 
 		return issues.stream().anyMatch(issue -> issue.assess(limit))
 				|| fields.values().stream().anyMatch(trace -> trace.assess(limit));
+	}
+
+	/**
+	 * Removes issues and fields below a target severity level.
+	 *
+	 * @param limit the minimum severity level to be retained
+	 *
+	 * @return a copy of this report retaining only issues and fields reaching the severity {@code limit}
+	 *
+	 * @throws NullPointerException if {@code limit} is null
+	 */
+	public Frame prune(final Issue.Level limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		return new Frame(value,
+
+				issues.stream()
+						.filter(issue -> issue.assess(limit))
+						.collect(toSet()),
+
+				fields.entrySet().stream()
+						.filter(entry -> entry.getValue().assess(limit))
+						.collect(toMap(
+								Map.Entry::getKey,
+								e -> e.getValue().prune(limit)
+						))
+
+		);
 	}
 
 	/**

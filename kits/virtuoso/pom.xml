@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Copyright © 2013-2019 Metreeca srl. All rights reserved.
+
+  This file is part of Metreeca/Link.
+
+  Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+  of the GNU Affero General Public License as published by the Free Software Foundation,
+  either version 3 of the License, or(at your option) any later version.
+
+  Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+  If not, see <http://www.gnu.org/licenses/>.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metreeca</groupId>
+        <artifactId>kits</artifactId>
+        <version>0.50.0</version>
+    </parent>
+
+    <artifactId>virtuoso</artifactId>
+    <version>0.50.0</version>
+
+	<name>Metreeca Virtuoso Tooling Kit</name>
+	<description>Adapter kit for OpenLink Virtuoso.</description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>virtuoso.openlinksw.com</groupId>
+            <artifactId>rdf4j-provider</artifactId>
+            <version>2.2-20180514</version>
+        </dependency>
+
+        <dependency>
+            <groupId>virtuoso.openlinksw.com</groupId>
+            <artifactId>jdbc-driver</artifactId>
+            <version>4.0</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin> <!-- http://maven.apache.org/plugins/maven-install-plugin/install-file-mojo.html -->
+
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.1</version>
+
+                <executions>
+
+                    <execution>
+
+                        <!-- install virtuoso RDF4J provider in the local maven repository -->
+                        <!-- download stable jars from http://vos.openlinksw.com/owiki/wiki/VOS/VOSDownload#For%20RDF4J%202.x -->
+                        <!-- download develop jars from https://github.com/openlink/virtuoso-opensource/tree/develop/7/binsrc/rdf4j -->
+
+                        <id>install-virtuoso-rdf4j-provider</id>
+                        <phase>validate</phase>
+
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+
+                        <configuration>
+
+                            <file>lib/virtuoso-rdf4j-2.2-20180514.jar</file>
+                            <pomFile>lib/virtuoso-rdf4j-2.2-20180514.pom.xml</pomFile>
+
+                        </configuration>
+
+                    </execution>
+
+                    <execution>
+
+                        <id>install-virtuoso-jdbc-driver</id>
+                        <phase>validate</phase>
+
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+
+                        <configuration>
+
+                            <file>lib/virtuoso-jdbc-4.0.jar</file>
+                            <pomFile>lib/virtuoso-jdbc-4.0.pom.xml</pomFile>
+
+                        </configuration>
+
+                    </execution>
+
+                </executions>
+
+            </plugin>
+
+            <plugin> <!-- https://maven.apache.org/plugins/maven-dependency-plugin -->
+
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+
+                <executions>
+                    <execution>
+
+                        <!-- copy local dependencies to the main jar -->
+
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+
+                        <configuration>
+
+                            <includeGroupIds>virtuoso.openlinksw.com</includeGroupIds>
+                            <includeScope>runtime</includeScope>
+
+                            <outputDirectory>${project.build.directory}/classes/</outputDirectory>
+
+                        </configuration>
+
+                    </execution>
+                </executions>
+
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

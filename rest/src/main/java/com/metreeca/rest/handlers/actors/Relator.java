@@ -1,70 +1,73 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
+import com.metreeca.form.Query;
 import com.metreeca.form.Shape;
+import com.metreeca.form.queries.Edges;
+import com.metreeca.form.queries.Items;
+import com.metreeca.form.queries.Stats;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.RDFFormat;
+import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Actor;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.rest.Message.link;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
-import static com.metreeca.rest.wrappers.Throttler.entity;
-import static com.metreeca.rest.wrappers.Throttler.resource;
-
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.form.things.Shapes.container;
+import static com.metreeca.form.things.Shapes.resource;
 
 
 /**
  * LDP resource relator.
  *
  * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item() focus
- * item}.</p>
+ * item}, according to the following operating modes.</p>
  *
  * <p>If the focus item is a {@linkplain Request#container() container} and the request includes an expected
  * {@linkplain Request#shape() shape}:</p>
  *
  * <ul>
  *
- * <li>the response includes the derived shape actually used in the {@linkplain Engine#browse(IRI) browsing} process,
- * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#convey}
- * mode and {@link Form#digest} view;</li>
+ * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
+ * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#convey} mode and {@link Form#digest}
+ * view;</li>
  *
- * <li>the response {@linkplain RDFFormat RDF body} includes the RDF description of the container as matched by the
- * {@linkplain Throttler#container() container section} of redacted shape, linked using the {@code ldp:contains}
- * property to the RDF description of the container items matched by the {@linkplain Throttler#resource() resource
+ * <li>the response {@linkplain RDFBody RDF body} includes the RDF description of the container as matched by the
+ * {@linkplain Shapes#container(Shape) container section} of redacted shape, linked using the {@code ldp:contains}
+ * property to the RDF description of the container items matched by the {@linkplain Shapes#resource(Shape) resource
  * section} of redacted shape;</li>
  *
  * <li>contained items are selected as required by the LDP container profile {@linkplain
@@ -79,7 +82,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>the response {@linkplain RDFFormat RDF body} includes the symmetric concise bounded description of the
+ * <li>the response {@linkplain RDFBody RDF body} includes the symmetric concise bounded description of the
  * container, linked using the {@code ldp:contains} property to the symmetric concise bounded description of the
  * container items, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced
  * IRIs;</li>
@@ -104,11 +107,11 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>the response includes the derived shape actually used in the {@linkplain Engine#relate(IRI) retrieval} process,
- * redacted according to request user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail}
- * view and {@link Form#convey} mode;</li>
+ * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
+ * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail} view and {@link Form#convey}
+ * mode;</li>
  *
- * <li>the response {@link RDFFormat RDF body} contains the RDF description of the request focus, as matched by the
+ * <li>the response {@link RDFBody RDF body} contains the RDF description of the request focus, as matched by the
  * redacted request shape.</li>
  *
  * </ul>
@@ -117,12 +120,12 @@ import static java.util.stream.Collectors.toList;
  *
  * <ul>
  *
- * <li>the response {@link RDFFormat RDF body} contains the symmetric concise bounded description of the request focus
+ * <li>the response {@link RDFBody RDF body} contains the symmetric concise bounded description of the request focus
  * item, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced IRIs;</li>
  *
  * </ul>
  *
- * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#Factory graph}
+ * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#graph() graph}
  * database.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
@@ -155,8 +158,8 @@ public final class Relator extends Actor {
 
 	private Wrapper throttler() {
 		return wrapper(Request::container,
-				new Throttler(Form.relate, Form.digest, entity()),
-				new Throttler(Form.relate, Form.detail, resource())
+				new Throttler(Form.relate, Form.digest, Shapes::entity),
+				new Throttler(Form.relate, Form.detail, Shapes::resource)
 		);
 	}
 
@@ -164,75 +167,107 @@ public final class Relator extends Actor {
 		return request -> request.reply(response -> {
 
 			final IRI item=request.item();
+			final Shape shape=request.shape();
 
 			final boolean resource=!request.container();
 			final boolean minimal=include(request, LDP.PREFER_MINIMAL_CONTAINER);
-			final boolean total=request.query().isEmpty();
-
-			final Engine engine=engine(request.shape());
+			final boolean filtered=!request.query().isEmpty();
 
 			if ( resource || minimal ) {
 
-				// !!! 410 Gone if previously known
+				return filtered ? response.map(new Failure()
 
-				return engine
+						.status(Response.NotImplemented)
+						.cause("resource filtered retrieval not supported")
 
-						.relate(item, request::query, (shape, model) -> response
+				) : request.query(resource(item, shape)).fold(
 
-								.status(resource && total && model.isEmpty() ? NotFound : OK)
+						query -> {
 
-								.header("+Preference-Applied",
-										minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
-								)
+							final Collection<Statement> model=relate(item, query);
 
-								.shape(shape)
-								.body(rdf(), model)
+							return response
 
-						)
+									.status(resource && model.isEmpty() ? NotFound : OK) // !!! 410 Gone if previously known
 
-						.fold(
-								identity(),
-								response::map
-						);
+									.header("+Preference-Applied",
+											minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
+									)
+
+									.shape(query.map(new Query.Probe<Shape>() {
+
+										@Override public Shape probe(final Edges edges) {
+											return edges.getShape(); // !!! add ldp:contains if edges.path is not empty
+										}
+
+										@Override public Shape probe(final Stats stats) {
+											return Stats.Shape;
+										}
+
+										@Override public Shape probe(final Items items) {
+											return Items.Shape;
+										}
+
+									}))
+
+									.body(rdf(), model);
+
+						},
+
+						response::map
+
+				);
 
 			} else {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+				return request.query(container(item, resource(shape))).fold(
 
-				return engine
+						query -> {
 
-						.browse(item, request::query, (rshape, rmodel) -> {
+							final Collection<Statement> matches=relate(item, query);
 
-							if ( total ) { // retrieve container description
-
-								return engine
-
-										.relate(item, shape -> Value(edges(shape)), (cshape, cmodel) -> response
-												.status(OK)
-												.shape(and(cshape, rshape))
-												.body(rdf(), Stream
-														.concat(cmodel.stream(), rmodel.stream())
-														.collect(toList())
-												)
-										)
-
-										.fold(identity(), unexpected -> response);
-
-							} else {
+							if ( filtered ) { // matches only
 
 								return response
 										.status(OK)
-										.shape(rshape)
-										.body(rdf(), rmodel);
+										.shape(query.map(new Query.Probe<Shape>() {
+
+											@Override public Shape probe(final Edges edges) {
+												return field(LDP.CONTAINS, edges.getShape());
+											}
+
+											@Override public Shape probe(final Stats stats) {
+												return Stats.Shape;
+											}
+
+											@Override public Shape probe(final Items items) {
+												return Items.Shape;
+											}
+
+										}))
+										.body(rdf(), matches);
+
+							} else { // include container description
+
+								// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+
+								return response
+										.status(OK)
+										.shape(shape)
+										.body(rdf(), concat(
+												matches,
+												relate(item, edges(resource(item, container(shape))))
+										));
 
 							}
 
-						}).fold(
-								identity(),
-								response::map
-						);
+						},
+
+						response::map
+
+				);
 
 			}
 

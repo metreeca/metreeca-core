@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -39,7 +39,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 /**
  * Graph connection manager.
  *
- * <p>Executes wrapped handlers inside a shared connection to the the system {@linkplain Graph#Factory graph
+ * <p>Executes wrapped handlers inside a shared connection to the the system { ̰ graph
  * database}.</p>
  *
  * <p>If the incoming request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single
@@ -82,7 +82,7 @@ public final class Connector implements Wrapper {
 
 		}
 
-		final Graph graph=tool(Graph.Factory);
+		final Graph graph=tool(Graph.graph());
 
 		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.update(connection -> {
 
@@ -131,7 +131,7 @@ public final class Connector implements Wrapper {
 
 		}
 
-		final Graph graph=tool(Graph.Factory);
+		final Graph graph=tool(Graph.graph());
 
 		return update.isEmpty() ? (message, model) -> model : (message, model) -> graph.update(connection -> {
 
@@ -293,7 +293,7 @@ public final class Connector implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Graph graph=tool(Graph.Factory);
+	private final Graph graph=tool(Graph.graph());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

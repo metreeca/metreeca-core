@@ -1,33 +1,35 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.And;
+import com.metreeca.form.probes.Evaluator;
+import com.metreeca.rest.bodies.MultipartBody;
 
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.things.Lists.concat;
 import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.Value;
@@ -45,14 +47,15 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
  *
- * <p>Messages are associated with possibly multiple {@linkplain #body(Format) body} representations managed by message
- * body {@linkplain Format formats}.</p>
+ * <p>Messages are associated with possibly multiple {@linkplain #body(Body) body} representations managed by message
+ * body {@linkplain Body formats}.</p>
  *
  * @param <T> the self-bounded message type supporting fluent setters
  */
 @SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {
 
+	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b");
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 
 
@@ -86,12 +89,14 @@ public abstract class Message<T extends Message<T>> {
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
 
-	private final Map<Format<?>, Object> cache=new HashMap<>();
-	private final Map<Format<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
+	private final Map<Body<?>, Object> cache=new HashMap<>();
+	private final Map<Body<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
 
 
 	private T self() { return (T)this; }
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the focus item IRI of this message.
@@ -129,6 +134,77 @@ public abstract class Message<T extends Message<T>> {
 		return requireNonNull(mapper.apply(self()), "null mapper return value");
 	}
 
+	/**
+	 * Merge a message into this message.
+	 *
+	 * <p>Mainly intended to be used inside wrappers to lift for further downstream processing the main message part in
+	 * {@linkplain MultipartBody multipart} requests, as for instance in:</p>
+	 *
+	 * <pre>{@code handler -> request -> request.body(multipart(1000, 10_000)).fold(
+	 *
+	 *     parts -> Optional.ofNullable(parts.get("main"))
+	 *
+	 *         .map(main -> {
+	 *
+	 *           ... // process ancillary body parts
+	 *
+	 *           return handler.handle(request.merge(main));
+	 *
+	 *         })
+	 *
+	 *         .orElseGet(() -> request.reply(new Failure()
+	 *             .status(BadRequest)
+	 *             .cause("missing main body part")
+	 *         )),
+	 *
+	 *     request::reply
+	 *
+	 * )}</pre>
+	 *
+	 * @param message the source message to be merged into this message
+	 *
+	 * @return this message modified as follows:
+	 * <ul>
+	 * <li>source message headers are copied to this message overriding existing values;</li>
+	 * <li>source message body representations are copied to this message overriding existing values;</li>
+	 * <li>body representations cached in this message are discarded</li>
+	 * </ul>
+	 *
+	 * @throws NullPointerException if {@code message} is null
+	 */
+	public T merge(final Message<?> message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		headers.putAll(message.headers); // value lists are read-only
+
+		cache.clear();
+		pipes.putAll(message.pipes);
+
+		return self();
+	}
+
+	/**
+	 * Creates a linked message.
+	 *
+	 * @param item the IRI identifying the {@linkplain #item() focus item} of the new linked message
+	 *
+	 * @return a new linked message with a focus item identified by {@code item} and the same {@linkplain #request()
+	 * originating request} as this message
+	 *
+	 * @throws NullPointerException if {@code item} is null
+	 */
+	public Message<?> link(final IRI item) {
+
+		if ( item == null ) {
+			throw new NullPointerException("null item");
+		}
+
+		return new Part(item, this);
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -142,6 +218,19 @@ public abstract class Message<T extends Message<T>> {
 		return Stream.of(headers("accept"), headers("content-type"))
 				.flatMap(Collection::stream)
 				.anyMatch(value -> HTMLPattern.matcher(value).find());
+	}
+
+	/**
+	 * Retrieves the character encoding of this message.
+	 *
+	 * @return the character encoding set in the {@code Content-Type} header of this message; empty if this message
+	 * doesn't include a  {@code Content-Type} header or if no character encoding is explicitly set
+	 */
+	public Optional<String> charset() {
+		return header("Content-Type")
+				.map(CharsetPattern::matcher)
+				.filter(Matcher::find)
+				.map(matcher -> matcher.group("charset"));
 	}
 
 
@@ -339,7 +428,7 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the linked data shape.
 	 *
-	 * @return the linked data shape associated to this message; defaults to the {@linkplain And#pass() wildcard}
+	 * @return the linked data shape associated to this message; defaults to the {@linkplain Evaluator#pass() wildcard}
 	 * shape
 	 */
 	public Shape shape() {
@@ -370,27 +459,27 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves a body representation.
 	 *
-	 * @param format the body format managing the body representation to be retrieved
-	 * @param <V>    the type of the body representation managed by {@code format}
+	 * @param body the body format managing the body representation to be retrieved
+	 * @param <V>  the type of the body representation managed by {@code body}
 	 *
-	 * @return a result providing access to the body representation managed by {@code format}, if one was successfully
-	 * retrieved from this message; a result providing access to the format processing failure, otherwise
+	 * @return a result providing access to the body representation managed by {@code body}, if one was successfully
+	 * retrieved from this message; a result providing access to the body processing failure, otherwise
 	 *
-	 * @throws NullPointerException if {@code format} is null
+	 * @throws NullPointerException if {@code body} is null
 	 */
-	public <V> Result<V, Failure> body(final Format<V> format) {
+	public <V> Result<V, Failure> body(final Body<V> body) {
 
-		if ( format == null ) {
-			throw new NullPointerException("null format");
+		if ( body == null ) {
+			throw new NullPointerException("null body");
 		}
 
-		final V cached=(V)cache.get(format);
+		final V cached=(V)cache.get(body);
 
-		return cached != null ? Value(cached) : pipes.getOrDefault(format, format::get).apply(self()).value(
+		return cached != null ? Value(cached) : pipes.getOrDefault(body, body::get).apply(self()).value(
 
 				value -> {
 
-					cache.put(format, value);
+					cache.put(body, value);
 
 					return (V)value;
 
@@ -403,22 +492,22 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures a body representation.
 	 *
-	 * <p>Future calls to {@link #body(Format)} with the same format will return the specified value, rather than the
-	 * value {@linkplain Format#get(Message) retrieved} from this message by format.</p>
+	 * <p>Future calls to {@link #body(Body)} with the same body format will return the specified value, rather than
+	 * the value {@linkplain Body#get(Message) retrieved} from this message by the body format.</p>
 	 *
-	 * @param format the body format managing the body representation to be configured
-	 * @param value  the body representation to be associated with {@code format}
-	 * @param <V>    the type of the body representation managed by {@code format}
+	 * @param body  the body format managing the body representation to be configured
+	 * @param value the body representation to be associated with {@code body}
+	 * @param <V>   the type of the body representation managed by {@code body}
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException  if either {@code format} or {@code value} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
+	 * @throws NullPointerException  if either {@code body} or {@code value} is null
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
 	 */
-	public <V> T body(final Format<V> format, final V value) {
+	public <V> T body(final Body<V> body, final V value) {
 
-		if ( format == null ) {
-			throw new NullPointerException("null format");
+		if ( body == null ) {
+			throw new NullPointerException("null body");
 		}
 
 		if ( value == null ) {
@@ -429,33 +518,70 @@ public abstract class Message<T extends Message<T>> {
 			throw new IllegalStateException("message body already retrieved");
 		}
 
-		pipes.put(format, message -> Value(value));
+		pipes.put(body, message -> Value(value));
 
-		return format.set(self());
+		return body.set(self());
+	}
+
+	/**
+	 * Configures a body representation.
+	 *
+	 * <p>Future calls to {@link #body(Body)} with the same body format will return a value generated from this
+	 * message, rather than the value {@linkplain Body#get(Message) retrieved} from this message by the body
+	 * format.</p>
+	 *
+	 * @param body      the body format managing the body representation to be configured
+	 * @param generator the value generating function; takes as argument this message and must return either a result
+	 *                  with the generated body representation or an error reporting a processing failure
+	 * @param <V>       the type of the body representation managed by {@code body}
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException  if either {@code body} or {@code generator} is null
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
+	 */
+	public <V> T body(final Body<V> body, final Function<T, Result<V, Failure>> generator) {
+
+		if ( body == null ) {
+			throw new NullPointerException("null body");
+		}
+
+		if ( generator == null ) {
+			throw new NullPointerException("null generator");
+		}
+
+		if ( !cache.isEmpty() ) {
+			throw new IllegalStateException("message body already retrieved");
+		}
+
+		pipes.put(body, message -> requireNonNull(generator.apply((T)message), "null generated result"));
+
+		return body.set(self());
 	}
 
 
 	/**
 	 * Process a body representation.
 	 *
-	 * <p>Future calls to {@link #body(Format)} with the same format will pipe the value either explicitly {@linkplain
-	 * #body(Format, Object) set} or {@linkplain Format#get(Message) retrieved} on demand by the format through a
-	 * result-returning processing function.</p>
+	 * <p>Future calls to {@link #body(Body)} with the same body format will pipe the value either explicitly
+	 * {@linkplain #body(Body, Object) set} or {@linkplain Body#get(Message) retrieved} on demand by the body format
+	 * through a mapping function function.</p>
 	 *
 	 * <p><strong>Warning</strong> / Processing is performed on demand, as final consumer eventually retrieves the
 	 * processed message body: if {@code mapper} relies on information retrieved from the message, its current state
 	 * must be memoized, before it's possibly altered by downstream wrappers.</p>
 	 *
-	 * @param format the body format managing the body representation to be processed
-	 * @param mapper the value processing function
-	 * @param <V>    the type of the body representation managed by {@code format}
+	 * @param body   the body format managing the body representation to be processed
+	 * @param mapper the value mapping function; takes as argument the original body representation and must return
+	 *               either a result with the mapped representation or an error reporting a processing failure
+	 * @param <V>    the type of the body representation managed by {@code body}
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException  if either {@code format} or {@code mapper} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
+	 * @throws NullPointerException  if either {@code body} or {@code mapper} is null
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
 	 */
-	public <V> T pipe(final Format<V> format, final Function<V, Result<V, Failure>> mapper) {
+	public <V> T pipe(final Body<V> body, final Function<V, Result<V, Failure>> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -465,9 +591,11 @@ public abstract class Message<T extends Message<T>> {
 			throw new IllegalStateException("message body already retrieved");
 		}
 
-		pipes.compute(format, (_format, getter) -> message ->
-				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)format::get)
-						.apply(message).fold(value -> mapper.apply((V)value), Result::Error)
+		pipes.compute(body, (_body, getter) -> message ->
+				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)body::get).apply(message).fold(
+						value -> requireNonNull(mapper.apply((V)value), "null mapped value"),
+						Result::Error
+				)
 		);
 
 		return self();
@@ -486,6 +614,31 @@ public abstract class Message<T extends Message<T>> {
 				.filter(value -> !value.isEmpty())
 				.distinct()
 				.collect(toList());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class Part extends Message<Part> {
+
+		private final IRI item;
+		private final Request request;
+
+
+		private Part(final IRI item, final Message<?> message) {
+			this.item=item;
+			this.request=message.request();
+		}
+
+
+		@Override public IRI item() {
+			return item;
+		}
+
+		@Override public Request request() {
+			return request;
+		}
+
 	}
 
 }

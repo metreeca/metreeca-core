@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -32,6 +32,22 @@ public abstract class Delegator implements Handler {
 
 
 	/**
+	 * Retrieves the delegate handler.
+	 *
+	 * @return the handler request processing is delegated to
+	 *
+	 * @throws IllegalStateException if the delegate handler wasn't {@linkplain #delegate(Handler) configured}
+	 */
+	protected Handler delegate() {
+
+		if ( delegate == null ) {
+			throw new IllegalStateException("undefined delegate");
+		}
+
+		return delegate;
+	}
+
+	/**
 	 * Configures the delegate handler.
 	 *
 	 * @param delegate the handler request processing is delegated to
@@ -46,10 +62,6 @@ public abstract class Delegator implements Handler {
 			throw new NullPointerException("null delegate");
 		}
 
-		if ( this.delegate != null ) {
-			throw new IllegalStateException("delegate already defined");
-		}
-
 		this.delegate=delegate;
 
 		return this;
@@ -59,21 +71,11 @@ public abstract class Delegator implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler with(final Wrapper wrapper) {
-
-		if ( delegate == null ) {
-			throw new NullPointerException("undefined delegate");
-		}
-
-		return delegate.with(wrapper);
+		return delegate().with(wrapper);
 	}
 
 	@Override public Responder handle(final Request request) {
-
-		if ( delegate == null ) {
-			throw new NullPointerException("undefined delegate");
-		}
-
-		return delegate.handle(request);
+		return delegate().handle(request);
 	}
 
 }

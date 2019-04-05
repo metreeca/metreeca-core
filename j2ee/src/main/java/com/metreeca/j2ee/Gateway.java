@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -23,36 +23,23 @@ import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
 import com.metreeca.tray.sys.Storage;
-import com.metreeca.tray.sys.Trace;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase.IOFileUploadException;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FileCleaningTracker;
 
 import java.io.*;
-import java.net.SocketTimeoutException;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
-import static com.metreeca.tray.Tray.tool;
-
-import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.tray.sys.Trace.trace;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.list;
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -63,7 +50,7 @@ import static java.util.Collections.list;
  *
  * <ul>
  *
- * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform components required by
+ * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform services required by
  * resource handlers;</li>
  *
  * <li>intercepts HTTP requests and handles them using a linked data {@linkplain Handler handler} loaded from the
@@ -74,49 +61,38 @@ import static java.util.Collections.list;
  *
  * </ul>
  */
-public abstract class Gateway implements ServletContextListener {
-
-	private static final Supplier<ServletFileUpload> Upload=ServletFileUpload::new; // shared file upload tool
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+public abstract class Gateway implements Filter {
 
 	private final Tray tray=new Tray();
 
-	private final String pattern;
-	private final Function<Tray, Handler> loader;
+	private final Supplier<Handler> handler=() -> requireNonNull(load(tray), "null resource handler");
 
 
-	protected Gateway(final String pattern, final Function<Tray, Handler> loader) {
-
-		if ( pattern == null ) {
-			throw new NullPointerException("null pattern");
-		}
-
-		if ( loader == null ) {
-			throw new NullPointerException("null loader");
-		}
-
-		this.pattern=pattern;
-		this.loader=loader;
-	}
+	/*
+	 * Creates the main gateway handler.
+	 *
+	 * @param tray the shared tool tray; may be configured with additional application-specific services
+	 * @return a non-null resource handler to be used as main entry point for serving requests
+	 */
+	protected abstract Handler load(final Tray tray);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public void contextInitialized(final ServletContextEvent event) {
+	@Override public void init(final FilterConfig config) {
 
-		final ServletContext context=event.getServletContext();
+		final ServletContext context=config.getServletContext();
 
 		try {
 
-			context.addFilter(Gateway.class.getName(), new GatewayFilter(loader.apply(tray
+			tray
 
-					.set(Storage.Factory, () -> storage(context))
-					.set(Loader.Factory, () -> loader(context))
-					.set(Upload, () -> upload(context))
+					.set(Storage.storage(), () -> storage(context))
+					.set(Loader.loader(), () -> loader(context))
 
-			))).addMappingForUrlPatterns(null, false, pattern);
+					.exec(handler::get) // force handler loading during filter initialization
+
+					.get(trace()).info(this, "loaded handler");
 
 		} catch ( final Throwable t ) {
 
@@ -124,7 +100,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				t.printStackTrace(new PrintWriter(message));
 
-				tray.get(Trace.Factory).error(this, "error during initialization: "+message);
+				tray.get(trace()).error(this, "error during initialization: "+message);
 
 				context.log("error during initialization", t);
 
@@ -143,14 +119,12 @@ public abstract class Gateway implements ServletContextListener {
 		}
 	}
 
-	@Override public void contextDestroyed(final ServletContextEvent event) {
+	@Override public void destroy() {
 
 		tray.clear();
 
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Storage storage(final ServletContext context) {
 		return name -> {
@@ -175,262 +149,83 @@ public abstract class Gateway implements ServletContextListener {
 		};
 	}
 
-	private ServletFileUpload upload(final ServletContext context) {
-
-		final DiskFileItemFactory factory=new DiskFileItemFactory();
-		final FileCleaningTracker tracker=new FileCleaningTracker();
-
-		factory.setSizeThreshold(DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD);
-
-		factory.setRepository((File)context.getAttribute("javax.servlet.context.tempdir"));
-		factory.setFileCleaningTracker(tracker);
-
-		final ServletFileUpload upload=new ServletFileUpload(factory);
-
-		upload.setSizeMax(10_000_000L);
-		upload.setFileSizeMax(10_000_000L);
-
-		tool(() -> (AutoCloseable)tracker::exitWhenFinished); // register cleanup hook
-
-		return upload;
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class GatewayFilter implements Filter {
+	@Override public void doFilter(
+			final ServletRequest request, final ServletResponse response, final FilterChain chain
+	) throws ServletException, IOException {
 
-		private final Handler handler;
+		tray.get(handler)
+				.handle(request((HttpServletRequest)request))
+				.accept(_response -> response((HttpServletResponse)response, _response));
 
-
-		private GatewayFilter(final Handler handler) {
-			this.handler=handler;
+		if ( !response.isCommitted() ) {
+			chain.doFilter(request, response);
 		}
 
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		@Override public void init(final FilterConfig config) {}
-
-		@Override public void destroy() {}
+	}
 
 
-		@Override public void doFilter(
-				final ServletRequest request, final ServletResponse response, final FilterChain chain
-		) throws ServletException, IOException {
+	private Request request(final HttpServletRequest http) {
 
-			if ( !filter((HttpServletRequest)request, (HttpServletResponse)response) ) {
-				chain.doFilter(request, response);
-			}
+		final String target=http.getRequestURL().toString();
+		final String path=http.getRequestURI().substring(http.getContextPath().length());
+		final String base=target.substring(0, target.length()-path.length()+1);
+		final String query=http.getQueryString();
 
+		final Request request=new Request()
+				.method(http.getMethod())
+				.base(base)
+				.path(path)
+				.query(query != null ? query : "");
+
+		for (final Map.Entry<String, String[]> parameter : http.getParameterMap().entrySet()) {
+			request.parameters(parameter.getKey(), asList(parameter.getValue()));
 		}
 
+		for (final String name : list(http.getHeaderNames())) {
+			request.headers(name, list(http.getHeaders(name)));
+		}
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		private boolean filter(final HttpServletRequest request, final HttpServletResponse response) {
+		return request.body(input(), () -> {
 			try {
-
-				try { // ;( request.getParts() is not available to filters…
-
-					final List<FileItem> items=isMultipartContent(request) ?
-							tool(Upload).parseRequest(request) : emptyList();
-
-					handler.handle(request(request, items)).accept(r -> response(response, r));
-
-				} catch ( final IOFileUploadException e ) {
-
-					final Throwable cause=e.getCause();
-
-					if ( cause instanceof SocketTimeoutException ) {
-						response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT);
-					} else {
-						throw new UncheckedIOException((IOException)cause);
-					}
-
-				} catch ( final FileUploadException e ) {
-
-					request.getServletContext().log(e.getMessage(), e);
-
-					response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-
-				}
-
-				return response.isCommitted();
-
+				return http.getInputStream();
 			} catch ( final IOException e ) {
-
 				throw new UncheckedIOException(e);
-
 			}
-		}
+		});
 
+	}
 
-		private Request request(final HttpServletRequest http, final Collection<FileItem> items) {
+	private void response(final HttpServletResponse http, final Response response) {
+		if ( response.status() > 0 ) { // only if actually processed
 
-			final String target=http.getRequestURL().toString();
-			final String path=http.getRequestURI().substring(http.getContextPath().length());
-			final String base=target.substring(0, target.length()-path.length()+1);
-			final String query=http.getQueryString();
+			http.setStatus(response.status());
 
-			final Request request=new Request()
-					.method(http.getMethod())
-					.base(base)
-					.path(path)
-					.query(query != null ? query : "");
+			response.headers().forEach((name, values) ->
+					values.forEach(value -> http.addHeader(name, value))
+			);
 
-			for (final Map.Entry<String, String[]> parameter : http.getParameterMap().entrySet()) {
-				request.parameters(parameter.getKey(), asList(parameter.getValue()));
-			}
+			// ignore missing response bodies // !!! handle other body retrieval errors
 
-			for (final String name : list(http.getHeaderNames())) {
-				request.headers(name, list(http.getHeaders(name)));
-			}
-
-			if ( items.isEmpty() ) {
-
-				return request
-
-						.body(input(), () -> {
-							try {
-								return http.getInputStream();
-							} catch ( final IOException e ) {
-								throw new UncheckedIOException(e);
-							}
-						})
-
-						.body(reader(), () -> {
-							try {
-								return http.getReader();
-							} catch ( final IOException e ) {
-								throw new UncheckedIOException(e);
-							}
-						});
-
-			} else {
-
-				//final Map<String, List<String>> parameters=new LinkedHashMap<>();
-				//final Map<String, List<Message<?>>> parts=new LinkedHashMap<>();
-				//
-				//for (final FileItem item : items) {
-				//
-				//	if ( item.isFormField() ) { // accumulate parameters
-				//
-				//		parameters.compute(item.getFieldName(), (key, current) -> {
-				//
-				//			List<String> updated=current;
-				//
-				//			if ( updated == null ) {
-				//				updated=new ArrayList<>();
-				//			}
-				//
-				//			try {
-				//				updated.add(item.getString(Codecs.UTF8.name()));
-				//			} catch ( final UnsupportedEncodingException unexpected ) {
-				//				throw new UncheckedIOException(unexpected);
-				//			}
-				//
-				//			return updated;
-				//
-				//		});
-				//
-				//	} else { // accumulate items
-				//
-				//		parts.compute(item.getFieldName(), (key, current) -> {
-				//
-				//			List<Message<?>> updated=current;
-				//
-				//			if ( updated == null ) {
-				//				updated=new ArrayList<>();
-				//			}
-				//
-				//			final Message<?> part=new Message<Message>() {
-				//				@Override protected Message self() { return this; }
-				//			}; // !!! .filename(item.getName());
-				//
-				//			final FileItemHeaders headers=item.getHeaders();
-				//
-				//			headers.getHeaderNames().forEachRemaining(name -> {
-				//
-				//				final List<String> values=new ArrayList<>();
-				//
-				//				headers.getHeaders(name).forEachRemaining(values::add);
-				//
-				//				part.headers(name, values);
-				//
-				//			});
-				//
-				//			updated.add(part
-				//
-				//					.body(InputFormat.Format, () -> {
-				//						try {
-				//							return item.getInputStream();
-				//						} catch ( final IOException e ) {
-				//							throw new UncheckedIOException(e);
-				//						}
-				//					})
-				//
-				//					.body(ReaderFormat.Format, () -> { // !!! from input using part/request encoding
-				//						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-				//					}));
-				//
-				//			return updated;
-				//
-				//		});
-				//
-				//	}
-				//
-				//}
-				//
-				//for (final Map.Entry<String, List<String>> parameter : parameters.entrySet()) {
-				//	request.parameters(parameter.getKey(), parameter.getValue());
-				//}
-				//
-				//for (final Map.Entry<String, List<Message<?>>> part : parts.entrySet()) {
-				//	// !!! request.body(_Parts,Format, ___)// !!! request.part(part.getKey(), part.getValue());
-				//}
-
-				// !!! set input/reader format from main body part
-
-				return request;
-
-			}
-		}
-
-		private void response(final HttpServletResponse http, final Response response) {
-			if ( response.status() != 0 ) {
-
-				http.setStatus(response.status());
-
-				response.headers().forEach((name, values) -> values.forEach(value -> http.addHeader(name, value)));
-
-				response.body(output()).value().ifPresent(consumer -> consumer.accept(() -> {
-					try {
-						return http.getOutputStream();
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}));
-
-				response.body(writer()).value().ifPresent(consumer -> consumer.accept(() -> {
-					try {
-						return http.getWriter();
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}));
-
-				if ( response.status() > 0 && !http.isCommitted() ) { // flush if not already committed by bodies
-					try {
-						http.flushBuffer();
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
+			response.body(output()).value().ifPresent(consumer -> consumer.accept(() -> {
+				try {
+					return http.getOutputStream();
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
 				}
+			}));
 
+			if ( !http.isCommitted() ) { // flush if not already committed by bodies
+				try {
+					http.flushBuffer();
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
 			}
-		}
 
+		}
 	}
 
 }

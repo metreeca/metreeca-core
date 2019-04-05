@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -32,9 +32,7 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.*;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.*;
@@ -48,9 +46,9 @@ import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.RDFFormat.rdf;
+import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
@@ -59,7 +57,7 @@ import static java.lang.String.format;
 /**
  * SPARQL 1.1 Graph Store endpoint handler.
  *
- * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain Graph#Factory
+ * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain Graph#graph()
  * graph database}</p>*
  *
  * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
@@ -79,8 +77,8 @@ public final class Graphs extends Delegator {
 
 	private boolean publik; // public availability of the endpoint
 
-	private final Graph graph=tool(Graph.Factory);
-	private final Trace trace=tool(Trace.Factory);
+	private final Graph graph=tool(Graph.graph());
+	private final Trace trace=tool(Trace.trace());
 
 
 	public Graphs() {
@@ -241,7 +239,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
-								.cause("I/O while reading RDF payload: see server logs for more detail")
+								.cause("I/O while reading RDF payload: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -263,7 +261,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to update graph: see server logs for more detail")
+								.cause("unable to update graph: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -316,7 +314,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to delete graph: see server logs for more detail")
+								.cause("unable to delete graph: see server logs for details")
 						).accept(consumer);
 
 					}
@@ -380,7 +378,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
-								.cause("I/O while reading RDF payload: see server logs for more detail")
+								.cause("I/O while reading RDF payload: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -402,7 +400,7 @@ public final class Graphs extends Delegator {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to update graph: see server logs for more detail")
+								.cause("unable to update graph: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 

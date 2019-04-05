@@ -6,12 +6,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="_gate" />
-        <module name="_utow" />
         <module name="form" />
+        <module name="gate" />
         <module name="j2ee" />
+        <module name="rdf4j" />
         <module name="rest" />
+        <module name="stardog" />
         <module name="tray" />
+        <module name="virtuoso" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -31,21 +33,27 @@
       <module name="demo" target="1.8" />
       <module name="fore" target="1.8" />
       <module name="form" target="1.8" />
+      <module name="gate" target="1.8" />
       <module name="j2ee" target="1.8" />
       <module name="jeep" target="1.8" />
+      <module name="kits" target="1.8" />
       <module name="link" target="1.8" />
+      <module name="Link" target="1.8" />
       <module name="link (1)" target="1.8" />
       <module name="mesh" target="1.8" />
       <module name="mill" target="1.8" />
       <module name="mill (1)" target="1.8" />
       <module name="node" target="1.8" />
+      <module name="rdf4j" target="1.8" />
       <module name="rest" target="1.8" />
       <module name="self" target="1.8" />
       <module name="spec" target="1.8" />
       <module name="spec (1)" target="1.8" />
+      <module name="stardog" target="1.8" />
       <module name="tool" target="1.8" />
       <module name="tray" target="1.8" />
       <module name="tray (1)" target="1.8" />
+      <module name="virtuoso" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

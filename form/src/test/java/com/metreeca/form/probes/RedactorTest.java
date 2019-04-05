@@ -1,87 +1,101 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.form.probes;
 
-import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.shapes.Guard;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.UnaryOperator;
+
+import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Guard.guard;
-import static com.metreeca.form.shapes.When.when;
-import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Guard.guard;
+import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.form.things.ValuesTest.term;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonMap;
 
 
 final class RedactorTest {
 
-	private static final Redactor empty=new Redactor(emptyMap());
-
-	private static final Redactor first=new Redactor(singletonMap(RDF.VALUE, singleton(RDF.FIRST)));
-	private static final Redactor rest=new Redactor(singletonMap(RDF.VALUE, singleton(RDF.REST)));
-	private static final Redactor any=new Redactor(singletonMap(RDF.VALUE, singleton(Form.any)));
+	private static final UnaryOperator<Shape> first=s -> s.map(new Redactor(RDF.VALUE, RDF.FIRST)).map(new Optimizer());
+	private static final UnaryOperator<Shape> rest=s -> s.map(new Redactor(RDF.VALUE, RDF.REST)).map(new Optimizer());
+	private static final UnaryOperator<Shape> any=s -> s.map(new Redactor(RDF.VALUE)).map(new Optimizer());
 
 
-	@Test void testIgnoreUnconditionalShapes() {
-
-		final Shape shape=and();
-
-		assertThat(shape.map(empty)).as("unconditional shape").isEqualTo(shape);
-
-	}
-
-	@Test void testIgnoreUndefinedConditions() {
+	@Test void testIgnoreUnrelatedConditions() {
 
 		final Guard guard=guard(RDF.VALUE, RDF.FIRST);
 
-		assertThat(guard.map(empty)).as("undefined variable").isEqualTo(guard);
+		assertThat(guard.map(new Redactor(RDF.NIL, RDF.NIL))).as("undefined variable").isEqualTo(guard);
 
 	}
 
-	@Test void testReplaceDefinedConditions() {
+	@Test void testReplaceTargetedConditions() {
 
-		final Guard guard=guard(RDF.VALUE, RDF.FIRST);
+		final Shape shape=field(RDF.TYPE);
+		final Shape guard=guard(RDF.VALUE, RDF.FIRST).then(shape);
 
-		assertThat(guard.map(first)).as("included value").isEqualTo(and());
-		assertThat(guard.map(rest)).as("excluded value").isEqualTo(or());
-		assertThat(guard.map(any)).as("wildcard value").isEqualTo(and());
+		assertThat(guard.map(first)).as("included value").isEqualTo(shape);
+		assertThat(guard.map(rest)).as("excluded value").isEqualTo(pass());
+		assertThat(guard.map(any)).as("wildcard value").isEqualTo(shape);
 
 	}
 
 	@Test void testRedactNestedShapes() {
 
-		final Guard nested=guard(RDF.VALUE, RDF.FIRST);
+		final Shape x=field(term("x"));
+		final Shape y=field(term("y"));
+		final Shape z=field(term("z"));
 
-		assertThat(field(RDF.VALUE, nested).map(first)).as("field").isEqualTo(field(RDF.VALUE, and()));
+		final Shape guard=guard(RDF.VALUE, RDF.FIRST);
 
-		assertThat(and(nested).map(first)).as("conjunction").isEqualTo(and(and()));
-		assertThat(or(nested).map(first)).as("disjunction").isEqualTo(or(and()));
-		assertThat(when(and(), and(), nested).map(first)).as("option").isEqualTo(when(and(), and(), and()));
+		assertThat(field(RDF.VALUE, guard.then(x)).map(first))
+				.as("field")
+				.isEqualTo(field(RDF.VALUE, x));
 
+		assertThat(and(guard.then(x), guard.then(y)).map(first))
+				.as("conjunction")
+				.isEqualTo(and(x, y));
+
+		assertThat(or(guard.then(x), guard.then(y))
+				.map(first)).as("disjunction")
+				.isEqualTo(or(x, y));
+
+		assertThat(when(guard.then(x), guard.then(y), guard.then(z)).map(first))
+				.as("option")
+				.isEqualTo(when(x, y, z));
+
+	}
+
+	@Test void testHandleWildcards() {
+
+		final Shape x=field(term("x"));
+		final Shape y=field(term("y"));
+
+		assertThat(and(guard(RDF.VALUE, RDF.FIRST).then(x), guard(RDF.VALUE, RDF.REST).then(y)).map(any))
+				.as("wildcard")
+				.isEqualTo(and(x, y));
 	}
 
 }

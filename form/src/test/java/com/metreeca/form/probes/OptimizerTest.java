@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -25,7 +25,9 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Guard.guard;
@@ -61,22 +63,7 @@ final class OptimizerTest {
 	}
 
 
-	@Test void testOptimizeMinCount() {
-
-		assertThat(optimize(and(minCount(10), minCount(100)))).as("conjunction").isEqualTo(minCount(100));
-		assertThat(optimize(or(minCount(10), minCount(100)))).as("disjunction").isEqualTo(minCount(10));
-
-	}
-
-	@Test void testOptimizeMaxCount() {
-
-		assertThat(optimize(and(maxCount(10), maxCount(100)))).as("conjunction").isEqualTo(maxCount(10));
-		assertThat(optimize(or(maxCount(10), maxCount(100)))).as("disjunction").isEqualTo(maxCount(100));
-
-	}
-
-
-	@Test void testOptimizeType() {
+	@Test void testOptimizeDatatype() {
 
 		assertThat(optimize(and(datatype(Form.IRIType), datatype(Form.ResourceType))))
 				.as("conjunction / superclass")
@@ -105,7 +92,36 @@ final class OptimizerTest {
 	}
 
 
-	@Test void testOptimizeTFields() {
+	@Test void testOptimizeMinCount() {
+
+		assertThat(optimize(and(minCount(10), minCount(100)))).as("conjunction").isEqualTo(minCount(100));
+		assertThat(optimize(or(minCount(10), minCount(100)))).as("disjunction").isEqualTo(minCount(10));
+
+	}
+
+	@Test void testOptimizeMaxCount() {
+
+		assertThat(optimize(and(maxCount(10), maxCount(100)))).as("conjunction").isEqualTo(maxCount(10));
+		assertThat(optimize(or(maxCount(10), maxCount(100)))).as("disjunction").isEqualTo(maxCount(100));
+
+	}
+
+
+	@Test void testOptimizeAll() {
+
+		assertThat(optimize(all())).as("empty").isEqualTo(and());
+
+	}
+
+	@Test void testOptimizeAny() {
+
+		assertThat(optimize(any())).as("empty").isEqualTo(or());
+
+	}
+
+
+
+	@Test void testOptimizeFields() {
 
 		assertThat(optimize(field(RDF.VALUE, and(x))))
 				.as("optimize nested shape")
@@ -126,7 +142,8 @@ final class OptimizerTest {
 
 	}
 
-	@Test void testOptimizeConjunctions() {
+
+	@Test void testOptimizeAnd() {
 
 		assertThat(optimize(and(or(), Field.field(RDF.TYPE)))).as("simplify constants").isEqualTo(or());
 		assertThat(optimize(and(x))).as("unwrap singletons").isEqualTo(x);
@@ -136,7 +153,7 @@ final class OptimizerTest {
 
 	}
 
-	@Test void testOptimizeDisjunctions() {
+	@Test void testOptimizeOr() {
 
 		assertThat(optimize(or(and(), Field.field(RDF.TYPE)))).as("simplify constants").isEqualTo(and());
 		assertThat(optimize(or(x))).as("unwrap singletons").isEqualTo(x);
@@ -146,7 +163,7 @@ final class OptimizerTest {
 
 	}
 
-	@Test void testOptimizeOption() {
+	@Test void testOptimizeWhen() {
 
 		assertThat(optimize(when(and(), x, y))).as("always pass").isEqualTo(x);
 		assertThat(optimize(when(or(), x, y))).as("always fail").isEqualTo(y);

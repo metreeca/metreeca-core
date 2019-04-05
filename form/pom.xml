@@ -3,17 +3,17 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Copyright © 2013-2019 Metreeca srl. All rights reserved.
 
-  This file is part of Metreeca.
+  This file is part of Metreeca/Link.
 
-  Metreeca is free software: you can redistribute it and/or modify it under the terms
+  Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
   of the GNU Affero General Public License as published by the Free Software Foundation,
   either version 3 of the License, or(at your option) any later version.
 
-  Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License along with Metreeca.
+  You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
   If not, see <http://www.gnu.org/licenses/>.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
@@ -25,55 +25,55 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>link</artifactId>
-		<version>0.0.0-SNAPSHOT</version>
+		<version>0.50.0</version>
 	</parent>
 
 	<artifactId>form</artifactId>
-	<version>0.0.0-SNAPSHOT</version>
+	<version>0.50.0</version>
 
 	<name>Metreeca Shapes Framework</name>
 	<description>An extended SHACL framework for validating, retrieving and publishing linked data.</description>
 
-	<dependencyManagement>
-		<dependencies>
-
-			<dependency>
-				<groupId>org.eclipse.rdf4j</groupId>
-				<artifactId>rdf4j-bom</artifactId>
-				<version>${rdf4j.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 
-		<dependency> <!-- version set by bom  -->
-
+		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-runtime</artifactId>
-
-			<exclusions>
-				<exclusion> <!-- prevent issues with multiple SLF4J bindings -->
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
-				</exclusion>
-			</exclusions>
-
+			<artifactId>rdf4j-model</artifactId>
+			<version>${rdf4j.version}</version>
 		</dependency>
 
-		<dependency> <!-- expose to compile scope / version set by bom  -->
+		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-sail-nativerdf</artifactId>
-			<scope>compile</scope>
+			<artifactId>rdf4j-queryalgebra-evaluation</artifactId>
+			<version>${rdf4j.version}</version>
 		</dependency>
+
+		<!--<exclusions>
+			<exclusion> &lt;!&ndash; prevent issues with multiple SLF4J bindings &ndash;&gt;
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+			</exclusion>
+		</exclusions>-->
 
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
-			<version>1.1.2</version>
+			<version>1.1.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-repository-sail</artifactId>
+			<version>${rdf4j.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-sail-memory</artifactId>
+			<version>${rdf4j.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

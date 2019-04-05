@@ -1,141 +1,147 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.form.codecs;
 
-import com.metreeca.form.things.Lists;
-import com.metreeca.form.things.Maps;
+import com.metreeca.form.Shape;
+import com.metreeca.form.things.ValuesTest;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.List;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Test;
+
 import java.util.Map;
 
-import javax.json.*;
-
+import static com.metreeca.form.shapes.And.and;
+import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Meta.alias;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Maps.union;
-import static com.metreeca.form.things.Values.bnode;
-import static com.metreeca.form.things.Values.format;
+import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.iri;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import static java.util.Collections.singletonMap;
 
 
-public abstract class JSONCodecTest {
+final class JSONCodecTest {
 
-	protected static final String value="http://www.w3.org/1999/02/22-rdf-syntax-ns#value";
-
-
-	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	protected static List<Object> array(final Object... items) {
-		return Lists.list(items);
-	}
-
-	@SafeVarargs protected static Map<String, Object> object(final Map.Entry<String, Object>... fields) {
-		return map(fields);
-	}
-
-	protected static Map<String, Object> object(final Map<String, Object> fields) {
-		return fields;
-	}
-
-	protected static Map.Entry<String, Object> field(final String label, final Object value) {
-		return Maps.entry(label, value);
+	private Map<IRI, String> aliases(final Shape shape) {
+		return new JSONCodec() {}.aliases(shape);
 	}
 
 
-	//// Converters ////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected static JsonValue json(final Object object) {
-		return object instanceof List<?> ? json((List<?>)object)
-				: object instanceof Map<?, ?> ? json((Map<?, ?>)object)
-				: null;
+	@Test void testGuessAliasFromIRI() {
+
+		assertThat(aliases(field(RDF.VALUE)))
+				.as("direct")
+				.isEqualTo(singletonMap(RDF.VALUE, "value"));
+
+		assertThat(aliases(field(inverse(RDF.VALUE))))
+				.as("inverse")
+				.isEqualTo(singletonMap(inverse(RDF.VALUE), "valueOf"));
+
 	}
 
-	protected static JsonArray json(final List<?> array) {
-
-		final JsonArrayBuilder builder=Json.createArrayBuilder();
-
-		for (final Object item : array) {
-			if ( item instanceof List<?> ) {
-				builder.add(json((List<?>)item));
-			} else if ( item instanceof Map<?, ?> ) {
-				builder.add(json((Map<?, ?>)item));
-			} else if ( item instanceof Boolean ) {
-				builder.add((Boolean)item);
-			} else if ( item instanceof BigInteger ) {
-				builder.add((BigInteger)item);
-			} else if ( item instanceof BigDecimal ) {
-				builder.add((BigDecimal)item);
-			} else if ( item instanceof Double ) {
-				builder.add((Double)item);
-			} else if ( item instanceof String ) {
-				builder.add((String)item);
-			} else {
-				builder.addNull();
-			}
-		}
-
-		return builder.build();
+	@Test void testRetrieveUserDefinedAlias() {
+		assertThat(aliases(field(RDF.VALUE, alias("alias"))))
+				.as("user-defined")
+				.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 	}
 
-	protected static JsonObject json(final Map<?, ?> object) {
-
-		final JsonObjectBuilder builder=Json.createObjectBuilder();
-
-		for (final Map.Entry<?, ?> field : object.entrySet()) {
-
-			final String label=field.getKey().toString();
-			final Object value=field.getValue();
-
-			if ( value instanceof List<?> ) {
-				builder.add(label, json((List<?>)value));
-			} else if ( value instanceof Map<?, ?> ) {
-				builder.add(label, json((Map<?, ?>)value));
-			} else if ( value instanceof Boolean ) {
-				builder.add(label, (Boolean)value);
-			} else if ( value instanceof BigInteger ) {
-				builder.add(label, (BigInteger)value);
-			} else if ( value instanceof BigDecimal ) {
-				builder.add(label, (BigDecimal)value);
-			} else if ( value instanceof Double ) {
-				builder.add(label, (Double)value);
-			} else if ( value instanceof String ) {
-				builder.add(label, (String)value);
-			} else {
-				builder.addNull(label);
-			}
-		}
-
-		return builder.build();
+	@Test void testPreferUserDefinedAliases() {
+		assertThat(aliases(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE))))
+				.as("user-defined")
+				.isEqualTo(map(entry(RDF.VALUE, "alias")));
 	}
 
 
-	//// !!! review ////////////////////////////////////////////////////////////////////////////////////////////////////
+	@Test void testRetrieveAliasFromNestedShapes() {
 
-	protected Object blanks(final Object... json) {
-		return array(blank(field(value, array(json))));
+		assertThat(aliases(and(field(RDF.VALUE, alias("alias")))))
+				.as("group")
+				.isEqualTo(map(entry(RDF.VALUE, "alias")));
+
+		assertThat(aliases(field(RDF.VALUE, and(alias("alias")))))
+				.as("conjunction")
+				.isEqualTo(map(entry(RDF.VALUE, "alias")));
+
+	}
+
+	@Test void testMergeDuplicateFields() {
+
+		// nesting required to prevent and() from collapsing duplicates
+		assertThat(aliases(and(field(RDF.VALUE), and(field(RDF.VALUE)))))
+				.as("system-guessed")
+				.isEqualTo(map(entry(RDF.VALUE, "value")));
+
+		// nesting required to prevent and() from collapsing duplicates
+		assertThat(aliases(and(field(RDF.VALUE, alias("alias")), and(field(RDF.VALUE, alias("alias"))))))
+				.as("user-defined")
+				.isEqualTo(map(entry(RDF.VALUE, "alias")));
+
 	}
 
 
-	@SafeVarargs protected final Map<String, Object> blank(final Map.Entry<String, Object>... fields) {
-		return object(union(
-				map(field("this", format(bnode()))),
-				map(fields)
-		));
+	@Test void testHandleMultipleAliases() {
+
+		assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("two")))))
+				.as("clashing")
+				.isEqualTo(map(entry(RDF.VALUE, "value")));
+
+		assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("one")))))
+				.as("repeated")
+				.isEqualTo(map(entry(RDF.VALUE, "one")));
+
+	}
+
+	@Test void testMergeAliases() {
+		assertThat(aliases(and(field(RDF.TYPE), field(RDF.VALUE))))
+				.as("merged")
+				.isEqualTo(map(entry(RDF.TYPE, "type"), entry(RDF.VALUE, "value")));
+	}
+
+	@Test void testIgnoreClashingAliases() {
+
+		assertThat(aliases(and(field(RDF.VALUE), field(iri("urn:example:value")))))
+				.as("different fields")
+				.isEmpty();
+
+		// fall back to system-guess alias
+
+		assertThat(aliases(and(field(RDF.VALUE, alias("one")), field(RDF.VALUE, alias("two")))))
+				.as("same field")
+				.isEqualTo(map(entry(RDF.VALUE, "value")));
+
+	}
+
+	@Test void testIgnoreReservedAliases() {
+
+		assertThat(aliases(field(iri(ValuesTest.Base, "_this"))))
+				.as("ignore reserved system-guessed aliases")
+				.isEmpty();
+
+		assertThat(aliases(field(RDF.VALUE, alias("_this"))))
+				.as("ignore reserved user-defined aliases")
+				.isEqualTo(singletonMap(RDF.VALUE, "value"));
+
 	}
 
 }

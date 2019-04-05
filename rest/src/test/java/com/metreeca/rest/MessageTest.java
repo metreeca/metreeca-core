@@ -1,23 +1,23 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.formats.TextFormat;
+import com.metreeca.rest.bodies.TextBody;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -29,7 +29,7 @@ import java.util.function.Function;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Codecs.text;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
+import static com.metreeca.rest.bodies.ReaderBody.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static java.util.Collections.emptySet;
 
 
-final class MessageTest {
+public final class MessageTest {
 
 	//// Headers ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -111,10 +111,8 @@ final class MessageTest {
 
 		final TestMessage message=new TestMessage().body(reader(), () -> new StringReader("test"));
 
-		final Function<Message<?>, String> accessor=m -> {
-			return ((Result<String, Failure>)m
-					.body(TextFormat.text())).fold(value -> value, error -> fail("missing test body"));
-		};
+		final Function<Message<?>, String> accessor=m -> m
+				.body(TextBody.text()).fold(value -> value, error -> fail("missing test body"));
 
 		assertSame(accessor.apply(message), accessor.apply(message));
 	}
@@ -122,18 +120,18 @@ final class MessageTest {
 	@Test void testBodyOnDemandFiltering() {
 
 		final Message<?> message=new TestMessage()
-				.pipe(TestFormat.test(), string -> Value(string+"!"))
+				.pipe(TestBody.test(), string -> Value(string+"!"))
 				.body(reader(), () -> new StringReader("test"));
 
 		assertEquals("test!",
-				message.body(TestFormat.test()).fold(value -> value, error -> fail("missing test body")));
+				message.body(TestBody.test()).fold(value -> value, error -> fail("missing test body")));
 
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TestMessage extends Message<TestMessage> {
+	public static final class TestMessage extends Message<TestMessage> {
 
 		private final Request request=new Request();
 
@@ -146,12 +144,12 @@ final class MessageTest {
 
 	}
 
-	private static final class TestFormat implements Format<String> {
+	private static final class TestBody implements Body<String> {
 
-		private static final TestFormat Instance=new TestFormat();
+		private static final TestBody Instance=new TestBody();
 
 
-		private static TestFormat test() { return Instance; }
+		private static TestBody test() { return Instance; }
 
 
 		@Override public Result<String, Failure> get(final Message<?> message) {

@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -24,7 +24,6 @@ import com.metreeca.form.codecs.QueryParser;
 import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 import java.util.function.Function;
@@ -66,7 +65,7 @@ public final class Request extends Message<Request> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private IRI user=Form.none;
-	private Set<Value> roles=singleton(Form.none);
+	private Set<IRI> roles=singleton(Form.none);
 
 	private String method="";
 	private String base="app:/";
@@ -75,6 +74,8 @@ public final class Request extends Message<Request> {
 
 	private final Map<String, List<String>> parameters=new LinkedHashMap<>();
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the focus item IRI of this request.
@@ -202,7 +203,7 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return Value(new QueryParser(shape).parse(decode(query())));
+			return Value(new QueryParser(shape, item().stringValue()).parse(decode(query())));
 
 		} catch ( final JsonException e ) {
 
@@ -258,7 +259,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return a set of values uniquely identifying the roles attributed to the request {@linkplain #user() user}
 	 */
-	public Set<Value> roles() { return unmodifiableSet(roles); }
+	public Set<IRI> roles() { return unmodifiableSet(roles); }
 
 	/**
 	 * Configures the roles attributed to the request user.
@@ -270,28 +271,24 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
 	 */
-	public Request roles(final Value... roles) {
+	public Request roles(final IRI... roles) {
 		return roles(asList(roles));
 	}
 
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of values uniquely identifying the roles attributed to the request {@linkplain #user()
+	 * @param roles a collection of IRIs uniquely identifying the roles attributed to the request {@linkplain #user()
 	 *              user}
 	 *
 	 * @return this request
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
 	 */
-	public Request roles(final Collection<? extends Value> roles) {
+	public Request roles(final Collection<IRI> roles) {
 
-		if ( roles == null ) {
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull)) {
 			throw new NullPointerException("null roles");
-		}
-
-		if ( roles.contains(null) ) {
-			throw new NullPointerException("null role");
 		}
 
 		this.roles=new LinkedHashSet<>(roles);

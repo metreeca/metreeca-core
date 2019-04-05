@@ -1,39 +1,55 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
-import com.metreeca.rest.formats.DataFormat;
-import com.metreeca.rest.formats.TextFormat;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.Assertions;
+import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Consumer;
 
-import static com.metreeca.form.shapes.And.pass;
+import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.rest.bodies.DataBody.data;
+import static com.metreeca.rest.bodies.TextBody.text;
 import static com.metreeca.tray.sys.Trace.clip;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
 public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Message<T>> extends AbstractAssert<A, T> {
+
+	@SuppressWarnings("unchecked") public static <T extends Message<T>> MessageAssert<?, ?> assertThat(final Message<?> message) {
+
+		final class WorkAssert extends MessageAssert<WorkAssert, T> {
+
+			private WorkAssert(final T actual) { super(actual, WorkAssert.class); }
+
+		}
+
+		return new WorkAssert((T)message);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected MessageAssert(final T actual, final Class<A> type) {
 		super(actual, type);
@@ -41,6 +57,18 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public A hasItem(final IRI item) {
+
+		isNotNull();
+
+		if ( !Objects.equals(actual.item(), item)) {
+			failWithMessage("expected message to have <%s> item but has <%s>", item, actual.item());
+		}
+
+		return myself;
+	}
+
 
 	public A hasHeader(final String name) {
 
@@ -53,7 +81,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		final Collection<String> values=actual.headers(name);
 
 		if ( values.isEmpty() ) {
-			failWithMessage("expected response to have <%s> headers but has none", name);
+			failWithMessage("expected message to have <%s> headers but has none", name);
 		}
 
 		return myself;
@@ -114,7 +142,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		assertThat(actual.headers(name))
+		Assertions.assertThat(actual.headers(name))
 				.as("<%sh> message headers", name)
 				.containsExactly(values);
 
@@ -130,7 +158,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( shape.equals(pass()) ) {
+		if ( pass(shape) ) {
 			failWithMessage("expected message to have a shape but has none", shape);
 		}
 
@@ -158,7 +186,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( !shape.equals(pass()) ) {
+		if ( !pass(shape) ) {
 			failWithMessage("expected message to have no shape but has <%s>", shape);
 		}
 
@@ -168,8 +196,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	public A hasBody(final Format<?> format) {
+	public A hasBody(final Body<?> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
@@ -178,10 +205,10 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		return hasBody(format, body -> {});
 	}
 
-	public <V> A hasBody(final Format<V> format, final Consumer<V> assertions) {
+	public <V> A hasBody(final Body<V> body, final Consumer<V> assertions) {
 
-		if ( format == null ) {
-			throw new NullPointerException("null format");
+		if ( body == null ) {
+			throw new NullPointerException("null body");
 		}
 
 		if ( assertions == null ) {
@@ -190,7 +217,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		return actual.body(format).fold(
+		return actual.body(body).fold(
 
 				value -> {
 
@@ -201,8 +228,8 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 				},
 
 				error -> fail(
-						"expected response to have a <%s> body but was unable to retrieve one (%s)",
-						format.getClass().getSimpleName(), error
+						"expected message to have a <%s> body but was unable to retrieve one (%s)",
+						body.getClass().getSimpleName(), error
 				)
 		);
 	}
@@ -212,13 +239,13 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		actual.body(DataFormat.data()).value().ifPresent(data -> {
+		actual.body(data()).value().ifPresent(data -> {
 			if ( data.length > 0 ) {
 				failWithMessage("expected empty body but had binary body of length <%d>", data.length);
 			}
 		});
 
-		actual.body(TextFormat.text()).value().ifPresent(text -> {
+		actual.body(text()).value().ifPresent(text -> {
 			if ( !text.isEmpty() ) {
 				failWithMessage(
 						"expected empty body but had textual body of length <%d> (%s)",
@@ -230,16 +257,16 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		return myself;
 	}
 
-	public A doesNotHaveBody(final Format<?> format) {
+	public A doesNotHaveBody(final Body<?> body) {
 
-		if ( format == null ) {
-			throw new NullPointerException("null format");
+		if ( body == null ) {
+			throw new NullPointerException("null body");
 		}
 
 		isNotNull();
 
-		return actual.body(format).fold(
-				value -> fail("expected response to have no <%s> body but has one"),
+		return actual.body(body).fold(
+				value -> fail("expected message to have no <%s> body but has one"),
 				error -> myself
 		);
 	}

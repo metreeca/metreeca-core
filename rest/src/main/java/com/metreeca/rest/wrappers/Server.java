@@ -1,17 +1,17 @@
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
- * This file is part of Metreeca.
+ * This file is part of Metreeca/Link.
  *
- * Metreeca is free software: you can redistribute it and/or modify it under the terms
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or(at your option) any later version.
  *
- * Metreeca is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca.
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Request.GET;
 import static com.metreeca.rest.Request.POST;
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.bodies.TextBody.text;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
@@ -45,13 +45,13 @@ import static java.util.Collections.unmodifiableMap;
  */
 public final class Server implements Wrapper {
 
-	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=.*$");
+	private static final Pattern TextualPattern=Pattern.compile("text/[-\\w]+|application/json");
 	private static final Pattern URLEncodedPattern=Pattern.compile("application/x-www-form-urlencoded\\b");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Trace trace=tool(Trace.Factory);
+	private final Trace trace=tool(Trace.trace());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,12 +131,11 @@ public final class Server implements Wrapper {
 		return response;
 	}
 
-	private Response charset(final Response response) { // prevent the container from adding its default charset…
+	private Response charset(final Response response) { // ;( prevent the container from adding its own default charset…
 
 		response.header("Content-Type")
-				.filter(type -> !CharsetPattern.matcher(type).find())
-				.filter(type -> type.startsWith("text/") || type.equals("application/json"))
-				.ifPresent(type -> response.header("Content-Type", type+";charset=UTF-8"));
+				.filter(type -> TextualPattern.matcher(type).matches()) // textual content with no charset
+				.ifPresent(type -> response.header("Content-Type", type+"; charset=UTF-8"));
 
 		return response;
 	}
