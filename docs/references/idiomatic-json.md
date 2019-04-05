@@ -107,11 +107,11 @@ If the term may be proved to be  a back-reference to an enclosing resource, the 
 
 ### Parsing
 
-When parsing, relative `<iri>` references are resolved against the base URI provided to the [parser](...javadocs/com/metreeca/form/codecs/JSONParser.html), which for HTTP REST operations equals the IRI of the request [item](../javadocs/com/metreeca/rest/Request.html#item--).
+When parsing, relative `<iri>` references are resolved against the base URI provided to the [parser](../javadocs/com/metreeca/form/codecs/JSONParser.html), which for HTTP REST operations equals the IRI of the request [item](../javadocs/com/metreeca/rest/Request.html#item--).
 
 ### Writing
 
-When writing, local `<iri>` references are relativized as root-relative IRIs against the base URI provided to the [writer](...javadocs/com/metreeca/form/codecs/JSONWRiter.html), which for HTTP REST operations equals the root IRI of the response [item](.../javadocs/com/metreeca/rest/Response.html#item--).
+When writing, local `<iri>` references are relativized as root-relative IRIs against the base URI provided to the [writer](../javadocs/com/metreeca/form/codecs/JSONWRiter.html), which for HTTP REST operations equals the root IRI of the response [item](../javadocs/com/metreeca/rest/Response.html#item--).
 
 ## Term Properties
 

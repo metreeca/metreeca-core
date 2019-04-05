@@ -246,7 +246,7 @@ If the router doesn't contain a matching handler, no action is performed giving 
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](linked-data-interaction#faceted-search), sorting and pagination |
+| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](interact-with-ldp-apis#faceted-search), sorting and pagination |
 | [Generator](../javadocs/?com/metreeca/rest/handlers/actors/Generator.html) | virtual container/resource retrieval / retrieves the detailed RDF description of the target virtual item and (optionally) the digest RDF description of the contained resources |
 | [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
 | [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html) | resource updating / updates the detailed RDF description of the target item |
