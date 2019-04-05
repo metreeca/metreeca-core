@@ -225,12 +225,12 @@ Content-Type: text/turtle;charset=UTF-8
 
 Requests are forwarded to a registered handler if their path is matched by an associated pattern defined by a sequence of steps according to the following rules:
 
-| pattern step | matching path step   | definition                  |
-| ------------ | -------------------- | --------------------------- |
-| /            | /                    | matches only the empty step |
-| `/<step>`    | `/<step>`            | matches step verbatim       |
-| `/*`         | `/<step>`            | matches a single step       |
-| /**          | `/<step>[/<step>/…]` | matches one or more steps   |
+| pattern step | matching path step   | definition                                  |
+| ------------ | -------------------- | ------------------------------------------- |
+| /            | /                    | empty / matches only the empty step         |
+| `/<step>`    | `/<step>`            | literal / matches step verbatim             |
+| `/*`         | `/<step>`            | wildcard / matches a single step            |
+| /**          | `/<step>[/<step>/…]` | prefix / matches one or more trailing steps |
 
 Registered path patterns are tested in order of definition.
 

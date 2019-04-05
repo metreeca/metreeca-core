@@ -47,21 +47,33 @@ final class RouterTest {
 	@Test void testCheckPaths() {
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
+				.as("empty path")
+				.isThrownBy(() -> new Router()
+						.path("", handler())
+				);
+
+		assertThatExceptionOfType(IllegalArgumentException.class)
 				.as("missing leading slash path")
 				.isThrownBy(() -> new Router()
 						.path("path", handler())
 				);
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
-				.as("malformed child segment")
+				.as("malformed child step")
 				.isThrownBy(() -> new Router()
 						.path("/pa*th", handler())
 				);
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
-				.as("malformed descendant segment")
+				.as("malformed prefix step")
 				.isThrownBy(() -> new Router()
 						.path("/pa**th", handler())
+				);
+
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.as("inline prefix step")
+				.isThrownBy(() -> new Router()
+						.path("/**/path", handler())
 				);
 
 		assertThatExceptionOfType(IllegalStateException.class)
@@ -89,7 +101,7 @@ final class RouterTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testMatchesExactPath() {
+	@Test void testMatchesLiteralPath() {
 
 		final Router router=new Router().path("/path", handler());
 
@@ -107,7 +119,7 @@ final class RouterTest {
 
 	}
 
-	@Test void testMatchesChildPath() {
+	@Test void testMatchesWildcardPath() {
 
 		final Router router=new Router().path("/head/*/tail", handler());
 
@@ -125,19 +137,19 @@ final class RouterTest {
 
 	}
 
-	@Test void testMatchesDescendantPath() {
+	@Test void testMatchesPrefixPath() {
 
-		final Router router=new Router().path("/head/**/tail", handler());
+		final Router router=new Router().path("/head/**", handler());
 
-		router.handle(request("/head/path/tail")).accept(response -> assertThat(response)
-				.hasHeader("path", "/head/path/tail")
+		router.handle(request("/head/path")).accept(response -> assertThat(response)
+				.hasHeader("path", "/head/path")
 		);
 
-		router.handle(request("/head/path/path/tail")).accept(response -> assertThat(response)
-				.hasHeader("path", "/head/path/path/tail")
+		router.handle(request("/head/path/path")).accept(response -> assertThat(response)
+				.hasHeader("path", "/head/path/path")
 		);
 
-		router.handle(request("/head/tail")).accept(response -> assertThat(response)
+		router.handle(request("/head")).accept(response -> assertThat(response)
 				.doesNotHaveHeader("path")
 		);
 

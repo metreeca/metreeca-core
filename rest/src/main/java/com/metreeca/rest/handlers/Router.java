@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * path}, ignoring the leading segment possibly already matched by wrapping routers.</p>
  *
  * <p>Requests are forwarded to a {@linkplain #path(String, Handler) registered} handler if their path is matched by an
- * associated pattern defined by a sequence of path steps according to the following rules:</p>
+ * associated pattern defined by a sequence of steps according to the following rules:</p>
  *
  * <ul>
  *
@@ -45,9 +45,9 @@ import java.util.regex.Pattern;
  *
  * <li>literal steps {@code /<step>} match path steps verbatim;</li>
  *
- * <li>child wildcard steps {@code /*} match a single path step;</li>
+ * <li>wildcard steps {@code /*} match a single path step;</li>
  *
- * <li>descendant wildcard steps {@code /**} match one or more path steps.</li>
+ * <li>prefix steps {@code /**} match one or more trailing path steps.</li>
  *
  * </ul>
  *
@@ -58,7 +58,7 @@ import java.util.regex.Pattern;
  */
 public final class Router implements Handler {
 
-	private static final Pattern PathPattern=Pattern.compile("(?<prefix>(/[^/*]*|/\\*\\*?)*?)(?<suffix>/\\*\\*?)?");
+	private static final Pattern PathPattern=Pattern.compile("(?<prefix>(/[^/*]*|/\\*)*?)(?<suffix>/\\*\\*?)?");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ public final class Router implements Handler {
 
 		final Matcher matcher=PathPattern.matcher(path);
 
-		if ( !matcher.matches() ) {
+		if ( path.isEmpty() || !matcher.matches() ) {
 			throw new IllegalArgumentException("malformed path <"+path+">");
 		}
 
@@ -133,8 +133,8 @@ public final class Router implements Handler {
 
 		final Pattern pattern=Pattern.compile(
 				String.format("(?<prefix>%s)(?<suffix>%s)",
-						Pattern.quote(prefix ==null? "" : prefix),
-						Pattern.quote(suffix ==null? "" : suffix)
+						prefix ==null? "" : Pattern.quote(prefix),
+						suffix ==null? "" : Pattern.quote(suffix)
 				)
 				.replaceAll("/\\*\\*", "\\\\E/.*\\\\Q")
 				.replaceAll("/\\*", "\\\\E/[^/]*\\\\Q")
