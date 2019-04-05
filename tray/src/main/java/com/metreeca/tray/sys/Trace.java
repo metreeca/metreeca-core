@@ -191,6 +191,7 @@ public abstract class Trace {
 		entry(Level.Error, source, message, cause);
 	}
 
+
 	/**
 	 * Adds a warning trace entry.
 	 *
@@ -229,6 +230,7 @@ public abstract class Trace {
 		entry(Level.Warning, source, message, cause);
 	}
 
+
 	/**
 	 * Adds an info trace entry.
 	 *
@@ -246,6 +248,7 @@ public abstract class Trace {
 	public final void info(final Object source, final Supplier<String> message) {
 		entry(Level.Info, source, message, null);
 	}
+
 
 	/**
 	 * Adds a debug trace entry.
@@ -381,7 +384,7 @@ public abstract class Trace {
 
 			record.setLoggerName(logger);
 			record.setSourceClassName(logger);
-			// !!! record.setSourceMethodName(null); // !!! support
+			//record.setSourceMethodName(???); // !!! support
 			record.setThrown(cause);
 
 			Logger.getLogger(logger).log(record);
