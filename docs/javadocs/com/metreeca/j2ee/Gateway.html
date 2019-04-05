@@ -18,8 +18,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":6};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -109,13 +109,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="https://docs.oracle.com/javase/8/docs/api/java/util/EventListener.html?is-external=true" title="class or interface in java.util">EventListener</a>, javax.servlet.ServletContextListener</dd>
+<dd>javax.servlet.Filter</dd>
 </dl>
 <hr>
 <br>
 <pre>public abstract class <span class="typeNameLabel">Gateway</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
-implements javax.servlet.ServletContextListener</pre>
+implements javax.servlet.Filter</pre>
 <div class="block">J2EE gateway.
 
  <p>Provides a gateway between a web application managed by Servlet 3.1 container and resource handlers based on the
@@ -123,7 +123,7 @@ implements javax.servlet.ServletContextListener</pre>
 
  <ul>
 
- <li>initializes and destroys the shared tool <a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">tray</a> managing platform components required by
+ <li>initializes and destroys the shared tool <a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">tray</a> managing platform services required by
  resource handlers;</li>
 
  <li>intercepts HTTP requests and handles them using a linked data <a href="../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">handler</a> loaded from the
@@ -148,15 +148,10 @@ implements javax.servlet.ServletContextListener</pre>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
 <caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
 <tr>
-<th class="colFirst" scope="col">Modifier</th>
-<th class="colLast" scope="col">Constructor and Description</th>
+<th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>protected </code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/j2ee/Gateway.html#Gateway-java.lang.String-java.util.function.Function-">Gateway</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;pattern,
-       <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>,<a href="../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a>&gt;&nbsp;loader)</code>
-<div class="block">Creates a new J2EE gateway.</div>
-</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../com/metreeca/j2ee/Gateway.html#Gateway--">Gateway</a></span>()</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -168,18 +163,28 @@ implements javax.servlet.ServletContextListener</pre>
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t3" class="tableTab"><span><a href="javascript:show(4);">Abstract Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/j2ee/Gateway.html#contextDestroyed-javax.servlet.ServletContextEvent-">contextDestroyed</a></span>(javax.servlet.ServletContextEvent&nbsp;event)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/j2ee/Gateway.html#destroy--">destroy</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/j2ee/Gateway.html#contextInitialized-javax.servlet.ServletContextEvent-">contextInitialized</a></span>(javax.servlet.ServletContextEvent&nbsp;event)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/j2ee/Gateway.html#doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain-">doFilter</a></span>(javax.servlet.ServletRequest&nbsp;request,
+        javax.servlet.ServletResponse&nbsp;response,
+        javax.servlet.FilterChain&nbsp;chain)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/j2ee/Gateway.html#init-javax.servlet.FilterConfig-">init</a></span>(javax.servlet.FilterConfig&nbsp;config)</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>protected abstract <a href="../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/j2ee/Gateway.html#load-com.metreeca.tray.Tray-">load</a></span>(<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;tray)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -203,23 +208,13 @@ implements javax.servlet.ServletContextListener</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="Gateway-java.lang.String-java.util.function.Function-">
+<a name="Gateway--">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>Gateway</h4>
-<pre>protected&nbsp;Gateway(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;pattern,
-                  <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>,<a href="../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a>&gt;&nbsp;loader)</pre>
-<div class="block">Creates a new J2EE gateway.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>pattern</code> - the URL pattern matching requests paths to be handled by the new gateway</dd>
-<dd><code>loader</code> - the handler loader; the loader is passed a configurable tool tray and is expected to return a
-                non-null resource handler</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if either <code>pattern</code> or <code>loader</code> is null</dd>
-</dl>
+<pre>public&nbsp;Gateway()</pre>
 </li>
 </ul>
 </li>
@@ -230,29 +225,58 @@ implements javax.servlet.ServletContextListener</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="contextInitialized-javax.servlet.ServletContextEvent-">
+<a name="load-com.metreeca.tray.Tray-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>contextInitialized</h4>
-<pre>public&nbsp;void&nbsp;contextInitialized(javax.servlet.ServletContextEvent&nbsp;event)</pre>
+<h4>load</h4>
+<pre>protected abstract&nbsp;<a href="../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a>&nbsp;load(<a href="../../../com/metreeca/tray/Tray.html" title="class in com.metreeca.tray">Tray</a>&nbsp;tray)</pre>
+</li>
+</ul>
+<a name="init-javax.servlet.FilterConfig-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>init</h4>
+<pre>public&nbsp;void&nbsp;init(javax.servlet.FilterConfig&nbsp;config)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>contextInitialized</code>&nbsp;in interface&nbsp;<code>javax.servlet.ServletContextListener</code></dd>
+<dd><code>init</code>&nbsp;in interface&nbsp;<code>javax.servlet.Filter</code></dd>
 </dl>
 </li>
 </ul>
-<a name="contextDestroyed-javax.servlet.ServletContextEvent-">
+<a name="destroy--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>destroy</h4>
+<pre>public&nbsp;void&nbsp;destroy()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>destroy</code>&nbsp;in interface&nbsp;<code>javax.servlet.Filter</code></dd>
+</dl>
+</li>
+</ul>
+<a name="doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>contextDestroyed</h4>
-<pre>public&nbsp;void&nbsp;contextDestroyed(javax.servlet.ServletContextEvent&nbsp;event)</pre>
+<h4>doFilter</h4>
+<pre>public&nbsp;void&nbsp;doFilter(javax.servlet.ServletRequest&nbsp;request,
+                     javax.servlet.ServletResponse&nbsp;response,
+                     javax.servlet.FilterChain&nbsp;chain)
+              throws javax.servlet.ServletException,
+                     <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>contextDestroyed</code>&nbsp;in interface&nbsp;<code>javax.servlet.ServletContextListener</code></dd>
+<dd><code>doFilter</code>&nbsp;in interface&nbsp;<code>javax.servlet.Filter</code></dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>javax.servlet.ServletException</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>

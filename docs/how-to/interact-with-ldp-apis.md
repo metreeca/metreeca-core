@@ -1,5 +1,5 @@
 ---
-title:	        How-To Interact with Model‑Driven Linked Data REST APIs
+title:	        How To Interact with Model‑Driven Linked Data REST APIs
 excerpt:        Hands-on guided tour of model-driven linked data REST APIs features
 redirect_from: /tutorials/linked-data-interaction
 ---

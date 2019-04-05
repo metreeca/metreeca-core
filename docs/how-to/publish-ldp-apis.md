@@ -1,5 +1,5 @@
 ---
-title:	        How-To Publish Model‑Driven Linked Data REST APIs
+title:	        How To Publish Model‑Driven Linked Data REST APIs
 excerpt:        Hands-on guided tour of model-driven linked data REST APIs publishing
 redirect_from: /tutorials/linked-data-publishing
 ---
@@ -505,15 +505,11 @@ role(BIRT.staff).then(field(BIRT.buy, and(required(),
 This `role` guard states that the `birt:buy` price will be visible only if the request is performed by a user in the `birt:staff` role, usually as verified by authtentication/authorization wrappers, like in the following naive sample:
 
 ```java
-private static boolean authorized(final Request request) {
-    return request.header("Authorization").orElse("").equals("Bearer secret");
-}
-```
-
-```java
 () -> new Server()
 
     .wrap(new Rewriter(BIRT.Base))
+  
+  	// set request roles if user is authorized
 
     .wrap((Wrapper)handler -> request ->
           authorized(request) ? handler.handle(request.roles(BIRT.staff))
@@ -526,6 +522,12 @@ private static boolean authorized(final Request request) {
             .path("/products/**", new Products())
 
     )
+```
+
+```java
+private static boolean authorized(final Request request) {
+    return request.header("Authorization").orElse("").equals("Bearer secret");
+}
 ```
 
 ```shell

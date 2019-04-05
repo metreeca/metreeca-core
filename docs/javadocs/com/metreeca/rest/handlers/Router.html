@@ -118,24 +118,24 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 implements <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></pre>
 <div class="block">Path-based request router.
 
- <p>Delegates request processing to a handler selected on the basis of the request HTTP <a href="../../../../com/metreeca/rest/Request.html#path--">path</a> according to the following rules, in order of precedence:</p>
+ <p>Delegates request processing to a handler selected on the basis of the request HTTP <a href="../../../../com/metreeca/rest/Request.html#path--">path</a>, ignoring the leading segment possibly already matched by wrapping routers.</p>
+
+ <p>Requests are forwarded to a <a href="../../../../com/metreeca/rest/handlers/Router.html#path-java.lang.String-com.metreeca.rest.Handler-">registered</a> handler if their path is matched by an
+ associated pattern defined by a sequence of steps according to the following rules:</p>
 
  <ul>
 
- <li>the root path (<code>/</code>) matches only the root resource (<code>/</code>);</li>
+ <li>the empty step (<code>/</code>) matches only an empty step (<code>/</code>);</li>
 
- <li>paths with a trailing slash (<code>/&lt;resource&gt;/</code>) match any resource path sharing the same prefix, ignoring
- trailing slashes (<code>/&lt;resource&gt;</code>, <code>/&lt;resource&gt;/</code>, <code>/&lt;resource&gt;/&lt;item&gt;/…</code>);</li>
+ <li>literal steps <code>/&lt;step&gt;</code> match path steps verbatim;</li>
 
- <li>paths with a trailing wildcard (<code>/&lt;resource&gt;/*</code>) match any immediately nested resource path sharing the
- same prefix, ignoring trailing slashes (<code>/&lt;resource&gt;/&lt;item&gt;</code>, <code>/&lt;resource&gt;/&lt;item&gt;/</code>, but not <code>/&lt;resource&gt;/&lt;item&gt;/…</code>);</li>
+ <li>wildcard steps <code>/*</code> match a single path step;</li>
 
- <li>paths with no trailing slash or wildcard (<code>/&lt;resource&gt;</code>) match resource path exactly, ignoring trailing
- slashes (<code>/&lt;resource&gt;</code>, <code>/&lt;resource&gt;/</code>);</li>
+ <li>prefix steps <code>/**</code> match one or more trailing path steps.</li>
 
  </ul>
 
- <p>Lexicographically longer/preceding paths take precedence over shorter/following ones.</p>
+ <p>Registered path patterns are tested in order of definition.</p>
 
  <p>If the index doesn't contain a matching handler, no action is performed giving the system adapter a fall-back
  opportunity to handle the request.</p></div>
@@ -250,8 +250,7 @@ implements <a href="../../../../com/metreeca/rest/Handler.html" title="interface
 <dd>this router</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if either <code>path</code> or <code>handler</code> is null</dd>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if <code>path</code> doesn't match the <code>^(/[-+_\w]+)*(/\*?)?$</code> regular
-                                  expression</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if <code>path</code> is not a well-formed sequence of steps ( <code>/&lt;step&gt; | /** | /*</code> )</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></code> - if <code>path</code> is already bound to a handler</dd>
 </dl>
 </li>

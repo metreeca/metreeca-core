@@ -118,7 +118,13 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 implements <a href="../../../../com/metreeca/gate/Roster.html" title="interface in com.metreeca.gate">Roster</a></pre>
 <div class="block">Basic user roster.
 
- <p>Manages user credentials stored in the shared <a href="../../../../com/metreeca/tray/rdf/Graph.html#graph--"><code>graph</code></a> tool using the shared <a href="../../../../com/metreeca/gate/Digest.html#digest--"><code>digest</code></a> and <a href="../../../../com/metreeca/gate/Policy.html#policy--"><code>policy</code></a> tools.</p></div>
+ <p>Manages user credentials stored in the shared <a href="../../../../com/metreeca/tray/rdf/Graph.html#graph--"><code>graph</code></a> tool using the shared <a href="../../../../com/metreeca/gate/Digest.html#digest--"><code>digest</code></a> and <a href="../../../../com/metreeca/gate/Policy.html#policy--"><code>policy</code></a> tools.</p>
+
+ <p>User secret digests are stored in the graph with the following layout:</p>
+
+ <pre><code>
+ &lt;user&gt; gate:secret 'digest' .
+ </code></pre></div>
 </li>
 </ul>
 </div>
@@ -153,7 +159,9 @@ implements <a href="../../../../com/metreeca/gate/Roster.html" title="interface 
 </tr>
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gate/rosters/BasicRoster.html#BasicRoster-java.util.function.BiFunction-java.util.function.BiFunction-">BasicRoster</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/repository/RepositoryConnection.html?is-external=true" title="class or interface in org.eclipse.rdf4j.repository">RepositoryConnection</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&gt;&gt;&nbsp;resolver,
-           <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/repository/RepositoryConnection.html?is-external=true" title="class or interface in org.eclipse.rdf4j.repository">RepositoryConnection</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="../../../../com/metreeca/gate/Permit.html" title="class in com.metreeca.gate">Permit</a>&gt;&gt;&nbsp;profiler)</code>&nbsp;</td>
+           <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/repository/RepositoryConnection.html?is-external=true" title="class or interface in org.eclipse.rdf4j.repository">RepositoryConnection</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="../../../../com/metreeca/gate/Permit.html" title="class in com.metreeca.gate">Permit</a>&gt;&gt;&nbsp;profiler)</code>
+<div class="block">Creates a basic user roster.</div>
+</td>
 </tr>
 </table>
 </li>
@@ -235,6 +243,15 @@ implements <a href="../../../../com/metreeca/gate/Roster.html" title="interface 
 <h4>BasicRoster</h4>
 <pre>public&nbsp;BasicRoster(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/repository/RepositoryConnection.html?is-external=true" title="class or interface in org.eclipse.rdf4j.repository">RepositoryConnection</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>&gt;&gt;&nbsp;resolver,
                    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/repository/RepositoryConnection.html?is-external=true" title="class or interface in org.eclipse.rdf4j.repository">RepositoryConnection</a>,<a href="http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/IRI.html?is-external=true" title="class or interface in org.eclipse.rdf4j.model">IRI</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="../../../../com/metreeca/gate/Permit.html" title="class in com.metreeca.gate">Permit</a>&gt;&gt;&nbsp;profiler)</pre>
+<div class="block">Creates a basic user roster.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>resolver</code> - a function mapping from a user handle (e.g. an email address) to an IRI uniquely identifying the
+                 user; returns an empty optional if the user is not known</dd>
+<dd><code>profiler</code> - a function mapping from a IRI uniquely identifying a user to a permit describing the user
+                 (including current state hash, granted roles and public profile; returns an empty optional if the
+                 user is not known</dd>
+</dl>
 </li>
 </ul>
 </li>
