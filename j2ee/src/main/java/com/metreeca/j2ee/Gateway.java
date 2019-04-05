@@ -23,12 +23,11 @@ import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.sys.Loader;
 import com.metreeca.tray.sys.Storage;
-import com.metreeca.tray.sys.Trace;
 
 import java.io.*;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.OutputBody.output;
+import static com.metreeca.tray.sys.Trace.trace;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;
@@ -50,7 +50,7 @@ import static java.util.Objects.requireNonNull;
  *
  * <ul>
  *
- * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform components required by
+ * <li>initializes and destroys the shared tool {@linkplain Tray tray} managing platform services required by
  * resource handlers;</li>
  *
  * <li>intercepts HTTP requests and handles them using a linked data {@linkplain Handler handler} loaded from the
@@ -61,55 +61,38 @@ import static java.util.Objects.requireNonNull;
  *
  * </ul>
  */
-public abstract class Gateway implements ServletContextListener {
+public abstract class Gateway implements Filter {
 
 	private final Tray tray=new Tray();
 
-	private final String pattern;
-	private final Function<Tray, Handler> loader;
+	private final Supplier<Handler> handler=() -> requireNonNull(load(tray), "null resource handler");
 
 
-	/**
-	 * Creates a new J2EE gateway.
+	/*
+	 * Creates the main gateway handler.
 	 *
-	 * @param pattern the URL pattern matching requests paths to be handled by the new gateway
-	 * @param loader  the handler loader; the loader is passed a configurable tool tray and is expected to return a
-	 *                non-null resource handler
-	 *
-	 * @throws NullPointerException if either {@code pattern} or {@code loader} is null
+	 * @param tray the shared tool tray; may be configured with additional application-specific services
+	 * @return a non-null resource handler to be used as main entry point for serving requests
 	 */
-	protected Gateway(final String pattern, final Function<Tray, Handler> loader) {
-
-		if ( pattern == null ) {
-			throw new NullPointerException("null pattern");
-		}
-
-		if ( loader == null ) {
-			throw new NullPointerException("null loader");
-		}
-
-		this.pattern=pattern;
-		this.loader=loader;
-	}
+	protected abstract Handler load(final Tray tray);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public void contextInitialized(final ServletContextEvent event) {
+	@Override public void init(final FilterConfig config) {
 
-		final ServletContext context=event.getServletContext();
+		final ServletContext context=config.getServletContext();
 
 		try {
 
-			final Handler handler=requireNonNull(loader.apply(tray
+			tray
 
 					.set(Storage.storage(), () -> storage(context))
 					.set(Loader.loader(), () -> loader(context))
 
-			), "null resource handler");
+					.exec(handler::get) // force handler loading during filter initialization
 
-			context.addFilter(Gateway.class.getName(), tray.get(() -> new GatewayFilter(handler)))
-					.addMappingForUrlPatterns(null, false, pattern);
+					.get(trace()).info(this, "loaded handler");
 
 		} catch ( final Throwable t ) {
 
@@ -117,7 +100,7 @@ public abstract class Gateway implements ServletContextListener {
 
 				t.printStackTrace(new PrintWriter(message));
 
-				tray.get(Trace.trace()).error(this, "error during initialization: "+message);
+				tray.get(trace()).error(this, "error during initialization: "+message);
 
 				context.log("error during initialization", t);
 
@@ -136,14 +119,12 @@ public abstract class Gateway implements ServletContextListener {
 		}
 	}
 
-	@Override public void contextDestroyed(final ServletContextEvent event) {
+	@Override public void destroy() {
 
 		tray.clear();
 
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Storage storage(final ServletContext context) {
 		return name -> {
@@ -171,100 +152,80 @@ public abstract class Gateway implements ServletContextListener {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class GatewayFilter implements Filter {
+	@Override public void doFilter(
+			final ServletRequest request, final ServletResponse response, final FilterChain chain
+	) throws ServletException, IOException {
 
-		private final Handler handler;
+		tray.get(handler)
+				.handle(request((HttpServletRequest)request))
+				.accept(_response -> response((HttpServletResponse)response, _response));
 
-
-		private GatewayFilter(final Handler handler) {
-			this.handler=handler;
+		if ( !response.isCommitted() ) {
+			chain.doFilter(request, response);
 		}
 
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		@Override public void init(final FilterConfig config) {}
-
-		@Override public void destroy() {}
+	}
 
 
-		@Override public void doFilter(
-				final ServletRequest request, final ServletResponse response, final FilterChain chain
-		) throws ServletException, IOException {
+	private Request request(final HttpServletRequest http) {
 
-			handler.handle(request((HttpServletRequest)request))
-					.accept(r -> response((HttpServletResponse)response, r));
+		final String target=http.getRequestURL().toString();
+		final String path=http.getRequestURI().substring(http.getContextPath().length());
+		final String base=target.substring(0, target.length()-path.length()+1);
+		final String query=http.getQueryString();
 
-			if ( !response.isCommitted() ) {
-				chain.doFilter(request, response);
-			}
+		final Request request=new Request()
+				.method(http.getMethod())
+				.base(base)
+				.path(path)
+				.query(query != null ? query : "");
 
+		for (final Map.Entry<String, String[]> parameter : http.getParameterMap().entrySet()) {
+			request.parameters(parameter.getKey(), asList(parameter.getValue()));
 		}
 
+		for (final String name : list(http.getHeaderNames())) {
+			request.headers(name, list(http.getHeaders(name)));
+		}
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		private Request request(final HttpServletRequest http) {
-
-			final String target=http.getRequestURL().toString();
-			final String path=http.getRequestURI().substring(http.getContextPath().length());
-			final String base=target.substring(0, target.length()-path.length()+1);
-			final String query=http.getQueryString();
-
-			final Request request=new Request()
-					.method(http.getMethod())
-					.base(base)
-					.path(path)
-					.query(query != null ? query : "");
-
-			for (final Map.Entry<String, String[]> parameter : http.getParameterMap().entrySet()) {
-				request.parameters(parameter.getKey(), asList(parameter.getValue()));
+		return request.body(input(), () -> {
+			try {
+				return http.getInputStream();
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
 			}
+		});
 
-			for (final String name : list(http.getHeaderNames())) {
-				request.headers(name, list(http.getHeaders(name)));
-			}
+	}
 
-			return request.body(input(), () -> {
+	private void response(final HttpServletResponse http, final Response response) {
+		if ( response.status() > 0 ) { // only if actually processed
+
+			http.setStatus(response.status());
+
+			response.headers().forEach((name, values) ->
+					values.forEach(value -> http.addHeader(name, value))
+			);
+
+			// ignore missing response bodies // !!! handle other body retrieval errors
+
+			response.body(output()).value().ifPresent(consumer -> consumer.accept(() -> {
 				try {
-					return http.getInputStream();
+					return http.getOutputStream();
 				} catch ( final IOException e ) {
 					throw new UncheckedIOException(e);
 				}
-			});
+			}));
 
-		}
-
-		private void response(final HttpServletResponse http, final Response response) {
-			if ( response.status() > 0 ) { // only if actually processed
-
-				http.setStatus(response.status());
-
-				response.headers().forEach((name, values) ->
-						values.forEach(value -> http.addHeader(name, value))
-				);
-
-				// ignore missing response bodies // !!! handle other body retrieval errors
-
-				response.body(output()).value().ifPresent(consumer -> consumer.accept(() -> {
-					try {
-						return http.getOutputStream();
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}));
-
-				if ( !http.isCommitted() ) { // flush if not already committed by bodies
-					try {
-						http.flushBuffer();
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
+			if ( !http.isCommitted() ) { // flush if not already committed by bodies
+				try {
+					http.flushBuffer();
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
 				}
-
 			}
-		}
 
+		}
 	}
 
 }

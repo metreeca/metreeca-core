@@ -32,7 +32,7 @@ import java.io.StringReader;
 import java.util.function.Function;
 
 import static com.metreeca.form.things.ValuesTest.*;
-import static com.metreeca.form.truths.JSONAssert.assertThat;
+import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.InputBody.input;

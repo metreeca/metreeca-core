@@ -24,10 +24,12 @@ import com.metreeca.rest.Wrapper;
 import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
@@ -45,7 +47,7 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Postprocessor implements Wrapper {
 
-	private final Collection<BiFunction<Response, Model, Model>> filters;
+	private final Collection<BiFunction<Response, Model, ? extends Collection<Statement>>> filters;
 
 
 	/**
@@ -63,7 +65,7 @@ public final class Postprocessor implements Wrapper {
 	 * @see Connector#query(String, BiConsumer[])
 	 * @see Connector#update(String, BiConsumer[])
 	 */
-	@SafeVarargs public Postprocessor(final BiFunction<Response, Model, Model>... filters) {
+	@SafeVarargs public Postprocessor(final BiFunction<Response, Model, ? extends Collection<Statement>>... filters) {
 		this(asList(filters));
 	}
 
@@ -83,13 +85,13 @@ public final class Postprocessor implements Wrapper {
 	 * @see Connector#query(String, BiConsumer[])
 	 * @see Connector#update(String, BiConsumer[])
 	 */
-	public Postprocessor(final Collection<BiFunction<Response, Model, Model>> filters) {
+	public Postprocessor(final Collection<BiFunction<Response, Model, ? extends Collection<Statement>>> filters) {
 
 		if ( filters == null ) {
 			throw new NullPointerException("null filters");
 		}
 
-		if ( filters.contains(null) ) {
+		if ( filters.stream().anyMatch(Objects::isNull)) {
 			throw new NullPointerException("null filter");
 		}
 
@@ -119,10 +121,16 @@ public final class Postprocessor implements Wrapper {
 
 						(Model)new LinkedHashModel(model),
 
-						(_model, filter) -> requireNonNull(
-								filter.apply(response, new LinkedHashModel(_model)),
-								"null filter return value"
-						),
+						(_model, filter) -> {
+
+							final Collection<Statement> out=requireNonNull(
+									filter.apply(response, _model),
+									"null filter return value"
+							);
+
+							return out instanceof Model ? (Model)out : new LinkedHashModel(out);
+
+						},
 
 						(x, y) -> {
 

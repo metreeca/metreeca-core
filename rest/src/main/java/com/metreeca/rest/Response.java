@@ -34,6 +34,7 @@ public final class Response extends Message<Response> {
 	public static final int OK=200; // https://tools.ietf.org/html/rfc7231#section-6.3.1
 	public static final int Created=201; // https://tools.ietf.org/html/rfc7231#section-6.3.2
 	public static final int Accepted=202; // https://tools.ietf.org/html/rfc7231#section-6.3.3
+	public static final int NonAuthoritativeInformation=203; // https://tools.ietf.org/html/rfc7231#section-6.3.4
 	public static final int NoContent=204; // https://tools.ietf.org/html/rfc7231#section-6.3.5
 
 	public static final int MovedPermanently=301; // https://tools.ietf.org/html/rfc7231#section-6.4.2

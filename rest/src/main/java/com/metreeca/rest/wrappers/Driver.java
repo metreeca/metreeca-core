@@ -123,7 +123,7 @@ public final class Driver implements Wrapper {
 
 
 	private Request before(final Request request) {
-		return pass(shape) ? request : request.shape(shape);
+		return request.shape(shape);
 	}
 
 	private Response after(final Response response) {

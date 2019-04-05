@@ -40,6 +40,8 @@ import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Codecs.encode;
+import static com.metreeca.form.things.JsonValues.object;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Values.inverse;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
@@ -266,11 +268,11 @@ final class RewriterTest {
 						.shape(TestShape)
 
 						.body(input(), () -> new ByteArrayInputStream(
-								Json.createObjectBuilder()
-										.add("p", "o")
-										.build()
+								object(entry("p", "o"))
 										.toString()
-										.getBytes(Codecs.UTF8))))
+										.getBytes(Codecs.UTF8)
+						))
+				)
 
 
 				.accept(response -> {
@@ -284,10 +286,10 @@ final class RewriterTest {
 
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
 										.as("rewritten response json")
-										.isEqualTo(Json.createObjectBuilder()
-												.add("this", External+"s")
-												.add("p", External+"o")
-												.build());
+										.isEqualTo(object(
+												entry("_this", "/s"),
+												entry("p", "/o")
+										));
 
 							},
 							error -> fail("missing output body")

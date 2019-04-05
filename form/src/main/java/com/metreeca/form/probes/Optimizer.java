@@ -54,6 +54,15 @@ public final class Optimizer extends Traverser<Shape> {
 	// !!! optimize datatypes (remove form:value, merge super/subtypes)
 
 
+	@Override public Shape probe(final All all) {
+		return all.getValues().isEmpty()? and() : all;
+	}
+
+	@Override public Shape probe(final Any any) {
+		return any.getValues().isEmpty()? or() : any;
+	}
+
+
 	@Override public Shape probe(final Field field) {
 
 		final IRI iri=field.getIRI();

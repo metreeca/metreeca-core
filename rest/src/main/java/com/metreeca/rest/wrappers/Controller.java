@@ -21,11 +21,9 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Wrapper;
 
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.IRI;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static com.metreeca.rest.Handler.refused;
 
@@ -40,39 +38,35 @@ import static java.util.Arrays.asList;
  */
 public final class Controller implements Wrapper {
 
-	private final Set<Value> roles;
+	private final Set<IRI> roles;
 
 
 	/**
 	 * Creates a controller.
 	 *
-	 * @param roles the user {@linkplain Request#roles(Value...) roles} enabled to perform the action managed by the
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
 	 *              {@linkplain Request#shape() request shape}, if one is present
 	 *
 	 * @throws NullPointerException if either {@code roles} is null or contains null values
 	 */
-	public Controller(final Value... roles) {
+	public Controller(final IRI... roles) {
 		this(asList(roles));
 	}
 
 	/**
 	 * Configures the permitted roles.
 	 *
-	 * @param roles the user {@linkplain Request#roles(Value...) roles} enabled to perform the action managed by the
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
 	 *              {@linkplain Request#shape() request shape}, if one is present
 	 *
 	 * @throws NullPointerException if either {@code roles} is null or contains null values
 	 */
-	public Controller(final Collection<? extends Value> roles) {
+	public Controller(final Collection<? extends IRI> roles) {
 
-		if ( roles == null ) {
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull)) {
 			throw new NullPointerException("null roles");
-		}
-
-		if ( roles.contains(null) ) {
-			throw new NullPointerException("null role");
 		}
 
 		this.roles=new HashSet<>(roles);
@@ -89,7 +83,7 @@ public final class Controller implements Wrapper {
 
 			} else {
 
-				final Collection<Value> roles=new HashSet<>(this.roles);
+				final Collection<IRI> roles=new HashSet<>(this.roles);
 
 				roles.retainAll(request.roles());
 

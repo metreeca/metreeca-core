@@ -55,7 +55,22 @@ public final class Values {
 	/**
 	 * A pattern matching absolute IRIs.
 	 */
-	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^\\w+:\\S+$");
+	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^[^:/?#]+:.+$");
+
+	/**
+	 * A pattern matching IRI components.
+	 *
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
+	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
+	 */
+	public static final Pattern IRIPattern=Pattern.compile("^"
+			+ "(?<schemeall>(?<scheme>[^:/?#]+):)?"
+			+ "(?<hostall>//(?<host>[^/?#]*))?"
+			+ "(?<path>[^?#]*)"
+			+ "(?<queryall>\\?(?<query>[^#]*))?"
+			+ "(?<fragmentall>#(?<fragment>.*))?"
+			+"$"
+	);
 
 
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
@@ -105,9 +120,9 @@ public final class Values {
 
 	public static boolean is(final Value value, final IRI datatype) {
 		return value != null && (type(value).equals(datatype)
-				|| Form.ValueType.equals(datatype)
 				|| value instanceof Resource && Form.ResourceType.equals(datatype)
 				|| value instanceof Literal && Form.LiteralType.equals(datatype)
+				|| Form.ValueType.equals(datatype)
 		);
 	}
 
@@ -219,7 +234,7 @@ public final class Values {
 			throw new NullPointerException("null id");
 		}
 
-		return factory.createBNode(id);
+		return factory.createBNode(id.startsWith("_:")? id.substring(2) : id);
 	}
 
 

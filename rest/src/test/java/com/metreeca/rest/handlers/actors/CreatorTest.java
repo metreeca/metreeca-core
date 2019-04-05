@@ -45,7 +45,7 @@ import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.*;
-import static com.metreeca.form.truths.JSONAssert.assertThat;
+import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.form.truths.ValueAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;

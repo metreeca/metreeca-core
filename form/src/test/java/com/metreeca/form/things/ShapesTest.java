@@ -292,6 +292,19 @@ import static java.util.stream.Collectors.toSet;
 						.hasStatement(resource, RDF.TYPE, term("Employee"));
 			}
 
+			@Test void testAnchorToDirectNestedContainer() {
+
+				final Shape direct=redact(container(item("employees/1370/customers/"), and(
+						meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
+						meta(LDP.HAS_MEMBER_RELATION, term("customer")),
+						meta(LDP.MEMBERSHIP_RESOURCE, LDP.RESOURCE),
+						field(LDP.CONTAINS, Employee)
+				)));
+
+				ModelAssert.assertThat(direct.map(new Outliner(item("/customer/123"))).collect(toList()))
+						.hasStatement(item("employees/1370"), term("customer"), item("/customer/123"));
+			}
+
 		}
 
 	}

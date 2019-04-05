@@ -349,6 +349,7 @@ public final class ValuesTest {
 		}
 	}
 
+
 	public static Model export(final RepositoryConnection connection, final Resource... contexts) {
 
 		final Model model=new TreeModel();
@@ -367,7 +368,7 @@ public final class ValuesTest {
 
 		final Repository repository=new SailRepository(new MemoryStore());
 
-		repository.initialize();
+		repository.init();
 
 		try (final RepositoryConnection connection=repository.getConnection()) {
 			for (final Iterable<Statement> dataset : datasets) {

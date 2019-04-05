@@ -7,13 +7,13 @@ REST APIs publishing model-driven [LDP Containers](https://www.w3.org/TR/ldp/#ld
 
 <!-- document support for other query serializations -->
 
-Faceted searches return an RDF description of the query-specific result set. Standard content negotiation is supported for the RDF payload through the `Accept` HTTP request header. In the following sections, RDF structures for query responses are outlined using the [idiomatic JSON](idiomatic-json.md) format (`application/json`  MIME type).
+Faceted searches return an RDF description of the query-specific result set. Standard content negotiation is supported for the RDF payload through the `Accept` HTTP request header. In the following sections, RDF structures for query responses are outlined using the [idiomatic JSON](idiomatic-json) format (`application/json`  MIME type).
 
 # Queries
 
-Linked data [queries](../javadocs/com/metreeca/form/Query.html) define what kind of results is expected from faceted searches on [readable](../tutorials/linked-data-interaction.md#read-operations) linked data REST APIs.
+Linked data [queries](../javadocs/com/metreeca/form/Query.html) define what kind of results is expected from faceted searches on [readable](../how-to/interact-with-ldp-apis#read-operations) linked data REST APIs.
 
-JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format with  query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all RDF terms appearing in filters, including [shorthands](idiomatic-json.md#literals) for numeric values and literals with provable datatypes.
+JSON query serialization extends the [idiomatic JSON](idiomatic-json) format with  query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all RDF terms appearing in filters, including [shorthands](idiomatic-json#literals) for numeric values and literals with provable datatypes.
 
 <p class="warning">Work in progress… specs to be improved and detailed.</p>
 
@@ -21,7 +21,7 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format 
 
 [Edges](../javadocs/com/metreeca/form/queries/Edges.html) queries return the RDF description of container items matching a set of facet filters.
 
-    <edges query> ::= { // all fields are optional
+    <edges query> ::= { // all fields are optional and nullable
         "filter": <filter>,        
         "order": <criterion> | [<criterion>,(<criterion>)*],
         "offset": <integer>,
@@ -42,7 +42,7 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format 
 ```
 <stats query> ::= {
     "stats": "<path>",
-      "filter": <filter> // optional
+    "filter": <filter> // optional and nullable
 }
 ```
 
@@ -75,8 +75,8 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format 
 [Items](../javadocs/com/metreeca/form/queries/Items.html) queries return an RDF report detailing option values and counts for a facet specified by a target property path, taking into account applied filters.
 
     <items query> ::= {
-        "filter": <filter>,
-        "items": "<path>" // optional
+        "items": "<path>",
+        "filter": <filter> // optional and nullable
     }
     
     <items response> ::= {
@@ -110,7 +110,7 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json.md) format 
         
         ">#": <object>, // minLength
         "#<": <object>, // maxLength
-                
+        
         "*": "pattern", // pattern (regular expression matching)
         "~": "keywords", // like (stemmed word search)
     

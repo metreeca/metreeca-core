@@ -6,10 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="_gate" />
-        <module name="_utow" />
         <module name="form" />
         <module name="gcloud" />
+        <module name="gate" />
         <module name="j2ee" />
         <module name="rdf4j" />
         <module name="rest" />
@@ -35,6 +34,7 @@
       <module name="demo" target="1.8" />
       <module name="fore" target="1.8" />
       <module name="form" target="1.8" />
+      <module name="gate" target="1.8" />
       <module name="gcloud" target="1.8" />
       <module name="j2ee" target="1.8" />
       <module name="jeep" target="1.8" />

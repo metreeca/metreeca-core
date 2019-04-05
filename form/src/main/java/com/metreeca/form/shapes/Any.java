@@ -63,10 +63,6 @@ public final class Any implements Shape {
 			throw new NullPointerException("null values");
 		}
 
-		if ( values.isEmpty() ) {
-			throw new IllegalArgumentException("empty values");
-		}
-
 		if ( values.contains(null) ) {
 			throw new NullPointerException("null value");
 		}

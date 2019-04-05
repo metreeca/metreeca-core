@@ -167,7 +167,7 @@ public final class Throttler implements Wrapper {
 
 			final IRI focus=request.item();
 			final Shape shape=request.shape();
-			final Set<Value> roles=request.roles();
+			final Set<IRI> roles=request.roles();
 
 			if ( pass(shape) ) {
 

@@ -30,6 +30,7 @@ import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -84,6 +85,7 @@ public final class RDFBody implements Body<Collection<Statement>> {
 					final IRI focus=message.item();
 					final Shape shape=message.shape();
 
+					final String base=focus.stringValue();
 					final String type=message.header("Content-Type").orElse("");
 
 					final RDFParser parser=Formats
@@ -103,7 +105,7 @@ public final class RDFBody implements Body<Collection<Statement>> {
 
 					parser.setParseErrorListener(errorCollector);
 
-					final Collection<Statement> model=new LinkedHashSet<>();  // order-preserving and writable
+					final Collection<Statement> model=new LinkedHashSet<>(); // order-preserving and writable
 
 					parser.setRDFHandler(new AbstractRDFHandler() {
 						@Override public void handleStatement(final Statement statement) { model.add(statement); }
@@ -111,7 +113,7 @@ public final class RDFBody implements Body<Collection<Statement>> {
 
 					try (final InputStream input=supplier.get()) {
 
-						parser.parse(input, focus.stringValue()); // resolve relative IRIs wrt the focus
+						parser.parse(input, base); // resolve relative IRIs wrt the request focus
 
 					} catch ( final RDFParseException e ) {
 
@@ -183,20 +185,27 @@ public final class RDFBody implements Body<Collection<Statement>> {
 				)
 
 				.body(output(), rdf().map(rdf -> target -> {
+
+					final IRI focus=message.item();
+					final Shape shape=message.shape();
+
+					final String base=focus.stringValue();
+
 					try (final OutputStream output=target.get()) {
 
-						final Shape shape=message.shape();
-
-						final RDFWriter writer=factory.getWriter(output);
+						final RDFWriter writer=factory.getWriter(output, base); // relativize IRIs wrt the response focus
 
 						writer.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
-						writer.set(JSONCodec.Focus, message.item());
+						writer.set(JSONCodec.Focus, focus);
 
 						Rio.write(rdf, writer);
 
+					} catch ( final URISyntaxException e ) {
+						throw new UnsupportedOperationException("unsupported base IRI {" +base+ "}", e);
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
+
 				}));
 	}
 

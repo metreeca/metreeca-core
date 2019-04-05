@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Shape.filter;
@@ -48,6 +49,7 @@ import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.iri;
 
 import static java.util.stream.Collectors.toList;
 
@@ -61,9 +63,8 @@ import static java.util.stream.Collectors.toList;
  * ldp:contains} {@linkplain Field fields}.</p>
  *
  * <p>The LDP profile of the container is identified by its {@code rdf:type} and LDP properties, as inferred either
- * from
- * {@linkplain Meta metadata} annotations or {@linkplain Field field} constraints in the combo shape, defaulting to the
- * <em>Basic</em> profile if no metadata is available:</p>
+ * from {@linkplain Meta metadata} annotations or {@linkplain Field field} constraints in the combo shape, defaulting to
+ * the <em>Basic</em> profile if no metadata is available:</p>
  *
  * <table summary="container profiles">
  *
@@ -105,6 +106,12 @@ import static java.util.stream.Collectors.toList;
  * @see <a href="https://www.w3.org/TR/ldp/">Linked Data Platform 1.0</a>
  */
 public final class Shapes {
+
+	/**
+	 * Splits resource / nested container IRI components.
+	 */
+	private static final Pattern ResourcePattern=Pattern.compile("^(?<resource>.*)(?<nested>/[^/]+/?)$");
+
 
 	private static final Set<IRI> ContainerMetadata=set(
 			RDF.TYPE,
@@ -300,22 +307,34 @@ public final class Shapes {
 		if ( direct != null ) {
 
 			return direct instanceof IRI && target instanceof Resource ?
-					 container -> field(inverse((IRI)direct), target.equals(LDP.CONTAINER) ?container : target)
+					container -> field(inverse((IRI)direct), target(target, container))
 					: container -> and();
 
 		} else if ( inverse != null ) {
 
 			return inverse instanceof IRI && target instanceof Resource
-					? container -> field((IRI)inverse, target.equals(LDP.CONTAINER) ? container : target)
+					? container -> field((IRI)inverse, target(target, container))
 					: container -> and();
 
 		} else {
 
 			return target instanceof Resource
-					? container -> field(inverse(LDP.MEMBER), target.equals(LDP.CONTAINER) ? container : target)
+					? container -> field(inverse(LDP.MEMBER), target(target, container))
 					: container -> and();
 
 		}
+	}
+
+
+	private static Value target(final Value target, final Resource container) {
+		return target.equals(LDP.CONTAINER) ? container
+				: target.equals(LDP.RESOURCE) ? container instanceof IRI ? resource((IRI)container) : container
+				: target;
+	}
+
+
+	private static IRI resource(final IRI container) {
+		return iri(ResourcePattern.matcher(container.stringValue()).replaceAll("${resource}"));
 	}
 
 

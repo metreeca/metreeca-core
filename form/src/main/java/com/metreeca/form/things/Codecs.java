@@ -179,20 +179,33 @@ public final class Codecs {
 			throw new NullPointerException("null reader");
 		}
 
-		return input(reader, UTF8.name());
+		return input(reader, UTF8);
 	}
 
-	public static InputStream input(final Reader reader, final String encoding) {
+	public static InputStream input(final Reader reader, final String charset) {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
 		}
 
-		if ( encoding == null ) {
-			throw new NullPointerException("null encoding");
+		if ( charset == null ) {
+			throw new NullPointerException("null charset");
 		}
 
-		return new ReaderInputStream(reader, encoding);
+		return input(reader, Charset.forName(charset));
+	}
+
+	public static InputStream input(final Reader reader, final Charset charset) {
+
+		if ( reader == null ) {
+			throw new NullPointerException("null reader");
+		}
+
+		if ( charset == null ) {
+			throw new NullPointerException("null charset");
+		}
+
+		return new ReaderInputStream(reader, charset);
 	}
 
 
@@ -211,24 +224,33 @@ public final class Codecs {
 			throw new NullPointerException("null input");
 		}
 
-		return reader(input, UTF8.name());
+		return reader(input, UTF8);
 	}
 
-	public static Reader reader(final InputStream input, final String encoding) {
+	public static Reader reader(final InputStream input, final String charset) {
 
 		if ( input == null ) {
 			throw new NullPointerException("null input");
 		}
 
-		if ( encoding == null ) {
-			throw new NullPointerException("null encoding");
+		if ( charset == null ) {
+			throw new NullPointerException("null charset");
 		}
 
-		try {
-			return new InputStreamReader(input, encoding);
-		} catch ( final UnsupportedEncodingException e ) {
-			throw new UncheckedIOException(e);
+		return reader(input, Charset.forName(charset));
+	}
+
+	public static Reader reader(final InputStream input, final Charset charset) {
+
+		if ( input == null ) {
+			throw new NullPointerException("null input");
 		}
+
+		if ( charset == null ) {
+			throw new NullPointerException("null charset");
+		}
+
+		return new InputStreamReader(input, charset);
 	}
 
 
@@ -262,42 +284,62 @@ public final class Codecs {
 	//// Output Utilities //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static OutputStream output(final Writer writer) {
-		return output(writer, UTF8.name());
+		return output(writer, UTF8);
 	}
 
-	public static OutputStream output(final Writer writer, final String encoding) {
+	public static OutputStream output(final Writer writer, final String charset) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
 		}
 
-		if ( encoding == null ) {
-			throw new NullPointerException("null encoding");
+		if ( charset == null ) {
+			throw new NullPointerException("null charset");
 		}
 
-		return new WriterOutputStream(writer, encoding);
+		return output(writer, Charset.forName(charset));}
+
+	public static OutputStream output(final Writer writer, final Charset charset) {
+
+		if ( writer == null ) {
+			throw new NullPointerException("null writer");
+		}
+
+		if ( charset == null ) {
+			throw new NullPointerException("null charset");
+		}
+
+		return new WriterOutputStream(writer, charset);
 	}
 
 
 	public static Writer writer(final OutputStream output) {
-		return writer(output, UTF8.name());
+		return writer(output, UTF8);
 	}
 
-	public static Writer writer(final OutputStream output, final String encoding) {
+	public static Writer writer(final OutputStream output, final String charset) {
 
 		if ( output == null ) {
 			throw new NullPointerException("null output");
 		}
 
-		if ( encoding == null ) {
-			throw new NullPointerException("null encoding");
+		if ( charset == null ) {
+			throw new NullPointerException("null charset");
 		}
 
-		try {
-			return new OutputStreamWriter(output, encoding);
-		} catch ( final UnsupportedEncodingException e ) {
-			throw new UncheckedIOException(e);
+		return writer(output, Charset.forName(charset));}
+
+	public static Writer writer(final OutputStream output, final Charset charset) {
+
+		if ( output == null ) {
+			throw new NullPointerException("null output");
 		}
+
+		if ( charset == null ) {
+			throw new NullPointerException("null charset");
+		}
+
+		return new OutputStreamWriter(output, charset);
 	}
 
 
@@ -403,18 +445,18 @@ public final class Codecs {
 		private final CharBuffer chars=CharBuffer.allocate(16);
 
 
-		private ReaderInputStream(final Reader reader, final String encoding) {
+		private ReaderInputStream(final Reader reader, final Charset charset) {
 
 			if ( reader == null ) {
 				throw new NullPointerException("null reader");
 			}
 
-			if ( encoding == null ) {
-				throw new NullPointerException("null encoding");
+			if ( charset == null ) {
+				throw new NullPointerException("null charset");
 			}
 
 			this.reader=reader;
-			this.encoder=Charset.forName(encoding).newEncoder();
+			this.encoder=charset.newEncoder();
 
 			// put buffers in reading mode
 
@@ -468,18 +510,18 @@ public final class Codecs {
 		private final CharBuffer chars=CharBuffer.allocate(16);
 
 
-		private WriterOutputStream(final Writer writer, final String encoding) {
+		private WriterOutputStream(final Writer writer, final Charset charset) {
 
 			if ( writer == null ) {
 				throw new NullPointerException("null writer");
 			}
 
-			if ( encoding == null ) {
-				throw new NullPointerException("null encoding");
+			if ( charset == null ) {
+				throw new NullPointerException("null charset");
 			}
 
 			this.writer=writer;
-			this.decoder=Charset.forName(encoding).newDecoder();
+			this.decoder=charset.newDecoder();
 		}
 
 

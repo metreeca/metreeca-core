@@ -29,7 +29,7 @@ final class JSONWriterFactoryTest {
 
 		assertThat(RDFWriterRegistry.getInstance()
 				.getFileFormatForMIMEType(JSONCodec.JSONFormat.getDefaultMIMEType())
-				.filter(format1 -> format1.equals(JSONCodec.JSONFormat))
+				.filter(format -> format.equals(JSONCodec.JSONFormat))
 				.isPresent()).as("by mime type").isTrue();
 
 		assertThat(RDFWriterRegistry.getInstance()

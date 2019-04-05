@@ -17,6 +17,17 @@
 
 /**
  * OpenLink Virtuoso tools.
+ *
+ * <p>Requires the following Maven dependency in your project:</p>
+ *
+ * <pre>{@code
+ * <dependency>
+ *      <groupId>com.metreeca</groupId>
+ *      <artifactId>virtuoso</artifactId>
+ *      <version>${project.version}</version>
+ * </dependency>
+ *
+ * }</pre>
  */
 
 package com.metreeca.kits.virtuoso;

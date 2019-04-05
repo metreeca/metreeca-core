@@ -48,7 +48,7 @@ public final class JSONWriterFactory implements RDFWriterFactory {
 			throw new NullPointerException("null output");
 		}
 
-		return new JSONWriter(output);
+		return new JSONWriter(output, baseURI);
 	}
 
 
@@ -67,7 +67,7 @@ public final class JSONWriterFactory implements RDFWriterFactory {
 			throw new NullPointerException("null writer");
 		}
 
-		return new JSONWriter(writer);
+		return new JSONWriter(writer, baseURI);
 	}
 
 }
