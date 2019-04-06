@@ -66,7 +66,7 @@ import static com.metreeca.tray.rdf.Graph.graph;
       
     		.set(graph(), () -> new RDF4JMemory())
           
-        .get(() -> new Server()
+            .get(() -> new Server()
               
         		.wrap((Request request) -> request.reply(response ->
             		response.status(Response.OK))
