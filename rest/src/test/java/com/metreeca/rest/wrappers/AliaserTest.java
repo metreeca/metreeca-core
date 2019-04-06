@@ -17,16 +17,17 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.*;
+import com.metreeca.form.things.ValuesTest;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
-import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -38,10 +39,16 @@ final class AliaserTest {
 		new Tray().exec(tasks).clear();
 	}
 
-	private Aliaser aliaser(final Resource canonical) {
+	private Aliaser aliaser(final IRI canonical) {
 		return new Aliaser((connection, request) ->
 				request.path().equals("/alias") ? Optional.of(canonical) : Optional.empty()
 		);
+	}
+
+	private Request request(final String path) {
+		return new Request()
+				.base(ValuesTest.Base)
+				.path(path);
 	}
 
 
@@ -54,7 +61,7 @@ final class AliaserTest {
 
 					.wrap(echo())
 
-					.handle(new Request().path("/alias"))
+					.handle(request("/alias"))
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.SeeOther)
@@ -63,12 +70,12 @@ final class AliaserTest {
 			);
 		}
 
-		@Test void testDelegateUnknownItemsToHandler() {
-			exec(() -> aliaser(item("/canonical"))
+		@Test void testForwardIdempotentItemsToHandler() {
+			exec(() -> aliaser(item("/alias"))
 
 					.wrap(echo())
 
-					.handle(new Request().path("/unknown"))
+					.handle(request("/alias"))
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
@@ -76,17 +83,16 @@ final class AliaserTest {
 			);
 		}
 
-		@Test void testIgnoreBNodes() {
-			exec(() -> aliaser(bnode())
+		@Test void testReportUnknownItems() {
+			exec(() -> aliaser(item("/canonical"))
 
 					.wrap(echo())
 
-					.handle(new Request().path("/alias"))
+					.handle(request("/unknown"))
 
 					.accept(response -> assertThat(response)
-							.hasStatus(Response.OK)
+							.hasStatus(Response.NotFound)
 					)
-
 			);
 		}
 
@@ -97,7 +103,7 @@ final class AliaserTest {
 		@Test void testRedirectAliasedItem() {
 			exec(() -> aliaser(item("/canonical"))
 
-					.handle(new Request().path("/alias"))
+					.handle(request("/alias"))
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.SeeOther)
@@ -106,26 +112,27 @@ final class AliaserTest {
 			);
 		}
 
-		@Test void testReportUnknownItems() {
-			exec(() -> aliaser(item("/canonical"))
+		@Test void testAcceptIdempotentItems() {
+			exec(() -> aliaser(item("/alias"))
 
-					.handle(new Request().path("/unknown"))
+					.wrap(echo())
+
+					.handle(request("/alias"))
 
 					.accept(response -> assertThat(response)
-							.hasStatus(Response.NotFound)
+							.hasStatus(Response.OK)
 					)
 			);
 		}
 
-		@Test void testIgnoreBNodes() {
-			exec(() -> aliaser(bnode())
+		@Test void testReportUnknownItems() {
+			exec(() -> aliaser(item("/canonical"))
 
-					.handle(new Request().path("/alias"))
+					.handle(request("/unknown"))
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.NotFound)
 					)
-
 			);
 		}
 
