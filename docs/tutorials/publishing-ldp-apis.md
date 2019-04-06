@@ -1,5 +1,5 @@
 ---
-title:	        How To Publish Model‑Driven Linked Data REST APIs
+title:	        Publishing Model‑Driven Linked Data REST APIs
 excerpt:        Hands-on guided tour of model-driven linked data REST APIs publishing
 redirect_from: /tutorials/linked-data-publishing
 ---
