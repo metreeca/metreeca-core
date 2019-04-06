@@ -27,7 +27,6 @@ import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.MinExclusive;
 import com.metreeca.form.shapes.MinLength;
 import com.metreeca.form.things.Lists;
-import com.metreeca.form.things.Values;
 import com.metreeca.form.things.ValuesTest;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -59,6 +58,8 @@ import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Pattern.pattern;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.Values.literal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -69,8 +70,8 @@ import static java.math.BigInteger.TEN;
 
 final class QueryParserTest {
 
-	private static final Literal One=Values.literal(ONE);
-	private static final Literal Ten=Values.literal(TEN);
+	private static final Literal One=literal(ONE);
+	private static final Literal Ten=literal(TEN);
 
 	private static final Shape shape=and(
 			field(RDF.FIRST, field(RDF.REST)),
@@ -86,7 +87,9 @@ final class QueryParserTest {
 
 		edges("", shape, edges -> {
 
-			assertThat(shape).as("base shape").isEqualTo(edges.getShape());
+			assertThat(shape)
+					.as("base shape")
+					.isEqualTo(edges.getShape());
 
 			assertThat(0).as("no offset").isEqualTo(edges.getOffset());
 			assertThat(0).as("no limit").isEqualTo(edges.getLimit());
@@ -147,21 +150,35 @@ final class QueryParserTest {
 
 	@Test void testParseSortingCriteria() {
 
-		edges("{ 'order': '' }", shape, edges -> assertThat(list(increasing())).as("empty path").isEqualTo(edges.getOrders()));
+		edges("{ 'order': '' }", shape, edges -> assertThat(edges.getOrders())
+						.as("empty path")
+						.isEqualTo(list(increasing())));
 
-		edges("{ 'order': '+' }", shape, edges -> assertThat(list(increasing())).as("empty path increasing").isEqualTo(edges.getOrders()));
+		edges("{ 'order': '+' }", shape, edges -> assertThat(edges.getOrders())
+						.as("empty path increasing")
+						.isEqualTo(list(increasing())));
 
-		edges("{ 'order': '-' }", shape, edges -> assertThat(list(decreasing())).as("empty path decreasing").isEqualTo(edges.getOrders()));
+		edges("{ 'order': '-' }", shape, edges -> assertThat(edges.getOrders())
+						.as("empty path decreasing")
+						.isEqualTo(list(decreasing())));
 
-		edges("{ 'order': 'first.rest' }", shape, edges -> assertThat(list(increasing(RDF.FIRST, RDF.REST))).as("path").isEqualTo(edges.getOrders()));
+		edges("{ 'order': 'first.rest' }", shape, edges -> assertThat(edges.getOrders())
+						.as("path")
+						.isEqualTo(list(increasing(RDF.FIRST, RDF.REST))));
 
-		edges("{ 'order': '+first.rest' }", shape, edges -> assertThat(list(increasing(RDF.FIRST, RDF.REST))).as("path increasing").isEqualTo(edges.getOrders()));
+		edges("{ 'order': '+first.rest' }", shape, edges -> assertThat(edges.getOrders())
+						.as("path increasing")
+						.isEqualTo(list(increasing(RDF.FIRST, RDF.REST))));
 
-		edges("{ 'order': '-first.rest' }", shape, edges -> assertThat(list(decreasing(RDF.FIRST, RDF.REST))).as("path decreasing").isEqualTo(edges.getOrders()));
+		edges("{ 'order': '-first.rest' }", shape, edges -> assertThat(edges.getOrders())
+						.as("path decreasing")
+						.isEqualTo(list(decreasing(RDF.FIRST, RDF.REST))));
 
 		edges("{ 'order': [] }", shape, edges -> assertThat(list()).as("empty list").isEqualTo(edges.getOrders()));
 
-		edges("{ 'order': ['+first', '-first.rest'] }", shape, edges -> assertThat(list(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))).as("list").isEqualTo(edges.getOrders()));
+		edges("{ 'order': ['+first', '-first.rest'] }", shape, edges -> assertThat(edges.getOrders())
+						.as("list")
+						.isEqualTo(list(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))));
 
 	}
 
@@ -379,45 +396,6 @@ final class QueryParserTest {
 	}
 
 
-	@Test void testParseEdgesQuery() {
-
-		edges("{ 'filter': {}, 'offset': 1, 'limit': 2 }", shape, edges -> {
-
-			assertThat(filter(shape, and())).as("shape").isEqualTo(edges.getShape());
-			assertThat(1).as("offset").isEqualTo(edges.getOffset());
-			assertThat(2).as("limit").isEqualTo(edges.getLimit());
-
-		});
-
-	}
-
-	@Test void testParseStatsQuery() {
-
-		stats("{ 'filter': {}, 'stats': '' }", shape, stats -> {
-
-			assertThat(filter(shape, and())).as("shape").isEqualTo(stats.getShape());
-			assertThat(stats.getPath())
-					.as("path")
-					.isEqualTo(Lists.<IRI>list());
-
-		});
-
-	}
-
-	@Test void testParseItemsQuery() {
-
-		items("{ 'filter': {}, 'items': '' }", shape, items -> {
-
-			assertThat(filter(shape, and())).as("shape").isEqualTo(items.getShape());
-			assertThat(items.getPath())
-					.as("path")
-					.isEqualTo(Lists.<IRI>list());
-
-		});
-
-	}
-
-
 	@Test void testIgnoreNullFilters() {
 
 		edges("{ 'filter': null }", shape, edges -> assertThat(edges.getShape()).isEqualTo(shape));
@@ -500,6 +478,70 @@ final class QueryParserTest {
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				edges("{ 'order': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil' }", pass(), edges -> {})
 		);
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testParsePlainQuery() {
+
+		edges("first=http://example.com/&first.rest=x&first.rest=y+z", shape, edges -> {
+
+			assertThat(edges.getShape())
+					.as("shape")
+					.isEqualTo(filter(shape, and(
+						field(RDF.FIRST, and(
+								any(iri("http://example.com/")),
+								field(RDF.REST, any(literal("x"), literal("y z")))
+						))
+				)));
+
+		});
+
+	}
+
+	@Test void testParseEdgesQuery() {
+
+		edges("{ 'filter': {}, 'offset': 1, 'limit': 2 }", shape, edges -> {
+
+			assertThat(filter(shape, and()))
+					.as("shape")
+					.isEqualTo(edges.getShape());
+			assertThat(1).as("offset").isEqualTo(edges.getOffset());
+			assertThat(2).as("limit").isEqualTo(edges.getLimit());
+
+		});
+
+	}
+
+	@Test void testParseStatsQuery() {
+
+		stats("{ 'filter': {}, 'stats': '' }", shape, stats -> {
+
+			assertThat(filter(shape, and()))
+					.as("shape")
+					.isEqualTo(stats.getShape());
+			assertThat(stats.getPath())
+					.as("path")
+					.isEqualTo(Lists.<IRI>list());
+
+		});
+
+	}
+
+	@Test void testParseItemsQuery() {
+
+		items("{ 'filter': {}, 'items': '' }", shape, items -> {
+
+			assertThat(filter(shape, and()))
+					.as("shape")
+					.isEqualTo(items.getShape());
+			assertThat(items.getPath())
+					.as("path")
+					.isEqualTo(Lists.<IRI>list());
+
+		});
 
 	}
 
