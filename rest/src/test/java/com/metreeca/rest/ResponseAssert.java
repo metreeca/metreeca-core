@@ -101,7 +101,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 			});
 
 			Logger.getLogger(response.getClass().getName()).log(
-					response.success() ? Level.INFO : Level.WARNING,
+					response.status() < 400 ? Level.INFO :response.status() < 500 ? Level.WARNING : Level.SEVERE,
 					builder.toString(),
 					response.cause().orElse(null)
 			);

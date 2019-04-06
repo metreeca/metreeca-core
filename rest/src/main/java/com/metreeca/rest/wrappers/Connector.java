@@ -39,8 +39,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 /**
  * Graph connection manager.
  *
- * <p>Executes wrapped handlers inside a shared connection to the the system { ̰ graph
- * database}.</p>
+ * <p>Executes wrapped handlers inside a shared connection to the the system {@linkplain Graph graph database}.</p>
  *
  * <p>If the incoming request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single
  * transaction on the shared connection, which is automatically committed on {@linkplain Response#success() successful}
