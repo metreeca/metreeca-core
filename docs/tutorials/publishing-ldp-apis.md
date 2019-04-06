@@ -226,7 +226,7 @@ Requests are forwarded to a registered handler if their path is matched by an as
 | `/`          | `/`                  | empty / matches only the empty step                          |
 | `/<step>`    | `/<step>`            | literal / matches step verbatim                              |
 | `/{}`        | `/<step>`            | wildcard / matches a single step                             |
-| `/{<key>}`   | `/<step>`            | placeholder / match a single path step, adding the matched `<key>`/`<step>` entry to request [parameters](../javadocs/com/metreeca/rest/Request.html#parameters—) |
+| `/{<key>}`   | `/<step>`            | placeholder / match a single path step, adding the matched `<key>`/`<step>` entry to request [parameters](../javadocs/com/metreeca/rest/Request.html#parameters—); the matched `<step>` name is URL-decoded before use |
 | `/*`         | `/<step>[/<step>/…]` | prefix / matches one or more trailing steps                  |
 
 Registered path patterns are tested in order of definition.

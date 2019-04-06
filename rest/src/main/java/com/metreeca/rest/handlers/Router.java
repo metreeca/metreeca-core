@@ -49,7 +49,8 @@ import java.util.regex.Pattern;
  * <li>wildcard steps {@code /{}} match a single path step;</li>
  *
  * <li>placeholder steps {@code /{<key>}} match a single path step, adding the matched {@code <key>}/{@code <step>}
- * entry to request {@linkplain Request#parameters() parameters};</li>
+ * entry to request {@linkplain Request#parameters() parameters}; the matched {@code <step>} name is URL-decoded before
+ * use;</li>
  *
  * <li>prefix steps {@code /*} match one or more trailing path steps.</li>
  *
