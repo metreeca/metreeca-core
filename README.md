@@ -14,5 +14,5 @@ To get started with Metreeca/Link, open the [docs](https://metreeca.github.io/li
 ---
 
 home / [www.metreeca.com](https://www.metreeca.com/)  
-docs / [metreeca.github.io/link](https://metreeca.github.io/link/)  
-forum / [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca)
+docs / [metreeca.github.io/link](https://metreeca.github.io/link/)  
+forum / [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca)
