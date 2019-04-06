@@ -59,22 +59,20 @@ import javax.servlet.annotation.WebListener;
 import static com.metreeca.tray.rdf.Graph.graph;
 
 
-@WebListener public final class Demo extends Gateway {
+@WebFilter(urlPatterns="/*") public final class Demo extends Gateway {
 
-	public Demo() {
-		super("/*", tray -> tray
+	@Override protected Handler load(final Tray tray) {
+		return tray
+      
+    		.set(graph(), () -> new RDF4JMemory())
           
-         .set(graph(), () -> new RDF4JMemory())
-          
-         .get(() -> new Server()
+        .get(() -> new Server()
               
-              .wrap((Request request) -> request.reply(response ->
-                  response.status(Response.OK))
-              )
+        		.wrap((Request request) -> request.reply(response ->
+            		response.status(Response.OK))
+             )
 
-          )
-          
-     );
+         );
 	}
 
 }
@@ -93,9 +91,9 @@ HTTP/1.1 200
 The [tray](../javadocs/?com/metreeca/tray/Tray.html) argument handled to the app loader lambda manages the shared system-provided tools and can be used to customize them and to run app initialization tasks.
 
 ```java
-public Demo() {
-	super("/*", tray -> tray
-
+@Override protected Handler load(final Tray tray) {
+		return tray
+      
       .set(graph(), () -> new RDF4JMemory())
 
 			.exec(() -> tool(graph()).update(connection -> {
@@ -115,8 +113,7 @@ public Demo() {
 							response.status(Response.OK))
 					)
 
-			)
-	);
+			);
 }
 ```
 
@@ -149,8 +146,8 @@ public final class BIRT implements Runnable {
 ```
 
 ```java
-public Demo() {
-	super("/*", tray -> tray
+@Override protected Handler load(final Tray tray) {
+		return tray
         
         .set(graph(), RDF4JMemory::new)
         
@@ -164,8 +161,7 @@ public Demo() {
              		response.status(Response.OK))
              )
         
-        )
-	);
+        );
 }
 ```
 
