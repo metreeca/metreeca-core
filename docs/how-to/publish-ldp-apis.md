@@ -221,12 +221,13 @@ Content-Type: text/turtle;charset=UTF-8
 
 Requests are forwarded to a registered handler if their path is matched by an associated pattern defined by a sequence of steps according to the following rules:
 
-| pattern step | matching path step   | definition                                  |
-| ------------ | -------------------- | ------------------------------------------- |
-| /            | /                    | empty / matches only the empty step         |
-| `/<step>`    | `/<step>`            | literal / matches step verbatim             |
-| `/*`         | `/<step>`            | wildcard / matches a single step            |
-| /**          | `/<step>[/<step>/…]` | prefix / matches one or more trailing steps |
+| pattern step | matching path step   | definition                                                   |
+| ------------ | -------------------- | ------------------------------------------------------------ |
+| `/`          | `/`                  | empty / matches only the empty step                          |
+| `/<step>`    | `/<step>`            | literal / matches step verbatim                              |
+| `/{}`        | `/<step>`            | wildcard / matches a single step                             |
+| `/{<key>}`   | `/<step>`            | placeholder / match a single path step, adding the matched `<key>`/`<step>` entry to request [parameters](../javadocs/com/metreeca/rest/Request.html#parameters—) |
+| `/*`         | `/<step>[/<step>/…]` | prefix / matches one or more trailing steps                  |
 
 Registered path patterns are tested in order of definition.
 
