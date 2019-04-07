@@ -84,7 +84,7 @@ new Router()
         )
 ```
 
-```http request
+```
 GET http://localhost:8080/products/
 
 200 OK
@@ -107,14 +107,14 @@ GET http://localhost:8080/products/
 }
 ```
 
-```http request
+```
 GET http://localhost:8080/products/?name=Pont+Yacht
 
 303 See Other
 Location: http://localhost:8080/products/S72_3212
 ```
 
-```http request
+```
 GET http://localhost:8080/products/?name=Something
 
 404 Not Found
