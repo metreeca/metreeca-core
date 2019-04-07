@@ -37,73 +37,42 @@
     <dependencies>
 
         <dependency>
-            <groupId>virtuoso.openlinksw.com</groupId>
+            <groupId>virtuoso</groupId>
             <artifactId>rdf4j-provider</artifactId>
             <version>2.2-20180514</version>
+
+            <!-- download stable jars from http://vos.openlinksw.com/owiki/wiki/VOS/VOSDownload#For%20RDF4J%202.x -->
+            <!-- download develop jars from https://github.com/openlink/virtuoso-opensource/tree/develop/7/binsrc/rdf4j -->
+
         </dependency>
 
         <dependency>
-            <groupId>virtuoso.openlinksw.com</groupId>
+            <groupId>virtuoso</groupId>
             <artifactId>jdbc-driver</artifactId>
             <version>4.0</version>
         </dependency>
 
     </dependencies>
 
+    <repositories>  <!--  http://maven.apache.org/plugins/maven-install-plugin/install-file-mojo.html -->
+
+        <!-- to install new jars to the local repo copy/edit jars/pom from lib/virtuoso/*/* to work/ then
+
+            rm -rf lib && for i in work/*.pom; do
+                mvn install:install-file -DlocalRepositoryPath=lib -DpomFile=${i} -Dfile=${i%.pom}.jar;
+            done
+
+        -->
+
+        <repository>
+            <id>local dependencies</id>
+            <url>file://${project.basedir}/lib</url>
+        </repository>
+
+    </repositories>
+
     <build>
         <plugins>
-
-            <plugin> <!-- http://maven.apache.org/plugins/maven-install-plugin/install-file-mojo.html -->
-
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.1</version>
-
-                <executions>
-
-                    <execution>
-
-                        <!-- install virtuoso RDF4J provider in the local maven repository -->
-                        <!-- download stable jars from http://vos.openlinksw.com/owiki/wiki/VOS/VOSDownload#For%20RDF4J%202.x -->
-                        <!-- download develop jars from https://github.com/openlink/virtuoso-opensource/tree/develop/7/binsrc/rdf4j -->
-
-                        <id>install-virtuoso-rdf4j-provider</id>
-                        <phase>validate</phase>
-
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-
-                        <configuration>
-
-                            <file>lib/virtuoso-rdf4j-2.2-20180514.jar</file>
-                            <pomFile>lib/virtuoso-rdf4j-2.2-20180514.pom.xml</pomFile>
-
-                        </configuration>
-
-                    </execution>
-
-                    <execution>
-
-                        <id>install-virtuoso-jdbc-driver</id>
-                        <phase>validate</phase>
-
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-
-                        <configuration>
-
-                            <file>lib/virtuoso-jdbc-4.0.jar</file>
-                            <pomFile>lib/virtuoso-jdbc-4.0.pom.xml</pomFile>
-
-                        </configuration>
-
-                    </execution>
-
-                </executions>
-
-            </plugin>
 
             <plugin> <!-- https://maven.apache.org/plugins/maven-dependency-plugin -->
 
@@ -125,7 +94,7 @@
 
                         <configuration>
 
-                            <includeGroupIds>virtuoso.openlinksw.com</includeGroupIds>
+                            <includeGroupIds>virtuoso</includeGroupIds>
                             <includeScope>runtime</includeScope>
 
                             <outputDirectory>${project.build.directory}/classes/</outputDirectory>
