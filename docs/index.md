@@ -26,5 +26,5 @@ References
 - [Shape Specification Language](references/spec-language)
 - [REST Faceted Search API](references/faceted-search)
 - [Idiomatic RDF/JSON Serialization](references/idiomatic-json)
-<!-- - [FAQs and Known Issues](faqs) -->
+<!-- - [Known Issues](references/known-issues) -->
 
