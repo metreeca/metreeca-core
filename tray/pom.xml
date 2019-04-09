@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>link</artifactId>
-		<version>0.0.0-SNAPSHOT</version>
+		<version>0.51.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>tray</artifactId>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.metreeca</groupId>
 			<artifactId>form</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
+			<version>0.51.0-SNAPSHOT</version>
 		</dependency>
 
 
@@ -65,7 +65,7 @@
 		<dependency>
 			<groupId>com.metreeca</groupId>
 			<artifactId>form</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
+			<version>0.51.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
