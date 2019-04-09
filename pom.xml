@@ -152,13 +152,18 @@
 
 		<resources>
 
-			<resource> <!-- enable resource filtering -->
-				<directory>src/main/resources</directory>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+
+			<resource>
+				<directory>${basedir}/docs/_resources</directory>
+				<targetPath>${basedir}/docs</targetPath>
 				<filtering>true</filtering>
 			</resource>
 
 		</resources>
-
 
 		<plugins>
 
