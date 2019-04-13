@@ -40,7 +40,7 @@ final class AliaserTest {
 	}
 
 	private Aliaser aliaser(final IRI canonical) {
-		return new Aliaser((connection, request) ->
+		return new Aliaser(request ->
 				request.path().equals("/alias") ? Optional.of(canonical) : Optional.empty()
 		);
 	}

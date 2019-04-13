@@ -18,17 +18,12 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.rdf.Graph.graph;
 
 import static java.util.Objects.requireNonNull;
 
@@ -36,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Resource aliaser.
  *
- * <p>Redirects request for alias resources to the canonical resource they {@linkplain #Aliaser(BiFunction) resolve}
+ * <p>Redirects request for alias resources to the canonical resource they {@linkplain #Aliaser(Function) resolve}
  * to.</p>
  *
  * <p>May be used as either a {@linkplain Wrapper wrapper} or a {@linkplain Handler handler}; idempotent aliases, that
@@ -52,21 +47,19 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Aliaser implements Wrapper, Handler {
 
-	private final BiFunction<RepositoryConnection, Request, Optional<IRI>> resolver;
-
-	private final Graph graph=tool(graph());
+	private final Function<Request, Optional<IRI>> resolver;
 
 
 	/**
 	 * Creates a resource aliaser.
 	 *
-	 * @param resolver the resource resolving function; takes as argument a connection to the shared system {@linkplain
-	 *                 Graph} and a request and returns the canonical IRI for the aliased request {@linkplain
-	 *                 Request#item() item}, if one was identified, or an empty optional, otherwise
+	 * @param resolver the resource resolving function; takes as argument a request and returns the canonical IRI for
+	 *                 the aliased request {@linkplain Request#item() item}, if one was identified, or an empty
+	 *                 optional, otherwise
 	 *
 	 * @throws NullPointerException if {@code resolver} is null or returns a null value
 	 */
-	public Aliaser(final BiFunction<RepositoryConnection, Request, Optional<IRI>> resolver) {
+	public Aliaser(final Function<Request, Optional<IRI>> resolver) {
 
 		if ( resolver == null ) {
 			throw new NullPointerException("null resolver");
@@ -90,13 +83,7 @@ public final class Aliaser implements Wrapper, Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder alias(final Request request, final Supplier<Responder> self) {
-		return graph
-
-				.query(connection -> {
-
-					return requireNonNull(resolver.apply(connection, request), "null resolver return value");
-
-				})
+		return requireNonNull(resolver.apply(request), "null resolver return value")
 
 				.map(resource -> resource.equals(request.item()) ? self.get() : request.reply(response -> response
 						.status(Response.SeeOther)
