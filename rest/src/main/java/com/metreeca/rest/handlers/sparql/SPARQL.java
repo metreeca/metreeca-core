@@ -20,11 +20,9 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
@@ -35,17 +33,13 @@ import org.eclipse.rdf4j.rio.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.bodies.OutputBody.output;
-import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.rdf.Graph.graph;
 
 import static java.lang.Boolean.parseBoolean;
-import static java.util.Collections.disjoint;
 
 
 /**
@@ -59,15 +53,7 @@ import static java.util.Collections.disjoint;
  *
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
-public final class SPARQL extends Delegator {
-
-	private int timeout=60; // endpoint operations timeout [s]
-
-	private Set<IRI> query=set(Form.root); // roles enabled for query operations
-	private Set<IRI> update=set(Form.root); // roles enabled for update operations
-
-	private final Graph graph=tool(graph());
-
+public final class SPARQL extends Endpoint<SPARQL> {
 
 	public SPARQL() {
 		delegate(new Worker()
@@ -79,102 +65,8 @@ public final class SPARQL extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Configures timeout for endpoint requests.
-	 *
-	 * @param timeout the timeout for endpoint requests in seconds or 0 to disable timeouts
-	 *
-	 * @return this endpoint handler
-	 *
-	 * @throws IllegalArgumentException if {@code timeout} is less than 0
-	 */
-	public SPARQL timeout(final int timeout) {
-
-		if ( timeout < 0 ) {
-			throw new IllegalArgumentException("illegal timeout ["+timeout+"]");
-		}
-
-		this.timeout=timeout;
-
-		return this;
-	}
-
-
-	/**
-	 * Configures the roles for query operations.
-	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform query operations on this
-	 *              endpoint; empty for public access
-	 *
-	 * @return this endpoint handler
-	 *
-	 * @throws NullPointerException if {@code roles} is null or contains null values
-	 */
-	public SPARQL query(final IRI... roles) {
-		return query(list(roles));
-	}
-
-	/**
-	 * Configures the roles for query operations.
-	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform query operations on this
-	 *              endpoint; empty for public access
-	 *
-	 * @return this endpoint handler
-	 *
-	 * @throws NullPointerException if {@code roles} is null or contains null values
-	 */
-	public SPARQL query(final Collection<? extends IRI> roles) {
-
-		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null roles");
-		}
-
-		this.query=new HashSet<>(roles);
-
-		return this;
-	}
-
-
-	/**
-	 * Configures the roles for update operations.
-	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform update operations on this
-	 *              endpoint; empty for public access
-	 *
-	 * @return this endpoint handler
-	 *
-	 * @throws NullPointerException if {@code roles} is null or contains null values
-	 */
-	public SPARQL update(final IRI... roles) {
-		return update(list(roles));
-	}
-
-	/**
-	 * Configures the roles for update operations.
-	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform update operations on this
-	 *              endpoint; empty for public access
-	 *
-	 * @return this endpoint handler
-	 *
-	 * @throws NullPointerException if {@code roles} is null or contains null values
-	 */
-	public SPARQL update(final Collection<? extends IRI> roles) {
-
-		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null roles");
-		}
-
-		this.update=new HashSet<>(roles);
-
-		return this;
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private Responder process(final Request request) {
-		return consumer -> graph.query(connection -> {
+		return consumer -> graph().query(connection -> {
 			try {
 
 				final Operation operation=operation(request, connection);
@@ -187,8 +79,8 @@ public final class SPARQL extends Delegator {
 							.cause("missing query/update parameter")
 					).accept(consumer);
 
-				} else if ( operation instanceof Query && !query.isEmpty() && disjoint(query, request.roles())
-						|| operation instanceof Update && !update.isEmpty() && disjoint(update, request.roles())
+				} else if ( operation instanceof Query && !queryable(request.roles())
+						|| operation instanceof Update && !updatable(request.roles())
 				) {
 
 					refused(request).accept(consumer);
@@ -303,7 +195,7 @@ public final class SPARQL extends Delegator {
 			nameds.stream().distinct().forEachOrdered(named -> dataset.addNamedGraph(factory.createIRI(named)));
 
 			operation.setDataset(dataset);
-			operation.setMaxExecutionTime(timeout);
+			operation.setMaxExecutionTime(timeout());
 			operation.setIncludeInferred(infer.isEmpty() || parseBoolean(infer));
 
 		}
