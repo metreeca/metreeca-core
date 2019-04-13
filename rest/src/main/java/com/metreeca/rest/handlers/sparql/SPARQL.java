@@ -20,10 +20,11 @@ package com.metreeca.rest.handlers.sparql;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Worker;
 import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
@@ -34,14 +35,17 @@ import org.eclipse.rdf4j.rio.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.bodies.OutputBody.output;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.rdf.Graph.graph;
 
 import static java.lang.Boolean.parseBoolean;
+import static java.util.Collections.disjoint;
 
 
 /**
@@ -50,24 +54,26 @@ import static java.lang.Boolean.parseBoolean;
  * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
  * Graph#graph() graph database}.</p>
  *
- * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
- * role}, unless otherwise {@linkplain #publik(boolean) specified}; update operations are always restricted to users in
- * the {@linkplain Form#root root} role.</p>
+ * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
+ * to users in the {@linkplain Form#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
  *
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
 public final class SPARQL extends Delegator {
 
 	private int timeout=60; // endpoint operations timeout [s]
-	private boolean publik; // public availability of the endpoint
 
-	private final Graph graph=tool(Graph.graph());
+	private Set<IRI> query=set(Form.root); // roles enabled for query operations
+	private Set<IRI> update=set(Form.root); // roles enabled for update operations
+
+	private final Graph graph=tool(graph());
 
 
 	public SPARQL() {
 		delegate(new Worker()
 				.get(this::process)
-				.post(this::process));
+				.post(this::process)
+		);
 	}
 
 
@@ -93,20 +99,77 @@ public final class SPARQL extends Delegator {
 		return this;
 	}
 
+
 	/**
-	 * Configures public visibility for query endpoint operations.
+	 * Configures the roles for query operations.
 	 *
-	 * @param publik {@code true} if query endpoint operations should be available to any user; {@code false} otherwise
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform query operations on this
+	 *              endpoint; empty for public access
 	 *
 	 * @return this endpoint handler
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public SPARQL publik(final boolean publik) {
+	public SPARQL query(final IRI... roles) {
+		return query(list(roles));
+	}
 
-		this.publik=publik;
+	/**
+	 * Configures the roles for query operations.
+	 *
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform query operations on this
+	 *              endpoint; empty for public access
+	 *
+	 * @return this endpoint handler
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public SPARQL query(final Collection<? extends IRI> roles) {
+
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null roles");
+		}
+
+		this.query=new HashSet<>(roles);
 
 		return this;
 	}
 
+
+	/**
+	 * Configures the roles for update operations.
+	 *
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform update operations on this
+	 *              endpoint; empty for public access
+	 *
+	 * @return this endpoint handler
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public SPARQL update(final IRI... roles) {
+		return update(list(roles));
+	}
+
+	/**
+	 * Configures the roles for update operations.
+	 *
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform update operations on this
+	 *              endpoint; empty for public access
+	 *
+	 * @return this endpoint handler
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public SPARQL update(final Collection<? extends IRI> roles) {
+
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null roles");
+		}
+
+		this.update=new HashSet<>(roles);
+
+		return this;
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -124,7 +187,9 @@ public final class SPARQL extends Delegator {
 							.cause("missing query/update parameter")
 					).accept(consumer);
 
-				} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
+				} else if ( operation instanceof Query && !query.isEmpty() && disjoint(query, request.roles())
+						|| operation instanceof Update && !update.isEmpty() && disjoint(update, request.roles())
+				) {
 
 					refused(request).accept(consumer);
 

@@ -22,8 +22,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Worker;
 import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -32,17 +32,19 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
-import org.eclipse.rdf4j.repository.*;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static com.metreeca.form.Shape.only;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Handler.refused;
@@ -52,17 +54,17 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
+import static java.util.Collections.disjoint;
 
 
 /**
  * SPARQL 1.1 Graph Store endpoint handler.
  *
  * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain Graph#graph()
- * graph database}</p>*
+ * graph database}.</p>
  *
- * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
- * role}, unless otherwise {@linkplain #publik(boolean) specified}; update operations are always restricted to users in
- * the root role.</p>
+ * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
+ * to users in the {@linkplain Form#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
  *
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
@@ -75,7 +77,8 @@ public final class Graphs extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private boolean publik; // public availability of the endpoint
+	private Set<IRI> query=set(Form.root); // roles enabled for query operations
+	private Set<IRI> update=set(Form.root); // roles enabled for update operations
 
 	private final Graph graph=tool(Graph.graph());
 	private final Trace trace=tool(Trace.trace());
@@ -86,22 +89,80 @@ public final class Graphs extends Delegator {
 				.get(this::get)
 				.put(this::put)
 				.delete(this::delete)
-				.post(this::post));
+				.post(this::post)
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Configures public visibility for query endpoint operations.
+	 * Configures the roles for query operations.
 	 *
-	 * @param publik {@code true} if query endpoint operations should be available to any user; {@code false} otherwise
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform query operations on this
+	 *              endpoint; empty for public access
 	 *
 	 * @return this endpoint handler
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Graphs publik(final boolean publik) {
+	public Graphs query(final IRI... roles) {
+		return query(list(roles));
+	}
 
-		this.publik=publik;
+	/**
+	 * Configures the roles for query operations.
+	 *
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform query operations on this
+	 *              endpoint; empty for public access
+	 *
+	 * @return this endpoint handler
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public Graphs query(final Collection<? extends IRI> roles) {
+
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null roles");
+		}
+
+		this.query=new HashSet<>(roles);
+
+		return this;
+	}
+
+
+	/**
+	 * Configures the roles for update operations.
+	 *
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform update operations on this
+	 *              endpoint; empty for public access
+	 *
+	 * @return this endpoint handler
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public Graphs update(final IRI... roles) {
+		return update(list(roles));
+	}
+
+	/**
+	 * Configures the roles for update operations.
+	 *
+	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform update operations on this
+	 *              endpoint; empty for public access
+	 *
+	 * @return this endpoint handler
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public Graphs update(final Collection<? extends IRI> roles) {
+
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null roles");
+		}
+
+		this.update=new HashSet<>(roles);
 
 		return this;
 	}
@@ -128,7 +189,8 @@ public final class Graphs extends Delegator {
 						.cause("missing target graph parameter")
 				).accept(consumer);
 
-			} else if ( !publik && !request.role(Form.root) ) {
+
+			} else if ( !query.isEmpty() && disjoint(query, request.roles()) ) {
 
 				refused(request).accept(consumer);
 
@@ -202,7 +264,8 @@ public final class Graphs extends Delegator {
 						.cause("missing target graph parameter")
 				).accept(consumer);
 
-			} else if ( !request.role(Form.root) ) {
+
+			} else if ( !update.isEmpty() && disjoint(update, request.roles()) ) {
 
 				refused(request).accept(consumer);
 
@@ -288,7 +351,7 @@ public final class Graphs extends Delegator {
 						.cause("missing target graph parameter")
 				).accept(consumer);
 
-			} else if ( !request.role(Form.root) ) {
+			} else if ( !update.isEmpty() && disjoint(update, request.roles()) ) {
 
 				refused(request).accept(consumer);
 
@@ -343,7 +406,7 @@ public final class Graphs extends Delegator {
 						.cause("missing target graph parameter")
 				).accept(consumer);
 
-			} else if ( !request.role(Form.root) ) {
+			} else if ( !update.isEmpty() && disjoint(update, request.roles()) ) {
 
 				refused(request).accept(consumer);
 
