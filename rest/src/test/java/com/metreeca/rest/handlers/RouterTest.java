@@ -17,10 +17,9 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -59,21 +58,21 @@ final class RouterTest {
 				);
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
-				.as("malformed child step")
+				.as("malformed placeholder step")
 				.isThrownBy(() -> new Router()
-						.path("/pa*th", handler())
+						.path("/pa{}th", handler())
 				);
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
 				.as("malformed prefix step")
 				.isThrownBy(() -> new Router()
-						.path("/pa**th", handler())
+						.path("/pa*th", handler())
 				);
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
 				.as("inline prefix step")
 				.isThrownBy(() -> new Router()
-						.path("/**/path", handler())
+						.path("/*/path", handler())
 				);
 
 		assertThatExceptionOfType(IllegalStateException.class)
@@ -119,9 +118,9 @@ final class RouterTest {
 
 	}
 
-	@Test void testMatchesWildcardPath() {
+	@Test void testMatchesPlaceholderPath() {
 
-		final Router router=new Router().path("/head/*/tail", handler());
+		final Router router=new Router().path("/head/{id}/tail", handler());
 
 		router.handle(request("/head/path/tail")).accept(response -> assertThat(response)
 				.hasHeader("path", "/head/path/tail")
@@ -139,7 +138,7 @@ final class RouterTest {
 
 	@Test void testMatchesPrefixPath() {
 
-		final Router router=new Router().path("/head/**", handler());
+		final Router router=new Router().path("/head/*", handler());
 
 		router.handle(request("/head/path")).accept(response -> assertThat(response)
 				.hasHeader("path", "/head/path")
@@ -156,6 +155,28 @@ final class RouterTest {
 	}
 
 
+	@Test void testSavePlaceholderValuesAsRequestParameters() {
+
+		new Router().path("/{head}/{tail}", handler())
+				.handle(request("/one/two"))
+				.accept(response -> RequestAssert.assertThat(response.request())
+						.as("placeholder values saved as parameters")
+						.hasParameter("head", "one")
+						.hasParameter("tail", "two")
+		);
+
+		new Router().path("/{}/{}", handler())
+				.handle(request("/one/two"))
+				.accept(response -> RequestAssert.assertThat(response.request())
+						.has(new Condition<>(
+								request -> request.parameters().isEmpty(),
+								"empty placeholders ignored")
+						)
+		);
+
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testPreferFirstMatch() {
@@ -163,7 +184,7 @@ final class RouterTest {
 		final Router router=new Router()
 
 				.path("/path", request -> request.reply(response -> response.status(100)))
-				.path("/**", request -> request.reply(response -> response.status(200)));
+				.path("/*", request -> request.reply(response -> response.status(200)));
 
 		router.handle(request("/path")).accept(response -> assertThat(response).hasStatus(100));
 		router.handle(request("/path/path")).accept(response -> assertThat(response).hasStatus(200));

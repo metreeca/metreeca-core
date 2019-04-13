@@ -78,7 +78,7 @@ final class SPARQLTest {
 	}
 
 	private SPARQL _public(final SPARQL endpoint) {
-		return endpoint.publik(true);
+		return endpoint.query();
 	}
 
 

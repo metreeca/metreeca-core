@@ -1,5 +1,5 @@
 ---
-title:	        How To Interact with Model‑Driven Linked Data REST APIs
+title:	        Interacting  with Model‑Driven Linked Data REST APIs
 excerpt:        Hands-on guided tour of model-driven linked data REST APIs features
 redirect_from: /tutorials/linked-data-interaction
 ---
@@ -472,6 +472,51 @@ Content-Type: application/json;charset=UTF-8
 ```
 
 Note that RDF container descriptions are omitted from faceted search results.
+
+Queries including only (possibly alternative) facet values without other constraints may be submitted in a simplified format as query parameters.
+
+```json
+{	
+  "filter": { 
+    "line": "/product-lines/planes",
+    "scale": ["1:24", "1:72"]
+  }
+}
+```
+
+```sh
+% curl --include --header 'Accept: application/json' \
+    'http://localhost:8080/products/?line=/product-lines/planes&scale=1:24&scale=1:72'
+    
+HTTP/1.1 200 
+Content-Type: application/json;charset=UTF-8
+
+{
+    "_this": "/products/",
+    "contains": [
+        {
+            "_this": "/products/S18_2581",
+            "type": "/terms#Product",
+            "label": "P-51-D Mustang",
+            "comment": "Has retractable wheels and comes with a stand",
+            "code": "S18_2581",
+            "line": {
+                "_this": "/product-lines/planes",
+                "label": "Planes"
+            },
+            "scale": "1:72",
+            "vendor": "Gearbox Collectibles",
+            "stock": 992,
+            "price": 84.48
+        },
+      
+      ⋮
+      
+    ]
+}
+```
+
+
 
 ## Sorting and Pagination
 

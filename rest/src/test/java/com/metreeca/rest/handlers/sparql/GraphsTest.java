@@ -120,7 +120,7 @@ final class GraphsTest {
 	}
 
 	private Graphs _public(final Graphs endpoint) {
-		return endpoint.publik(true);
+		return endpoint.query();
 	}
 
 

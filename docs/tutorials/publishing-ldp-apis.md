@@ -1,5 +1,5 @@
 ---
-title:	        How To Publish Model‑Driven Linked Data REST APIs
+title:	        Publishing Model‑Driven Linked Data REST APIs
 excerpt:        Hands-on guided tour of model-driven linked data REST APIs publishing
 redirect_from: /tutorials/linked-data-publishing
 ---
@@ -26,13 +26,13 @@ To get started, set up a Java 1.8 project, adding required dependencies for the 
     <dependency>
         <groupId>com.metreeca</groupId>
         <artifactId>j2ee</artifactId>
-        <version>{{ site.github.latest_release.tag_name | remove: "v" }}</version>
+        <version>{{ page.version }}</version>
     </dependency>
 
     <dependency>
 	    <groupId>com.metreeca</groupId>
 	    <artifactId>rdf4j</artifactId>
-        <version>{{ site.github.latest_release.tag_name | remove: "v" }}</version>
+        <version>{{ page.version }}</version>
     </dependency>
 
     <dependency>
@@ -59,22 +59,20 @@ import javax.servlet.annotation.WebListener;
 import static com.metreeca.tray.rdf.Graph.graph;
 
 
-@WebListener public final class Demo extends Gateway {
+@WebFilter(urlPatterns="/*") public final class Demo extends Gateway {
 
-	public Demo() {
-		super("/*", tray -> tray
+	@Override protected Handler load(final Tray tray) {
+		return tray
+      
+    		.set(graph(), () -> new RDF4JMemory())
           
-         .set(graph(), () -> new RDF4JMemory())
-          
-         .get(() -> new Server()
+            .get(() -> new Server()
               
-              .wrap((Request request) -> request.reply(response ->
-                  response.status(Response.OK))
-              )
+        		.wrap((Request request) -> request.reply(response ->
+            		response.status(Response.OK))
+             )
 
-          )
-          
-     );
+         );
 	}
 
 }
@@ -93,9 +91,9 @@ HTTP/1.1 200
 The [tray](../javadocs/?com/metreeca/tray/Tray.html) argument handled to the app loader lambda manages the shared system-provided tools and can be used to customize them and to run app initialization tasks.
 
 ```java
-public Demo() {
-	super("/*", tray -> tray
-
+@Override protected Handler load(final Tray tray) {
+		return tray
+      
       .set(graph(), () -> new RDF4JMemory())
 
 			.exec(() -> tool(graph()).update(connection -> {
@@ -115,8 +113,7 @@ public Demo() {
 							response.status(Response.OK))
 					)
 
-			)
-	);
+			);
 }
 ```
 
@@ -149,8 +146,8 @@ public final class BIRT implements Runnable {
 ```
 
 ```java
-public Demo() {
-	super("/*", tray -> tray
+@Override protected Handler load(final Tray tray) {
+		return tray
         
         .set(graph(), RDF4JMemory::new)
         
@@ -164,8 +161,7 @@ public Demo() {
              		response.status(Response.OK))
              )
         
-        )
-	);
+        );
 }
 ```
 
@@ -225,12 +221,13 @@ Content-Type: text/turtle;charset=UTF-8
 
 Requests are forwarded to a registered handler if their path is matched by an associated pattern defined by a sequence of steps according to the following rules:
 
-| pattern step | matching path step   | definition                                  |
-| ------------ | -------------------- | ------------------------------------------- |
-| /            | /                    | empty / matches only the empty step         |
-| `/<step>`    | `/<step>`            | literal / matches step verbatim             |
-| `/*`         | `/<step>`            | wildcard / matches a single step            |
-| /**          | `/<step>[/<step>/…]` | prefix / matches one or more trailing steps |
+| pattern step | matching path step   | definition                                                   |
+| ------------ | -------------------- | ------------------------------------------------------------ |
+| `/`          | `/`                  | empty / matches only the empty step                          |
+| `/<step>`    | `/<step>`            | literal / matches step verbatim                              |
+| `/{}`        | `/<step>`            | wildcard / matches a single step                             |
+| `/{<key>}`   | `/<step>`            | placeholder / match a single path step, adding the matched `<key>`/`<step>` entry to request [parameters](../javadocs/com/metreeca/rest/Request.html#parameters—); the matched `<step>` name is URL-decoded before use |
+| `/*`         | `/<step>[/<step>/…]` | prefix / matches one or more trailing steps                  |
 
 Registered path patterns are tested in order of definition.
 

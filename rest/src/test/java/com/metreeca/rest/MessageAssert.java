@@ -70,6 +70,8 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public A hasHeader(final String name) {
 
 		if ( name == null ) {
@@ -138,7 +140,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		if ( values == null ) {
 			throw new NullPointerException("null values");
 		}
-
 
 		isNotNull();
 
