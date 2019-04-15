@@ -151,34 +151,34 @@ final class QueryParserTest {
 	@Test void testParseSortingCriteria() {
 
 		edges("{ 'order': '' }", shape, edges -> assertThat(edges.getOrders())
-						.as("empty path")
-						.isEqualTo(list(increasing())));
+				.as("empty path")
+				.isEqualTo(list(increasing())));
 
 		edges("{ 'order': '+' }", shape, edges -> assertThat(edges.getOrders())
-						.as("empty path increasing")
-						.isEqualTo(list(increasing())));
+				.as("empty path increasing")
+				.isEqualTo(list(increasing())));
 
 		edges("{ 'order': '-' }", shape, edges -> assertThat(edges.getOrders())
-						.as("empty path decreasing")
-						.isEqualTo(list(decreasing())));
+				.as("empty path decreasing")
+				.isEqualTo(list(decreasing())));
 
 		edges("{ 'order': 'first.rest' }", shape, edges -> assertThat(edges.getOrders())
-						.as("path")
-						.isEqualTo(list(increasing(RDF.FIRST, RDF.REST))));
+				.as("path")
+				.isEqualTo(list(increasing(RDF.FIRST, RDF.REST))));
 
 		edges("{ 'order': '+first.rest' }", shape, edges -> assertThat(edges.getOrders())
-						.as("path increasing")
-						.isEqualTo(list(increasing(RDF.FIRST, RDF.REST))));
+				.as("path increasing")
+				.isEqualTo(list(increasing(RDF.FIRST, RDF.REST))));
 
 		edges("{ 'order': '-first.rest' }", shape, edges -> assertThat(edges.getOrders())
-						.as("path decreasing")
-						.isEqualTo(list(decreasing(RDF.FIRST, RDF.REST))));
+				.as("path decreasing")
+				.isEqualTo(list(decreasing(RDF.FIRST, RDF.REST))));
 
 		edges("{ 'order': [] }", shape, edges -> assertThat(list()).as("empty list").isEqualTo(edges.getOrders()));
 
 		edges("{ 'order': ['+first', '-first.rest'] }", shape, edges -> assertThat(edges.getOrders())
-						.as("list")
-						.isEqualTo(list(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))));
+				.as("list")
+				.isEqualTo(list(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))));
 
 	}
 
@@ -486,17 +486,28 @@ final class QueryParserTest {
 
 	@Test void testParsePlainQuery() {
 
-		edges("first=http://example.com/&first.rest=x&first.rest=y+z", shape, edges -> {
+		edges("first=http://example.com/&first.rest=x&first.rest=y+z", shape, edges -> assertThat(edges.getShape())
+				.isEqualTo(filter(shape, field(RDF.FIRST, and(
+						any(iri("http://example.com/")),
+						field(RDF.REST, any(literal("x"), literal("y z")))
+				)))));
+
+		edges("first=http://example.com/&first.rest=x&_order=-first.rest&_order=first&_offset=1&_limit=2", shape, edges -> {
+
+			assertThat(edges.getOrders())
+					.containsExactly(decreasing(RDF.FIRST, RDF.REST), increasing(RDF.FIRST));
+
+			assertThat(edges.getOffset())
+					.isEqualTo(1);
+
+			assertThat(edges.getLimit())
+					.isEqualTo(2);
 
 			assertThat(edges.getShape())
-					.as("shape")
-					.isEqualTo(filter(shape, and(
-						field(RDF.FIRST, and(
-								any(iri("http://example.com/")),
-								field(RDF.REST, any(literal("x"), literal("y z")))
-						))
-				)));
-
+					.isEqualTo(filter(shape, field(RDF.FIRST, and(
+							any(iri("http://example.com/")),
+							field(RDF.REST, any(literal("x")))
+					))));
 		});
 
 	}

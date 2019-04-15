@@ -77,7 +77,8 @@ public final class QueryParser extends JSONDecoder {
 	/**
 	 * Parses a JSON object encoding a query.
 	 *
-	 * @param query either a URL-encoded JSON object or URL query parameters representing a shape-driven linked data query
+	 * @param query either a URL-encoded JSON object or URL query parameters representing a shape-driven linked data
+	 *              query
 	 *
 	 * @return the parsed query
 	 *
@@ -95,7 +96,7 @@ public final class QueryParser extends JSONDecoder {
 		return query.isEmpty() ? Edges.edges(shape)
 				: query.startsWith("%7B") ? json(decode(query))
 				: query.startsWith("{") ? json(query)
-				: parameters(query);
+				: form(query);
 
 	}
 
@@ -106,7 +107,7 @@ public final class QueryParser extends JSONDecoder {
 				.map(v -> Json.createReader(new StringReader(v)).readValue())
 				.filter(v -> v instanceof JsonObject)
 				.map(JsonValue::asJsonObject)
-				.orElseGet(() ->error("filter is not an object"))
+				.orElseGet(() -> error("filter is not an object"))
 		);
 	}
 
@@ -133,14 +134,47 @@ public final class QueryParser extends JSONDecoder {
 	}
 
 
-	private Query parameters(final String query) {
+	private Query form(final String query) {
 
+		final JsonObjectBuilder json=Json.createObjectBuilder();
 		final JsonObjectBuilder filter=Json.createObjectBuilder();
+		final JsonArrayBuilder orders=Json.createArrayBuilder();
 
-		Codecs.parameters(query).forEach((path, values) -> filter.add(path, Json.createArrayBuilder(values)));
+		Codecs.parameters(query).forEach((path, values) -> {
 
-		return json(Json.createObjectBuilder()
+			switch ( path ) {
+
+				case "_order":
+
+					values.forEach(orders::add);
+
+					break;
+
+				case "_offset":
+				case "_limit":
+
+					values.stream()
+							.map(s -> {
+								try { return Integer.parseInt(s); } catch ( NumberFormatException e ) { return null; }
+							})
+							.filter(Objects::nonNull)
+							.findFirst()
+							.ifPresent(i -> json.add(path.substring(1), i));
+
+					break;
+
+				default:
+
+					filter.add(path, Json.createArrayBuilder(values));
+
+					break;
+			}
+
+		});
+
+		return json(json
 				.add("filter", filter)
+				.add("order", orders)
 				.build()
 		);
 	}
