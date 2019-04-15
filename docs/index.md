@@ -28,3 +28,9 @@ References
 - [Idiomatic RDF/JSON Serialization](references/idiomatic-json)
 <!-- - [Known Issues](references/known-issues) -->
 
+---
+
+home / [www.metreeca.com](https://www.metreeca.com/)
+code / [github.com/metreeca/link](https://github.com/metreeca/link)
+forum / [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca)
+
