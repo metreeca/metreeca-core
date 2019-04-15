@@ -71,28 +71,6 @@ public final class Connector implements Wrapper {
 	}
 
 	/**
-	 * Connects a graph-based consumer.
-	 *
-	 * @param consumer the graph-based consumer
-	 * @param <V>      the type of the value accepted by {@code consumer}
-	 *
-	 * @return a plain consumer that creates a read-only on demand connection to the to shared system {@linkplain Graph}
-	 * and delegates value processing to the connected graph-based {@code consumer}
-	 *
-	 * @throws NullPointerException if {@code consumer} is null
-	 */
-	public static <V> Consumer<V> connect(final BiConsumer<RepositoryConnection, V> consumer) {
-
-		if ( consumer == null ) {
-			throw new NullPointerException("null consumer");
-		}
-
-		final Graph graph=tool(graph());
-
-		return v -> graph.query(connection -> { consumer.accept(connection, v); });
-	}
-
-	/**
 	 * Connects a graph-based function.
 	 *
 	 * @param function the graph-based function
