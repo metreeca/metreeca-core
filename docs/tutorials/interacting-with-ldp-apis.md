@@ -8,13 +8,13 @@ This example-driven tutorial introduces the main client-facing features of the M
 
 In the following sections you will learn how to interact with REST APIs published with the framework, leveraging automatic model-driven fine-grained role‑based read/write access control,  faceted search and incoming data validation.
 
-In the tutorial we will work with the linked data server developed in the  [publishing tutorial](publish-ldp-apis), using a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
+In the tutorial we will work with the linked data server developed in the  [publishing tutorial](publishing-ldp-apis), using a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
 
 We will walk through the REST API interaction process focusing on the task of consuming the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog as a [Linked Data Platform](https://www.w3.org/TR/ldp-primer/) (LDP) Basic Container.
 
 You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl` or `wget`.
 
-A Maven project with the code for the complete demo app is available on [GitHub](https://github.com/metreeca/demo/tree/tutorial): clone or [download](https://github.com/metreeca/demo/archive/tutorial.zip) it to your workspace, open in your favorite IDE and launch a local instance of the server. If you are working with IntelliJ IDEA you may want to use the `Demo` pre-configured run configuration to deploy and update the local server instance.
+A Maven project with the code for the complete demo app is available on [GitHub](https://github.com/metreeca/demo): clone or [download](https://github.com/metreeca/demo/archive/master.zip) it to your workspace, open in your favorite IDE and launch a local instance of the server. If you are working with IntelliJ IDEA you may want to use the `Demo` pre-configured run configuration to deploy and update the local server instance.
 
 # Model-Driven APIs
 
@@ -33,7 +33,7 @@ Even a simple application like this would usually require extensive back-end dev
 
 Metreeca/Link automates the whole process with a model-driven API engine that compiles high‑level declarative linked data models into read/write REST APIs immediately available for front-end app development, supporting all of the above-mentioned features without custom back-end coding.
 
-You may learn how to publish your own model-driven linked data APIs walking through the [linked data publishing tutorial](publish-ldp-apis).
+You may learn how to publish your own model-driven linked data APIs walking through the [linked data publishing tutorial](publishing-ldp-apis).
 
 # Read Operations
 
@@ -593,7 +593,7 @@ Edge queries including only (possibly alternative) facet values and sorting/pagi
 % curl --include --header 'Accept: application/json' \
     'http://localhost:8080/products/?'`
     `'line=/product-lines/planes&scale=1:24&scale=1:72'`
-    `'&_order=-scale&_offset=10&limit=10"
+    `'&_order=-scale&_offset=3&_limit=10'
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -602,19 +602,19 @@ Content-Type: application/json;charset=UTF-8
     "_this": "/products/",
     "contains": [
         {
-            "_this": "/products/S18_2581",
+            "_this": "/products/S24_1785",
             "type": "/terms#Product",
-            "label": "P-51-D Mustang",
-            "comment": "Has retractable wheels and comes with a stand",
-            "code": "S18_2581",
+            "label": "1928 British Royal Navy Airplane",
+            "comment": "Official logos and insignias",
+            "code": "S24_1785",
             "line": {
                 "_this": "/product-lines/planes",
                 "label": "Planes"
             },
-            "scale": "1:72",
-            "vendor": "Gearbox Collectibles",
-            "stock": 992,
-            "price": 84.48
+            "scale": "1:24",
+            "vendor": "Classic Metal Creations",
+            "stock": 3627,
+            "price": 109.42
         },
       
       ⋮

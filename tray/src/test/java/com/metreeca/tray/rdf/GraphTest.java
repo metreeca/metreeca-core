@@ -65,7 +65,7 @@ public final class GraphTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testPreventUpdateTransactionsOnReadOnlyRepositories() {
-		try (final Graph graph=tool(Graph.graph())) {
+		try (final Graph graph=graph()) {
 
 			assertThatExceptionOfType(RepositoryReadOnlyException.class)
 					.isThrownBy(() -> graph.isolation(Graph.READ_ONLY).update(connection -> {}));
