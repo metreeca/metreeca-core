@@ -7,6 +7,9 @@ Sometimes you need to access resources using alternate identifiers or to set up 
 The following samples present typical setups built on the same data used in the [tutorials](../tutorials/publishing-ldp-apis) and a custom name-based product resolver.
 
 ```java
+import static com.metreeca.form.things.Values.literal;
+import static com.metreeca.rest.wrappers.Connector.connect;
+
 private Optional<IRI> byname(final RepositoryConnection connection, final String name) {
   return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))
       .map(Statement::getSubject)
@@ -31,10 +34,10 @@ new Router()
  
   // alternate name-based endpoint
 
-  .path("/products/byname/{name}", new Aliaser((connection, request) -> request
+  .path("/products/byname/{name}", new Aliaser(connect((connection, request) -> request
       .parameter("name")
       .flatMap(name -> byname(connection, name))
-  ))
+  )))
 ```
 
 ## Shared Endpoints
@@ -44,7 +47,7 @@ new Router()
 
     .path("/products/{id}", new Worker()
         .get(new Relator()
-            .with(new Aliaser((connection, request) -> request.parameter("id")
+            .with(new Aliaser(connect((connection, request) -> request.parameter("id")
                
                 // match provided id against expected code pattern
                
@@ -59,7 +62,7 @@ new Router()
                     : byname(connection, code)
              
                 )
-            ))
+            )))
         )
 ```
 
@@ -70,7 +73,7 @@ new Router()
 
     .path("/products/", new Worker()
         .get(new Relator()
-            .with(new Aliaser((connection, request) -> request.parameter("name")
+            .with(new Aliaser(connect((connection, request) -> request.parameter("name")
                
                 // product name provided as query parameter: resolve and redirect
                
@@ -80,7 +83,7 @@ new Router()
                
                 .orElseGet(() -> Optional.of(request.item()))
                
-            ))
+            )))
         )
 ```
 
