@@ -46,6 +46,8 @@ import static com.metreeca.gate.Roster.CredentialsInvalid;
 import static com.metreeca.gate.policies.ComboPolicy.lowercases;
 import static com.metreeca.gate.policies.ComboPolicy.only;
 import static com.metreeca.rest.ResultAssert.assertThat;
+import static com.metreeca.tray.rdf.Graph.graph;
+import static com.metreeca.tray.rdf.GraphTest.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -60,10 +62,11 @@ final class BasicRosterTest {
 	private void exec(final Runnable... tasks) {
 		new Tray()
 
+				.set(graph(), GraphTest::graph)
 				.set(digest(), PBKDF2Digest::new)
 				.set(policy(), () -> only(lowercases()))
 
-				.exec(GraphTest.model(small()))
+				.exec(model(small()))
 
 				.exec(tasks)
 
