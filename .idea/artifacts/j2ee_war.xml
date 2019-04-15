@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="j2ee:war">
-    <output-path>$PROJECT_DIR$/j2ee/target</output-path>
-    <root id="archive" name="metreeca-j2ee-0.0-SNAPSHOT.war">
-      <element id="artifact" artifact-name="j2ee:war exploded" />
-    </root>
-  </artifact>
-</component>
