@@ -19,7 +19,6 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -32,21 +31,17 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.Base;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.HandlerTest.echo;
+import static com.metreeca.rest.HandlerTest.exec;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.rest.wrappers.Connector.update;
+import static com.metreeca.tray.rdf.GraphTest.model;
 
 import static java.util.Arrays.asList;
 
 
 final class PostprocessorTest {
-
-	private void exec(final Runnable... tasks) {
-		new Tray().exec(tasks).clear();
-	}
-
 
 	private BiFunction<Response, Model, Model> post(final Value value) {
 		return (response, model) -> {
@@ -76,8 +71,7 @@ final class PostprocessorTest {
 										statement(response.item(), RDF.VALUE, RDF.REST)
 								))
 						)
-				)
-		);
+				));
 	}
 
 	@Test void testIgnoreUnsuccessfulResponses() {
@@ -92,8 +86,7 @@ final class PostprocessorTest {
 								.as("filters not executed")
 								.isEmpty()
 						)
-				)
-		);
+				));
 
 	}
 
@@ -117,13 +110,11 @@ final class PostprocessorTest {
 							.as("retrieve body to activate postprocessing")
 							.hasBody(rdf());
 
-					assertThat(graph())
+					assertThat(model())
 							.as("repository updated")
 							.isIsomorphicTo(decode("<test> rdf:value rdf:first, rdf:rest."));
 
-				})
-
-		);
+				}));
 	}
 
 }

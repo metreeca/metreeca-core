@@ -23,6 +23,7 @@ import com.metreeca.kits.stardog.Stardog;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.kits.virtuoso.Virtuoso;
+import com.metreeca.tray.rdf.GraphTest;
 
 import com.complexible.stardog.api.ConnectionConfiguration;
 import org.eclipse.rdf4j.IsolationLevels;
@@ -36,7 +37,8 @@ import static com.metreeca.form.things.ValuesTest.small;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.rdf.Graph.READ_ONLY;
-import static com.metreeca.tray.rdf.GraphTest.graph;
+import static com.metreeca.tray.rdf.Graph.graph;
+import static com.metreeca.tray.rdf.GraphTest.model;
 
 
 abstract class ActorProcessorTest {
@@ -44,14 +46,16 @@ abstract class ActorProcessorTest {
 	protected void exec(final Runnable... tasks) {
 		new Tray()
 
-				//.set(Graph.Factory, this::graphdb)
-				//.set(Graph.Factory, this::virtuoso)
-				//.set(Graph.Factory, this::stardog)
-				//.set(Graph.Factory, this::dydra)
+				.set(graph(), GraphTest::graph)
+
+				//.set(graph(), this::graphdb)
+				//.set(graph(), this::virtuoso)
+				//.set(graph(), this::stardog)
+				//.set(graph(), this::dydra)
 
 				.exec(() -> {
 
-					final Graph graph=tool(Graph.graph()); // expect pre-loaded dataset if read-only
+					final Graph graph=tool(graph()); // expect pre-loaded dataset if read-only
 
 					if ( graph.isolation().isCompatibleWith(IsolationLevels.NONE) ) {
 						graph.update(connection -> {
@@ -97,7 +101,7 @@ abstract class ActorProcessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testUploadDataset() {
-		exec(() -> assertThat(graph("construct where { ?office a :Office }"))
+		exec(() -> assertThat(model("construct where { ?office a :Office }"))
 				.as("test dataset is actually loaded")
 				.isNotEmpty());
 	}

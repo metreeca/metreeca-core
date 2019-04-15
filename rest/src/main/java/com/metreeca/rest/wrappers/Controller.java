@@ -48,20 +48,20 @@ public final class Controller implements Wrapper {
 	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
 	 *              {@linkplain Request#shape() request shape}, if one is present
 	 *
-	 * @throws NullPointerException if either {@code roles} is null or contains null values
+	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
 	public Controller(final IRI... roles) {
 		this(asList(roles));
 	}
 
 	/**
-	 * Configures the permitted roles.
+	 * Creates a controller.
 	 *
 	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
 	 *              {@linkplain Request#shape() request shape}, if one is present
 	 *
-	 * @throws NullPointerException if either {@code roles} is null or contains null values
+	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
 	public Controller(final Collection<? extends IRI> roles) {
 

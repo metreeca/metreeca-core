@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class ControllerTest {
 
 	private void exec(final Runnable task) {
-		new Tray().exec(task).clear();
+		HandlerTest.exec(task);
 	}
 
 

@@ -17,6 +17,10 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.rdf.GraphTest;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -34,6 +38,13 @@ import static java.util.function.Function.identity;
 
 public final class HandlerTest {
 
+	public static void exec(final Runnable... tasks) {
+		new Tray()
+				.set(Graph.graph(), GraphTest::graph)
+				.exec(tasks)
+				.clear();
+	}
+
 	@SafeVarargs public static Handler echo(final Function<Response, Response>... tasks) {
 		return request -> request.reply(response -> response
 
@@ -49,6 +60,8 @@ public final class HandlerTest {
 		);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testPreserverChainedWrapperOrder() {
 		echo()

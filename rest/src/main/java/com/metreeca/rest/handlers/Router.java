@@ -22,9 +22,10 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Responder;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,9 +46,13 @@ import java.util.regex.Pattern;
  *
  * <li>literal steps {@code /<step>} match path steps verbatim;</li>
  *
- * <li>wildcard steps {@code /*} match a single path step;</li>
+ * <li>wildcard steps {@code /{}} match a single path step;</li>
  *
- * <li>prefix steps {@code /**} match one or more trailing path steps.</li>
+ * <li>placeholder steps {@code /{<key>}} match a single path step, adding the matched {@code <key>}/{@code <step>}
+ * entry to request {@linkplain Request#parameters() parameters}; the matched {@code <step>} name is URL-decoded before
+ * use;</li>
+ *
+ * <li>prefix steps {@code /*} match one or more trailing path steps.</li>
  *
  * </ul>
  *
@@ -58,7 +63,13 @@ import java.util.regex.Pattern;
  */
 public final class Router implements Handler {
 
-	private static final Pattern PathPattern=Pattern.compile("(?<prefix>(/[^/*]*|/\\*)*?)(?<suffix>/\\*\\*?)?");
+	private static final Pattern KeyPattern=Pattern.compile(
+			"\\{(?<key>[^}]*)}"
+	);
+
+	private static final Pattern PathPattern=Pattern.compile(String.format(
+			"(?<prefix>(/[^/*{}]*|/%s)*)(?<suffix>/\\*)?", KeyPattern.pattern()
+	));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +111,11 @@ public final class Router implements Handler {
 		final String prefix=matcher.group("prefix");
 		final String suffix=matcher.group("suffix");
 
-		final Function<Request, Optional<Responder>> route=route(prefix, suffix, handler);
+		final Function<Request, Optional<Responder>> route=route(
+				prefix == null ? "" : prefix,
+				suffix == null ? "" : suffix,
+				handler
+		);
 
 		if ( routes.putIfAbsent(path, route) != null ) {
 			throw new IllegalStateException("path already mapped <"+path+">");
@@ -131,14 +146,30 @@ public final class Router implements Handler {
 
 	private Function<Request, Optional<Responder>> route(final String prefix, final String suffix, final Handler handler) {
 
-		final Pattern pattern=Pattern.compile(
-				String.format("(?<prefix>%s)(?<suffix>%s)",
-						prefix ==null? "" : Pattern.quote(prefix),
-						suffix ==null? "" : Pattern.quote(suffix)
-				)
-				.replaceAll("/\\*\\*", "\\\\E/.*\\\\Q")
-				.replaceAll("/\\*", "\\\\E/[^/]*\\\\Q")
-		);
+		final Collection<String> keys=new LinkedHashSet<>();
+
+		final Matcher scanner=KeyPattern.matcher(prefix.isEmpty() ? "" : Pattern.quote(prefix));
+
+		final StringBuffer buffer=new StringBuffer(2*(prefix.length()+suffix.length())).append("(");
+
+		while ( scanner.find() ) { // collect placeholder keys and replace with wildcard step patterns
+
+			final String key=scanner.group("key");
+
+			if ( !key.isEmpty() && !keys.add(key) ) {
+				throw new IllegalArgumentException("repeated placeholder key <"+key+">");
+			}
+
+			scanner.appendReplacement(buffer, key.isEmpty()
+					? "\\\\E[^/]*\\\\Q"
+					: "\\\\E(?<${key}>[^/]*)\\\\Q"
+			);
+
+		}
+
+		scanner.appendTail(buffer).append(suffix.isEmpty() ? ")" : ")(/.*)");
+
+		final Pattern pattern=Pattern.compile(buffer.toString());
 
 		return request -> {
 
@@ -146,10 +177,24 @@ public final class Router implements Handler {
 			final String tail=request.path().substring(head.length());
 
 			return Optional.of(pattern.matcher(tail))
+
 					.filter(Matcher::matches)
-					.map(matcher -> consumer -> handler
-							.handle(request.header("Location", head+matcher.group("prefix")))
-							.accept(consumer)
+
+					.map(matcher -> consumer -> {
+
+								keys.forEach(key -> {
+									try {
+										request.parameter(key, URLDecoder.decode(matcher.group(key), "UTF-8"));
+									} catch ( final UnsupportedEncodingException unexpected ) {
+										throw new UncheckedIOException(unexpected);
+									}
+								});
+
+								handler
+										.handle(request.header("Location", head+matcher.group(1)))
+										.accept(consumer);
+
+							}
 					);
 
 		};

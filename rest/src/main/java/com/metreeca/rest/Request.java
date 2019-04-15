@@ -30,7 +30,6 @@ import java.util.function.Function;
 
 import javax.json.JsonException;
 
-import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Strings.upper;
 import static com.metreeca.form.things.Values.iri;
@@ -203,7 +202,7 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return Value(new QueryParser(shape, item().stringValue()).parse(decode(query())));
+			return Value(new QueryParser(shape, item().stringValue()).parse(query()));
 
 		} catch ( final JsonException e ) {
 

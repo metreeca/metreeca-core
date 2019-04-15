@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -79,7 +80,11 @@ public abstract class JSONDecoder extends JSONCodec {
 	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected String resolve(final String iri) {
-		return base == null ? iri : base.resolve(iri).toString();
+		try {
+			return base == null ? iri : base.resolve(new URI(iri)).toString();
+		} catch ( final URISyntaxException e ) {
+			throw new JsonException(String.format("invalid IRI: %s", e.getMessage()));
+		}
 	}
 
 

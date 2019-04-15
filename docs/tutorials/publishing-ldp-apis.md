@@ -1,5 +1,5 @@
 ---
-title:	        How To Publish Model‑Driven Linked Data REST APIs
+title:	        Publishing Model‑Driven Linked Data REST APIs
 excerpt:        Hands-on guided tour of model-driven linked data REST APIs publishing
 redirect_from: /tutorials/linked-data-publishing
 ---
@@ -26,13 +26,13 @@ To get started, set up a Java 1.8 project, adding required dependencies for the 
     <dependency>
         <groupId>com.metreeca</groupId>
         <artifactId>j2ee</artifactId>
-        <version>{{ site.github.latest_release.tag_name | remove: "v" }}</version>
+        <version>{{ page.version }}</version>
     </dependency>
 
     <dependency>
 	    <groupId>com.metreeca</groupId>
 	    <artifactId>rdf4j</artifactId>
-        <version>{{ site.github.latest_release.tag_name | remove: "v" }}</version>
+        <version>{{ page.version }}</version>
     </dependency>
 
     <dependency>
@@ -221,12 +221,13 @@ Content-Type: text/turtle;charset=UTF-8
 
 Requests are forwarded to a registered handler if their path is matched by an associated pattern defined by a sequence of steps according to the following rules:
 
-| pattern step | matching path step   | definition                                  |
-| ------------ | -------------------- | ------------------------------------------- |
-| /            | /                    | empty / matches only the empty step         |
-| `/<step>`    | `/<step>`            | literal / matches step verbatim             |
-| `/*`         | `/<step>`            | wildcard / matches a single step            |
-| /**          | `/<step>[/<step>/…]` | prefix / matches one or more trailing steps |
+| pattern step | matching path step   | definition                                                   |
+| ------------ | -------------------- | ------------------------------------------------------------ |
+| `/`          | `/`                  | empty / matches only the empty step                          |
+| `/<step>`    | `/<step>`            | literal / matches step verbatim                              |
+| `/{}`        | `/<step>`            | wildcard / matches a single step                             |
+| `/{<key>}`   | `/<step>`            | placeholder / match a single path step, adding the matched `<key>`/`<step>` entry to request [parameters](../javadocs/com/metreeca/rest/Request.html#parameters—); the matched `<step>` name is URL-decoded before use |
+| `/*`         | `/<step>[/<step>/…]` | prefix / matches one or more trailing steps                  |
 
 Registered path patterns are tested in order of definition.
 
@@ -242,7 +243,7 @@ If the router doesn't contain a matching handler, no action is performed giving 
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](interact-with-ldp-apis#faceted-search), sorting and pagination |
+| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](interacting-with-ldp-apis#faceted-search), sorting and pagination |
 | [Generator](../javadocs/?com/metreeca/rest/handlers/actors/Generator.html) | virtual container/resource retrieval / retrieves the detailed RDF description of the target virtual item and (optionally) the digest RDF description of the contained resources |
 | [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
 | [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html) | resource updating / updates the detailed RDF description of the target item |
@@ -297,7 +298,7 @@ The [Delegator](../javadocs/?com/metreeca/rest/handlers/Delegator.html) abstract
 
 # Model-Driven Handlers
 
-The behaviour of standard resource action handlers can be fine-tuned using high-level declarative models that drive automatic fine‑grained role‑based read/write access control, faceted search,  incoming data validation and bidirectional conversion between RDF and [idiomatic](../references/idiomatic-json) JSON payloads, as demonstrated in the [REST APIs interaction tutorial](interact-with-ldp-apis).
+The behaviour of standard resource action handlers can be fine-tuned using high-level declarative models that drive automatic fine‑grained role‑based read/write access control, faceted search,  incoming data validation and bidirectional conversion between RDF and [idiomatic](../references/idiomatic-json) JSON payloads, as demonstrated in the [REST APIs interaction tutorial](interacting-with-ldp-apis).
 
 ## Defining Models
 
@@ -641,5 +642,5 @@ Request and response RDF payloads may also be [pre](../javadocs/com/metreeca/res
 
 To complete your tour of the framework:
 
-- walk through the [interaction tutorial](interact-with-ldp-apis) to learn how to interact with model-driven REST APIs to power client apps like the demo [online product catalog](https://demo.metreeca.com/apps/shop/);
+- walk through the [interaction tutorial](interacting-with-ldp-apis) to learn how to interact with model-driven REST APIs to power client apps like the demo [online product catalog](https://demo.metreeca.com/apps/shop/);
 - explore the standard [library](../javadocs/?overview-summary.html) to learn how to develop your own custom wrappers and handlers and to extend your server with additional services like [SPARQL endpoints](../javadocs/?com/metreeca/rest/handlers/sparql/package-summary.html).

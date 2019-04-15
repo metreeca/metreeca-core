@@ -5,4 +5,13 @@ remote_theme: metreeca/docs
 exclude: [Gemfile, Gemfile.lock]
 
 plugins:
-- jekyll-redirect-from
+  - jekyll-redirect-from
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      project: "link"
+      version: "0.51.0"
+      tagline: "Metreeca Linked Data Framework"
+      release: "https://github.com/metreeca/link/releases/tag/v0.51.0"

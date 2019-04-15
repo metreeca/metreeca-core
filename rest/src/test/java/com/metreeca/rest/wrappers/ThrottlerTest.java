@@ -22,9 +22,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -55,9 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class ThrottlerTest {
 
 	private void exec(final Runnable task) {
-		new Tray()
-				.exec(task)
-				.clear();
+		HandlerTest.exec(task);
 	}
 
 
