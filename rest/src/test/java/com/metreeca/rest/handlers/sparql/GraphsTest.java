@@ -24,6 +24,7 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 import com.metreeca.tray.rdf.Graph;
+import com.metreeca.tray.rdf.GraphTest;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -42,7 +43,6 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.encode;
 import static com.metreeca.form.things.ValuesTest.export;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
@@ -61,7 +61,7 @@ final class GraphsTest {
 
 	private Tray with(final Runnable... datasets) {
 
-		final Tray tray=new Tray();
+		final Tray tray=new Tray().set(Graph.graph(), GraphTest::graph);
 
 		for (final Runnable dataset : datasets) {
 			tray.exec(dataset);
@@ -98,11 +98,11 @@ final class GraphsTest {
 
 
 	private Runnable named(final Iterable<Statement> model) {
-		return graph(model, RDF.NIL);
+		return GraphTest.model(model, RDF.NIL);
 	}
 
 	private Runnable dflt(final Iterable<Statement> model) {
-		return graph(model, (Resource)null);
+		return GraphTest.model(model, (Resource)null);
 	}
 
 

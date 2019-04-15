@@ -23,6 +23,7 @@ import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.GraphTest;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
@@ -37,14 +38,16 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.JSONBody.json;
-import static com.metreeca.tray.rdf.GraphTest.graph;
+import static com.metreeca.tray.rdf.Graph.graph;
+import static com.metreeca.tray.rdf.GraphTest.model;
 
 
 final class UpdaterTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
-				.exec(graph(small()))
+				.set(graph(), GraphTest::graph)
+				.exec(model(small()))
 				.exec(task)
 				.clear();
 	}
@@ -86,7 +89,7 @@ final class UpdaterTest {
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 
 									.as("updated values inserted")
 									.hasSubset(decode("</employees/1370>"
@@ -120,7 +123,7 @@ final class UpdaterTest {
 											.hasField("error")
 									);
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(small());
 
@@ -145,7 +148,7 @@ final class UpdaterTest {
 											.hasField("error")
 									);
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(small());
 
@@ -172,7 +175,7 @@ final class UpdaterTest {
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 
 									.as("updated values inserted")
 									.hasSubset(decode("</employees/1370>"
@@ -205,7 +208,7 @@ final class UpdaterTest {
 									.hasStatus(Response.Unauthorized)
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(small());
 
@@ -223,7 +226,7 @@ final class UpdaterTest {
 									.hasStatus(Response.Forbidden)
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(small());
 
@@ -242,7 +245,7 @@ final class UpdaterTest {
 									.hasBody(json(), json -> assertThat(json)
 											.hasField("error"));
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(small());
 
@@ -266,7 +269,7 @@ final class UpdaterTest {
 									.hasBody(json(), json -> assertThat(json)
 											.hasField("error"));
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(small());
 
@@ -286,7 +289,7 @@ final class UpdaterTest {
 											.hasField("error")
 									);
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(small());
 

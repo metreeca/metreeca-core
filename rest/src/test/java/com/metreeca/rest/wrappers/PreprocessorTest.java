@@ -18,8 +18,8 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.truths.ModelAssert;
+import com.metreeca.rest.HandlerTest;
 import com.metreeca.rest.Request;
-import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -40,10 +40,6 @@ import static java.util.Arrays.asList;
 
 final class PreprocessorTest {
 
-	private void exec(final Runnable... tasks) {
-		new Tray().exec(tasks).clear();
-	}
-
 
 	private BiFunction<Request, Model, Model> pre(final Value value) {
 		return (request, model) -> {
@@ -59,7 +55,7 @@ final class PreprocessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessRequestRDFPayload() {
-		exec(() -> echo()
+		HandlerTest.exec(() -> echo()
 
 				.with(new Preprocessor(pre(RDF.FIRST), pre(RDF.REST))) // multiple filters to test piping
 
@@ -78,7 +74,7 @@ final class PreprocessorTest {
 	}
 
 	@Test void testSupportSPARQLGraphQueries() {
-		exec(() -> echo()
+		HandlerTest.exec(() -> echo()
 
 				.with(new Preprocessor(query(sparql(
 						"construct { <> rdf:value rdf:first, rdf:rest } where {}"

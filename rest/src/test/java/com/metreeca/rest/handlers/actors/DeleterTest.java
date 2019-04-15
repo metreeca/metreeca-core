@@ -19,9 +19,9 @@ package com.metreeca.rest.handlers.actors;
 
 
 import com.metreeca.form.truths.JsonAssert;
+import com.metreeca.rest.HandlerTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -31,9 +31,9 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.form.Form.none;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.rest.bodies.JSONBody.json;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.tray.rdf.GraphTest.model;
 
 
 final class DeleterTest {
@@ -42,7 +42,7 @@ final class DeleterTest {
 
 
 	private void exec(final Runnable task) {
-		new Tray().exec(graph(small()), task).clear();
+		HandlerTest.exec(model(small()), task);
 	}
 
 
@@ -70,15 +70,15 @@ final class DeleterTest {
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							assertThat(graph("construct where { <employees/1370> ?p ?o }"))
+							assertThat(model("construct where { <employees/1370> ?p ?o }"))
 									.as("cell deleted")
 									.isEmpty();
 
-							assertThat(graph("construct where { ?s ?p <employees/1370> }"))
+							assertThat(model("construct where { ?s ?p <employees/1370> }"))
 									.as("inbound links removed")
 									.isEmpty();
 
-							assertThat(graph("construct where { <employees/1102> rdfs:label ?o }"))
+							assertThat(model("construct where { <employees/1102> rdfs:label ?o }"))
 									.as("connected resources preserved")
 									.isNotEmpty();
 
@@ -97,7 +97,7 @@ final class DeleterTest {
 									.hasStatus(Response.NotFound)
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(Dataset);
 
@@ -123,7 +123,7 @@ final class DeleterTest {
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							assertThat(graph("construct where { <employees/1370> ?p ?o }"))
+							assertThat(model("construct where { <employees/1370> ?p ?o }"))
 									.isEmpty();
 
 						}));
@@ -141,7 +141,7 @@ final class DeleterTest {
 									.hasStatus(Response.Unauthorized)
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(Dataset);
 
@@ -159,7 +159,7 @@ final class DeleterTest {
 									.hasStatus(Response.Forbidden)
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(Dataset);
 
@@ -177,7 +177,7 @@ final class DeleterTest {
 									.hasStatus(Response.NotFound)
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(Dataset);
 

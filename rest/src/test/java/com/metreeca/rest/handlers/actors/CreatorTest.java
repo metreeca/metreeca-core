@@ -20,10 +20,7 @@ package com.metreeca.rest.handlers.actors;
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.Values;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.tray.Tray;
+import com.metreeca.rest.*;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
@@ -52,13 +49,13 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.rest.handlers.actors.Creator.auto;
-import static com.metreeca.tray.rdf.GraphTest.graph;
+import static com.metreeca.tray.rdf.GraphTest.model;
 
 
 final class CreatorTest {
 
 	private void exec(final Runnable task) {
-		new Tray().exec(task).clear();
+		HandlerTest.exec(task);
 	}
 
 
@@ -93,7 +90,7 @@ final class CreatorTest {
 											.hasField("cause")
 									);
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -123,7 +120,7 @@ final class CreatorTest {
 											.hasField("cause")
 									);
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -179,14 +176,14 @@ final class CreatorTest {
 									.as("resource created with IRI stemmed on request focus")
 									.hasNamespace(container.stringValue());
 
-							assertThat(graph())
+							assertThat(model())
 									.as("resource description stored into the graph")
 									.hasSubset(
 											statement(resource, term("forename"), literal("Tino")),
 											statement(resource, term("surname"), literal("Faussone"))
 									);
 
-							assertThat(graph())
+							assertThat(model())
 									.as("basic container connected to resource description")
 									.hasSubset(
 											statement(container, LDP.CONTAINS, resource)
@@ -214,7 +211,7 @@ final class CreatorTest {
 									.as("resource created with computed IRI")
 									.isEqualTo(item("employees/slug"));
 
-							assertThat(graph()).hasSubset(
+							assertThat(model()).hasSubset(
 									statement(location, term("forename"), literal("Tino")),
 									statement(location, term("surname"), literal("Faussone"))
 							);
@@ -238,7 +235,7 @@ final class CreatorTest {
 											.hasField("error")
 									);
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -263,7 +260,7 @@ final class CreatorTest {
 											.hasField("error")
 									);
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -277,14 +274,14 @@ final class CreatorTest {
 
 					creator.handle(simple()).accept(response -> {});
 
-					final Model snapshot=graph();
+					final Model snapshot=model();
 
 					creator.handle(simple()).accept(response -> {
 
 						assertThat(response)
 								.hasStatus(Response.InternalServerError);
 
-						assertThat(graph())
+						assertThat(model())
 								.as("graph unchanged")
 								.isIsomorphicTo(snapshot);
 
@@ -322,7 +319,7 @@ final class CreatorTest {
 									.as("resource created with IRI stemmed on request focus")
 									.hasNamespace(response.request().item().stringValue());
 
-							assertThat(graph())
+							assertThat(model())
 									.as("resource description stored into the graph")
 									.hasSubset(
 											statement(location, RDF.TYPE, term("Employee")),
@@ -352,7 +349,7 @@ final class CreatorTest {
 									.as("resource created with computed IRI")
 									.isEqualTo(item("employees/slug"));
 
-							assertThat(graph()).hasSubset(
+							assertThat(model()).hasSubset(
 									statement(location, RDF.TYPE, term("Employee")),
 									statement(location, term("forename"), literal("Tino")),
 									statement(location, term("surname"), literal("Faussone"))
@@ -374,7 +371,7 @@ final class CreatorTest {
 									.doesNotHaveHeader("Location")
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -393,7 +390,7 @@ final class CreatorTest {
 									.doesNotHaveHeader("Location")
 									.doesNotHaveBody();
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -412,7 +409,7 @@ final class CreatorTest {
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> assertThat(json).hasField("error"));
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -434,7 +431,7 @@ final class CreatorTest {
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> assertThat(json).hasField("error"));
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -454,7 +451,7 @@ final class CreatorTest {
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> assertThat(json).hasField("error"));
 
-							assertThat(graph())
+							assertThat(model())
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -468,14 +465,14 @@ final class CreatorTest {
 
 					creator.handle(shaped()).accept(response -> {});
 
-					final Model snapshot=graph();
+					final Model snapshot=model();
 
 					creator.handle(shaped()).accept(response -> {
 
 						assertThat(response)
 								.hasStatus(Response.InternalServerError);
 
-						assertThat(graph())
+						assertThat(model())
 								.as("graph unchanged")
 								.isIsomorphicTo(snapshot);
 
@@ -505,7 +502,7 @@ final class CreatorTest {
 
 					Assertions.assertThat(one).isNotEqualTo(two);
 
-					assertThat(graph())
+					assertThat(model())
 							.doesNotHaveStatement(iri(request.stem(), one), null, null)
 							.doesNotHaveStatement(iri(request.stem(), two), null, null);
 

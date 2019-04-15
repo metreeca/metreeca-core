@@ -22,6 +22,7 @@ import com.metreeca.gate.Permit;
 import com.metreeca.gate.digests.PBKDF2Digest;
 import com.metreeca.rest.Result;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.GraphTest;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -45,7 +46,6 @@ import static com.metreeca.gate.Roster.CredentialsInvalid;
 import static com.metreeca.gate.policies.ComboPolicy.lowercases;
 import static com.metreeca.gate.policies.ComboPolicy.only;
 import static com.metreeca.rest.ResultAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -63,7 +63,7 @@ final class BasicRosterTest {
 				.set(digest(), PBKDF2Digest::new)
 				.set(policy(), () -> only(lowercases()))
 
-				.exec(graph(small()))
+				.exec(GraphTest.model(small()))
 
 				.exec(tasks)
 

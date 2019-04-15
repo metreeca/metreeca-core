@@ -22,6 +22,7 @@ import com.metreeca.form.truths.JsonAssert;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.GraphTest;
 
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -42,7 +43,8 @@ import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.tray.rdf.GraphTest.graph;
+import static com.metreeca.tray.rdf.Graph.graph;
+import static com.metreeca.tray.rdf.GraphTest.model;
 
 import static javax.json.Json.createObjectBuilder;
 
@@ -51,7 +53,8 @@ final class RelatorTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
-				.exec(graph(small()))
+				.set(graph(), GraphTest::graph)
+				.exec(model(small()))
 				.exec(task)
 				.clear();
 	}
@@ -150,7 +153,7 @@ final class RelatorTest {
 
 								.hasBody(rdf(), rdf -> assertThat(rdf)
 										.as("items retrieved")
-										.hasSubset(graph(
+										.hasSubset(model(
 												"construct where { <employees/1102> a :Employee; :code ?c; :seniority ?s }"
 										))
 								)
@@ -170,7 +173,7 @@ final class RelatorTest {
 								.hasBody(rdf(), rdf -> assertThat(rdf)
 
 										.as("items retrieved")
-										.hasSubset(graph(
+										.hasSubset(model(
 												"construct where { <employees/1102> a :Employee; :code ?c }"
 										))
 
@@ -285,7 +288,7 @@ final class RelatorTest {
 								.hasBody(rdf(), rdf -> assertThat(rdf)
 
 										.as("labelled descriptions included")
-										.hasSubset(graph("construct {\n"
+										.hasSubset(model("construct {\n"
 												+"\n"
 												+"\t<employees-basic/> ldp:contains ?employee.\n"
 												+"\n"
@@ -301,7 +304,7 @@ final class RelatorTest {
 										))
 
 										.as("connected resources not described")
-										.doesNotHaveSubset(graph("construct {\n"
+										.doesNotHaveSubset(model("construct {\n"
 												+"\n"
 												+"\t?office :code ?code.\n"
 												+"\n"
@@ -354,7 +357,7 @@ final class RelatorTest {
 
 								.hasBody(rdf(), rdf -> assertThat(rdf)
 										.hasStatement(response.item(), LDP.CONTAINS, null)
-										.hasSubset(graph("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
+										.hasSubset(model("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
 								)
 						)
 				);
@@ -372,7 +375,7 @@ final class RelatorTest {
 								.hasShape()
 
 								.hasBody(rdf(), rdf -> assertThat(rdf)
-										.hasSubset(graph("construct where { ?e a :Employee; rdfs:label ?label }"))
+										.hasSubset(model("construct where { ?e a :Employee; rdfs:label ?label }"))
 
 										.as("properties restricted to manager role not included")
 										.doesNotHaveStatement(null, term("seniority"), null)
@@ -397,7 +400,7 @@ final class RelatorTest {
 
 								.hasBody(rdf(), rdf -> assertThat(rdf)
 
-										.hasSubset(graph(""
+										.hasSubset(model(""
 												+"construct { ?e a :Employee; :title ?t }\n"
 												+"where { ?e a :Employee; :title ?t, 'Sales Rep' }"
 										))

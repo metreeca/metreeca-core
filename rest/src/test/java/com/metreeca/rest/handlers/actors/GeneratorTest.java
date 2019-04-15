@@ -22,6 +22,7 @@ import com.metreeca.form.Form;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.rdf.GraphTest;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -33,17 +34,19 @@ import java.util.function.BiFunction;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.rest.wrappers.Connector.query;
+import static com.metreeca.tray.rdf.Graph.graph;
+import static com.metreeca.tray.rdf.GraphTest.model;
 
 
 final class GeneratorTest {
 
 	private void exec(final Runnable task) {
 		new Tray()
-				.exec(graph(small()))
+				.set(graph(), GraphTest::graph)
+				.exec(model(small()))
 				.exec(task)
 				.clear();
 	}

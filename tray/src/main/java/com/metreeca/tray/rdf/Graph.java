@@ -24,8 +24,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -63,12 +61,10 @@ public abstract class Graph implements AutoCloseable {
 	/**
 	 * Retrieves the default graph factory.
 	 *
-	 * @return the default graph factory, which creates graphs backed by a RDF4J Memory store with no persistence
+	 * @return the default graph factory, which throws an exception reporting the tool as undefined
 	 */
 	public static Supplier<Graph> graph() {
-		return () -> new Graph() {{
-			repository(new SailRepository(new MemoryStore()));
-		}};
+		return () -> { throw new IllegalStateException("undefined graph tool"); };
 	}
 
 

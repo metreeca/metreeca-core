@@ -19,9 +19,10 @@
 package com.metreeca.tray.rdf;
 
 
-
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -32,22 +33,21 @@ import static com.metreeca.form.things.ValuesTest.export;
 import static com.metreeca.form.things.ValuesTest.select;
 import static com.metreeca.tray.Tray.tool;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
 public final class GraphTest {
 
-	public static Model graph(final Resource... contexts) {
+	public static Graph graph() {
+		return new Graph() {{ repository(new SailRepository(new MemoryStore())); }};
+	}
+
+
+	public static Model model(final Resource... contexts) {
 		return tool(Graph.graph()).query(connection -> { return export(connection, contexts); });
 	}
 
-	public static Runnable graph(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> tool(Graph.graph()).update(connection -> { connection.add(model, contexts); });
-	}
-
-
-
-	public static Model graph(final String sparql) {
+	public static Model model(final String sparql) {
 		return tool(Graph.graph()).query(connection -> { return construct(connection, sparql); });
 	}
 
@@ -56,16 +56,19 @@ public final class GraphTest {
 	}
 
 
+	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
+		return () -> tool(Graph.graph()).update(connection -> { connection.add(model, contexts); });
+	}
+
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testPreventUpdateTransactionsOnReadOnlyRepositories() {
-		try (final Graph graph=Graph.graph().get()) {
+		try (final Graph graph=tool(Graph.graph())) {
 
-			assertThatThrownBy(() ->
-
-					graph.isolation(Graph.READ_ONLY).update(connection -> {})
-
-			).isInstanceOf(RepositoryReadOnlyException.class);
+			assertThatExceptionOfType(RepositoryReadOnlyException.class)
+					.isThrownBy(() -> graph.isolation(Graph.READ_ONLY).update(connection -> {}));
 
 		}
 	}
