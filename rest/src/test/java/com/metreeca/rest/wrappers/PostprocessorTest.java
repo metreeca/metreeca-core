@@ -32,6 +32,7 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.Base;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -69,7 +70,7 @@ final class PostprocessorTest {
 				.handle(new Request())
 
 				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.as("filters executed")
 								.hasSubset(asList(
 										statement(response.item(), RDF.VALUE, RDF.FIRST),
@@ -88,7 +89,7 @@ final class PostprocessorTest {
 				.handle(new Request())
 
 				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.as("filters not executed")
 								.isEmpty()
 						)

@@ -39,6 +39,7 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
+import static com.metreeca.form.things.Values.stream;
 import static com.metreeca.rest.handlers.ActorProcessor.convey;
 import static com.metreeca.rest.handlers.ActorProcessor.filter;
 import static com.metreeca.tray.Tray.tool;
@@ -93,7 +94,7 @@ public abstract class Actor extends Delegator {
 	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
 	 * @throws UnsupportedOperationException if resource creation is not supported by this engine
 	 */
-	protected Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
+	protected Optional<Focus> create(final IRI resource, final Shape shape, final Iterable<Statement> model) {
 		return graph.update(connection -> {
 
 			return Optional.of(resource)
@@ -136,7 +137,7 @@ public abstract class Actor extends Delegator {
 	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
 	 * @throws UnsupportedOperationException if resource updating is not supported by this engine
 	 */
-	protected Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
+	protected Optional<Focus> update(final IRI resource, final Shape shape, final Iterable<Statement> model) {
 		return graph.update(connection -> {
 			return retrieve(connection, resource, shape).map(current -> {
 
@@ -203,7 +204,7 @@ public abstract class Actor extends Delegator {
 	}
 
 	private Focus validate(final RepositoryConnection connection,
-			final Resource resource, final Shape shape, final Collection<Statement> model
+			final Resource resource, final Shape shape, final Iterable<Statement> model
 	) {
 
 		final Shape target=shape.map(convey);
@@ -221,7 +222,7 @@ public abstract class Actor extends Delegator {
 
 						focus.getIssues().stream(),
 
-						model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
+						stream(model).filter(statement -> !envelope.contains(statement)).map(outlier ->
 								issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
 						)
 

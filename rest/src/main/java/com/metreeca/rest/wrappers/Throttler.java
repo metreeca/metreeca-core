@@ -19,15 +19,16 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.*;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Outliner;
+import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.form.things.Structures;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.form.things.Shapes;
 
 import org.eclipse.rdf4j.model.*;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -39,6 +40,7 @@ import static com.metreeca.form.things.Structures.network;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.stream.Collectors.toList;
@@ -232,7 +234,9 @@ public final class Throttler implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private <V extends Collection<Statement>> V expand(final IRI resource, final Shape shape, final V model) {
+	private Iterable<Statement> expand(final IRI resource, final Shape shape, final Iterable<Statement> statements) {
+
+		final Model model=model(statements);
 
 		model.addAll(shape // add implied statements
 				.map(new Outliner(resource)) // shape already redacted for convey mode

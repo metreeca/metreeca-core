@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
@@ -36,15 +37,15 @@ import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Clazz.clazz;
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.shapes.Guard.guard;
 import static com.metreeca.form.shapes.In.in;
 import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.MinExclusive.minExclusive;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
-import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Guard.guard;
+import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.Values.*;
@@ -198,6 +199,10 @@ public final class Rewriter implements Wrapper {
 			return shape.map(shapes);
 		}
 
+
+		private <T> Iterable<T> rewrite(final Iterable<T> collection, final Function<T, T> rewriter) {
+			return () -> StreamSupport.stream(collection.spliterator(), false).map(rewriter).iterator();
+		}
 
 		private <T> Collection<T> rewrite(final Collection<T> collection, final Function<T, T> rewriter) {
 			return collection.stream().map(rewriter).collect(toList());

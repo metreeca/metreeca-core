@@ -50,7 +50,7 @@ import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 /**
  * RDF body format.
  */
-public final class RDFBody implements Body<Collection<Statement>> {
+public final class RDFBody implements Body<Iterable<Statement>> {
 
 	private static final RDFBody Instance=new RDFBody();
 
@@ -77,7 +77,7 @@ public final class RDFBody implements Body<Collection<Statement>> {
 	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
 	 * status, otherwise
 	 */
-	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
+	@Override public Result<Iterable<Statement>, Failure> get(final Message<?> message) {
 		return message.body(input()).fold(
 
 				supplier -> {

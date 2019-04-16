@@ -34,6 +34,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
@@ -119,7 +120,7 @@ public final class Postprocessor implements Wrapper {
 		return handler -> request -> handler.handle(request)
 				.map(response -> response.success() ? response.pipe(rdf(), model -> Value(filters.stream().reduce(
 
-						(Model)new LinkedHashModel(model),
+						model(model),
 
 						(_model, filter) -> {
 

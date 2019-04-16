@@ -40,6 +40,7 @@ import javax.json.JsonValue;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
@@ -372,7 +373,7 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
+						.hasBody(rdf(), rdf -> assertThat(model(rdf)).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
 				));
 	}
 
@@ -383,7 +384,7 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
+						.hasBody(rdf(), rdf -> assertThat(model(rdf)).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
 				));
 	}
 
@@ -395,7 +396,7 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
+						.hasBody(rdf(), rdf -> assertThat(model(rdf)).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
 				));
 	}
 
@@ -406,7 +407,7 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
+						.hasBody(rdf(), rdf -> assertThat(model(rdf)).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
 				));
 	}
 
@@ -417,7 +418,9 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
+								.satisfies(hasObjects(RDF.FIRST, RDF.REST))
+						)
 				));
 	}
 
@@ -428,7 +431,9 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf).satisfies(hasObjects(RDF.FIRST, RDF.REST)))
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
+								.satisfies(hasObjects(RDF.FIRST, RDF.REST))
+						)
 				));
 	}
 

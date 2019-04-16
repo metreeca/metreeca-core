@@ -20,6 +20,7 @@ package com.metreeca.rest.handlers.actors;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Shapes;
+import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Delegator;
@@ -28,7 +29,6 @@ import com.metreeca.rest.wrappers.Throttler;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -105,7 +105,7 @@ public final class Generator extends Delegator {
 						model -> {
 
 							final Collection<Statement> virtual=Objects.requireNonNull(
-									generator.apply(request, new LinkedHashModel(model)),
+									generator.apply(request, Values.model(model)),
 									"null generator return value"
 							);
 

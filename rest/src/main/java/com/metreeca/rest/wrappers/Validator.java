@@ -22,6 +22,7 @@ import com.metreeca.form.Issue;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
@@ -30,6 +31,7 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
@@ -82,7 +84,9 @@ public final class Validator implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> handler.handle(request.pipe(rdf(), model -> {
+		return request -> handler.handle(request.pipe(rdf(), statements -> {
+
+			final Model model=model(statements);
 
 			final Focus report=Focus.focus(rules.stream()
 					.flatMap(rule -> rule.apply(request, model).stream())

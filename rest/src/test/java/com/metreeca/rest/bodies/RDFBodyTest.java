@@ -36,6 +36,7 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.rest.bodies.TextBody.text;
@@ -47,14 +48,14 @@ final class RDFBodyTest {
 
 	@Test void testHandleMissingInput() {
 		new Request().body(rdf()).use(
-				value -> assertThat(value).isEmpty(),
+				value -> assertThat(model(value)).isEmpty(),
 				error -> fail("unexpected error {"+error+"}")
 		);
 	}
 
 	@Test void testHandleEmptyInput() {
 		new Request().body(input(), (Supplier<InputStream>)Codecs::input).body(rdf()).use(
-				value -> assertThat(value).isEmpty(),
+				value -> assertThat(model(value)).isEmpty(),
 				error -> fail("unexpected error {"+error+"}")
 		);
 	}

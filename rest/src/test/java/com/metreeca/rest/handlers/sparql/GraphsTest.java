@@ -42,6 +42,7 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.encode;
 import static com.metreeca.form.things.ValuesTest.export;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.InputBody.input;
@@ -190,7 +191,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(catalog())
 						)));
 	}
@@ -202,7 +203,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(catalog())
 						)));
 	}
@@ -214,7 +215,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(catalog())
 						)));
 	}
@@ -243,7 +244,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(First)
 						)
 				)
@@ -257,7 +258,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(First)
 						)));
 	}
@@ -269,7 +270,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(First)
 						)
 				)
@@ -294,7 +295,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(Rest)
 						)));
 	}
@@ -306,7 +307,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(Rest)
 						)));
 	}
@@ -318,7 +319,7 @@ final class GraphsTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(rdf)
+						.hasBody(rdf(), rdf -> assertThat(model(rdf))
 								.isIsomorphicTo(Rest)
 						)));
 	}

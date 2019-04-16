@@ -51,6 +51,7 @@ import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.MultipartBody.multipart;
 import static com.metreeca.rest.bodies.OutputBody.output;
@@ -212,9 +213,9 @@ final class RewriterTest {
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					request.body(rdf()).use(
-							model -> ModelAssert.assertThat(internal("s", "p", "o"))
+							model -> ModelAssert.assertThat(model(model))
 									.as("request rdf rewritten")
-									.isIsomorphicTo(model),
+									.isIsomorphicTo(internal("s", "p", "o")),
 							error -> fail("missing RDF payload")
 					);
 
@@ -232,9 +233,9 @@ final class RewriterTest {
 				.accept(response -> {
 
 					response.body(rdf()).use(
-							model -> assertThat(singleton(external("s", "p", "o")))
+							model -> assertThat(model(model))
 									.as("response rdf rewritten")
-									.isIsomorphicTo(model),
+									.isIsomorphicTo(singleton(external("s", "p", "o"))),
 							error -> fail("missing RDF payload")
 					);
 
@@ -249,7 +250,7 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
+					assertThat(request).hasBody(rdf(), rdf -> assertThat(model(rdf))
 							.as("request json rewritten")
 							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
@@ -330,7 +331,7 @@ final class RewriterTest {
 
 						.wrap((Handler)request -> {
 
-							assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
+							assertThat(request).hasBody(rdf(), rdf -> assertThat(model(rdf))
 									.isIsomorphicTo(internal("s", "p", "o"))
 							);
 

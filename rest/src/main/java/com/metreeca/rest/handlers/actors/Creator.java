@@ -22,6 +22,7 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Issue.Level;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Shapes;
+import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Actor;
@@ -36,19 +37,19 @@ import java.util.function.BiFunction;
 
 import javax.json.JsonValue;
 
+import static com.metreeca.form.things.Shapes.container;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Response.NotImplemented;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.form.things.Shapes.container;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.repository.util.Connections.getStatement;
 
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -194,7 +195,7 @@ public final class Creator extends Actor {
 				rdf -> {
 					synchronized ( lock ) { // attempt to serialize slug operations from multiple txns
 
-						final String name=slug.apply(request, rdf);
+						final String name=slug.apply(request, model(rdf));
 
 						if ( name == null ) {
 							throw new NullPointerException("null resource name");
@@ -208,7 +209,7 @@ public final class Creator extends Actor {
 						final IRI resource=iri(request.stem(), name);
 
 						final Shape shape=container(container, request.shape());
-						final Collection<Statement> model=rewrite(resource, container, trace.trace(this, rdf));
+						final Iterable<Statement> model=rewrite(resource, container, trace.trace(this, rdf));
 
 						// !!! recognize txns failures due to conflicting slugs and report as 409 Conflict
 
@@ -255,8 +256,8 @@ public final class Creator extends Actor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> rewrite(final IRI target, final IRI source, final Collection<Statement> model) {
-		return model.stream().map(statement -> rewrite(target, source, statement)).collect(toList());
+	private Iterable<Statement> rewrite(final IRI target, final IRI source, final Iterable<Statement> model) {
+		return () -> Values.stream(model).map(statement -> rewrite(target, source, statement)).iterator();
 	}
 
 	private Statement rewrite(final IRI target, final IRI source, final Statement statement) {
