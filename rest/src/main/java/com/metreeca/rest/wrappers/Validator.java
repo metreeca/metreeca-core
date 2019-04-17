@@ -29,9 +29,8 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.BiFunction;
 
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.form.things.Values.model;
+import static com.metreeca.rest.Body.Missing;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
@@ -84,23 +83,29 @@ public final class Validator implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> handler.handle(request.pipe(rdf(), statements -> {
+		return request -> request.body(rdf()).fold(
 
-			final Model model=model(statements);
+				rdf -> {
 
-			final Focus report=Focus.focus(rules.stream()
-					.flatMap(rule -> rule.apply(request, model).stream())
-					.collect(toList()));
+					final Model model=model(rdf);
 
-			return report.assess(Issue.Level.Error) ? Error(new Failure()
+					final Focus report=Focus.focus(rules.stream()
+							.flatMap(rule -> rule.apply(request, model).stream())
+							.collect(toList()));
 
-					.status(Response.UnprocessableEntity)
-					.error(Failure.DataInvalid)
-					.trace(report)
+					return report.assess(Issue.Level.Error) ? request.reply(new Failure()
 
-			) : Value(model);
+							.status(Response.UnprocessableEntity)
+							.error(Failure.DataInvalid)
+							.trace(report)
 
-		}));
+					) : handler.handle(request.body(rdf(), rdf));
+
+				},
+
+				failure -> failure.equals(Missing)? handler.handle(request) : request.reply(failure)
+
+		);
 	}
 
 }

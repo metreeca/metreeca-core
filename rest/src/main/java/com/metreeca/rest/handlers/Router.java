@@ -63,6 +63,8 @@ import java.util.regex.Pattern;
  */
 public final class Router implements Handler {
 
+	private static final String RoutingPrefix="-Routing-Prefix";
+
 	private static final Pattern KeyPattern=Pattern.compile(
 			"\\{(?<key>[^}]*)}"
 	);
@@ -173,7 +175,7 @@ public final class Router implements Handler {
 
 		return request -> {
 
-			final String head=request.header("Location").orElse("");
+			final String head=request.header(RoutingPrefix).orElse("");
 			final String tail=request.path().substring(head.length());
 
 			return Optional.of(pattern.matcher(tail))
@@ -191,7 +193,7 @@ public final class Router implements Handler {
 								});
 
 								handler
-										.handle(request.header("Location", head+matcher.group(1)))
+										.handle(request.header(RoutingPrefix, head+matcher.group(1)))
 										.accept(consumer);
 
 							}

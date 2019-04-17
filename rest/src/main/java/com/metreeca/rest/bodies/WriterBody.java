@@ -68,22 +68,22 @@ public final class WriterBody implements Body<Consumer<Supplier<Writer>>> {
 	 *
 	 * <p>Sets the {@code Content-Type} header of {@code message} to {@link #MIME}, if not already set.</p>
 	 */
-	@Override public <T extends Message<T>> T set(final T message) {
+	@Override public <M extends Message<M>> M set(final M message, final Consumer<Supplier<Writer>> value) {
 		return message
 
 				.header("~Content-Type", MIME)
 
-				.body(output(), writer().map(writer -> source -> {
+				.body(output(), source -> {
 
 					try (final OutputStream output=source.get()) {
 
-						writer.accept(() -> Codecs.writer(output, message.charset().orElse(Codecs.UTF8.name())));
+						value.accept(() -> Codecs.writer(output, message.charset().orElse(Codecs.UTF8.name())));
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
 
-				}));
+				});
 	}
 
 }

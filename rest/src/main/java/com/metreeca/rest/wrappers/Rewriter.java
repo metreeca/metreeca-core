@@ -23,13 +23,13 @@ import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
 
 import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
@@ -48,9 +48,9 @@ import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Codecs.encode;
-import static com.metreeca.form.things.Values.*;
-import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.form.things.Values.direct;
+import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.form.things.Values.iri;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -127,9 +127,9 @@ public final class Rewriter implements Wrapper {
 			final boolean identity=external.isEmpty() || internal.isEmpty() || external.equals(internal);
 
 			return identity ? handler.handle(request) : request
-					.map(r -> rewrite(r, new Engine(external, internal)))
+					.map(_request -> rewrite(_request, new Engine(external, internal)))
 					.map(handler::handle)
-					.map(r -> rewrite(r, new Engine(internal, external)));
+					.map(_response -> rewrite(request, _response, new Engine(internal, external)));
 		};
 	}
 
@@ -137,42 +137,63 @@ public final class Rewriter implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Request rewrite(final Request request, final Engine engine) {
-		return request
+
+		final String base=request.base();
+
+		final String encoded=request.query();
+		final String decoded=decode(encoded);
+
+		// clone the external request to preserve it for linking to the external response
+
+		return new Request().merge(request)
 
 				.user(engine.rewrite(request.user()))
 				.roles(engine.rewrite(request.roles(), engine::rewrite))
 
-				.base(engine.rewrite(request.base()))
-
-				.map(r -> { // re-encode rewritten query only if it was actually encoded
-
-					final String encoded=r.query();
-					final String decoded=decode(encoded);
-
-					return r.query(encoded.equals(decoded) ? engine.rewrite(encoded) : encode(engine.rewrite(decoded)));
-
-				})
+				.method(request.method())
+				.base(engine.rewrite(base))
+				.path(request.path())
+				.query(encoded.equals(decoded) ? // re-encode the rewritten query only if it was originally encoded
+						engine.rewrite(encoded) : encode(engine.rewrite(decoded))
+				)
 
 				.parameters(engine.rewrite(request.parameters()))
+
 				.headers(engine.rewrite(request.headers()))
 
 				.shape(engine.rewrite(request.shape()))
 
-				.pipe(rdf(), model -> Value(engine.rewrite(model, engine::rewrite)));
+				.header(RDFBody.ExternalBase, base); // make the external base available to rewriting in RDFBody
+
 	}
 
-	private Response rewrite(final Response response, final Engine engine) {
-		return response
+	private Response rewrite(final Request request, final Response response, final Engine engine) {
 
-				// ;( force response focus rewriting even if location is not already set
+		// rewrite the internal response to drive on-demand rewriting in RDFBody
 
-				.header("Location", response.item().stringValue())
+		response
 
 				.headers(engine.rewrite(response.headers()))
+				.shape(engine.rewrite(response.shape()));
 
-				.shape(engine.rewrite(response.shape()))
+		// clone the internal response linking it to the original external request
 
-				.pipe(rdf(), model -> Value(engine.rewrite(model, engine::rewrite)));
+		final Response external=new Response(request).merge(response)
+
+				.status(response.status())
+				.cause(response.cause().orElse(null))
+
+				.shape(response.shape());
+
+		// make external base/location available to rewriting in RDFBody
+
+		response
+
+				.header(RDFBody.ExternalBase, request.base())
+				.header("Location", engine.rewrite(response.item().stringValue()));
+
+		return external;
+
 	}
 
 
@@ -200,10 +221,6 @@ public final class Rewriter implements Wrapper {
 		}
 
 
-		private <T> Iterable<T> rewrite(final Iterable<T> collection, final Function<T, T> rewriter) {
-			return () -> StreamSupport.stream(collection.spliterator(), false).map(rewriter).iterator();
-		}
-
 		private <T> Collection<T> rewrite(final Collection<T> collection, final Function<T, T> rewriter) {
 			return collection.stream().map(rewriter).collect(toList());
 		}
@@ -215,21 +232,8 @@ public final class Rewriter implements Wrapper {
 		}
 
 
-		private Statement rewrite(final Statement statement) {
-			return statement == null ? null : statement(
-					rewrite(statement.getSubject()),
-					rewrite(statement.getPredicate()),
-					rewrite(statement.getObject()),
-					rewrite(statement.getContext())
-			);
-		}
-
 		private Value rewrite(final Value value) {
 			return value instanceof IRI ? rewrite((IRI)value) : value;
-		}
-
-		private Resource rewrite(final Resource resource) {
-			return resource instanceof IRI ? rewrite((IRI)resource) : resource;
 		}
 
 		private IRI rewrite(final IRI iri) {

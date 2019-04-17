@@ -19,7 +19,6 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Field;
 import com.metreeca.form.things.Codecs;
 import com.metreeca.form.truths.ModelAssert;
 import com.metreeca.rest.*;
@@ -29,8 +28,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import java.util.Optional;
 
 import javax.json.Json;
@@ -42,16 +40,14 @@ import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.things.Codecs.encode;
 import static com.metreeca.form.things.JsonValues.object;
 import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.form.things.Values.*;
+import static com.metreeca.form.things.ValuesTest.decode;
+import static com.metreeca.form.things.ValuesTest.encode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.Result.Value;
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.MultipartBody.multipart;
 import static com.metreeca.rest.bodies.OutputBody.output;
@@ -61,7 +57,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
 
@@ -174,10 +169,11 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					assertThat(request.shape()).isEqualTo(and(
-							Field.field(internal("p")),
-							Field.field(inverse(internal("p")))
-					));
+					assertThat(request.shape())
+							.isEqualTo(and(
+									field(internal("p")),
+									field(inverse(internal("p")))
+							));
 
 					return request.reply(response -> response
 							.status(OK)
@@ -190,20 +186,17 @@ final class RewriterTest {
 						.base(External)
 
 						.shape(and(
-								Field.field(external("p")),
-								Field.field(inverse(external("p")))
+								field(external("p")),
+								field(inverse(external("p")))
 						))
 
 				)
 
-				.accept(response -> {
-
-					assertThat(response.shape()).isEqualTo(and(
-							Field.field(external("p")),
-							Field.field(inverse(external("p")))
-					));
-
-				});
+				.accept(response -> assertThat(response.shape())
+						.isEqualTo(and(
+								field(external("p")),
+								field(inverse(external("p")))
+						)));
 
 	}
 
@@ -213,10 +206,13 @@ final class RewriterTest {
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
 					request.body(rdf()).use(
+
 							model -> ModelAssert.assertThat(model(model))
 									.as("request rdf rewritten")
 									.isIsomorphicTo(internal("s", "p", "o")),
+
 							error -> fail("missing RDF payload")
+
 					);
 
 					return request.reply(response -> response.status(OK)
@@ -228,18 +224,31 @@ final class RewriterTest {
 						.base(External)
 						.path("/s")
 
-						.body(rdf(), singleton(external("s", "p", "o"))))
+						.body(input(), () -> Codecs.input(new StringReader(encode(singleton(
+								external("s", "p", "o")
+						))))))
 
-				.accept(response -> {
+				.accept(response -> response.body(output()).use(
 
-					response.body(rdf()).use(
-							model -> assertThat(model(model))
-									.as("response rdf rewritten")
-									.isIsomorphicTo(singleton(external("s", "p", "o"))),
-							error -> fail("missing RDF payload")
-					);
+						consumer -> {
 
-				});
+							try (final ByteArrayOutputStream stream=new ByteArrayOutputStream()) {
+
+								consumer.accept(() -> stream);
+
+								assertThat(decode(new String(stream.toByteArray(), Codecs.UTF8)))
+										.as("response rdf rewritten")
+										.isIsomorphicTo(singleton(external("s", "p", "o")));
+
+							} catch ( final IOException e ) {
+								throw new UncheckedIOException(e);
+							}
+
+						},
+
+						error -> fail("missing RDF payload")
+
+				));
 	}
 
 	@Test void testJSONRewriting() {
@@ -277,13 +286,11 @@ final class RewriterTest {
 						))
 				)
 
+				.accept(response -> response.body(output()).use(
 
-				.accept(response -> {
+						value -> {
 
-					response.body(output()).use(
-							value -> {
-
-								final ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+							try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
 
 								value.accept(() -> buffer);
 
@@ -294,11 +301,15 @@ final class RewriterTest {
 												entry("p", "/o")
 										));
 
-							},
-							error -> fail("missing output body")
-					);
+							} catch ( final IOException e ) {
+								throw new UncheckedIOException(e);
+							}
 
-				});
+						},
+
+						error -> fail("missing output body")
+
+				));
 	}
 
 
@@ -361,36 +372,6 @@ final class RewriterTest {
 						).replace("\n", "\r\n").getBytes(Codecs.UTF8))))
 
 				.accept(response -> assertThat(response).hasStatus(OK));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testBodyFiltersShouldSeeInternalData() {
-		new Tray()
-
-				.exec(() -> new Rewriter(Internal)
-
-						.wrap((Handler handler) -> (Request request) -> handler.handle(request)
-								.map(response -> response.pipe(rdf(), statements -> {
-
-									// ;( assertThat(response).hasHeader("Location", Internal) causes SOE
-
-									assertThat(response.header("Location")).contains(Internal);
-
-									return Value(statements);
-
-								}))
-						)
-
-						.wrap((Request request) -> request.reply(response -> response
-								.status(Response.OK)
-								.header("Location", Internal)
-								.body(rdf(), emptySet())))
-
-						.handle(new Request().base(External))
-
-						.accept(response -> assertThat(response).hasBody(rdf())));
 	}
 
 }

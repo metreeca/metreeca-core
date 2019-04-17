@@ -67,7 +67,7 @@ public final class OutputBody implements Body<Consumer<Supplier<OutputStream>>> 
 	/**
 	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
 	 */
-	@Override public <T extends Message<T>> T set(final T message) {
+	@Override public <M extends Message<M>> M set(final M message, final Consumer<Supplier<OutputStream>> value) {
 		return message.header("~Content-Type", MIME);
 	}
 

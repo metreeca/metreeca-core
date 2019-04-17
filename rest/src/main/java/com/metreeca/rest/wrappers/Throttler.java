@@ -37,10 +37,9 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Structures.envelope;
 import static com.metreeca.form.things.Structures.network;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.rest.Result.Value;
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.stream.Collectors.toList;
@@ -195,9 +194,20 @@ public final class Throttler implements Wrapper {
 
 				return empty(general) ? forbidden(request)
 						: empty(authorized) ? refused(request)
-						: handler.handle(request.shape(redacted)
-						.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
-				);
+						:
+						request.body(rdf()).fold(
+
+								rdf -> handler.handle(request
+
+										.shape(redacted)
+										.body(rdf(), expand(focus, authorized, rdf))
+
+								),
+
+								failure -> failure.equals(Body.Missing) ?
+										handler.handle(request.shape(redacted)) : request.reply(failure)
+
+						);
 
 			}
 
@@ -212,8 +222,15 @@ public final class Throttler implements Wrapper {
 
 			if ( pass(shape) ) {
 
-				return response.shape(shape)
-						.pipe(rdf(), rdf -> Value(network(item, rdf)));
+				return response.body(rdf()).fold(
+
+						rdf -> response
+								.shape(shape)
+								.body(rdf(), network(item, rdf)),
+
+						failure -> failure.equals(Body.Missing) ?
+								response.shape(shape) : response.map(failure)
+				);
 
 			} else {
 
@@ -222,9 +239,18 @@ public final class Throttler implements Wrapper {
 						.map(new Redactor(Form.role, request.roles()))
 						.map(new Optimizer());
 
-				return response.shape(redacted)
-						.pipe(rdf(), rdf -> Value(envelope(item, redacted, rdf)))
-						.pipe(rdf(), rdf -> Value(expand(item, redacted, rdf)));
+				return response.body(rdf()).fold(
+
+						rdf -> response
+								.shape(redacted)
+								.body(rdf(), expand(item, redacted,
+										envelope(item, redacted, rdf)
+								)),
+
+						failure -> failure.equals(Body.Missing) ?
+								response.shape(redacted) : response.map(failure)
+
+				);
 
 			}
 

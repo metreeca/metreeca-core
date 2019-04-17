@@ -17,27 +17,25 @@
 
 package com.metreeca.rest.bodies;
 
-
 import com.metreeca.form.Form;
 import com.metreeca.form.things.Codecs;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.ResponseAssert;
+import com.metreeca.rest.*;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.InputStream;
-import java.util.function.Supplier;
+import java.io.*;
 
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
+import static com.metreeca.form.things.Values.model;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.InputBody.input;
+import static com.metreeca.rest.bodies.OutputBody.output;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.rest.bodies.TextBody.text;
 
@@ -46,38 +44,103 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 final class RDFBodyTest {
 
-	@Test void testHandleMissingInput() {
-		new Request().body(rdf()).use(
-				value -> assertThat(model(value)).isEmpty(),
-				error -> fail("unexpected error {"+error+"}")
-		);
+	private static final String external="http://example.com/";
+	private static final String internal="app://local/";
+
+
+	@Nested final class Getter {
+
+		@Test void testHandleMissingInput() {
+			new Request()
+
+					.body(rdf())
+
+					.value(value -> fail("unexpected RDF body {"+value+"}"))
+					.error(error -> Assertions.assertThat(error).isEqualTo(Body.Missing));
+		}
+
+		@Test void testHandleEmptyInput() {
+			new Request()
+
+					.body(input(), Codecs::input)
+
+					.body(rdf())
+
+					.value(value -> assertThat(model(value)).isEmpty())
+					.error(error -> fail("unexpected error {"+error+"}"));
+		}
+
+		@Test void testRewriteRequestBody() {
+			new Request()
+
+					.base(internal)
+					.path("/")
+					.header(RDFBody.ExternalBase, external)
+					.body(input(), () -> Codecs.input(new StringReader(
+							"<http://example.com/container> ldp:contains <http://example.com/resource> ."
+					)))
+
+					.body(rdf())
+
+					.value(statements -> assertThat(model(statements))
+							.isIsomorphicTo(decode("<app://local/container> ldp:contains <app://local/resource> ."))
+					)
+
+					.error(error -> fail("unexpected error {"+error+"}"));
+		}
+
 	}
 
-	@Test void testHandleEmptyInput() {
-		new Request().body(input(), (Supplier<InputStream>)Codecs::input).body(rdf()).use(
-				value -> assertThat(model(value)).isEmpty(),
-				error -> fail("unexpected error {"+error+"}")
-		);
-	}
+	@Nested final class Setter {
+
+		@Test void testConfigureWriterBaseIRI() {
+			new Request()
+
+					.base(ValuesTest.Base+"context/")
+					.path("/container/")
+
+					.reply(response -> response
+							.status(Response.OK)
+							.shape(field(LDP.CONTAINS, datatype(Form.IRIType)))
+							.body(rdf(), decode("</context/container/> ldp:contains </context/container/x>."))
+					)
+
+					.accept(response -> ResponseAssert.assertThat(response)
+							.hasBody(text(), text -> Assertions.assertThat(text)
+									.contains("@base <"+ValuesTest.Base+"context/container/"+">")
+							)
+					);
+		}
 
 
-	@Test void testConfigureWriterBaseIRI() {
-		new Request()
+		@Test void testRewriteResponseBody() {
+			new Response(new Request().base(internal))
 
-				.base(ValuesTest.Base+"context/")
-				.path("/container/")
+					.header(RDFBody.ExternalBase, external)
+					.body(rdf(), decode("<app://local/container> ldp:contains <app://local/resource> ."))
 
-				.reply(response -> response
-						.status(Response.OK)
-						.shape(field(LDP.CONTAINS, datatype(Form.IRIType)))
-						.body(rdf(), decode("</context/container/> ldp:contains </context/container/x>."))
-				)
+					.body(output())
 
-				.accept(response -> ResponseAssert.assertThat(response)
-						.hasBody(text(), text -> Assertions.assertThat(text)
-								.contains("@base <" +ValuesTest.Base+"context/container/"+ ">")
-						)
-				);
+					.value(consumer -> {
+
+						try (final ByteArrayOutputStream stream=new ByteArrayOutputStream()) {
+
+							consumer.accept(() -> stream);
+
+							assertThat(decode(new String(stream.toByteArray(), Codecs.UTF8)))
+									.isIsomorphicTo(decode("<http://example.com/container> ldp:contains <http://example.com/resource> ."));
+
+							return consumer;
+
+						} catch ( final IOException e ) {
+							throw new UncheckedIOException(e);
+						}
+
+					})
+
+					.error(error -> fail("unexpected error {"+error+"}"));
+		}
+
 	}
 
 }

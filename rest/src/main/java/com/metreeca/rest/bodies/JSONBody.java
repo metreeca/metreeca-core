@@ -117,21 +117,21 @@ public final class JSONBody implements Body<JsonObject> {
 	 * Configures the {@link WriterBody} representation of {@code message} to write the JSON {@code value} to the
 	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
 	 */
-	@Override public <T extends Message<T>> T set(final T message) {
+	@Override public <M extends Message<M>> M set(final M message, final JsonObject value) {
 		return message
 				.header("content-type", MIME)
-				.body(writer(), json().map(json -> target -> {
+				.body(writer(), target -> {
 					try (
 							final Writer writer=target.get();
 							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)
 					) {
 
-						jsonWriter.write(json);
+						jsonWriter.write(value);
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-				}));
+				});
 	}
 
 }

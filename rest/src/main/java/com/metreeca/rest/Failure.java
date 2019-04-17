@@ -219,7 +219,7 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null response");
 		}
 
-		return response
+		return new Response(response.request())
 				.status(status)
 				.cause(cause)
 				.body(JSONBody.json(), ticket());

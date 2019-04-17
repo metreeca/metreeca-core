@@ -21,9 +21,9 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.codecs.JSONCodec;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
+import com.metreeca.rest.wrappers.Rewriter;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
@@ -31,14 +31,14 @@ import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
 import java.io.*;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
 import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.InputBody.input;
@@ -53,6 +53,14 @@ import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 public final class RDFBody implements Body<Iterable<Statement>> {
 
 	private static final RDFBody Instance=new RDFBody();
+
+
+	/**
+	 * Custom header providing the external base for on-demand RDF body rewriting.
+	 *
+	 * @see Rewriter
+	 */
+	public static final String ExternalBase="-External-Base";
 
 
 	/**
@@ -107,8 +115,21 @@ public final class RDFBody implements Body<Iterable<Statement>> {
 
 					final Collection<Statement> model=new LinkedHashSet<>(); // order-preserving and writable
 
-					parser.setRDFHandler(new AbstractRDFHandler() {
-						@Override public void handleStatement(final Statement statement) { model.add(statement); }
+					final String internal=message.request().base();
+					final String external=message.header(ExternalBase).orElse(internal); // made available by Rewriter
+
+					parser.setRDFHandler(external.equals(internal) ? new AbstractRDFHandler() {
+
+						@Override public void handleStatement(final Statement statement) {
+							model.add(statement);
+						}
+
+					} : new AbstractRDFHandler() {
+
+						@Override public void handleStatement(final Statement statement) {
+							model.add(rewrite(external, internal, statement));
+						}
+
 					});
 
 					try (final InputStream input=supplier.get()) {
@@ -154,9 +175,7 @@ public final class RDFBody implements Body<Iterable<Statement>> {
 
 				},
 
-				error -> error.equals(Body.Missing)
-						? Value(new LinkedHashSet<>()) // order-preserving and writable
-						: Error(error)
+				Result::Error
 
 		);
 	}
@@ -167,7 +186,7 @@ public final class RDFBody implements Body<Iterable<Statement>> {
 	 * selected according to the {@code Accept} header of the request associated to the message, if one is present, or
 	 * to {@code "text/turtle"}, otherwise.
 	 */
-	@Override public <T extends Message<T>> T set(final T message) {
+	@Override public <M extends Message<M>> M set(final M message, final Iterable<Statement> value) {
 
 		final List<String> types=Formats.types(message.request().request().headers("Accept"));
 
@@ -184,12 +203,15 @@ public final class RDFBody implements Body<Iterable<Statement>> {
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
 				)
 
-				.body(output(), rdf().map(rdf -> target -> {
+				.body(output(), target -> {
 
 					final IRI focus=message.item();
 					final Shape shape=message.shape();
 
 					final String base=focus.stringValue();
+
+					final String internal=message.request().base();
+					final String external=message.header(ExternalBase).orElse(internal); // made available by Rewriter
 
 					try (final OutputStream output=target.get()) {
 
@@ -198,15 +220,60 @@ public final class RDFBody implements Body<Iterable<Statement>> {
 						writer.set(JSONCodec.Shape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
 						writer.set(JSONCodec.Focus, focus);
 
-						Rio.write(rdf, writer);
+						Rio.write(external.equals(internal) ? value : rewrite(internal, external, value), writer);
 
 					} catch ( final URISyntaxException e ) {
-						throw new UnsupportedOperationException("unsupported base IRI {" +base+ "}", e);
+						throw new UnsupportedOperationException("unsupported base IRI {"+base+"}", e);
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
 
-				}));
+				});
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Iterable<Statement> rewrite(final String source, final String target, final Iterable<Statement> statements) {
+		return () -> new Iterator<Statement>() {
+
+			private final Iterator<Statement> iterator=statements.iterator();
+
+			@Override public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			@Override public Statement next() {
+				return rewrite(source, target, iterator.next());
+			}
+
+		};
+	}
+
+
+	private Statement rewrite(final String source, final String target, final Statement statement) {
+		return statement == null ? null : statement(
+				rewrite(source, target, statement.getSubject()),
+				rewrite(source, target, statement.getPredicate()),
+				rewrite(source, target, statement.getObject()),
+				rewrite(source, target, statement.getContext())
+		);
+	}
+
+	private Value rewrite(final String source, final String target, final Value value) {
+		return value instanceof IRI ? rewrite(source, target, (IRI)value) : value;
+	}
+
+	private Resource rewrite(final String source, final String target, final Resource resource) {
+		return resource instanceof IRI ? rewrite(source, target, (IRI)resource) : resource;
+	}
+
+	private IRI rewrite(final String source, final String target, final IRI iri) {
+		return iri == null ? null : iri(rewrite(source, target, iri.stringValue()));
+	}
+
+	private String rewrite(final String source, final String target, final String string) {
+		return string.startsWith(source) ? target+string.substring(source.length()) : string;
 	}
 
 }
