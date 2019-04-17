@@ -207,7 +207,7 @@ final class RewriterTest {
 
 					request.body(rdf()).use(
 
-							model -> ModelAssert.assertThat(model(model))
+							model -> ModelAssert.assertThat(model)
 									.as("request rdf rewritten")
 									.isIsomorphicTo(internal("s", "p", "o")),
 
@@ -259,7 +259,7 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					assertThat(request).hasBody(rdf(), rdf -> assertThat(model(rdf))
+					assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 							.as("request json rewritten")
 							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
@@ -342,7 +342,7 @@ final class RewriterTest {
 
 						.wrap((Handler)request -> {
 
-							assertThat(request).hasBody(rdf(), rdf -> assertThat(model(rdf))
+							assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 									.isIsomorphicTo(internal("s", "p", "o"))
 							);
 

@@ -33,7 +33,6 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.sparql;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.rest.wrappers.Connector.query;
 
@@ -68,7 +67,7 @@ final class PreprocessorTest {
 				.handle(new Request().body(rdf(), set()))
 
 				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rfd -> ModelAssert.assertThat(model(rfd))
+						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
 								.as("items retrieved")
 								.hasSubset(asList(
 										statement(response.item(), RDF.VALUE, RDF.FIRST),
@@ -89,7 +88,7 @@ final class PreprocessorTest {
 				.handle(new Request().body(rdf(), set()))
 
 				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rfd -> ModelAssert.assertThat(model(rfd))
+						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
 								.as("items retrieved")
 								.hasSubset(asList(
 										statement(response.item(), RDF.VALUE, RDF.FIRST),

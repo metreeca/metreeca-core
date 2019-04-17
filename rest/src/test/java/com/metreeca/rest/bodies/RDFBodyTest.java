@@ -31,7 +31,6 @@ import java.io.*;
 
 import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.bodies.InputBody.input;
@@ -66,7 +65,7 @@ final class RDFBodyTest {
 
 					.body(rdf())
 
-					.value(value -> assertThat(model(value)).isEmpty())
+					.value(value -> assertThat(value).isEmpty())
 					.error(error -> fail("unexpected error {"+error+"}"));
 		}
 
@@ -82,7 +81,7 @@ final class RDFBodyTest {
 
 					.body(rdf())
 
-					.value(statements -> assertThat(model(statements))
+					.value(statements -> assertThat(statements)
 							.isIsomorphicTo(decode("<app://local/container> ldp:contains <app://local/resource> ."))
 					)
 

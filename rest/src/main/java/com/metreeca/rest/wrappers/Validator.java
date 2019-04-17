@@ -24,12 +24,12 @@ import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.Body.Missing;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
@@ -87,7 +87,7 @@ public final class Validator implements Wrapper {
 
 				rdf -> {
 
-					final Model model=model(rdf);
+					final Model model=(rdf instanceof Model) ? (Model)rdf : new LinkedHashModel(rdf);
 
 					final Focus report=Focus.focus(rules.stream()
 							.flatMap(rule -> rule.apply(request, model).stream())
@@ -103,7 +103,7 @@ public final class Validator implements Wrapper {
 
 				},
 
-				failure -> failure.equals(Missing)? handler.handle(request) : request.reply(failure)
+				failure -> failure.equals(Missing) ? handler.handle(request) : request.reply(failure)
 
 		);
 	}

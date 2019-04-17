@@ -28,7 +28,9 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -37,7 +39,6 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.shapes.Memoizing.memoizable;
 import static com.metreeca.form.things.Structures.envelope;
 import static com.metreeca.form.things.Structures.network;
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
@@ -260,9 +261,9 @@ public final class Throttler implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Iterable<Statement> expand(final IRI resource, final Shape shape, final Iterable<Statement> statements) {
+	private Collection<Statement> expand(final IRI resource, final Shape shape, final Collection<Statement> rdf) {
 
-		final Model model=model(statements);
+		final Collection<Statement> model=new LinkedHashModel(rdf);
 
 		model.addAll(shape // add implied statements
 				.map(new Outliner(resource)) // shape already redacted for convey mode

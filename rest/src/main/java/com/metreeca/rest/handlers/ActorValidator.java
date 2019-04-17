@@ -41,7 +41,6 @@ import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Snippets.source;
 import static com.metreeca.form.things.Values.*;
-import static com.metreeca.form.things.Values.stream;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
@@ -57,14 +56,14 @@ final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> 
 	private final RepositoryConnection connection;
 
 	private final Collection<Value> focus;
-	private final Iterable<Statement> model;
+	private final Collection<Statement> model;
 
 
 	ActorValidator(
 			final Trace trace,
 			final RepositoryConnection connection,
 			final Collection<Value> focus,
-			final Iterable<Statement> model
+			final Collection<Statement> model
 	) {
 
 		super(trace);
@@ -121,7 +120,7 @@ final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> 
 
 					// retrieve type info from the validated model
 
-					focus.stream().flatMap(value -> stream(model)
+					focus.stream().flatMap(value -> model.stream()
 							.filter(pattern(value, RDF.TYPE, null))
 							.map(Statement::getObject)
 							.map(type1 -> entry(value, type1))
@@ -312,8 +311,8 @@ final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> 
 
 			final Set<Value> focus=(direct(iri)
 
-					? stream(model).filter(pattern(value, iri, null)).map(Statement::getObject)
-					: stream(model).filter(pattern(null, inverse(iri), value)).map(Statement::getSubject)
+					? model.stream().filter(pattern(value, iri, null)).map(Statement::getObject)
+					: model.stream().filter(pattern(null, inverse(iri), value)).map(Statement::getSubject)
 
 			).collect(toSet());
 

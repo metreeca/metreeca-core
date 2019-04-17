@@ -24,6 +24,7 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.wrappers.Rewriter;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
@@ -50,7 +51,7 @@ import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 /**
  * RDF body format.
  */
-public final class RDFBody implements Body<Iterable<Statement>> {
+public final class RDFBody implements Body<Collection<Statement>> {
 
 	private static final RDFBody Instance=new RDFBody();
 
@@ -85,7 +86,7 @@ public final class RDFBody implements Body<Iterable<Statement>> {
 	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
 	 * status, otherwise
 	 */
-	@Override public Result<Iterable<Statement>, Failure> get(final Message<?> message) {
+	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
 		return message.body(input()).fold(
 
 				supplier -> {
@@ -113,7 +114,7 @@ public final class RDFBody implements Body<Iterable<Statement>> {
 
 					parser.setParseErrorListener(errorCollector);
 
-					final Collection<Statement> model=new LinkedHashSet<>(); // order-preserving and writable
+					final Collection<Statement> model=new LinkedHashModel(); // order-preserving and writable
 
 					final String internal=message.request().base();
 					final String external=message.header(ExternalBase).orElse(internal); // made available by Rewriter
@@ -186,7 +187,7 @@ public final class RDFBody implements Body<Iterable<Statement>> {
 	 * selected according to the {@code Accept} header of the request associated to the message, if one is present, or
 	 * to {@code "text/turtle"}, otherwise.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final Iterable<Statement> value) {
+	@Override public <M extends Message<M>> M set(final M message, final Collection<Statement> value) {
 
 		final List<String> types=Formats.types(message.request().request().headers("Accept"));
 

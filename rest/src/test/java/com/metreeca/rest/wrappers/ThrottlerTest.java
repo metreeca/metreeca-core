@@ -48,7 +48,6 @@ import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -113,7 +112,7 @@ final class ThrottlerTest {
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-							.hasBody(rdf(), rdf -> assertThat(model(rdf))
+							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.isIsomorphicTo(statement(response.item(), RDF.VALUE, RDF.NIL))
 							)
 					)
@@ -177,7 +176,7 @@ final class ThrottlerTest {
 					)
 
 					.accept(response -> assertThat(response)
-							.hasBody(rdf(), rdf -> assertThat(model(rdf))
+							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.isIsomorphicTo(statement(response.item(), RDFS.LABEL, literal("request")))
 							)
 					)
@@ -196,7 +195,7 @@ final class ThrottlerTest {
 					.handle(new Request())
 
 					.accept(response -> assertThat(response)
-							.hasBody(rdf(), rdf -> assertThat(model(rdf))
+							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.isIsomorphicTo(statement(response.item(), RDFS.LABEL, literal("response")))
 							)
 					)
@@ -291,7 +290,7 @@ final class ThrottlerTest {
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-							.hasBody(rdf(), rdf -> assertThat(model(rdf))
+							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.as("extended with implied statements and trimmed")
 									.isIsomorphicTo(decode("<> :email 'tino.faussone@example.com'."))
 							)

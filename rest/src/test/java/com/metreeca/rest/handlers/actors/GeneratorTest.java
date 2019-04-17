@@ -33,7 +33,6 @@ import java.util.function.BiFunction;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.tray.rdf.GraphTest.graph;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
@@ -92,7 +91,7 @@ final class GeneratorTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(model(rdf))
+						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(decode("<virtual> a :Employee ;\n"
 										+"\trdfs:label 'Tino Faussone' ;\n"
 										+"\t:code '1234' ;\n"
@@ -114,7 +113,7 @@ final class GeneratorTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.OK)
-						.hasBody(rdf(), rdf -> assertThat(model(rdf))
+						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(decode("<virtual> a :Employee ;\n"
 										+"\trdfs:label 'Tino Faussone' ;\n"
 										+"\t:code '1234' ;\n"

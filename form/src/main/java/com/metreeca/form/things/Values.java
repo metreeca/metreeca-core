@@ -20,7 +20,9 @@ package com.metreeca.form.things;
 import com.metreeca.form.Form;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.*;
+import org.eclipse.rdf4j.model.impl.SimpleIRI;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
@@ -36,7 +38,6 @@ import java.time.temporal.TemporalQueries;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -44,7 +45,6 @@ import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toCollection;
 
 
 /**
@@ -535,23 +535,10 @@ public final class Values {
 	}
 
 
-	public static Stream<Statement> stream(final Iterable<Statement> statements) {
-		return statements == null ? null
-				: StreamSupport.stream(statements.spliterator(), false);
-	}
-
-	public static Model model(final Iterable<Statement> statements) {
-		return statements == null ? null
-				: statements instanceof Model ? (Model)statements
-				: statements instanceof Collection ? new LinkedHashModel((Collection<Statement>)statements)
-				: stream(statements).collect(toCollection(LinkedHashModel::new));
-	}
-
-
 	//// Formatters ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String format(final Iterable<Statement> statements) {
-		return statements == null ? null : stream(statements)
+		return statements == null ? null : StreamSupport.stream(statements.spliterator(), false)
 				.map(Values::format)
 				.collect(joining("\n"));
 	}

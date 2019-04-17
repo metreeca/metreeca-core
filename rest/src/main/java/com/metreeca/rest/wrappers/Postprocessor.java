@@ -31,7 +31,6 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.things.Values.model;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
@@ -118,7 +117,7 @@ public final class Postprocessor implements Wrapper {
 
 				rdf -> response.body(rdf(), filters.stream().reduce(
 
-						model(rdf),
+						rdf instanceof Model? (Model)rdf : new LinkedHashModel(rdf),
 
 						(_model, filter) -> {
 

@@ -120,7 +120,7 @@ public final class Updater extends Actor {
 
 					final IRI item=request.item();
 					final Shape shape=resource(item, request.shape());
-					final Iterable<Statement> model=trace.trace(this, rdf);
+					final Collection<Statement> model=trace.trace(this, rdf);
 
 					return request.reply(response -> update(item, shape, model)
 
