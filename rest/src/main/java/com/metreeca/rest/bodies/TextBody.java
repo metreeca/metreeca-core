@@ -55,8 +55,7 @@ public final class TextBody implements Body<String> {
 
 	/**
 	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
-	 * supplied by its {@link ReaderBody} body, if one is present; a failure describing the processing error,
-	 * otherwise
+	 * supplied by its {@link ReaderBody} body, if one is present; a failure describing the processing error, otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
 		return message.body(reader()).fold(
@@ -77,19 +76,19 @@ public final class TextBody implements Body<String> {
 	}
 
 	/**
-	 * Configures the {@link WriterBody} body of {@code message} to write the textual {@code value} to the output
-	 * stream supplied by the accepted output stream supplier.
+	 * Configures the {@link WriterBody} body of {@code message} to write the textual {@code value} to the output stream
+	 * supplied by the accepted output stream supplier.
 	 */
-	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(writer(), text().map(text -> target -> {
+	@Override public <M extends Message<M>> M set(final M message, final String value) {
+		return message.body(writer(), target -> {
 			try (final Writer output=target.get()) {
 
-				output.write(text);
+				output.write(value);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		}));
+		});
 	}
 
 }

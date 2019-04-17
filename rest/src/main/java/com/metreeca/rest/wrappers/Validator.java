@@ -22,14 +22,15 @@ import com.metreeca.form.Issue;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.BiFunction;
 
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.Body.Missing;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
@@ -82,21 +83,29 @@ public final class Validator implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> handler.handle(request.pipe(rdf(), model -> {
+		return request -> request.body(rdf()).fold(
 
-			final Focus report=Focus.focus(rules.stream()
-					.flatMap(rule -> rule.apply(request, model).stream())
-					.collect(toList()));
+				rdf -> {
 
-			return report.assess(Issue.Level.Error) ? Error(new Failure()
+					final Model model=(rdf instanceof Model) ? (Model)rdf : new LinkedHashModel(rdf);
 
-					.status(Response.UnprocessableEntity)
-					.error(Failure.DataInvalid)
-					.trace(report)
+					final Focus report=Focus.focus(rules.stream()
+							.flatMap(rule -> rule.apply(request, model).stream())
+							.collect(toList()));
 
-			) : Value(model);
+					return report.assess(Issue.Level.Error) ? request.reply(new Failure()
 
-		}));
+							.status(Response.UnprocessableEntity)
+							.error(Failure.DataInvalid)
+							.trace(report)
+
+					) : handler.handle(request.body(rdf(), rdf));
+
+				},
+
+				failure -> failure.equals(Missing) ? handler.handle(request) : request.reply(failure)
+
+		);
 	}
 
 }

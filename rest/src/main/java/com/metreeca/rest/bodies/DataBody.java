@@ -82,16 +82,16 @@ public final class DataBody implements Body<byte[]> {
 	 * Configures the {@link OutputBody} body of {@code message} to write the binary {@code value} to the output
 	 * stream supplied by the accepted output stream supplier.
 	 */
-	@Override public <T extends Message<T>> T set(final T message) {
-		return message.body(output(), data().map(data -> target -> {
+	@Override public <M extends Message<M>> M set(final M message, final byte[] value) {
+		return message.body(output(), target -> {
 			try (final OutputStream output=target.get()) {
 
-				output.write(data);
+				output.write(value);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		}));
+		});
 	}
 
 }

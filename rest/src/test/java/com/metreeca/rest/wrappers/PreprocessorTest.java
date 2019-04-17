@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.sparql;
 import static com.metreeca.rest.HandlerTest.echo;
@@ -59,7 +60,7 @@ final class PreprocessorTest {
 
 				.with(new Preprocessor(pre(RDF.FIRST), pre(RDF.REST))) // multiple filters to test piping
 
-				.handle(new Request())
+				.handle(new Request().body(rdf(), set()))
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
@@ -80,7 +81,7 @@ final class PreprocessorTest {
 						"construct { <> rdf:value rdf:first, rdf:rest } where {}"
 				))))
 
-				.handle(new Request())
+				.handle(new Request().body(rdf(), set()))
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)

@@ -18,11 +18,7 @@
 package com.metreeca.rest;
 
 
-import java.util.function.Function;
-
 import static com.metreeca.rest.Result.Error;
-
-import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -41,28 +37,6 @@ public interface Body<V> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Maps this body format.
-	 *
-	 * @param mapper the value mapping function; must return a non-null value
-	 * @param <T>    the type of the target message for the body format generator
-	 * @param <R>    the type of the value returned by {@code mapper}
-	 *
-	 * @return a body format {@linkplain Message#body(Body, Function) generator} applying {@code mapper} to the values
-	 * retrieved from a message by this body format
-	 *
-	 * @throws NullPointerException if {@code mapper} is null
-	 */
-	public default <T extends Message<T>, R> Function<T, Result<R, Failure>> map(final Function<V, R> mapper) {
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return message -> requireNonNull(message.body(this).value(mapper), "null mapped value");
-	}
-
 
 	/**
 	 * Retrieves a structured body from a message.
@@ -94,21 +68,26 @@ public interface Body<V> {
 	}
 
 	/**
-	 * Configures a message to hold a structured body.
+	 * Configures a message to hold a structured value.
 	 *
 	 * <p>The default implementation has no effects.</p>
 	 *
 	 * @param message the message to be configured to hold a structured body managed by this body format
-	 * @param <T>     the type of {@code message}
+	 * @param value the structured body being configured for {@code message} by this message body format
+	 * @param <M>     the type of {@code message}
 	 *
 	 * @return the configured {@code message}
 	 *
-	 * @throws NullPointerException if {@code message} is null
+	 * @throws NullPointerException if either {@code message} or {@code value} is null
 	 */
-	public default <T extends Message<T>> T set(final T message) {
+	public default <M extends Message<M>> M set(final M message, final V value) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
 		}
 
 		return message;

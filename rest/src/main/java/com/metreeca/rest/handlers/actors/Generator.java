@@ -35,6 +35,8 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.rest.Body.Missing;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
@@ -62,11 +64,11 @@ public final class Generator extends Delegator {
 	/**
 	 * Creates a virtual model generator.
 	 *
-	 * @param generator a function mapping from a request and its {@linkplain RDFBody RDF} payload to a possibly empty
-	 *                  RDF model; must return a non null value; generators based on SPARQL graph queries may be created
-	 *                  using {@link Connector} factory methods
+	 * @param generator a function mapping from a request and its (likely empty) {@linkplain RDFBody RDF} payload to a
+	 *                  possibly empty RDF model; generators based on SPARQL graph queries may be created using {@link
+	 *                  Connector} factory methods
 	 *
-	 * @throws NullPointerException if {@code generator} is null
+	 * @throws NullPointerException if {@code generator} is null or returns a null value
 	 * @see Connector#query(String, BiConsumer[])
 	 */
 	public Generator(final BiFunction<Request, Model, Model> generator) {
@@ -102,22 +104,9 @@ public final class Generator extends Delegator {
 
 				return request.body(rdf()).fold(
 
-						model -> {
+						rdf -> generate(request, response, rdf),
 
-							final Collection<Statement> virtual=Objects.requireNonNull(
-									generator.apply(request, new LinkedHashModel(model)),
-									"null generator return value"
-							);
-
-							return virtual.isEmpty() ? response.status(Response.NotFound) : response
-
-									.status(Response.OK)
-									.shape(request.shape())
-									.body(rdf(), virtual);
-
-						},
-
-						response::map
+						failure -> failure.equals(Missing) ? generate(request, response, set()) : response.map(failure)
 
 				);
 
@@ -131,6 +120,21 @@ public final class Generator extends Delegator {
 			}
 
 		});
+	}
+
+
+	private Response generate(final Request request, final Response response, final Collection<Statement> rdf) {
+
+		final Collection<Statement> virtual=Objects.requireNonNull(
+				generator.apply(request, rdf instanceof Model ? (Model)rdf : new LinkedHashModel(rdf)),
+				"null generator return value"
+		);
+
+		return virtual.isEmpty() ? response.status(Response.NotFound) : response
+
+				.status(Response.OK)
+				.shape(request.shape())
+				.body(rdf(), virtual);
 	}
 
 }

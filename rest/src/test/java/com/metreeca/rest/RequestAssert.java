@@ -24,7 +24,6 @@ import org.assertj.core.api.Assertions;
 
 import java.io.*;
 import java.util.Collection;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,24 +37,19 @@ public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
 
 		if ( request != null ) {
 
-			request.pipe(input(), input -> Result.Value(new Supplier<InputStream>() { // cache input
+			request.body(input()).value().ifPresent(supplier -> { // cache input
 
-				private byte[] data;
+				try (final InputStream stream=supplier.get()) {
 
-				@Override public InputStream get() {
+					final byte[] data=Codecs.data(stream);
 
-					if ( data == null ) {
-						try (final InputStream in=input.get()) {
-							data=Codecs.data(in);
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
-					}
+					request.body(input(), () -> new ByteArrayInputStream(data));
 
-					return new ByteArrayInputStream(data);
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
 				}
 
-			}));
+			});
 
 			final StringBuilder builder=new StringBuilder(2500);
 

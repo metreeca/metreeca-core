@@ -27,10 +27,12 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.form.Issue.issue;
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 
 final class ValidatorTest {
@@ -63,7 +65,7 @@ final class ValidatorTest {
 
 						.wrap(echo())
 
-						.handle(new Request())
+						.handle(new Request().body(rdf(), set()))
 
 						.accept(response -> assertThat(response)
 								.hasStatus(Response.UnprocessableEntity)

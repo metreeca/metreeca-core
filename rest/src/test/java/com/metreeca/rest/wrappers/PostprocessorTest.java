@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.Base;
 import static com.metreeca.form.things.ValuesTest.decode;
@@ -61,7 +62,7 @@ final class PostprocessorTest {
 
 				.with(new Postprocessor(post(RDF.FIRST), post(RDF.REST))) // multiple filters to test piping
 
-				.handle(new Request())
+				.handle(new Request().body(rdf(), set()))
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
@@ -102,7 +103,9 @@ final class PostprocessorTest {
 				.handle(new Request()
 						.method(Request.POST)
 						.base(Base)
-						.path("/test"))
+						.path("/test")
+						.body(rdf(), set())
+				)
 
 				.accept(response -> {
 

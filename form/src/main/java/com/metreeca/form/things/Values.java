@@ -38,13 +38,13 @@ import java.time.temporal.TemporalQueries;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.StreamSupport.stream;
 
 
 /**
@@ -538,7 +538,7 @@ public final class Values {
 	//// Formatters ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String format(final Iterable<Statement> statements) {
-		return statements == null ? null : stream(statements.spliterator(), false)
+		return statements == null ? null : StreamSupport.stream(statements.spliterator(), false)
 				.map(Values::format)
 				.collect(joining("\n"));
 	}

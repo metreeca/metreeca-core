@@ -53,7 +53,7 @@ public final class HandlerTest {
 				.shape(request.shape())
 				.headers(request.headers())
 
-				.map(r -> request.body(rdf()).fold(v -> r.body(rdf(), v), r::map))
+				.map(r -> request.body(rdf()).fold(v -> r.body(rdf(), v), e -> e.equals(Body.Missing)? r : r.map(e)))
 
 				.map(stream(tasks).reduce(identity(), Function::andThen))
 

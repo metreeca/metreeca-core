@@ -18,9 +18,7 @@
 package com.metreeca.rest.wrappers;
 
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
@@ -33,7 +31,6 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
@@ -73,8 +70,8 @@ public final class Postprocessor implements Wrapper {
 	 * Inserts a response RDF postprocessing filters.
 	 *
 	 * <p>The filters is chained after previously inserted postprocessing filters and executed on {@linkplain
-	 * Response#success() successful} outgoing responses and their {@linkplain RDFBody RDF} payload, if one is
-	 * present, or ignored, otherwise.</p>
+	 * Response#success() successful} outgoing responses and their {@linkplain RDFBody RDF} payload, if one is present,
+	 * or ignored, otherwise.</p>
 	 *
 	 * @param filters the response RDF postprocessing filters to be inserted; each filter takes as argument a successful
 	 *                outgoing response and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model;
@@ -91,7 +88,7 @@ public final class Postprocessor implements Wrapper {
 			throw new NullPointerException("null filters");
 		}
 
-		if ( filters.stream().anyMatch(Objects::isNull)) {
+		if ( filters.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null filter");
 		}
 
@@ -116,10 +113,11 @@ public final class Postprocessor implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper postprocessor() {
-		return handler -> request -> handler.handle(request)
-				.map(response -> response.success() ? response.pipe(rdf(), model -> Value(filters.stream().reduce(
+		return handler -> request -> handler.handle(request).map(response -> response.success() ? response.body(rdf()).fold(
 
-						(Model)new LinkedHashModel(model),
+				rdf -> response.body(rdf(), filters.stream().reduce(
+
+						rdf instanceof Model? (Model)rdf : new LinkedHashModel(rdf),
 
 						(_model, filter) -> {
 
@@ -140,7 +138,11 @@ public final class Postprocessor implements Wrapper {
 
 						}
 
-				))) : response);
+				)),
+
+				failure -> failure.equals(Body.Missing) ? response : response.map(failure)
+
+		) : response );
 	}
 
 }

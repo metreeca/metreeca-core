@@ -37,6 +37,7 @@ import java.util.Collection;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.meta;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.Employee;
@@ -133,7 +134,8 @@ final class ThrottlerTest {
 		private Request request() {
 			return ThrottlerTest.this.request()
 					.shape(shape)
-					.roles(role);
+					.roles(role)
+					.body(rdf(), set());
 		}
 
 		private Handler handler(final Collection<Statement> model, final Shape shape) {
@@ -166,6 +168,7 @@ final class ThrottlerTest {
 
 					.handle(new Request()
 							.shape(field(RDFS.LABEL, literal("request")))
+							.body(rdf(), set())
 					)
 
 					.accept(response -> assertThat(response)
@@ -182,6 +185,7 @@ final class ThrottlerTest {
 
 					.wrap(echo().with(handler -> request -> handler.handle(request).map(response ->
 							response.shape(field(RDFS.LABEL, literal("response")))
+							.body(rdf(), set())
 					)))
 
 					.handle(new Request())
