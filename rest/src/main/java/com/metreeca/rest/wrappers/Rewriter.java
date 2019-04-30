@@ -185,7 +185,7 @@ public final class Rewriter implements Wrapper {
 
 				.shape(response.shape());
 
-		// make external base/location available to rewriting in RDFBody
+		// make external base/location available to rewriting in RDFBody (after cloning to keep service headers hidden)
 
 		response
 
