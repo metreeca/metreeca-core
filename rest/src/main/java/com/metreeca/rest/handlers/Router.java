@@ -90,8 +90,7 @@ public final class Router implements Handler {
 	 * @return this router
 	 *
 	 * @throws NullPointerException     if either {@code path} or {@code handler} is null
-	 * @throws IllegalArgumentException if {@code path} is not a well-formed sequence of steps ( {@code
-	 *                                  /<step> | /** | /*} )
+	 * @throws IllegalArgumentException if {@code path} is not a well-formed sequence of steps
 	 * @throws IllegalStateException    if {@code path} is already bound to a handler
 	 */
 	public Router path(final String path, final Handler handler) {
