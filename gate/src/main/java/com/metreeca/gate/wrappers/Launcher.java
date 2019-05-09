@@ -58,7 +58,7 @@ public final class Launcher implements Wrapper {
 
 	private final Function<Response, Optional<String>> selector;
 
-	private final Map<String, String> cache=new HashMap<>();
+	private final Map<String, String> cache=new HashMap<>(); // path to page
 
 	private final Loader loader=tool(loader());
 
