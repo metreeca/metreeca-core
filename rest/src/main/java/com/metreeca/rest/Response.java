@@ -147,11 +147,11 @@ public final class Response extends Message<Response> {
 	 *
 	 * @return this response
 	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 0 or greater than 599
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
 	 */
 	public Response status(final int status) {
 
-		if ( status < 100 || status > 599 ) {
+		if ( status != 0 && (status < 100 || status > 599) ) { // 0 used internally
 			throw new IllegalArgumentException("illegal status code ["+status+"]");
 		}
 
