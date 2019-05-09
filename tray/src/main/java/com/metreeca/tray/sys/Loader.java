@@ -35,7 +35,6 @@ import java.util.function.Supplier;
 	 * @return the default loader factory, which retrieves system resources from the classpath through {@link
 	 * ClassLoader#getResourceAsStream(String)}
 	 */
-
 	public static Supplier<Loader> loader() {
 		return () -> path -> {
 
@@ -54,7 +53,7 @@ import java.util.function.Supplier;
 	 * Loads a shared resource.
 	 *
 	 * @param path the path the system resource should be loaded from; path syntax is source dependent, but a
-	 *             fileystem-like slash-separated hierarchical structure is recommended
+	 *             filesystem-like slash-separated hierarchical structure is recommended
 	 *
 	 * @return an optional input stream for reading the required resource, if one is available at {@code path};  an
 	 * empty optional, otherwise
