@@ -21,7 +21,10 @@ import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 
+import java.net.URI;
 import java.util.Optional;
+
+import static com.metreeca.form.things.Values.AbsoluteIRIPattern;
 
 
 /**
@@ -91,9 +94,15 @@ public final class Response extends Message<Response> {
 	 * Request#item() focus item} IRI of the originating request otherwise
 	 */
 	@Override public IRI item() {
-		return header("location")
+
+		final IRI base=request().item();
+
+		return header("Location")
+				.map(location -> AbsoluteIRIPattern.matcher(location).matches() ?
+						location : URI.create(base.stringValue()).resolve(location).toString()
+				)
 				.map(Values::iri)
-				.orElseGet(() -> request().item());
+				.orElseGet(() -> base);
 	}
 
 	/**
