@@ -22,6 +22,7 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Preprocessor implements Wrapper {
 
-	private final Collection<BiFunction<Request, Model, Model>> filters;
+	private final Collection<BiFunction<Request, Model, ? extends Collection<Statement>>> filters;
 
 
 	/**
@@ -59,7 +60,7 @@ public final class Preprocessor implements Wrapper {
 	 * @see Connector#query(String, BiConsumer[])
 	 * @see Connector#update(String, BiConsumer[])
 	 */
-	@SafeVarargs public Preprocessor(final BiFunction<Request, Model, Model>... filters) {
+	@SafeVarargs public Preprocessor(final BiFunction<Request, Model, ? extends Collection<Statement>>... filters) {
 		this(asList(filters));
 	}
 
@@ -77,7 +78,7 @@ public final class Preprocessor implements Wrapper {
 	 * @see Connector#query(String, BiConsumer[])
 	 * @see Connector#update(String, BiConsumer[])
 	 */
-	public Preprocessor(final Collection<BiFunction<Request, Model, Model>> filters) {
+	public Preprocessor(final Collection<BiFunction<Request, Model, ? extends Collection<Statement>>> filters) {
 
 		if ( filters == null ) {
 			throw new NullPointerException("null filters");
@@ -114,10 +115,16 @@ public final class Preprocessor implements Wrapper {
 
 						rdf instanceof Model? (Model)rdf : new LinkedHashModel(rdf),
 
-						(model, filter) -> requireNonNull(
-								filter.apply(request, new LinkedHashModel(model)),
-								"null filter return value"
-						),
+						(model, filter) -> {
+
+							final Collection<Statement> out=requireNonNull(
+									filter.apply(request, new LinkedHashModel(model)),
+									"null filter return value"
+							);
+
+							return out instanceof Model ? (Model)out : new LinkedHashModel(out);
+
+						},
 
 						(x, y) -> {
 

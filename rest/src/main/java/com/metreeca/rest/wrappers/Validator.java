@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.Focus.focus;
 import static com.metreeca.rest.Body.Missing;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
@@ -89,9 +90,10 @@ public final class Validator implements Wrapper {
 
 					final Model model=(rdf instanceof Model) ? (Model)rdf : new LinkedHashModel(rdf);
 
-					final Focus report=Focus.focus(rules.stream()
+					final Focus report=focus(rules.stream()
 							.flatMap(rule -> rule.apply(request, model).stream())
-							.collect(toList()));
+							.collect(toList())
+					);
 
 					return report.assess(Issue.Level.Error) ? request.reply(new Failure()
 
