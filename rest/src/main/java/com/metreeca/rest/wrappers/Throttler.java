@@ -171,44 +171,35 @@ public final class Throttler implements Wrapper {
 			final Shape shape=request.shape();
 			final Set<IRI> roles=request.roles();
 
-			if ( pass(shape) ) {
+			if ( pass(shape) ) { // no driving shape
 
 				return handler.handle(request);
 
-			} else {
+			} else { // authorize ignoring annotations and filtering-only constraints
 
-				// remove annotations and filtering-only constraints for authorization checks
-
-				final Shape general=shape
+				final Shape baseline=shape // visible to anyone regardless of task/view
 						.map(convey)
 						.map(anyone);
 
-				final Shape authorized=shape
+				final Shape authorized=shape // visible to the user regardless of task/view
 						.map(convey)
 						.map(new Redactor(Form.role, roles))
 						.map(new Optimizer());
 
-				final Shape redacted=shape
+				final Shape redacted=shape // effective shape taking into account user/task/view
 						.map(common)
 						.map(new Redactor(Form.role, roles))
 						.map(new Optimizer());
 
-				return empty(general) ? forbidden(request)
+				return empty(baseline) ? forbidden(request)
 						: empty(authorized) ? refused(request)
-						:
-						request.body(rdf()).fold(
+						: request.shape(redacted).body(rdf()).fold(
 
-								rdf -> handler.handle(request
+						rdf -> handler.handle(request.body(rdf(), expand(focus, authorized, rdf))),
 
-										.shape(redacted)
-										.body(rdf(), expand(focus, authorized, rdf))
+						failure -> failure.equals(Body.Missing) ? handler.handle(request) : request.reply(failure)
 
-								),
-
-								failure -> failure.equals(Body.Missing) ?
-										handler.handle(request.shape(redacted)) : request.reply(failure)
-
-						);
+				);
 
 			}
 
@@ -221,35 +212,28 @@ public final class Throttler implements Wrapper {
 			final IRI item=request.item();
 			final Shape shape=response.shape().map(convey);
 
-			if ( pass(shape) ) {
+			if ( pass(shape) ) { // no driving shape
 
-				return response.body(rdf()).fold(
+				return response.shape(shape).body(rdf()).fold(
 
-						rdf -> response
-								.shape(shape)
-								.body(rdf(), network(item, rdf)),
+						rdf -> response.body(rdf(), network(item, rdf)),
 
-						failure -> failure.equals(Body.Missing) ?
-								response.shape(shape) : response.map(failure)
+						failure -> failure.equals(Body.Missing) ? response : response.map(failure)
+
 				);
 
 			} else {
 
-				final Shape redacted=shape
+				final Shape redacted=shape // effective shape taking into account user/task/view
 
 						.map(new Redactor(Form.role, request.roles()))
 						.map(new Optimizer());
 
-				return response.body(rdf()).fold(
+				return response.shape(redacted).body(rdf()).fold(
 
-						rdf -> response
-								.shape(redacted)
-								.body(rdf(), expand(item, redacted,
-										envelope(item, redacted, rdf)
-								)),
+						rdf -> response.body(rdf(), expand(item, redacted, envelope(item, redacted, rdf))),
 
-						failure -> failure.equals(Body.Missing) ?
-								response.shape(redacted) : response.map(failure)
+						failure -> failure.equals(Body.Missing) ? response : response.map(failure)
 
 				);
 
