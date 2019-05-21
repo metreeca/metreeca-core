@@ -28,6 +28,8 @@ import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.*;
 
 import static com.metreeca.form.things.Values.*;
@@ -122,17 +124,13 @@ public final class Connector implements Wrapper {
 			throw new NullPointerException("null customizers");
 		}
 
-		for (final BiConsumer<M, GraphQuery> customizer : customizers) {
-
-			if ( customizer == null ) {
-				throw new NullPointerException("null customizer");
-			}
-
+		if ( Arrays.stream(customizers).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null customizer");
 		}
 
 		final Graph graph=tool(graph());
 
-		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.update(connection -> {
+		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.query(connection -> {
 
 			configure(
 					message, connection.prepareGraphQuery(SPARQL, query, message.request().base()), customizers
@@ -171,12 +169,8 @@ public final class Connector implements Wrapper {
 			throw new NullPointerException("null customizers");
 		}
 
-		for (final BiConsumer<M, Update> customizer : customizers) {
-
-			if ( customizer == null ) {
-				throw new NullPointerException("null customizer");
-			}
-
+		if ( Arrays.stream(customizers).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null customizer");
 		}
 
 		final Graph graph=tool(graph());
@@ -304,12 +298,8 @@ public final class Connector implements Wrapper {
 			throw new NullPointerException("null customizers");
 		}
 
-		for (final BiConsumer<M, O> customizer : customizers) {
-
-			if ( customizer == null ) {
-				throw new NullPointerException("null customizer");
-			}
-
+		if ( Arrays.stream(customizers).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null customizer");
 		}
 
 		operation.setBinding("time", time(true));
