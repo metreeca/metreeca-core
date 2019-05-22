@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import static java.lang.System.currentTimeMillis;
+
 
 /**
  * PBKDF2 secret digest.
@@ -45,8 +47,8 @@ public final class PBKDF2Digest implements Digest {
 	 */
 	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(Codecs.UTF8));
 
-	private static final int Length=24; // salt length
-	private static final int Rounds=1000; // encryption rounds
+	private static final int Length=32; // salt length
+	private static final int Rounds=50_0000; // encryption rounds
 
 	private static final SecureRandom random=new SecureRandom();
 
@@ -54,7 +56,12 @@ public final class PBKDF2Digest implements Digest {
 
 
 	public static void main(final String... args) {
-		System.out.println(new PBKDF2Digest().digest("secret"));
+
+		final long start=currentTimeMillis();
+		final String digest=new PBKDF2Digest().digest("secret");
+		final long stop=currentTimeMillis();
+
+		System.out.println(String.format("generated digest in %.1fs: %s", (stop-start)/1000f, digest));
 	}
 
 
