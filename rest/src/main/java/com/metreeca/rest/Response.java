@@ -41,7 +41,9 @@ public final class Response extends Message<Response> {
 	public static final int NoContent=204; // https://tools.ietf.org/html/rfc7231#section-6.3.5
 
 	public static final int MovedPermanently=301; // https://tools.ietf.org/html/rfc7231#section-6.4.2
+	public static final int Found=302; // https://tools.ietf.org/html/rfc7231#section-6.4.3
 	public static final int SeeOther=303; // https://tools.ietf.org/html/rfc7231#section-6.4.4
+	public static final int TemporaryRedirect=307; // https://tools.ietf.org/html/rfc7231#section-6.4.7
 
 	public static final int BadRequest=400; // https://tools.ietf.org/html/rfc7231#section-6.5.1
 	public static final int Unauthorized=401; // https://tools.ietf.org/html/rfc7235#section-3.1
