@@ -39,7 +39,119 @@ import static java.lang.String.format;
 
 final class ProtectorTest {
 
-	@Nested final class XSRF {
+	@Nested final class TransportSecurity {
+
+		@Test void testIsDisabledbyDefault() {
+			exec(() -> new Protector()
+
+					.wrap(echo())
+
+					.handle(new Request()
+							.method(Request.GET)
+							.base("http://example.com/")
+					)
+
+					.accept(response -> assertThat(response)
+
+							.hasStatus(Response.OK)
+							.doesNotHaveHeader("Strict-Transport-Security")
+
+					)
+			);
+		}
+
+		@Test void testRedirectHTTPRequests() {
+			exec(() -> new Protector()
+
+					.secure(true)
+
+					.wrap(echo())
+
+					.handle(new Request()
+							.method(Request.GET)
+							.base("http://example.com/")
+					)
+
+					.accept(response -> assertThat(response)
+
+							.hasStatus(Response.TemporaryRedirect)
+							.hasHeader("Location", "https://example.com/")
+							.doesNotHaveHeader("Strict-Transport-Security")
+
+					)
+			);
+		}
+
+		@Test void testSetStrictTransportSecurityHeader() {
+			exec(() -> new Protector()
+
+					.secure(true)
+
+					.wrap(echo())
+
+					.handle(new Request()
+							.method(Request.GET)
+							.base("https://example.com/")
+					)
+
+					.accept(response -> assertThat(response)
+
+							.hasStatus(Response.OK)
+							.hasHeader("Strict-Transport-Security")
+
+					)
+			);
+		}
+
+
+	}
+
+	@Nested final class XSSProtection {
+
+		@Test void testIsDisabledbyDefault() {
+			exec(() -> new Protector()
+
+					.wrap(echo())
+
+					.handle(new Request()
+							.method(Request.GET)
+							.base("http://example.com/")
+					)
+
+					.accept(response -> assertThat(response)
+
+							.hasStatus(Response.OK)
+							.doesNotHaveHeader("Content-Security-Policy")
+							.doesNotHaveHeader("X-XSS-Protection")
+
+					)
+			);
+		}
+
+		@Test void testSetPolicyHeaders() {
+			exec(() -> new Protector()
+
+					.policy(true)
+
+					.wrap(echo())
+
+					.handle(new Request()
+							.method(Request.GET)
+					)
+
+					.accept(response -> assertThat(response)
+
+							.hasStatus(Response.OK)
+							.hasHeader("Content-Security-Policy")
+							.hasHeader("X-XSS-Protection")
+
+					)
+			);
+		}
+
+	}
+
+	@Nested final class XSRFProtection {
 
 		private void play(
 				final Supplier<Handler> factory,

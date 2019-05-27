@@ -37,7 +37,7 @@ import static com.metreeca.tray.sys.Vault.vault;
 
 
 /**
- * JWT token notary.
+ * JWT notary.
  *
  * <p>Creates and verifies signed claims-based JWT tokens.</p>
  *
@@ -53,11 +53,11 @@ public final class Notary {
 
 
 	/**
-	 * Retrieves the default JWT token notary factory.
+	 * Retrieves the default JWT notary factory.
 	 *
-	 * @return the default JWT token notary factory, configured with the {@link SignatureAlgorithm#HS256} signing
-	 * algorithm and the signing key {@linkplain #KeyVaultId retrieved} from the shared {@linkplain Vault vault}, if one
-	 * is available, or a random key, otherwise
+	 * @return the default JWT notary factory, configured with the {@link SignatureAlgorithm#HS256} signing algorithm
+	 * and the signing key {@linkplain #KeyVaultId retrieved} from the shared {@linkplain Vault vault}, if one is
+	 * available, or a random key, otherwise
 	 */
 	public static Supplier<Notary> notary() {
 
@@ -74,10 +74,17 @@ public final class Notary {
 
 	private final SignatureAlgorithm algorithm;
 
-
 	private final Key key;
 
 
+	/**
+	 * Creates a JWT token notary.
+	 *
+	 * @param algorithm the algorithm to be used for signing tokens; tokens are signed using a random key generated with
+	 *                  {@link KeyGenerator}
+	 *
+	 * @throws NullPointerException if {@code algorithm} is null
+	 */
 	public Notary(final SignatureAlgorithm algorithm) {
 
 		if ( algorithm == null ) {
@@ -98,6 +105,14 @@ public final class Notary {
 		}
 	}
 
+	/**
+	 * Creates a JWT token notary.
+	 *
+	 * @param algorithm the algorithm to be used for signing tokens
+	 * @param key       the key to be used for signing tokens; must satisfy length requirements for {@code algorithm}
+	 *
+	 * @throws NullPointerException if either {@code algorithm} or {@code key} is null
+	 */
 	public Notary(final SignatureAlgorithm algorithm, final String key) {
 
 		if ( algorithm == null ) {
@@ -112,6 +127,14 @@ public final class Notary {
 		this.key=new SecretKeySpec(key.getBytes(UTF8), this.algorithm.getJcaName());
 	}
 
+	/**
+	 * Creates a JWT token notary.
+	 *
+	 * @param algorithm the algorithm to be used for signing tokens
+	 * @param key       the key to be used for signing tokens; must satisfy length requirements for {@code algorithm}
+	 *
+	 * @throws NullPointerException if either {@code algorithm} or {@code key} is null
+	 */
 	public Notary(final SignatureAlgorithm algorithm, final Key key) {
 
 		if ( algorithm == null ) {
@@ -127,15 +150,26 @@ public final class Notary {
 	}
 
 
-	public String create(final Consumer<Claims> consumer) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		if ( consumer == null ) {
-			throw new NullPointerException("null consumer");
+	/**
+	 * Creates a signed claims-based JWT token.
+	 *
+	 * @param customizer claims customizer for the generated token
+	 *
+	 * @return a signed, compact, compressed, URL-safe serialized JWT token
+	 *
+	 * @throws NullPointerException if {@code customizer} is null
+	 */
+	public String create(final Consumer<Claims> customizer) {
+
+		if ( customizer == null ) {
+			throw new NullPointerException("null customizer");
 		}
 
 		final Claims claims=Jwts.claims();
 
-		consumer.accept(claims);
+		customizer.accept(claims);
 
 		return Jwts.builder()
 				.addClaims(claims)
@@ -144,6 +178,15 @@ public final class Notary {
 				.compact();
 	}
 
+	/**
+	 * Verifies a signed claims-based JWT token.
+	 *
+	 * @param token the serialized JWT token
+	 *
+	 * @return the claims associated with {@code token}, if successfully verified; an empty optional, otherwise
+	 *
+	 * @throws NullPointerException if {@code token} is null
+	 */
 	public Optional<Claims> verify(final String token) {
 
 		if ( token == null ) {

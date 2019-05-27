@@ -19,6 +19,7 @@ package com.metreeca.gate.wrappers;
 
 import com.metreeca.gate.Notary;
 import com.metreeca.rest.*;
+import com.metreeca.tray.sys.Trace;
 
 import java.time.Duration;
 import java.util.*;
@@ -28,13 +29,14 @@ import java.util.regex.Pattern;
 import static com.metreeca.gate.Gate.random;
 import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.sys.Trace.trace;
 
 import static java.lang.String.format;
 import static java.util.regex.Pattern.compile;
 
 
 /**
- * XSS protector.
+ * XSS/XSRF protector.
  *
  * <p>Configures the following standard XSS protection headers (unless already defined by wrapper handlers):</p>
  *
@@ -53,43 +55,68 @@ import static java.util.regex.Pattern.compile;
  */
 public final class Protector implements Wrapper {
 
+	private static final int SessionIdLength=256; // [bits]
+
 	private static final long SecureDefault=86400;
+
 	private static final String PolicyDefault="default-src 'self'; base-uri 'self'";
 	private static final String XSSDefault="1; mode=block";
 
 	public static final String XSRFCookie="XSRF-TOKEN";
 	public static final String XSRFHeader="X-XSRF-TOKEN";
+	public static final String SameSiteDefault="Lax";
 
 	private static final Pattern XSRFCookiePattern=compile(format("\\b(?<name>%s)\\s*=\\s*(?<value>[^\\s;]+)", XSRFCookie));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private long lease=0; // XSRF token duration (s); 0 for no expiry
-	private long secure=0; // enforced secure transport period (s); 0 for no enforcing
+	private long secure;
+	private long period;
 
-	private String policy=""; // browser security policy; empty for no policy
+	private String policy="";
 
 	private final Notary notary=tool(notary());
 	private final Random random=tool(random());
 
-
-	public Protector lease(final long lease) {
-
-		if ( lease < 0 ) {
-			throw new IllegalArgumentException("illegal XSRF token duratio ["+lease+"]");
-		}
-
-		this.lease=lease;
-
-		return this;
-	}
+	private final Trace trace=tool(trace());
 
 
+	/**
+	 * Configures strict transport security.
+	 *
+	 * @param secure enables strict {@linkplain #secure(long) secure} transport with a default period equal to {@value
+	 *               #SecureDefault}, if true; disables it, otherwise
+	 *
+	 * @return this protector
+	 */
 	public Protector secure(final boolean secure) {
 		return secure(secure ? SecureDefault : 0L);
 	}
 
+	/**
+	 * Configures strict transport security.
+	 *
+	 * <p>If an enforced strict secure transport period is defined:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>{@code HTTP} requests are temporarily redirected to {@code HTTPS};</li>
+	 *
+	 * <li>the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security">Strict-Transport-Security</a>
+	 * header is set on responses with the provided {@code max-age} value, unless already defined by nested
+	 * handlers;</li>
+	 *
+	 * <li>XSRF cookies are created with the {@code Secure} attribute.</li>
+	 *
+	 * </ul>
+	 *
+	 * @param secure enforced secure transport period in seconds; 0 for no secure transport enforcing
+	 *
+	 * @return this protector
+	 *
+	 * @throws IllegalArgumentException if {@code secure} is less than 0
+	 */
 	public Protector secure(final long secure) {
 
 		if ( secure < 0 ) {
@@ -106,6 +133,25 @@ public final class Protector implements Wrapper {
 		return policy(policy ? PolicyDefault : "");
 	}
 
+	/**
+	 * Configures content security policy.
+	 *
+	 * <p>If a content securiti policy is defined:</p>
+	 *
+	 *
+	 * <li>the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP">Content-Security-Policy</a> header is
+	 * set on responses with the provided value, unless already defined by nested handlers;</li>
+	 *
+	 * <li>the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection">X-XSS-Protection</a>
+	 * header is set as a fallback measure with the {@value XSSDefault} value, unless already defined by nested
+	 * handlers;</li>
+	 *
+	 * @param policy the content security policy to be enforced by the browser; empty for no policy enforcing
+	 *
+	 * @return this protector
+	 *
+	 * @throws NullPointerException if {@code policy} is null
+	 */
 	public Protector policy(final String policy) {
 
 		if ( policy == null ) {
@@ -113,6 +159,18 @@ public final class Protector implements Wrapper {
 		}
 
 		this.policy=policy;
+
+		return this;
+	}
+
+
+	public Protector lease(final long lease) {
+
+		if ( lease < 0 ) {
+			throw new IllegalArgumentException("illegal XSRF token duratio ["+lease+"]");
+		}
+
+		this.period=lease;
 
 		return this;
 	}
@@ -161,14 +219,14 @@ public final class Protector implements Wrapper {
 	private Wrapper xss() {
 		return handler -> request -> handler.handle(request).map(response -> response
 				.header("~Content-Security-Policy", policy)
-				.header("~X-XSS-Protection", XSSDefault)
+				.header("~X-XSS-Protection", policy.isEmpty()? "" : XSSDefault)
 		);
 	}
 
 
 	//// XSRF //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Wrapper xsrf() { // !!! refactor
+	private Wrapper xsrf() {
 		return handler -> request -> {
 
 			final String header=request.header(XSRFHeader)
@@ -195,13 +253,16 @@ public final class Protector implements Wrapper {
 
 				return handler.handle(request).map(response -> {
 
-					final Request request1=response.request();
+					// add cookie on safe request if not already defined
 
-					if ( request1.safe() && request1.headers("Cookie").stream().noneMatch(value -> XSRFCookiePattern.matcher(value).find()) ) {
+					if ( request.safe() && request.headers("Cookie").stream()
+							.noneMatch(value -> XSRFCookiePattern.matcher(value).find())
+					) {
 
 						response.header("Set-Cookie", format("%s=%s; Path=%s; SameSite=Lax%s",
 								XSRFCookie, token(), request.base(), secure > 0 ? "; Secure" : ""
 						));
+
 					}
 
 					return response;
@@ -209,6 +270,12 @@ public final class Protector implements Wrapper {
 				});
 
 			} else {
+
+				trace.warning(this, header.isEmpty() ? "missing XSRF header"
+						: cookie.isEmpty() ? "missing XSRF cookie"
+						: header.equals(cookie) ? format("invalid XSRF token: %s", header)
+						: format("mismatched XSRF header/cookie: %s / %s", header, cookie)
+				);
 
 				return request.reply(new Failure().status(Response.Forbidden)); // no details disclosed
 
@@ -221,13 +288,13 @@ public final class Protector implements Wrapper {
 	private String token() {
 		return notary.create(claims -> {
 
-			final byte[] bytes=new byte[256/8];
+			final byte[] bytes=new byte[SessionIdLength/8];
 
 			random.nextBytes(bytes);
 
 			claims
 					.setId(Base64.getEncoder().encodeToString(bytes))
-					.setExpiration(new Date(System.currentTimeMillis()+(lease > 0 ? lease : Duration.ofDays(1).toMillis())));
+					.setExpiration(new Date(System.currentTimeMillis()+(period > 0 ? period : Duration.ofDays(1).toMillis())));
 		});
 	}
 
