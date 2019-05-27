@@ -20,32 +20,25 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.form.things.Values;
 import com.metreeca.gate.Permit;
 import com.metreeca.gate.Roster;
+import com.metreeca.gate.Notary;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
-import com.metreeca.tray.sys.Vault;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.spec.SecretKeySpec;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
-import static com.metreeca.form.things.Codecs.UTF8;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.gate.Roster.roster;
+import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Vault.vault;
 
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
@@ -54,7 +47,7 @@ import static java.util.stream.Collectors.toSet;
 
 
 /**
- * Single page app session manager.
+ * Session manager.
  *
  * <p>Manages the lifecycle of JWT-based sessions using permits issued by shared {@link Roster#roster() roster}
  * tool.</p>
@@ -128,7 +121,8 @@ import static java.util.stream.Collectors.toSet;
  * … }</pre>
  *
  * <p><em>Failed token validation</em> / Due either to hard session expiration or to a modified {@linkplain
- * Permit#hash() permit hash} on soft session expiration; reported with a response providing a machine-readable error code.</p>
+ * Permit#hash() permit hash} on soft session expiration; reported with a response providing a machine-readable error
+ * code.</p>
  *
  * <pre>{@code 403 Forbidden
  * Content-Type: application/json
@@ -141,12 +135,6 @@ import static java.util.stream.Collectors.toSet;
  * @see <a href="https://github.com/jwtk/jjwt">https://github.com/jwtk/jjwt</a>
  */
 public final class Manager implements Wrapper {
-
-	/**
-	 * The id of the {@linkplain Vault vault} entry containing the key used for signing JWT tokens ({@code
-	 * com.metreeca.gate.wrapper.manager:key}); if no key is provided a random one is generated automatically.
-	 */
-	public static final String KeyVaultId=Manager.class.getName().toLowerCase(Locale.ROOT)+":key";
 
 
 	public static final long Seconds=1000;
@@ -161,7 +149,7 @@ public final class Manager implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final SignatureAlgorithm algorithm=SignatureAlgorithm.HS512;
+	private static final SignatureAlgorithm algorithm=SignatureAlgorithm.HS256;
 
 
 	private static Failure malformed(final String error) {
@@ -183,29 +171,8 @@ public final class Manager implements Wrapper {
 
 	private final Handler endpoint=new Worker().post(create());
 
+	private final Notary notary=tool(notary());
 	private final Roster roster=tool(roster());
-
-	private final Key key=tool(vault())
-
-			.get(KeyVaultId)
-
-			.map(string -> // generate from supplied key string
-					(Key)new SecretKeySpec(string.getBytes(UTF8), algorithm.getJcaName())
-			)
-
-			.orElseGet(() -> { // generate random key
-				try {
-
-					final KeyGenerator generator=KeyGenerator.getInstance(algorithm.getJcaName());
-
-					generator.init(algorithm.getMinKeyLength());
-
-					return generator.generateKey();
-
-				} catch ( final NoSuchAlgorithmException e ) {
-					throw new RuntimeException(e);
-				}
-			});
 
 
 	/**
@@ -372,31 +339,19 @@ public final class Manager implements Wrapper {
 
 
 	private String token(final Session session) {
-		return Jwts.builder()
+		return notary.create(claims -> {
 
-				.setClaims(map(
+			claims.put("issued", session.issued());
+			claims.put("hash", session.hash());
 
-						entry("issued", session.issued()),
-						entry("hash", session.hash()),
+			claims.put("user", session.user().stringValue());
+			claims.put("roles", session.roles().stream().map(Value::stringValue).collect(toList()));
 
-						entry("user", session.user().stringValue()),
-						entry("roles", session.roles().stream().map(Value::stringValue).collect(toList()))
-
-				))
-
-				.signWith(key, algorithm)
-
-				.compressWith(CompressionCodecs.GZIP)
-				.compact();
+		});
 	}
 
 	private Optional<Session> session(final String token) {
-		try {
-
-			final Claims claims=Jwts.parser()
-					.setSigningKey(key)
-					.parseClaimsJws(token)
-					.getBody();
+		return notary.verify(token).map(claims -> {
 
 			final long issued=Optional
 					.ofNullable(claims.get("issued", Long.class))
@@ -419,16 +374,13 @@ public final class Manager implements Wrapper {
 					.map(Values::iri)
 					.collect(toSet());
 
-			return Optional.of(new Session(
+
+			return new Session(
 					issued, hash,
 					user, roles
-			));
+			);
 
-		} catch ( final Exception e ) {
-
-			return Optional.empty();
-
-		}
+		});
 	}
 
 
