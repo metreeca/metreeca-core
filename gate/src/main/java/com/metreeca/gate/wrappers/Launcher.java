@@ -1,3 +1,4 @@
+
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
@@ -17,59 +18,35 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.*;
-import com.metreeca.tray.sys.Loader;
-
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.metreeca.form.things.Codecs.reader;
-import static com.metreeca.rest.bodies.TextBody.text;
-import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Loader.loader;
 
 import static java.lang.String.format;
-import static java.util.regex.Matcher.quoteReplacement;
 
 
 /**
  * App launcher.
  *
- * <p>Replaces non-{@linkplain Message#interactive() interactive} responses to {@linkplain Message#interactive()
- * interactive} requests with a HTML page {@linkplain Loader loaded} from the path {@linkplain #Launcher(Function)
- * selected} on the basis of the response.</p>
- *
- * @see Message#interactive()
+ * <p>Delegates {@linkplain Request#interactive() interactive} requests to an {@linkplain #Launcher(Handler) alternate}
+ * handler.</p>
  */
 public final class Launcher implements Wrapper {
 
-	private static final Pattern CommentPattern=Pattern.compile("<!--(?s:.)*?-->");
-	private static final Pattern SpacePattern=Pattern.compile("[\n\\s]+");
-	private static final Pattern LinkPattern=Pattern.compile("\\b(src|href)\\s*=\\s*(?:'([^']*)'|\"([^\"]*)\")");
+	private static final String PathCookie="metreeca";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Function<Response, Optional<String>> selector;
-
-	private final Map<String, String> cache=new HashMap<>(); // path to page
-
-	private final Loader loader=tool(loader());
+	private final Handler interactive;
 
 
 	/**
 	 * Creates an app launcher.
 	 *
-	 * @param path the absolute path of the page to be launched; {@code index.html} will be appended to paths ending
-	 *             with a trailing slash
+	 * @param path the root-relative path of the app to be launched; the root-relative {@linkplain Request#path() path}
+	 *             of the original request is made available to the app  under the {@value PathCookie} session cookie
 	 *
-	 * @throws NullPointerException if {@code path} is null
+	 * @throws NullPointerException     if {@code path} is null
+	 * @throws IllegalArgumentException if {@code path} does not start with a trailing slash
 	 */
 	public Launcher(final String path) {
 
@@ -77,84 +54,38 @@ public final class Launcher implements Wrapper {
 			throw new NullPointerException("null path");
 		}
 
-		this.selector=request -> Optional.of(path);
+		if ( !path.startsWith("/") ) {
+			throw new IllegalArgumentException("illegal path ["+path+"]");
+		}
+
+		this.interactive=request -> request.reply(response -> request.path().equals(path) ? response : response
+				.status(Response.SeeOther)
+				.header("Location", path)
+				.header("Set-Cookie", format("%s=%s; path=%s", PathCookie, request.path(), path))
+		);
 	}
 
 	/**
 	 * Creates an app launcher.
 	 *
-	 * @param selector the page selector; must return the optional path of the page to be launched for response; {@code
-	 *                 index.html} will be appended to paths ending with a trailing slash
+	 * @param interactive the alternate handler for {@linkplain Request#interactive() interactive} requests
 	 *
-	 * @throws NullPointerException if {@code selector} is null
+	 * @throws NullPointerException if {@code handler} is null
 	 */
-	public Launcher(final Function<Response, Optional<String>> selector) {
+	public Launcher(final Handler interactive) {
 
-		if ( selector == null ) {
-			throw new NullPointerException("null selector");
+		if ( interactive == null ) {
+			throw new NullPointerException("null handler");
 		}
 
-		this.selector=selector;
+		this.interactive=interactive;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> handler.handle(request).map(response -> Optional.of(response)
-
-				.filter(r -> request.interactive() && !response.interactive())
-				.flatMap(selector)
-
-				.filter(path -> !request.path().equals(path))
-				.map(path -> path.endsWith("/") ? path+"index.html" : path)
-				.map(path -> cache.computeIfAbsent(path, this::load))
-
-				.map(page -> new Response(request)
-						.status(Response.OK)
-						.header("Content-Type", "text/html")
-						.body(text(), page)
-				)
-
-				.orElse(response)
-		);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private String load(final String path) {
-		return loader.load(path)
-
-				.map(stream -> Codecs.text(reader(stream))) // load page
-
-				.map(html -> CommentPattern.matcher(html).replaceAll("")) // remove comments
-				.map(html -> SpacePattern.matcher(html).replaceAll(" ")) // collapses spaces
-
-				.map(html -> { // transform relative links into absolute ones
-
-					final URI base=URI.create(path);
-
-					final Matcher matcher=LinkPattern.matcher(html);
-					final StringBuffer buffer=new StringBuffer(html.length());
-
-					while ( matcher.find() ) {
-
-						final String attribute=matcher.group(1);
-						final String squote=matcher.group(2);
-						final String dquote=matcher.group(3);
-
-						matcher.appendReplacement(buffer, quoteReplacement(format("%s=\"%s\"",
-								attribute, base.resolve(squote != null ? squote : dquote != null ? dquote : "")
-						)));
-
-					}
-
-					return matcher.appendTail(buffer).toString();
-
-				})
-
-				.orElseThrow(() -> new IllegalArgumentException("missing resource ["+path+"]"));
+		return request -> (request.interactive() ? interactive : handler).handle(request);
 	}
 
 }
