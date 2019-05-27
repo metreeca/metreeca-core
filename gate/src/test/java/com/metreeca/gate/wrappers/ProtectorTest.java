@@ -41,7 +41,7 @@ final class ProtectorTest {
 
 	@Nested final class TransportSecurity {
 
-		@Test void testIsDisabledbyDefault() {
+		@Test void testIsDisabledByDefault() {
 			exec(() -> new Protector()
 
 					.wrap(echo())
@@ -108,7 +108,7 @@ final class ProtectorTest {
 
 	@Nested final class XSSProtection {
 
-		@Test void testIsDisabledbyDefault() {
+		@Test void testIsDisabledByDefault() {
 			exec(() -> new Protector()
 
 					.wrap(echo())
@@ -187,10 +187,32 @@ final class ProtectorTest {
 		}
 
 
+		@Test void testIsDisabledByDefault() {
+			exec(() -> new Protector()
+
+					.wrap(echo())
+
+					.handle(new Request()
+							.method(Request.GET)
+							.base("http://example.com/")
+					)
+
+					.accept(response -> assertThat(response)
+
+							.hasStatus(Response.OK)
+							.doesNotHaveHeader("Set-Cookie")
+
+					)
+			);
+		}
+
+
 		@Nested final class TokenGeneration {
 
 			@Test void testGenerateXSRFTokenOnSafeRequests() {
 				exec(() -> new Protector()
+
+						.token(true)
 
 						.wrap(echo())
 
@@ -212,6 +234,8 @@ final class ProtectorTest {
 
 			@Test void testGenerateSecureXSRFTokenOnSafeRequests() {
 				exec(() -> new Protector()
+
+						.token(true)
 
 						.secure(true)
 
@@ -236,6 +260,8 @@ final class ProtectorTest {
 			@Test void testDontGenerateXSRFTokenOnUnsafeRequests() {
 				exec(() -> new Protector()
 
+						.token(true)
+
 						.wrap(echo())
 
 						.handle(new Request()
@@ -253,6 +279,8 @@ final class ProtectorTest {
 			@Test void testDontReplaceExistingXSRFToken() {
 				play(() -> new Protector()
 
+								.token(true)
+
 								.wrap(echo()),
 
 						request -> request.method(Request.POST),
@@ -267,7 +295,11 @@ final class ProtectorTest {
 			@Test void testRandomizeXSRFTokens() {
 				exec(() -> {
 
-					final Handler handler=new Protector().wrap(echo());
+					final Handler handler=new Protector()
+
+							.token(true)
+
+							.wrap(echo());
 
 					handler
 
@@ -295,6 +327,8 @@ final class ProtectorTest {
 			@Test void testIgnoreMissingTokenOnSafeRequest() {
 				exec(() -> new Protector()
 
+						.token(true)
+
 						.wrap(echo())
 
 						.handle(new Request()
@@ -312,6 +346,8 @@ final class ProtectorTest {
 			@Test void testReportMissingTokenOnUnsafeRequest() {
 				exec(() -> new Protector()
 
+						.token(true)
+
 						.wrap(echo())
 
 						.handle(new Request()
@@ -328,6 +364,8 @@ final class ProtectorTest {
 
 			@Test void testReportUnpairedXSRFCookie() {
 				exec(() -> new Protector()
+
+						.token(true)
 
 						.wrap(echo())
 
@@ -347,6 +385,8 @@ final class ProtectorTest {
 			@Test void testReportUnpairedXSRFHeader() {
 				exec(() -> new Protector()
 
+						.token(true)
+
 						.wrap(echo())
 
 						.handle(new Request()
@@ -364,6 +404,8 @@ final class ProtectorTest {
 
 			@Test void testReportMismatchedXSRFHeaderAndCookie() {
 				exec(() -> new Protector()
+
+						.token(true)
 
 						.wrap(echo())
 
@@ -383,6 +425,8 @@ final class ProtectorTest {
 
 			@Test void testReportForgedXSRFToken() {
 				exec(() -> new Protector()
+
+						.token(true)
 
 						.wrap(echo())
 
@@ -408,6 +452,8 @@ final class ProtectorTest {
 
 				exec(() -> new Protector()
 
+						.token(true)
+
 						.wrap(echo())
 
 						.handle(new Request()
@@ -427,7 +473,7 @@ final class ProtectorTest {
 			@Test void testReportExpiredXSRFToken() {
 				play(() -> new Protector()
 
-								.lease(10)
+								.token(10)
 
 								.wrap(echo()),
 
@@ -450,6 +496,8 @@ final class ProtectorTest {
 
 			@Test void testAcceptValidXSRFToken() {
 				play(() -> new Protector()
+
+								.token(true)
 
 								.wrap(echo()),
 

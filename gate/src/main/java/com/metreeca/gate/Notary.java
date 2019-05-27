@@ -29,6 +29,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import static com.metreeca.form.things.Codecs.UTF8;
@@ -46,8 +47,8 @@ import static com.metreeca.tray.sys.Vault.vault;
 public final class Notary {
 
 	/**
-	 * The id of the {@linkplain Vault vault} entry containing the key used for signing JWT tokens ({@code
-	 * com.metreeca.gate.notary:key}); if no key is provided a random one is generated automatically.
+	 * The id of the shared {@linkplain Vault vault} entry containing the key to be used for signing JWT tokens ({@code
+	 * com.metreeca.gate.notary:key}).
 	 */
 	public static final String KeyVaultId=Notary.class.getName().toLowerCase(Locale.ROOT)+":key";
 
@@ -61,12 +62,31 @@ public final class Notary {
 	 */
 	public static Supplier<Notary> notary() {
 
-		return () -> tool(vault()).get(KeyVaultId)
+		return () -> new Notary(SignatureAlgorithm.HS256, tool(vault()).get(KeyVaultId).orElse(""));
 
-				.map(key -> new Notary(SignatureAlgorithm.HS256, key)) // generate from supplied key string
+	}
 
-				.orElseGet(() -> new Notary(SignatureAlgorithm.HS256));  // generate random key
 
+	private static SecretKey key(final SignatureAlgorithm algorithm, final String key) {
+		if ( key.isEmpty() ) { // generate random key
+
+			try {
+
+				final KeyGenerator generator=KeyGenerator.getInstance(algorithm.getJcaName());
+
+				generator.init(algorithm.getMinKeyLength());
+
+				return generator.generateKey();
+
+			} catch ( final NoSuchAlgorithmException e ) {
+				throw new RuntimeException(e);
+			}
+
+		} else { // convert string to key
+
+			return new SecretKeySpec(key.getBytes(UTF8), algorithm.getJcaName());
+
+		}
 	}
 
 
@@ -91,25 +111,18 @@ public final class Notary {
 			throw new NullPointerException("null algorithm");
 		}
 
-		try {
 
-			final KeyGenerator generator=KeyGenerator.getInstance(algorithm.getJcaName());
+		this.algorithm=algorithm;
+		this.key=key(algorithm, "");
 
-			generator.init(algorithm.getMinKeyLength());
-
-			this.algorithm=algorithm;
-			this.key=generator.generateKey();
-
-		} catch ( final NoSuchAlgorithmException e ) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	/**
 	 * Creates a JWT token notary.
 	 *
 	 * @param algorithm the algorithm to be used for signing tokens
-	 * @param key       the key to be used for signing tokens; must satisfy length requirements for {@code algorithm}
+	 * @param key       the key to be used for signing tokens; if empty tokens are signed using a random key generated
+	 *                  with {@link KeyGenerator}; must satisfy length requirements for {@code algorithm}
 	 *
 	 * @throws NullPointerException if either {@code algorithm} or {@code key} is null
 	 */
@@ -124,7 +137,7 @@ public final class Notary {
 		}
 
 		this.algorithm=algorithm;
-		this.key=new SecretKeySpec(key.getBytes(UTF8), this.algorithm.getJcaName());
+		this.key=key(algorithm, key);
 	}
 
 	/**
@@ -155,7 +168,7 @@ public final class Notary {
 	/**
 	 * Creates a signed claims-based JWT token.
 	 *
-	 * @param customizer claims customizer for the generated token
+	 * @param customizer claims customizer for the new token
 	 *
 	 * @return a signed, compact, compressed, URL-safe serialized JWT token
 	 *
