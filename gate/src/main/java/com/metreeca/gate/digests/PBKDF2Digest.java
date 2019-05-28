@@ -19,17 +19,21 @@ package com.metreeca.gate.digests;
 
 import com.metreeca.form.things.Codecs;
 import com.metreeca.gate.Digest;
+import com.metreeca.tray.Tray;
 
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+
+import static com.metreeca.gate.Gate.random;
+import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -47,25 +51,29 @@ public final class PBKDF2Digest implements Digest {
 	 */
 	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(Codecs.UTF8));
 
-	private static final int Length=32; // salt length
-	private static final int Rounds=50_0000; // encryption rounds
-
-	private static final SecureRandom random=new SecureRandom();
+	private static final int Length=32; // salt length [bytes]
+	private static final int Rounds=25_0000; // encryption rounds
 
 	private static final Pattern DigestPattern=Pattern.compile("(?<tag>.*):(?<rounds>\\d+):(?<salt>.+):(?<hash>.+)");
 
 
 	public static void main(final String... args) {
+		new Tray().exec(() -> {
 
-		final long start=currentTimeMillis();
-		final String digest=new PBKDF2Digest().digest("secret");
-		final long stop=currentTimeMillis();
+			final long start=currentTimeMillis();
+			final String digest=new PBKDF2Digest().digest("secret");
+			final long stop=currentTimeMillis();
 
-		System.out.println(String.format("generated digest in %.1fs: %s", (stop-start)/1000f, digest));
+			System.out.println(String.format("generated digest in %.1fs: %s", (stop-start)/1000f, digest));
+
+		}).clear();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Random random=tool(random());
+
 
 	@Override public String digest(final String secret) {
 
