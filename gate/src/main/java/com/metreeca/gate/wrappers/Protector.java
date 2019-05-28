@@ -46,13 +46,13 @@ public final class Protector implements Wrapper {
 	public static final String XSRFCookie="XSRF-TOKEN";
 	public static final String XSRFHeader="X-XSRF-TOKEN";
 
-	private static final long SecureDefault=86400; // [s]
+	private static final long SecureDefault=86_400_000; // [ms]
 
 	private static final String PolicyDefault="default-src 'self'; base-uri 'self'";
 	private static final String XSSDefault="1; mode=block";
 
-	private static final long TokenDefault=86400; // [s]
-	private static final int SessionIDLength=256; // [bits]
+	private static final long TokenDefault=86_400_000; // [ms]
+	private static final int SessionIDLength=32; // [bytes]
 	private static final String SameSiteDefault="Lax";
 
 	private static final Pattern XSRFCookiePattern=compile(format("\\b(?<name>%s)\\s*=\\s*(?<value>[^\\s;]+)", XSRFCookie));
@@ -75,7 +75,7 @@ public final class Protector implements Wrapper {
 	 * Configures strict transport security.
 	 *
 	 * @param secure enables strict {@linkplain #secure(long) secure} transport with a default period equal to {@value
-	 *               #SecureDefault} seconds, if true; disables it, otherwise
+	 *               #SecureDefault} milliseconds, if true; disables it, otherwise
 	 *
 	 * @return this protector
 	 */
@@ -168,7 +168,7 @@ public final class Protector implements Wrapper {
 	 * Configures token-based XSRF protection.
 	 *
 	 * @param token enables {@linkplain #token(long) token}-based XSRF protection with a default session duration equal
-	 *              to {@value #TokenDefault} seconds, if true; disables it, otherwise
+	 *              to {@value #TokenDefault} milliseconds, if true; disables it, otherwise
 	 *
 	 * @return this protector
 	 */
@@ -242,7 +242,7 @@ public final class Protector implements Wrapper {
 			} else {
 
 				return handler.handle(request).map(response -> response
-						.header("~Strict-Transport-Security", format("max-age=%d", secure))
+						.header("~Strict-Transport-Security", format("max-age=%d", secure/1000))
 				);
 
 			}
@@ -329,13 +329,15 @@ public final class Protector implements Wrapper {
 	private String token() {
 		return notary.create(claims -> {
 
-			final byte[] bytes=new byte[SessionIDLength/8];
+			final long now=System.currentTimeMillis();
+			final byte[] id=new byte[SessionIDLength];
 
-			random.nextBytes(bytes);
+			random.nextBytes(id);
 
 			claims
-					.setId(Base64.getEncoder().encodeToString(bytes))
-					.setExpiration(new Date(System.currentTimeMillis()+token));
+					.setId(Base64.getEncoder().encodeToString(id))
+					.setIssuedAt(new Date(now))
+					.setExpiration(new Date(now+token));
 		});
 	}
 
