@@ -52,6 +52,11 @@ public final class Notary {
 	 */
 	public static final String KeyVaultId=Notary.class.getName().toLowerCase(Locale.ROOT)+":key";
 
+	/**
+	 * Allowed clock skew in seconds.
+	 */
+	public static final int AllowedClockSkew=5;
+
 
 	/**
 	 * Retrieves the default JWT notary factory.
@@ -209,6 +214,7 @@ public final class Notary {
 		try {
 
 			return Optional.of(Jwts.parser()
+					.setAllowedClockSkewSeconds(AllowedClockSkew)
 					.setSigningKey(key)
 					.parseClaimsJws(token)// validates signature and expiration
 					.getBody()

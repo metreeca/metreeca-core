@@ -172,7 +172,7 @@ public final class PBKDF2Digest implements Digest {
 	 * @param x the first byte array to be compared
 	 * @param y the second byte array to be compared
 	 *
-	 * @return {@code true} if the byte arrays are equal, false otherwise
+	 * @return {@code true} if the byte arrays are equal, {@code false} otherwise
 	 */
 	private boolean equals(final byte[] x, final byte[] y) {
 

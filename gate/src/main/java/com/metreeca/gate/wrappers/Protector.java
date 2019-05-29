@@ -38,8 +38,8 @@ import static java.util.regex.Pattern.compile;
  * XSS/XSRF protector.
  *
  * <p>Enforces transport security and content security policies and manages
- * <a href="https://angular.io/guide/http#security-xsrf-protection">Angular-compatible</a> token-based XSRF
- * protection.</p>
+ * <a href="https://angular.io/guide/http#security-xsrf-protection">Angular-compatible</a>
+ * token-based XSRF protection.</p>
  */
 public final class Protector implements Wrapper {
 
@@ -55,7 +55,7 @@ public final class Protector implements Wrapper {
 	private static final int SessionIDLength=32; // [bytes]
 	private static final String SameSiteDefault="Lax";
 
-	private static final Pattern XSRFCookiePattern=compile(format("\\b(?<name>%s)\\s*=\\s*(?<value>[^\\s;]+)", XSRFCookie));
+	private static final Pattern XSRFCookiePattern=compile(format("\\b%s\\s*=\\s*(?<value>[^\\s;]+)", XSRFCookie));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ public final class Protector implements Wrapper {
 	//// XSS ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper xss() {
-		return handler -> request -> policy.isEmpty()? handler.handle(request) : handler.handle(request).map(response -> response
+		return handler -> request -> policy.isEmpty() ? handler.handle(request) : handler.handle(request).map(response -> response
 				.header("~Content-Security-Policy", policy)
 				.header("~X-XSS-Protection", XSSDefault)
 		);

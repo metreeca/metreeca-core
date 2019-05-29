@@ -343,6 +343,7 @@ final class ProtectorTest {
 				);
 			}
 
+
 			@Test void testReportMissingTokenOnUnsafeRequest() {
 				exec(() -> new Protector()
 

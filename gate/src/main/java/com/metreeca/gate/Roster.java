@@ -19,15 +19,13 @@ package com.metreeca.gate;
 
 import com.metreeca.rest.Result;
 
-import org.eclipse.rdf4j.model.IRI;
-
 import java.util.function.Supplier;
 
 
 /**
  * User roster.
  *
- * <p>Authenticates users and manages user credentials.</p>
+ * <p>Manages user credentials and authentication.</p>
  */
 public interface Roster {
 
@@ -42,27 +40,21 @@ public interface Roster {
 
 
 	public static String CredentialsInvalid="credentials-invalid"; // invalid handle or secret
+	public static String CredentialsExpired="credentials-expired"; // expired secret
 	public static String CredentialsIllegal="credentials-illegal"; // secret unacceptable by policy
 
-	public static String CredentialsExpired="credentials-expired"; // expired secret
-	public static String CredentialsPending="credentials-pending"; // account to be activated
-	public static String CredentialsRevoked="credentials-revoked"; // account revoked or locked
+	public static String CredentialsPending="credentials-pending"; // account to be activated // !!! review
+	public static String CredentialsRevoked="credentials-revoked"; // account revoked or locked // !!! review
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Result<IRI, String> resolve(final String handle);
+	public Result<Permit, String> lookup(final String handle);
 
+	public Result<Permit, String> login(final String handle, final String secret);
 
-	public Result<Permit, String> verify(final IRI user, final String secret);
+	public Result<Permit, String> login(final String handle, final String secret, final String update);
 
-	public Result<Permit, String> verify(final IRI user, final String secret, final String update);
-
-
-	public Result<Permit, String> lookup(final IRI user);
-
-	public Result<Permit, String> insert(final IRI user, final String secret);
-
-	public Result<Permit, String> remove(final IRI user);
+	public Result<Permit, String> logout(final String handle);
 
 }

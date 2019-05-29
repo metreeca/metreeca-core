@@ -31,7 +31,7 @@ import static com.metreeca.form.things.Maps.map;
 
 public final class JsonValues {
 
-	@SuppressWarnings("unchecked") public static JsonValue json(final Object object) {
+	@SuppressWarnings("unchecked") public static JsonValue value(final Object object) {
 		return object instanceof JsonValue ? (JsonValue)object
 
 				: object instanceof Boolean ? (Boolean)object ? JsonValue.TRUE : JsonValue.FALSE
