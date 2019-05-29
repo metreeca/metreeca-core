@@ -104,7 +104,7 @@ public final class JsonAssert extends AbstractAssert<JsonAssert, JsonValue> {
 		}
 
 		return isObject().satisfies(new Condition<>(
-				json -> value.equals(json.asJsonObject().getValue(name)),
+				json -> value.equals(json.asJsonObject().getValue("/"+name)),
 				"expected <%s> to have field <%s> with value <%s>",
 				actual, name, value
 		));
