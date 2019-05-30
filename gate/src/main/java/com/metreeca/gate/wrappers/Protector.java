@@ -19,6 +19,7 @@ package com.metreeca.gate.wrappers;
 
 import com.metreeca.gate.Notary;
 import com.metreeca.rest.*;
+import com.metreeca.tray.sys.Clock;
 import com.metreeca.tray.sys.Trace;
 
 import java.util.*;
@@ -28,6 +29,7 @@ import java.util.regex.Pattern;
 import static com.metreeca.gate.Gate.random;
 import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.sys.Clock.clock;
 import static com.metreeca.tray.sys.Trace.trace;
 
 import static java.lang.String.format;
@@ -68,6 +70,7 @@ public final class Protector implements Wrapper {
 	private final Notary notary=tool(notary());
 	private final Random random=tool(random());
 
+	private final Clock clock=tool(clock());
 	private final Trace trace=tool(trace());
 
 
@@ -329,7 +332,7 @@ public final class Protector implements Wrapper {
 	private String token() {
 		return notary.create(claims -> {
 
-			final long now=System.currentTimeMillis();
+			final long now=clock.time();
 			final byte[] id=new byte[SessionIDLength];
 
 			random.nextBytes(id);

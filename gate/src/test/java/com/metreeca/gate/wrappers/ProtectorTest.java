@@ -20,17 +20,20 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.tray.Tray;
+import com.metreeca.tray.sys.ClockTest;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.HandlerTest.echo;
-import static com.metreeca.rest.HandlerTest.exec;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.tray.sys.Clock.clock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,6 +41,19 @@ import static java.lang.String.format;
 
 
 final class ProtectorTest {
+
+	private final ClockTest.MockClock clock=new ClockTest.MockClock();
+
+	private void exec(final Runnable... tasks) {
+		new Tray()
+
+				.set(clock(), () -> clock.time(0))
+
+				.exec(tasks)
+
+				.clear();
+	}
+
 
 	@Nested final class TransportSecurity {
 
@@ -102,7 +118,6 @@ final class ProtectorTest {
 					)
 			);
 		}
-
 
 	}
 
@@ -448,8 +463,8 @@ final class ProtectorTest {
 			@Test void testReportUnsignedXSRFToken() {
 
 				final String token="eyJhbGciOiJub25lIiwiemlwIjoiR1pJUCJ9." // unsigned id+expiry token
-						+ "H4sIAAAAAAAAAKtWyirJVLJSCsvNK44wzzOPCA8MS_QvstD2TCpwLXMrN8nJdCwK"
-						+ "yYvUTkxzMs4O9LIMcrRV0lFKrShQsjI0NbU0MDY2sTCoBQA-JXtwRwAAAA.";
+						+"H4sIAAAAAAAAAKtWyirJVLJSCsvNK44wzzOPCA8MS_QvstD2TCpwLXMrN8nJdCwK"
+						+"yYvUTkxzMs4O9LIMcrRV0lFKrShQsjI0NbU0MDY2sTCoBQA-JXtwRwAAAA.";
 
 				exec(() -> new Protector()
 
@@ -474,13 +489,13 @@ final class ProtectorTest {
 			@Test void testReportExpiredXSRFToken() {
 				play(() -> new Protector()
 
-								.token(10)
+								.token(Duration.ofDays(1).toMillis())
 
 								.wrap(echo()),
 
 						request -> {
 
-							try { Thread.sleep(100);} catch ( final InterruptedException ignored ) {}
+							clock.time(Duration.ofDays(2).toMillis());
 
 							return request.method(Request.POST);
 

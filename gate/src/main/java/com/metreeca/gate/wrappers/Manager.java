@@ -153,6 +153,8 @@ public final class Manager implements Wrapper {
 	public static final String TicketMalformed="ticket-malformed";
 
 
+	private static final int TokenIdLength=32; // [bytes]
+
 	private static final Pattern SessionCookiePattern=compile(format("\\b%s\\s*=\\s*(?<value>[^\\s;]+)", SessionCookie));
 
 
@@ -372,7 +374,7 @@ public final class Manager implements Wrapper {
 
 	private String cookie(final Response response, final String handle, final long issued, final long expiry) {
 
-		final byte[] id=new byte[32];
+		final byte[] id=new byte[TokenIdLength];
 		final String base=response.request().base();
 
 		random.nextBytes(id);
