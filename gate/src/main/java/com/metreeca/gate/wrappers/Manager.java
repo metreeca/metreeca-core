@@ -240,20 +240,23 @@ public final class Manager implements Wrapper {
 										.user(permit.user())
 										.roles(permit.roles())
 
-								).map(response -> { // extend cookie if residual lease is < 90% soft timeout
+								).map(response -> {
 
 									final long now=clock.time();
 
 									final long issued=claims.getIssuedAt().getTime();
 									final long expiry=claims.getExpiration().getTime();
 
-									if ( expiry-now < soft*90/100 ) {
+									if ( expiry-now < soft*90/100 ) { // extend if residual lease is < 90% soft timeout
 										response.header("Set-Cookie",
 												cookie(response, permit.id(), issued, min(now+soft, issued+hard))
 										);
 									}
 
-									return response;
+									return response // disable caching of protected content
+
+											.header("~Cache-Control", "no-store")
+											.header("~Pragma", "no-cache");
 
 								}),
 
