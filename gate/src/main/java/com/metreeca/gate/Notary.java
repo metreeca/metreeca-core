@@ -17,12 +17,14 @@
 
 package com.metreeca.gate;
 
+import com.metreeca.tray.sys.Clock;
 import com.metreeca.tray.sys.Vault;
 
 import io.jsonwebtoken.*;
 
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -34,6 +36,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.sys.Clock.clock;
 import static com.metreeca.tray.sys.Vault.vault;
 
 
@@ -98,8 +101,9 @@ public final class Notary {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final SignatureAlgorithm algorithm;
-
 	private final Key key;
+
+	private final Clock clock=tool(clock());
 
 
 	/**
@@ -214,6 +218,7 @@ public final class Notary {
 		try {
 
 			return Optional.of(Jwts.parser()
+					.setClock(() -> new Date(clock.time()))
 					.setAllowedClockSkewSeconds(AllowedClockSkew)
 					.setSigningKey(key)
 					.parseClaimsJws(token)// validates signature and expiration

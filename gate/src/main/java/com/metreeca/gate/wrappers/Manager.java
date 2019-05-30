@@ -22,6 +22,7 @@ import com.metreeca.gate.Permit;
 import com.metreeca.gate.Roster;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
+import com.metreeca.tray.sys.Clock;
 
 import io.jsonwebtoken.Claims;
 
@@ -40,9 +41,10 @@ import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.sys.Clock.clock;
 
+import static java.lang.Math.min;
 import static java.lang.String.format;
-import static java.lang.System.currentTimeMillis;
 import static java.util.regex.Pattern.compile;
 
 
@@ -77,7 +79,7 @@ import static java.util.regex.Pattern.compile;
  * roster}.</p>
  *
  * <pre>{@code 201 Created
- * Set-Cooke: ID=<token>; Path=/; HttpOnly; Secure; SameSite=Lax
+ * Set-Cooke: ID=<token>; Path=<base>; HttpOnly; Secure; SameSite=Lax
  * Content-Type: application/json
  *
  * {
@@ -112,10 +114,11 @@ import static java.util.regex.Pattern.compile;
  * Cookie: ID=<token> }</pre>
  *
  * <p><em>Successful session deletion</em> / The current session is delete and reported with a response including an
- * empty session token in a HTTP only session cookie; malformed and unknown session tokens are ignored.</p>
+ * empty session token in a HTTP only self-expiring session cookie; malformed and unknown session tokens are
+ * ignored.</p>
  *
  * <pre>{@code 204 No Content
- * Set-Cooke: ID=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0 }</pre>
+ * Set-Cooke: ID=; Path=<base>; HttpOnly; Secure; SameSite=Lax; Max-Age=0 }</pre>
  *
  * <hr>
  *
@@ -155,17 +158,6 @@ public final class Manager implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static Failure malformed() {
-		return new Failure().status(Response.BadRequest).error(TicketMalformed);
-	}
-
-	private static Failure forbidden(final String error) {
-		return new Failure().status(Response.Forbidden).error(error);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private final String path;
 
 	private final long soft;
@@ -175,6 +167,9 @@ public final class Manager implements Wrapper {
 	private final Handler housekeeper=new Worker()
 			.post(create())
 			.delete(delete());
+
+
+	private final Clock clock=tool(clock());
 
 	private final Roster roster=tool(roster());
 	private final Notary notary=tool(notary());
@@ -228,35 +223,34 @@ public final class Manager implements Wrapper {
 
 	private Wrapper challenger() { // add authentication challenge, unless already provided by wrapped handlers
 		return handler -> request -> handler.handle(request).map(response -> response.status() == Response.Unauthorized
-				? response.header("~WWW-Authenticate", format("session realm=\"%s\"", response.request().base()))
+				? response.header("~WWW-Authenticate", format("Session realm=\"%s\"", response.request().base()))
 				: response
 		);
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper gatekeeper() {
 		return handler -> request -> cookie(request) // look for session token
 
 				.map(token -> notary.verify(token) // token found >> verify
 
-						.map(claims -> permit(claims.getSubject()).fold( // valid token >> look for permit
+						.map(claims -> lookup(claims.getSubject()).fold( // valid token >> look for permit
 
 								permit -> handler.handle(request // permit found > authenticate and process request
 
 										.user(permit.user())
 										.roles(permit.roles())
 
-								).map(response -> {
+								).map(response -> { // extend cookie if residual lease is < 90% soft timeout
 
-									final long now=currentTimeMillis();
+									final long now=clock.time();
 
 									final long issued=claims.getIssuedAt().getTime();
 									final long expiry=claims.getExpiration().getTime();
 
-									if ( now < expiry && expiry-now < (soft*90/100) && now+soft < issued+hard ) {
-										response.header("Set-Cookie", cookie(response, permit.id(), issued, now+soft));
+									if ( expiry-now < soft*90/100 ) {
+										response.header("Set-Cookie",
+												cookie(response, permit.id(), issued, min(now+soft, issued+hard))
+										);
 									}
 
 									return response;
@@ -277,20 +271,19 @@ public final class Manager implements Wrapper {
 				.orElseGet(() -> handler.handle(request)); // token not found >> process request
 	}
 
-
-	//// Housekeeper ///////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private Wrapper housekeeper() {
-		return handler -> request -> request.path().equals(path) ? housekeeper.handle(request) : handler.handle(request);
+		return handler -> request -> request.path().equals(path)
+				? housekeeper.handle(request)
+				: handler.handle(request);
 	}
 
 
 	private Handler create() {
-		return request -> request.reply(response -> request.body(json()).process(this::permit).fold(
+		return request -> request.reply(response -> request.body(json()).process(this::login).fold(
 
 				permit -> {
 
-					final long now=currentTimeMillis();
+					final long now=clock.time();
 
 					return response.status(Response.Created)
 
@@ -314,7 +307,7 @@ public final class Manager implements Wrapper {
 			cookie(request)
 					.flatMap(notary::verify)
 					.map(Claims::getSubject)
-					.ifPresent(roster::logout);
+					.ifPresent(this::logout);
 
 			return response.status(Response.NoContent)
 
@@ -324,13 +317,13 @@ public final class Manager implements Wrapper {
 	}
 
 
-	//// Permit Retrieval //////////////////////////////////////////////////////////////////////////////////////////////
+	//// Roster Wrappers ///////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Result<Permit, String> permit(final String handle) {
+	private Result<Permit, String> lookup(final String handle) {
 		return roster.lookup(handle);
 	}
 
-	private Result<Permit, Failure> permit(final JsonObject ticket) {
+	private Result<Permit, Failure> login(final JsonObject ticket) {
 		return Optional.of(ticket)
 
 				.filter(t -> t.values().stream().allMatch(value -> value instanceof JsonString))
@@ -348,9 +341,13 @@ public final class Manager implements Wrapper {
 
 				})
 
-				.map(result -> result.error(Manager::forbidden))
+				.map(result -> result.error(error -> new Failure().status(Response.Forbidden).error(error)))
 
-				.orElseGet(() -> Error(malformed()));
+				.orElseGet(() -> Error(new Failure().status(Response.BadRequest).error(TicketMalformed)));
+	}
+
+	private Result<Permit, String> logout(final String handle) {
+		return roster.logout(handle);
 	}
 
 

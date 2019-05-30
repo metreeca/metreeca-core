@@ -18,16 +18,19 @@
 package com.metreeca.gate.wrappers;
 
 import com.metreeca.form.Form;
+import com.metreeca.gate.Roster;
 import com.metreeca.gate.RosterAssert;
 import com.metreeca.gate.RosterAssert.MockRoster;
 import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.sys.ClockTest.MockClock;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -40,21 +43,27 @@ import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.sys.Clock.clock;
 
 import static java.lang.Math.max;
-import static java.lang.Thread.sleep;
 
 
 final class ManagerTest {
 
-	private static final int SoftTimeout=1000;
-	private static final int HardTimeout=2500;
+	private static final long SoftTimeout=Duration.ofHours(1).toMillis();
+	private static final long HardTimeout=Duration.ofDays(1).toMillis();
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final MockClock clock=new MockClock();
+	private final Roster roster=new MockRoster("faussone");
 
 	private void exec(final Runnable... tasks) {
 		new Tray()
 
-				.set(roster(), () -> new MockRoster("faussone"))
+				.set(clock(), () -> clock.time(0))
+				.set(roster(), () -> roster)
 
 				.exec(tasks)
 
@@ -156,7 +165,7 @@ final class ManagerTest {
 		}
 
 
-		@Test void testRejectedCredentials() {
+		@Test void testInvalidCredentials() {
 			exec(() -> manager()
 
 					.wrap(handler(user -> Response.OK))
@@ -329,7 +338,7 @@ final class ManagerTest {
 			}
 
 
-			@Test void testBadCredentials() {
+			@Test void testInvalidCookie() {
 				exec(() -> authenticate(manager()
 
 						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
@@ -496,9 +505,9 @@ final class ManagerTest {
 
 				).accept((handler, cookie) -> {
 
-					try { sleep(SoftTimeout*50/100); } catch ( final InterruptedException ignored ) {}
+					clock.time(SoftTimeout*50/100);
 
-					handler // submit request between soft expiry
+					handler // submit request before soft expiry
 
 							.handle(new Request()
 									.method(Request.GET)
@@ -520,16 +529,16 @@ final class ManagerTest {
 				}));
 			}
 
-			@Test void testExpiry() {
+			@Test void testSoftExpiry() {
 				exec(() -> authenticate(manager()
 
 						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 
-					try { sleep(SoftTimeout*2); } catch ( final InterruptedException ignored ) {}
+					clock.time(SoftTimeout*150/100);
 
-					handler // submit request after hard expiry
+					handler // submit request after soft expiry
 
 							.handle(new Request()
 									.method(Request.GET)
