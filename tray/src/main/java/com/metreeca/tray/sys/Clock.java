@@ -17,47 +17,34 @@
 
 package com.metreeca.tray.sys;
 
-import java.io.File;
 import java.util.function.Supplier;
 
 
 /**
- * System file storage.
+ * System clock.
  *
- * <p>Provides access to system-specific file storage areas.</p>
+ * <p>Provides access to system-specific time.</p>
  */
-@FunctionalInterface public interface Storage {
+@FunctionalInterface public interface Clock {
 
 	/**
-	 * Retrieves the default storage factory.
+	 * Retrieves the default clock factory.
 	 *
-	 * @return the default storage factory, which provides access to files stored in the current working directory of
-	 * the process in the host filesystem
+	 * @return the default clock factory, which provides access to the default {@linkplain System#currentTimeMillis()
+	 * system time}
 	 */
-	public static Supplier<Storage> storage() {
-		return () -> name -> {
-
-			if ( name == null ) {
-				throw new NullPointerException("null name");
-			}
-
-			return new File(System.getProperty("user.dir"));
-		};
+	public static Supplier<Clock> clock() {
+		return () -> System::currentTimeMillis;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Locates a file storage area.
+	 * Retrieves the system time.
 	 *
-	 * @param name the name of the storage area to be located
-	 *
-	 * @return a file providing access to the named storage area
-	 *
-	 * @throws NullPointerException     if {@code name} is null
-	 * @throws IllegalArgumentException if {@code name} is not a valid system-specific filename
+	 * @return the current time in milliseconds
 	 */
-	public File area(final String name);
+	public long time();
 
 }
