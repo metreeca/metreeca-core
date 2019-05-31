@@ -19,10 +19,6 @@ package com.metreeca.gate;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.function.Supplier;
-
 import static com.metreeca.form.things.Values.iri;
 
 
@@ -38,29 +34,6 @@ public final class Gate {
 	public static final IRI user=iri(Namespace, "user"); // IRI
 	public static final IRI time=iri(Namespace, "time"); // xsd:dataTime with ms-precision
 	public static final IRI code=iri(Namespace, "code"); // xsd:integer
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves the default secure random generator factory.
-	 *
-	 * @return the default secure random generator factory, as retrieved through {@link
-	 * SecureRandom#getInstanceStrong()}
-	 */
-	public static Supplier<SecureRandom> random() {
-		return () -> {
-			try {
-
-				return SecureRandom.getInstanceStrong();
-
-			} catch ( final NoSuchAlgorithmException e ) {
-
-				throw new RuntimeException("unavailable secure random generator algorithm", e);
-
-			}
-		};
-	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -17,16 +17,16 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.gate.Notary;
-import com.metreeca.gate.Permit;
-import com.metreeca.gate.Roster;
+import com.metreeca.gate.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.sys.Clock;
 
 import io.jsonwebtoken.Claims;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +35,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 
 import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.gate.Gate.random;
+import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.Result.Error;
@@ -175,7 +175,7 @@ public final class Manager implements Wrapper {
 
 	private final Roster roster=tool(roster());
 	private final Notary notary=tool(notary());
-	private final Random random=tool(random());
+	private final Crypto crypto=tool(crypto());
 
 
 	/**
@@ -374,15 +374,12 @@ public final class Manager implements Wrapper {
 
 	private String cookie(final Response response, final String handle, final long issued, final long expiry) {
 
-		final byte[] id=new byte[TokenIdLength];
 		final String base=response.request().base();
-
-		random.nextBytes(id);
 
 		return format("%s=%s; Path=%s; SameSite=Lax; HttpOnly%s%s",
 				SessionCookie,
 				handle.isEmpty() ? "" : notary.create(claims -> claims
-						.setId(Base64.getEncoder().encodeToString(id))
+						.setId(crypto.token(TokenIdLength))
 						.setSubject(handle)
 						.setIssuedAt(new Date(issued))
 						.setExpiration(new Date(expiry))

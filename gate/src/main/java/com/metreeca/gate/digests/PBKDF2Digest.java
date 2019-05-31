@@ -18,6 +18,7 @@
 package com.metreeca.gate.digests;
 
 import com.metreeca.form.things.Codecs;
+import com.metreeca.gate.Crypto;
 import com.metreeca.gate.Digest;
 import com.metreeca.tray.Tray;
 
@@ -25,14 +26,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import static com.metreeca.gate.Gate.random;
+import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.System.currentTimeMillis;
@@ -72,7 +72,7 @@ public final class PBKDF2Digest implements Digest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Random random=tool(random());
+	private final Crypto crypto=tool(crypto());
 
 
 	@Override public String digest(final String secret) {
@@ -130,12 +130,7 @@ public final class PBKDF2Digest implements Digest {
 	 * @return a random password salt
 	 */
 	private byte[] salt(final int bytes) {
-
-		final byte[] salt=new byte[bytes];
-
-		random.nextBytes(salt);
-
-		return salt;
+		return crypto.id(bytes);
 	}
 
 	/**

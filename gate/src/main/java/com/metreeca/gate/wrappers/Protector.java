@@ -17,16 +17,18 @@
 
 package com.metreeca.gate.wrappers;
 
+import com.metreeca.gate.Crypto;
 import com.metreeca.gate.Notary;
 import com.metreeca.rest.*;
 import com.metreeca.tray.sys.Clock;
 import com.metreeca.tray.sys.Trace;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.gate.Gate.random;
+import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Clock.clock;
@@ -53,8 +55,8 @@ public final class Protector implements Wrapper {
 	private static final String PolicyDefault="default-src 'self'; base-uri 'self'";
 	private static final String XSSDefault="1; mode=block";
 
-	private static final long TokenDefault=86_400_000; // [ms]
-	private static final int SessionIDLength=32; // [bytes]
+	private static final long KeeperDefault=86_400_000; // [ms]
+	private static final int TokenIdLength=32; // [bytes]
 	private static final String SameSiteDefault="Lax";
 
 	private static final Pattern XSRFCookiePattern=compile(format("\\b%s\\s*=\\s*(?<value>[^\\s;]+)", XSRFCookie));
@@ -63,12 +65,12 @@ public final class Protector implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private long secure;
-	private long token;
+	private long keeper;
 
 	private String policy="";
 
 	private final Notary notary=tool(notary());
-	private final Random random=tool(random());
+	private final Crypto crypto=tool(crypto());
 
 	private final Clock clock=tool(clock());
 	private final Trace trace=tool(trace());
@@ -170,13 +172,13 @@ public final class Protector implements Wrapper {
 	/**
 	 * Configures token-based XSRF protection.
 	 *
-	 * @param token enables {@linkplain #token(long) token}-based XSRF protection with a default session duration equal
-	 *              to {@value #TokenDefault} milliseconds, if true; disables it, otherwise
+	 * @param keeper enables token-based {@linkplain #keeper(long) XSRF protection} with a default token lease equal
+	 *              to {@value #KeeperDefault} milliseconds, if true; disables it, otherwise
 	 *
 	 * @return this protector
 	 */
-	public Protector token(final boolean token) {
-		return token(token ? TokenDefault : 0L);
+	public Protector keeper(final boolean keeper) {
+		return keeper(keeper ? KeeperDefault : 0L);
 	}
 
 	/**
@@ -186,31 +188,31 @@ public final class Protector implements Wrapper {
 	 *
 	 * <ul>
 	 *
-	 * <li>a unique XSRF session token is returned in the {@value XSRFCookie} cookie on {@linkplain Request#safe()
-	 * safe} requests, unless already defined;</li>
+	 * <li>a unique XSRF token is returned in the {@value XSRFCookie} session cookie on {@linkplain Request#safe()
+	 * safe} requests;</li>
 	 *
-	 * <li>unsafe requests are processed only if a valid XSRF session token is included both in the {@value XSRFCookie}
+	 * <li>unsafe requests are processed only if a valid XSRF token is included both in the {@value XSRFCookie}
 	 * cookie and in the {@value XSRFHeader} header and refused with a {@link Response#Forbidden} status
 	 * otherwise.</li>
 	 *
 	 * </ul>
 	 *
-	 * <p><strong>Warning</strong> / XSRF session token validity must exceed the maximum allowed session duration: no
+	 * <p><strong>Warning</strong> / XSRF session token lease time must exceed the maximum allowed session duration: no
 	 * automatic XSRF token extension/rotation is performed until the session expires.</p>
 	 *
-	 * @param token XSRF session token validity in seconds; 0 for no token-based XSRF protection
+	 * @param keeper XSRF token lease time in milliseconds; 0 for no token-based XSRF protection
 	 *
 	 * @return this protector
 	 *
-	 * @throws IllegalArgumentException if {@code secure} is less than 0
+	 * @throws IllegalArgumentException if {@code keeper} is less than 0
 	 */
-	public Protector token(final long token) {
+	public Protector keeper(final long keeper) {
 
-		if ( token < 0 ) {
-			throw new IllegalArgumentException("illegal XSRF token validity ["+token+"]");
+		if ( keeper < 0 ) {
+			throw new IllegalArgumentException("illegal XSRF token lease time ["+keeper+"]");
 		}
 
-		this.token=token;
+		this.keeper=keeper;
 
 		return this;
 	}
@@ -287,7 +289,7 @@ public final class Protector implements Wrapper {
 					.orElse("")
 					.trim();
 
-			if ( token == 0 ) {
+			if ( keeper == 0 ) {
 
 				return handler.handle(request);
 
@@ -297,14 +299,14 @@ public final class Protector implements Wrapper {
 
 				return handler.handle(request).map(response -> {
 
-					// add cookie on safe request if not already defined
-
-					if ( request.safe() && request.headers("Cookie").stream()
-							.noneMatch(value -> XSRFCookiePattern.matcher(value).find())
-					) {
+					if ( request.safe() ) {
 
 						response.header("Set-Cookie", format("%s=%s; Path=%s; SameSite=%s%s",
-								XSRFCookie, token(), request.base(), SameSiteDefault, secure > 0 ? "; Secure" : ""
+								XSRFCookie,
+								token(clock.time()),
+								request.base(),
+								SameSiteDefault,
+								secure > 0 ? "; Secure" : ""
 						));
 
 					}
@@ -329,19 +331,12 @@ public final class Protector implements Wrapper {
 	}
 
 
-	private String token() {
-		return notary.create(claims -> {
-
-			final long now=clock.time();
-			final byte[] id=new byte[SessionIDLength];
-
-			random.nextBytes(id);
-
-			claims
-					.setId(Base64.getEncoder().encodeToString(id))
-					.setIssuedAt(new Date(now))
-					.setExpiration(new Date(now+token));
-		});
+	private String token(final long now) {
+		return notary.create(claims -> claims
+				.setId(crypto.token(TokenIdLength))
+				.setIssuedAt(new Date(now))
+				.setExpiration(new Date(now+keeper))
+		);
 	}
 
 	private boolean token(final String token) {
