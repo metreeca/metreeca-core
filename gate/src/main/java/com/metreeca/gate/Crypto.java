@@ -21,9 +21,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.metreeca.form.things.Codecs.UTF8;
+
+import static java.util.Arrays.stream;
 
 
 /**
@@ -78,10 +81,13 @@ public interface Crypto {
 				if ( data == null ) {
 					throw new NullPointerException("null data");
 				}
+				if ( stream(data).anyMatch(Objects::isNull) ) {
+					throw new NullPointerException("null data chunk");
+				}
 
 				synchronized ( digest ) {
 
-					for (final byte[] datum : data) { digest.digest(datum); }
+					for (final byte[] chunk : data) { digest.digest(chunk); }
 
 					return digest.digest();
 
@@ -167,7 +173,7 @@ public interface Crypto {
 	 *
 	 * @return an opaque hash-based id generated from the supplied {@code data}
 	 *
-	 * @throws NullPointerException if {@code data} is null
+	 * @throws NullPointerException if {@code data} is null or contains null values
 	 */
 	public byte[] id(final byte[]... data);
 
@@ -198,20 +204,19 @@ public interface Crypto {
 	 * @return a textually {@linkplain #encode(byte...) encoded} {@linkplain #id(byte[]...) hash-based id} generated
 	 * from the supplied {@code text}
 	 *
-	 * @throws NullPointerException     if {@code text} is null
-	 * @throws IllegalArgumentException if {@code text} is empty
+	 * @throws NullPointerException     if {@code text} is null or contains null values
 	 */
-	public default String token(final String text) {
+	public default String token(final String... text) {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");
 		}
 
-		if ( text.isEmpty() ) {
-			throw new IllegalArgumentException("empty text");
+		if ( stream(text).anyMatch(Objects::isNull) ) {
+			throw new IllegalArgumentException("null text chunk");
 		}
 
-		return encode(id(text.getBytes(UTF8)));
+		return encode(id(stream(text).map(chunk -> chunk.getBytes(UTF8)).toArray(byte[][]::new)));
 	}
 
 

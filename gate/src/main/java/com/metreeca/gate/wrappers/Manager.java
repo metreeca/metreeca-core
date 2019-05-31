@@ -21,6 +21,7 @@ import com.metreeca.gate.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tray.sys.Clock;
+import com.metreeca.tray.sys.Trace;
 
 import io.jsonwebtoken.Claims;
 
@@ -39,9 +40,11 @@ import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Clock.clock;
+import static com.metreeca.tray.sys.Trace.trace;
 
 import static java.lang.Math.min;
 import static java.lang.String.format;
@@ -171,11 +174,12 @@ public final class Manager implements Wrapper {
 			.delete(delete());
 
 
-	private final Clock clock=tool(clock());
-
 	private final Roster roster=tool(roster());
 	private final Notary notary=tool(notary());
 	private final Crypto crypto=tool(crypto());
+
+	private final Clock clock=tool(clock());
+	private final Trace trace=tool(trace());
 
 
 	/**
@@ -262,14 +266,26 @@ public final class Manager implements Wrapper {
 
 								}),
 
-								error -> request.reply(response -> response // permit not found >> reject request
-										.status(Response.Unauthorized)
-								)
+								error -> { // permit not found >> reject request
+
+									trace.warning(this, "unknown session token");
+
+									return request.reply(response -> response
+											.status(Response.Unauthorized)
+									);
+
+								}
 						))
 
-						.orElseGet(() -> request.reply(response -> response // invalid token >> reject request
-								.status(Response.Unauthorized)
-						))
+						.orElseGet(() -> { // invalid token >> reject request
+
+							trace.warning(this, "invalid session token");
+
+							return request.reply(response -> response
+									.status(Response.Unauthorized)
+							);
+
+						})
 
 				)
 
@@ -346,13 +362,56 @@ public final class Manager implements Wrapper {
 
 				})
 
-				.map(result -> result.error(error -> new Failure().status(Response.Forbidden).error(error)))
+				.map(result -> result.<Result<Permit, Failure>>fold(
 
-				.orElseGet(() -> Error(new Failure().status(Response.BadRequest).error(TicketMalformed)));
+						permit -> { // log opaque handle to support entry correlation without exposing sensitive info
+
+							trace.info(this, "login "+session(permit));
+
+							return Value(permit);
+
+						},
+
+						error -> { // log only error without exposing sensitive info
+
+							trace.warning(this, "login error "+error);
+
+							return Error(new Failure().status(Response.Forbidden).error(error));
+
+						}
+
+				))
+
+				.orElseGet(() -> { // log only error without exposing sensitive info
+
+					trace.warning(this, "login error "+TicketMalformed);
+
+					return Error(new Failure().status(Response.BadRequest).error(TicketMalformed));
+
+				});
 	}
 
-	private Result<Permit, String> logout(final String handle) {
-		return roster.logout(handle);
+	private void logout(final String handle) {
+		roster.logout(handle).use(
+
+				permit -> { // log opaque handle to support entry correlation without exposing sensitive info
+
+					trace.info(this, "logout "+session(permit));
+
+				},
+
+				error -> { // log only error without exposing sensitive info
+
+					trace.warning(this, "logout error "+error);
+
+				}
+
+		);
+	}
+
+
+	private String session(final Permit permit) {
+		return crypto.token(permit.id(), permit.user().stringValue());
 	}
 
 

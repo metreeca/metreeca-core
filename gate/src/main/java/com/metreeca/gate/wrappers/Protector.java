@@ -319,8 +319,8 @@ public final class Protector implements Wrapper {
 
 				trace.warning(this, header.isEmpty() ? "missing XSRF header"
 						: cookie.isEmpty() ? "missing XSRF cookie"
-						: header.equals(cookie) ? format("invalid XSRF token: %s", header)
-						: format("mismatched XSRF header/cookie: %s / %s", header, cookie)
+						: header.equals(cookie) ? "invalid XSRF token"
+						: "mismatched XSRF header/cookie"
 				);
 
 				return request.reply(new Failure().status(Response.Forbidden)); // no details disclosed
