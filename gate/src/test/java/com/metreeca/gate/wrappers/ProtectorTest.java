@@ -227,7 +227,7 @@ final class ProtectorTest {
 			@Test void testGenerateXSRFTokenOnSafeRequests() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -250,7 +250,7 @@ final class ProtectorTest {
 			@Test void testGenerateSecureXSRFTokenOnSafeRequests() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.secure(true)
 
@@ -275,7 +275,7 @@ final class ProtectorTest {
 			@Test void testDontGenerateXSRFTokenOnUnsafeRequests() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -294,11 +294,11 @@ final class ProtectorTest {
 			@Test void testDontReplaceExistingXSRFToken() {
 				play(() -> new Protector()
 
-								.keeper(true)
+								.cookie(true)
 
 								.wrap(echo()),
 
-						request -> request.method(Request.POST),
+						request -> request.method(Request.GET),
 
 						response -> assertThat(response)
 
@@ -312,7 +312,7 @@ final class ProtectorTest {
 
 					final Handler handler=new Protector()
 
-							.keeper(true)
+							.cookie(true)
 
 							.wrap(echo());
 
@@ -342,7 +342,7 @@ final class ProtectorTest {
 			@Test void testIgnoreMissingTokenOnSafeRequest() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -362,7 +362,7 @@ final class ProtectorTest {
 			@Test void testReportMissingTokenOnUnsafeRequest() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -381,7 +381,7 @@ final class ProtectorTest {
 			@Test void testReportUnpairedXSRFCookie() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -401,7 +401,7 @@ final class ProtectorTest {
 			@Test void testReportUnpairedXSRFHeader() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -421,7 +421,7 @@ final class ProtectorTest {
 			@Test void testReportMismatchedXSRFHeaderAndCookie() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -442,7 +442,7 @@ final class ProtectorTest {
 			@Test void testReportForgedXSRFToken() {
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -468,7 +468,7 @@ final class ProtectorTest {
 
 				exec(() -> new Protector()
 
-						.keeper(true)
+						.cookie(true)
 
 						.wrap(echo())
 
@@ -489,7 +489,7 @@ final class ProtectorTest {
 			@Test void testReportExpiredXSRFToken() {
 				play(() -> new Protector()
 
-								.keeper(Duration.ofDays(1).toMillis())
+								.cookie(Duration.ofDays(1).toMillis())
 
 								.wrap(echo()),
 
@@ -513,7 +513,7 @@ final class ProtectorTest {
 			@Test void testAcceptValidXSRFToken() {
 				play(() -> new Protector()
 
-								.keeper(true)
+								.cookie(true)
 
 								.wrap(echo()),
 

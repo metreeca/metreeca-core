@@ -55,7 +55,7 @@ public final class Protector implements Wrapper {
 	private static final String PolicyDefault="default-src 'self'; base-uri 'self'";
 	private static final String XSSDefault="1; mode=block";
 
-	private static final long KeeperDefault=86_400_000; // [ms]
+	private static final long CookieDefault=86_400_000; // [ms]
 	private static final int TokenIdLength=32; // [bytes]
 	private static final String SameSiteDefault="Lax";
 
@@ -65,7 +65,7 @@ public final class Protector implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private long secure;
-	private long keeper;
+	private long cookie;
 
 	private String policy="";
 
@@ -170,21 +170,21 @@ public final class Protector implements Wrapper {
 
 
 	/**
-	 * Configures token-based XSRF protection.
+	 * Configures cookie-based XSRF protection.
 	 *
-	 * @param keeper enables token-based {@linkplain #keeper(long) XSRF protection} with a default token lease equal
-	 *              to {@value #KeeperDefault} milliseconds, if true; disables it, otherwise
+	 * @param cookie enables {@linkplain #cookie(long) cookie}-based XSRF protection with a default cookie lease equal
+	 *              to {@value #CookieDefault} milliseconds, if true; disables it, otherwise
 	 *
 	 * @return this protector
 	 */
-	public Protector keeper(final boolean keeper) {
-		return keeper(keeper ? KeeperDefault : 0L);
+	public Protector cookie(final boolean cookie) {
+		return cookie(cookie ? CookieDefault : 0L);
 	}
 
 	/**
-	 * Configures token-based XSRF protection.
+	 * Configures cookie-based XSRF protection.
 	 *
-	 * <p>If token-based XSRF protection is enabled:</p>
+	 * <p>If cookie-based XSRF protection is enabled:</p>
 	 *
 	 * <ul>
 	 *
@@ -192,27 +192,29 @@ public final class Protector implements Wrapper {
 	 * safe} requests;</li>
 	 *
 	 * <li>unsafe requests are processed only if a valid XSRF token is included both in the {@value XSRFCookie}
-	 * cookie and in the {@value XSRFHeader} header and refused with a {@link Response#Forbidden} status
+	 * cookie and in the {@value XSRFHeader} header and refused with a {@link Response#Forbidden Forbidden} status
 	 * otherwise.</li>
 	 *
 	 * </ul>
 	 *
-	 * <p><strong>Warning</strong> / XSRF session token lease time must exceed the maximum allowed session duration: no
-	 * automatic XSRF token extension/rotation is performed until the session expires.</p>
+	 * <p><strong>Warning</strong> / XSRF session cookie lease time must exceed the maximum allowed session duration: no
+	 * automatic XSRF cookie extension/rotation is performed until the session expires.</p>
 	 *
-	 * @param keeper XSRF token lease time in milliseconds; 0 for no token-based XSRF protection
+	 * <p><strong>Note</strong> / XSRF cookie/header names are compatible by default with <a href="https://angular.io/guide/http#security-xsrf-protection">Angular XSRF protection</a> scheme.</p>
+	 *
+	 * @param cookie XSRF cookie lease time in milliseconds; 0 for no cookie-based XSRF protection
 	 *
 	 * @return this protector
 	 *
-	 * @throws IllegalArgumentException if {@code keeper} is less than 0
+	 * @throws IllegalArgumentException if {@code cookie} is less than 0
 	 */
-	public Protector keeper(final long keeper) {
+	public Protector cookie(final long cookie) {
 
-		if ( keeper < 0 ) {
-			throw new IllegalArgumentException("illegal XSRF token lease time ["+keeper+"]");
+		if ( cookie < 0 ) {
+			throw new IllegalArgumentException("illegal XSRF token lease time ["+cookie+"]");
 		}
 
-		this.keeper=keeper;
+		this.cookie=cookie;
 
 		return this;
 	}
@@ -289,7 +291,7 @@ public final class Protector implements Wrapper {
 					.orElse("")
 					.trim();
 
-			if ( keeper == 0 ) {
+			if ( this.cookie == 0 ) {
 
 				return handler.handle(request);
 
@@ -299,7 +301,7 @@ public final class Protector implements Wrapper {
 
 				return handler.handle(request).map(response -> {
 
-					if ( request.safe() ) {
+					if ( request.safe() && cookie.isEmpty() ) {
 
 						response.header("Set-Cookie", format("%s=%s; Path=%s; SameSite=%s%s",
 								XSRFCookie,
@@ -335,7 +337,7 @@ public final class Protector implements Wrapper {
 		return notary.create(claims -> claims
 				.setId(crypto.token(TokenIdLength))
 				.setIssuedAt(new Date(now))
-				.setExpiration(new Date(now+keeper))
+				.setExpiration(new Date(now+cookie))
 		);
 	}
 
