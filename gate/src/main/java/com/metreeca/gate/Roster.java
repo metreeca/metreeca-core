@@ -40,16 +40,21 @@ public interface Roster {
 
 
 	public static String CredentialsInvalid="credentials-invalid"; // invalid handle or secret
-	public static String CredentialsExpired="credentials-expired"; // expired secret
 	public static String CredentialsIllegal="credentials-illegal"; // secret unacceptable by policy
 
-	public static String CredentialsPending="credentials-pending"; // account to be activated // !!! review
-	public static String CredentialsRevoked="credentials-revoked"; // account revoked or locked // !!! review
+	// !!! public static String CredentialsExpired="credentials-expired"; // expired secret // !!! review
+	// !!! public static String CredentialsPending="credentials-pending"; // account to be activated // !!! review
+	// !!! public static String CredentialsRevoked="credentials-revoked"; // account revoked or locked // !!! review
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Result<Permit, String> lookup(final String handle);
+
+	public Result<Permit, String> insert(final String handle, final String secret);
+
+	public Result<Permit, String> remove(final String handle);
+
 
 	public Result<Permit, String> login(final String handle, final String secret);
 

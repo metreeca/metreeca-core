@@ -38,6 +38,7 @@ import java.util.function.Function;
 import static com.metreeca.form.things.JsonValues.field;
 import static com.metreeca.form.things.JsonValues.object;
 import static com.metreeca.form.things.JsonValues.value;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -57,7 +58,7 @@ final class ManagerTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final MockClock clock=new MockClock();
-	private final Roster roster=new MockRoster("faussone");
+	private final Roster roster=new MockRoster(entry("faussone", "faussone"));
 
 	private void exec(final Runnable... tasks) {
 		new Tray()

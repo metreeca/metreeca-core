@@ -21,18 +21,19 @@ import com.metreeca.rest.Result;
 
 import org.assertj.core.api.AbstractAssert;
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
+import static com.metreeca.form.things.Codecs.UTF8;
 import static com.metreeca.form.things.JsonValues.field;
 import static com.metreeca.form.things.JsonValues.object;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
+import static java.lang.Math.abs;
 
 
 public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
@@ -90,96 +91,95 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 
 	public static final class MockRoster implements Roster {
 
-		private static final Random random=new Random();
-
-		private static String opaque() {
-			return String.valueOf(random.nextLong());
-		}
+		private final Map<String, String> users=new HashMap<>(); // id > secret
 
 
-		private static final class Entry {
-
-			private String opaque=opaque();
-
-			private String handle;
-			private String secret;
-
-
-			private Entry(final String handle, final String secret) {
-				this.handle=handle;
-				this.secret=secret;
+		@SafeVarargs public MockRoster(final Map.Entry<String, String> ...entries) {
+			for (final Map.Entry<String, String> entry : entries) {
+				insert(entry.getKey(), entry.getValue());
 			}
-
-		}
-
-		private final Collection<Entry> entries;
-
-
-		public MockRoster(final String... handles) {
-			this.entries=stream(handles).map(handle -> new Entry(handle, handle)).collect(toList());
 		}
 
 
 		@Override public Result<Permit, String> lookup(final String handle) {
 			return resolve(handle)
-					.map(entry -> Result.<Permit, String>Value(permit(entry)))
-					.orElseGet(() -> Error(CredentialsIllegal));
+					.map(this::permit)
+					.orElseGet(this::error);
 		}
+
+		@Override public Result<Permit, String> insert(final String handle, final String secret) {
+
+			users.put(handle, secret);
+
+			return lookup(handle);
+		}
+
+		@Override public Result<Permit, String> remove(final String handle) {
+			return resolve(handle).map(entry -> {
+
+				try {
+					return permit(entry);
+				} finally {
+					users.remove(entry.getKey());
+				}
+
+			}).orElseGet(this::error);
+		}
+
 
 		@Override public Result<Permit, String> login(final String handle, final String secret) {
 			return resolve(handle)
-					.filter(entry -> entry.secret.equals(secret))
-					.map(entry -> {
-
-						entry.opaque=opaque();
-
-						return entry;
-
-					})
-					.map(entry -> Result.<Permit, String>Value(permit(entry)))
-					.orElseGet(() -> Error(CredentialsIllegal));
+					.filter(entry -> entry.getValue().equals(secret))
+					.map(entry -> handle(entry, secret))
+					.map(this::permit)
+					.orElseGet(this::error);
 		}
 
 		@Override public Result<Permit, String> login(final String handle, final String secret, final String update) {
 			return resolve(handle)
-					.filter(entry -> entry.secret.equals(secret))
-					.map(entry -> {
-
-						entry.opaque=opaque();
-						entry.secret=update;
-
-						return entry;
-
-					})
-					.map(entry -> Result.<Permit, String>Value(permit(entry)))
-					.orElseGet(() -> Error(CredentialsIllegal));
+					.filter(entry -> entry.getValue().equals(secret))
+					.map(entry -> handle(entry, update))
+					.map(this::permit)
+					.orElseGet(this::error);
 		}
 
 		@Override public Result<Permit, String> logout(final String handle) {
 			return resolve(handle)
-					.map(entry -> {
-
-						entry.opaque=opaque();
-
-						return entry;
-
-					})
-					.map(entry -> Result.<Permit, String>Value(permit(entry)))
-					.orElseGet(() -> Error(CredentialsIllegal));
+					.map(entry -> handle(entry, entry.getValue()))
+					.map(this::permit)
+					.orElseGet(this::error);
 		}
 
 
-		private Optional<Entry> resolve(final String handle) {
-			return entries.stream()
-					.filter(entry -> entry.handle.equals(handle) || entry.opaque.equals(handle))
+		private Optional<Map.Entry<String, String>> resolve(final String handle) {
+			return users.entrySet().stream()
+					.filter(entry -> handle.equals(entry.getKey()) || handle.equals(handle(entry)))
 					.findFirst();
 		}
 
-		private Permit permit(final Entry entry) {
-			return new Permit(entry.opaque,
-					item("users/"+entry.handle), set(),
-					object(field("user", entry.handle))
-			);
+
+		private String handle(final Map.Entry<String, String> entry) {
+			return String.valueOf(abs(System.identityHashCode(entry.getValue())));
+		}
+
+		private Map.Entry<String, String> handle(final Map.Entry<String, String> entry, final String secret) {
+
+			entry.setValue(new String(secret.getBytes(UTF8), UTF8)); // a unique secret whose id hash is the handle
+
+			return entry;
+
+		}
+
+
+		private Result<Permit, String> permit(final Map.Entry<String, String> entry) {
+			return Value(new Permit(handle(entry),
+					item("users/"+entry.getKey()), set(),
+					object(field("user", entry.getKey()))
+			));
+		}
+
+		private Result<Permit, String> error() {
+			return Error(CredentialsInvalid);
 		}
 
 	}
