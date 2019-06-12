@@ -205,7 +205,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-06-12 07:28:53 +0000</string>
+	<string>2019-06-12 09:59:43 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro</string>
 	<key>MovementHandleVisible</key>
@@ -4513,7 +4513,7 @@ look for X-XSRF-TOKEN header  }</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{167.56299276001229, 27.850394035136603}, {21.338999999999942, 11.261062622070312}}</string>
+					<string>{{98.586992760011725, 27.850394035136603}, {159.29100000000108, 11.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -4553,7 +4553,7 @@ look for X-XSRF-TOKEN header  }</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs18 \cf0 Login}</string>
+\f0\fs18 \cf0 Login = POST \{ handle, secret[, update] \}}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 						<key>VerticalPad</key>
@@ -5304,7 +5304,7 @@ look for X-XSRF-TOKEN header  }</string>
 {\*\expandedcolortbl;;\csgray\c0;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs18 \cf0 \ul \ulc2 report incident}</string>
+\f0\fs18 \cf0 report incident}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 					</dict>
@@ -5969,7 +5969,7 @@ look for X-XSRF-TOKEN header  }</string>
 {\*\expandedcolortbl;;\csgray\c0;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs18 \cf0 \ul \ulc2 report incident}</string>
+\f0\fs18 \cf0 report incident}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 					</dict>
@@ -9986,7 +9986,7 @@ opaque handle}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs18 \cf0 \ul \ulc0 report incident}</string>
+\f0\fs18 \cf0 report incident}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 					</dict>
@@ -11192,7 +11192,7 @@ opaque handle}</string>
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>0</integer>
+		<integer>1</integer>
 		<key>Frame</key>
 		<string>{{0, 0}, {1440, 828}}</string>
 		<key>ShowInfo</key>
@@ -11204,7 +11204,7 @@ opaque handle}</string>
 		<key>Sidebar_Tab</key>
 		<integer>2</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, 0}, {806.1746231155779, 536.99999999999989}}</string>
+		<string>{{0, 0}, {805.5, 537}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
 			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>

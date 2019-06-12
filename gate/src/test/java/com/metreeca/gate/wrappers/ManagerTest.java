@@ -83,6 +83,23 @@ final class ManagerTest {
 
 	@Nested final class Management {
 
+		@Test void testTouchSession() {
+			exec(() -> manager()
+
+					.wrap(handler(user -> Response.OK))
+
+					.handle(new Request()
+							.method(Request.GET)
+							.path("/~")
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.OK)
+							.doesNotHaveBody()
+					)
+			);
+		}
+
 		@Test void testCreateSession() {
 			exec(() -> manager()
 
@@ -151,8 +168,9 @@ final class ManagerTest {
 					.wrap(handler(user -> Response.OK))
 
 					.handle(new Request()
-							.method(Request.DELETE)
+							.method(Request.POST)
 							.path("/~")
+							.body(json(), object())
 					)
 
 					.accept(response -> assertThat(response)
@@ -198,7 +216,9 @@ final class ManagerTest {
 					.handle(new Request()
 							.method(Request.POST)
 							.path("/~")
-							.body(json(), object())
+							.body(json(), object(
+									field("handle", "")
+							))
 					)
 
 					.accept(response -> assertThat(response)
@@ -431,9 +451,10 @@ final class ManagerTest {
 					handler // delete session
 
 							.handle(new Request()
-									.method(Request.DELETE)
+									.method(Request.POST)
 									.path("/~")
 									.header("Cookie", cookie)
+									.body(json(), object())
 							)
 
 							.accept(response -> assertThat(response)
