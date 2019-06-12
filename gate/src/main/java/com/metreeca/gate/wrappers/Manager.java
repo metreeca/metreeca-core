@@ -35,6 +35,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
+import static com.metreeca.form.things.JsonValues.object;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
@@ -312,7 +313,7 @@ public final class Manager implements Wrapper {
 
 							.body(json(), Json.createObjectBuilder()
 									.add("timeout", soft)
-									.add("profile", permit.profile())
+									.add("profile", object(permit.profile()))
 									.build()
 							);
 				},
@@ -357,8 +358,8 @@ public final class Manager implements Wrapper {
 					final String update=t.getString("update", null);
 
 					return handle == null || secret == null ? Optional.empty()
-							: update == null ? Optional.of(roster.login(handle, secret))
-							: Optional.of(roster.login(handle, secret, update));
+							: update == null ? Optional.of(roster.signin(handle, secret))
+							: Optional.of(roster.signin(handle, secret, update));
 
 				})
 
@@ -392,7 +393,7 @@ public final class Manager implements Wrapper {
 	}
 
 	private void logout(final String handle) {
-		roster.logout(handle).use(
+		roster.signout(handle).use(
 
 				permit -> { // log opaque handle to support entry correlation without exposing sensitive info
 

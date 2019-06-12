@@ -39,27 +39,101 @@ public interface Roster {
 	}
 
 
-	public static String CredentialsInvalid="credentials-invalid"; // invalid handle or secret
-	public static String CredentialsIllegal="credentials-illegal"; // secret unacceptable by policy
+	/**
+	 * Error tag for reporting invalid user handles or secrets.
+	 */
+	public static String CredentialsInvalid="credentials-invalid";
 
-	// !!! public static String CredentialsExpired="credentials-expired"; // expired secret // !!! review
-	// !!! public static String CredentialsPending="credentials-pending"; // account to be activated // !!! review
-	// !!! public static String CredentialsRevoked="credentials-revoked"; // account revoked or locked // !!! review
+	/**
+	 * Error tag for reporting user secrets not compliant with the enforced {@linkplain Policy secret policy}.
+	 */
+	public static String CredentialsIllegal="credentials-illegal";
+
+	// !!! public static String CredentialsExpired="credentials-expired"; // expired secret
+	// !!! public static String CredentialsPending="credentials-pending"; // account to be activated
+	// !!! public static String CredentialsRevoked="credentials-revoked"; // account revoked or locked
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	/**
+	 * Looks up a user.
+	 *
+	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
+	 *
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful
+	 * identified; an error result with a roster-specific error tag, otherwise
+	 *
+	 * @throws NullPointerException if {@code handle} is null
+	 */
 	public Result<Permit, String> lookup(final String handle);
 
+	/**
+	 * Inserts a user.
+	 *
+	 * @param handle a handle uniquely identifying the user to be inserted into this roster (e.g. username, email, …)
+	 * @param secret the initial secret for the user identified by {@code handle}
+	 *
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful inserted
+	 * into this roster using {@code secret}; an error result with a roster-specific error tag, otherwise
+	 *
+	 * @throws NullPointerException if either {@code handle} or {@code secret} is null
+	 */
 	public Result<Permit, String> insert(final String handle, final String secret);
 
+	/**
+	 * Removes a user.
+	 *
+	 * @param handle a handle uniquely identifying the user to be removed from this roster (e.g. username, email,
+	 *               current session id, …)
+	 *
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful removed
+	 * from this roster; an error result with a roster-specific error tag, otherwise
+	 *
+	 * @throws NullPointerException if {@code handle} is null
+	 */
 	public Result<Permit, String> remove(final String handle);
 
 
-	public Result<Permit, String> login(final String handle, final String secret);
+	/**
+	 * Signs in a user.
+	 *
+	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
+	 * @param secret the current secret for the user identified by {@code handle}
+	 *
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful signed in
+	 * using {@code secret}; an error result with a roster-specific error tag, otherwise
+	 *
+	 * @throws NullPointerException if either {@code handle} or {@code secret} is null
+	 */
+	public Result<Permit, String> signin(final String handle, final String secret);
 
-	public Result<Permit, String> login(final String handle, final String secret, final String update);
+	/**
+	 * Signs in a user with an updated secret.
+	 *
+	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
+	 * @param secret the current secret for the user identified by {@code handle}
+	 * @param update the updated secret for the user identified by {@code handle}
+	 *
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful signed in
+	 * using the current {@code secret} and associated with the {@code updated} one; an error result with a
+	 * roster-specific error tag, otherwise
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public Result<Permit, String> signin(final String handle, final String secret, final String update);
 
-	public Result<Permit, String> logout(final String handle);
+	/**
+	 * Signs out a user.
+	 *
+	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
+	 *
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful signed
+	 * out; an error result with a roster-specific error tag, otherwise
+	 *
+	 * @throws NullPointerException if {@code handle} is null
+	 */
+	public Result<Permit, String> signout(final String handle);
 
 }
