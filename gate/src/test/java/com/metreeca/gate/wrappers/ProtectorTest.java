@@ -159,6 +159,7 @@ final class ProtectorTest {
 							.hasStatus(Response.OK)
 							.hasHeader("Content-Security-Policy")
 							.hasHeader("X-XSS-Protection")
+							.hasHeader("Referrer-Policy", "same-origin")
 
 					)
 			);

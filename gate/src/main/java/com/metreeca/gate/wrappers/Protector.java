@@ -60,6 +60,7 @@ public final class Protector implements Wrapper {
 	private static final String SameSiteDefault="Lax";
 
 	private static final Pattern XSRFCookiePattern=compile(format("\\b%s\\s*=\\s*(?<value>[^\\s;]+)", XSRFCookie));
+	private static final Pattern SelfPolicyPattern=compile("\\bdefault-src\\s*'self'");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +150,10 @@ public final class Protector implements Wrapper {
 	 * header is set as a fallback measure with the {@value XSSDefault} value, unless already defined by nested
 	 * handlers;</li>
 	 *
+	 * <li>if the policy includes the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src">default-src
+	 * 'self'</a> directive, the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy">Referrer-Policy</a>
+	 * header is set on responses with the {@code same-origin} value, unless already defined by nested handlers.</li>
+	 *
 	 * </ul>
 	 *
 	 * @param policy the content security policy to be enforced by the browser; empty for no policy enforcing
@@ -173,7 +178,7 @@ public final class Protector implements Wrapper {
 	 * Configures cookie-based XSRF protection.
 	 *
 	 * @param cookie enables {@linkplain #cookie(long) cookie}-based XSRF protection with a default cookie lease equal
-	 *              to {@value #CookieDefault} milliseconds, if true; disables it, otherwise
+	 *               to {@value #CookieDefault} milliseconds, if true; disables it, otherwise
 	 *
 	 * @return this protector
 	 */
@@ -197,10 +202,11 @@ public final class Protector implements Wrapper {
 	 *
 	 * </ul>
 	 *
-	 * <p><strong>Warning</strong> / XSRF session cookie lease time must exceed the maximum allowed session duration: no
-	 * automatic XSRF cookie extension/rotation is performed until the session expires.</p>
+	 * <p><strong>Warning</strong> / XSRF session cookie lease time must exceed the maximum allowed session duration:
+	 * no automatic XSRF cookie extension/rotation is performed until the session expires.</p>
 	 *
-	 * <p><strong>Note</strong> / XSRF cookie/header names are compatible by default with <a href="https://angular.io/guide/http#security-xsrf-protection">Angular XSRF protection</a> scheme.</p>
+	 * <p><strong>Note</strong> / XSRF cookie/header names are compatible by default with <a
+	 * href="https://angular.io/guide/http#security-xsrf-protection">Angular XSRF protection</a> scheme.</p>
 	 *
 	 * @param cookie XSRF cookie lease time in milliseconds; 0 for no cookie-based XSRF protection
 	 *
@@ -263,6 +269,7 @@ public final class Protector implements Wrapper {
 	private Wrapper xss() {
 		return handler -> request -> policy.isEmpty() ? handler.handle(request) : handler.handle(request).map(response -> response
 				.header("~Content-Security-Policy", policy)
+				.header("~Referrer-Policy", SelfPolicyPattern.matcher(policy).find() ? "same-origin" : "")
 				.header("~X-XSS-Protection", XSSDefault)
 		);
 	}
