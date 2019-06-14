@@ -18,9 +18,9 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.rest.*;
-
-import static java.lang.String.format;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Wrapper;
 
 
 /**
@@ -31,39 +31,8 @@ import static java.lang.String.format;
  */
 public final class Launcher implements Wrapper {
 
-	private static final String PathCookie="metreeca";
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private final Handler interactive;
 
-
-	/**
-	 * Creates an app launcher.
-	 *
-	 * @param path the root-relative path of the app to be launched; the root-relative {@linkplain Request#path() path}
-	 *             of the original request is made available to the app  under the {@value PathCookie} session cookie
-	 *
-	 * @throws NullPointerException     if {@code path} is null
-	 * @throws IllegalArgumentException if {@code path} does not start with a trailing slash
-	 */
-	public Launcher(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		if ( !path.startsWith("/") ) {
-			throw new IllegalArgumentException("illegal path ["+path+"]");
-		}
-
-		this.interactive=request -> request.reply(response -> request.path().equals(path) ? response : response
-				.status(Response.SeeOther)
-				.header("Location", path)
-				.header("Set-Cookie", format("%s=%s; path=%s", PathCookie, request.path(), path))
-		);
-	}
 
 	/**
 	 * Creates an app launcher.
