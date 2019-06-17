@@ -83,23 +83,6 @@ final class ManagerTest {
 
 	@Nested final class Management {
 
-		@Test void testTouchSession() {
-			exec(() -> manager()
-
-					.wrap(handler(user -> Response.OK))
-
-					.handle(new Request()
-							.method(Request.GET)
-							.path("/~")
-					)
-
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.OK)
-							.doesNotHaveBody()
-					)
-			);
-		}
-
 		@Test void testCreateSession() {
 			exec(() -> manager()
 

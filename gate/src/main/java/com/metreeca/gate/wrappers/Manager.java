@@ -67,22 +67,6 @@ import static java.util.regex.Pattern.compile;
  *
  * <hr>
  *
- * <h3>Session Extension</h3>
- *
- * <p>This is a utility stub for extending existing sessions and/or priming XSRF {@linkplain Protector#cookie(boolean)
- * cookie}-based protection before actual session creation with a POST request.</p>
- *
- * <pre>{@code GET <path>
- * Cookie: ID=<token> // optional}</pre>
- *
- *
- * <p><em>Successful session extension</em> / The current session token, if present, is extended.</p>
- *
- * <pre>{@code 200 OK
- * Set-Cooke: ID=<token>; Path=<base>; HttpOnly; Secure; SameSite=Lax // optional}</pre>
- *
- * <hr>
- *
  * <h3>Session Creation</h3>
  *
  * <pre>{@code POST <path>
@@ -190,9 +174,7 @@ public final class Manager implements Wrapper {
 	private final long hard;
 
 
-	private final Handler housekeeper=new Worker()
-			.get(get())
-			.post(post());
+	private final Handler housekeeper=new Worker().post(post());
 
 
 	private final Roster roster=tool(roster());
@@ -319,10 +301,6 @@ public final class Manager implements Wrapper {
 				: handler.handle(request);
 	}
 
-
-	private Handler get() {
-		return request -> request.reply(response -> response.status(Response.OK));
-	}
 
 	private Handler post() {
 		return request -> request.reply(response -> request.body(json())
