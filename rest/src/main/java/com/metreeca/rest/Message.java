@@ -19,6 +19,7 @@ package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Evaluator;
+import com.metreeca.form.things.Sets;
 import com.metreeca.rest.bodies.MultipartBody;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -35,7 +36,6 @@ import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.Value;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
@@ -341,7 +341,14 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null name");
 		}
 
-		return unmodifiableCollection(headers.getOrDefault(normalize(name), emptyList()));
+		final String _name=normalize(name);
+
+		return unmodifiableCollection(headers.entrySet().stream()
+				.filter(entry -> entry.getKey().equalsIgnoreCase(_name))
+				.map(Map.Entry::getValue)
+				.findFirst()
+				.orElseGet(Sets::set)
+		);
 	}
 
 	/**

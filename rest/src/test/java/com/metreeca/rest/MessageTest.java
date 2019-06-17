@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import static com.metreeca.form.things.Codecs.text;
 import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.rest.MessageAssert.assertThat;
 import static com.metreeca.rest.bodies.ReaderBody.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,9 +44,14 @@ public final class MessageTest {
 	@Test void testHeadersNormalizeHeaderNames() {
 
 		final TestMessage message=new TestMessage()
-				.headers("test-header", "value");
+				.headers("TEST-header", "value");
 
-		assertTrue(message.headers().keySet().contains("Test-Header"));
+		assertTrue(message.headers().keySet().contains("TEST-Header"));
+	}
+
+	@Test void testHeadersIgnoreHeaderCase() {
+		assertThat(new TestMessage().header("TEST-header", "value"))
+				.hasHeader("test-header", "value");
 	}
 
 	@Test void testHeadersIgnoreEmptyHeaders() {
