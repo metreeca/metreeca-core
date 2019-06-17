@@ -302,13 +302,11 @@ public final class Protector implements Wrapper {
 
 				return handler.handle(request);
 
-			} else if ( header.isEmpty() && cookie.isEmpty() && request.safe()
-					|| !header.isEmpty() && !cookie.isEmpty() && header.equals(cookie) && token(header)
-			) {
+			} else if ( request.safe() ) {
 
 				return handler.handle(request).map(response -> {
 
-					if ( request.safe() && cookie.isEmpty() ) {
+					if ( cookie.isEmpty() ) {
 
 						response.header("Set-Cookie", format("%s=%s; Path=%s; SameSite=%s%s",
 								XSRFCookie,
@@ -323,6 +321,10 @@ public final class Protector implements Wrapper {
 					return response;
 
 				});
+
+			} else if ( !header.isEmpty() && !cookie.isEmpty() && header.equals(cookie) && token(header) ) {
+
+				return handler.handle(request);
 
 			} else {
 
