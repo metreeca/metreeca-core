@@ -50,8 +50,8 @@ public final class Permit {
 	 *
 	 * @param id      an opaque handle uniquely identifying the user at the time the permit was created; must be
 	 *                accepted as a handle for {@linkplain Roster#lookup(String) looking up} the user in the roster;
-	 *                must change on credential and account status updates and user {@linkplain Roster#signin(String,
-	 *                String) signin}/{@linkplain Roster#signout(String) signout}
+	 *                must change on credential and account status updates and user {@linkplain Roster#login(String,
+	 *                String) login}/{@linkplain Roster#logout(String) logout}
 	 * @param user    an IRI uniquely identifying the user
 	 * @param roles   a set of IRIs uniquely identifying the roles attributed to the user
 	 * @param profile a front-end profile for the user, providing information such as name, email, picture and

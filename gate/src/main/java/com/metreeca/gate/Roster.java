@@ -97,43 +97,43 @@ public interface Roster {
 
 
 	/**
-	 * Signs in a user.
+	 * Logs a user in.
 	 *
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 * @param secret the current secret for the user identified by {@code handle}
 	 *
-	 * @return a value result with the current permit for the user identified by {@code handle}, if successful signed in
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful logged in
 	 * using {@code secret}; an error result with a roster-specific error tag, otherwise
 	 *
 	 * @throws NullPointerException if either {@code handle} or {@code secret} is null
 	 */
-	public Result<Permit, String> signin(final String handle, final String secret);
+	public Result<Permit, String> login(final String handle, final String secret);
 
 	/**
-	 * Signs in a user with an updated secret.
+	 * Logs a user in with an updated secret.
 	 *
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 * @param secret the current secret for the user identified by {@code handle}
 	 * @param update the updated secret for the user identified by {@code handle}
 	 *
-	 * @return a value result with the current permit for the user identified by {@code handle}, if successful signed in
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful logged in
 	 * using the current {@code secret} and associated with the {@code updated} one; an error result with a
 	 * roster-specific error tag, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	public Result<Permit, String> signin(final String handle, final String secret, final String update);
+	public Result<Permit, String> login(final String handle, final String secret, final String update);
 
 	/**
-	 * Signs out a user.
+	 * Logs a user out.
 	 *
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 *
-	 * @return a value result with the current permit for the user identified by {@code handle}, if successful signed
+	 * @return a value result with the current permit for the user identified by {@code handle}, if successful logged
 	 * out; an error result with a roster-specific error tag, otherwise
 	 *
 	 * @throws NullPointerException if {@code handle} is null
 	 */
-	public Result<Permit, String> signout(final String handle);
+	public Result<Permit, String> logout(final String handle);
 
 }

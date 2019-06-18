@@ -56,7 +56,7 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 
 		isNotNull();
 
-		actual.signin(handle, secret).error(error -> {
+		actual.login(handle, secret).error(error -> {
 
 			failWithMessage(
 					"expected roster to have user <%s:%s>", handle, secret
@@ -73,7 +73,7 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 
 		isNotNull();
 
-		actual.signin(handle, secret).value(permit -> {
+		actual.login(handle, secret).value(permit -> {
 
 			failWithMessage(
 					"expected roster not to have user <%s:%s>", handle, secret
@@ -127,7 +127,7 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 		}
 
 
-		@Override public Result<Permit, String> signin(final String handle, final String secret) {
+		@Override public Result<Permit, String> login(final String handle, final String secret) {
 			return resolve(handle)
 					.filter(entry -> entry.getValue().equals(secret))
 					.map(entry -> handle(entry, secret))
@@ -135,7 +135,7 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 					.orElseGet(this::error);
 		}
 
-		@Override public Result<Permit, String> signin(final String handle, final String secret, final String update) {
+		@Override public Result<Permit, String> login(final String handle, final String secret, final String update) {
 			return resolve(handle)
 					.filter(entry -> entry.getValue().equals(secret))
 					.map(entry -> handle(entry, update))
@@ -143,7 +143,7 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 					.orElseGet(this::error);
 		}
 
-		@Override public Result<Permit, String> signout(final String handle) {
+		@Override public Result<Permit, String> logout(final String handle) {
 			return resolve(handle)
 					.map(entry -> handle(entry, entry.getValue()))
 					.map(this::permit)

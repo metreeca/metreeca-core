@@ -249,7 +249,7 @@ public final class Manager implements Wrapper {
 								cookie(request)
 										.flatMap(notary::verify)
 										.map(Claims::getSubject)
-										.ifPresent(this::signout);
+										.ifPresent(this::logout);
 
 								return Value(response.status(Response.OK)
 
@@ -260,7 +260,7 @@ public final class Manager implements Wrapper {
 
 							} else {
 
-								return signin(ticket).value(permit -> {
+								return login(ticket).value(permit -> {
 
 									final long now=clock.time();
 
@@ -352,7 +352,7 @@ public final class Manager implements Wrapper {
 		return roster.lookup(handle);
 	}
 
-	private Result<Permit, Failure> signin(final JsonObject ticket) {
+	private Result<Permit, Failure> login(final JsonObject ticket) {
 		return Optional.of(ticket)
 
 				.filter(t -> t.values().stream().allMatch(value -> value instanceof JsonString))
@@ -365,8 +365,8 @@ public final class Manager implements Wrapper {
 					final String update=t.getString("update", null);
 
 					return handle == null || secret == null ? Optional.empty()
-							: update == null ? Optional.of(roster.signin(handle, secret))
-							: Optional.of(roster.signin(handle, secret, update));
+							: update == null ? Optional.of(roster.login(handle, secret))
+							: Optional.of(roster.login(handle, secret, update));
 
 				})
 
@@ -399,8 +399,8 @@ public final class Manager implements Wrapper {
 				});
 	}
 
-	private void signout(final String handle) {
-		roster.signout(handle).use(
+	private void logout(final String handle) {
+		roster.logout(handle).use(
 
 				permit -> { // log opaque handle to support entry correlation without exposing sensitive info
 
