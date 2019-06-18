@@ -306,7 +306,7 @@ public final class Protector implements Wrapper {
 
 				return handler.handle(request).map(response -> {
 
-					if ( cookie.isEmpty() ) {
+					if ( cookie.isEmpty() || !token(cookie) ) {
 
 						response.header("Set-Cookie", format("%s=%s; Path=%s; SameSite=%s%s",
 								XSRFCookie,

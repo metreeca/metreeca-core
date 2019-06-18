@@ -315,7 +315,7 @@
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{89.879191779684675, 124.46131933300541}, {35.668000000001484, 21.261062622070312}}</string>
+					<string>{{89.879191779489162, 124.46131895524624}, {35.668000000001484, 21.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -329,7 +329,7 @@
 						<key>ID</key>
 						<integer>123</integer>
 						<key>Position</key>
-						<real>0.23967852323111122</real>
+						<real>0.2396785169839859</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -348,34 +348,14 @@
 					</dict>
 					<key>Text</key>
 					<dict>
-						<key>RTFD</key>
-						<data>
-						BAtzdHJlYW10eXBlZIHoA4QBQISE
-						hBJOU0F0dHJpYnV0ZWRTdHJpbmcA
-						hIQITlNPYmplY3QAhZKEhIQITlNT
-						dHJpbmcBlIQBKwZ1bnNhZmWGhAJp
-						SQEGkoSEhAxOU0RpY3Rpb25hcnkA
-						lIQBaQWShJaWEE5TVW5kZXJsaW5l
-						Q29sb3KGkoSEhAdOU0NvbG9yAJSE
-						AWMDhAJmZgABhpKElpYGTlNGb250
-						hpKEhIQGTlNGb250HpSZMIQFWzQ4
-						Y10GAAAAKAAAAP/+SABlAGwAdgBl
-						AHQAaQBjAGEATgBlAHUAZQAtAEwA
-						aQBnAGgAdACEAWYJmwCbAZsAmwCG
-						koSWlgdOU0NvbG9yhpKakoSWlhBO
-						U1BhcmFncmFwaFN0eWxlhpKEhIQQ
-						TlNQYXJhZ3JhcGhTdHlsZQCUhARD
-						Q0BTAgCFAIaShJaWFE5TU3RyaWtl
-						dGhyb3VnaENvbG9yhpKahoY=
-						</data>
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf500
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
-{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
-{\*\expandedcolortbl;;\csgray\c0;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs18 \cf2 unsafe}</string>
+\f0\fs18 \cf0 unsafe}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 					</dict>
@@ -518,7 +498,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{600.05232459203944, 392.89950157953774}, {36.333999999998923, 21.261062622070312}}</string>
+					<string>{{586.63782459203867, 392.89950157953774}, {63.163000000000466, 21.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -558,7 +538,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs18 \cf0 absent}</string>
+\f0\fs18 \cf0 absent/invalid}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 					</dict>
@@ -796,8 +776,6 @@
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -877,8 +855,6 @@
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -964,8 +940,6 @@
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -1138,7 +1112,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{177.08641337311025, 99.212602704722798}, {26.002000000000407, 21.261062622070312}}</string>
+					<string>{{177.08641239016967, 99.212602704722798}, {26.002000000000407, 21.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1152,7 +1126,7 @@
 						<key>ID</key>
 						<integer>106</integer>
 						<key>Position</key>
-						<real>0.055726105106092029</real>
+						<real>0.055726103484630585</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -1508,7 +1482,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{201.61569459249392, 186.69848090749198}, {63.163000000000466, 21.261062622070312}}</string>
+					<string>{{201.61569612517405, 186.69848090749198}, {63.163000000000466, 21.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1522,7 +1496,7 @@
 						<key>ID</key>
 						<integer>99</integer>
 						<key>Position</key>
-						<real>0.21217345613554744</real>
+						<real>0.2121734619140625</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -1638,7 +1612,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{78.137179768736928, 229.15541525625355}, {59.175999999999476, 21.261062622070312}}</string>
+					<string>{{78.137179769116912, 229.15541435921102}, {59.175999999999476, 21.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1652,7 +1626,7 @@
 						<key>ID</key>
 						<integer>96</integer>
 						<key>Position</key>
-						<real>0.37097279513780052</real>
+						<real>0.37097278237342834</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -7157,8 +7131,6 @@ look for X-XSRF-TOKEN header  }</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -7242,8 +7214,6 @@ look for X-XSRF-TOKEN header  }</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -8501,8 +8471,6 @@ opaque handle}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -8582,8 +8550,6 @@ opaque handle}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -8669,8 +8635,6 @@ opaque handle}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>8</real>
 					</dict>
@@ -10869,7 +10833,7 @@ opaque handle}</string>
 		<key>CurrentSheet</key>
 		<integer>0</integer>
 		<key>Frame</key>
-		<string>{{0, 0}, {1440, 853}}</string>
+		<string>{{0, 0}, {1440, 828}}</string>
 		<key>ShowInfo</key>
 		<false/>
 		<key>Sidebar</key>
@@ -10879,7 +10843,7 @@ opaque handle}</string>
 		<key>Sidebar_Tab</key>
 		<integer>2</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, -8.0000000000000409}, {806, 553.07112970711285}}</string>
+		<string>{{0, 0}, {805.5, 537}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
 			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
