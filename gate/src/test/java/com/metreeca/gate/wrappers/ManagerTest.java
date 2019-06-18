@@ -100,11 +100,9 @@ final class ManagerTest {
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.Created)
 							.hasHeader("Set-Cookie")
+							.hasHeader(Manager.SessionHeader)
 							.hasBody(json(), json -> assertThat(json)
-									.hasField("timeout", value(SoftTimeout))
-									.hasField("profile", object(
-											field("user", "faussone")
-									))
+									.hasField("user", value("faussone"))
 							)
 					)
 			);
@@ -130,11 +128,9 @@ final class ManagerTest {
 						assertThat(response)
 								.hasStatus(Response.Created)
 								.hasHeader("Set-Cookie")
+								.hasHeader(Manager.SessionHeader)
 								.hasBody(json(), json -> assertThat(json)
-										.hasField("timeout", value(SoftTimeout))
-										.hasField("profile", object(
-												field("user", "faussone")
-										))
+										.hasField("user", value("faussone"))
 								);
 
 						RosterAssert.assertThat(tool(roster()))
