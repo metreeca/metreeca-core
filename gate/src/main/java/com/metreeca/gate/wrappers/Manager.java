@@ -31,15 +31,16 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
+import static com.metreeca.form.things.JsonValues.field;
 import static com.metreeca.form.things.JsonValues.object;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.gate.Roster.roster;
+import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.JSONBody.json;
@@ -125,9 +126,10 @@ import static java.util.regex.Pattern.compile;
  * empty session token in a HTTP only self-expiring session cookie; malformed and unknown session tokens are
  * ignored.</p>
  *
- * <pre>{@code 204 No Content
- * Set-Cooke: ID=; Path=<base>; HttpOnly; Secure; SameSite=Lax; Max-Age=0}</pre>
+ * <pre>{@code 200 OK
+ * Set-Cooke: ID=; Path=<base>; HttpOnly; Secure; SameSite=Lax; Max-Age=0} * Content-Type: application/json
  *
+ * {}}</pre>
  * <hr>
  *
  * <h3>Secured Resource Access</h3>
@@ -149,7 +151,8 @@ import static java.util.regex.Pattern.compile;
  * <p><em>Failed token validation</em> / Due either to session deletion or expiration or to a modified user {@linkplain
  * Permit#id() opaque handle}; no details about the failure are disclosed.</p>
  *
- * <pre>{@code 403 Forbidden
+ * <pre>{@code 401 Unauthorized
+ * WWW-Authenticate: …
  * Content-Type: application/json
  *
  * {} }</pre>
@@ -172,9 +175,6 @@ public final class Manager implements Wrapper {
 
 	private final long soft;
 	private final long hard;
-
-
-	private final Handler housekeeper=new Worker().post(post());
 
 
 	private final Roster roster=tool(roster());
@@ -223,8 +223,8 @@ public final class Manager implements Wrapper {
 	@Override public Handler wrap(final Handler handler) {
 		return handler
 				.with(challenger())
-				.with(gatekeeper())
-				.with(housekeeper());
+				.with(housekeeper())
+				.with(gatekeeper());
 	}
 
 
@@ -234,6 +234,60 @@ public final class Manager implements Wrapper {
 		return handler -> request -> handler.handle(request).map(response -> response.status() == Response.Unauthorized
 				? response.header("~WWW-Authenticate", format("Session realm=\"%s\"", response.request().base()))
 				: response
+		);
+	}
+
+	private Wrapper housekeeper() {
+		return handler -> handler(request -> request.path().equals(path),
+
+				new Worker().post(request -> request.reply(response -> request.body(json())
+
+						.process(ticket -> {
+
+							if ( ticket.isEmpty() ) {
+
+								cookie(request)
+										.flatMap(notary::verify)
+										.map(Claims::getSubject)
+										.ifPresent(this::signout);
+
+								return Value(response.status(Response.OK)
+
+										.header("Set-Cookie", cookie(request, "", 0, 0))
+
+										.body(json(), object())
+								);
+
+							} else {
+
+								return signin(ticket).value(permit -> {
+
+									final long now=clock.time();
+
+									return response.status(Response.Created)
+
+											.header("Set-Cookie", cookie(request, permit.id(), now, now+soft))
+
+											.body(json(), object(
+													field("timeout", soft),
+													field("profile", permit.profile())
+											));
+
+								});
+
+							}
+
+						})
+
+						.fold(
+								identity(),
+								response::map
+						)
+
+				)),
+
+				handler
+
 		);
 	}
 
@@ -271,11 +325,9 @@ public final class Manager implements Wrapper {
 
 								error -> { // permit not found >> reject request
 
-									trace.warning(this, "unknown session token");
+									trace.warning(this, error);
 
-									return request.reply(response -> response
-											.status(Response.Unauthorized)
-									);
+									return request.reply(new Failure().status(Response.Unauthorized));
 
 								}
 						))
@@ -284,68 +336,13 @@ public final class Manager implements Wrapper {
 
 							trace.warning(this, "invalid session token");
 
-							return request.reply(response -> response
-									.status(Response.Unauthorized)
-							);
+							return request.reply(new Failure().status(Response.Unauthorized));
 
 						})
 
 				)
 
 				.orElseGet(() -> handler.handle(request)); // token not found >> process request
-	}
-
-	private Wrapper housekeeper() {
-		return handler -> request -> request.path().equals(path)
-				? housekeeper.handle(request)
-				: handler.handle(request);
-	}
-
-
-	private Handler post() {
-		return request -> request.reply(response -> request.body(json())
-
-				.process(ticket -> {
-
-					if ( ticket.isEmpty() ) {
-
-						cookie(request)
-								.flatMap(notary::verify)
-								.map(Claims::getSubject)
-								.ifPresent(this::signout);
-
-						return Value(response.status(Response.NoContent)
-								.header("Set-Cookie", cookie(request, "", 0, 0))
-						);
-
-					} else {
-
-						return signin(ticket).value(permit -> {
-
-							final long now=clock.time();
-
-							return response.status(Response.Created)
-
-									.header("Set-Cookie", cookie(request, permit.id(), now, now+soft))
-
-									.body(json(), Json.createObjectBuilder()
-											.add("timeout", soft)
-											.add("profile", object(permit.profile()))
-											.build()
-									);
-
-						});
-
-					}
-
-				})
-
-				.fold(
-						identity(),
-						response::map
-				)
-
-		);
 	}
 
 

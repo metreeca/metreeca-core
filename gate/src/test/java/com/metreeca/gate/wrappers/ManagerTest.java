@@ -157,11 +157,13 @@ final class ManagerTest {
 					)
 
 					.accept(response -> assertThat(response)
-							.hasStatus(Response.NoContent)
+							.hasStatus(Response.OK)
 							.hasHeader("Set-Cookie", cookie -> Assertions.assertThat(cookie)
 									.startsWith(Manager.SessionCookie+"=;")
 							)
-							.doesNotHaveBody()
+							.hasBody(json(), json -> assertThat(json)
+									.isEqualTo(object())
+							)
 					)
 			);
 		}
@@ -441,7 +443,10 @@ final class ManagerTest {
 							)
 
 							.accept(response -> assertThat(response)
-									.hasStatus(Response.NoContent)
+									.hasStatus(Response.OK)
+									.hasBody(json(), json -> assertThat(json)
+											.isEqualTo(object())
+									)
 							);
 
 					handler // submit request after session deletion
