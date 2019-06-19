@@ -25,6 +25,7 @@ import com.metreeca.tray.sys.Trace;
 
 import io.jsonwebtoken.Claims;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -524,7 +525,7 @@ public final class Manager implements Wrapper {
 						.setIssuedAt(new Date(issued))
 						.setExpiration(new Date(expiry))
 				),
-				request.base(),
+				URI.create(request.base()).getPath(),
 				request.base().startsWith("https:") ? "; Secure" : "",
 				handle.isEmpty() ? "; Max-Age=0" : ""
 		);

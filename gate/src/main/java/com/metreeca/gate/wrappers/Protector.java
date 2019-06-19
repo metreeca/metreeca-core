@@ -23,6 +23,7 @@ import com.metreeca.rest.*;
 import com.metreeca.tray.sys.Clock;
 import com.metreeca.tray.sys.Trace;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -311,7 +312,7 @@ public final class Protector implements Wrapper {
 						response.header("Set-Cookie", format("%s=%s; Path=%s; SameSite=%s%s",
 								XSRFCookie,
 								token(clock.time()),
-								request.base(),
+								URI.create(request.base()).getPath(),
 								SameSiteDefault,
 								secure > 0 ? "; Secure" : ""
 						));

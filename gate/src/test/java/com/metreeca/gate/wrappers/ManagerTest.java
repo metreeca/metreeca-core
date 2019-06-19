@@ -164,6 +164,7 @@ final class ManagerTest {
 
 					.handle(new Request()
 							.method(Request.POST)
+							.base("http://examplecom/base/")
 							.path("/~")
 							.body(json(), object(
 									field("handle", "faussone"),
@@ -173,7 +174,9 @@ final class ManagerTest {
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-							.hasHeader("Set-Cookie")
+							.hasHeader("Set-Cookie", cookie  -> Assertions.assertThat(cookie)
+									.contains("Path=/base/")
+							)
 							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
 									.contains("timeout=")
 							)
@@ -191,6 +194,7 @@ final class ManagerTest {
 
 					.handle(new Request()
 							.method(Request.POST)
+							.base("http://example.com/base/")
 							.path("/~")
 							.body(json(), object(
 									field("handle", "faussone"),
@@ -203,7 +207,9 @@ final class ManagerTest {
 
 						assertThat(response)
 								.hasStatus(Response.OK)
-								.hasHeader("Set-Cookie")
+								.hasHeader("Set-Cookie", cookie  -> Assertions.assertThat(cookie)
+										.contains("Path=/base/")
+								)
 								.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
 										.contains("timeout=")
 								)
@@ -226,6 +232,7 @@ final class ManagerTest {
 
 					.handle(new Request()
 							.method(Request.POST)
+							.base("http://example.com/base/")
 							.path("/~")
 							.body(json(), object())
 					)
@@ -234,6 +241,7 @@ final class ManagerTest {
 							.hasStatus(Response.OK)
 							.hasHeader("Set-Cookie", cookie -> Assertions.assertThat(cookie)
 									.startsWith(Manager.SessionCookie+"=;")
+									.contains("Path=/base/")
 							)
 							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
 									.contains("timeout=0")
@@ -573,6 +581,7 @@ final class ManagerTest {
 							.handle(new Request()
 									.method(Request.GET)
 									.header("Cookie", cookie)
+									.base("http://example.com/base/")
 									.path("/resource")
 							)
 

@@ -234,13 +234,15 @@ final class ProtectorTest {
 
 						.handle(new Request()
 								.method(Request.GET)
+								.base("http://example.com/base/")
+								.path("/path")
 						)
 
 						.accept(response -> assertThat(response)
 
 								.hasHeader("Set-Cookie", value -> assertThat(value)
 										.matches(format("%s=[^\\s;]+; Path=%s; SameSite=Lax",
-												Protector.XSRFCookie, response.request().base()
+												Protector.XSRFCookie, "/base/"
 										))
 								)
 
@@ -259,13 +261,15 @@ final class ProtectorTest {
 
 						.handle(new Request()
 								.method(Request.GET)
+								.base("https://example.com/base/")
+								.path("/path")
 						)
 
 						.accept(response -> assertThat(response)
 
 								.hasHeader("Set-Cookie", value -> assertThat(value)
 										.matches(format("%s=[^\\s;]+; Path=%s; SameSite=Lax; Secure",
-												Protector.XSRFCookie, response.request().base()
+												Protector.XSRFCookie, "/base/"
 										))
 								)
 
