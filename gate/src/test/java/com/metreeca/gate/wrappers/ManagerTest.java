@@ -81,7 +81,81 @@ final class ManagerTest {
 	}
 
 
+	private Consumer<BiConsumer<Handler, String>> authenticate(final Handler handler) {
+		return consumer -> handler
+
+				// open session
+
+				.handle(new Request()
+						.method(Request.POST)
+						.path("/~")
+						.body(json(), object(
+								field("handle", "faussone"),
+								field("secret", "faussone")
+						))
+				)
+
+				// handle requests
+
+				.accept(response -> consumer.accept(handler, response
+
+						.header("Set-Cookie")
+						.map(cookie -> cookie.substring(0, max(0, cookie.indexOf(';'))))
+						.orElse("")
+
+				));
+	}
+
+
 	@Nested final class Management {
+
+		@Test void testQuerySessionAnonymous() {
+			exec(() -> manager()
+
+					.wrap(handler(user -> Response.OK))
+
+					.handle(new Request()
+							.method(Request.GET)
+							.path("/~")
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.OK)
+							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+									.contains("timeout=0")
+							)
+							.hasBody(json(), json -> assertThat(json)
+									.isEqualTo(object())
+							)
+					)
+			);
+		}
+
+		@Test void testQuerySessionIdentified() {
+			exec(() -> authenticate(manager()
+
+					.wrap(handler(user -> Response.OK))
+
+			).accept((handler, cookie) -> handler
+
+					.handle(new Request()
+							.method(Request.GET)
+							.path("/~")
+							.header("Cookie", cookie)
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.OK)
+							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+									.contains("timeout=")
+							)
+							.hasBody(json(), json -> assertThat(json)
+									.hasField("user", value("faussone"))
+							)
+					)
+			));
+		}
+
 
 		@Test void testCreateSession() {
 			exec(() -> manager()
@@ -98,9 +172,11 @@ final class ManagerTest {
 					)
 
 					.accept(response -> assertThat(response)
-							.hasStatus(Response.Created)
+							.hasStatus(Response.OK)
 							.hasHeader("Set-Cookie")
-							.hasHeader(Manager.SessionHeader)
+							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+									.contains("timeout=")
+							)
 							.hasBody(json(), json -> assertThat(json)
 									.hasField("user", value("faussone"))
 							)
@@ -126,9 +202,11 @@ final class ManagerTest {
 					.accept(response -> {
 
 						assertThat(response)
-								.hasStatus(Response.Created)
+								.hasStatus(Response.OK)
 								.hasHeader("Set-Cookie")
-								.hasHeader(Manager.SessionHeader)
+								.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+										.contains("timeout=")
+								)
 								.hasBody(json(), json -> assertThat(json)
 										.hasField("user", value("faussone"))
 								);
@@ -156,6 +234,9 @@ final class ManagerTest {
 							.hasStatus(Response.OK)
 							.hasHeader("Set-Cookie", cookie -> Assertions.assertThat(cookie)
 									.startsWith(Manager.SessionCookie+"=;")
+							)
+							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+									.contains("timeout=0")
 							)
 							.hasBody(json(), json -> assertThat(json)
 									.isEqualTo(object())
@@ -215,32 +296,6 @@ final class ManagerTest {
 	}
 
 	@Nested final class Authentication {
-
-		private Consumer<BiConsumer<Handler, String>> authenticate(final Handler handler) {
-			return consumer -> handler
-
-					// open session
-
-					.handle(new Request()
-							.method(Request.POST)
-							.path("/~")
-							.body(json(), object(
-									field("handle", "faussone"),
-									field("secret", "faussone")
-							))
-					)
-
-					// handle requests
-
-					.accept(response -> consumer.accept(handler, response
-
-							.header("Set-Cookie")
-							.map(cookie -> cookie.substring(0, max(0, cookie.indexOf(';'))))
-							.orElse("")
-
-					));
-		}
-
 
 		@Nested final class Anonymous {
 
@@ -483,7 +538,7 @@ final class ManagerTest {
 							)
 
 							.accept(response -> assertThat(response)
-									.hasStatus(Response.Created)
+									.hasStatus(Response.OK)
 							);
 
 
