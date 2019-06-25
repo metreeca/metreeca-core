@@ -49,7 +49,7 @@ final class ConnectorTest {
 
 
 	private void exec(final Runnable task) {
-		new Tray().exec(task).clear();
+		HandlerTest.exec(task);
 	}
 
 

@@ -20,21 +20,20 @@ package com.metreeca.gate;
 import com.metreeca.rest.Result;
 
 import org.assertj.core.api.AbstractAssert;
-import org.eclipse.rdf4j.model.IRI;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.metreeca.form.things.Codecs.UTF8;
-import static com.metreeca.form.things.JsonValues.field;
-import static com.metreeca.form.things.JsonValues.object;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 
-import static java.util.Arrays.stream;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
+import static java.lang.Math.abs;
 
 
 public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
@@ -53,14 +52,14 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public RosterAssert hasUser(final IRI user, final String secret) {
+	public RosterAssert hasUser(final String handle, final String secret) {
 
 		isNotNull();
 
-		actual.verify(user, secret).error(error -> {
+		actual.login(handle, secret).error(error -> {
 
 			failWithMessage(
-					"expected roster to have user <%s:%s>", user, secret
+					"expected roster to have user <%s:%s>", handle, secret
 			);
 
 			return this;
@@ -70,14 +69,14 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 		return this;
 	}
 
-	public RosterAssert doesNotHaveUser(final IRI user, final String secret) {
+	public RosterAssert doesNotHaveUser(final String handle, final String secret) {
 
 		isNotNull();
 
-		actual.verify(user, secret).value(permit -> {
+		actual.login(handle, secret).value(permit -> {
 
 			failWithMessage(
-					"expected roster not to have user <%s:%s>", user, secret
+					"expected roster not to have user <%s:%s>", handle, secret
 			);
 
 			return this;
@@ -90,68 +89,97 @@ public final class RosterAssert extends AbstractAssert<RosterAssert, Roster> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static IRI user(final String handle) {
-		return item("users/"+handle);
-	}
+	public static final class MockRoster implements Roster {
+
+		private final Map<String, String> users=new HashMap<>(); // id > secret
 
 
-	public static final class MockRoster implements Roster
-	{
-
-		private final Map<IRI, String> user2secret;
-
-
-		public MockRoster(final String... handles) {
-			this.user2secret=new LinkedHashMap<>(stream(handles).collect(toMap(RosterAssert::user, identity())));
+		@SafeVarargs public MockRoster(final Map.Entry<String, String> ...entries) {
+			for (final Map.Entry<String, String> entry : entries) {
+				insert(entry.getKey(), entry.getValue());
+			}
 		}
 
 
-		@Override public Result<IRI, String> resolve(final String handle) {
-			return Optional.of(user(handle))
-					.filter(user2secret::containsKey)
-					.map(Result::<IRI, String>Value)
-					.orElseGet(() -> Error(CredentialsIllegal));
+		@Override public Result<Permit, String> lookup(final String handle) {
+			return resolve(handle)
+					.map(this::permit)
+					.orElseGet(this::error);
+		}
+
+		@Override public Result<Permit, String> insert(final String handle, final String secret) {
+
+			users.put(handle, secret);
+
+			return lookup(handle);
+		}
+
+		@Override public Result<Permit, String> remove(final String handle) {
+			return resolve(handle).map(entry -> {
+
+				try {
+					return permit(entry);
+				} finally {
+					users.remove(entry.getKey());
+				}
+
+			}).orElseGet(this::error);
 		}
 
 
-		@Override public Result<Permit, String> verify(final IRI user, final String secret) {
-			return secret.equals(user2secret.get(user))
-					? Value(permit(user, secret))
-					: Error(CredentialsIllegal);
+		@Override public Result<Permit, String> login(final String handle, final String secret) {
+			return resolve(handle)
+					.filter(entry -> entry.getValue().equals(secret))
+					.map(entry -> handle(entry, secret))
+					.map(this::permit)
+					.orElseGet(this::error);
 		}
 
-		@Override public Result<Permit, String> verify(final IRI user, final String secret, final String update) {
-			return update.equals(user2secret.computeIfPresent(user, (_user, _secret) -> update))
-					? Value(permit(user, update))
-					: Error(CredentialsIllegal);
+		@Override public Result<Permit, String> login(final String handle, final String secret, final String update) {
+			return resolve(handle)
+					.filter(entry -> entry.getValue().equals(secret))
+					.map(entry -> handle(entry, update))
+					.map(this::permit)
+					.orElseGet(this::error);
 		}
 
-
-		@Override public Result<Permit, String> lookup(final IRI user) {
-			return Optional.ofNullable(user2secret.get(user))
-					.map(secret -> Result.<Permit, String>Value(permit(user, secret)))
-					.orElseGet(() -> Error(CredentialsIllegal));
-		}
-
-		@Override public Result<Permit, String> insert(final IRI user, final String secret) {
-			return user2secret.computeIfPresent(user, (_user, _secret) -> secret) != null
-					? Value(permit(user, secret))
-					: Error(CredentialsIllegal);
-		}
-
-		@Override public Result<Permit, String> remove(final IRI user) {
-			return Optional.ofNullable(user2secret.remove(user))
-					.map(secret -> Result.<Permit, String>Value(permit(user, secret)))
-					.orElseGet(() -> Error(CredentialsIllegal));
+		@Override public Result<Permit, String> logout(final String handle) {
+			return resolve(handle)
+					.map(entry -> handle(entry, entry.getValue()))
+					.map(this::permit)
+					.orElseGet(this::error);
 		}
 
 
-		private Permit permit(final IRI user, final String secret) {
-			return new Permit(
-					UUID.nameUUIDFromBytes((user+":"+secret).getBytes(UTF8)).toString(),
-					user, set(),
-					object(field("user", user.getLocalName()))
-			);
+		private Optional<Map.Entry<String, String>> resolve(final String handle) {
+			return users.entrySet().stream()
+					.filter(entry -> handle.equals(entry.getKey()) || handle.equals(handle(entry)))
+					.findFirst();
+		}
+
+
+		private String handle(final Map.Entry<String, String> entry) {
+			return String.valueOf(abs(System.identityHashCode(entry.getValue())));
+		}
+
+		private Map.Entry<String, String> handle(final Map.Entry<String, String> entry, final String secret) {
+
+			entry.setValue(new String(secret.getBytes(UTF8), UTF8)); // a unique secret whose id hash is the handle
+
+			return entry;
+
+		}
+
+
+		private Result<Permit, String> permit(final Map.Entry<String, String> entry) {
+			return Value(new Permit(handle(entry),
+					item("users/"+entry.getKey()), set(),
+					map(entry("user", entry.getKey()))
+			));
+		}
+
+		private Result<Permit, String> error() {
+			return Error(CredentialsInvalid);
 		}
 
 	}

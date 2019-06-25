@@ -20,6 +20,8 @@ package com.metreeca.gate;
 
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.rest.HandlerTest.exec;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -30,23 +32,27 @@ public abstract class DigestTest {
 
 
 	@Test void testRandomize() {
-		assertThat(digest().digest("secret"))
-				.describedAs("randomized").isNotEqualTo(digest().digest("secret"));
+		exec(() -> assertThat(digest().digest("secret"))
+				.as("randomized").isNotEqualTo(digest().digest("secret"))
+		);
 	}
 
 	@Test void testRecognize() {
-		assertThat(digest().verify("secret", digest().digest("secret")))
-				.describedAs("recognized").isTrue();
+		exec(() -> assertThat(digest().verify("secret", digest().digest("secret")))
+				.as("recognized").isTrue()
+		);
 	}
 
 	@Test void testReject() {
-		assertThat(digest().verify("public", digest().digest("secret")))
-				.describedAs("rejected").isFalse();
+		exec(() -> assertThat(digest().verify("public", digest().digest("secret")))
+				.as("rejected").isFalse()
+		);
 	}
 
 	@Test void testMalformed() {
-		assertThatExceptionOfType(IllegalArgumentException.class)
-				.isThrownBy(() -> digest().verify("secret", "malformed"));
+		exec(() -> assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> digest().verify("secret", "malformed"))
+		);
 	}
 
 }

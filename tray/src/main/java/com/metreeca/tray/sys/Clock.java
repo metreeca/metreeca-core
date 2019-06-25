@@ -15,8 +15,36 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * User rosters.
- */
+package com.metreeca.tray.sys;
 
-package com.metreeca.gate.rosters;
+import java.util.function.Supplier;
+
+
+/**
+ * System clock.
+ *
+ * <p>Provides access to system-specific time.</p>
+ */
+@FunctionalInterface public interface Clock {
+
+	/**
+	 * Retrieves the default clock factory.
+	 *
+	 * @return the default clock factory, which provides access to the default {@linkplain System#currentTimeMillis()
+	 * system time}
+	 */
+	public static Supplier<Clock> clock() {
+		return () -> System::currentTimeMillis;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the system time.
+	 *
+	 * @return the current time in milliseconds
+	 */
+	public long time();
+
+}

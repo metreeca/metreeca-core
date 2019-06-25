@@ -104,9 +104,24 @@ public final class JsonAssert extends AbstractAssert<JsonAssert, JsonValue> {
 		}
 
 		return isObject().satisfies(new Condition<>(
-				json -> value.equals(json.asJsonObject().getValue(name)),
+				json -> value.equals(json.asJsonObject().getValue("/"+name)),
 				"expected <%s> to have field <%s> with value <%s>",
 				actual, name, value
+		));
+	}
+
+
+
+	public JsonAssert doesNotHaveField(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return isObject().satisfies(new Condition<>(
+				json -> !json.asJsonObject().containsKey(name),
+				"expected <%s> not to have field <%s>",
+				actual, name
 		));
 	}
 

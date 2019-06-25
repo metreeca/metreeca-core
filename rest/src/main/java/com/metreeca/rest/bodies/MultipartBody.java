@@ -215,7 +215,7 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 				.orElseGet(() -> Error(Missing));
 	}
 
-	@Override public <T extends Message<T>> T set(final T message) {
+	@Override public <M extends Message<M>> M set(final M message, final Map<String, Message<?>> value) {
 
 		final String type=message
 				.header("Content-Type") // custom value
@@ -241,10 +241,10 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 		}
 
-		return message.body(output(), multipart().map(multipart -> target -> {
+		return message.body(output(), target -> {
 			try (final OutputStream out=target.get()) {
 
-				for (final Message<?> part : multipart.values()) {
+				for (final Message<?> part : value.values()) {
 
 					out.write(Dashes);
 					out.write(boundary);
@@ -254,10 +254,10 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 
 						final String name=header.getKey();
 
-						for (final String value : header.getValue()) {
+						for (final String _value : header.getValue()) {
 							out.write(name.getBytes(UTF8));
 							out.write(Colon);
-							out.write(value.getBytes(UTF8));
+							out.write(_value.getBytes(UTF8));
 							out.write(CRLF);
 						}
 					}
@@ -277,7 +277,7 @@ public final class MultipartBody implements Body<Map<String, Message<?>>> {
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		}));
+		});
 	}
 
 

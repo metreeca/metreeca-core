@@ -31,7 +31,8 @@ import java.util.function.Supplier;
 	/**
 	 * Retrieves the default storage factory.
 	 *
-	 * @return the default storage factory, which provides access to files stored in the current working directory of the process in the host filesystem
+	 * @return the default storage factory, which provides access to files stored in the current working directory of
+	 * the process in the host filesystem
 	 */
 	public static Supplier<Storage> storage() {
 		return () -> name -> {

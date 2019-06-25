@@ -19,6 +19,7 @@ package com.metreeca.rest;
 
 import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Evaluator;
+import com.metreeca.form.things.Sets;
 import com.metreeca.rest.bodies.MultipartBody;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -35,7 +36,6 @@ import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.Value;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
@@ -88,9 +88,7 @@ public abstract class Message<T extends Message<T>> {
 	private Shape shape=pass();
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
-
-	private final Map<Body<?>, Object> cache=new HashMap<>();
-	private final Map<Body<?>, Function<Message<?>, Result<?, Failure>>> pipes=new HashMap<>();
+	private final Map<Body<?>, Object> bodies=new HashMap<>();
 
 
 	private T self() { return (T)this; }
@@ -137,8 +135,8 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Merge a message into this message.
 	 *
-	 * <p>Mainly intended to be used inside wrappers to lift for further downstream processing the main message part in
-	 * {@linkplain MultipartBody multipart} requests, as for instance in:</p>
+	 * <p>Mainly intended to be used inside wrappers to lift the main message part in {@linkplain MultipartBody
+	 * multipart} requests for further downstream processing, as for instance in:</p>
 	 *
 	 * <pre>{@code handler -> request -> request.body(multipart(1000, 10_000)).fold(
 	 *
@@ -166,8 +164,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @return this message modified as follows:
 	 * <ul>
 	 * <li>source message headers are copied to this message overriding existing values;</li>
-	 * <li>source message body representations are copied to this message overriding existing values;</li>
-	 * <li>body representations cached in this message are discarded</li>
+	 * <li>source message body representations are copied to this message replacing all existing values.</li>
 	 * </ul>
 	 *
 	 * @throws NullPointerException if {@code message} is null
@@ -180,8 +177,8 @@ public abstract class Message<T extends Message<T>> {
 
 		headers.putAll(message.headers); // value lists are read-only
 
-		cache.clear();
-		pipes.putAll(message.pipes);
+		bodies.clear();
+		bodies.putAll(message.bodies);
 
 		return self();
 	}
@@ -234,7 +231,7 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Headers ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves message headers.
@@ -344,7 +341,14 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null name");
 		}
 
-		return unmodifiableCollection(headers.getOrDefault(normalize(name), emptyList()));
+		final String _name=normalize(name);
+
+		return unmodifiableCollection(headers.entrySet().stream()
+				.filter(entry -> entry.getKey().equalsIgnoreCase(_name))
+				.map(Map.Entry::getValue)
+				.findFirst()
+				.orElseGet(Sets::set)
+		);
 	}
 
 	/**
@@ -423,7 +427,7 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Bodies ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the linked data shape.
@@ -473,19 +477,15 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null body");
 		}
 
-		final V cached=(V)cache.get(body);
+		final V cached=(V)bodies.get(body);
 
-		return cached != null ? Value(cached) : pipes.getOrDefault(body, body::get).apply(self()).value(
+		return cached != null ? Value(cached) : body.get(self()).value(value -> {
 
-				value -> {
+			bodies.put(body, value);
 
-					cache.put(body, value);
+			return value;
 
-					return (V)value;
-
-				}
-
-		);
+		});
 
 	}
 
@@ -514,91 +514,9 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
-		if ( !cache.isEmpty() ) {
-			throw new IllegalStateException("message body already retrieved");
-		}
+		bodies.put(body, value);
 
-		pipes.put(body, message -> Value(value));
-
-		return body.set(self());
-	}
-
-	/**
-	 * Configures a body representation.
-	 *
-	 * <p>Future calls to {@link #body(Body)} with the same body format will return a value generated from this
-	 * message, rather than the value {@linkplain Body#get(Message) retrieved} from this message by the body
-	 * format.</p>
-	 *
-	 * @param body      the body format managing the body representation to be configured
-	 * @param generator the value generating function; takes as argument this message and must return either a result
-	 *                  with the generated body representation or an error reporting a processing failure
-	 * @param <V>       the type of the body representation managed by {@code body}
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException  if either {@code body} or {@code generator} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
-	 */
-	public <V> T body(final Body<V> body, final Function<T, Result<V, Failure>> generator) {
-
-		if ( body == null ) {
-			throw new NullPointerException("null body");
-		}
-
-		if ( generator == null ) {
-			throw new NullPointerException("null generator");
-		}
-
-		if ( !cache.isEmpty() ) {
-			throw new IllegalStateException("message body already retrieved");
-		}
-
-		pipes.put(body, message -> requireNonNull(generator.apply((T)message), "null generated result"));
-
-		return body.set(self());
-	}
-
-
-	/**
-	 * Process a body representation.
-	 *
-	 * <p>Future calls to {@link #body(Body)} with the same body format will pipe the value either explicitly
-	 * {@linkplain #body(Body, Object) set} or {@linkplain Body#get(Message) retrieved} on demand by the body format
-	 * through a mapping function function.</p>
-	 *
-	 * <p><strong>Warning</strong> / Processing is performed on demand, as final consumer eventually retrieves the
-	 * processed message body: if {@code mapper} relies on information retrieved from the message, its current state
-	 * must be memoized, before it's possibly altered by downstream wrappers.</p>
-	 *
-	 * @param body   the body format managing the body representation to be processed
-	 * @param mapper the value mapping function; takes as argument the original body representation and must return
-	 *               either a result with the mapped representation or an error reporting a processing failure
-	 * @param <V>    the type of the body representation managed by {@code body}
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException  if either {@code body} or {@code mapper} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
-	 */
-	public <V> T pipe(final Body<V> body, final Function<V, Result<V, Failure>> mapper) {
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		if ( !cache.isEmpty() ) {
-			throw new IllegalStateException("message body already retrieved");
-		}
-
-		pipes.compute(body, (_body, getter) -> message ->
-				(getter != null ? getter : (Function<Message<?>, Result<?, Failure>>)body::get).apply(message).fold(
-						value -> requireNonNull(mapper.apply((V)value), "null mapped value"),
-						Result::Error
-				)
-		);
-
-		return self();
+		return body.set(self(), value);
 	}
 
 

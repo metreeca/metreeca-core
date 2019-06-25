@@ -21,7 +21,10 @@ import com.metreeca.form.things.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 
+import java.net.URI;
 import java.util.Optional;
+
+import static com.metreeca.form.things.Values.AbsoluteIRIPattern;
 
 
 /**
@@ -37,8 +40,12 @@ public final class Response extends Message<Response> {
 	public static final int NonAuthoritativeInformation=203; // https://tools.ietf.org/html/rfc7231#section-6.3.4
 	public static final int NoContent=204; // https://tools.ietf.org/html/rfc7231#section-6.3.5
 
+	public static final int MultipleChoices=300; // https://tools.ietf.org/html/rfc7231#section-6.4.1
 	public static final int MovedPermanently=301; // https://tools.ietf.org/html/rfc7231#section-6.4.2
+	public static final int Found=302; // https://tools.ietf.org/html/rfc7231#section-6.4.3
 	public static final int SeeOther=303; // https://tools.ietf.org/html/rfc7231#section-6.4.4
+	public static final int TemporaryRedirect=307; // https://tools.ietf.org/html/rfc7231#section-6.4.7
+	public static final int PermanentRedirect=308; // https://tools.ietf.org/html/rfc7538#section-3
 
 	public static final int BadRequest=400; // https://tools.ietf.org/html/rfc7231#section-6.5.1
 	public static final int Unauthorized=401; // https://tools.ietf.org/html/rfc7235#section-3.1
@@ -91,9 +98,15 @@ public final class Response extends Message<Response> {
 	 * Request#item() focus item} IRI of the originating request otherwise
 	 */
 	@Override public IRI item() {
-		return header("location")
+
+		final IRI base=request().item();
+
+		return header("Location")
+				.map(location -> AbsoluteIRIPattern.matcher(location).matches() ?
+						location : URI.create(base.stringValue()).resolve(location).toString()
+				)
 				.map(Values::iri)
-				.orElseGet(() -> request().item());
+				.orElseGet(() -> base);
 	}
 
 	/**
@@ -129,7 +142,7 @@ public final class Response extends Message<Response> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Outcome ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the status code of this response.
@@ -147,11 +160,11 @@ public final class Response extends Message<Response> {
 	 *
 	 * @return this response
 	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 0 or greater than 599
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
 	 */
 	public Response status(final int status) {
 
-		if ( status < 100 || status > 599 ) {
+		if ( status != 0 && (status < 100 || status > 599) ) { // 0 used internally
 			throw new IllegalArgumentException("illegal status code ["+status+"]");
 		}
 

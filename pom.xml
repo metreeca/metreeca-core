@@ -24,7 +24,7 @@
 
 	<groupId>com.metreeca</groupId>
 	<artifactId>link</artifactId>
-	<version>0.50.0</version>
+	<version>0.52.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Metreeca Linked Data Framework</name>
@@ -103,6 +103,8 @@
 	<properties>
 
 		<java.version>1.8</java.version>
+		<maven.version>3.3</maven.version>
+
 		<rdf4j.version>2.5.0</rdf4j.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -152,13 +154,18 @@
 
 		<resources>
 
-			<resource> <!-- enable resource filtering -->
-				<directory>src/main/resources</directory>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+
+			<resource>
+				<directory>${basedir}/docs/_resources</directory>
+				<targetPath>${basedir}/docs</targetPath>
 				<filtering>true</filtering>
 			</resource>
 
 		</resources>
-
 
 		<plugins>
 
@@ -180,7 +187,7 @@
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>3.3</version>
+									<version>${maven.version}</version>
 								</requireMavenVersion>
 							</rules>
 						</configuration>
@@ -223,8 +230,7 @@
 						<manifestEntries>
 							<Built-By>${project.organization.name}</Built-By>
 							<Built-On>${maven.build.timestamp}</Built-On>
-							<Implementation-Version>${project.version}+${maven.build.timestamp}
-							</Implementation-Version>
+							<Implementation-Version>${project.version}+${maven.build.timestamp}</Implementation-Version>
 						</manifestEntries>
 
 					</archive>
@@ -245,7 +251,6 @@
 				</executions>
 
 			</plugin>
-
 
 			<plugin> <!-- https://maven.apache.org/surefire/maven-surefire-plugin/ -->
 

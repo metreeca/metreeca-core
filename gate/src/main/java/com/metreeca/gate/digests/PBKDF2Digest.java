@@ -18,10 +18,11 @@
 package com.metreeca.gate.digests;
 
 import com.metreeca.form.things.Codecs;
+import com.metreeca.gate.Crypto;
 import com.metreeca.gate.Digest;
+import com.metreeca.tray.Tray;
 
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
@@ -30,6 +31,11 @@ import java.util.regex.Pattern;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+
+import static com.metreeca.gate.Crypto.crypto;
+import static com.metreeca.tray.Tray.tool;
+
+import static java.lang.System.currentTimeMillis;
 
 
 /**
@@ -45,20 +51,29 @@ public final class PBKDF2Digest implements Digest {
 	 */
 	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(Codecs.UTF8));
 
-	private static final int Length=24; // salt length
-	private static final int Rounds=1000; // encryption rounds
-
-	private static final SecureRandom random=new SecureRandom();
+	private static final int Length=32; // salt length [bytes]
+	private static final int Rounds=25_0000; // encryption rounds
 
 	private static final Pattern DigestPattern=Pattern.compile("(?<tag>.*):(?<rounds>\\d+):(?<salt>.+):(?<hash>.+)");
 
 
 	public static void main(final String... args) {
-		System.out.println(new PBKDF2Digest().digest("secret"));
+		new Tray().exec(() -> {
+
+			final long start=currentTimeMillis();
+			final String digest=new PBKDF2Digest().digest("secret");
+			final long stop=currentTimeMillis();
+
+			System.out.println(String.format("generated digest in %.1fs: %s", (stop-start)/1000f, digest));
+
+		}).clear();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Crypto crypto=tool(crypto());
+
 
 	@Override public String digest(final String secret) {
 
@@ -115,12 +130,7 @@ public final class PBKDF2Digest implements Digest {
 	 * @return a random password salt
 	 */
 	private byte[] salt(final int bytes) {
-
-		final byte[] salt=new byte[bytes];
-
-		random.nextBytes(salt);
-
-		return salt;
+		return crypto.id(bytes);
 	}
 
 	/**
@@ -157,7 +167,7 @@ public final class PBKDF2Digest implements Digest {
 	 * @param x the first byte array to be compared
 	 * @param y the second byte array to be compared
 	 *
-	 * @return {@code true} if the byte arrays are equal, false otherwise
+	 * @return {@code true} if the byte arrays are equal, {@code false} otherwise
 	 */
 	private boolean equals(final byte[] x, final byte[] y) {
 

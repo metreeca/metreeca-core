@@ -22,9 +22,7 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.probes.Optimizer;
 import com.metreeca.form.probes.Redactor;
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -39,6 +37,7 @@ import java.util.Collection;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.meta;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.Employee;
@@ -55,9 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class ThrottlerTest {
 
 	private void exec(final Runnable task) {
-		new Tray()
-				.exec(task)
-				.clear();
+		HandlerTest.exec(task);
 	}
 
 
@@ -137,7 +134,8 @@ final class ThrottlerTest {
 		private Request request() {
 			return ThrottlerTest.this.request()
 					.shape(shape)
-					.roles(role);
+					.roles(role)
+					.body(rdf(), set());
 		}
 
 		private Handler handler(final Collection<Statement> model, final Shape shape) {
@@ -170,6 +168,7 @@ final class ThrottlerTest {
 
 					.handle(new Request()
 							.shape(field(RDFS.LABEL, literal("request")))
+							.body(rdf(), set())
 					)
 
 					.accept(response -> assertThat(response)
@@ -186,6 +185,7 @@ final class ThrottlerTest {
 
 					.wrap(echo().with(handler -> request -> handler.handle(request).map(response ->
 							response.shape(field(RDFS.LABEL, literal("response")))
+							.body(rdf(), set())
 					)))
 
 					.handle(new Request())

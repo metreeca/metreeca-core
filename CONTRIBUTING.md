@@ -19,6 +19,6 @@ If you just want some help with the framework or your project, try asking a spec
 
 # Suggesting Features
 
-If you think you have a good idea about improving or extending Metreeca/Link, feel free to open a ticket on the project's [issues](https://github.com/metreeca/link/issues) page, ignoring the issue reporting template.
+If you think you have a good idea about improving or extending Metreeca/Link, feel free to open a ticket on the project's [issues](https://github.com/metreeca/link/issues) page, using the dedicated template.
 
 Again search already reported suggestions and, if something is found, just add any additional details in the comments.

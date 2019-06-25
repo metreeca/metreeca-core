@@ -5,7 +5,7 @@
 	<key>ApplicationVersion</key>
 	<array>
 		<string>com.omnigroup.OmniGraffle7</string>
-		<string>192.17.0.322419</string>
+		<string>195.13.0.328142</string>
 	</array>
 	<key>ColorProfiles</key>
 	<array>
@@ -291,6 +291,11 @@
 						<string>NO</string>
 					</dict>
 				</dict>
+				<key>Text</key>
+				<dict>
+					<key>TextAlongPathGlyphAnchor</key>
+					<string>center</string>
+				</dict>
 			</dict>
 			<key>BaseZoom</key>
 			<integer>0</integer>
@@ -365,13 +370,15 @@
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\i\fs14 \cf0 shape linking for extended query/navigation?}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>3</real>
 					</dict>
@@ -433,13 +440,15 @@
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\i\fs14 \cf0 on-demand sections?}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>3</real>
 					</dict>
@@ -618,7 +627,7 @@
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -626,6 +635,8 @@
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 view}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -676,7 +687,7 @@ view}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -685,6 +696,8 @@ view}</string>
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 digest\
 detail}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -737,13 +750,15 @@ detail}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\fs16 \cf0 validation}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -796,13 +811,15 @@ detail}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\fs16 \cf0 writing}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -855,13 +872,15 @@ detail}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\fs16 \cf0 reading}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1063,13 +1082,15 @@ detail}</string>
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\i\fs14 \cf0 configured by shape creators/handlers}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>3</real>
 					</dict>
@@ -1194,13 +1215,15 @@ detail}</string>
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\i\fs14 \cf0 configured by each final user of the shape}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>3</real>
 					</dict>
@@ -1314,7 +1337,7 @@ detail}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1322,6 +1345,8 @@ detail}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Sorting}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1372,7 +1397,7 @@ Sorting}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1380,6 +1405,8 @@ Sorting}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Pagination}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1430,7 +1457,7 @@ Pagination}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1438,6 +1465,8 @@ Pagination}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Query}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1488,7 +1517,7 @@ Query}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1496,6 +1525,8 @@ Query}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Items}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1546,7 +1577,7 @@ Items}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1554,6 +1585,8 @@ Items}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Links}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1604,7 +1637,7 @@ Links}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1612,6 +1645,8 @@ Links}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Filter}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1662,7 +1697,7 @@ Filter}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1670,6 +1705,8 @@ Filter}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Edges}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1720,7 +1757,7 @@ Edges}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -1728,6 +1765,8 @@ Edges}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Stats}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1905,6 +1944,8 @@ Stats}</string>
 					<dict>
 						<key>Pad</key>
 						<real>3</real>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>3</real>
 					</dict>
@@ -1953,6 +1994,8 @@ Stats}</string>
 					<dict>
 						<key>Pad</key>
 						<real>3</real>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>3</real>
 					</dict>
@@ -2068,7 +2111,7 @@ Stats}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2076,6 +2119,8 @@ Stats}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Shape}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2126,7 +2171,7 @@ Shape}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2134,6 +2179,8 @@ Shape}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 JSONParser}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2184,7 +2231,7 @@ JSONParser}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2192,6 +2239,8 @@ JSONParser}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 JSONWriter}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2242,7 +2291,7 @@ JSONWriter}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2250,6 +2299,8 @@ JSONWriter}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Container}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2300,7 +2351,7 @@ Container}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2308,6 +2359,8 @@ Container}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 Resource}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2547,7 +2600,7 @@ Resource}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2555,6 +2608,8 @@ Resource}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 shape parameters}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2668,7 +2723,7 @@ shape parameters}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2676,6 +2731,8 @@ shape parameters}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 as SPARQL Update scripts}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2789,7 +2846,7 @@ as SPARQL Update scripts}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2797,6 +2854,8 @@ as SPARQL Update scripts}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 as custom shape constraints in preprocessors}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2847,7 +2906,7 @@ as custom shape constraints in preprocessors}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2855,6 +2914,8 @@ as custom shape constraints in preprocessors}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 role}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2968,7 +3029,7 @@ role}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -2977,6 +3038,8 @@ role}</string>
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 filter\
 verify}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3090,7 +3153,7 @@ verify}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3098,6 +3161,8 @@ verify}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 task}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3148,7 +3213,7 @@ task}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3156,6 +3221,8 @@ task}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 mode}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3206,7 +3273,7 @@ mode}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3214,6 +3281,8 @@ mode}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 SPARQL/Update}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3264,7 +3333,7 @@ SPARQL/Update}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3272,6 +3341,8 @@ SPARQL/Update}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 post-processing}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3322,7 +3393,7 @@ post-processing}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3330,6 +3401,8 @@ post-processing}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 SPARQL}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3380,7 +3453,7 @@ SPARQL}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3388,6 +3461,8 @@ SPARQL}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 pre-conditions}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3438,7 +3513,7 @@ pre-conditions}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3452,6 +3527,8 @@ delete\
 \
 client\
 server}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3504,7 +3581,7 @@ server}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3512,6 +3589,8 @@ server}</string>
 
 \f0\fs16 \cf0 extraction\
 construct (filter+pattern+template)}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3639,7 +3718,7 @@ construct (filter+pattern+template)}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3647,6 +3726,8 @@ construct (filter+pattern+template)}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 shape}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3697,7 +3778,7 @@ shape}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3705,6 +3786,8 @@ shape}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 shape(user, task)}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3832,7 +3915,7 @@ shape(user, task)}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3840,6 +3923,8 @@ shape(user, task)}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 report}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -3967,7 +4052,7 @@ report}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -3975,6 +4060,8 @@ report}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 json}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -4102,7 +4189,7 @@ json}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4110,6 +4197,8 @@ json}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 json}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -4160,7 +4249,7 @@ json}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4168,6 +4257,8 @@ json}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 focus}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -4295,7 +4386,7 @@ focus}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -4303,6 +4394,8 @@ focus}</string>
 
 \f0\fs16 \cf0 \expnd0\expndtw0\kerning0
 store}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -5084,6 +5177,11 @@ store}</string>
 						<string>NO</string>
 					</dict>
 				</dict>
+				<key>Text</key>
+				<dict>
+					<key>TextAlongPathGlyphAnchor</key>
+					<string>center</string>
+				</dict>
 			</dict>
 			<key>BaseZoom</key>
 			<integer>0</integer>
@@ -5131,13 +5229,13 @@ store}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{352.38587028374923, 232.84252149824081}</string>
+								<string>{352.38587028374923, 232.84252149824079}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{409.69294768412283, 232.84249479520406}</string>
+								<string>{409.69294768412283, 232.84249479520403}</string>
 							</dict>
 						</array>
 					</dict>
@@ -5149,8 +5247,8 @@ store}</string>
 					<real>43.253105163574219</real>
 					<key>Points</key>
 					<array>
-						<string>{352.38587028374923, 232.84252149824081}</string>
-						<string>{409.69294768412283, 232.84249479520406}</string>
+						<string>{352.38587028374923, 232.84252149824079}</string>
+						<string>{409.69294768412283, 232.84249479520403}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -5232,13 +5330,15 @@ store}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Order}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5284,7 +5384,7 @@ store}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -5292,6 +5392,8 @@ store}</string>
 
 \f0\fs16 \cf0 path:List&lt;IRI&gt;\
 inverse:boolean}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5338,6 +5440,8 @@ inverse:boolean}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5434,13 +5538,15 @@ inverse:boolean}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Shape}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5488,13 +5594,15 @@ inverse:boolean}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 map(:Probe&lt;T&gt;):T}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5590,13 +5698,15 @@ inverse:boolean}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Shape.Probe&lt;T&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5643,6 +5753,8 @@ inverse:boolean}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5687,6 +5799,8 @@ inverse:boolean}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5884,13 +5998,15 @@ inverse:boolean}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Query}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -5936,13 +6052,15 @@ inverse:boolean}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 map(:Probe&lt;T&gt;):T}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6036,13 +6154,15 @@ inverse:boolean}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Query.Probe&lt;T&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6087,6 +6207,8 @@ inverse:boolean}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6131,6 +6253,8 @@ inverse:boolean}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6225,13 +6349,15 @@ inverse:boolean}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Stats}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6277,7 +6403,7 @@ inverse:boolean}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -6285,6 +6411,8 @@ inverse:boolean}</string>
 
 \f0\fs16 \cf0 shape:Shape\
 path:List&lt;IRI&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6331,6 +6459,8 @@ path:List&lt;IRI&gt;}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6425,13 +6555,15 @@ path:List&lt;IRI&gt;}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Items}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6477,7 +6609,7 @@ path:List&lt;IRI&gt;}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -6485,6 +6617,8 @@ path:List&lt;IRI&gt;}</string>
 
 \f0\fs16 \cf0 shape:Shape\
 path:List&lt;IRI&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6531,6 +6665,8 @@ path:List&lt;IRI&gt;}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6625,13 +6761,15 @@ path:List&lt;IRI&gt;}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Edges}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6677,7 +6815,7 @@ path:List&lt;IRI&gt;}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -6686,6 +6824,8 @@ path:List&lt;IRI&gt;}</string>
 \f0\fs16 \cf0 shape:Shape\
 offset:int\
 limit:int}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6732,6 +6872,8 @@ limit:int}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6929,13 +7071,15 @@ limit:int}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\fs16 \cf0 IRI}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -6974,13 +7118,15 @@ limit:int}</string>
 									<key>Text</key>
 									<dict>
 										<key>Text</key>
-										<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+										<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Frame}</string>
+										<key>TextAlongPathGlyphAnchor</key>
+										<string>left</string>
 										<key>VerticalPad</key>
 										<real>2</real>
 									</dict>
@@ -7016,13 +7162,15 @@ limit:int}</string>
 										<key>Align</key>
 										<integer>0</integer>
 										<key>Text</key>
-										<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+										<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 value:Value}</string>
+										<key>TextAlongPathGlyphAnchor</key>
+										<string>left</string>
 										<key>VerticalPad</key>
 										<real>2</real>
 									</dict>
@@ -7057,6 +7205,8 @@ limit:int}</string>
 									<dict>
 										<key>Align</key>
 										<integer>0</integer>
+										<key>TextAlongPathGlyphAnchor</key>
+										<string>left</string>
 										<key>VerticalPad</key>
 										<real>2</real>
 									</dict>
@@ -7246,7 +7396,7 @@ limit:int}</string>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{687.53551246728864, 118.48868210540972}</string>
+								<string>{687.53551246728864, 118.48868210540974}</string>
 							</dict>
 						</array>
 					</dict>
@@ -7259,7 +7409,7 @@ limit:int}</string>
 					<key>Points</key>
 					<array>
 						<string>{637.67330717705761, 102.3036423752627}</string>
-						<string>{687.53551246728864, 118.48868210540972}</string>
+						<string>{687.53551246728864, 118.48868210540974}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7329,13 +7479,15 @@ limit:int}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Issue}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -7371,7 +7523,7 @@ limit:int}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -7380,6 +7532,8 @@ limit:int}</string>
 \f0\fs16 \cf0 level\
 message\
 shape}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -7414,6 +7568,8 @@ shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -7595,13 +7751,15 @@ shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Focus}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -7648,6 +7806,8 @@ shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -7694,6 +7854,8 @@ shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -7830,6 +7992,11 @@ shape}</string>
 						<string>NO</string>
 					</dict>
 				</dict>
+				<key>Text</key>
+				<dict>
+					<key>TextAlongPathGlyphAnchor</key>
+					<string>center</string>
+				</dict>
 			</dict>
 			<key>BaseZoom</key>
 			<integer>0</integer>
@@ -7865,20 +8032,20 @@ shape}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{184.41732448067256, 159.88043750490127}</string>
+								<string>{184.15732448067257, 159.88043750490127}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{184.64138258024875, 149.22047349543084}</string>
+								<string>{184.48342949907001, 149.22047349543084}</string>
 							</dict>
 						</array>
 					</dict>
 					<key>Points</key>
 					<array>
-						<string>{184.41732448067256, 159.88043750490127}</string>
-						<string>{184.64138258024875, 149.22047349543084}</string>
+						<string>{184.15732448067257, 159.88043750490127}</string>
+						<string>{184.48342949907001, 149.22047349543084}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7919,7 +8086,7 @@ shape}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{166.41732448067256, 159.88043750490127}, {36, 15}}</string>
+							<string>{{166.41732448067256, 159.88043750490127}, {35.480000000000004, 14.2320556640625}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -7944,20 +8111,22 @@ shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Field*}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{166.41732448067256, 174.88043750490127}, {36, 25}}</string>
+							<string>{{166.41732448067256, 174.11249316896377}, {35.480000000000004, 34.6719970703125}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -7984,14 +8153,17 @@ shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 :IRI\
+inverse\
 :Shape}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>center</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -8000,7 +8172,7 @@ shape}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{166.41732448067256, 199.88043750490127}, {36, 16}}</string>
+							<string>{{166.41732448067256, 208.78449023927627}, {35.480000000000004, 16}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -8026,6 +8198,8 @@ shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -8108,13 +8282,15 @@ shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-BoldItalic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\i\b\fs16 \cf0 \ul \ulc0 Trait*}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -8148,7 +8324,7 @@ shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8156,6 +8332,8 @@ shape}</string>
 
 \f0\i\fs16 \cf0 :List&lt;IRI&gt;\
 :Shape}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -8190,6 +8368,8 @@ shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -8532,7 +8712,7 @@ shape}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8540,6 +8720,8 @@ shape}</string>
 
 \f0\fs18 \cf0 \expnd0\expndtw0\kerning0
 sh:hasValue}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -8581,7 +8763,7 @@ sh:hasValue}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8591,6 +8773,8 @@ sh:hasValue}</string>
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 \cf0 \expnd0\expndtw0\kerning0
 sh:ignoredProperties}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -8709,7 +8893,7 @@ sh:ignoredProperties}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8717,6 +8901,8 @@ sh:ignoredProperties}</string>
 
 \f0\fs18 \cf0 \expnd0\expndtw0\kerning0
 sh:closed by default}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -8835,7 +9021,7 @@ sh:closed by default}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8843,6 +9029,8 @@ sh:closed by default}</string>
 
 \f0\fs18 \cf0 \expnd0\expndtw0\kerning0
 sh:node}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -8896,7 +9084,7 @@ sh:node}</string>
 					<key>Text</key>
 					<dict>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8904,6 +9092,8 @@ sh:node}</string>
 
 \f0\fs18 \cf0 \expnd0\expndtw0\kerning0
 sh:qualifiedValueShape}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -8940,7 +9130,7 @@ sh:qualifiedValueShape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 AppleSymbols;\f1\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8951,6 +9141,8 @@ sh:qualifiedValueShape}</string>
 \f0\b0 \uc0\u8811 
 \f1\b \
 Relation}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -8986,7 +9178,7 @@ Relation}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -8996,6 +9188,8 @@ Relation}</string>
 disjoint\
 lt\
 lte}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9167,13 +9361,15 @@ lte}</string>
 						<key>Align</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\i\fs14 \cf0 merges sh:datatype and sh:nodeKind }</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>3</real>
 					</dict>
@@ -9222,13 +9418,15 @@ lte}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Meta}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9276,7 +9474,7 @@ lte}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -9284,6 +9482,8 @@ lte}</string>
 
 \f0\fs16 \cf0 :IRI\
 :Value}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9330,6 +9530,8 @@ lte}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9426,13 +9628,15 @@ lte}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-BoldItalic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\i\b\fs16 \cf0 \ul \ulc0 Xor}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9478,13 +9682,15 @@ lte}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\i\fs16 \cf0 :Set&lt;Shape&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9529,6 +9735,8 @@ lte}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9623,13 +9831,15 @@ lte}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-BoldItalic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\i\b\fs16 \cf0 \ul \ulc0 Lang}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9675,13 +9885,15 @@ lte}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\i\fs16 \cf0 :Set&lt;Tag&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9726,6 +9938,8 @@ lte}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9923,13 +10137,15 @@ lte}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 In}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -9975,13 +10191,15 @@ lte}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 :Set&lt;Value&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10028,6 +10246,8 @@ lte}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10122,13 +10342,15 @@ lte}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Like*}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10174,13 +10396,15 @@ lte}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 text:String}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10227,6 +10451,8 @@ lte}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10321,13 +10547,15 @@ lte}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Guard*}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10373,7 +10601,7 @@ lte}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -10381,6 +10609,8 @@ lte}</string>
 
 \f0\fs16 \cf0 axis:IRI\
 values:Set&lt;Value&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10427,6 +10657,8 @@ values:Set&lt;Value&gt;}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10521,13 +10753,15 @@ values:Set&lt;Value&gt;}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 All*}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10573,13 +10807,15 @@ values:Set&lt;Value&gt;}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 :Set&lt;Value&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10626,6 +10862,8 @@ values:Set&lt;Value&gt;}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10720,13 +10958,15 @@ values:Set&lt;Value&gt;}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-BoldItalic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\i\b\fs16 \cf0 \ul \ulc0 Pair}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10772,7 +11012,7 @@ values:Set&lt;Value&gt;}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -10781,6 +11021,8 @@ values:Set&lt;Value&gt;}</string>
 \f0\i\fs16 \cf0 x:List&lt;IRI&gt;\
 y:List&lt;IRI&gt;\
 :Relation}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10827,6 +11069,8 @@ y:List&lt;IRI&gt;\
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10921,13 +11165,15 @@ y:List&lt;IRI&gt;\
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Pattern}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -10973,7 +11219,7 @@ y:List&lt;IRI&gt;\
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -10981,6 +11227,8 @@ y:List&lt;IRI&gt;\
 
 \f0\fs16 \cf0 expression:String\
 flags:Strings}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11027,6 +11275,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11121,13 +11371,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 MaxExclusive}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11175,13 +11427,15 @@ flags:Strings}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 limit:Value}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11226,6 +11480,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11320,13 +11576,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 MinExclusive}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11374,13 +11632,15 @@ flags:Strings}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 limit:Value}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11425,6 +11685,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11507,13 +11769,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-BoldItalic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\i\b\fs16 \cf0 \ul \ulc0 Partition*}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11548,6 +11812,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11580,6 +11846,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11674,13 +11942,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-BoldItalic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\i\b\fs16 \cf0 \ul \ulc0 UniqueLang}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11727,6 +11997,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11773,6 +12045,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11869,13 +12143,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 MaxLength}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11923,13 +12199,15 @@ flags:Strings}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 limit:int}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -11974,6 +12252,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12068,13 +12348,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 MinLength}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12120,13 +12402,15 @@ flags:Strings}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 limit:int}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12171,6 +12455,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12265,13 +12551,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 MaxInclusive}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12317,13 +12605,15 @@ flags:Strings}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 limit:Value}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12368,6 +12658,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12462,13 +12754,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 MinInclusive}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12516,13 +12810,15 @@ flags:Strings}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 limit:Value}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12567,6 +12863,8 @@ flags:Strings}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12661,13 +12959,15 @@ flags:Strings}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 When*}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12713,7 +13013,7 @@ flags:Strings}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
@@ -12722,6 +13022,8 @@ flags:Strings}</string>
 \f0\fs16 \cf0 test:Shape\
 pass:Shape\
 fail:Shape}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12766,6 +13068,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12860,13 +13164,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 MaxCount}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12912,13 +13218,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 limit:int}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -12963,6 +13271,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13057,13 +13367,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-BoldItalic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\i\b\fs16 \cf0 \ul \ulc0 Not}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13109,13 +13421,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\i\fs16 \cf0 :Shape}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13160,6 +13474,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13254,13 +13570,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Or}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13306,13 +13624,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 :Set&lt;Shape&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13357,6 +13677,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13451,13 +13773,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Any*}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13503,13 +13827,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 :Set&lt;Value&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13556,6 +13882,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13650,13 +13978,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Clazz}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13704,13 +14034,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 :IRI}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13755,6 +14087,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13849,13 +14183,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Datatype}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13903,13 +14239,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 :IRI}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -13954,6 +14292,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14252,13 +14592,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 And}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14304,13 +14646,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 :Set&lt;Shape&gt;}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14357,6 +14701,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14556,13 +14902,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 Shape}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14610,13 +14958,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 map(:Probe&lt;T&gt;):T}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14712,13 +15062,15 @@ fail:Shape}</string>
 							<key>Text</key>
 							<dict>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f0\b\fs16 \cf0 MinCount}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14764,13 +15116,15 @@ fail:Shape}</string>
 								<key>Align</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f0\fs16 \cf0 limit:int}</string>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14815,6 +15169,8 @@ fail:Shape}</string>
 							<dict>
 								<key>Align</key>
 								<integer>0</integer>
+								<key>TextAlongPathGlyphAnchor</key>
+								<string>left</string>
 								<key>VerticalPad</key>
 								<real>2</real>
 							</dict>
@@ -14913,13 +15269,15 @@ fail:Shape}</string>
 						<key>Pad</key>
 						<real>9</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qr\partightenfactor0
 
 \f0\fs36 \cf0 annotations}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>6</real>
 					</dict>
@@ -14974,13 +15332,15 @@ fail:Shape}</string>
 						<key>Pad</key>
 						<real>9</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qr\partightenfactor0
 
 \f0\fs36 \cf0 traversable}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>6</real>
 					</dict>
@@ -15035,13 +15395,15 @@ fail:Shape}</string>
 						<key>Pad</key>
 						<real>9</real>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf400
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qr\partightenfactor0
 
 \f0\fs36 \cf0 constraints}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>left</string>
 						<key>VerticalPad</key>
 						<real>6</real>
 					</dict>
@@ -15131,7 +15493,7 @@ fail:Shape}</string>
 		<string>{{-35, 0}, {877.85909712722298, 537}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
-			<string>com.omnigroup.OmniGraffle.inspectorGroup.properties</string>
+			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
 		</array>
 		<key>ZoomValues</key>
 		<array>

@@ -20,8 +20,6 @@ package com.metreeca.rest;
 import com.metreeca.form.things.Codecs;
 
 import java.io.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,24 +34,21 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 		if ( response != null ) {
 
-			response.pipe(output(), output -> Result.Value(new Consumer<Supplier<OutputStream>>() { // cache output
+			response.body(output()).value().ifPresent(output -> {
 
-				private byte[] data;
+				final byte[] data;
 
-				@Override public void accept(final Supplier<OutputStream> supplier) {
+				try (final ByteArrayOutputStream out=new ByteArrayOutputStream(1000)) {
 
-					if ( data == null ) {
+					output.accept(() -> out);
 
-						try (final ByteArrayOutputStream out=new ByteArrayOutputStream(1000)) {
+					data=out.toByteArray();
 
-							output.accept(() -> out);
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
 
-							data=out.toByteArray();
-
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
-					}
+				response.body(output(), supplier -> { // cache output
 
 					try (final OutputStream out=supplier.get()) {
 
@@ -62,22 +57,12 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-				}
 
-			}));
+				});
 
-			response.body(input(), output().map(output -> () -> { // make output readable for testing purposes
-				try (final ByteArrayOutputStream out=new ByteArrayOutputStream(1000)) {
+				response.body(input(), () -> new ByteArrayInputStream(data)); // make output readable for testing
 
-					output.accept(() -> out);
-
-					return new ByteArrayInputStream(out.toByteArray());
-
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
-				}
-			}));
-
+			});
 
 			final StringBuilder builder=new StringBuilder(2500);
 
@@ -101,7 +86,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 			});
 
 			Logger.getLogger(response.getClass().getName()).log(
-					response.success() ? Level.INFO : Level.WARNING,
+					response.status() < 400 ? Level.INFO : response.status() < 500 ? Level.WARNING : Level.SEVERE,
 					builder.toString(),
 					response.cause().orElse(null)
 			);

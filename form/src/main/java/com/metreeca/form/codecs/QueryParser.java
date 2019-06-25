@@ -25,6 +25,7 @@ import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
+import com.metreeca.form.things.Codecs;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -39,6 +40,7 @@ import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.form.things.Codecs.decode;
 import static com.metreeca.form.things.Values.format;
 
 import static java.util.Collections.disjoint;
@@ -75,36 +77,51 @@ public final class QueryParser extends JSONDecoder {
 	/**
 	 * Parses a JSON object encoding a query.
 	 *
-	 * @param json the JSON object encoding a shape-driven linked data query
+	 * @param query either a URL-encoded JSON object or URL query parameters representing a shape-driven linked data
+	 *              query
 	 *
 	 * @return the parsed query
 	 *
-	 * @throws NullPointerException   if {@code json} is null
-	 * @throws JsonException          if {@code json} is malformed
-	 * @throws NoSuchElementException if the query encoded by {@code json} referes to data outside the {@linkplain
+	 * @throws NullPointerException   if {@code query} is null
+	 * @throws JsonException          if {@code query} is malformed
+	 * @throws NoSuchElementException if the query encoded by {@code query} referes to data outside the {@linkplain
 	 *                                #QueryParser(Shape, String) parser shape}
 	 */
-	public Query parse(final String json) throws JsonException {
+	public Query parse(final String query) throws JsonException, NoSuchElementException {
 
-		if ( json == null ) {
-			throw new NullPointerException("null json");
+		if ( query == null ) {
+			throw new NullPointerException("null query");
 		}
 
-		final JsonObject query=Optional.of(json)
-				.filter(v -> !v.isEmpty())
+		return query.isEmpty() ? Edges.edges(shape)
+				: query.startsWith("%7B") ? json(decode(query))
+				: query.startsWith("{") ? json(query)
+				: form(query);
+
+	}
+
+
+	private Query json(final String query) {
+		return json(Optional
+				.of(query)
 				.map(v -> Json.createReader(new StringReader(v)).readValue())
-				.map(v -> v instanceof JsonObject ? (JsonObject)v : error("filter is not an object"))
-				.orElse(JsonValue.EMPTY_JSON_OBJECT);
+				.filter(v -> v instanceof JsonObject)
+				.map(JsonValue::asJsonObject)
+				.orElseGet(() -> error("filter is not an object"))
+		);
+	}
 
-		final Shape filter=filter(query);
+	private Query json(final JsonObject json) {
 
-		final List<IRI> stats=stats(query);
-		final List<IRI> items=items(query);
+		final Shape filter=filter(json);
 
-		final List<Order> order=order(query);
+		final List<IRI> stats=stats(json);
+		final List<IRI> items=items(json);
 
-		final int offset=offset(query);
-		final int limit=limit(query);
+		final List<Order> order=order(json);
+
+		final int offset=offset(json);
+		final int limit=limit(json);
 
 		final Shape merged=filter == null ? shape
 				: and(shape, com.metreeca.form.Shape.filter().then(filter)); // mark as filtering only >> don't include in results
@@ -114,7 +131,52 @@ public final class QueryParser extends JSONDecoder {
 		return stats != null ? Stats.stats(optimized, stats)
 				: items != null ? Items.items(optimized, items)
 				: Edges.edges(optimized, order, offset, limit);
+	}
 
+
+	private Query form(final String query) {
+
+		final JsonObjectBuilder json=Json.createObjectBuilder();
+		final JsonObjectBuilder filter=Json.createObjectBuilder();
+		final JsonArrayBuilder orders=Json.createArrayBuilder();
+
+		Codecs.parameters(query).forEach((path, values) -> {
+
+			switch ( path ) {
+
+				case "_order":
+
+					values.forEach(orders::add);
+
+					break;
+
+				case "_offset":
+				case "_limit":
+
+					values.stream()
+							.map(s -> {
+								try { return Integer.parseInt(s); } catch ( NumberFormatException e ) { return null; }
+							})
+							.filter(Objects::nonNull)
+							.findFirst()
+							.ifPresent(i -> json.add(path.substring(1), i));
+
+					break;
+
+				default:
+
+					filter.add(path, Json.createArrayBuilder(values));
+
+					break;
+			}
+
+		});
+
+		return json(json
+				.add("filter", filter)
+				.add("order", orders)
+				.build()
+		);
 	}
 
 
@@ -201,7 +263,7 @@ public final class QueryParser extends JSONDecoder {
 
 				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : error("offset not a number"))
 				.map(JsonNumber::intValue)
-				.map(v ->v >= 0 ? v : error("negative offset"))
+				.map(v -> v >= 0 ? v : error("negative offset"))
 
 				.orElse(0);
 	}

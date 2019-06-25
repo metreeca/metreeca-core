@@ -30,18 +30,19 @@ import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.function.BiFunction;
 
 import javax.json.JsonValue;
 
+import static com.metreeca.form.things.Shapes.container;
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Response.NotImplemented;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.form.things.Shapes.container;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.eclipse.rdf4j.repository.util.Connections.getStatement;
@@ -121,7 +122,7 @@ public final class Creator extends Actor {
 	 *
 	 * @return a slug generator returning a new random UUID for each call
 	 */
-	public static BiFunction<Request, Collection<Statement>, String> uuid() {
+	public static BiFunction<Request, Model, String> uuid() {
 		return (request, model) -> randomUUID().toString();
 	}
 
@@ -150,7 +151,7 @@ public final class Creator extends Actor {
 	 */
 	private final Object lock=new Object();
 
-	private final BiFunction<Request, Collection<Statement>, String> slug;
+	private final BiFunction<Request, Model, String> slug;
 
 
 	/**
@@ -170,7 +171,7 @@ public final class Creator extends Actor {
 	 *
 	 * @throws NullPointerException if {@code slug} is null
 	 */
-	public Creator(final BiFunction<Request, Collection<Statement>, String> slug) {
+	public Creator(final BiFunction<Request, Model, String> slug) {
 
 		if ( slug == null ) {
 			throw new NullPointerException("null slug");
@@ -194,7 +195,8 @@ public final class Creator extends Actor {
 				rdf -> {
 					synchronized ( lock ) { // attempt to serialize slug operations from multiple txns
 
-						final String name=slug.apply(request, rdf);
+						final String name=slug.apply(request, 						rdf instanceof Model? (Model)rdf : new LinkedHashModel(rdf)
+								);
 
 						if ( name == null ) {
 							throw new NullPointerException("null resource name");

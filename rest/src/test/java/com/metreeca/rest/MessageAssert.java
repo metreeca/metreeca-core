@@ -62,13 +62,15 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		if ( !Objects.equals(actual.item(), item)) {
+		if ( !Objects.equals(actual.item(), item) ) {
 			failWithMessage("expected message to have <%s> item but has <%s>", item, actual.item());
 		}
 
 		return myself;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public A hasHeader(final String name) {
 
@@ -111,6 +113,30 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		return myself;
 	}
 
+	public A hasHeader(final String name, final Consumer<String> assertions) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( assertions == null ) {
+			throw new NullPointerException("null assertions");
+		}
+
+		isNotNull();
+
+		final String value=actual.header(name).orElse(null);
+
+
+		if ( value == null ) {
+			failWithMessage("expected message to have <%s> headers but has none", name);
+		}
+
+		assertions.accept(value);
+
+		return myself;
+	}
+
 	public A doesNotHaveHeader(final String name) {
 
 		if ( name == null ) {
@@ -138,7 +164,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		if ( values == null ) {
 			throw new NullPointerException("null values");
 		}
-
 
 		isNotNull();
 

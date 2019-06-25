@@ -5,13 +5,13 @@ excerpt:    Linked data shape specification language semantics and components
 
 Most framework services are driven by declarative linked data models defined using a [SHACL](https://www.w3.org/TR/shacl/)‑based [shape](#shapes) specification language.
 
-Models are [programmaticaly](../how-to/publish-ldp-apis) built using a Java‑based DSL and can eventually automate a range of different tasks in the lifecycle of linked data REST APIs.
+Models are [programmaticaly](../tutorials/publishing-ldp-apis) built using a Java‑based DSL and can eventually automate a range of different tasks in the lifecycle of linked data REST APIs.
 
 | task                | shape role                                                   |
 | ------------------- | ------------------------------------------------------------ |
-| data selection      | RDF data retrieved from [readable](../how-to/interact-with-ldp-apis#read-operations) linked data REST APIs is selected from the underlying graph storage layer by SPARQL queries derived from the associated linked data models |
-| data validation     | RDF data submitted to [writable](../how-to/interact-with-ldp-apis#write-operations) linked data REST APIs on resource creation and updating is automatically validated against the associated linked data models |
-| faceted search      | [faceted search](../how-to/interact-with-ldp-apis#faceted-search) and ancillary facet-populating queries are managed by the system on the basis of structural and typing constraints specified in linked data models associated with target linked data REST APIs |
+| data selection      | RDF data retrieved from [readable](../tutorials/interacting-with-ldp-apis#read-operations) linked data REST APIs is selected from the underlying graph storage layer by SPARQL queries derived from the associated linked data models |
+| data validation     | RDF data submitted to [writable](../tutorials/interacting-with-ldp-apis#write-operations) linked data REST APIs on resource creation and updating is automatically validated against the associated linked data models |
+| faceted search      | [faceted search](../tutorials/interacting-with-ldp-apis#faceted-search) and ancillary facet-populating queries are managed by the system on the basis of structural and typing constraints specified in linked data models associated with target linked data REST APIs |
 | dynamic UI building | Interactive linked data navigators and editing forms could be dynamically created and laid out according to the linked data models associated with linked data REST APIs |
 | API documentation   | Human and machine readable docs for linked data REST APIs could be dynamically derived from associated linked data models and published as hypertexts and [OpenAPI](https://www.openapis.org)/[Swagger](https://swagger.io/specification/) specs |
 | data ingestion      | RDF data ingested from external data sources could be dynamically mapped to and validated against the linked data models associated with target RDF graphs |

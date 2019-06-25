@@ -19,13 +19,16 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
-import com.metreeca.form.probes.*;
+import com.metreeca.form.probes.Optimizer;
+import com.metreeca.form.probes.Outliner;
+import com.metreeca.form.probes.Redactor;
+import com.metreeca.form.things.Shapes;
 import com.metreeca.form.things.Structures;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.form.things.Shapes;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.Set;
@@ -38,7 +41,6 @@ import static com.metreeca.form.things.Structures.envelope;
 import static com.metreeca.form.things.Structures.network;
 import static com.metreeca.rest.Handler.forbidden;
 import static com.metreeca.rest.Handler.refused;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.stream.Collectors.toList;
@@ -169,32 +171,34 @@ public final class Throttler implements Wrapper {
 			final Shape shape=request.shape();
 			final Set<IRI> roles=request.roles();
 
-			if ( pass(shape) ) {
+			if ( pass(shape) ) { // no driving shape
 
 				return handler.handle(request);
 
-			} else {
+			} else { // authorize ignoring annotations and filtering-only constraints
 
-				// remove annotations and filtering-only constraints for authorization checks
-
-				final Shape general=shape
+				final Shape baseline=shape // visible to anyone regardless of task/view
 						.map(convey)
 						.map(anyone);
 
-				final Shape authorized=shape
+				final Shape authorized=shape // visible to the user regardless of task/view
 						.map(convey)
 						.map(new Redactor(Form.role, roles))
 						.map(new Optimizer());
 
-				final Shape redacted=shape
+				final Shape redacted=shape // effective shape taking into account user/task/view
 						.map(common)
 						.map(new Redactor(Form.role, roles))
 						.map(new Optimizer());
 
-				return empty(general) ? forbidden(request)
+				return empty(baseline) ? forbidden(request)
 						: empty(authorized) ? refused(request)
-						: handler.handle(request.shape(redacted)
-						.pipe(rdf(), rdf -> Value(expand(focus, authorized, rdf)))
+						: request.shape(redacted).body(rdf()).fold(
+
+						rdf -> handler.handle(request.body(rdf(), expand(focus, authorized, rdf))),
+
+						failure -> failure.equals(Body.Missing) ? handler.handle(request) : request.reply(failure)
+
 				);
 
 			}
@@ -208,21 +212,30 @@ public final class Throttler implements Wrapper {
 			final IRI item=request.item();
 			final Shape shape=response.shape().map(convey);
 
-			if ( pass(shape) ) {
+			if ( pass(shape) ) { // no driving shape
 
-				return response.shape(shape)
-						.pipe(rdf(), rdf -> Value(network(item, rdf)));
+				return response.shape(shape).body(rdf()).fold(
+
+						rdf -> response.body(rdf(), network(item, rdf)),
+
+						failure -> failure.equals(Body.Missing) ? response : response.map(failure)
+
+				);
 
 			} else {
 
-				final Shape redacted=shape
+				final Shape redacted=shape // effective shape taking into account user/task/view
 
 						.map(new Redactor(Form.role, request.roles()))
 						.map(new Optimizer());
 
-				return response.shape(redacted)
-						.pipe(rdf(), rdf -> Value(envelope(item, redacted, rdf)))
-						.pipe(rdf(), rdf -> Value(expand(item, redacted, rdf)));
+				return response.shape(redacted).body(rdf()).fold(
+
+						rdf -> response.body(rdf(), expand(item, redacted, envelope(item, redacted, rdf))),
+
+						failure -> failure.equals(Body.Missing) ? response : response.map(failure)
+
+				);
 
 			}
 
@@ -232,7 +245,9 @@ public final class Throttler implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private <V extends Collection<Statement>> V expand(final IRI resource, final Shape shape, final V model) {
+	private Collection<Statement> expand(final IRI resource, final Shape shape, final Collection<Statement> rdf) {
+
+		final Collection<Statement> model=new LinkedHashModel(rdf);
 
 		model.addAll(shape // add implied statements
 				.map(new Outliner(resource)) // shape already redacted for convey mode

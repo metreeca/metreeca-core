@@ -10,17 +10,14 @@
           </option>
           <option name="goals">
             <list>
-              <option value="clean" />
-              <option value="validate" />
+              <option value="resources:resources" />
               <option value="site" />
               <option value="site:stage" />
             </list>
           </option>
           <option name="pomFileName" />
           <option name="profilesMap">
-            <map>
-              <entry key="release" value="true" />
-            </map>
+            <map />
           </option>
           <option name="resolveToWorkspace" value="false" />
           <option name="workingDirPath" value="$PROJECT_DIR$" />

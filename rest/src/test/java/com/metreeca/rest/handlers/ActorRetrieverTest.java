@@ -103,7 +103,7 @@ final class ActorRetrieverTest extends ActorProcessorTest {
 	}
 
 	private List<Statement> graph(final String sparql) {
-		return GraphTest.graph(sparql)
+		return GraphTest.model(sparql)
 
 				.stream()
 

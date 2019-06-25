@@ -21,7 +21,6 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.Formats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -39,7 +38,6 @@ import java.util.Map;
 
 import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.bodies.OutputBody.output;
-import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.Boolean.parseBoolean;
 
@@ -50,68 +48,25 @@ import static java.lang.Boolean.parseBoolean;
  * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
  * Graph#graph() graph database}.</p>
  *
- * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
- * role}, unless otherwise {@linkplain #publik(boolean) specified}; update operations are always restricted to users in
- * the {@linkplain Form#root root} role.</p>
+ * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
+ * to users in the {@linkplain Form#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
  *
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
-public final class SPARQL extends Delegator {
-
-	private int timeout=60; // endpoint operations timeout [s]
-	private boolean publik; // public availability of the endpoint
-
-	private final Graph graph=tool(Graph.graph());
-
+public final class SPARQL extends Endpoint<SPARQL> {
 
 	public SPARQL() {
 		delegate(new Worker()
 				.get(this::process)
-				.post(this::process));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Configures timeout for endpoint requests.
-	 *
-	 * @param timeout the timeout for endpoint requests in seconds or 0 to disable timeouts
-	 *
-	 * @return this endpoint handler
-	 *
-	 * @throws IllegalArgumentException if {@code timeout} is less than 0
-	 */
-	public SPARQL timeout(final int timeout) {
-
-		if ( timeout < 0 ) {
-			throw new IllegalArgumentException("illegal timeout ["+timeout+"]");
-		}
-
-		this.timeout=timeout;
-
-		return this;
-	}
-
-	/**
-	 * Configures public visibility for query endpoint operations.
-	 *
-	 * @param publik {@code true} if query endpoint operations should be available to any user; {@code false} otherwise
-	 *
-	 * @return this endpoint handler
-	 */
-	public SPARQL publik(final boolean publik) {
-
-		this.publik=publik;
-
-		return this;
+				.post(this::process)
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder process(final Request request) {
-		return consumer -> graph.query(connection -> {
+		return consumer -> graph().query(connection -> {
 			try {
 
 				final Operation operation=operation(request, connection);
@@ -124,7 +79,9 @@ public final class SPARQL extends Delegator {
 							.cause("missing query/update parameter")
 					).accept(consumer);
 
-				} else if ( !(publik && operation instanceof Query || request.role(Form.root)) ) {
+				} else if ( operation instanceof Query && !queryable(request.roles())
+						|| operation instanceof Update && !updatable(request.roles())
+				) {
 
 					refused(request).accept(consumer);
 
@@ -238,7 +195,7 @@ public final class SPARQL extends Delegator {
 			nameds.stream().distinct().forEachOrdered(named -> dataset.addNamedGraph(factory.createIRI(named)));
 
 			operation.setDataset(dataset);
-			operation.setMaxExecutionTime(timeout);
+			operation.setMaxExecutionTime(timeout());
 			operation.setIncludeInferred(infer.isEmpty() || parseBoolean(infer));
 
 		}

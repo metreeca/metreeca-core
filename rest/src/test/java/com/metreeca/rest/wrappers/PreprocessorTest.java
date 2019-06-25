@@ -18,8 +18,8 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.truths.ModelAssert;
+import com.metreeca.rest.HandlerTest;
 import com.metreeca.rest.Request;
-import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.sparql;
 import static com.metreeca.rest.HandlerTest.echo;
@@ -39,10 +40,6 @@ import static java.util.Arrays.asList;
 
 
 final class PreprocessorTest {
-
-	private void exec(final Runnable... tasks) {
-		new Tray().exec(tasks).clear();
-	}
 
 
 	private BiFunction<Request, Model, Model> pre(final Value value) {
@@ -59,11 +56,11 @@ final class PreprocessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessRequestRDFPayload() {
-		exec(() -> echo()
+		HandlerTest.exec(() -> echo()
 
 				.with(new Preprocessor(pre(RDF.FIRST), pre(RDF.REST))) // multiple filters to test piping
 
-				.handle(new Request())
+				.handle(new Request().body(rdf(), set()))
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
@@ -78,13 +75,13 @@ final class PreprocessorTest {
 	}
 
 	@Test void testSupportSPARQLGraphQueries() {
-		exec(() -> echo()
+		HandlerTest.exec(() -> echo()
 
 				.with(new Preprocessor(query(sparql(
 						"construct { <> rdf:value rdf:first, rdf:rest } where {}"
 				))))
 
-				.handle(new Request())
+				.handle(new Request().body(rdf(), set()))
 
 				.accept(response -> assertThat(response)
 						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)

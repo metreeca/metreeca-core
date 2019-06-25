@@ -18,39 +18,53 @@
 package com.metreeca.gate.wrappers;
 
 import com.metreeca.form.Form;
+import com.metreeca.gate.Roster;
 import com.metreeca.gate.RosterAssert;
 import com.metreeca.gate.RosterAssert.MockRoster;
 import com.metreeca.rest.*;
 import com.metreeca.tray.Tray;
+import com.metreeca.tray.sys.ClockTest.MockClock;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.metreeca.form.things.JsonValues.field;
 import static com.metreeca.form.things.JsonValues.object;
+import static com.metreeca.form.things.JsonValues.value;
+import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.gate.Roster.roster;
-import static com.metreeca.gate.RosterAssert.user;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.sys.Clock.clock;
+
+import static java.lang.Math.max;
 
 
 final class ManagerTest {
 
-	private static final int SoftExpiry=100;
-	private static final int HardExpiry=200;
+	private static final long SoftTimeout=Duration.ofHours(1).toMillis();
+	private static final long HardTimeout=Duration.ofDays(1).toMillis();
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final MockClock clock=new MockClock();
+	private final Roster roster=new MockRoster(entry("faussone", "faussone"));
 
 	private void exec(final Runnable... tasks) {
 		new Tray()
 
-				.set(roster(), () -> new MockRoster("faussone"))
+				.set(clock(), () -> clock.time(0))
+				.set(roster(), () -> roster)
 
 				.exec(tasks)
 
@@ -59,7 +73,7 @@ final class ManagerTest {
 
 
 	private Wrapper manager() {
-		return new Manager("/~", SoftExpiry, HardExpiry);
+		return new Manager("/~", SoftTimeout, HardTimeout);
 	}
 
 	private Handler handler(final Function<IRI, Integer> status) {
@@ -67,15 +81,90 @@ final class ManagerTest {
 	}
 
 
+	private Consumer<BiConsumer<Handler, String>> authenticate(final Handler handler) {
+		return consumer -> handler
+
+				// open session
+
+				.handle(new Request()
+						.method(Request.POST)
+						.path("/~")
+						.body(json(), object(
+								field("handle", "faussone"),
+								field("secret", "faussone")
+						))
+				)
+
+				// handle requests
+
+				.accept(response -> consumer.accept(handler, response
+
+						.header("Set-Cookie")
+						.map(cookie -> cookie.substring(0, max(0, cookie.indexOf(';'))))
+						.orElse("")
+
+				));
+	}
+
+
 	@Nested final class Management {
 
-		@Test void testOpenSession() {
+		@Test void testQuerySessionAnonymous() {
+			exec(() -> manager()
+
+					.wrap(handler(user -> Response.OK))
+
+					.handle(new Request()
+							.method(Request.GET)
+							.path("/~")
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.OK)
+							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+									.contains("timeout=0")
+							)
+							.hasBody(json(), json -> assertThat(json)
+									.isEqualTo(object())
+							)
+					)
+			);
+		}
+
+		@Test void testQuerySessionIdentified() {
+			exec(() -> authenticate(manager()
+
+					.wrap(handler(user -> Response.OK))
+
+			).accept((handler, cookie) -> handler
+
+					.handle(new Request()
+							.method(Request.GET)
+							.path("/~")
+							.header("Cookie", cookie)
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.OK)
+							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+									.contains("timeout=")
+							)
+							.hasBody(json(), json -> assertThat(json)
+									.hasField("user", value("faussone"))
+							)
+					)
+			));
+		}
+
+
+		@Test void testCreateSession() {
 			exec(() -> manager()
 
 					.wrap(handler(user -> Response.OK))
 
 					.handle(new Request()
 							.method(Request.POST)
+							.base("http://examplecom/base/")
 							.path("/~")
 							.body(json(), object(
 									field("handle", "faussone"),
@@ -84,22 +173,28 @@ final class ManagerTest {
 					)
 
 					.accept(response -> assertThat(response)
-							.hasStatus(Response.Created)
-							.hasHeader("Authorization")
+							.hasStatus(Response.OK)
+							.hasHeader("Set-Cookie", cookie  -> Assertions.assertThat(cookie)
+									.contains("Path=/base/")
+							)
+							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+									.contains("timeout=")
+							)
 							.hasBody(json(), json -> assertThat(json)
-									.hasField("user", "faussone")
+									.hasField("user", value("faussone"))
 							)
 					)
 			);
 		}
 
-		@Test void testOpenSessionAndUpdateSecret() {
+		@Test void testCreateSessionAndUpdateSecret() {
 			exec(() -> manager()
 
 					.wrap(handler(user -> Response.OK))
 
 					.handle(new Request()
 							.method(Request.POST)
+							.base("http://example.com/base/")
 							.path("/~")
 							.body(json(), object(
 									field("handle", "faussone"),
@@ -110,24 +205,56 @@ final class ManagerTest {
 
 					.accept(response -> {
 
-								assertThat(response)
-										.hasStatus(Response.Created)
-										.hasHeader("Authorization")
-										.hasBody(json(), json -> assertThat(json)
-												.hasField("user", "faussone")
-										);
+						assertThat(response)
+								.hasStatus(Response.OK)
+								.hasHeader("Set-Cookie", cookie  -> Assertions.assertThat(cookie)
+										.contains("Path=/base/")
+								)
+								.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+										.contains("timeout=")
+								)
+								.hasBody(json(), json -> assertThat(json)
+										.hasField("user", value("faussone"))
+								);
 
-								RosterAssert.assertThat(tool(roster()))
-										.hasUser(user("faussone"), "new-secret")
-										.doesNotHaveUser(user("faussone"), "faussone");
+						RosterAssert.assertThat(tool(roster()))
+								.hasUser("faussone", "new-secret")
+								.doesNotHaveUser("faussone", "faussone");
 
-							}
+					})
+			);
+		}
+
+		@Test void testDeleteSession() {
+			exec(() -> manager()
+
+					.wrap(handler(user -> Response.OK))
+
+					.handle(new Request()
+							.method(Request.POST)
+							.base("http://example.com/base/")
+							.path("/~")
+							.body(json(), object())
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.OK)
+							.hasHeader("Set-Cookie", cookie -> Assertions.assertThat(cookie)
+									.startsWith(Manager.SessionCookie+"=;")
+									.contains("Path=/base/")
+							)
+							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+									.contains("timeout=0")
+							)
+							.hasBody(json(), json -> assertThat(json)
+									.isEqualTo(object())
+							)
 					)
 			);
 		}
 
 
-		@Test void testRejectedCredentials() {
+		@Test void testInvalidCredentials() {
 			exec(() -> manager()
 
 					.wrap(handler(user -> Response.OK))
@@ -143,6 +270,7 @@ final class ManagerTest {
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.Forbidden)
+							.doesNotHaveHeader("Set-Cookie")
 							.hasBody(json(), json -> assertThat(json)
 									.hasField("error")
 							)
@@ -158,11 +286,14 @@ final class ManagerTest {
 					.handle(new Request()
 							.method(Request.POST)
 							.path("/~")
-							.body(json(), object())
+							.body(json(), object(
+									field("handle", "")
+							))
 					)
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.BadRequest)
+							.doesNotHaveHeader("Set-Cookie")
 							.hasBody(json(), json -> assertThat(json)
 									.hasField("error")
 							)
@@ -173,30 +304,6 @@ final class ManagerTest {
 	}
 
 	@Nested final class Authentication {
-
-		private Consumer<BiConsumer<Handler, String>> authenticate(final Handler handler) {
-			return consumer -> handler
-
-					// open session
-
-					.handle(new Request()
-							.method(Request.POST)
-							.path("/~")
-							.body(json(), object(
-									field("handle", "faussone"),
-									field("secret", "faussone")
-							))
-					)
-
-					// handle requests
-
-					.accept(response -> consumer.accept(
-
-							handler, response.header("Authorization").orElse("")
-
-					));
-		}
-
 
 		@Nested final class Anonymous {
 
@@ -275,11 +382,11 @@ final class ManagerTest {
 
 						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
 
-				).accept((handler, authorization) -> handler
+				).accept((handler, cookie) -> handler
 
 						.handle(new Request()
 								.method(Request.GET)
-								.header("Authorization", authorization)
+								.header("Cookie", cookie)
 								.path("/resource")
 						)
 
@@ -296,7 +403,7 @@ final class ManagerTest {
 			}
 
 
-			@Test void testBadCredentials() {
+			@Test void testInvalidCookie() {
 				exec(() -> authenticate(manager()
 
 						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
@@ -305,7 +412,7 @@ final class ManagerTest {
 
 						.handle(new Request()
 								.method(Request.GET)
-								.header("Authorization", "Bearer qwertyuiop")
+								.header("Cookie", Manager.SessionCookie+"=qwertyuiop")
 								.path("/resource")
 						)
 
@@ -314,11 +421,8 @@ final class ManagerTest {
 								.as("error reported")
 								.hasStatus(Response.Unauthorized)
 
-								.as("challenge included with error")
-								.matches(r -> r
-										.header("WWW-Authenticate").orElse("")
-										.matches("Bearer realm=\".*\", error=\"invalid_token\"")
-								)
+								.as("challenge included")
+								.hasHeader("WWW-Authenticate")
 
 						)
 
@@ -330,11 +434,11 @@ final class ManagerTest {
 
 						.wrap(handler(user -> Response.Forbidden))
 
-				).accept((handler, authorization) -> handler
+				).accept((handler, cookie) -> handler
 
 						.handle(new Request()
 								.method(Request.GET)
-								.header("Authorization", authorization)
+								.header("Cookie", cookie)
 								.path("/resource")
 						)
 
@@ -356,11 +460,11 @@ final class ManagerTest {
 
 						.wrap(handler(user -> Response.Unauthorized))
 
-				).accept((handler, authorization) -> handler
+				).accept((handler, cookie) -> handler
 
 						.handle(new Request()
 								.method(Request.GET)
-								.header("Authorization", authorization)
+								.header("Cookie", cookie)
 								.path("/resource")
 						)
 
@@ -369,12 +473,8 @@ final class ManagerTest {
 								.as("error reported")
 								.hasStatus(Response.Unauthorized)
 
-
-								.as("challenge included without error")
-								.matches(r -> r
-										.header("WWW-Authenticate").orElse("")
-										.matches("Bearer realm=\".*\"")
-								)
+								.as("challenge included")
+								.hasHeader("WWW-Authenticate")
 
 						)
 
@@ -385,30 +485,118 @@ final class ManagerTest {
 
 		@Nested final class Expiry {
 
-			@Test void testNoExpiry() {
+			@Test void testDeletion() {
 				exec(() -> authenticate(manager()
 
 						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
 
-				).accept((handler, authorization) -> handler
+				).accept((handler, cookie) -> {
 
-						.handle(new Request() // submit request before soft expiry
+					handler // delete session
 
-								.method(Request.GET)
-								.header("Authorization", authorization)
-								.path("/resource")
-						)
+							.handle(new Request()
+									.method(Request.POST)
+									.path("/~")
+									.header("Cookie", cookie)
+									.body(json(), object())
+							)
 
-						.accept(response -> assertThat(response)
+							.accept(response -> assertThat(response)
+									.hasStatus(Response.OK)
+									.hasBody(json(), json -> assertThat(json)
+											.isEqualTo(object())
+									)
+							);
 
-								.as("access granted")
-								.hasStatus(Response.OK)
+					handler // submit request after session deletion
 
-								.as("authorization replayed")
-								.hasHeader("Authorization", authorization)
+							.handle(new Request()
+									.method(Request.GET)
+									.header("Cookie", cookie)
+									.path("/resource")
+							)
 
-						)
-				));
+							.accept(response -> assertThat(response)
+
+									.as("access denied")
+									.hasStatus(Response.Unauthorized)
+
+							);
+				}));
+			}
+
+
+			@Test void testHandleChange() {
+				exec(() -> authenticate(manager()
+
+						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
+
+				).accept((handler, cookie) -> {
+
+					handler // update credentials > handle changes
+
+							.handle(new Request()
+									.method(Request.POST)
+									.path("/~")
+									.body(json(), object(
+											field("handle", "faussone"),
+											field("secret", "faussone"),
+											field("update", "new-secret")
+									))
+							)
+
+							.accept(response -> assertThat(response)
+									.hasStatus(Response.OK)
+							);
+
+
+					handler // submit request after handle change
+
+							.handle(new Request()
+									.method(Request.GET)
+									.header("Cookie", cookie)
+									.path("/resource")
+							)
+
+							.accept(response -> assertThat(response)
+
+									.as("access denied")
+									.hasStatus(Response.Unauthorized)
+
+							);
+				}));
+			}
+
+			@Test void testExtension() {
+				exec(() -> authenticate(manager()
+
+						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
+
+				).accept((handler, cookie) -> {
+
+					clock.time(SoftTimeout*50/100);
+
+					handler // submit request before soft expiry
+
+							.handle(new Request()
+									.method(Request.GET)
+									.header("Cookie", cookie)
+									.base("http://example.com/base/")
+									.path("/resource")
+							)
+
+							.accept(response -> assertThat(response)
+
+									.as("access granted")
+									.hasStatus(Response.OK)
+
+									.as("token extended")
+									.hasHeader("Set-Cookie", extended -> Assertions.assertThat(extended)
+											.doesNotStartWith(cookie)
+									)
+
+							);
+				}));
 			}
 
 			@Test void testSoftExpiry() {
@@ -416,110 +604,25 @@ final class ManagerTest {
 
 						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
 
-				).accept((handler, authorization) -> {
+				).accept((handler, cookie) -> {
 
-							try { Thread.sleep(SoftExpiry+10); } catch ( final InterruptedException ignored ) {}
+					clock.time(SoftTimeout*150/100);
 
-							handler // submit request between soft and hard expiry
+					handler // submit request after soft expiry
 
-									.handle(new Request()
-											.method(Request.GET)
-											.header("Authorization", authorization)
-											.path("/resource")
-									)
+							.handle(new Request()
+									.method(Request.GET)
+									.header("Cookie", cookie)
+									.path("/resource")
+							)
 
-									.accept(response -> assertThat(response)
+							.accept(response -> assertThat(response)
 
-											.as("access granted")
-											.hasStatus(Response.OK)
+									.as("access denied")
+									.hasStatus(Response.Unauthorized)
 
-											.as("authorization regenerated")
-											.hasHeader("Authorization")
-											.matches(r -> !r
-													.header("Authorization")
-													.orElse("")
-													.equals(authorization)
-											)
-
-									);
-						}
-				));
-			}
-
-			@Test void testHashChange() {
-				exec(() -> authenticate(manager()
-
-						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
-
-				).accept((handler, authorization) -> {
-
-							handler // update credentials > hash changes
-
-									.handle(new Request()
-											.method(Request.POST)
-											.path("/~")
-											.body(json(), object(
-													field("handle", "faussone"),
-													field("secret", "faussone"),
-													field("update", "new-secret")
-											))
-									)
-
-									.accept(response -> assertThat(response)
-											.hasStatus(Response.Created)
-									);
-
-							try { Thread.sleep(SoftExpiry+10); } catch ( final InterruptedException ignored ) {}
-
-							handler // submit request after hash change
-
-									.handle(new Request()
-											.method(Request.GET)
-											.header("Authorization", authorization)
-											.path("/resource")
-									)
-
-									.accept(response -> assertThat(response)
-
-											.as("access denied")
-											.hasStatus(Response.Forbidden)
-
-											.as("no authorization included")
-											.doesNotHaveHeader("Authorization")
-
-									);
-						}
-				));
-			}
-
-			@Test void testHardExpiry() {
-				exec(() -> authenticate(manager()
-
-						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
-
-				).accept((handler, authorization) -> {
-
-							try { Thread.sleep(HardExpiry+10); } catch ( final InterruptedException ignored ) {}
-
-							handler // submit request after hard expiry
-
-									.handle(new Request()
-											.method(Request.GET)
-											.header("Authorization", authorization)
-											.path("/resource")
-									)
-
-									.accept(response -> assertThat(response)
-
-											.as("access denied")
-											.hasStatus(Response.Forbidden)
-
-											.as("no authorization included")
-											.doesNotHaveHeader("Authorization")
-
-									);
-						}
-				));
+							);
+				}));
 			}
 
 		}

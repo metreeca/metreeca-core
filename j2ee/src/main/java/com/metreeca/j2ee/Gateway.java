@@ -90,9 +90,7 @@ public abstract class Gateway implements Filter {
 					.set(Storage.storage(), () -> storage(context))
 					.set(Loader.loader(), () -> loader(context))
 
-					.exec(handler::get) // force handler loading during filter initialization
-
-					.get(trace()).info(this, "loaded handler");
+					.get(handler); // force handler loading during filter initialization
 
 		} catch ( final Throwable t ) {
 

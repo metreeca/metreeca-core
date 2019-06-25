@@ -17,15 +17,12 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.*;
 import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Request.GET;
@@ -34,7 +31,6 @@ import static com.metreeca.rest.bodies.TextBody.text;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
-import static java.util.Collections.unmodifiableMap;
 
 
 /**
@@ -101,7 +97,7 @@ public final class Server implements Wrapper {
 
 	private Request query(final Request request) { // parse parameters from query string, if not already set
 		return request.parameters().isEmpty() && request.method().equals(GET)
-				? request.parameters(parse(request.query()))
+				? request.parameters(Codecs.parameters(request.query()))
 				: request;
 	}
 
@@ -109,7 +105,7 @@ public final class Server implements Wrapper {
 		return request.parameters().isEmpty()
 				&& request.method().equals(POST)
 				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
-				? request.parameters(parse(request.body(text()).value().orElse("")))
+				? request.parameters(Codecs.parameters(request.body(text()).value().orElse("")))
 				: request;
 	}
 
@@ -138,46 +134,6 @@ public final class Server implements Wrapper {
 				.ifPresent(type -> response.header("Content-Type", type+"; charset=UTF-8"));
 
 		return response;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static Map<String, List<String>> parse(final String query) {
-
-		final Map<String, List<String>> parameters=new LinkedHashMap<>();
-
-		final int length=query.length();
-
-		for (int head=0, tail; head < length; head=tail+1) {
-			try {
-
-				final int equal=query.indexOf('=', head);
-				final int ampersand=query.indexOf('&', head);
-
-				tail=(ampersand >= 0) ? ampersand : length;
-
-				final boolean split=equal >= 0 && equal < tail;
-
-				final String label=URLDecoder.decode(query.substring(head, split ? equal : tail), "UTF-8");
-				final String value=URLDecoder.decode(query.substring(split ? equal+1 : tail, tail), "UTF-8");
-
-				parameters.compute(label, (name, values) -> {
-
-					final List<String> strings=(values != null) ? values : new ArrayList<>();
-
-					strings.add(value);
-
-					return strings;
-
-				});
-
-			} catch ( final UnsupportedEncodingException unexpected ) {
-				throw new UncheckedIOException(unexpected);
-			}
-		}
-
-		return unmodifiableMap(parameters);
 	}
 
 }

@@ -18,12 +18,11 @@
 package com.metreeca.rest.wrappers;
 
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 import static java.util.Arrays.asList;
@@ -45,7 +43,7 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Preprocessor implements Wrapper {
 
-	private final Collection<BiFunction<Request, Model, Model>> filters;
+	private final Collection<BiFunction<Request, Model, ? extends Collection<Statement>>> filters;
 
 
 	/**
@@ -62,7 +60,7 @@ public final class Preprocessor implements Wrapper {
 	 * @see Connector#query(String, BiConsumer[])
 	 * @see Connector#update(String, BiConsumer[])
 	 */
-	@SafeVarargs public Preprocessor(final BiFunction<Request, Model, Model>... filters) {
+	@SafeVarargs public Preprocessor(final BiFunction<Request, Model, ? extends Collection<Statement>>... filters) {
 		this(asList(filters));
 	}
 
@@ -80,7 +78,7 @@ public final class Preprocessor implements Wrapper {
 	 * @see Connector#query(String, BiConsumer[])
 	 * @see Connector#update(String, BiConsumer[])
 	 */
-	public Preprocessor(final Collection<BiFunction<Request, Model, Model>> filters) {
+	public Preprocessor(final Collection<BiFunction<Request, Model, ? extends Collection<Statement>>> filters) {
 
 		if ( filters == null ) {
 			throw new NullPointerException("null filters");
@@ -111,24 +109,36 @@ public final class Preprocessor implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper preprocessor() {
-		return handler -> request -> handler.handle(request.pipe(rdf(), model -> Value(filters.stream().reduce(
+		return handler -> request -> request.body(rdf()).fold(
 
-				(Model)new LinkedHashModel(model),
+				rdf -> handler.handle(request.body(rdf(), filters.stream().reduce(
 
-				(_model, filter) -> requireNonNull(
-						filter.apply(request, new LinkedHashModel(_model)),
-						"null filter return value"
-				),
+						rdf instanceof Model? (Model)rdf : new LinkedHashModel(rdf),
 
-				(x, y) -> {
+						(model, filter) -> {
 
-					x.addAll(y);
+							final Collection<Statement> out=requireNonNull(
+									filter.apply(request, new LinkedHashModel(model)),
+									"null filter return value"
+							);
 
-					return x;
+							return out instanceof Model ? (Model)out : new LinkedHashModel(out);
 
-				}
+						},
 
-		))));
+						(x, y) -> {
+
+							x.addAll(y);
+
+							return x;
+
+						}
+
+				))),
+
+				failure -> failure.equals(Body.Missing) ? handler.handle(request) : request.reply(failure)
+
+		);
 	}
 
 }

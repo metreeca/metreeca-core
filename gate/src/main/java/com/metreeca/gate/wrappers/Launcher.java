@@ -1,3 +1,4 @@
+
 /*
  * Copyright © 2013-2019 Metreeca srl. All rights reserved.
  *
@@ -17,84 +18,45 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.form.things.Codecs;
-import com.metreeca.rest.*;
-
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.metreeca.rest.bodies.TextBody.text;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Wrapper;
 
 
 /**
- * Single page app launcher.
+ * App launcher.
  *
- * <p>Replaces non-{@linkplain Message#interactive() interactive} responses to {@linkplain Message#interactive()
- * interactive} requests with a client-side loader for a provided {@linkplain #Launcher(String) URL}; relative links in
- * the target page are resolved against its URL.</p>
- *
- * @see Message#interactive()
+ * <p>Delegates {@linkplain Request#interactive() interactive} {@linkplain Request#GET} requests to an {@linkplain
+ * #Launcher(Handler) alternate} handler.</p>
  */
 public final class Launcher implements Wrapper {
 
-	private static final Pattern BasePattern=Pattern.compile("\\$\\{base}");
-	private static final Pattern CommentPattern=Pattern.compile("(//[^\n]*)|(<!--(?s:.)*?-->)");
-	private static final Pattern SpacePattern=Pattern.compile("[\n\\s]+");
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final String path;
-	private final String body;
+	private final Handler interactive;
 
 
 	/**
 	 * Creates an app launcher.
 	 *
-	 * @param url the URL of the single page app to be loaded
+	 * @param interactive the alternate handler for {@linkplain Request#interactive() interactive} requests
 	 *
-	 * @throws NullPointerException if {@code url} is null
+	 * @throws NullPointerException if {@code handler} is null
 	 */
-	public Launcher(final String url) {
+	public Launcher(final Handler interactive) {
 
-		if ( url == null ) {
-			throw new NullPointerException("null url");
+		if ( interactive == null ) {
+			throw new NullPointerException("null handler");
 		}
 
-		this.path=url;
-
-		this.body=Optional
-				.ofNullable(Codecs.text(Launcher.class, ".html"))
-				.map(template -> CommentPattern.matcher(template).replaceAll("")) // remove comments
-				.map(template -> SpacePattern.matcher(template).replaceAll(" ")) // collapses spaces
-				.map(template -> BasePattern.matcher(template).replaceAll(Matcher.quoteReplacement(url))) // relocate
-				.orElse("unexpected");
+		this.interactive=interactive;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> consumer -> handler.handle(request).accept(response -> {
-
-			if ( !request.path().equals(path) && request.interactive()
-					&& response.status() != 0 && !response.interactive() ) {
-
-				response.request().reply(loader -> loader
-
-						.status(Response.OK)
-						.header("Content-Type", "text/html")
-						.body(text(), body)
-
-				).accept(consumer);
-
-			} else {
-
-				consumer.accept(response);
-
-			}
-
-		});
+		return request -> (
+				request.method().equals(Request.GET) && request.interactive() ? interactive : handler
+		).handle(request);
 	}
+
 }

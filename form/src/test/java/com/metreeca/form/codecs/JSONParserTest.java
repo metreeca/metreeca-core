@@ -49,7 +49,7 @@ import static com.metreeca.form.shapes.Datatype.datatype;
 import static com.metreeca.form.shapes.Field.field;
 import static com.metreeca.form.shapes.Meta.alias;
 import static com.metreeca.form.things.JsonValues.array;
-import static com.metreeca.form.things.JsonValues.json;
+import static com.metreeca.form.things.JsonValues.value;
 import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Maps.entry;
 import static com.metreeca.form.things.Maps.map;
@@ -507,7 +507,7 @@ final class JSONParserTest {
 	}
 
 	private Model rdf(final Object json, final Resource focus, final Shape shape, final String base) {
-		try (final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString())) {
+		try (final StringReader reader=new StringReader((json instanceof String ? json : value(json)).toString())) {
 
 			final StatementCollector collector=new StatementCollector();
 

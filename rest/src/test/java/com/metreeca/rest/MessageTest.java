@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.util.function.Function;
 
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.form.things.Codecs.text;
-import static com.metreeca.rest.Result.Value;
+import static com.metreeca.form.things.Lists.list;
+import static com.metreeca.rest.MessageAssert.assertThat;
 import static com.metreeca.rest.bodies.ReaderBody.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,9 +44,14 @@ public final class MessageTest {
 	@Test void testHeadersNormalizeHeaderNames() {
 
 		final TestMessage message=new TestMessage()
-				.headers("test-header", "value");
+				.headers("TEST-header", "value");
 
-		assertTrue(message.headers().keySet().contains("Test-Header"));
+		assertTrue(message.headers().keySet().contains("TEST-Header"));
+	}
+
+	@Test void testHeadersIgnoreHeaderCase() {
+		assertThat(new TestMessage().header("TEST-header", "value"))
+				.hasHeader("test-header", "value");
 	}
 
 	@Test void testHeadersIgnoreEmptyHeaders() {
@@ -117,17 +122,6 @@ public final class MessageTest {
 		assertSame(accessor.apply(message), accessor.apply(message));
 	}
 
-	@Test void testBodyOnDemandFiltering() {
-
-		final Message<?> message=new TestMessage()
-				.pipe(TestBody.test(), string -> Value(string+"!"))
-				.body(reader(), () -> new StringReader("test"));
-
-		assertEquals("test!",
-				message.body(TestBody.test()).fold(value -> value, error -> fail("missing test body")));
-
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -162,7 +156,7 @@ public final class MessageTest {
 			});
 		}
 
-		@Override public <T extends Message<T>> T set(final T message) {
+		@Override public <M extends Message<M>> M set(final M message, final String value) {
 			return message.header("content-type", "text/plain");
 		}
 

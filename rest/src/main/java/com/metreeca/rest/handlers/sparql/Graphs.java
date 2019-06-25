@@ -23,16 +23,16 @@ import com.metreeca.form.things.Formats;
 import com.metreeca.form.things.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
-import org.eclipse.rdf4j.repository.*;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.*;
@@ -49,7 +49,6 @@ import static com.metreeca.rest.Handler.refused;
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.OutputBody.output;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.tray.Tray.tool;
 
 import static java.lang.String.format;
 
@@ -58,15 +57,14 @@ import static java.lang.String.format;
  * SPARQL 1.1 Graph Store endpoint handler.
  *
  * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain Graph#graph()
- * graph database}</p>*
+ * graph database}.</p>
  *
- * <p>Query operations are restricted to users in the {@linkplain Form#root root} {@linkplain Request#roles()
- * role}, unless otherwise {@linkplain #publik(boolean) specified}; update operations are always restricted to users in
- * the root role.</p>
+ * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
+ * to users in the {@linkplain Form#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
  *
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public final class Graphs extends Delegator {
+public final class Graphs extends Endpoint<Graphs> {
 
 	private static final Shape GraphsShape=field(RDF.VALUE, and(
 			field(RDF.TYPE, only(VOID.DATASET))
@@ -75,35 +73,13 @@ public final class Graphs extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private boolean publik; // public availability of the endpoint
-
-	private final Graph graph=tool(Graph.graph());
-	private final Trace trace=tool(Trace.trace());
-
-
 	public Graphs() {
 		delegate(new Worker()
 				.get(this::get)
 				.put(this::put)
 				.delete(this::delete)
-				.post(this::post));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Configures public visibility for query endpoint operations.
-	 *
-	 * @param publik {@code true} if query endpoint operations should be available to any user; {@code false} otherwise
-	 *
-	 * @return this endpoint handler
-	 */
-	public Graphs publik(final boolean publik) {
-
-		this.publik=publik;
-
-		return this;
+				.post(this::post)
+		);
 	}
 
 
@@ -128,7 +104,8 @@ public final class Graphs extends Delegator {
 						.cause("missing target graph parameter")
 				).accept(consumer);
 
-			} else if ( !publik && !request.role(Form.root) ) {
+
+			} else if ( !queryable(request.roles()) ) {
 
 				refused(request).accept(consumer);
 
@@ -137,7 +114,7 @@ public final class Graphs extends Delegator {
 				final IRI focus=request.item();
 				final Collection<Statement> model=new ArrayList<>();
 
-				graph.query(connection -> {
+				graph().query(connection -> {
 					try (final RepositoryResult<Resource> contexts=connection.getContextIDs()) {
 						while ( contexts.hasNext() ) {
 
@@ -164,7 +141,7 @@ public final class Graphs extends Delegator {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				graph.query(connection -> {
+				graph().query(connection -> {
 					request.reply(response -> response.status(Response.OK)
 
 							.header("Content-Type", format.getDefaultMIMEType())
@@ -202,7 +179,8 @@ public final class Graphs extends Delegator {
 						.cause("missing target graph parameter")
 				).accept(consumer);
 
-			} else if ( !request.role(Form.root) ) {
+
+			} else if ( !updatable(request.roles()) ) {
 
 				refused(request).accept(consumer);
 
@@ -218,7 +196,7 @@ public final class Graphs extends Delegator {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
-				graph.update(connection -> {
+				graph().update(connection -> {
 					try (final InputStream input=request.body(input()).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
@@ -234,7 +212,7 @@ public final class Graphs extends Delegator {
 
 					} catch ( final IOException e ) {
 
-						trace.warning(this, "unable to read RDF payload", e);
+						trace().warning(this, "unable to read RDF payload", e);
 
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
@@ -245,7 +223,7 @@ public final class Graphs extends Delegator {
 
 					} catch ( final RDFParseException e ) {
 
-						trace.warning(this, "malformed RDF payload", e);
+						trace().warning(this, "malformed RDF payload", e);
 
 						request.reply(new Failure()
 								.status(Response.BadRequest)
@@ -256,7 +234,7 @@ public final class Graphs extends Delegator {
 
 					} catch ( final RepositoryException e ) {
 
-						trace.warning(this, "unable to update graph "+context, e);
+						trace().warning(this, "unable to update graph "+context, e);
 
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
@@ -288,7 +266,7 @@ public final class Graphs extends Delegator {
 						.cause("missing target graph parameter")
 				).accept(consumer);
 
-			} else if ( !request.role(Form.root) ) {
+			} else if ( !updatable(request.roles()) ) {
 
 				refused(request).accept(consumer);
 
@@ -296,7 +274,7 @@ public final class Graphs extends Delegator {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				graph.update(connection -> {
+				graph().update(connection -> {
 					try {
 
 						final boolean exists=exists(connection, context);
@@ -309,7 +287,7 @@ public final class Graphs extends Delegator {
 
 					} catch ( final RepositoryException e ) {
 
-						trace.warning(this, "unable to update graph "+context, e);
+						trace().warning(this, "unable to update graph "+context, e);
 
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
@@ -343,7 +321,7 @@ public final class Graphs extends Delegator {
 						.cause("missing target graph parameter")
 				).accept(consumer);
 
-			} else if ( !request.role(Form.root) ) {
+			} else if ( !updatable(request.roles()) ) {
 
 				refused(request).accept(consumer);
 
@@ -358,7 +336,7 @@ public final class Graphs extends Delegator {
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
-				graph.update(connection -> {
+				graph().update(connection -> {
 					try (final InputStream input=request.body(input()).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
@@ -373,7 +351,7 @@ public final class Graphs extends Delegator {
 
 					} catch ( final IOException e ) {
 
-						trace.warning(this, "unable to read RDF payload", e);
+						trace().warning(this, "unable to read RDF payload", e);
 
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
@@ -384,7 +362,7 @@ public final class Graphs extends Delegator {
 
 					} catch ( final RDFParseException e ) {
 
-						trace.warning(this, "malformed RDF payload", e);
+						trace().warning(this, "malformed RDF payload", e);
 
 						request.reply(new Failure()
 								.status(Response.BadRequest)
@@ -395,7 +373,7 @@ public final class Graphs extends Delegator {
 
 					} catch ( final RepositoryException e ) {
 
-						trace.warning(this, "unable to update graph "+context, e);
+						trace().warning(this, "unable to update graph "+context, e);
 
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
