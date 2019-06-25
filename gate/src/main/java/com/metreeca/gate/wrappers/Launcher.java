@@ -26,8 +26,8 @@ import com.metreeca.rest.Wrapper;
 /**
  * App launcher.
  *
- * <p>Delegates {@linkplain Request#interactive() interactive} requests to an {@linkplain #Launcher(Handler) alternate}
- * handler.</p>
+ * <p>Delegates {@linkplain Request#interactive() interactive} {@linkplain Request#GET} requests to an {@linkplain
+ * #Launcher(Handler) alternate} handler.</p>
  */
 public final class Launcher implements Wrapper {
 
@@ -54,7 +54,9 @@ public final class Launcher implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> (request.interactive() ? interactive : handler).handle(request);
+		return request -> (
+				request.method().equals(Request.GET) && request.interactive() ? interactive : handler
+		).handle(request);
 	}
 
 }
