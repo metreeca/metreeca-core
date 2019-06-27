@@ -23,7 +23,6 @@ import org.eclipse.rdf4j.common.iteration.AbstractCloseableIteration;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.model.Namespace;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
-import org.eclipse.rdf4j.sail.SailException;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -121,9 +120,8 @@ public final class Datastore {
 	}
 
 
-	//// Namespaces ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private CloseableIteration<? extends Namespace, SailException> getNamespacesInternal() {
+	private CloseableIteration<? extends Namespace, Exception> getNamespacesInternal() {
 
 		final Query query=new Query(SpaceKind, root);
 
