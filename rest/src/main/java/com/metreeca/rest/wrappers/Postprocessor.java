@@ -19,6 +19,7 @@ package com.metreeca.rest.wrappers;
 
 
 import com.metreeca.rest.*;
+import com.metreeca._repo.wrappers.Connector;
 import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;

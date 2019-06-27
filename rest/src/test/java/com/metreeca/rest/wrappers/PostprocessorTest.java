@@ -36,7 +36,7 @@ import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.HandlerTest.exec;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca.rest.wrappers.Connector.update;
+import static com.metreeca._repo.wrappers.Connector.update;
 import static com.metreeca.tray.rdf.GraphTest.model;
 
 import static java.util.Arrays.asList;

@@ -40,7 +40,6 @@
       <module name="jeep" target="1.8" />
       <module name="kits" target="1.8" />
       <module name="link" target="1.8" />
-      <module name="Link" target="1.8" />
       <module name="link (1)" target="1.8" />
       <module name="mesh" target="1.8" />
       <module name="mill" target="1.8" />

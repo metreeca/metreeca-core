@@ -8,7 +8,7 @@ The following samples present typical setups built on the same data used in the 
 
 ```java
 import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.rest.wrappers.Connector.connect;
+import static com.metreeca._sparql.wrappers.Connector.connect;
 
 private Optional<IRI> byname(final RepositoryConnection connection, final String name) {
   return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))

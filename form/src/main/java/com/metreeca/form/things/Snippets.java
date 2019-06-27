@@ -135,6 +135,11 @@ public final class Snippets {
 	}
 
 
+	public static Snippet list(final Stream<?> items, final Object separator) {
+		return items == null ? nothing() : snippet(items.flatMap(item -> Stream.of(separator, item)).skip(1));
+	}
+
+
 	//// Identifiers ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Snippet id(final Object object) {
