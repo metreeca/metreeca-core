@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.shapes.*;
@@ -50,7 +50,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.*;
 
 
-final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> {
+final class EngineValidator extends EngineProcessor implements Shape.Probe<Focus> {
 
 	private final Trace trace;
 	private final RepositoryConnection connection;
@@ -59,7 +59,7 @@ final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> 
 	private final Collection<Statement> model;
 
 
-	ActorValidator(
+	EngineValidator(
 			final Trace trace,
 			final RepositoryConnection connection,
 			final Collection<Value> focus,
@@ -318,7 +318,7 @@ final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> 
 
 			// validate the field shape on the new focus set
 
-			final Focus report=shape.map(new ActorValidator(trace, connection, focus, model));
+			final Focus report=shape.map(new EngineValidator(trace, connection, focus, model));
 
 			// identifies the values in the new focus set referenced in report frames
 
@@ -348,7 +348,7 @@ final class ActorValidator extends ActorProcessor implements Shape.Probe<Focus> 
 	@Override public Focus probe(final And and) {
 		return and.getShapes().stream()
 				.map(shape -> shape.map(this))
-				.reduce(focus(), (focus1, focus12) -> focus1.merge(focus12));
+				.reduce(focus(), Focus::merge);
 	}
 
 	@Override public Focus probe(final Or or) {

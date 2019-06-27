@@ -22,7 +22,8 @@ import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.engines.Engine;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
@@ -30,6 +31,8 @@ import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.form.things.Shapes.resource;
+import static com.metreeca.rest.engines.Engine.engine;
+import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -70,11 +73,17 @@ import static com.metreeca.form.things.Shapes.resource;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Deleter extends Actor {
+public final class Deleter extends Delegator {
+
+	private final Engine engine=tool(engine());
+
 
 	public Deleter() {
-		delegate(deleter().with(throttler()));
+		delegate(deleter()
+				.with(throttler())
+		);
 	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -95,7 +104,7 @@ public final class Deleter extends Actor {
 
 					new Failure().status(Response.NotImplemented).cause("container deletion not supported")
 
-			) : request.reply(response -> delete(item, shape)
+			) : request.reply(response -> engine.delete(item, shape)
 
 					.map(iri -> response.status(Response.NoContent))
 

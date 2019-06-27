@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers;
+package com.metreeca.rest.engines;
 
 import com.metreeca.kits.rdf4j.RDF4JRemote;
 import com.metreeca.kits.rdf4j.RDF4JSPARQL;
@@ -41,7 +41,7 @@ import static com.metreeca.tray.rdf.Graph.graph;
 import static com.metreeca.tray.rdf.GraphTest.model;
 
 
-abstract class ActorProcessorTest {
+abstract class EngineProcessorTest {
 
 	protected void exec(final Runnable... tasks) {
 		new Tray()

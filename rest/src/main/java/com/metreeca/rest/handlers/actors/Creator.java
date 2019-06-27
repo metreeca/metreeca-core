@@ -24,7 +24,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.engines.Engine;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -43,7 +44,9 @@ import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Response.NotImplemented;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.rest.engines.Engine.engine;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.sys.Trace.trace;
 
 import static org.eclipse.rdf4j.repository.util.Connections.getStatement;
 
@@ -115,7 +118,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Creator extends Actor {
+public final class Creator extends Delegator {
 
 	/**
 	 * Creates a random UUID-based slug generator.
@@ -144,7 +147,6 @@ public final class Creator extends Actor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Trace trace=tool(Trace.trace());
 
 	/*
 	 * Shared lock for taming serialization issues with slug operations (concurrent graph txns may produce conflicts).
@@ -152,6 +154,10 @@ public final class Creator extends Actor {
 	private final Object lock=new Object();
 
 	private final BiFunction<Request, Model, String> slug;
+
+
+	private final Engine engine=tool(engine());
+	private final Trace trace=tool(trace());
 
 
 	/**
@@ -179,7 +185,9 @@ public final class Creator extends Actor {
 
 		this.slug=slug;
 
-		delegate(creator().with(throttler()));
+		delegate(creator()
+				.with(throttler())
+		);
 	}
 
 
@@ -195,8 +203,7 @@ public final class Creator extends Actor {
 				rdf -> {
 					synchronized ( lock ) { // attempt to serialize slug operations from multiple txns
 
-						final String name=slug.apply(request, 						rdf instanceof Model? (Model)rdf : new LinkedHashModel(rdf)
-								);
+						final String name=slug.apply(request, rdf instanceof Model ? (Model)rdf : new LinkedHashModel(rdf));
 
 						if ( name == null ) {
 							throw new NullPointerException("null resource name");
@@ -214,7 +221,7 @@ public final class Creator extends Actor {
 
 						// !!! recognize txns failures due to conflicting slugs and report as 409 Conflict
 
-						return request.reply(response -> create(resource, shape, model)
+						return request.reply(response -> engine.create(resource, shape, model)
 
 								.map(focus -> focus.assess(Level.Error) // shape violations
 

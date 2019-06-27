@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Traverser;
@@ -53,7 +53,7 @@ import static com.metreeca.form.things.Values.*;
 import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
 
-final class ActorRetriever extends ActorProcessor implements Query.Probe<Collection<Statement>> {
+final class EngineRetriever extends EngineProcessor implements Query.Probe<Collection<Statement>> {
 
 	private final RepositoryConnection connection;
 
@@ -61,7 +61,7 @@ final class ActorRetriever extends ActorProcessor implements Query.Probe<Collect
 	private final boolean labelled;
 
 
-	ActorRetriever(
+	EngineRetriever(
 			final Trace trace,
 			final RepositoryConnection connection,
 			final Resource resource,

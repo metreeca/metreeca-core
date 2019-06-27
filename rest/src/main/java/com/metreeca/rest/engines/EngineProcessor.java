@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
@@ -41,7 +41,7 @@ import static java.lang.Math.max;
 import static java.lang.String.format;
 
 
-abstract class ActorProcessor {
+abstract class EngineProcessor {
 
 	static final Function<Shape, Shape> convey=memoizable(s -> s
 			.map(new Redactor(Form.mode, Form.convey))
@@ -59,7 +59,7 @@ abstract class ActorProcessor {
 	private final Trace trace;
 
 
-	ActorProcessor(final Trace trace) {
+	EngineProcessor(final Trace trace) {
 
 		this.trace=trace;
 

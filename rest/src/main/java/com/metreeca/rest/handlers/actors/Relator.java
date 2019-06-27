@@ -26,7 +26,8 @@ import com.metreeca.form.queries.Stats;
 import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.engines.Engine;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 
@@ -48,6 +49,8 @@ import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.form.things.Shapes.container;
 import static com.metreeca.form.things.Shapes.resource;
+import static com.metreeca.rest.engines.Engine.engine;
+import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -130,7 +133,7 @@ import static com.metreeca.form.things.Shapes.resource;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Relator extends Actor {
+public final class Relator extends Delegator {
 
 	private static final Pattern RepresentationPattern=Pattern
 			.compile("\\s*return\\s*=\\s*representation\\s*;\\s*include\\s*=\\s*\"(?<representation>[^\"]*)\"\\s*");
@@ -138,8 +141,14 @@ public final class Relator extends Actor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private final Engine engine=tool(engine());
+
+
 	public Relator() {
-		delegate(relator().with(annotator()).with(throttler()));
+		delegate(relator()
+				.with(annotator())
+				.with(throttler())
+		);
 	}
 
 
@@ -184,7 +193,7 @@ public final class Relator extends Actor {
 
 						query -> {
 
-							final Collection<Statement> model=relate(item, query);
+							final Collection<Statement> model=engine.relate(item, query);
 
 							return response
 
@@ -226,7 +235,7 @@ public final class Relator extends Actor {
 
 						query -> {
 
-							final Collection<Statement> matches=relate(item, query);
+							final Collection<Statement> matches=engine.relate(item, query);
 
 							if ( filtered ) { // matches only
 
@@ -258,7 +267,7 @@ public final class Relator extends Actor {
 										.shape(shape)
 										.body(rdf(), concat(
 												matches,
-												relate(item, edges(resource(item, container(shape))))
+												engine.relate(item, edges(resource(item, container(shape))))
 										));
 
 							}

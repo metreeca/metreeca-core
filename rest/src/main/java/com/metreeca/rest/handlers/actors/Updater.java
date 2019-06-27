@@ -24,7 +24,8 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.handlers.Actor;
+import com.metreeca.rest.engines.Engine;
+import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -39,6 +40,7 @@ import javax.json.JsonValue;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.form.things.Shapes.resource;
+import static com.metreeca.rest.engines.Engine.engine;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.trace;
 
@@ -91,13 +93,16 @@ import static com.metreeca.tray.sys.Trace.trace;
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */
-public final class Updater extends Actor {
+public final class Updater extends Delegator {
 
+	private final Engine engine=tool(engine());
 	private final Trace trace=tool(trace());
 
 
 	public Updater() {
-		delegate(updater().with(throttler()));
+		delegate(updater()
+				.with(throttler())
+		);
 	}
 
 
@@ -125,7 +130,7 @@ public final class Updater extends Actor {
 					final Shape shape=resource(item, request.shape());
 					final Collection<Statement> model=trace.trace(this, rdf);
 
-					return request.reply(response -> update(item, shape, model)
+					return request.reply(response -> engine.update(item, shape, model)
 
 							.map(focus -> focus.assess(Issue.Level.Error) // shape violations
 

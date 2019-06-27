@@ -79,7 +79,10 @@ public final class Generator extends Delegator {
 
 		this.generator=generator;
 
-		delegate(generator().with(annotator()).with(throttler()));
+		delegate(generator()
+				.with(annotator())
+				.with(throttler())
+		);
 	}
 
 

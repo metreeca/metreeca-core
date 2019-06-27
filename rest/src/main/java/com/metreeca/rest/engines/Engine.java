@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers;
+package com.metreeca.rest.engines;
 
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Outliner;
@@ -30,6 +30,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.metreeca.form.Focus.focus;
@@ -39,8 +40,8 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
-import static com.metreeca.rest.handlers.ActorProcessor.convey;
-import static com.metreeca.rest.handlers.ActorProcessor.filter;
+import static com.metreeca.rest.engines.EngineProcessor.convey;
+import static com.metreeca.rest.engines.EngineProcessor.filter;
 import static com.metreeca.tray.Tray.tool;
 
 import static java.util.stream.Collectors.toList;
@@ -53,7 +54,12 @@ import static java.util.stream.Collectors.toSet;
  * <p>Handles  CRUD operations on linked data resources stored in the system {@linkplain Graph graph} and identified by
  * the request {@linkplain Request#item() focus item}.</p>
  */
-public abstract class Actor extends Delegator {
+public final class Engine {
+
+	public static Supplier<Engine> engine() {
+		return Engine::new;
+	}
+
 
 	private final Graph graph=tool(Graph.graph());
 	private final Trace trace=tool(Trace.trace());
@@ -74,9 +80,9 @@ public abstract class Actor extends Delegator {
 	 * @throws NullPointerException          if either {@code resource} or {@code query} is {@code null}
 	 * @throws UnsupportedOperationException if resource retrieval is not supported by this engine
 	 */
-	protected Collection<Statement> relate(final IRI resource, final Query query) {
+	public Collection<Statement> relate(final IRI resource, final Query query) {
 		return graph.query(connection -> {
-			return query.map(new ActorRetriever(trace, connection, resource, true));
+			return query.map(new EngineRetriever(trace, connection, resource, true));
 		});
 	}
 
@@ -87,13 +93,13 @@ public abstract class Actor extends Delegator {
 	 * @param shape    the validation shape for the description of the resource;
 	 * @param model    the description for {@code resource} to be created
 	 *
-	 * @return an optional validation report for the operation; empty a description for {@code resource} is already
+	 * @return an optional validation report for the operation; empty if a description for {@code resource} is already
 	 * present
 	 *
 	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
 	 * @throws UnsupportedOperationException if resource creation is not supported by this engine
 	 */
-	protected Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
+	public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
 		return graph.update(connection -> {
 
 			return Optional.of(resource)
@@ -136,7 +142,7 @@ public abstract class Actor extends Delegator {
 	 * @throws NullPointerException          if any argument is null or if {@code model} contains null values
 	 * @throws UnsupportedOperationException if resource updating is not supported by this engine
 	 */
-	protected Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
+	public Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
 		return graph.update(connection -> {
 			return retrieve(connection, resource, shape).map(current -> {
 
@@ -167,7 +173,7 @@ public abstract class Actor extends Delegator {
 	 * @throws NullPointerException          if either {@code resource} or {@code shape} is {@code null}
 	 * @throws UnsupportedOperationException if resource deletion is not supported by this engine
 	 */
-	protected Optional<Focus> delete(final IRI resource, final Shape shape) {
+	public Optional<Focus> delete(final IRI resource, final Shape shape) {
 		return graph.update(connection -> {
 
 			// !!! merge retrieve/remove operations into a single SPARQL update txn
@@ -197,7 +203,7 @@ public abstract class Actor extends Delegator {
 	) {
 		return Optional.of(edges(shape))
 
-				.map(query -> query.map(new ActorRetriever(trace, connection, resource, false)))
+				.map(query -> query.map(new EngineRetriever(trace, connection, resource, false)))
 
 				.filter(current -> !current.isEmpty());
 	}
@@ -209,7 +215,7 @@ public abstract class Actor extends Delegator {
 		final Shape target=shape.map(convey);
 
 		final Focus focus=target // validate against shape
-				.map(new ActorValidator(trace, connection, set(resource), model));
+				.map(new EngineValidator(trace, connection, set(resource), model));
 
 		final Collection<Statement> envelope=pass(target)
 				? description(resource, false, model) // collect resource cbd
