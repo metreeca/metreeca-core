@@ -344,7 +344,7 @@
 
 				<configuration>
 
-					<skipDeploy>true</skipDeploy> <!-- ;( manual deployment -->
+					<skipDeploy>true</skipDeploy> <!-- github deployment -->
 
 					<stagingDirectory>${maven.multiModuleProjectDirectory}/docs/reports</stagingDirectory>
 

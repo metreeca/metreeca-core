@@ -15,15 +15,25 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Google Cloud tools.
- *
- * <pre>{@code
- * <dependency>
- *      <groupId>com.metreeca</groupId>
- *      <artifactId>gcloud</artifactId>
- *      <version>${project.version}</version>
- * </dependency>}</pre>
- */
+package com.metreeca.kits.gae;
 
-package com.metreeca.kits.gcloud;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+
+
+final class DatastoreTest {
+
+	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
+
+	@BeforeEach void setUp() {
+		helper.setUp();
+	}
+
+	@AfterEach void tearDown() {
+		helper.tearDown();
+	}
+
+}

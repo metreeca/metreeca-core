@@ -28,15 +28,15 @@
         <version>0.52.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>gcloud</artifactId>
+    <artifactId>gae</artifactId>
     <version>0.52.0-SNAPSHOT</version>
 
-    <name>Metreeca Google Cloud Tooling Kit</name>
+    <name>Metreeca Google App Engine Tooling Kit</name>
     <description>Adapter kit for Google Cloud.</description>
 
     <properties>
 
-        <gcloud.version>1.9.73</gcloud.version>
+        <gae.version>1.9.73</gae.version>
 
     </properties>
 
@@ -45,21 +45,21 @@
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>${gcloud.version}</version>
+            <version>${gae.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-stubs</artifactId>
-            <version>${gcloud.version}</version>
+            <version>${gae.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-testing</artifactId>
-            <version>${gcloud.version}</version>
+            <version>${gae.version}</version>
             <scope>test</scope>
         </dependency>
 

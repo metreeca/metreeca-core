@@ -9,10 +9,10 @@
         <module name="rest" />
         <module name="virtuoso" />
         <module name="stardog" />
-        <module name="gate" />
-        <module name="rdf4j" />
-        <module name="gcloud" />
         <module name="j2ee" />
+        <module name="rdf4j" />
+        <module name="gae" />
+        <module name="gate" />
         <module name="tray" />
         <module name="form" />
       </profile>
@@ -34,8 +34,8 @@
       <module name="demo" target="1.8" />
       <module name="fore" target="1.8" />
       <module name="form" target="1.8" />
+      <module name="gae" target="1.8" />
       <module name="gate" target="1.8" />
-      <module name="gcloud" target="1.8" />
       <module name="j2ee" target="1.8" />
       <module name="jeep" target="1.8" />
       <module name="kits" target="1.8" />

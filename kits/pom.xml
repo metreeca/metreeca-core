@@ -41,7 +41,7 @@
 		<module>stardog</module>
 		<module>virtuoso</module>
 
-		<module>gcloud</module>
+		<module>gae</module>
 
 	</modules>
 
