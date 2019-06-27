@@ -17,6 +17,13 @@
 
 /**
  * Google Cloud tools.
+ *
+ * <pre>{@code
+ * <dependency>
+ *      <groupId>com.metreeca</groupId>
+ *      <artifactId>gcloud</artifactId>
+ *      <version>${project.version}</version>
+ * </dependency>}</pre>
  */
 
 package com.metreeca.kits.gcloud;

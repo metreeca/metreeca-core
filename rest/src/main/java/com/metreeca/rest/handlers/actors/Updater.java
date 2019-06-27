@@ -40,6 +40,7 @@ import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.form.things.Shapes.resource;
 import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.tray.sys.Trace.trace;
 
 
 /**
@@ -92,7 +93,7 @@ import static com.metreeca.tray.Tray.tool;
  */
 public final class Updater extends Actor {
 
-	private final Trace trace=tool(Trace.trace());
+	private final Trace trace=tool(trace());
 
 
 	public Updater() {
@@ -112,7 +113,9 @@ public final class Updater extends Actor {
 	private Handler updater() {
 		return request -> request.container() ? request.reply(
 
-				new Failure().status(Response.NotImplemented).cause("container updating not supported")
+				new Failure()
+						.status(Response.NotImplemented)
+						.cause("container updating not supported")
 
 		) : request.body(rdf()).fold(
 

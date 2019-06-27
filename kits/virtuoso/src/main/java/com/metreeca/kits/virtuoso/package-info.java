@@ -25,9 +25,7 @@
  *      <groupId>com.metreeca</groupId>
  *      <artifactId>virtuoso</artifactId>
  *      <version>${project.version}</version>
- * </dependency>
- *
- * }</pre>
+ * </dependency>}</pre>
  */
 
 package com.metreeca.kits.virtuoso;
