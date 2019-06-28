@@ -19,8 +19,8 @@ package com.metreeca._repo;
 
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Outliner;
-import com.metreeca.rest.Request;
 import com.metreeca.rest.Engine;
+import com.metreeca.rest.Request;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
 
@@ -31,8 +31,11 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.metreeca._repo.GraphProcessor.convey;
+import static com.metreeca._repo.GraphProcessor.filter;
 import static com.metreeca.form.Focus.focus;
 import static com.metreeca.form.Frame.frame;
 import static com.metreeca.form.Issue.issue;
@@ -40,8 +43,6 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
-import static com.metreeca._repo.GraphProcessor.convey;
-import static com.metreeca._repo.GraphProcessor.filter;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.rdf.Graph.graph;
 import static com.metreeca.tray.sys.Trace.trace;
@@ -60,6 +61,27 @@ public final class GraphEngine implements Engine {
 
 	private final Graph graph=tool(graph());
 	private final Trace trace=tool(trace());
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public <R> R reading(final Supplier<R> task) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		return graph.query(connection -> { return task.get(); });
+	}
+
+	@Override public <R> R writing(final Supplier<R> task) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		return graph.update(connection -> { return task.get(); });
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

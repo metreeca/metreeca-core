@@ -185,6 +185,7 @@ public final class Creator extends Delegator {
 
 		delegate(creator()
 				.with(throttler())
+				.with(connector())
 		);
 	}
 
@@ -193,6 +194,10 @@ public final class Creator extends Delegator {
 
 	private Wrapper throttler() {
 		return new Throttler(Form.create, Form.detail, Shapes::resource);
+	}
+
+	private Wrapper connector() {
+		return handler -> request -> engine.writing(() -> handler.handle(request));
 	}
 
 	private Handler creator() {

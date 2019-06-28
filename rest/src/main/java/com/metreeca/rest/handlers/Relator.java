@@ -146,6 +146,7 @@ public final class Relator extends Delegator {
 		delegate(relator()
 				.with(annotator())
 				.with(throttler())
+				.with(connector())
 		);
 	}
 
@@ -168,6 +169,10 @@ public final class Relator extends Delegator {
 				new Throttler(Form.relate, Form.digest, Shapes::entity),
 				new Throttler(Form.relate, Form.detail, Shapes::resource)
 		);
+	}
+
+	private Wrapper connector() {
+		return handler -> request -> engine.reading(() -> handler.handle(request));
 	}
 
 	private Handler relator() {

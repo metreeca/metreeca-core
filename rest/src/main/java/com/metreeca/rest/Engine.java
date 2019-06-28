@@ -30,10 +30,10 @@ import java.util.function.Supplier;
 
 
 /**
- * LDP engine.
+ * Storage engine.
  *
- * <p>Performs CRUD actions on LDP <a href="https://www.w3.org/TR/ldp/#ldpr">resources</a> and <a
- * href="https://www.w3.org/TR/ldp/#ldpc">containers</a>.</p>
+ * <p>Manages storage transactions and performs CRUD actions on LDP <a href="https://www.w3.org/TR/ldp/#ldpr">resources</a>
+ * and <a href="https://www.w3.org/TR/ldp/#ldpc">containers</a>.</p>
  *
  * <p>When operating on containers, engines select the operating {@linkplain com.metreeca.form.things.Shapes profile}
  * according to the {@code rdf:type} property of the target, as inferred either from {@linkplain
@@ -53,6 +53,39 @@ public interface Engine {
 		return () -> { throw new IllegalStateException("undefined engine tool"); };
 	}
 
+
+	//// Transactions //////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Executes a task within a read-only storage transaction.
+	 *
+	 * <p>Falls back to plain task execution if transactions are not supported by this engine.</p>
+	 *
+	 * @param task the task to be executed
+	 * @param <R>  the type of the value returned by the task
+	 *
+	 * @return the value returned by {@code task}
+	 *
+	 * @throws NullPointerException if {@code task} is null
+	 */
+	public <R> R reading(final Supplier<R> task);
+
+	/**
+	 * Executes a task within a read-write storage transaction.
+	 *
+	 * <p>Falls back to plain task execution if transactions are not supported by this engine.</p>
+	 *
+	 * @param task the task to be executed
+	 * @param <R>  the type of the value returned by the task
+	 *
+	 * @return the value returned by {@code task}
+	 *
+	 * @throws NullPointerException if {@code task} is null
+	 */
+	public <R> R writing(final Supplier<R> task);
+
+
+	//// CRUD Operations ///////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Relates a resource.

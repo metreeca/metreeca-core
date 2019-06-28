@@ -36,8 +36,10 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.rest.Body.Missing;
+import static com.metreeca.rest.Engine.engine;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.tray.Tray.tool;
 
 
 /**
@@ -58,6 +60,8 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 public final class Generator extends Delegator {
 
 	private final BiFunction<Request, Model, Model> generator;
+
+	private final Engine engine=tool(engine());
 
 
 	/**
@@ -81,6 +85,7 @@ public final class Generator extends Delegator {
 		delegate(generator()
 				.with(annotator())
 				.with(throttler())
+				.with(connector())
 		);
 	}
 
@@ -98,6 +103,10 @@ public final class Generator extends Delegator {
 				new Throttler(Form.relate, Form.digest, Shapes::entity),
 				new Throttler(Form.relate, Form.detail, Shapes::resource)
 		);
+	}
+
+	private Wrapper connector() {
+		return handler -> request -> engine.reading(() -> handler.handle(request));
 	}
 
 	private Handler generator() {

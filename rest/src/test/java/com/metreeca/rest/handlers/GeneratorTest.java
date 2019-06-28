@@ -18,6 +18,7 @@
 package com.metreeca.rest.handlers;
 
 
+import com.metreeca._repo.GraphEngine;
 import com.metreeca.form.Form;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -31,12 +32,13 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
+import static com.metreeca._repo.wrappers.Connector.query;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.rest.Engine.engine;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca._repo.wrappers.Connector.query;
 import static com.metreeca.tray.rdf.Graph.graph;
 import static com.metreeca.tray.rdf.GraphTest.model;
 
@@ -45,6 +47,7 @@ final class GeneratorTest {
 
 	private void exec(final Runnable ...tasks) {
 		new Tray()
+				.set(engine(), GraphEngine::new)
 				.set(graph(), GraphTest::graph)
 				.exec(model(small()))
 				.exec(tasks)

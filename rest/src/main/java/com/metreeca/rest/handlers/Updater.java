@@ -24,8 +24,6 @@ import com.metreeca.form.Shape;
 import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.Engine;
-import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.rdf.Graph;
 import com.metreeca.tray.sys.Trace;
@@ -37,10 +35,10 @@ import java.util.Collection;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.form.things.Shapes.resource;
 import static com.metreeca.rest.Engine.engine;
+import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.tray.Tray.tool;
 import static com.metreeca.tray.sys.Trace.trace;
 
@@ -102,6 +100,7 @@ public final class Updater extends Delegator {
 	public Updater() {
 		delegate(updater()
 				.with(throttler())
+				.with(connector())
 		);
 	}
 
@@ -113,6 +112,10 @@ public final class Updater extends Delegator {
 				new Throttler(Form.update, Form.detail, Shapes::container),
 				new Throttler(Form.update, Form.detail, Shapes::resource)
 		);
+	}
+
+	private Wrapper connector() {
+		return handler -> request -> engine.writing(() -> handler.handle(request));
 	}
 
 	private Handler updater() {

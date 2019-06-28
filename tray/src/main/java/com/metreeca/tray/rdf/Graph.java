@@ -237,7 +237,7 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 	/**
-	 * Executes a task inside a transaction on this graph store.
+	 * Executes a task inside a read-write transaction on this graph store.
 	 *
 	 * <p>If a transaction is not already active on the shared repository connection, begins one at the {@linkplain
 	 * #isolation(IsolationLevel) isolation} level required by this store and commits it on successful task completion;

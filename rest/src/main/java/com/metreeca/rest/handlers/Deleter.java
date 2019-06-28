@@ -79,6 +79,7 @@ public final class Deleter extends Delegator {
 	public Deleter() {
 		delegate(deleter()
 				.with(throttler())
+				.with(connector())
 		);
 	}
 
@@ -90,6 +91,10 @@ public final class Deleter extends Delegator {
 				new Throttler(Form.delete, Form.detail, Shapes::entity),
 				new Throttler(Form.delete, Form.detail, Shapes::resource)
 		);
+	}
+
+	private Wrapper connector() {
+		return handler -> request -> engine.writing(() -> handler.handle(request));
 	}
 
 	private Handler deleter() {
