@@ -46,13 +46,6 @@ final class BearerTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void test() {
-		exec(() ->{
-
-
-		});
-	}
-
 	@Test void testFallThroughToWrappedSchemes() {
 
 		final Wrapper authenticator=handler -> request ->

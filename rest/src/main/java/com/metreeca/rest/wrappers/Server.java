@@ -19,7 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.*;
-import com.metreeca.tray.sys.Trace;
+import com.metreeca.tray.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 

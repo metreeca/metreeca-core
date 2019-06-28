@@ -17,8 +17,6 @@
 
 package com.metreeca.tray;
 
-import com.metreeca.tray.sys.Trace;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;

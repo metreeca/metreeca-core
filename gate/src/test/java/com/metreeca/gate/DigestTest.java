@@ -18,9 +18,9 @@
 package com.metreeca.gate;
 
 
-import org.junit.jupiter.api.Test;
+import com.metreeca.tray.Tray;
 
-import static com.metreeca.rest.HandlerTest.exec;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -29,6 +29,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public abstract class DigestTest {
 
 	protected abstract Digest digest();
+
+
+	private void exec(final Runnable ...tasks) {
+		new Tray()
+				.exec(tasks)
+				.clear();
+	}
 
 
 	@Test void testRandomize() {

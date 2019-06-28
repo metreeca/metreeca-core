@@ -17,8 +17,8 @@
 
 package com.metreeca.gate;
 
-import com.metreeca.tray.sys.Clock;
-import com.metreeca.tray.sys.Vault;
+import com.metreeca.tray.Clock;
+import com.metreeca.tray.Vault;
 
 import io.jsonwebtoken.*;
 
@@ -35,9 +35,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import static com.metreeca.form.things.Codecs.UTF8;
+import static com.metreeca.tray.Clock.clock;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Clock.clock;
-import static com.metreeca.tray.sys.Vault.vault;
+import static com.metreeca.tray.Vault.vault;
 
 
 /**

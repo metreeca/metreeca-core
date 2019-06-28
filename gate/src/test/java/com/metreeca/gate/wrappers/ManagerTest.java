@@ -20,10 +20,10 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.form.Form;
 import com.metreeca.gate.Roster;
 import com.metreeca.gate.RosterAssert;
-import com.metreeca.gate.RosterAssert.MockRoster;
+import com.metreeca.gate.RosterMock;
 import com.metreeca.rest.*;
+import com.metreeca.tray.ClockMock;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.sys.ClockTest.MockClock;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
@@ -43,8 +43,8 @@ import static com.metreeca.form.truths.JsonAssert.assertThat;
 import static com.metreeca.gate.Roster.roster;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.tray.Clock.clock;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Clock.clock;
 
 import static java.lang.Math.max;
 
@@ -57,8 +57,8 @@ final class ManagerTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final MockClock clock=new MockClock();
-	private final Roster roster=new MockRoster(entry("faussone", "faussone"));
+	private final ClockMock clock=new ClockMock();
+	private final Roster roster=new RosterMock(entry("faussone", "faussone"));
 
 	private void exec(final Runnable... tasks) {
 		new Tray()

@@ -18,7 +18,6 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.Issue;
-import com.metreeca.rest.HandlerTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -37,8 +36,10 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 final class ValidatorTest {
 
-	private void exec(final Runnable task) {
-		HandlerTest.exec(task);
+	private void exec(final Runnable ...tasks) {
+		new Tray()
+				.exec(tasks)
+				.clear();
 	}
 
 

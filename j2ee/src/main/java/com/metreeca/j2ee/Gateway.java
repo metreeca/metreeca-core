@@ -21,8 +21,8 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.sys.Loader;
-import com.metreeca.tray.sys.Storage;
+import com.metreeca.tray.Loader;
+import com.metreeca.tray.Storage;
 
 import java.io.*;
 import java.util.Map;
@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static com.metreeca.rest.bodies.InputBody.input;
 import static com.metreeca.rest.bodies.OutputBody.output;
-import static com.metreeca.tray.sys.Trace.trace;
+import static com.metreeca.tray.Trace.trace;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;

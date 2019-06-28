@@ -20,8 +20,8 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.tray.ClockMock;
 import com.metreeca.tray.Tray;
-import com.metreeca.tray.sys.ClockTest;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.tray.sys.Clock.clock;
+import static com.metreeca.tray.Clock.clock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,8 @@ import static java.lang.String.format;
 
 final class ProtectorTest {
 
-	private final ClockTest.MockClock clock=new ClockTest.MockClock();
+	private final ClockMock clock=new ClockMock();
+
 
 	private void exec(final Runnable... tasks) {
 		new Tray()

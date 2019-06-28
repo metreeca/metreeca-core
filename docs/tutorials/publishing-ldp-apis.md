@@ -56,7 +56,7 @@ import com.metreeca.kits.rdf4j.RDF4JMemory;
 
 import javax.servlet.annotation.WebListener;
 
-import static com.metreeca.tray.rdf.Graph.graph;
+import static com.metreeca.sparql.Graph.graph;
 
 
 @WebFilter(urlPatterns="/*") public final class Demo extends Gateway {

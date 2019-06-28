@@ -19,6 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -29,20 +30,21 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.form.things.ValuesTest.Base;
-import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.HandlerTest.echo;
-import static com.metreeca.rest.HandlerTest.exec;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca._repo._Graph.update;
-import static com.metreeca.tray.rdf.GraphTest.model;
 
 import static java.util.Arrays.asList;
 
 
 final class PostprocessorTest {
+
+	private void exec(final Runnable... tasks) {
+		new Tray()
+				.exec(tasks)
+				.clear();
+	}
 
 	private BiFunction<Response, Model, Model> post(final Value value) {
 		return (response, model) -> {
@@ -89,35 +91,6 @@ final class PostprocessorTest {
 						)
 				));
 
-	}
-
-
-	@Test void testSupportSPARQLUpdateScripts() {
-		exec(() -> echo()
-
-				.with(new Postprocessor(
-						update("insert { ?this rdf:value rdf:first } where {}"),
-						update("insert { ?this rdf:value rdf:rest } where {}")
-				))
-
-				.handle(new Request()
-						.method(Request.POST)
-						.base(Base)
-						.path("/test")
-						.body(rdf(), set())
-				)
-
-				.accept(response -> {
-
-					assertThat(response)
-							.as("retrieve body to activate postprocessing")
-							.hasBody(rdf());
-
-					assertThat(model())
-							.as("repository updated")
-							.isIsomorphicTo(decode("<test> rdf:value rdf:first, rdf:rest."));
-
-				}));
 	}
 
 }

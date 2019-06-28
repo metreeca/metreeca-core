@@ -18,8 +18,8 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.truths.ModelAssert;
-import com.metreeca.rest.HandlerTest;
 import com.metreeca.rest.Request;
+import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -30,16 +30,20 @@ import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.statement;
-import static com.metreeca.form.things.ValuesTest.sparql;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca._repo._Graph.query;
 
 import static java.util.Arrays.asList;
 
 
 final class PreprocessorTest {
+
+	private void exec(final Runnable... tasks) {
+		new Tray()
+				.exec(tasks)
+				.clear();
+	}
 
 
 	private BiFunction<Request, Model, Model> pre(final Value value) {
@@ -56,7 +60,7 @@ final class PreprocessorTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testProcessRequestRDFPayload() {
-		HandlerTest.exec(() -> echo()
+		exec(() -> echo()
 
 				.with(new Preprocessor(pre(RDF.FIRST), pre(RDF.REST))) // multiple filters to test piping
 
@@ -74,24 +78,4 @@ final class PreprocessorTest {
 		);
 	}
 
-	@Test void testSupportSPARQLGraphQueries() {
-		HandlerTest.exec(() -> echo()
-
-				.with(new Preprocessor(query(sparql(
-						"construct { <> rdf:value rdf:first, rdf:rest } where {}"
-				))))
-
-				.handle(new Request().body(rdf(), set()))
-
-				.accept(response -> assertThat(response)
-						.hasBody(rdf(), rfd -> ModelAssert.assertThat(rfd)
-								.as("items retrieved")
-								.hasSubset(asList(
-										statement(response.item(), RDF.VALUE, RDF.FIRST),
-										statement(response.item(), RDF.VALUE, RDF.REST)
-								))
-						)
-				)
-		);
-	}
 }

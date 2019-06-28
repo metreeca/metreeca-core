@@ -20,8 +20,8 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.gate.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
-import com.metreeca.tray.sys.Clock;
-import com.metreeca.tray.sys.Trace;
+import com.metreeca.tray.Clock;
+import com.metreeca.tray.Trace;
 
 import io.jsonwebtoken.Claims;
 
@@ -45,9 +45,9 @@ import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.JSONBody.json;
+import static com.metreeca.tray.Clock.clock;
+import static com.metreeca.tray.Trace.trace;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Clock.clock;
-import static com.metreeca.tray.sys.Trace.trace;
 
 import static java.lang.Math.min;
 import static java.lang.String.format;

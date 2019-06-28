@@ -20,8 +20,8 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.gate.Crypto;
 import com.metreeca.gate.Notary;
 import com.metreeca.rest.*;
-import com.metreeca.tray.sys.Clock;
-import com.metreeca.tray.sys.Trace;
+import com.metreeca.tray.Clock;
+import com.metreeca.tray.Trace;
 
 import java.net.URI;
 import java.util.Date;
@@ -31,9 +31,9 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
+import static com.metreeca.tray.Clock.clock;
+import static com.metreeca.tray.Trace.trace;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Clock.clock;
-import static com.metreeca.tray.sys.Trace.trace;
 
 import static java.lang.String.format;
 import static java.util.regex.Pattern.compile;

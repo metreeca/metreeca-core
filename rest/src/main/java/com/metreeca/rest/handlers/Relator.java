@@ -27,7 +27,6 @@ import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.wrappers.Throttler;
-import com.metreeca.tray.rdf.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -126,8 +125,8 @@ import static com.metreeca.tray.Tray.tool;
  *
  * </ul>
  *
- * <p>Regardless of the operating mode, RDF data is retrieved from the system {@linkplain Graph#graph() graph}
- * database.</p>
+ * <p>Regardless of the operating mode, RDF data is retrieved from the system storage {@linkplain Engine#engine()
+ * engine}.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */

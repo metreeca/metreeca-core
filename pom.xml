@@ -91,10 +91,10 @@
 
 		<module>j2ee</module>
 
-		<module>rest</module>
 		<module>gate</module>
-		<module>form</module>
+		<module>rest</module>
 		<module>tray</module>
+		<module>form</module>
 
 		<module>kits</module>
 

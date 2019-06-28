@@ -9,12 +9,13 @@
         <module name="rest" />
         <module name="virtuoso" />
         <module name="stardog" />
-        <module name="j2ee" />
+        <module name="gate" />
         <module name="rdf4j" />
         <module name="gae" />
-        <module name="gate" />
+        <module name="j2ee" />
         <module name="tray" />
         <module name="form" />
+        <module name="sparql" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -48,6 +49,7 @@
       <module name="rdf4j" target="1.8" />
       <module name="rest" target="1.8" />
       <module name="self" target="1.8" />
+      <module name="sparql" target="1.8" />
       <module name="spec" target="1.8" />
       <module name="spec (1)" target="1.8" />
       <module name="stardog" target="1.8" />

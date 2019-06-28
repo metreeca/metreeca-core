@@ -17,7 +17,7 @@
 
 package com.metreeca.kits.stardog;
 
-import com.metreeca.tray.rdf.Graph;
+import com.metreeca.sparql.Graph;
 
 import com.complexible.stardog.api.ConnectionConfiguration;
 import com.complexible.stardog.rdf4j.StardogRepository;

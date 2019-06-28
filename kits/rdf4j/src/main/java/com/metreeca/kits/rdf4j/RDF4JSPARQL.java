@@ -17,7 +17,7 @@
 
 package com.metreeca.kits.rdf4j;
 
-import com.metreeca.tray.rdf.Graph;
+import com.metreeca.sparql.Graph;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;

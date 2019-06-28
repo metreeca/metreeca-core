@@ -18,7 +18,6 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.HandlerTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
@@ -36,8 +35,10 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 
 final class AliaserTest {
 
-	private void exec(final Runnable... tasks) {
-		HandlerTest.exec(tasks);
+	private void exec(final Runnable ...tasks) {
+		new Tray()
+				.exec(tasks)
+				.clear();
 	}
 
 	private Aliaser aliaser(final IRI canonical) {

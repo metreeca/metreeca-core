@@ -37,6 +37,7 @@
 
 	<modules>
 
+		<module>sparql</module>
 		<module>rdf4j</module>
 		<module>stardog</module>
 		<module>virtuoso</module>

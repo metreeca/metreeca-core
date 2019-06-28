@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>, Result<V, E>> {
 
 	public static <V, E> ResultAssert<V, E>  assertThat(final Result<V, E> result) {
-		return new ResultAssert(result);
+		return new ResultAssert<>(result);
 	}
 
 

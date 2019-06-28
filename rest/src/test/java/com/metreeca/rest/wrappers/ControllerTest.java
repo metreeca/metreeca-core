@@ -30,8 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class ControllerTest {
 
-	private void exec(final Runnable task) {
-		HandlerTest.exec(task);
+	private void exec(final Runnable ...tasks) {
+		new Tray()
+				.exec(tasks)
+				.clear();
 	}
 
 

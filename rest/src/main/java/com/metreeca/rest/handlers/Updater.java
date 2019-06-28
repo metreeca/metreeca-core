@@ -25,8 +25,7 @@ import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.wrappers.Throttler;
-import com.metreeca.tray.rdf.Graph;
-import com.metreeca.tray.sys.Trace;
+import com.metreeca.tray.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -39,8 +38,8 @@ import static com.metreeca.form.things.Shapes.resource;
 import static com.metreeca.rest.Engine.engine;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.tray.Trace.trace;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Trace.trace;
 
 
 /**
@@ -86,8 +85,7 @@ import static com.metreeca.tray.sys.Trace.trace;
  *
  * </ul>
  *
- * <p>Regardless of the operating mode, RDF data is updated in the system {@linkplain Graph#graph() graph}
- * database.</p>
+ * <p>Regardless of the operating mode, RDF data is updated in the system storage {@linkplain Engine#engine() engine}.</p>
  *
  * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
  */

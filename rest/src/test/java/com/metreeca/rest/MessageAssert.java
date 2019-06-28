@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.rest.bodies.DataBody.data;
 import static com.metreeca.rest.bodies.TextBody.text;
-import static com.metreeca.tray.sys.Trace.clip;
+import static com.metreeca.tray.Trace.clip;
 
 import static org.assertj.core.api.Assertions.fail;
 
