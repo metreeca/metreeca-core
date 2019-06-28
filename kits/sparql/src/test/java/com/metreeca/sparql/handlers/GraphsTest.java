@@ -45,6 +45,7 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.encode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.sparql._GraphTest.export;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -79,7 +80,7 @@ final class GraphsTest {
 	private Model dflt() {
 		return Tray.tool(Graph.graph()).exec(connection -> {
 
-			return ValuesTest.export(connection, (Resource)null);
+			return export(connection, (Resource)null);
 
 		});
 	}
@@ -87,7 +88,7 @@ final class GraphsTest {
 	private Model named() {
 		return Tray.tool(Graph.graph()).exec(connection -> {
 
-			return ValuesTest.export(connection, RDF.NIL).stream()
+			return export(connection, RDF.NIL).stream()
 					.map(s -> statement(s.getSubject(), s.getPredicate(), s.getObject())) // strip context info
 					.collect(toCollection(LinkedHashModel::new));
 

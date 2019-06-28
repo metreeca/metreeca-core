@@ -18,9 +18,7 @@
 package com.metreeca.tray;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.TempDirectory;
-import org.junitpioneer.jupiter.TempDirectory.TempDir;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.*;
 import java.net.URL;
@@ -34,7 +32,7 @@ import static com.metreeca.form.things.Codecs.url;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@ExtendWith(TempDirectory.class) final class CacheTest {
+final class CacheTest {
 
 	private static final int SyncDelay=1000;
 

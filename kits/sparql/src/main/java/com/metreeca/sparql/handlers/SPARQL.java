@@ -298,21 +298,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	private Responder process(final Request request, final Update update, final RepositoryConnection connection) {
 
-		try {
-
-			connection.begin();
-
-			update.execute();
-
-			connection.commit();
-
-		} catch ( final Throwable e ) {
-
-			connection.rollback();
-
-			throw e;
-
-		}
+		update.execute();
 
 		final String accept=request.header("Accept").orElse("");
 

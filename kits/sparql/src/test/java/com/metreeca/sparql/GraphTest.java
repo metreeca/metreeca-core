@@ -26,9 +26,9 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import java.util.List;
 import java.util.Map;
 
-import static com.metreeca.form.things.ValuesTest.construct;
-import static com.metreeca.form.things.ValuesTest.export;
-import static com.metreeca.form.things.ValuesTest.select;
+import static com.metreeca.sparql._GraphTest.construct;
+import static com.metreeca.sparql._GraphTest.export;
+import static com.metreeca.sparql._GraphTest.select;
 import static com.metreeca.tray.Tray.tool;
 
 

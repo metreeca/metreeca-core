@@ -18,16 +18,6 @@
 package com.metreeca.kits.gae;
 
 import com.google.appengine.api.datastore.*;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
-import org.eclipse.rdf4j.common.iteration.AbstractCloseableIteration;
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
-import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.impl.SimpleNamespace;
-
-import java.util.Iterator;
-import java.util.function.Function;
-
-import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
 
 
 public final class Datastore {
@@ -83,133 +73,132 @@ public final class Datastore {
 
 	//// Transactions //////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void startTransactionInternal() {
-		if ( txn == null ) {
-
-			txn=datastore.beginTransaction();
-
-		} else {
-
-			throw new IllegalStateException("active transaction");
-
-		}
-	}
-
-	private void commitInternal() {
-		if ( txn == null ) {
-
-			throw new IllegalStateException("no active transaction");
-
-		} else {
-
-			try { if ( txn.isActive() ) { txn.commit(); } } finally { txn=null; }
-
-		}
-	}
-
-	private void rollbackInternal() {
-		if ( txn == null ) {
-
-			throw new IllegalStateException("no active transaction");
-
-		} else {
-
-			try { if ( txn.isActive() ) { txn.rollback(); } } finally { txn=null; }
-
-		}
-	}
-
-
-
-	private CloseableIteration<? extends Namespace, Exception> getNamespacesInternal() {
-
-		final Query query=new Query(SpaceKind, root);
-
-		return iteration(map(
-				datastore.prepare(txn, query).asIterator(),
-				entity -> new SimpleNamespace(
-						(String)entity.getProperty("prefix"),
-						(String)entity.getProperty("name")
-				))
-		);
-	}
-
-	private String getNamespaceInternal(final String prefix) {
-
-		final Query query=new Query(SpaceKind, root)
-				.setFilter(new FilterPredicate("prefix", EQUAL, prefix.isEmpty() ? "<default>" : prefix));
-
-		final Entity space=datastore.prepare(txn, query).asSingleEntity();
-
-		return space == null ? null : (String)space.getProperty("name");
-	}
-
-	private void setNamespaceInternal(final String prefix, final String name) {
-
-		final Entity space=new Entity(SpaceKind, prefix.isEmpty() ? "<default>" : prefix, root);
-
-		space.setProperty("prefix", prefix);
-		space.setProperty("name", name);
-
-		datastore.put(txn, space);
-	}
-
-	private void removeNamespaceInternal(final String prefix) {
-
-		final Query query=new Query(SpaceKind, root)
-				.setFilter(new FilterPredicate("prefix", EQUAL, prefix.isEmpty() ? "<default>" : prefix))
-				.setKeysOnly();
-
-		datastore.delete(txn, () -> map(
-				datastore.prepare(txn, query).asIterator(),
-				Entity::getKey
-		));
-	}
-
-	private void clearNamespacesInternal() {
-
-		final Query query=new Query(SpaceKind, root)
-				.setKeysOnly();
-
-		datastore.delete(txn, () -> map(
-				datastore.prepare(txn, query).asIterator(),
-				Entity::getKey
-		));
-	}
+	//private void startTransactionInternal() {
+	//	if ( txn == null ) {
+	//
+	//		txn=datastore.beginTransaction();
+	//
+	//	} else {
+	//
+	//		throw new IllegalStateException("active transaction");
+	//
+	//	}
+	//}
+	//
+	//private void commitInternal() {
+	//	if ( txn == null ) {
+	//
+	//		throw new IllegalStateException("no active transaction");
+	//
+	//	} else {
+	//
+	//		try { if ( txn.isActive() ) { txn.commit(); } } finally { txn=null; }
+	//
+	//	}
+	//}
+	//
+	//private void rollbackInternal() {
+	//	if ( txn == null ) {
+	//
+	//		throw new IllegalStateException("no active transaction");
+	//
+	//	} else {
+	//
+	//		try { if ( txn.isActive() ) { txn.rollback(); } } finally { txn=null; }
+	//
+	//	}
+	//}
+	//
+	//
+	//private CloseableIteration<? extends Namespace, Exception> getNamespacesInternal() {
+	//
+	//	final Query query=new Query(SpaceKind, root);
+	//
+	//	return iteration(map(
+	//			datastore.prepare(txn, query).asIterator(),
+	//			entity -> new SimpleNamespace(
+	//					(String)entity.getProperty("prefix"),
+	//					(String)entity.getProperty("name")
+	//			))
+	//	);
+	//}
+	//
+	//private String getNamespaceInternal(final String prefix) {
+	//
+	//	final Query query=new Query(SpaceKind, root)
+	//			.setFilter(new FilterPredicate("prefix", EQUAL, prefix.isEmpty() ? "<default>" : prefix));
+	//
+	//	final Entity space=datastore.prepare(txn, query).asSingleEntity();
+	//
+	//	return space == null ? null : (String)space.getProperty("name");
+	//}
+	//
+	//private void setNamespaceInternal(final String prefix, final String name) {
+	//
+	//	final Entity space=new Entity(SpaceKind, prefix.isEmpty() ? "<default>" : prefix, root);
+	//
+	//	space.setProperty("prefix", prefix);
+	//	space.setProperty("name", name);
+	//
+	//	datastore.put(txn, space);
+	//}
+	//
+	//private void removeNamespaceInternal(final String prefix) {
+	//
+	//	final Query query=new Query(SpaceKind, root)
+	//			.setFilter(new FilterPredicate("prefix", EQUAL, prefix.isEmpty() ? "<default>" : prefix))
+	//			.setKeysOnly();
+	//
+	//	datastore.delete(txn, () -> map(
+	//			datastore.prepare(txn, query).asIterator(),
+	//			Entity::getKey
+	//	));
+	//}
+	//
+	//private void clearNamespacesInternal() {
+	//
+	//	final Query query=new Query(SpaceKind, root)
+	//			.setKeysOnly();
+	//
+	//	datastore.delete(txn, () -> map(
+	//			datastore.prepare(txn, query).asIterator(),
+	//			Entity::getKey
+	//	));
+	//}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private <V, R> Iterator<R> map(final Iterator<V> iterator, final Function<V, R> mapper) {
-		return new Iterator<R>() {
-
-			@Override public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			@Override public R next() {
-				return mapper.apply(iterator.next());
-			}
-
-		};
-	}
-
-	private <V, E extends Exception> CloseableIteration<V, E> iteration(final Iterator<V> iterator) {
-		return new AbstractCloseableIteration<V, E>() {
-
-			@Override public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			@Override public V next() {
-				return iterator.next();
-			}
-
-			@Override public void remove() {
-				throw new UnsupportedOperationException("read only iteration");
-			}
-
-		};
-	}
+	//private <V, R> Iterator<R> map(final Iterator<V> iterator, final Function<V, R> mapper) {
+	//	return new Iterator<R>() {
+	//
+	//		@Override public boolean hasNext() {
+	//			return iterator.hasNext();
+	//		}
+	//
+	//		@Override public R next() {
+	//			return mapper.apply(iterator.next());
+	//		}
+	//
+	//	};
+	//}
+	//
+	//private <V, E extends Exception> CloseableIteration<V, E> iteration(final Iterator<V> iterator) {
+	//	return new AbstractCloseableIteration<V, E>() {
+	//
+	//		@Override public boolean hasNext() {
+	//			return iterator.hasNext();
+	//		}
+	//
+	//		@Override public V next() {
+	//			return iterator.next();
+	//		}
+	//
+	//		@Override public void remove() {
+	//			throw new UnsupportedOperationException("read only iteration");
+	//		}
+	//
+	//	};
+	//}
 
 }

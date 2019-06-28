@@ -17,18 +17,28 @@
 
 package com.metreeca.sparql;
 
+import com.metreeca.form.things.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tray.Tray;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
+import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Values.iri;
@@ -41,8 +51,10 @@ import static com.metreeca.sparql.Graph.auto;
 import static com.metreeca.sparql.Graph.graph;
 import static com.metreeca.sparql.GraphTest.model;
 
+import static java.util.stream.Collectors.joining;
 
-final class _GraphTest {
+
+public final class _GraphTest {
 
 	private final Statement data=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 
@@ -192,6 +204,110 @@ final class _GraphTest {
 					.doesNotHaveStatement(iri(request.stem(), two), null, null);
 
 		});
+	}
+
+
+
+	//// Graph Operations //////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final Logger logger=Logger.getLogger(ValuesTest.class.getName());
+
+	private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
+			.map(entry -> "prefix "+entry.getKey()+": <"+entry.getValue()+">")
+			.collect(joining("\n"));
+
+	public static String sparql(final String sparql) {
+		return SPARQLPrefixes+"\n\n"+sparql; // !!! avoid prefix clashes
+	}
+
+
+	public static List<Map<String, Value>> select(final RepositoryConnection connection, final String sparql) {
+		try {
+
+			logger.info("evaluating SPARQL query\n\n\t"
+					+sparql.replace("\n", "\n\t")+(sparql.endsWith("\n") ? "" : "\n"));
+
+			final List<Map<String, Value>> tuples=new ArrayList<>();
+
+			connection
+					.prepareTupleQuery(QueryLanguage.SPARQL, sparql(sparql), Base)
+					.evaluate(new AbstractTupleQueryResultHandler() {
+						@Override public void handleSolution(final BindingSet bindings) {
+
+							final Map<String, Value> tuple=new LinkedHashMap<>();
+
+							for (final Binding binding : bindings) {
+								tuple.put(binding.getName(), binding.getValue());
+							}
+
+							tuples.add(tuple);
+
+						}
+					});
+
+			return tuples;
+
+		} catch ( final MalformedQueryException e ) {
+
+			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+sparql.replace("\n", "\n\t"));
+
+		}
+	}
+
+	public static Model construct(final RepositoryConnection connection, final String sparql) {
+		try {
+
+			logger.info("evaluating SPARQL query\n\n\t"
+					+sparql.replace("\n", "\n\t")+(sparql.endsWith("\n") ? "" : "\n"));
+
+			final Model model=new LinkedHashModel();
+
+			connection
+					.prepareGraphQuery(QueryLanguage.SPARQL, sparql(sparql), Base)
+					.evaluate(new StatementCollector(model));
+
+			return model;
+
+		} catch ( final MalformedQueryException e ) {
+
+			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+sparql.replace("\n", "\n\t"));
+
+		}
+	}
+
+
+	public static Model export(final RepositoryConnection connection, final Resource... contexts) {
+
+		final Model model=new TreeModel();
+
+		connection.export(new StatementCollector(model), contexts);
+
+		return model;
+	}
+
+
+	@SafeVarargs public static Supplier<RepositoryConnection> sandbox(final Iterable<Statement>... datasets) {
+
+		if ( datasets == null ) {
+			throw new NullPointerException("null datasets");
+		}
+
+		final Repository repository=new SailRepository(new MemoryStore());
+
+		repository.init();
+
+		try (final RepositoryConnection connection=repository.getConnection()) {
+			for (final Iterable<Statement> dataset : datasets) {
+
+				if ( dataset == null ) {
+					throw new NullPointerException("null dataset");
+				}
+
+				connection.add(dataset);
+			}
+		}
+
+		return repository::getConnection;
 	}
 
 }

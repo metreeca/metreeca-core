@@ -20,23 +20,18 @@ package com.metreeca.form.things;
 import com.metreeca.form.Form;
 import com.metreeca.form.Shape;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.vocabulary.*;
-import org.eclipse.rdf4j.query.*;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.logging.*;
 
 import static com.metreeca.form.Shape.*;
@@ -49,10 +44,13 @@ import static com.metreeca.form.shapes.MaxLength.maxLength;
 import static com.metreeca.form.shapes.Meta.meta;
 import static com.metreeca.form.shapes.MinInclusive.minInclusive;
 import static com.metreeca.form.shapes.Pattern.pattern;
+import static com.metreeca.form.things.Maps.entry;
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Values.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 
 
@@ -79,9 +77,6 @@ public final class ValuesTest {
 		}
 
 	}
-
-
-	private static final Logger logger=Logger.getLogger(ValuesTest.class.getName());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,20 +145,16 @@ public final class ValuesTest {
 	);
 
 
-	private static final Map<String, String> Prefixes=new LinkedHashMap<String, String>() {{
-		put("", Namespace);
-		put("birt", Namespace);
-		put("rdf", RDF.NAMESPACE);
-		put("rdfs", RDFS.NAMESPACE);
-		put("xsd", XMLSchema.NAMESPACE);
-		put("ldp", LDP.NAMESPACE);
-		put("skos", SKOS.NAMESPACE);
-		put("form", Form.Namespace);
-	}};
-
-	private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
-			.map(entry -> "prefix "+entry.getKey()+": <"+entry.getValue()+">")
-			.collect(joining("\n"));
+	public static final Map<String, String> Prefixes=unmodifiableMap(map(
+		entry("", Namespace),
+		entry("birt", Namespace),
+		entry("rdf", RDF.NAMESPACE),
+		entry("rdfs", RDFS.NAMESPACE),
+		entry("xsd", XMLSchema.NAMESPACE),
+		entry("ldp", LDP.NAMESPACE),
+		entry("skos", SKOS.NAMESPACE),
+		entry("form", Form.Namespace)
+	));
 
 	private static final String TurtlePrefixes=Prefixes.entrySet().stream()
 			.map(entry -> "@prefix "+entry.getKey()+": <"+entry.getValue()+">.")
@@ -285,103 +276,6 @@ public final class ValuesTest {
 		Rio.write(model, writer, format);
 
 		return writer.toString();
-	}
-
-
-	//// Graph Operations //////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static String sparql(final String sparql) {
-		return SPARQLPrefixes+"\n\n"+sparql; // !!! avoid prefix clashes
-	}
-
-
-	public static List<Map<String, Value>> select(final RepositoryConnection connection, final String sparql) {
-		try {
-
-			logger.info("evaluating SPARQL query\n\n\t"
-					+sparql.replace("\n", "\n\t")+(sparql.endsWith("\n") ? "" : "\n"));
-
-			final List<Map<String, Value>> tuples=new ArrayList<>();
-
-			connection
-					.prepareTupleQuery(QueryLanguage.SPARQL, sparql(sparql), Base)
-					.evaluate(new AbstractTupleQueryResultHandler() {
-						@Override public void handleSolution(final BindingSet bindings) {
-
-							final Map<String, Value> tuple=new LinkedHashMap<>();
-
-							for (final Binding binding : bindings) {
-								tuple.put(binding.getName(), binding.getValue());
-							}
-
-							tuples.add(tuple);
-
-						}
-					});
-
-			return tuples;
-
-		} catch ( final MalformedQueryException e ) {
-
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+sparql.replace("\n", "\n\t"));
-
-		}
-	}
-
-	public static Model construct(final RepositoryConnection connection, final String sparql) {
-		try {
-
-			logger.info("evaluating SPARQL query\n\n\t"
-					+sparql.replace("\n", "\n\t")+(sparql.endsWith("\n") ? "" : "\n"));
-
-			final Model model=new LinkedHashModel();
-
-			connection
-					.prepareGraphQuery(QueryLanguage.SPARQL, sparql(sparql), Base)
-					.evaluate(new StatementCollector(model));
-
-			return model;
-
-		} catch ( final MalformedQueryException e ) {
-
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+sparql.replace("\n", "\n\t"));
-
-		}
-	}
-
-
-	public static Model export(final RepositoryConnection connection, final Resource... contexts) {
-
-		final Model model=new TreeModel();
-
-		connection.export(new StatementCollector(model), contexts);
-
-		return model;
-	}
-
-
-	@SafeVarargs public static Supplier<RepositoryConnection> sandbox(final Iterable<Statement>... datasets) {
-
-		if ( datasets == null ) {
-			throw new NullPointerException("null datasets");
-		}
-
-		final Repository repository=new SailRepository(new MemoryStore());
-
-		repository.init();
-
-		try (final RepositoryConnection connection=repository.getConnection()) {
-			for (final Iterable<Statement> dataset : datasets) {
-
-				if ( dataset == null ) {
-					throw new NullPointerException("null dataset");
-				}
-
-				connection.add(dataset);
-			}
-		}
-
-		return repository::getConnection;
 	}
 
 

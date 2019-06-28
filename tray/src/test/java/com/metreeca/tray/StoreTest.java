@@ -18,9 +18,7 @@
 package com.metreeca.tray;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.TempDirectory;
-import org.junitpioneer.jupiter.TempDirectory.TempDir;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -28,8 +26,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@ExtendWith(TempDirectory.class) final class StoreTest {
-
+final class StoreTest {
 
 	private void exec(final Path tmp, final Consumer<Store> task) {
 		new Tray().exec(() ->
