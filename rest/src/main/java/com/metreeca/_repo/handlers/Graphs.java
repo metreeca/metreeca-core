@@ -114,7 +114,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				final IRI focus=request.item();
 				final Collection<Statement> model=new ArrayList<>();
 
-				graph().query(connection -> {
+				graph().exec(connection -> {
 					try (final RepositoryResult<Resource> contexts=connection.getContextIDs()) {
 						while ( contexts.hasNext() ) {
 
@@ -141,7 +141,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				graph().query(connection -> {
+				graph().exec(connection -> {
 					request.reply(response -> response.status(Response.OK)
 
 							.header("Content-Type", format.getDefaultMIMEType())
@@ -196,7 +196,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
-				graph().update(connection -> {
+				graph().exec(connection -> {
 					try (final InputStream input=request.body(input()).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
@@ -274,7 +274,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				graph().update(connection -> {
+				graph().exec(connection -> {
 					try {
 
 						final boolean exists=exists(connection, context);
@@ -336,7 +336,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
-				graph().update(connection -> {
+				graph().exec(connection -> {
 					try (final InputStream input=request.body(input()).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {

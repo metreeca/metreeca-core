@@ -66,7 +66,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Responder process(final Request request) {
-		return consumer -> graph().query(connection -> {
+		return consumer -> graph().exec(connection -> {
 			try {
 
 				final Operation operation=operation(request, connection);

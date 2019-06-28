@@ -86,7 +86,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 	}
 
 	private Focus validate(final Shape shape, final Collection<Statement> model) {
-		return tool(Graph.graph()).query(connection -> {
+		return tool(Graph.graph()).exec(connection -> {
 			return field(RDF.VALUE, shape).map(new GraphValidator(tool(Trace.trace()), connection, set(RDF.NIL), model));
 		});
 	}

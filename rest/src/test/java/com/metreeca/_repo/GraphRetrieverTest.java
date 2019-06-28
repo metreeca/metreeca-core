@@ -82,7 +82,7 @@ import static java.util.stream.Collectors.toList;
 final class GraphRetrieverTest extends GraphProcessorTest {
 
 	private Collection<Statement> query(final Query query) {
-		return tool(Graph.graph()).query(connection -> {
+		return tool(Graph.graph()).exec(connection -> {
 			return query
 
 					.map(new GraphRetriever(tool(Trace.trace()), connection, Form.root, true))

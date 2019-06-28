@@ -22,27 +22,21 @@ import com.metreeca.tray.rdf.Graph;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
+import static org.eclipse.rdf4j.IsolationLevels.NONE;
+
 
 /**
  * RDF4J SPARQL graph store.
  *
  * <p>Manages task execution on an RDF4J {@link SPARQLRepository}.</p>
  *
- * <p><strong>Warning</strong> / the {@linkplain #isolation(IsolationLevel) isolation level} is set to {@link
- * Graph#READ_ONLY} by default, disabling write access to the repository unless explicitly overridden during tray
- * configuration, like:</p>
- *
- * <pre>{@code
- * tray.set(Graph.graph(), () -> new RDF4JSPARQL().isolation(IsolationLevels.NONE);
- * }</pre>
- *
- * <p>Note that setting the isolation level to anything different from {@code IsolationLevels.NONE} will cause a runtime
- * exception on update transactions.</p>
+ * <p><strong>Warning</strong> / the {@linkplain Graph#isolation(IsolationLevel) isolation level} is set to {@code
+ * IsolationLevels.NONE}; setting the isolation level to anything different will cause a runtime exception on update
+ * transactions.</p>
  */
-public final class RDF4JSPARQL extends Graph { 	// ;( namespace ops silently ignored
+public final class RDF4JSPARQL extends Graph { // ;( namespace ops silently ignored
 
-	{ isolation(READ_ONLY); } // ;( no transaction support
-
+	{ isolation(NONE); } // ;( no transaction support
 
 	/**
 	 * Creates an RDF4J SPARQL graph.

@@ -60,7 +60,7 @@ public final class _Graph  {
 
 		final Graph graph=tool(graph());
 
-		return () -> graph.query(supplier);
+		return () -> graph.exec(supplier);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public final class _Graph  {
 
 		final Graph graph=tool(graph());
 
-		return v -> graph.query(connection -> { return function.apply(connection, v); });
+		return v -> graph.exec(connection -> { return function.apply(connection, v); });
 	}
 
 
@@ -121,7 +121,7 @@ public final class _Graph  {
 
 		final Graph graph=tool(graph());
 
-		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.query(connection -> {
+		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.exec(connection -> {
 
 			configure(
 					message, connection.prepareGraphQuery(SPARQL, query, message.request().base()), customizers
@@ -166,7 +166,7 @@ public final class _Graph  {
 
 		final Graph graph=tool(graph());
 
-		return update.isEmpty() ? (message, model) -> model : (message, model) -> graph.update(connection -> {
+		return update.isEmpty() ? (message, model) -> model : (message, model) -> graph.exec(connection -> {
 
 			configure(message, connection.prepareUpdate(SPARQL, update, message.request().base()), customizers).execute();
 

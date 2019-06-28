@@ -19,11 +19,8 @@ package com.metreeca.tray.rdf;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,22 +38,6 @@ import static java.util.Objects.requireNonNull;
  * RDF repository through a {@link ThreadLocal} context variable.</p>
  */
 public abstract class Graph implements AutoCloseable {
-
-	/**
-	 * Read-only isolation level.
-	 *
-	 * <p>Disables update transactions.</p>
-	 */
-	public static final IsolationLevel READ_ONLY=new IsolationLevel() {
-
-		@Override public boolean isCompatibleWith(final IsolationLevel level) { return equals(level); }
-
-		@Override public IRI getURI() { return RDF.NIL; }
-
-		@Override public String toString() { return "READ_ONLY"; }
-
-	};
-
 
 	/**
 	 * Retrieves the default graph factory.
@@ -161,52 +142,6 @@ public abstract class Graph implements AutoCloseable {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Executes a task on this graph store.
-	 *
-	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
-	 *             store
-	 *
-	 * @return this graph store
-	 *
-	 * @throws NullPointerException if {@code task} is null
-	 */
-	public Graph query(final Consumer<RepositoryConnection> task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		return exec(connection -> {
-
-			task.accept(connection);
-
-			return this;
-
-		});
-	}
-
-	/**
-	 * Executes a task on this graph store.
-	 *
-	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
-	 *             store
-	 * @param <V>  the type of the value returned by {@code task}
-	 *
-	 * @return the value returned by {@code task}
-	 *
-	 * @throws NullPointerException if {@code task} is null or returns a null value
-	 */
-	public <V> V query(final Function<RepositoryConnection, V> task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		return exec(task);
-	}
-
-
-	/**
 	 * Executes a task inside a transaction on this graph store.
 	 *
 	 * <p>If a transaction is not already active on the shared repository connection, begins one at the {@linkplain
@@ -221,13 +156,13 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if {@code task} is null
 	 */
-	public Graph update(final Consumer<RepositoryConnection> task) {
+	public Graph exec(final Consumer<RepositoryConnection> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
 		}
 
-		return update(connection -> {
+		return exec(connection -> {
 
 			task.accept(connection);
 
@@ -237,7 +172,7 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 	/**
-	 * Executes a task inside a read-write transaction on this graph store.
+	 * Executes a task inside a transaction on this graph store.
 	 *
 	 * <p>If a transaction is not already active on the shared repository connection, begins one at the {@linkplain
 	 * #isolation(IsolationLevel) isolation} level required by this store and commits it on successful task completion;
@@ -252,28 +187,35 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if {@code task} is null or returns a null value
 	 */
-	public <V> V update(final Function<RepositoryConnection, V> task) {
+	public <V> V exec(final Function<RepositoryConnection, V> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
 		}
 
-		return exec(connection -> {
-			if ( connection.isActive() ) {
+		if ( repository == null ) {
+			throw new IllegalStateException("undefined repository");
+		}
 
-				return task.apply(connection);
+		final RepositoryConnection shared=context.get();
 
-			} else {
+		if ( shared != null ) {
 
-				if ( connection.getIsolationLevel().equals(READ_ONLY) ) {
-					throw new RepositoryReadOnlyException("isolation level set to "+READ_ONLY);
-				}
+			return requireNonNull(task.apply(shared), "null task return value");
+
+		} else {
+
+			if ( !repository.isInitialized() ) { repository.init(); }
+
+			try (final RepositoryConnection connection=repository.getConnection()) {
+
+				context.set(connection);
 
 				try {
 
-					if ( !connection.isActive() ) { connection.begin(); }
+					if ( !connection.isActive() ) { connection.begin(isolation); }
 
-					final V value=task.apply(connection);
+					final V value=requireNonNull(task.apply(connection), "null task return value");
 
 					if ( connection.isActive() ) { connection.commit(); }
 
@@ -287,37 +229,6 @@ public abstract class Graph implements AutoCloseable {
 
 				}
 
-			}
-		});
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private <V> V exec(final Function<RepositoryConnection, V> task) {
-
-		final RepositoryConnection shared=context.get();
-
-		if ( shared != null ) {
-
-			return task.apply(shared);
-
-		} else {
-
-			if ( repository == null ) {
-				throw new IllegalStateException("undefined repository");
-			}
-
-			if ( !repository.isInitialized() ) { repository.init(); }
-
-			try (final RepositoryConnection connection=repository.getConnection()) {
-
-				connection.setIsolationLevel(isolation);
-
-				context.set(connection);
-
-				return requireNonNull(task.apply(connection), "null task return value");
-
 			} finally {
 
 				context.remove();
@@ -325,6 +236,7 @@ public abstract class Graph implements AutoCloseable {
 			}
 
 		}
+
 	}
 
 }

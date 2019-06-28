@@ -71,20 +71,20 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null task");
 		}
 
-		return graph.update(connection -> { return task.get(); });
+		return graph.exec(connection -> { return task.get(); });
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Collection<Statement> relate(final IRI resource, final Query query) {
-		return graph.query(connection -> {
+		return graph.exec(connection -> {
 			return query.map(new GraphRetriever(trace, connection, resource, true));
 		});
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
-		return graph.update(connection -> {
+		return graph.exec(connection -> {
 
 			return Optional.of(resource)
 
@@ -114,7 +114,7 @@ public final class GraphEngine implements Engine {
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
-		return graph.update(connection -> {
+		return graph.exec(connection -> {
 			return retrieve(connection, resource, shape).map(current -> {
 
 				// validate against shape before updating graph to support snapshot transactions
@@ -133,7 +133,7 @@ public final class GraphEngine implements Engine {
 	}
 
 	@Override public Optional<Focus> delete(final IRI resource, final Shape shape) {
-		return graph.update(connection -> {
+		return graph.exec(connection -> {
 
 			// !!! merge retrieve/remove operations into a single SPARQL update txn
 			// !!! must check resource existence anyway and wouldn't work for CBD shapes

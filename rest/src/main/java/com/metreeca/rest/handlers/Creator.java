@@ -296,7 +296,7 @@ public final class Creator extends Delegator {
 
 
 		@Override public String apply(final Request request, final Collection<Statement> model) {
-			return graph.update(connection -> {
+			return graph.exec(connection -> {
 
 				// !!! custom name pattern
 				// !!! client naming hints (http://www.w3.org/TR/ldp/ §5.2.3.10 -> https://tools.ietf.org/html/rfc5023#section-9.7)

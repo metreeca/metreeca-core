@@ -20,10 +20,8 @@ package com.metreeca.tray.rdf;
 
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
-import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
@@ -32,8 +30,6 @@ import static com.metreeca.form.things.ValuesTest.construct;
 import static com.metreeca.form.things.ValuesTest.export;
 import static com.metreeca.form.things.ValuesTest.select;
 import static com.metreeca.tray.Tray.tool;
-
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
 public final class GraphTest {
@@ -44,33 +40,20 @@ public final class GraphTest {
 
 
 	public static Model model(final Resource... contexts) {
-		return tool(Graph.graph()).query(connection -> { return export(connection, contexts); });
+		return tool(Graph.graph()).exec(connection -> { return export(connection, contexts); });
 	}
 
 	public static Model model(final String sparql) {
-		return tool(Graph.graph()).query(connection -> { return construct(connection, sparql); });
+		return tool(Graph.graph()).exec(connection -> { return construct(connection, sparql); });
 	}
 
 	public static List<Map<String, Value>> tuples(final String sparql) {
-		return tool(Graph.graph()).query(connection -> { return select(connection, sparql); });
+		return tool(Graph.graph()).exec(connection -> { return select(connection, sparql); });
 	}
 
 
 	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> tool(Graph.graph()).update(connection -> { connection.add(model, contexts); });
-	}
-
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testPreventUpdateTransactionsOnReadOnlyRepositories() {
-		try (final Graph graph=graph()) {
-
-			assertThatExceptionOfType(RepositoryReadOnlyException.class)
-					.isThrownBy(() -> graph.isolation(Graph.READ_ONLY).update(connection -> {}));
-
-		}
+		return () -> tool(Graph.graph()).exec(connection -> { connection.add(model, contexts); });
 	}
 
 }

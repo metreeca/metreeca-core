@@ -79,7 +79,7 @@ final class GraphsTest {
 	}
 
 	private Model dflt() {
-		return tool(Graph.graph()).query(connection -> {
+		return tool(Graph.graph()).exec(connection -> {
 
 			return export(connection, (Resource)null);
 
@@ -87,7 +87,7 @@ final class GraphsTest {
 	}
 
 	private Model named() {
-		return tool(Graph.graph()).query(connection -> {
+		return tool(Graph.graph()).exec(connection -> {
 
 			return export(connection, RDF.NIL).stream()
 					.map(s -> statement(s.getSubject(), s.getPredicate(), s.getObject())) // strip context info
