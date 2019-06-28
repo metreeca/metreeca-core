@@ -34,7 +34,7 @@ import static com.metreeca.form.things.ValuesTest.sparql;
 import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
-import static com.metreeca._repo.wrappers.Connector.query;
+import static com.metreeca._repo._Graph.query;
 
 import static java.util.Arrays.asList;
 

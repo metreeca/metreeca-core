@@ -65,16 +65,7 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <R> R reading(final Supplier<R> task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		return graph.query(connection -> { return task.get(); });
-	}
-
-	@Override public <R> R writing(final Supplier<R> task) {
+	@Override public <R> R exec(final Supplier<R> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");

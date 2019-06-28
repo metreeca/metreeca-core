@@ -22,7 +22,6 @@ import com.metreeca.form.Form;
 import com.metreeca.form.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca._repo.wrappers.Connector;
 import com.metreeca.rest.wrappers.Throttler;
 
 import org.eclipse.rdf4j.model.Model;
@@ -31,7 +30,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static com.metreeca.form.things.Sets.set;
@@ -68,11 +66,9 @@ public final class Generator extends Delegator {
 	 * Creates a virtual model generator.
 	 *
 	 * @param generator a function mapping from a request and its (likely empty) {@linkplain RDFBody RDF} payload to a
-	 *                  possibly empty RDF model; generators based on SPARQL graph queries may be created using {@link
-	 *                  Connector} factory methods
+	 *                  possibly empty RDF model
 	 *
 	 * @throws NullPointerException if {@code generator} is null or returns a null value
-	 * @see Connector#query(String, BiConsumer[])
 	 */
 	public Generator(final BiFunction<Request, Model, Model> generator) {
 
@@ -106,7 +102,7 @@ public final class Generator extends Delegator {
 	}
 
 	private Wrapper connector() {
-		return handler -> request -> engine.reading(() -> handler.handle(request));
+		return handler -> request -> engine.exec(() -> handler.handle(request));
 	}
 
 	private Handler generator() {

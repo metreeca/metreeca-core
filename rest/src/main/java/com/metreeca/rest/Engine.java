@@ -57,7 +57,11 @@ public interface Engine {
 	//// Transactions //////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Executes a task within a read-only storage transaction.
+	 * Executes a task within a storage transaction.
+	 *
+	 * <p>If a transaction is not already active on the underlying storage, begins one and commits it on successful
+	 * task completion; if the task throws an exception, the transaction is rolled back and the exception rethrown; in
+	 * either case, no action is taken if the transaction was already terminated inside the task.</p>
 	 *
 	 * <p>Falls back to plain task execution if transactions are not supported by this engine.</p>
 	 *
@@ -66,23 +70,9 @@ public interface Engine {
 	 *
 	 * @return the value returned by {@code task}
 	 *
-	 * @throws NullPointerException if {@code task} is null
+	 * @throws NullPointerException if {@code task} is null or returns a null value
 	 */
-	public <R> R reading(final Supplier<R> task);
-
-	/**
-	 * Executes a task within a read-write storage transaction.
-	 *
-	 * <p>Falls back to plain task execution if transactions are not supported by this engine.</p>
-	 *
-	 * @param task the task to be executed
-	 * @param <R>  the type of the value returned by the task
-	 *
-	 * @return the value returned by {@code task}
-	 *
-	 * @throws NullPointerException if {@code task} is null
-	 */
-	public <R> R writing(final Supplier<R> task);
+	public <R> R exec(final Supplier<R> task);
 
 
 	//// CRUD Operations ///////////////////////////////////////////////////////////////////////////////////////////////

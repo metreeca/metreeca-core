@@ -172,7 +172,7 @@ public final class Relator extends Delegator {
 	}
 
 	private Wrapper connector() {
-		return handler -> request -> engine.reading(() -> handler.handle(request));
+		return handler -> request -> engine.exec(() -> handler.handle(request));
 	}
 
 	private Handler relator() {

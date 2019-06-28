@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca._repo.wrappers;
+package com.metreeca._repo;
 
 import com.metreeca.rest.*;
 import com.metreeca.tray.rdf.Graph;
@@ -39,16 +39,7 @@ import static com.metreeca.tray.rdf.Graph.graph;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 
-/**
- * Graph connection manager.
- *
- * <p>Executes wrapped handlers inside a shared connection to the the system {@linkplain Graph graph database}.</p>
- *
- * <p>If the request is not {@linkplain Request#safe() safe}, wrapped handlers are executed inside a single transaction
- * on the shared connection, which is automatically committed on {@linkplain Response#success() successful} response or
- * rolled back otherwise.</p>
- */
-public final class Connector implements Wrapper {
+public final class _Graph  {
 
 	/**
 	 * Connects a graph-based supplier.
@@ -326,47 +317,6 @@ public final class Connector implements Wrapper {
 		}
 
 		return operation;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final Graph graph=tool(graph());
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Handler wrap(final Handler handler) {
-
-		if ( handler == null ) {
-			throw new NullPointerException("null handler");
-		}
-
-		return request -> consumer -> {
-			if ( request.safe() ) {
-
-				graph.query(connection -> {
-
-					handler.handle(request).accept(consumer);
-
-				});
-
-			} else {
-
-				graph.update(connection -> {
-					handler.handle(request).map(response -> {
-
-						if ( !response.success() && connection.isActive() ) {
-							connection.rollback();
-						}
-
-						return response;
-
-					}).accept(consumer);
-				});
-
-			}
-		};
 	}
 
 }

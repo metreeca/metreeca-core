@@ -115,7 +115,7 @@ public final class Updater extends Delegator {
 	}
 
 	private Wrapper connector() {
-		return handler -> request -> engine.writing(() -> handler.handle(request));
+		return handler -> request -> engine.exec(() -> handler.handle(request));
 	}
 
 	private Handler updater() {

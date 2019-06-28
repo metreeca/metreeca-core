@@ -19,7 +19,6 @@ package com.metreeca.rest.wrappers;
 
 
 import com.metreeca.rest.*;
-import com.metreeca._repo.wrappers.Connector;
 import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
@@ -28,7 +27,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static com.metreeca.rest.bodies.RDFBody.rdf;
@@ -54,12 +52,9 @@ public final class Preprocessor implements Wrapper {
 	 * RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
 	 * @param filters the request RDF preprocessing filters to be inserted; ech filter takes as argument an incoming
-	 *                request and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model; filters
-	 *                based on SPARQL Query/Update scripts may be created using {@link Connector} factory methods
+	 *                request and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model
 	 *
 	 * @throws NullPointerException if {@code filters} is null or contains null values
-	 * @see Connector#query(String, BiConsumer[])
-	 * @see Connector#update(String, BiConsumer[])
 	 */
 	@SafeVarargs public Preprocessor(final BiFunction<Request, Model, ? extends Collection<Statement>>... filters) {
 		this(asList(filters));
@@ -72,12 +67,9 @@ public final class Preprocessor implements Wrapper {
 	 * RDF} payload, if one is present, or ignored, otherwise.</p> *
 	 *
 	 * @param filters the request RDF preprocessing filters to be inserted; ech filter takes as argument an incoming
-	 *                request and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model; filters
-	 *                based on SPARQL Query/Update scripts may be created using {@link Connector} factory methods
+	 *                request and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model
 	 *
 	 * @throws NullPointerException if {@code filters} is null or contains null values
-	 * @see Connector#query(String, BiConsumer[])
-	 * @see Connector#update(String, BiConsumer[])
 	 */
 	public Preprocessor(final Collection<BiFunction<Request, Model, ? extends Collection<Statement>>> filters) {
 
@@ -101,16 +93,7 @@ public final class Preprocessor implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return new Connector()
-				.wrap(preprocessor())
-				.wrap(handler);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Wrapper preprocessor() {
-		return handler -> request -> request.body(rdf()).fold(
+		return request -> request.body(rdf()).fold(
 
 				rdf -> handler.handle(request.body(rdf(), filters.stream().reduce(
 

@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static com.metreeca._repo.wrappers.Connector.query;
+import static com.metreeca._repo._Graph.query;
 import static com.metreeca.form.shapes.Or.or;
 import static com.metreeca.form.things.ValuesTest.*;
 import static com.metreeca.form.truths.ModelAssert.assertThat;

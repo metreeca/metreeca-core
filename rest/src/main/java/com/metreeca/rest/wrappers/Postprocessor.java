@@ -19,7 +19,6 @@ package com.metreeca.rest.wrappers;
 
 
 import com.metreeca.rest.*;
-import com.metreeca._repo.wrappers.Connector;
 import com.metreeca.rest.bodies.RDFBody;
 
 import org.eclipse.rdf4j.model.Model;
@@ -29,7 +28,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static com.metreeca.rest.bodies.RDFBody.rdf;
@@ -55,13 +53,9 @@ public final class Postprocessor implements Wrapper {
 	 * outgoing responses and their {@linkplain RDFBody RDF} payload, if one is present, or ignored, otherwise.</p>
 	 *
 	 * @param filters the response RDF postprocessing filters to be inserted; each filter takes as argument a successful
-	 *                outgoing response and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model;
-	 *                filters based on SPARQL Query/Update scripts may be created using {@link Connector} factory
-	 *                methods
+	 *                outgoing response and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model
 	 *
 	 * @throws NullPointerException if {@code filters} is null or contains null values
-	 * @see Connector#query(String, BiConsumer[])
-	 * @see Connector#update(String, BiConsumer[])
 	 */
 	@SafeVarargs public Postprocessor(final BiFunction<Response, Model, ? extends Collection<Statement>>... filters) {
 		this(asList(filters));
@@ -75,13 +69,9 @@ public final class Postprocessor implements Wrapper {
 	 * or ignored, otherwise.</p>
 	 *
 	 * @param filters the response RDF postprocessing filters to be inserted; each filter takes as argument a successful
-	 *                outgoing response and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model;
-	 *                filters based on SPARQL Query/Update scripts may be created using {@link Connector} factory
-	 *                methods
+	 *                outgoing response and its {@linkplain RDFBody RDF} payload and must return a non-null RDF model
 	 *
 	 * @throws NullPointerException if {@code filters} is null or contains null values
-	 * @see Connector#query(String, BiConsumer[])
-	 * @see Connector#update(String, BiConsumer[])
 	 */
 	public Postprocessor(final Collection<BiFunction<Response, Model, ? extends Collection<Statement>>> filters) {
 
@@ -105,16 +95,7 @@ public final class Postprocessor implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return new Connector()
-				.wrap(postprocessor())
-				.wrap(handler);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Wrapper postprocessor() {
-		return handler -> request -> handler.handle(request).map(response -> response.success() ? response.body(rdf()).fold(
+		return request -> handler.handle(request).map(response -> response.success() ? response.body(rdf()).fold(
 
 				rdf -> response.body(rdf(), filters.stream().reduce(
 
