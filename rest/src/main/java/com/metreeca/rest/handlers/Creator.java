@@ -37,15 +37,12 @@ import javax.json.JsonValue;
 
 import static com.metreeca.form.things.Shapes.container;
 import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.rest.Engine.engine;
 import static com.metreeca.rest.Response.NotImplemented;
 import static com.metreeca.rest.bodies.RDFBody.rdf;
 import static com.metreeca.tray.Trace.trace;
 import static com.metreeca.tray.Tray.tool;
-
-import static org.eclipse.rdf4j.repository.util.Connections.getStatement;
 
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
@@ -206,7 +203,7 @@ public final class Creator extends Delegator {
 						final Shape shape=container(container, request.shape());
 						final Collection<Statement> model=rewrite(resource, container, trace.trace(this, rdf));
 
-						// !!! recognize txns failures due to conflicting slugs and report as 409 Conflict
+						// !!! recognize txns failures due to conflicting user-supplied slugs and report as 409 Conflict
 
 						return request.reply(response -> engine.create(resource, shape, model)
 
@@ -267,8 +264,5 @@ public final class Creator extends Delegator {
 	private <T extends Value> T rewrite(final T target, final T source, final T value) {
 		return source.equals(value) ? target : value;
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

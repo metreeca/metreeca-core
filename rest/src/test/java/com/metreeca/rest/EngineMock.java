@@ -24,31 +24,65 @@ import com.metreeca.form.Shape;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
+
+import static com.metreeca.form.Focus.focus;
+import static com.metreeca.form.things.Sets.set;
 
 
 public final class EngineMock implements Engine {
 
+	private final Map<IRI, Collection<Statement>> models=new HashMap<>();
+
+
 	@Override public <R> R exec(final Supplier<R> task) {
-		return null;
+		synchronized ( models ) {
+			return task.get();
+		}
 	}
 
 
 	@Override public Collection<Statement> relate(final IRI resource, final Query query) {
-		return null;
+		synchronized ( models ) {
+			return models.getOrDefault(resource, set());
+		}
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {
-		return Optional.empty();
+		synchronized ( models ) {
+			if ( models.containsKey(resource) ) { return Optional.empty(); } else {
+
+				models.put(resource, new LinkedHashSet<>(model));
+
+				return Optional.of(focus()); // !!! validation
+
+			}
+		}
 	}
 
 	@Override public Optional<Focus> update(final IRI resource, final Shape shape, final Collection<Statement> model) {
-		return Optional.empty();
+		synchronized ( models ) {
+			if ( !models.containsKey(resource) ) { return Optional.empty(); } else {
+
+				models.put(resource, new LinkedHashSet<>(model));
+
+				return Optional.of(focus()); // !!! validation
+
+			}
+		}
 	}
 
 	@Override public Optional<Focus> delete(final IRI resource, final Shape shape) {
-		return Optional.empty();
+		synchronized ( models ) {
+			if ( !models.containsKey(resource) ) { return Optional.empty(); } else {
+
+				models.remove(resource);
+
+				return Optional.of(focus()); // !!! validation
+
+			}
+		}
 	}
+
 }
