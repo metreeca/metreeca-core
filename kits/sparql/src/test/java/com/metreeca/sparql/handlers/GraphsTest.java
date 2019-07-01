@@ -45,7 +45,7 @@ import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.encode;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.sparql._GraphTest.export;
+import static com.metreeca.sparql.GraphTest.export;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;

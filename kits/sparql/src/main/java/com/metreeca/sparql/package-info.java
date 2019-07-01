@@ -17,8 +17,6 @@
 
 /**
  * SPARQL repositories tools.
- *
- * <p>Provides shared SPARQL storage utilities and endpoint handlers.</p>
- */
+*/
 
 package com.metreeca.sparql;

@@ -19,40 +19,35 @@ package com.metreeca.sparql;
 
 import com.metreeca.tray.Tray;
 
-import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
 
 import static com.metreeca.form.things.Values.iri;
 import static com.metreeca.form.things.ValuesTest.Base;
 import static com.metreeca.form.things.ValuesTest.small;
+import static com.metreeca.sparql.Graph.graph;
+import static com.metreeca.tray.Tray.tool;
 
 
-abstract class _GraphProcessorTest {
+abstract class GraphProcessorTest {
 
 	protected void exec(final Runnable... tasks) {
 		new Tray()
 
-				.set(Graph.graph(), GraphTest::graph)
+				.set(graph(), GraphTest::graph)
 
 				//.set(graph(), this::graphdb)
 				//.set(graph(), this::virtuoso)
 				//.set(graph(), this::stardog)
 				//.set(graph(), this::dydra)
 
-				.exec(() -> {
+				.exec(() -> tool(graph()).exec(connection -> {
 
-					final Graph graph=Tray.tool(Graph.graph()); // expect pre-loaded dataset if read-only
-
-					if ( graph.isolation().isCompatibleWith(IsolationLevels.NONE) ) {
-						graph.exec(connection -> {
-							if ( !connection.hasStatement(iri(Base), RDF.TYPE, VOID.DATASET, false) ) {
-								connection.add(small());
-							}
-						});
+					if ( !connection.hasStatement(iri(Base), RDF.TYPE, VOID.DATASET, false) ) {
+						connection.add(small()); // load test dataset
 					}
 
-				})
+				}))
 
 				.exec(tasks)
 

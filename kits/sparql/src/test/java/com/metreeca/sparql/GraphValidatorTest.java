@@ -66,7 +66,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphValidatorTest extends _GraphProcessorTest {
+final class GraphValidatorTest extends GraphProcessorTest {
 
 	private static final IRI x=item("x");
 	private static final IRI y=item("y");

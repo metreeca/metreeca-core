@@ -22,7 +22,6 @@ import com.metreeca.form.probes.Outliner;
 import com.metreeca.rest.Engine;
 import com.metreeca.rest.Request;
 import com.metreeca.tray.Trace;
-import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -41,8 +40,11 @@ import static com.metreeca.form.probes.Evaluator.pass;
 import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
+import static com.metreeca.sparql.Graph.graph;
 import static com.metreeca.sparql.GraphProcessor.convey;
 import static com.metreeca.sparql.GraphProcessor.filter;
+import static com.metreeca.tray.Trace.trace;
+import static com.metreeca.tray.Tray.tool;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -56,8 +58,8 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class GraphEngine implements Engine {
 
-	private final Graph graph=Tray.tool(Graph.graph());
-	private final Trace trace=Tray.tool(Trace.trace());
+	private final Graph graph=tool(graph());
+	private final Trace trace=tool(trace());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

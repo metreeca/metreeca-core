@@ -77,9 +77,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphRetrieverTest extends _GraphProcessorTest {
+final class GraphRetrieverTest extends GraphProcessorTest {
 
-	private static final IRI StardogDefaul=iri("tag:stardog:api:context:default"); // !!! review dependency
+	private static final IRI StardogDefaul=iri("tag:stardog:api:context:default");
 
 
 	private Collection<Statement> query(final Query query) {
@@ -90,7 +90,7 @@ final class GraphRetrieverTest extends _GraphProcessorTest {
 
 					.stream()
 
-					// ;(virtuoso) counts reported as xsd:int
+					// ;(virtuoso) counts reported as xsd:int // !!! review dependency
 
 					.map(statement -> type(statement.getObject()).equals(XMLSchema.INT) ? statement(
 							statement.getSubject(),
@@ -108,7 +108,7 @@ final class GraphRetrieverTest extends _GraphProcessorTest {
 
 				.stream()
 
-				// ;(stardog) statement from default context explicitly tagged
+				// ;(stardog) statement from default context explicitly tagged // !!! review dependency
 
 				.map(statement -> StardogDefaul.equals(statement.getContext()) ? statement(
 						statement.getSubject(),
