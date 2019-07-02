@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.metreeca.back.sparql.GraphTest.tuples;
 import static com.metreeca.form.Order.decreasing;
 import static com.metreeca.form.Order.increasing;
 import static com.metreeca.form.Shape.filter;
@@ -85,7 +86,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		return tool(Graph.graph()).exec(connection -> {
 			return query
 
-					.map(new GraphRetriever(tool(trace()), connection, Form.root, true))
+					.map(new GraphRetriever(tool(trace()), connection, Form.root))
 
 					.stream()
 
@@ -203,7 +204,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 						.distinct()
 						.collect(toList());
 
-				final Function<String, List<Value>> expected=sparql -> GraphTest.tuples(sparql)
+				final Function<String, List<Value>> expected=sparql -> tuples(sparql)
 						.stream()
 						.map(map -> map.get("employee"))
 						.distinct()

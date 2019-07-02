@@ -76,7 +76,7 @@ public final class GraphEngine implements Engine {
 
 	@Override public Collection<Statement> relate(final IRI resource, final Query query) {
 		return graph.exec(connection -> {
-			return query.map(new GraphRetriever(trace, connection, resource, true));
+			return query.map(new GraphRetriever(trace, connection, resource));
 		});
 	}
 
@@ -159,7 +159,7 @@ public final class GraphEngine implements Engine {
 	) {
 		return Optional.of(edges(shape))
 
-				.map(query -> query.map(new GraphRetriever(trace, connection, resource, false)))
+				.map(query -> query.map(new GraphRetriever(trace, connection, resource)))
 
 				.filter(current -> !current.isEmpty());
 	}

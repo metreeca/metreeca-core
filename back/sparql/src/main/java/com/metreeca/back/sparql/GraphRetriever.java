@@ -17,13 +17,13 @@
 
 package com.metreeca.back.sparql;
 
+import com.metreeca.form.Query;
 import com.metreeca.form.*;
 import com.metreeca.form.probes.Traverser;
 import com.metreeca.form.queries.Edges;
 import com.metreeca.form.queries.Items;
 import com.metreeca.form.queries.Stats;
 import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Structures;
 import com.metreeca.form.things.Values;
 import com.metreeca.tray.Trace;
 
@@ -31,11 +31,9 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
-import org.eclipse.rdf4j.query.algebra.Compare;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -47,10 +45,9 @@ import static com.metreeca.form.shapes.All.all;
 import static com.metreeca.form.shapes.And.and;
 import static com.metreeca.form.shapes.Any.any;
 import static com.metreeca.form.shapes.Or.or;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Snippets.*;
 import static com.metreeca.form.things.Values.*;
-
-import static org.eclipse.rdf4j.query.algebra.evaluation.util.QueryEvaluationUtil.compare;
 
 
 final class GraphRetriever extends GraphProcessor implements Query.Probe<Collection<Statement>> {
@@ -58,21 +55,18 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 	private final RepositoryConnection connection;
 
 	private final Resource resource;
-	private final boolean labelled;
 
 
 	GraphRetriever(
 			final Trace trace,
 			final RepositoryConnection connection,
-			final Resource resource,
-			final boolean labelled
+			final Resource resource
 	) {
 
 		super(trace);
 
 		this.connection=connection;
 		this.resource=resource;
-		this.labelled=labelled;
 	}
 
 
@@ -146,26 +140,102 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 					if ( template.isEmpty() ) { // wildcard shape => symmetric+labelled concise bounded description
 
-						model.addAll(Structures.description((Resource)match, labelled, connection));
+						description((Resource)match);
 
 					} else {
-						template.forEach(statement -> {
 
-							final Resource subject=statement.getSubject();
-							final Value object=statement.getObject();
+						template(bindings);
 
-							final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
-							final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
-
-							if ( source instanceof Resource && target != null ) {
-								model.add(statement((Resource)source, statement.getPredicate(), target));
-							}
-
-						});
 					}
 
 				}
 
+			}
+
+			private void template(final BindingSet bindings) {
+				template.forEach(statement -> {
+
+					final Resource subject=statement.getSubject();
+					final Value object=statement.getObject();
+
+					final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
+					final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
+
+					if ( source instanceof Resource && target != null ) {
+						model.add(statement((Resource)source, statement.getPredicate(), target));
+					}
+
+				});
+			}
+
+			private void description(final Resource resource) {
+
+				final Collection<Resource> visited=new HashSet<>();
+				final Collection<Resource> pending=new HashSet<>(set(resource));
+
+				while ( !pending.isEmpty() ) {
+
+					final GraphQuery query=connection.prepareGraphQuery(source(
+
+							"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+									+"\n"
+									+"construct {\n"
+									+"\n"
+									+"\t?r ?p ?o. ?o a ?t; rdfs:label ?l; rdfs:comment ?c.\n"
+									+"\t?s ?p ?r. ?s a ?t; rdfs:label ?l; rdfs:comment ?c.\n"
+									+"\t\n"
+									+"} where {\n"
+									+"\n"
+									+"\tvalues ?r {\n"
+									+"\t\t{resources}\n"
+									+"\t}\n"
+									+"\n"
+									+"\t{\n"
+									+"\t\n"
+									+"\t\t?r ?p ?o\n"
+									+"\n"
+									+"\t\toptional { ?o a ?t }\n"
+									+"\t\toptional { ?o rdfs:label ?l }\n"
+									+"\t\toptional { ?o rdfs:comment ?c }\n"
+									+"\n"
+									+"\t} union {\n"
+									+"\n"
+									+"\t\t?s ?p ?r\n"
+									+"\n"
+									+"\t\toptional { ?s a ?t }\n"
+									+"\t\toptional { ?s rdfs:label ?l }\n"
+									+"\t\toptional { ?s rdfs:comment ?c }\n"
+									+"\n"
+									+"\t}\n"
+									+"\n"
+									+"}",
+
+							list(pending.stream().map(Values::format), "\n")
+
+					));
+
+					pending.clear();
+
+					query.evaluate(new AbstractRDFHandler() {
+						@Override public void handleStatement(final Statement statement) {
+
+							model.add(statement);
+
+							final Resource subject=statement.getSubject();
+							final Value object=statement.getObject();
+
+							if ( subject instanceof BNode && visited.add(subject) ) {
+								pending.add(subject);
+							}
+
+							if ( object instanceof BNode && visited.add((Resource)object) ) {
+								pending.add((Resource)object);
+							}
+
+						}
+					});
+
+				}
 			}
 
 		}));
@@ -256,12 +326,12 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 		mins.stream()
 				.filter(Objects::nonNull)
-				.reduce((x, y) -> compare(x, y, Compare.CompareOp.LT) ? x : y)
+				.reduce((x, y) -> compare(x, y) < 0 ? x : y)
 				.ifPresent(min -> model.add(resource, Form.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
-				.reduce((x, y) -> compare(x, y, Compare.CompareOp.GT) ? x : y)
+				.reduce((x, y) -> compare(x, y) > 0 ? x : y)
 				.ifPresent(max -> model.add(resource, Form.max, max));
 
 		return model;
