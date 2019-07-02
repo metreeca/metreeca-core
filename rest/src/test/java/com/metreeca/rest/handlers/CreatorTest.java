@@ -28,6 +28,7 @@ import com.metreeca.tray.Tray;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -62,7 +63,7 @@ final class CreatorTest {
 	}
 
 
-	@Nested final class Resource {
+	@Disabled @Nested final class Resource {
 
 		private Request simple() {
 			return new Request()
@@ -130,7 +131,7 @@ final class CreatorTest {
 
 	}
 
-	@Nested final class Container {
+	@Disabled @Nested final class Container {
 
 		private Request simple() {
 			return new Request()

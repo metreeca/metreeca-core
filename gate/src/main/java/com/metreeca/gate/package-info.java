@@ -16,7 +16,7 @@
  */
 
 /**
- * Identity and Access management tools.
+ * Identity and Access management framework.
  */
 
 package com.metreeca.gate;

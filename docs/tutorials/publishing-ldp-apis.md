@@ -52,11 +52,11 @@ import com.metreeca.j2ee.Gateway;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.wrappers.Server;
-import com.metreeca.kits.rdf4j.RDF4JMemory;
+import com.metreeca.back.rdf4j.RDF4JMemory;
 
 import javax.servlet.annotation.WebListener;
 
-import static com.metreeca.sparql.Graph.graph;
+import static com.metreeca.back.sparql.Graph.graph;
 
 
 @WebFilter(urlPatterns="/*") public final class Demo extends Gateway {
@@ -117,7 +117,7 @@ The [tray](../javadocs/?com/metreeca/tray/Tray.html) argument handled to the app
 }
 ```
 
-Here we are customizing the system-wide [graph](../javadocs/?com/metreeca/tray/rdf/Graph.html) database as an ephemeral heap-based RDF4J store, initializing it on demand with the BIRT dataset. The framework includes other adapters for major RDF storage solutions: explore the [Tooling Kits](../javadocs/) package group  in the API reference to find your one and don't forget to include the Maven dependency specified in the package docs.
+Here we are customizing the system-wide [graph](../javadocs/?com/metreeca/tray/rdf/Graph.html) database as an ephemeral heap-based RDF4J store, initializing it on demand with the BIRT dataset. The framework includes other adapters for major RDF storage solutions: explore the [Storage Adapters](../javadocs/) package group  in the API reference to find your one and don't forget to include the Maven dependency specified in the package docs.
 
 The static [Tray.tool()](../javadocs/com/metreeca/tray/Tray.html#tool-java.util.function.Supplier-) service locator method provides access to shared tools inside tray initialisation tasks and wrapper/handlers constructors.
 

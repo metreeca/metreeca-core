@@ -89,14 +89,13 @@
 
 	<modules>
 
-		<module>j2ee</module>
-
 		<module>gate</module>
 		<module>rest</module>
 		<module>tray</module>
 		<module>form</module>
 
-		<module>kits</module>
+		<module>head</module>
+		<module>back</module>
 
 	</modules>
 
@@ -105,7 +104,7 @@
 		<java.version>1.8</java.version>
 		<maven.version>3.3</maven.version>
 
-		<rdf4j.version>2.5.0</rdf4j.version>
+		<rdf4j.version>2.5.2</rdf4j.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -121,7 +120,7 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.4.2</version>
+			<version>5.5.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -293,10 +292,6 @@
 
 							<groups>
 								<group>
-									<title>Server Adapters</title>
-									<packages>com.metreeca.j2ee*</packages>
-								</group>
-								<group>
 									<title>REST API Framework</title>
 									<packages>com.metreeca.rest*</packages>
 								</group>
@@ -313,8 +308,12 @@
 									<packages>com.metreeca.tray*</packages>
 								</group>
 								<group>
-									<title>Tooling Kits</title>
-									<packages>com.metreeca.kits*</packages>
+									<title>Server Adapters</title>
+									<packages>com.metreeca.head*</packages>
+								</group>
+								<group>
+									<title>Storage Adapters</title>
+									<packages>com.metreeca.back*</packages>
 								</group>
 							</groups>
 

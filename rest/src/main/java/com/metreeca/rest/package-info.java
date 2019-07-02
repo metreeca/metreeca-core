@@ -16,7 +16,7 @@
  */
 
 /**
- * Framework components.
+ * Linked Data REST API framework.
  */
 
 package com.metreeca.rest;

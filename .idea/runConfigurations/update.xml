@@ -10,6 +10,7 @@
           </option>
           <option name="goals">
             <list>
+              <option value="-Dversions.allowMajorUpdates=false" />
               <option value="versions:display-dependency-updates" />
               <option value="versions:display-plugin-updates" />
             </list>
