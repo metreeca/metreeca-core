@@ -41,8 +41,6 @@ import static com.metreeca.form.queries.Edges.edges;
 import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.form.things.Structures.description;
 import static com.metreeca.back.sparql.Graph.graph;
-import static com.metreeca.back.sparql.GraphProcessor.convey;
-import static com.metreeca.back.sparql.GraphProcessor.filter;
 import static com.metreeca.tray.Trace.trace;
 import static com.metreeca.tray.Tray.tool;
 
@@ -153,7 +151,7 @@ public final class GraphEngine implements Engine {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Iterable<Statement> anchor(final Resource resource, final Shape shape) {
-		return shape.map(filter).map(new Outliner(resource)).collect(toList());
+		return shape.map(GraphProcessor.filter).map(new Outliner(resource)).collect(toList());
 	}
 
 	private Optional<Collection<Statement>> retrieve(
@@ -170,7 +168,7 @@ public final class GraphEngine implements Engine {
 			final Resource resource, final Shape shape, final Collection<Statement> model
 	) {
 
-		final Shape target=shape.map(convey);
+		final Shape target=shape.map(GraphProcessor.convey);
 
 		final Focus focus=target // validate against shape
 				.map(new GraphValidator(trace, connection, set(resource), model));

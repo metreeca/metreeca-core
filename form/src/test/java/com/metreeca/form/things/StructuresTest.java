@@ -17,7 +17,6 @@
 
 package com.metreeca.form.things;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -33,6 +32,8 @@ import static com.metreeca.form.things.Values.bnode;
 import static com.metreeca.form.things.Values.literal;
 import static com.metreeca.form.things.Values.statement;
 import static com.metreeca.form.things.ValuesTest.item;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class StructuresTest {
@@ -88,8 +89,8 @@ final class StructuresTest {
 
 			final Model cell=new LinkedHashModel(description(focus, false, model));
 
-			Assertions.assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
-			Assertions.assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
+			assertThat(cell.subjects()).containsOnly(focus, _dblank, _iblank, inverse);
+			assertThat(cell.objects()).containsOnly(focus, _dblank, _iblank, direct);
 
 		}
 
@@ -97,13 +98,13 @@ final class StructuresTest {
 
 			final Model cell=(Model)description(focus, true, model);
 
-			Assertions.assertThat(cell.subjects())
+			assertThat(cell.subjects())
 					.containsOnly(focus, _dblank, _iblank, direct, inverse);
 
-			Assertions.assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
+			assertThat(cell.objects()).filteredOn(value -> value instanceof Resource)
 					.containsOnly(focus, _dblank, _iblank, direct);
 
-			Assertions.assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
+			assertThat(cell.stream().filter(statement -> !statement.getPredicate().equals(RDF.VALUE))).containsOnly(
 
 					statement(direct, RDFS.LABEL, dlabel),
 					statement(direct, RDFS.COMMENT, dcomment),

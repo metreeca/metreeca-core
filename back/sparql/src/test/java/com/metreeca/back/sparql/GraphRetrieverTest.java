@@ -68,7 +68,6 @@ import static com.metreeca.form.things.ValuesTest.decode;
 import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.form.things.ValuesTest.term;
 import static com.metreeca.form.truths.ModelAssert.assertThat;
-import static com.metreeca.back.sparql.GraphTest.model;
 import static com.metreeca.tray.Trace.trace;
 import static com.metreeca.tray.Tray.tool;
 
@@ -79,7 +78,7 @@ import static java.util.stream.Collectors.toList;
 
 final class GraphRetrieverTest extends GraphProcessorTest {
 
-	private static final IRI StardogDefaul=iri("tag:stardog:api:context:default");
+	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
 
 
 	private Collection<Statement> query(final Query query) {
@@ -104,13 +103,13 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 	}
 
 	private List<Statement> graph(final String sparql) {
-		return model(sparql)
+		return GraphTest.model(sparql)
 
 				.stream()
 
 				// ;(stardog) statement from default context explicitly tagged // !!! review dependency
 
-				.map(statement -> StardogDefaul.equals(statement.getContext()) ? statement(
+				.map(statement -> StardogDefault.equals(statement.getContext()) ? statement(
 						statement.getSubject(),
 						statement.getPredicate(),
 						statement.getObject()
