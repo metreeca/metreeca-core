@@ -24,7 +24,6 @@ import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
-import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -64,18 +63,18 @@ public final class Values {
 	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
 	 */
 	public static final Pattern IRIPattern=Pattern.compile("^"
-			+ "(?<schemeall>(?<scheme>[^:/?#]+):)?"
-			+ "(?<hostall>//(?<host>[^/?#]*))?"
-			+ "(?<path>[^?#]*)"
-			+ "(?<queryall>\\?(?<query>[^#]*))?"
-			+ "(?<fragmentall>#(?<fragment>.*))?"
+			+"(?<schemeall>(?<scheme>[^:/?#]+):)?"
+			+"(?<hostall>//(?<host>[^/?#]*))?"
+			+"(?<path>[^?#]*)"
+			+"(?<queryall>\\?(?<query>[^#]*))?"
+			+"(?<fragmentall>#(?<fragment>.*))?"
 			+"$"
 	);
 
 
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
 
-	private static final Comparator<Value> comparator=new ValueComparator();
+	private static final Comparator<Value> comparator=new _ValueComparator();
 
 
 	private static DecimalFormat exponential() { // ;( DecimalFormat is not thread-safe
@@ -234,7 +233,7 @@ public final class Values {
 			throw new NullPointerException("null id");
 		}
 
-		return factory.createBNode(id.startsWith("_:")? id.substring(2) : id);
+		return factory.createBNode(id.startsWith("_:") ? id.substring(2) : id);
 	}
 
 

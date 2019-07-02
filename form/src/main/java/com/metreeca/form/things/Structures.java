@@ -24,15 +24,12 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.metreeca.form.things.Values.pattern;
-
-import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toCollection;
@@ -73,36 +70,6 @@ public final class Structures {
 		}
 
 		return description(resource, labelled, source(model));
-	}
-
-	/**
-	 * Retrieves the symmetric concise bounded description of a resource from a repository.
-	 *
-	 * @param resource   the resource whose symmetric concise bounded description is to be retrieved
-	 * @param labelled   if {@code true}, the retrieved description will be extended with {@code rdf:type} and {@code
-	 *                   rdfs:label/comment} annotations for all referenced IRIs
-	 * @param connection the connection to the repository the description is to be retrieved from
-	 *
-	 * @return the symmetric concise bounded description of {@code focus} retrieved from {@code connection}
-	 *
-	 * @throws NullPointerException if either {@code focus} or {@code connection} is null
-	 * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
-	 */
-	public static Collection<Statement> description(
-			final Resource resource, final boolean labelled, final RepositoryConnection connection
-	) {
-
-		// !!! optimize for SPARQL
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( connection == null ) {
-			throw new NullPointerException("null connection");
-		}
-
-		return description(resource, labelled, source(connection));
 	}
 
 
@@ -170,30 +137,6 @@ public final class Structures {
 
 		return network(resource, source(model));
 	}
-
-	/**
-	 * Retrieves a reachable network from a repository.
-	 *
-	 * @param resource   the resource whose reachable network is to be retrieved
-	 * @param connection the connection to the repository the reachable network is to be retrieved from
-	 *
-	 * @return the reachable network of {@code resource} retrieved from {@code model}
-	 *
-	 * @throws NullPointerException if either {@code resource} or {@code connection} is null
-	 */
-	public static Model network(final Resource resource, final RepositoryConnection connection) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( connection == null ) {
-			throw new NullPointerException("null connection");
-		}
-
-		return network(resource, source(connection));
-	}
-
 
 	private static Model network(final Resource resource, final Source source) {
 
@@ -263,10 +206,6 @@ public final class Structures {
 
 	private static Source source(final Iterable<Statement> model) {
 		return (s, p, o) -> StreamSupport.stream(model.spliterator(), false).filter(pattern(s, p, o));
-	}
-
-	private static Source source(final RepositoryConnection connection) {
-		return (s, p, o) -> stream(connection.getStatements(s, p, o, true));
 	}
 
 

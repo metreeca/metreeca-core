@@ -74,19 +74,6 @@
 			<version>${rdf4j.version}</version>
 		</dependency>
 
-		<dependency> <!-- !!! remove -->
-			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-queryalgebra-evaluation</artifactId>
-			<version>${rdf4j.version}</version>
-		</dependency>
-
-		<!--<exclusions>
-			<exclusion> &lt;!&ndash; prevent issues with multiple SLF4J bindings &ndash;&gt;
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-classic</artifactId>
-			</exclusion>
-		</exclusions>-->
-
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
