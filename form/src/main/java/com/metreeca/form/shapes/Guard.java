@@ -23,9 +23,7 @@ import com.metreeca.form.probes.Redactor;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static com.metreeca.form.things.Strings.indent;
 import static com.metreeca.form.things.Values.format;
@@ -70,7 +68,7 @@ public final class Guard implements Shape {
 			throw new NullPointerException("null values");
 		}
 
-		if ( values.contains(null) ) {
+		if ( values.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null value");
 		}
 

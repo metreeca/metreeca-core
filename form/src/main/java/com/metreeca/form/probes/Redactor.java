@@ -24,6 +24,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.metreeca.form.probes.Evaluator.fail;
@@ -49,8 +50,28 @@ public final class Redactor extends Traverser<Shape> {
 	private final Set<Value> values;
 
 
+	/**
+	 * Creates a new shape redactor.
+	 *
+	 * @param axis   the identifier of the parametric axis to be redacted
+	 * @param values the driving values for the parametric {@code axis}; empty to unconditionally remove guards on
+	 *               {@code axis}
+	 *
+	 * @throws NullPointerException if either {@code axis} or {@code values} is null or {@code values} contains a null
+	 *                              value
+	 */
 	public Redactor(final IRI axis, final Value... values) { this(axis, set(values)); }
 
+	/**
+	 * Creates a new shape redactor.
+	 *
+	 * @param axis   the identifier of the parametric axis to be redacted
+	 * @param values the driving values for the parametric {@code axis}; empty to unconditionally remove guards on
+	 *               {@code axis}
+	 *
+	 * @throws NullPointerException if either {@code axis} or {@code values} is null or {@code values} contains a null
+	 *                              value
+	 */
 	public Redactor(final IRI axis, final Set<? extends Value> values) {
 
 		if ( axis == null ) {
@@ -59,6 +80,10 @@ public final class Redactor extends Traverser<Shape> {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
+		}
+
+		if ( values.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null value");
 		}
 
 		this.axis=axis;
