@@ -90,9 +90,7 @@ public final class GraphEngine implements Engine {
 									|| connection.hasStatement(null, null, reserved, true)
 					))
 
-					.map(reserved -> {
-
-						// validate before updating graph to support snapshot transactions
+					.map(reserved -> { // validate before updating graph to support snapshot transactions
 
 						final Focus focus=validate(connection, resource, shape, model);
 
