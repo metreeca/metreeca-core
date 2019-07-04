@@ -10,7 +10,7 @@
 
 #### Offices ###########################################################################################################
 
-<offices-basic> ldp:contains
+<offices-basic/> a ldp:BasicContainer; ldp:contains
 	<offices/1>,
 	<offices/6>,
 	<offices/4>,

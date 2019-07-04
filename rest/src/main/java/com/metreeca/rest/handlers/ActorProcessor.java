@@ -43,12 +43,12 @@ import static java.lang.String.format;
 
 abstract class ActorProcessor {
 
-	static final Function<Shape, Shape> convey=memoizable(s -> s
+	static final Function<Shape, Shape> convey=memoizable(shape -> shape
 			.map(new Redactor(Form.mode, Form.convey))
 			.map(new Optimizer())
 	);
 
-	static final Function<Shape, Shape> filter=memoizable(s -> s
+	static final Function<Shape, Shape> filter=memoizable(shape -> shape
 			.map(new Redactor(Form.mode, Form.filter))
 			.map(new Optimizer())
 	);
