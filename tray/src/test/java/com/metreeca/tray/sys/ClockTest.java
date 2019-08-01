@@ -15,29 +15,27 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gate;
-
-import org.eclipse.rdf4j.model.IRI;
-
-import static com.metreeca.form.things.Values.iri;
+package com.metreeca.tray.sys;
 
 
-/**
- * Identity and access management RDF vocabulary and utilities.
- */
-public final class Gate {
+public final class ClockTest {
 
-	public static final String Namespace="app://gate.metreeca.com/terms#";
+	public static final class MockClock implements Clock {
 
-	public static final IRI item=iri(Namespace, "item"); // IRI
-	public static final IRI task=iri(Namespace, "task"); // Value
-	public static final IRI user=iri(Namespace, "user"); // IRI
-	public static final IRI time=iri(Namespace, "time"); // xsd:dataTime with ms-precision
-	public static final IRI code=iri(Namespace, "code"); // xsd:integer
+		private long time;
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		@Override public long time() {
+			return time;
+		}
 
-	private Gate() {} // utility
+		public MockClock time(final long time) {
+
+			this.time=time;
+
+			return this;
+		}
+
+	}
 
 }

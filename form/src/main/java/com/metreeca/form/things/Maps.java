@@ -40,7 +40,7 @@ public final class Maps {
 		return entries == null ? emptyMap() : collect(Arrays.stream(entries));
 	}
 
-	public static <K, V> Map<K, V> map(final Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+	public static <K, V> Map<K, V> map(final Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
 		return entries == null ? emptyMap() : collect(StreamSupport.stream(entries.spliterator(), false));
 	}
 
@@ -67,7 +67,7 @@ public final class Maps {
 	// ;(jdk) Collectors.toMap doesn't support null entry values…
 	// https://stackoverflow.com/questions/24630963/java-8-nullpointerexception-in-collectors-tomap
 
-	private static <K, V> Map<K, V> collect(final Stream<Map.Entry<? extends K, ? extends V>> stream) {
+	private static <K, V> Map<K, V> collect(final Stream<? extends Map.Entry<? extends K, ? extends V>> stream) {
 		return unmodifiableMap(stream.filter(Objects::nonNull).collect(LinkedHashMap::new, (map, entry) -> {
 
 			final K key=entry.getKey();

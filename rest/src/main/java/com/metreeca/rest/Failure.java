@@ -98,7 +98,7 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error type.
 	 *
-	 * @param error a machine readable tag for the error condition defined by this failure; ignored if empty
+	 * @param error a machine-readable tag for the error condition defined by this failure; ignored if empty
 	 *
 	 * @return this failure
 	 *

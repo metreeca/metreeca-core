@@ -19,15 +19,14 @@ package com.metreeca.gate;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
-import javax.json.JsonObject;
+import javax.json.Json;
 
-import static com.metreeca.form.things.JsonValues.object;
+import static com.metreeca.form.things.Maps.map;
 import static com.metreeca.form.things.Sets.set;
 
+import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 
 
@@ -38,33 +37,32 @@ import static java.util.Collections.unmodifiableSet;
  */
 public final class Permit {
 
-	private final String hash;
+	private final String id;
 
 	private final IRI user;
 	private final Set<IRI> roles;
 
-	private final JsonObject profile;
+	private final Map<String, Object> profile;
 
 
 	/**
 	 * Creates a user permit.
 	 *
-	 * @param hash  an opaque value uniquely identifying the state of the user at the time the permit was created;
-	 *                must change on credential and account status updates
+	 * @param id      an opaque handle uniquely identifying the user at the time the permit was created; must be
+	 *                accepted as a handle for {@linkplain Roster#lookup(String) looking up} the user in the roster;
+	 *                must change on credential and account status updates and user {@linkplain Roster#login(String,
+	 *                String) login}/{@linkplain Roster#logout(String) logout}
 	 * @param user    an IRI uniquely identifying the user
 	 * @param roles   a set of IRIs uniquely identifying the roles attributed to the user
-	 * @param profile a profile for the user, including information useful for handling front-end activities, such as
-	 *                name, picture and operational roles
+	 * @param profile a front-end profile for the user, providing information such as name, email, picture and
+	 *                operational roles; usually {@linkplain Json#createObjectBuilder(Map)}  converted} to JSON before
+	 *                use
 	 *
 	 * @throws NullPointerException if any of the arguments is null or contains null values
 	 */
-	public Permit(
-			final String hash,
-			final IRI user, final Collection<IRI> roles,
-			final JsonObject profile
-	) {
+	public Permit(final String id, final IRI user, final Collection<IRI> roles, final Map<String, Object> profile) {
 
-		if ( hash == null ) {
+		if ( id == null ) {
 			throw new NullPointerException("null hash");
 		}
 
@@ -80,25 +78,24 @@ public final class Permit {
 			throw new NullPointerException("null profile");
 		}
 
-		this.hash=hash;
+		this.id=id;
 
 		this.user=user;
 		this.roles=set(roles);
 
-		this.profile=object(profile);
+		this.profile=map(profile.entrySet());
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves the permit hash.
+	 * Retrieves the permit id.
 	 *
-	 * @return an opaque value uniquely identifying the state of the user at the time the permit was create; will change
-	 * on credential and account status updates
+	 * @return an opaque handle uniquely identifying the permit user at the time the permit was create
 	 */
-	public String hash() {
-		return hash;
+	public String id() {
+		return id;
 	}
 
 
@@ -124,11 +121,10 @@ public final class Permit {
 	/**
 	 * Retrieves the permit user profile.
 	 *
-	 * @return a profile for the permit user, including information useful for handling front-end activities, such as
-	 * name, picture and operational roles
+	 * @return a front-end profile for the permit user
 	 */
-	public JsonObject profile() {
-		return object(profile);
+	public Map<String, Object> profile() {
+		return unmodifiableMap(profile);
 	}
 
 }

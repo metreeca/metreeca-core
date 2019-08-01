@@ -20,6 +20,8 @@ package com.metreeca.rest;
 
 import java.util.function.Predicate;
 
+import static com.metreeca.rest.Handler.handler;
+
 
 /**
  * Handler wrapper {thread-safe}.
@@ -93,7 +95,7 @@ import java.util.function.Predicate;
 			throw new NullPointerException("null fail wrapper");
 		}
 
-		return handler -> Handler.handler(test, pass.wrap(handler), fail.wrap(handler));
+		return handler -> handler(test, pass.wrap(handler), fail.wrap(handler));
 	}
 
 

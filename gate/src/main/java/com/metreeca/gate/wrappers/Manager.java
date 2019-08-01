@@ -17,54 +17,95 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.form.things.Values;
-import com.metreeca.gate.Permit;
-import com.metreeca.gate.Roster;
+import com.metreeca.gate.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
-import com.metreeca.tray.sys.Vault;
+import com.metreeca.tray.sys.Clock;
+import com.metreeca.tray.sys.Trace;
 
-import io.jsonwebtoken.*;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
+import io.jsonwebtoken.Claims;
 
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.net.URI;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.spec.SecretKeySpec;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
-import static com.metreeca.form.things.Codecs.UTF8;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
+import static com.metreeca.form.things.JsonValues.object;
 import static com.metreeca.form.things.Sets.set;
+import static com.metreeca.gate.Crypto.crypto;
+import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.gate.Roster.roster;
+import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.bodies.JSONBody.json;
 import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.sys.Vault.vault;
+import static com.metreeca.tray.sys.Clock.clock;
+import static com.metreeca.tray.sys.Trace.trace;
 
+import static java.lang.Math.min;
 import static java.lang.String.format;
-import static java.lang.System.currentTimeMillis;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.regex.Pattern.compile;
 
 
 /**
- * Single page app session manager.
+ * Session manager.
  *
- * <p>Manages the lifecycle of JWT-based sessions using permits issued by shared {@link Roster#roster() roster}
- * tool.</p>
+ * <p>Manages user authentication/authorization and session lifecycle using permits issued by shared {@link
+ * Roster#roster() roster} tool.</p>
+ *
+ * <p>Provides a virtual session management handler at the {@linkplain #Manager(String, long, long) provided path}
+ * with the methods described below.</p>
+ *
+ * <p><strong>Warning</strong> / Make sure XSS/XSRF {@linkplain Protector protection} is active when using session
+ * managers.</p>
  *
  * <hr>
  *
- * <p>Provides a session management endpoint at the {@linkplain #Manager(String, long, long) provided path} with the
- * following methods.</p>
+ * <h3>Session Retrieval</h3>
  *
- * <h3>Session creation</h3>
+ * <pre>{@code GET <path>
+ * Cookie: ID=<token> // optional}</pre>
+ *
+ * <p>Between session creation and deletion, any requests to the virtual session management handler will automatically
+ * include the session token in a cookie header, enabling user authentication.</p>
+ *
+ * <p><em>Active session</em> / The current session is reported with a response including a session token in a HTTP only
+ * session cookie, the session expiry date in milliseconds in the custom {@code timeout} directive of the {@code
+ * Cache-Control} header and a JSON payload containing the user profile included in the {@linkplain Permit#profile()
+ * permit} returned by the user {@linkplain Roster roster}.</p>
+ *
+ * <pre>{@code 200 OK
+ * Set-Cooke: ID=<token>; Path=<base>; HttpOnly; Secure; SameSite=Lax
+ * Cache-Control: no-store, timeout=1560940206395
+ * Content-Type: application/json
+ *
+ * {
+ *     …    // user profile
+ * }}</pre>
+ *
+ *
+ * <p><em>No active session</em> / The anonymous session is reported with a response including an empty session token
+ * in a HTTP only self-expiring session cookie, a dummy session expiry date in milliseconds in the custom {@code
+ * timeout} directive of the {@code Cache-Control} header and an empty JSON payload; malformed, invalid or expired
+ * session tokens are ignored.</p>
+ *
+ * <pre>{@code 200 OK
+ * Set-Cooke: ID=; Path=<base>; HttpOnly; Secure; SameSite=Lax; Max-Age=0
+ * Cache-Control: no-store, timeout=0
+ * Content-Type: application/json
+ *
+ * {}}</pre>
+ *
+ * <hr>
+ *
+ * <h3>Session Creation</h3>
  *
  * <pre>{@code POST <path>
  * Content-Type: application/json
@@ -75,18 +116,19 @@ import static java.util.stream.Collectors.toSet;
  *     "update": "<new password>"       // new user password (optional)
  * } }</pre>
  *
- * <p><em>Successful credentials validation</em> / A session is created and reported with a response providing an
- * authorization header with a JWT bearer token to be included in subsequent requests and a JSON object describing the
- * user profile included in the {@linkplain Permit#profile() permit} returned by the user {@linkplain Roster
- * roster}.</p>
+ * <p><em>Successful credentials validation</em> / A session is created and reported with a response including a
+ * session token in a HTTP only session cookie, the session expiry date in milliseconds in the custom {@code timeout}
+ * directive of the {@code Cache-Control} header and a JSON payload containing the user profile included in the
+ * {@linkplain Permit#profile() permit} returned by the user {@linkplain Roster roster}.</p>
  *
- * <pre>{@code 201 Created
- * Authorization: Bearer <jwt token>
+ * <pre>{@code 200 OK
+ * Set-Cooke: ID=<token>; Path=<base>; HttpOnly; Secure; SameSite=Lax
+ * Cache-Control: no-store, timeout=1560940206395
  * Content-Type: application/json
  *
  * {
- *      … // user profile
- * } }</pre>
+ *     …    // user profile
+ * }}</pre>
  *
  * <p><em>Failed credentials validation</em> / Reported with a response providing a machine-readable error code among
  * those defined by {@link Roster}.</p>
@@ -96,7 +138,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * {
  *      "error": "<error>"
- * } }</pre>
+ * }}</pre>
  *
  * <p><em>Malformed session ticket</em> / Reported with a response providing a machine-readable error code.</p>
  *
@@ -105,72 +147,74 @@ import static java.util.stream.Collectors.toSet;
  *
  * {
  *      "error": "ticket-malformed"
- * } }</pre>
+ * }}</pre>
+ *
+ * <hr>
+ *
+ * <h3>Session Deletion</h3>
+ *
+ * <pre>{@code POST <path>
+ * Cookie: ID=<token> // optional
+ * Content-Type: application/json
+ *
+ * {}}</pre>
+ *
+ * <p><em>Successful session deletion</em> / The current session is delete and reported with a response including an
+ * empty session token in a HTTP only self-expiring session cookie, a dummy session expiry date in milliseconds in the
+ * custom {@code timeout} directive of the {@code Cache-Control} header and an empty JSON payload; malformed, invalid
+ * and expired session tokens are ignored.</p>
+ *
+ * <pre>{@code 200 OK
+ * Set-Cooke: ID=; Path=<base>; HttpOnly; Secure; SameSite=Lax; Max-Age=0
+ * Cache-Control: no-store, timeout=0
+ * Content-Type: application/json
+ *
+ * {}}</pre>
  *
  * <hr>
  *
  * <h3>Secured Resource Access</h3>
  *
- * <p>Further requests to restricted REST endpoints must include the {@code Authorization} header with the bearer
- * token.</p>
+ * <p>Between session creation and deletion, any requests to restricted REST endpoints will automatically include the
+ * session token in a cookie header, enabling user authentication and authorization.</p>
  *
  * <pre>{@code <METHOD> <resource>
- * Authorization: Bearer <jwt token>
+ * Cookie: ID=<token> // optional
  *
- * … }</pre>
+ * …}</pre>
  *
- * <p><em>Successful token validation</em> / The response includes the response generated by the secured handler and an
- * authorization header with a possibly rotated JWT bearer token to be included in subsequent requests.</p>
+ * <p><em>Successful token validation</em> / The response includes the response generated by the secured handler; a new
+ * session cookie may be included if the session was automatically extended.</p>
  *
  * <pre>{@code <###> <Status>
- * Authorization: Bearer <jwt token>
+ * Set-Cooke: ID=<token>; Path=<base>; HttpOnly; Secure; SameSite=Lax // optional
  *
  * … }</pre>
  *
- * <p><em>Failed token validation</em> / Due either to hard session expiration or to a modified {@linkplain
- * Permit#hash() permit hash} on soft session expiration; reported with a response providing a machine-readable error code.</p>
+ * <p><em>Failed token validation</em> / Due either to session deletion or expiration or to a modified user {@linkplain
+ * Permit#id() opaque handle}; no details about the failure are disclosed.</p>
  *
- * <pre>{@code 403 Forbidden
+ * <pre>{@code 401 Unauthorized
+ * WWW-Authenticate: …
  * Content-Type: application/json
  *
- * {
- *      "error": "session-expired"
- * } }</pre>
+ * {} }</pre>
  *
- * @see <a href="https://jwt.io/">https://jwt.io/</a>
- * @see <a href="https://github.com/jwtk/jjwt">https://github.com/jwtk/jjwt</a>
+ * <hr>
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.3">RFC 7234 Hypertext Transfer Protocol (HTTP/1.1):
+ * Caching - 5.2.3.  Cache Control Extensions</a>
  */
 public final class Manager implements Wrapper {
 
-	/**
-	 * The id of the {@linkplain Vault vault} entry containing the key used for signing JWT tokens ({@code
-	 * com.metreeca.gate.wrapper.manager:key}); if no key is provided a random one is generated automatically.
-	 */
-	public static final String KeyVaultId=Manager.class.getName().toLowerCase(Locale.ROOT)+":key";
-
-
-	public static final long Seconds=1000;
-	public static final long Minutes=60*Seconds;
-	public static final long Hours=60*Minutes;
-	public static final long Days=24*Hours;
-	public static final long Weeks=7*Days;
+	public static final String SessionCookie="ID";
 
 	public static final String TicketMalformed="ticket-malformed";
-	public static final String SessionExpired="session-expired";
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private static final int TokenIdLength=32; // [bytes]
 
-	private static final SignatureAlgorithm algorithm=SignatureAlgorithm.HS512;
-
-
-	private static Failure malformed(final String error) {
-		return new Failure().status(Response.BadRequest).error(error);
-	}
-
-	private static Failure forbidden(final String error) {
-		return new Failure().status(Response.Forbidden).error(error);
-	}
+	private static final Pattern SessionCookiePattern=compile(format("\\b%s\\s*=\\s*(?<value>[^\\s;]+)", SessionCookie));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,46 +225,25 @@ public final class Manager implements Wrapper {
 	private final long hard;
 
 
-	private final Handler endpoint=new Worker().post(create());
-
 	private final Roster roster=tool(roster());
+	private final Notary notary=tool(notary());
+	private final Crypto crypto=tool(crypto());
 
-	private final Key key=tool(vault())
-
-			.get(KeyVaultId)
-
-			.map(string -> // generate from supplied key string
-					(Key)new SecretKeySpec(string.getBytes(UTF8), algorithm.getJcaName())
-			)
-
-			.orElseGet(() -> { // generate random key
-				try {
-
-					final KeyGenerator generator=KeyGenerator.getInstance(algorithm.getJcaName());
-
-					generator.init(algorithm.getMinKeyLength());
-
-					return generator.generateKey();
-
-				} catch ( final NoSuchAlgorithmException e ) {
-					throw new RuntimeException(e);
-				}
-			});
+	private final Clock clock=tool(clock());
+	private final Trace trace=tool(trace());
 
 
 	/**
 	 * Creates a session manager.
 	 *
-	 * @param path the root relative path of the virtual session endpoint
-	 * @param soft the soft session duration (ms); after the soft duration has expired the session is automatically
-	 *             extended on further activity, provided the {@linkplain Permit#hash() hash} of the user permit didn't
-	 *             change since the session was opened
-	 * @param hard the hard session duration (ms); after the hard duration has expired the session is closed, unless
-	 *             automatically extended
+	 * @param path the root relative path of the virtual session handler
+	 * @param soft the soft session timeout in milliseconds; on soft timeout session are automatically deleted if no
+	 *             activity was registered in the given period
+	 * @param hard the hard session timeout in milliseconds; on hard timeout session are unconditionally deleted
 	 *
 	 * @throws NullPointerException     if {@code path} is null
-	 * @throws IllegalArgumentException if {@code path} is not root relative or either {@code soft} or {@code hard} is
-	 *                                  less than or equal to 0
+	 * @throws IllegalArgumentException if {@code path} is not root relative or either {@code idle} or {@code hard} is
+	 *                                  less than or equal to 0 or {@code idle} is greater than {@code hard}
 	 */
 	public Manager(final String path, final long soft, final long hard) {
 
@@ -233,7 +256,7 @@ public final class Manager implements Wrapper {
 		}
 
 		if ( soft <= 0 || hard <= 0 || soft > hard ) {
-			throw new IllegalArgumentException("illegal durations <"+soft+"/"+hard+">");
+			throw new IllegalArgumentException("illegal timeouts <"+soft+"/"+hard+">");
 		}
 
 		this.path=path;
@@ -247,232 +270,265 @@ public final class Manager implements Wrapper {
 
 	@Override public Handler wrap(final Handler handler) {
 		return handler
-				.with(endpoint())
-				.with(bearer());
+				.with(challenger())
+				.with(housekeeper())
+				.with(gatekeeper());
 	}
 
 
 	//// Wrappers //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/***
-	 * @return a wrapper managing the virtual session endpoint
-	 */
-	private Wrapper endpoint() {
-		return handler -> request -> request.path().equals(path) ? endpoint.handle(request) : handler.handle(request);
+	private Wrapper challenger() { // add authentication challenge, unless already provided by wrapped handlers
+		return handler -> request -> handler.handle(request).map(response -> response.status() == Response.Unauthorized
+				? response.header("~WWW-Authenticate", format("Session realm=\"%s\"", response.request().base()))
+				: response
+		);
 	}
 
-	private Wrapper bearer() {
-		return new Bearer((now, token) -> session(token).map(session
-				-> (now >= session.issued()+hard) ? reject()
-				: (now >= session.issued()+soft) ? extend(session)
-				: handle(session)
-		));
+	private Wrapper housekeeper() {
+		return handler -> handler(request -> request.path().equals(path),
+
+				new Worker()
+
+						.get(relate())
+						.post(create()),
+
+				handler
+
+		);
 	}
 
+	private Wrapper gatekeeper() {
+		return handler -> request -> cookie(request) // look for session token
 
-	private Wrapper reject() {
-		return handler -> request -> request.reply(forbidden(SessionExpired));
-	}
+				.map(token -> notary.verify(token) // token found >> verify
 
-	private Wrapper extend(final Session session) {
-		return handler -> request -> permit(session.user()) // try to update the permit
+						.map(claims -> lookup(claims.getSubject()).fold( // valid token >> look for permit
 
-				.process(permit -> // make sure the account was not modified
-						session.hash().equals(permit.hash()) ? Result.Value(permit) : Error(SessionExpired)
-				)
+								permit -> handler.handle(request // permit found > authenticate and process request
 
-				.fold(
-
-						permit -> handler
-
-								.handle(request // authenticate and handle the request
 										.user(permit.user())
 										.roles(permit.roles())
-								)
 
-								.map(response -> // generate a new token for the extended session
-										response.header("Authorization", authorization(permit))
-								),
+								).map(response -> {
 
-						error -> request
+									final long now=clock.time();
 
-								.reply(forbidden(error))
+									final long issued=claims.getIssuedAt().getTime();
+									final long expiry=claims.getExpiration().getTime();
+									final long extend=min(now+soft, issued+hard);
 
-				);
-	}
+									if ( expiry-now < soft*90/100 ) { // extend if residual lease is < 90% soft timeout
+										response.header("Set-Cookie", cookie(request, permit.id(), issued, extend));
+									}
 
-	private Wrapper handle(final Session session) {
-		return handler -> request -> handler
+									return response // disable caching of protected content
 
-				.handle(request // authenticate and handle the request
-						.user(session.user())
-						.roles(session.roles())
+											.header("~Cache-Control", "no-store")
+											.header("~Pragma", "no-cache");
+
+								}),
+
+								error -> { // permit not found >> reject request
+
+									trace.warning(this, error);
+
+									return request.reply(new Failure().status(Response.Unauthorized));
+
+								}
+						))
+
+						.orElseGet(() -> { // invalid token >> reject request
+
+							trace.warning(this, "invalid session token");
+
+							return request.reply(new Failure().status(Response.Unauthorized));
+
+						})
+
 				)
 
-				.map(response -> // present again the current token
-						response.header("Authorization", request.header("Authorization").orElse(""))
-				);
+				.orElseGet(() -> handler.handle(request)); // token not found >> process request
 	}
 
 
 	//// Endpoint Methods //////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Handler create() {
-		return request -> request.reply(response -> request.body(json()).process(this::permit).fold(
+	private Handler relate() {
+		return request -> request.reply(cookie(request) // look for session token
 
-				permit -> response.status(Response.Created)
-						.header("Authorization", authorization(permit))
-						.body(json(), permit.profile()),
+				.flatMap(notary::verify) // token found >> verify
 
-				response::map
+				.flatMap(claims -> lookup(claims.getSubject()).value().map(permit -> // valid token >> look for permit
 
-		));
-	}
-
-
-	//// Permit Retrieval //////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Result<Permit, String> permit(final IRI user) {
-		return roster.lookup(user);
-	}
-
-	private Result<Permit, Failure> permit(final JsonObject ticket) {
-		return Optional.of(ticket)
-
-				.filter(t -> t.values().stream().allMatch(value -> value instanceof JsonString))
-
-				.flatMap(t -> t.keySet().equals(set("handle", "secret")) ? Optional.of(signon(ticket))
-						: ticket.keySet().equals(set("handle", "secret", "update")) ? Optional.of(update(ticket))
-						: Optional.empty()
-				)
-
-				.map(result -> result.error(Manager::forbidden))
-
-				.orElseGet(() -> Error(malformed(TicketMalformed)));
-	}
-
-	private Result<Permit, String> signon(final JsonObject ticket) {
-		return roster.resolve(ticket.getString("handle")).process(user -> roster.verify(
-				user, ticket.getString("secret")
-		));
-	}
-
-	private Result<Permit, String> update(final JsonObject ticket) {
-		return roster.resolve(ticket.getString("handle")).process(user -> roster.verify(
-				user, ticket.getString("secret"), ticket.getString("update")
-		));
-	}
-
-
-	//// Token Codecs //////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private String authorization(final Permit permit) {
-		return format("Bearer %s", token(new Session(permit)));
-	}
-
-
-	private String token(final Session session) {
-		return Jwts.builder()
-
-				.setClaims(map(
-
-						entry("issued", session.issued()),
-						entry("hash", session.hash()),
-
-						entry("user", session.user().stringValue()),
-						entry("roles", session.roles().stream().map(Value::stringValue).collect(toList()))
+						identified(permit, claims.getIssuedAt().getTime(), claims.getExpiration().getTime())
 
 				))
 
-				.signWith(key, algorithm)
+				.orElseGet(this::anonymous) // report anonymous session
 
-				.compressWith(CompressionCodecs.GZIP)
-				.compact();
+		);
 	}
 
-	private Optional<Session> session(final String token) {
-		try {
+	private Handler create() { // !!! refactor
+		return request -> request.reply(request.body(json()).fold(
 
-			final Claims claims=Jwts.parser()
-					.setSigningKey(key)
-					.parseClaimsJws(token)
-					.getBody();
+				ticket -> {
 
-			final long issued=Optional
-					.ofNullable(claims.get("issued", Long.class))
-					.orElseThrow(IllegalArgumentException::new);
+					if ( ticket.isEmpty() ) {
 
-			final String hash=Optional
-					.ofNullable(claims.get("hash", String.class))
-					.orElseThrow(IllegalArgumentException::new);
+						cookie(request)
+								.flatMap(notary::verify)
+								.map(Claims::getSubject)
+								.ifPresent(this::logout);
 
-			final IRI user=Optional
-					.ofNullable(claims.get("user", String.class))
-					.map(Values::iri)
-					.orElseThrow(IllegalArgumentException::new);
+						return anonymous();
 
-			final Set<IRI> roles=Optional
-					.ofNullable(claims.get("roles", List.class))
-					.map(list -> (List<String>)list)
-					.map(Collection::stream)
-					.orElseThrow(IllegalArgumentException::new)
-					.map(Values::iri)
-					.collect(toSet());
+					} else {
 
-			return Optional.of(new Session(
-					issued, hash,
-					user, roles
-			));
+						return login(ticket).fold(
+								permit -> identified(permit, clock.time(), clock.time()+soft),
+								failure -> failure
+						);
 
-		} catch ( final Exception e ) {
+					}
 
-			return Optional.empty();
+				},
 
-		}
+				failure -> failure
+
+		));
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private Function<Response, Response> identified(final Permit permit, final long issued, final long expiry) {
+		return response -> response.status(Response.OK)
 
-	private static final class Session {
+				.header("Set-Cookie", cookie(response.request(), permit.id(), issued, expiry))
+				.header("Cache-Control", "no-store, timeout="+expiry)
+				.header("Pragma", "no-cache")
 
-		private final long issued;
-		private final String hash;
-
-		private final IRI user;
-		private final Set<IRI> roles;
-
-
-		private Session(final Permit permit) {
-			this(
-					currentTimeMillis(), permit.hash(),
-					permit.user(), permit.roles()
-			);
-		}
-
-		private Session(
-				final long issued, final String hash,
-				final IRI user, final Set<IRI> roles
-		) {
-
-			this.hash=hash;
-			this.issued=issued;
-
-			this.user=user;
-			this.roles=roles;
-
-		}
+				.body(json(), object(permit.profile()));
+	}
 
 
-		private long issued() { return issued; }
+	private Function<Response, Response> anonymous() {
+		return response -> response.status(Response.OK)
 
-		private String hash() { return hash; }
+				.header("Set-Cookie", cookie(response.request(), "", 0, 0))
+				.header("Cache-Control", "no-store, timeout=0")
+				.header("Pragma", "no-cache")
+
+				.body(json(), object());
+	}
 
 
-		private IRI user() { return user; }
+	//// Roster Delegates //////////////////////////////////////////////////////////////////////////////////////////////
 
-		private Set<IRI> roles() { return roles; }
+	private Result<Permit, String> lookup(final String handle) {
+		return roster.lookup(handle);
+	}
 
+	private Result<Permit, Failure> login(final JsonObject ticket) {
+		return Optional.of(ticket)
+
+				.filter(t -> t.values().stream().allMatch(value -> value instanceof JsonString))
+				.filter(t -> set("handle", "secret", "update").containsAll(t.keySet()))
+
+				.flatMap(t -> {
+
+					final String handle=t.getString("handle", null);
+					final String secret=t.getString("secret", null);
+					final String update=t.getString("update", null);
+
+					return handle == null || secret == null ? Optional.empty()
+							: update == null ? Optional.of(roster.login(handle, secret))
+							: Optional.of(roster.login(handle, secret, update));
+
+				})
+
+				.map(result -> result.<Result<Permit, Failure>>fold(
+
+						permit -> { // log opaque handle to support entry correlation without exposing sensitive info
+
+							trace.info(this, "login "+session(permit));
+
+							return Value(permit);
+
+						},
+
+						error -> { // log only error without exposing sensitive info
+
+							trace.warning(this, "login error "+error);
+
+							return Error(new Failure().status(Response.Forbidden).error(error));
+
+						}
+
+				))
+
+				.orElseGet(() -> { // log only error without exposing sensitive info
+
+					trace.warning(this, "login error "+TicketMalformed);
+
+					return Error(new Failure().status(Response.BadRequest).error(TicketMalformed));
+
+				});
+	}
+
+	private void logout(final String handle) {
+		roster.logout(handle).use(
+
+				permit -> { // log opaque handle to support entry correlation without exposing sensitive info
+
+					trace.info(this, "logout "+session(permit));
+
+				},
+
+				error -> { // log only error without exposing sensitive info
+
+					trace.warning(this, "logout error "+error);
+
+				}
+
+		);
+	}
+
+
+	private String session(final Permit permit) {
+		return crypto.token(permit.id(), permit.user().stringValue());
+	}
+
+
+	//// Cookie Codecs /////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Optional<String> cookie(final Request request) {
+		return request.headers("Cookie")
+				.stream()
+				.map(value -> {
+
+					final Matcher matcher=SessionCookiePattern.matcher(value);
+
+					return matcher.find() ? matcher.group("value") : null;
+
+				})
+				.filter(Objects::nonNull)
+				.findFirst();
+	}
+
+	private String cookie(final Request request, final String handle, final long issued, final long expiry) {
+		return format("%s=%s; Path=%s; SameSite=Lax; HttpOnly%s%s",
+				SessionCookie,
+				handle.isEmpty() ? "" : notary.create(claims -> claims
+						.setId(crypto.token(TokenIdLength))
+						.setSubject(handle)
+						.setIssuedAt(new Date(issued))
+						.setExpiration(new Date(expiry))
+				),
+				URI.create(request.base()).getPath(),
+				request.base().startsWith("https:") ? "; Secure" : "",
+				handle.isEmpty() ? "; Max-Age=0" : ""
+		);
 	}
 
 }
