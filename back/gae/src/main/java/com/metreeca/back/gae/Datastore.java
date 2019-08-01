@@ -41,7 +41,9 @@ public final class Datastore {
 	 * @return the default datastore factory, which creates datastores with the default configuration
 	 */
 	public static Supplier<Datastore> datastore() {
-		return () -> new Datastore(DatastoreServiceConfig.Builder.withDefaults());
+		return () -> new Datastore(DatastoreServiceConfig.Builder.withDefaults()
+				.implicitTransactionManagementPolicy(ImplicitTransactionManagementPolicy.AUTO)
+		);
 	}
 
 
@@ -74,9 +76,8 @@ public final class Datastore {
 	 * Executes a task inside a transaction on this datastore.
 	 *
 	 * <p>If a transaction is not already active on the datastore, begins one and commits it on successful task
-	 * completion;
-	 * if the task throws an exception, the transaction is rolled back and the exception rethrown; in either case no
-	 * action is taken if the transaction was already closed inside the task.</p>
+	 * completion; if the task throws an exception, the transaction is rolled back and the exception rethrown; in either
+	 * case no action is taken if the transaction was already closed inside the task.</p>
 	 *
 	 * @param task the task to be executed; takes as argument a datastore service
 	 * @param <V>  the type of the value returned by {@code task}

@@ -16,7 +16,7 @@
  */
 
 /**
- * Shared RDF/Java utilities.
+ * Shared utilities.
  */
 
 package com.metreeca.form.things;

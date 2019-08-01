@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.metreeca.back.gae.Datastore.datastore;
+import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.tray.Tray.tool;
 
 
@@ -49,7 +50,7 @@ public final class DatastoreEngine implements Engine {
 
 
 	@Override public Collection<Statement> relate(final IRI resource, final Query query) {
-		return null;
+		return set();
 	}
 
 	@Override public Optional<Focus> create(final IRI resource, final Shape shape, final Collection<Statement> model) {

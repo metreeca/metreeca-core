@@ -189,7 +189,7 @@ public final class RDFBody implements Body<Collection<Statement>> {
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Collection<Statement> value) {
 
-		final List<String> types=Formats.types(message.request().request().headers("Accept"));
+		final List<String> types=Formats.types(message.request().headers("Accept"));
 
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
 		final RDFWriterFactory factory=Formats.service(registry, TURTLE, types);

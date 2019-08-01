@@ -82,7 +82,7 @@ public final class Failure implements Function<Response, Response> {
 	 *
 	 * @return this failure
 	 *
-	 * @throws IllegalArgumentException if {@code status } is less than 0 or greater than 599
+	 * @throws IllegalArgumentException if {@code status } is less than 100 or greater than 599
 	 */
 	public Failure status(final int status) {
 
