@@ -17,38 +17,37 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.form.Issue;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.tray.Tray;
+import com.metreeca.rest.*;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.truths.JsonAssert.assertThat;
-import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.bodies.JSONBody.json;
-import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.rest.formats.JSONFormat.json;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 
 
 final class ValidatorTest {
 
 	private void exec(final Runnable ...tasks) {
-		new Tray()
+		new Context()
 				.exec(tasks)
 				.clear();
 	}
 
+	private Handler handler() {
+		return request -> request.reply(response -> response.status(Response.OK));
+	}
+
+
 
 	@Test void testAcceptValidRequests() {
-		exec(() -> new Validator((request, model) -> list(
-				issue(Issue.Level.Warning, "failed")
-				))
+		exec(() -> new Validator(request -> emptyList())
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request())
 
@@ -59,19 +58,16 @@ final class ValidatorTest {
 	}
 
 	@Test void testRejectInvalidRequests() {
-		exec(() -> new Validator((request, model) -> list(
-				issue(Issue.Level.Error, "failed"),
-				issue(Issue.Level.Warning, "failed")
-				))
+		exec(() -> new Validator(request -> asList("issue", "issue"))
 
-						.wrap(echo())
+						.wrap(handler())
 
-						.handle(new Request().body(rdf(), set()))
+						.handle(new Request())
 
 						.accept(response -> assertThat(response)
 								.hasStatus(Response.UnprocessableEntity)
 								.hasBody(json(), json -> assertThat(json)
-										.hasField("error")
+										.containsKey("error")
 								)
 						)
 		);

@@ -17,14 +17,8 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.things.Values;
-
-import org.eclipse.rdf4j.model.IRI;
-
 import java.net.URI;
 import java.util.Optional;
-
-import static com.metreeca.form.things.Values.AbsoluteIRIPattern;
 
 
 /**
@@ -97,16 +91,13 @@ public final class Response extends Message<Response> {
 	 * @return the absolute IRI included in the {@code Location} header of this response, if defined; the {@linkplain
 	 * Request#item() focus item} IRI of the originating request otherwise
 	 */
-	@Override public IRI item() {
+	@Override public String item() {
 
-		final IRI base=request().item();
+		final String base=request().item();
 
 		return header("Location")
-				.map(location -> AbsoluteIRIPattern.matcher(location).matches() ?
-						location : URI.create(base.stringValue()).resolve(location).toString()
-				)
-				.map(Values::iri)
-				.orElseGet(() -> base);
+				.map(location -> URI.create(base).resolve(location).toString())
+				.orElse(base);
 	}
 
 	/**
@@ -164,7 +155,7 @@ public final class Response extends Message<Response> {
 	 */
 	public Response status(final int status) {
 
-		if ( status != 0 && (status < 100 || status > 599) ) { // 0 used internally
+		if ( status < 100 || status > 599 ) {
 			throw new IllegalArgumentException("illegal status code ["+status+"]");
 		}
 

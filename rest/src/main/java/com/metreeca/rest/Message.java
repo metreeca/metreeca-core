@@ -17,23 +17,19 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Evaluator;
-import com.metreeca.form.things.Sets;
-import com.metreeca.rest.bodies.MultipartBody;
+import com.metreeca.rest.formats.MultipartFormat;
+import com.metreeca.tree.Shape;
+import com.metreeca.tree.shapes.And;
 
-import org.eclipse.rdf4j.model.IRI;
-
+import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.things.Lists.concat;
-import static com.metreeca.form.things.Strings.title;
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.tree.shapes.And.and;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
@@ -47,8 +43,8 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
  *
- * <p>Messages are associated with possibly multiple {@linkplain #body(Body) body} representations managed by message
- * body {@linkplain Body formats}.</p>
+ * <p>Messages are associated with possibly multiple {@linkplain #body(Format) body} representations managed by message
+ * body {@linkplain Format formats}.</p>
  *
  * @param <T> the self-bounded message type supporting fluent setters
  */
@@ -59,36 +55,12 @@ public abstract class Message<T extends Message<T>> {
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 
 
-	/**
-	 * Creates a {@code Link} header value.
-	 *
-	 * @param resource the target resource to be linked through the header
-	 * @param relation the relation with the target {@code resource}
-	 *
-	 * @return the header value linking the target {@code resource} with the given {@code relation}
-	 *
-	 * @throws NullPointerException if either {@code resource} or {@code relation} is null
-	 */
-	public static String link(final IRI resource, final String relation) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( relation == null ) {
-			throw new NullPointerException("null relation");
-		}
-
-		return String.format("<%s>; rel=\"%s\"", resource, relation);
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape=pass();
+	private Shape shape=and();
 
 	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
-	private final Map<Body<?>, Object> bodies=new HashMap<>();
+	private final Map<Format<?>, Object> bodies=new HashMap<>();
 
 
 	private T self() { return (T)this; }
@@ -97,11 +69,11 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves the focus item IRI of this message.
+	 * Retrieves the focus item of this message.
 	 *
 	 * @return an absolute IRI identifying the focus item of this message
 	 */
-	public abstract IRI item();
+	public abstract String item();
 
 	/**
 	 * Retrieves the originating request for this message.
@@ -132,10 +104,11 @@ public abstract class Message<T extends Message<T>> {
 		return requireNonNull(mapper.apply(self()), "null mapper return value");
 	}
 
+
 	/**
-	 * Merge a message into this message.
+	 * Lift a message into this message.
 	 *
-	 * <p>Mainly intended to be used inside wrappers to lift the main message part in {@linkplain MultipartBody
+	 * <p>Mainly intended to be used inside wrappers to lift the main message part in {@linkplain MultipartFormat
 	 * multipart} requests for further downstream processing, as for instance in:</p>
 	 *
 	 * <pre>{@code handler -> request -> request.body(multipart(1000, 10_000)).fold(
@@ -169,7 +142,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public T merge(final Message<?> message) {
+	public T lift(final Message<?> message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
@@ -186,20 +159,22 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Creates a linked message.
 	 *
-	 * @param item the IRI identifying the {@linkplain #item() focus item} of the new linked message
+	 * @param item the (possibly relative)) IRI identifying the {@linkplain #item() focus item} of the new linked
+	 *             message; will be resolved against the message {@linkplain #item() item} IRI
 	 *
 	 * @return a new linked message with a focus item identified by {@code item} and the same {@linkplain #request()
 	 * originating request} as this message
 	 *
-	 * @throws NullPointerException if {@code item} is null
+	 * @throws NullPointerException     if {@code item} is null
+	 * @throws IllegalArgumentException if {@code item} is not a legal (possibly relative) IRI
 	 */
-	public Message<?> link(final IRI item) {
+	public Message<?> link(final String item) {
 
 		if ( item == null ) {
 			throw new NullPointerException("null item");
 		}
 
-		return new Part(item, this);
+		return new Part(URI.create(item()).resolve(item).toString(), this);
 	}
 
 
@@ -228,6 +203,38 @@ public abstract class Message<T extends Message<T>> {
 				.map(CharsetPattern::matcher)
 				.filter(Matcher::find)
 				.map(matcher -> matcher.group("charset"));
+	}
+
+
+	//// Shape /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the linked data shape.
+	 *
+	 * @return the linked data shape associated to this message; defaults to an {@linkplain And#and() empty conjunction}
+	 */
+	public Shape shape() {
+		return shape;
+	}
+
+	/**
+	 * Configures the linked data shape.
+	 *
+	 * @param shape the linked data shape to be associated to this message
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public T shape(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		this.shape=shape;
+
+		return self();
 	}
 
 
@@ -347,7 +354,7 @@ public abstract class Message<T extends Message<T>> {
 				.filter(entry -> entry.getKey().equalsIgnoreCase(_name))
 				.map(Map.Entry::getValue)
 				.findFirst()
-				.orElseGet(Sets::set)
+				.orElseGet(Collections::emptySet)
 		);
 	}
 
@@ -411,7 +418,9 @@ public abstract class Message<T extends Message<T>> {
 
 		} else if ( name.startsWith("+") || _name.equals("Set-Cookie") ) {
 
-			headers.compute(_name, (key, value) -> value == null ? _values : concat(value, _values));
+			headers.compute(_name, (key, value) -> value == null ?
+					_values : Stream.concat(value.stream(), _values.stream()).collect(toList())
+			);
 
 		} else if ( _values.isEmpty() ) {
 
@@ -429,59 +438,29 @@ public abstract class Message<T extends Message<T>> {
 
 	//// Bodies ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Retrieves the linked data shape.
-	 *
-	 * @return the linked data shape associated to this message; defaults to the {@linkplain Evaluator#pass() wildcard}
-	 * shape
-	 */
-	public Shape shape() {
-		return shape;
-	}
-
-	/**
-	 * Configures the linked data shape.
-	 *
-	 * @param shape the linked data shape to be associated to this message
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public T shape(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		this.shape=shape;
-
-		return self();
-	}
-
 
 	/**
 	 * Retrieves a body representation.
 	 *
-	 * @param body the body format managing the body representation to be retrieved
-	 * @param <V>  the type of the body representation managed by {@code body}
+	 * @param format the body format managing the body representation to be retrieved
+	 * @param <V>    the type of the body representation managed by {@code body}
 	 *
 	 * @return a result providing access to the body representation managed by {@code body}, if one was successfully
 	 * retrieved from this message; a result providing access to the body processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code body} is null
 	 */
-	public <V> Result<V, Failure> body(final Body<V> body) {
+	public <V> Result<V, Failure> body(final Format<V> format) {
 
-		if ( body == null ) {
+		if ( format == null ) {
 			throw new NullPointerException("null body");
 		}
 
-		final V cached=(V)bodies.get(body);
+		final V cached=(V)bodies.get(format);
 
-		return cached != null ? Value(cached) : body.get(self()).value(value -> {
+		return cached != null ? Value(cached) : format.get(self()).value(value -> {
 
-			bodies.put(body, value);
+			bodies.put(format, value);
 
 			return value;
 
@@ -492,21 +471,21 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures a body representation.
 	 *
-	 * <p>Future calls to {@link #body(Body)} with the same body format will return the specified value, rather than
-	 * the value {@linkplain Body#get(Message) retrieved} from this message by the body format.</p>
+	 * <p>Future calls to {@link #body(Format)} with the same body format will return the specified value, rather than
+	 * the value {@linkplain Format#get(Message) retrieved} from this message by the body format.</p>
 	 *
-	 * @param body  the body format managing the body representation to be configured
-	 * @param value the body representation to be associated with {@code body}
-	 * @param <V>   the type of the body representation managed by {@code body}
+	 * @param format the body format managing the body representation to be configured
+	 * @param value  the body representation to be associated with {@code body}
+	 * @param <V>    the type of the body representation managed by {@code body}
 	 *
 	 * @return this message
 	 *
 	 * @throws NullPointerException  if either {@code body} or {@code value} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Body) retrieved} from this message
+	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
 	 */
-	public <V> T body(final Body<V> body, final V value) {
+	public <V> T body(final Format<V> format, final V value) {
 
-		if ( body == null ) {
+		if ( format == null ) {
 			throw new NullPointerException("null body");
 		}
 
@@ -514,16 +493,19 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
-		bodies.put(body, value);
+		bodies.put(format, value);
 
-		return body.set(self(), value);
+		return format.set(self(), value);
 	}
 
+	public <V> T body(final Format<V> format, final Function<V, V> mapper) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String normalize(final String name) {
-		return title(name.startsWith("~") || name.startsWith("+") ? name.substring(1) : name);
+		return (name.startsWith("~") || name.startsWith("+") ? name.substring(1) : name).toLowerCase(Locale.ROOT);
 	}
 
 	private Collection<String> normalize(final Collection<String> values) {
@@ -539,17 +521,17 @@ public abstract class Message<T extends Message<T>> {
 
 	private static final class Part extends Message<Part> {
 
-		private final IRI item;
+		private final String item;
 		private final Request request;
 
 
-		private Part(final IRI item, final Message<?> message) {
+		private Part(final String item, final Message<?> message) {
 			this.item=item;
 			this.request=message.request();
 		}
 
 
-		@Override public IRI item() {
+		@Override public String item() {
 			return item;
 		}
 

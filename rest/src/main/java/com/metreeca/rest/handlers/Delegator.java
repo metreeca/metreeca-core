@@ -74,7 +74,7 @@ public abstract class Delegator implements Handler {
 		return delegate().with(wrapper);
 	}
 
-	@Override public Responder handle(final Request request) {
+	@Override public Future<Response> handle(final Request request) {
 		return delegate().handle(request);
 	}
 

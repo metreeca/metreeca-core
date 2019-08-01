@@ -17,15 +17,9 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Wrapper;
-
-import org.eclipse.rdf4j.model.IRI;
+import com.metreeca.rest.*;
 
 import java.util.*;
-
-import static com.metreeca.rest.Handler.refused;
 
 import static java.util.Arrays.asList;
 
@@ -38,32 +32,32 @@ import static java.util.Arrays.asList;
  */
 public final class Controller implements Wrapper {
 
-	private final Set<IRI> roles;
+	private final Set<String> roles;
 
 
 	/**
 	 * Creates a controller.
 	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform the action managed by the
+	 * @param roles the user {@linkplain Request#roles(String...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
 	 *              {@linkplain Request#shape() request shape}, if one is present
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Controller(final IRI... roles) {
+	public Controller(final String... roles) {
 		this(asList(roles));
 	}
 
 	/**
 	 * Creates a controller.
 	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform the action managed by the
+	 * @param roles the user {@linkplain Request#roles(String...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
 	 *              {@linkplain Request#shape() request shape}, if one is present
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Controller(final Collection<? extends IRI> roles) {
+	public Controller(final Collection<String> roles) {
 
 		if ( roles == null || roles.stream().anyMatch(Objects::isNull)) {
 			throw new NullPointerException("null roles");
@@ -83,11 +77,12 @@ public final class Controller implements Wrapper {
 
 			} else {
 
-				final Collection<IRI> roles=new HashSet<>(this.roles);
+				final Collection<String> roles=new HashSet<>(this.roles);
 
 				roles.retainAll(request.roles());
 
-				return roles.isEmpty() ? refused(request) : handler.handle(request.roles(roles));
+				return roles.isEmpty() ? request.reply(Response.Unauthorized) // !!! 404 under strict security
+						: handler.handle(request.roles(roles));
 
 			}
 		};

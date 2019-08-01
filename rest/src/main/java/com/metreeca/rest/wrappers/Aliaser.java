@@ -19,8 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
 
-import org.eclipse.rdf4j.model.IRI;
-
+import java.net.URI;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -47,7 +46,7 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Aliaser implements Wrapper, Handler {
 
-	private final Function<Request, Optional<IRI>> resolver;
+	private final Function<Request, Optional<String>> resolver;
 
 
 	/**
@@ -59,7 +58,7 @@ public final class Aliaser implements Wrapper, Handler {
 	 *
 	 * @throws NullPointerException if {@code resolver} is null or returns a null value
 	 */
-	public Aliaser(final Function<Request, Optional<IRI>> resolver) {
+	public Aliaser(final Function<Request, Optional<String>> resolver) {
 
 		if ( resolver == null ) {
 			throw new NullPointerException("null resolver");
@@ -75,22 +74,27 @@ public final class Aliaser implements Wrapper, Handler {
 		return request -> alias(request, () -> handler.handle(request));
 	}
 
-	@Override public Responder handle(final Request request) {
+	@Override public Future<Response> handle(final Request request) {
 		return alias(request, () -> request.reply(response -> response.status(Response.OK)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Responder alias(final Request request, final Supplier<Responder> self) {
+	private Future<Response> alias(final Request request, final Supplier<Future<Response>> self) {
 		return requireNonNull(resolver.apply(request), "null resolver return value")
 
-				.map(resource -> resource.equals(request.item()) ? self.get() : request.reply(response -> response
+				.map(resource -> idempotent(request.item(), resource) ? self.get() : request.reply(response -> response
 						.status(Response.SeeOther)
-						.header("Location", resource.stringValue())
+						.header("Location", resource)
 				))
 
 				.orElseGet(() -> request.reply(response -> response.status(Response.NotFound)));
+	}
+
+
+	private boolean idempotent(final String item, final String resource) {
+		return item.equals(URI.create(item).resolve(resource).toString());
 	}
 
 }

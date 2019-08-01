@@ -17,31 +17,25 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.form.things.ValuesTest;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.tray.Tray;
+import com.metreeca.rest.*;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.metreeca.form.things.ValuesTest.item;
-import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 
 
 final class AliaserTest {
 
 	private void exec(final Runnable ...tasks) {
-		new Tray()
+		new Context()
 				.exec(tasks)
 				.clear();
 	}
 
-	private Aliaser aliaser(final IRI canonical) {
+	private Aliaser aliaser(final String canonical) {
 		return new Aliaser(request ->
 				request.path().equals("/alias") ? Optional.of(canonical) : Optional.empty()
 		);
@@ -49,8 +43,12 @@ final class AliaserTest {
 
 	private Request request(final String path) {
 		return new Request()
-				.base(ValuesTest.Base)
+				.base("http://example.com/")
 				.path(path);
+	}
+
+	private Handler handler() {
+		return (Request request) -> request.reply(response -> response.status(Response.OK));
 	}
 
 
@@ -59,23 +57,23 @@ final class AliaserTest {
 	@Nested final class AsWrapper {
 
 		@Test void testRedirectAliasedItem() {
-			exec(() -> aliaser(item("/canonical"))
+			exec(() -> aliaser("/canonical")
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(request("/alias"))
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.SeeOther)
-							.hasHeader("Location", item("/canonical").stringValue())
+							.hasHeader("Location", "/canonical")
 					)
 			);
 		}
 
 		@Test void testForwardIdempotentItemsToHandler() {
-			exec(() -> aliaser(item("/alias"))
+			exec(() -> aliaser("/alias")
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(request("/alias"))
 
@@ -86,9 +84,9 @@ final class AliaserTest {
 		}
 
 		@Test void testReportUnknownItems() {
-			exec(() -> aliaser(item("/canonical"))
+			exec(() -> aliaser("/canonical")
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(request("/unknown"))
 
@@ -103,21 +101,21 @@ final class AliaserTest {
 	@Nested final class AsHandler {
 
 		@Test void testRedirectAliasedItem() {
-			exec(() -> aliaser(item("/canonical"))
+			exec(() -> aliaser("/canonical")
 
 					.handle(request("/alias"))
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.SeeOther)
-							.hasHeader("Location", item("/canonical").stringValue())
+							.hasHeader("Location", "/canonical")
 					)
 			);
 		}
 
 		@Test void testAcceptIdempotentItems() {
-			exec(() -> aliaser(item("/alias"))
+			exec(() -> aliaser("/alias")
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(request("/alias"))
 
@@ -128,7 +126,7 @@ final class AliaserTest {
 		}
 
 		@Test void testReportUnknownItems() {
-			exec(() -> aliaser(item("/canonical"))
+			exec(() -> aliaser("/canonical")
 
 					.handle(request("/unknown"))
 

@@ -18,9 +18,7 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Responder;
+import com.metreeca.rest.*;
 
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
@@ -76,7 +74,7 @@ public final class Router implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Map<String, Function<Request, Optional<Responder>>> routes=new LinkedHashMap<>();
+	private final Map<String, Function<Request, Optional<Future<Response>>>> routes=new LinkedHashMap<>();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,7 +110,7 @@ public final class Router implements Handler {
 		final String prefix=matcher.group("prefix");
 		final String suffix=matcher.group("suffix");
 
-		final Function<Request, Optional<Responder>> route=route(
+		final Function<Request, Optional<Future<Response>>> route=route(
 				prefix == null ? "" : prefix,
 				suffix == null ? "" : suffix,
 				handler
@@ -128,7 +126,7 @@ public final class Router implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Responder handle(final Request request) {
+	@Override public Future<Response> handle(final Request request) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");
@@ -145,7 +143,7 @@ public final class Router implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Function<Request, Optional<Responder>> route(final String prefix, final String suffix, final Handler handler) {
+	private Function<Request, Optional<Future<Response>>> route(final String prefix, final String suffix, final Handler handler) {
 
 		final Collection<String> keys=new LinkedHashSet<>();
 

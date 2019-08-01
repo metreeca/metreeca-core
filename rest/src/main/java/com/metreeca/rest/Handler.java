@@ -17,8 +17,6 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Form;
-
 import java.util.function.Predicate;
 
 
@@ -98,63 +96,6 @@ import java.util.function.Predicate;
 	}
 
 
-	/**
-	 * Handles refused requests.
-	 *
-	 * @param request the incoming request
-	 *
-	 * @return a responder providing an empty response with a {@value Response#Unauthorized} status code, if the request
-	 * {@linkplain Request#user()  user} is anonymous (that it's equal to {@link Form#none}), or a {@value
-	 * Response#Forbidden} status code, otherwise
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 */
-	public static Responder refused(final Request request) {
-
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
-
-		return request.user().equals(Form.none) ? unauthorized(request) : forbidden(request);
-	}
-
-	/**
-	 * Handles unauthorized requests.
-	 *
-	 * @param request the incoming request
-	 *
-	 * @return a responder providing an empty response with a {@value Response#Unauthorized} status {@code}
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 */
-	public static Responder unauthorized(final Request request) {
-
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
-
-		return request.reply(response -> response.status(Response.Unauthorized)); // WWW-Authenticate set by wrappers
-	}
-
-	/**
-	 * Handles forbidden requests.
-	 *
-	 * @param request the incoming request
-	 *
-	 * @return a responder providing an empty response with a {@value Response#Forbidden} status code
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 */
-	public static Responder forbidden(final Request request) {
-
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
-
-		return request.reply(response -> response.status(Response.Forbidden));
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -188,7 +129,7 @@ import java.util.function.Predicate;
 			}
 
 
-			@Override public Chain with(final Wrapper wrapper) {
+			@Override public Handler with(final Wrapper wrapper) {
 
 				if ( wrapper == null ) {
 					throw new NullPointerException("null wrapper");
@@ -197,7 +138,7 @@ import java.util.function.Predicate;
 				return new Chain(this.wrapper.wrap(wrapper), handler);
 			}
 
-			@Override public Responder handle(final Request request) {
+			@Override public Future<Response> handle(final Request request) {
 
 				if ( request == null ) {
 					throw new NullPointerException("null request");
@@ -217,9 +158,9 @@ import java.util.function.Predicate;
 	 *
 	 * @param request the inbound request for the managed linked data resource
 	 *
-	 * @return a responder providing a response generated for the managed linked data resource in reaction to {@code
-	 * request}
+	 * @return a lazy response generated for the managed linked data resource in reaction to {@code request}; lazy
+	 * processing supports streaming processing inside ephemeral context like database connections and transactions
 	 */
-	public Responder handle(final Request request);
+	public Future<Response> handle(final Request request);
 
 }

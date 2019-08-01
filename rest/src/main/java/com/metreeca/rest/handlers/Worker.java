@@ -24,8 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.metreeca.rest.bodies.OutputBody.output;
-import static com.metreeca.rest.bodies.WriterBody.writer;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 
 
 /**
@@ -135,7 +135,7 @@ public final class Worker implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Responder handle(final Request request) {
+	@Override public Future<Response> handle(final Request request) {
 		return Optional.ofNullable(mappings.get(request.method()))
 				.orElse(this::unsupported)
 				.handle(request);
@@ -144,20 +144,20 @@ public final class Worker implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Responder head(final Request request) {
+	private Future<Response> head(final Request request) {
 		return handle(request.method(Request.GET)).map(response -> response
 				.body(output(), target -> {})
 				.body(writer(), target -> {})
 		);
 	}
 
-	private Responder options(final Request request) {
+	private Future<Response> options(final Request request) {
 		return request.reply(response -> response
 				.status(Response.OK)
 				.headers("Allow", mappings.keySet()));
 	}
 
-	private Responder unsupported(final Request request) {
+	private Future<Response> unsupported(final Request request) {
 		return request.reply(response -> response
 				.status(Response.MethodNotAllowed)
 				.headers("Allow", mappings.keySet()));

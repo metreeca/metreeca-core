@@ -25,11 +25,11 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>link</artifactId>
-		<version>0.52.0-SNAPSHOT</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>head</artifactId>
-	<version>0.52.0-SNAPSHOT</version>
+	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Metreeca Server Adapters</name>

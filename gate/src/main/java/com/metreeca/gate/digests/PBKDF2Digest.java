@@ -17,10 +17,9 @@
 
 package com.metreeca.gate.digests;
 
-import com.metreeca.form.things.Codecs;
 import com.metreeca.gate.Crypto;
 import com.metreeca.gate.Digest;
-import com.metreeca.tray.Tray;
+import com.metreeca.rest.Context;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -33,9 +32,10 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import static com.metreeca.gate.Crypto.crypto;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.rest.Context.service;
 
 import static java.lang.System.currentTimeMillis;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
@@ -49,7 +49,7 @@ public final class PBKDF2Digest implements Digest {
 	/**
 	 * Opaque digest algorithm identifying tag.
 	 */
-	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(Codecs.UTF8));
+	public static final String Tag=Base64.getEncoder().encodeToString("PBKDF2/1".getBytes(UTF_8));
 
 	private static final int Length=32; // salt length [bytes]
 	private static final int Rounds=25_0000; // encryption rounds
@@ -58,7 +58,7 @@ public final class PBKDF2Digest implements Digest {
 
 
 	public static void main(final String... args) {
-		new Tray().exec(() -> {
+		new Context().exec(() -> {
 
 			final long start=currentTimeMillis();
 			final String digest=new PBKDF2Digest().digest("secret");
@@ -72,7 +72,7 @@ public final class PBKDF2Digest implements Digest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Crypto crypto=tool(crypto());
+	private final Crypto crypto=service(crypto());
 
 
 	@Override public String digest(final String secret) {

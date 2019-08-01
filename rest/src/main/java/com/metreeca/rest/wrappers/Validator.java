@@ -17,22 +17,11 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.form.Focus;
-import com.metreeca.form.Issue;
 import com.metreeca.rest.*;
-import com.metreeca.rest.bodies.RDFBody;
-
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.function.BiFunction;
-
-import static com.metreeca.form.Focus.focus;
-import static com.metreeca.rest.Body.Missing;
-import static com.metreeca.rest.bodies.RDFBody.rdf;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -41,32 +30,29 @@ import static java.util.stream.Collectors.toList;
 /**
  * Validating preprocessor.
  *
- * <p>Applies custom validation {@linkplain #Validator(Collection) rules} to the {@linkplain RDFBody RDF payload} of
- * incoming requests.</p>
+ * <p>Applies custom validation {@linkplain #Validator(Collection) rules} to incoming requests.</p>
  */
 public final class Validator implements Wrapper {
 
-	private final Collection<BiFunction<Request, Collection<Statement>, Collection<Issue>>> rules;
+	private final Collection<Function<Request, Collection<String>>> rules;
 
 
-	@SafeVarargs public Validator(final BiFunction<Request, Collection<Statement>, Collection<Issue>>... rules) {
+	@SafeVarargs public Validator(final Function<Request, Collection<String>>... rules) {
 		this(asList(rules));
 	}
 
 	/**
 	 * Creates a validating preprocessor.
 	 *
-	 * <p>Validation rules are handled a target request and its RDF payload and must return a non-null but possibly
-	 * empty collection of validation issues; if the collection includes at least one {@linkplain Issue.Level#Error
-	 * error}, the request fails with a {@link Response#UnprocessableEntity} status code; otherwise, the request is
-	 * routed to the wrapped handler.</p>
+	 * <p>Validation rules are handled a target request and must return a non-null but possibly
+	 * empty collection of validation issues; if the collection is not empty, the request fails with a {@link
+	 * Response#UnprocessableEntity} status code; otherwise, the request is routed to the wrapped handler.</p>
 	 *
-	 * @param rules the custom validation rules to be applied to the {@linkplain RDFBody RDF payload} of incoming
-	 *              requests
+	 * @param rules the custom validation rules to be applied to incoming requests
 	 *
 	 * @throws NullPointerException if {@code rules} is null or contains null values
 	 */
-	public Validator(final Collection<BiFunction<Request, Collection<Statement>, Collection<Issue>>> rules) {
+	public Validator(final Collection<Function<Request, Collection<String>>> rules) {
 
 		if ( rules == null ) {
 			throw new NullPointerException("null rules");
@@ -76,7 +62,6 @@ public final class Validator implements Wrapper {
 			throw new NullPointerException("null rule");
 		}
 
-
 		this.rules=new LinkedHashSet<>(rules);
 	}
 
@@ -84,30 +69,21 @@ public final class Validator implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> request.body(rdf()).fold(
+		return request -> {
 
-				rdf -> {
+			final Collection<String> issues=rules.stream()
+					.flatMap(rule -> rule.apply(request).stream())
+					.collect(toList());
 
-					final Model model=(rdf instanceof Model) ? (Model)rdf : new LinkedHashModel(rdf);
-
-					final Focus report=focus(rules.stream()
-							.flatMap(rule -> rule.apply(request, model).stream())
-							.collect(toList())
-					);
-
-					return report.assess(Issue.Level.Error) ? request.reply(new Failure()
+			return issues.isEmpty() ? handler.handle(request) : request.reply(new Failure()
 
 							.status(Response.UnprocessableEntity)
 							.error(Failure.DataInvalid)
-							.trace(report)
+					// !!! .trace(report)
 
-					) : handler.handle(request.body(rdf(), rdf));
+			);
 
-				},
-
-				failure -> failure.equals(Missing) ? handler.handle(request) : request.reply(failure)
-
-		);
+		};
 	}
 
 }

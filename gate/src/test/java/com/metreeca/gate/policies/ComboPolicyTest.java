@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
 
-import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.gate.policies.ComboPolicy.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,7 +49,7 @@ final class ComboPolicyTest {
 
 				no(sequences(3))
 
-		).verify(item("users/faussone"), secret);
+		).verify("/users/faussone", secret);
 	}
 
 

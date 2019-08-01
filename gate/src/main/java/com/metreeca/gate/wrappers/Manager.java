@@ -20,37 +20,33 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.gate.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
-import com.metreeca.tray.Clock;
-import com.metreeca.tray.Trace;
+import com.metreeca.rest.services.Clock;
+import com.metreeca.rest.services.Logger;
 
 import io.jsonwebtoken.Claims;
 
 import java.net.URI;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.json.JsonObject;
-import javax.json.JsonString;
+import javax.json.*;
 
-import static com.metreeca.form.things.JsonValues.object;
-import static com.metreeca.form.things.Sets.set;
 import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.gate.Roster.roster;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.bodies.JSONBody.json;
-import static com.metreeca.tray.Clock.clock;
-import static com.metreeca.tray.Trace.trace;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.services.Clock.clock;
+import static com.metreeca.rest.services.Logger.logger;
 
 import static java.lang.Math.min;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.regex.Pattern.compile;
 
 
@@ -215,6 +211,7 @@ public final class Manager implements Wrapper {
 	private static final int TokenIdLength=32; // [bytes]
 
 	private static final Pattern SessionCookiePattern=compile(format("\\b%s\\s*=\\s*(?<value>[^\\s;]+)", SessionCookie));
+	private static final Collection<String> TicketFields=new HashSet<>(asList("handle", "secret", "update"));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -225,12 +222,12 @@ public final class Manager implements Wrapper {
 	private final long hard;
 
 
-	private final Roster roster=tool(roster());
-	private final Notary notary=tool(notary());
-	private final Crypto crypto=tool(crypto());
+	private final Roster roster=service(roster());
+	private final Notary notary=service(notary());
+	private final Crypto crypto=service(crypto());
 
-	private final Clock clock=tool(clock());
-	private final Trace trace=tool(trace());
+	private final Clock clock=service(clock());
+	private final Logger logger=service(logger());
 
 
 	/**
@@ -331,7 +328,7 @@ public final class Manager implements Wrapper {
 
 								error -> { // permit not found >> reject request
 
-									trace.warning(this, error);
+									logger.warning(this, error);
 
 									return request.reply(new Failure().status(Response.Unauthorized));
 
@@ -340,7 +337,7 @@ public final class Manager implements Wrapper {
 
 						.orElseGet(() -> { // invalid token >> reject request
 
-							trace.warning(this, "invalid session token");
+							logger.warning(this, "invalid session token");
 
 							return request.reply(new Failure().status(Response.Unauthorized));
 
@@ -408,7 +405,7 @@ public final class Manager implements Wrapper {
 				.header("Cache-Control", "no-store, timeout="+expiry)
 				.header("Pragma", "no-cache")
 
-				.body(json(), object(permit.profile()));
+				.body(json(), Json.createObjectBuilder(permit.profile()).build());
 	}
 
 
@@ -419,7 +416,7 @@ public final class Manager implements Wrapper {
 				.header("Cache-Control", "no-store, timeout=0")
 				.header("Pragma", "no-cache")
 
-				.body(json(), object());
+				.body(json(), JsonValue.EMPTY_JSON_OBJECT);
 	}
 
 
@@ -433,7 +430,7 @@ public final class Manager implements Wrapper {
 		return Optional.of(ticket)
 
 				.filter(t -> t.values().stream().allMatch(value -> value instanceof JsonString))
-				.filter(t -> set("handle", "secret", "update").containsAll(t.keySet()))
+				.filter(t -> TicketFields.containsAll(t.keySet()))
 
 				.flatMap(t -> {
 
@@ -451,7 +448,7 @@ public final class Manager implements Wrapper {
 
 						permit -> { // log opaque handle to support entry correlation without exposing sensitive info
 
-							trace.info(this, "login "+session(permit));
+							logger.info(this, "login "+session(permit));
 
 							return Value(permit);
 
@@ -459,9 +456,10 @@ public final class Manager implements Wrapper {
 
 						error -> { // log only error without exposing sensitive info
 
-							trace.warning(this, "login error "+error);
+							logger.warning(this, "login error "+error);
 
-							return Error(new Failure().status(Response.Forbidden).error(error));
+							return Error(new Failure()
+									.status(Response.Forbidden).error(error));
 
 						}
 
@@ -469,25 +467,30 @@ public final class Manager implements Wrapper {
 
 				.orElseGet(() -> { // log only error without exposing sensitive info
 
-					trace.warning(this, "login error "+TicketMalformed);
+					logger.warning(this, "login error "+TicketMalformed);
 
-					return Error(new Failure().status(Response.BadRequest).error(TicketMalformed));
+					return Error(new Failure()
+							.status(Response.BadRequest).error(TicketMalformed));
 
 				});
 	}
 
 	private void logout(final String handle) {
-		roster.logout(handle).use(
+		roster.logout(handle).fold(
 
 				permit -> { // log opaque handle to support entry correlation without exposing sensitive info
 
-					trace.info(this, "logout "+session(permit));
+					logger.info(this, "logout "+session(permit));
+
+					return this;
 
 				},
 
 				error -> { // log only error without exposing sensitive info
 
-					trace.warning(this, "logout error "+error);
+					logger.warning(this, "logout error "+error);
+
+					return this;
 
 				}
 
@@ -496,7 +499,7 @@ public final class Manager implements Wrapper {
 
 
 	private String session(final Permit permit) {
-		return crypto.token(permit.id(), permit.user().stringValue());
+		return crypto.token(permit.id(), permit.user());
 	}
 
 

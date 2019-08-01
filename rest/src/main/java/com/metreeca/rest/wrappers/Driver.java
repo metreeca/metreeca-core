@@ -17,18 +17,15 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.form.Shape;
-import com.metreeca.form.probes.Optimizer;
-import com.metreeca.form.probes.Redactor;
 import com.metreeca.rest.*;
-
-import org.eclipse.rdf4j.model.vocabulary.LDP;
+import com.metreeca.tree.Shape;
+import com.metreeca.tree.probes.Inferencer;
+import com.metreeca.tree.probes.Optimizer;
+import com.metreeca.tree.probes.Redactor;
 
 import java.util.Optional;
 
-import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.shapes.Memoizing.memoizing;
-import static com.metreeca.rest.bodies.TextBody.text;
+import static com.metreeca.rest.formats.TextFormat.text;
 
 
 /**
@@ -39,7 +36,7 @@ import static com.metreeca.rest.bodies.TextBody.text;
  *
  * <ul>
  *
- * <li>associates the shape model to incoming requests as  a {@linkplain Message#shape() shape};</li>
+ * <li>associates the shape model to incoming requests as a {@linkplain Message#shape() shape};</li>
  *
  * <li>advertises the association between the response focus {@linkplain Response#item() item} and the shape model
  * through a "{@code Link: <resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy}" header;</li>
@@ -55,11 +52,11 @@ import static com.metreeca.rest.bodies.TextBody.text;
  *
  * <ul>
  *
- * <li>redacting the shape read associated with incoming request as  a {@linkplain Message#shape() shape} according to
+ * <li>redacting the shape read associated with incoming request as a {@linkplain Message#shape() shape} according to
  * the task to be performed;</li>
  *
  * <li>associating a shape to outgoing responses as  a {@linkplain Message#shape() shape} in order to drive further
- * processing (e.g. RDF to JSON body mapping).</li>
+ * processing (e.g. JSON body generation).</li>
  *
  * </ul>
  *
@@ -73,6 +70,7 @@ import static com.metreeca.rest.bodies.TextBody.text;
 public final class Driver implements Wrapper {
 
 	private static final String SpecsQuery="specs";
+	private static final String SpecsRelation="http://www.w3.org/ns/ldp#constrainedBy";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +91,9 @@ public final class Driver implements Wrapper {
 			throw new NullPointerException("null shape");
 		}
 
-		this.shape=memoizing(shape.map(new Optimizer())); // shape is going to be reused for each request
+		this.shape=shape
+				.map(new Inferencer())
+				.map(new Optimizer());
 	}
 
 
@@ -108,11 +108,11 @@ public final class Driver implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Optional<Responder> specs(final Request request) {
+	private Optional<Future<Response>> specs(final Request request) {
 
 		// !!! handle HEAD requests on ?specs (delegate to Worker)
 
-		return !pass(shape) && request.method().equals(Request.GET) && request.query().equals(SpecsQuery)
+		return request.method().equals(Request.GET) && request.query().equals(SpecsQuery)
 
 				? Optional.of(request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", "text/plain")
@@ -127,8 +127,8 @@ public final class Driver implements Wrapper {
 	}
 
 	private Response after(final Response response) {
-		return pass(shape) ? response : response.header("+Link", String.format(
-				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, LDP.CONSTRAINED_BY
+		return response.header("+Link", String.format(
+				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, SpecsRelation
 		));
 	}
 

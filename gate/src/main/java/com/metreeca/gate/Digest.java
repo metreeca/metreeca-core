@@ -30,10 +30,10 @@ public interface Digest {
 	/**
 	 * Retrieves the default digest factory.
 	 *
-	 * @return the default digest factory, which throws an exception reporting the digest as undefined
+	 * @return the default digest factory, which throws an exception reporting the service as undefined
 	 */
 	public static Supplier<Digest> digest() {
-		return () -> { throw new IllegalStateException("undefined digest tool"); };
+		return () -> { throw new IllegalStateException("undefined digest service"); };
 	}
 
 

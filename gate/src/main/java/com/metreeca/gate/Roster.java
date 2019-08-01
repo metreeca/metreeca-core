@@ -32,10 +32,10 @@ public interface Roster {
 	/**
 	 * Retrieves the default roster factory.
 	 *
-	 * @return the default roster factory, which throws an exception reporting the tool as undefined
+	 * @return the default roster factory, which throws an exception reporting the service as undefined
 	 */
 	public static Supplier<Roster> roster() {
-		return () -> { throw new IllegalStateException("undefined roster tool"); };
+		return () -> { throw new IllegalStateException("undefined roster service"); };
 	}
 
 

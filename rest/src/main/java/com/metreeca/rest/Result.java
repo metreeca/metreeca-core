@@ -18,7 +18,6 @@
 package com.metreeca.rest;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -228,39 +227,6 @@ public abstract class Result<V, E> {
 		return fold(
 				Result::Value,
 				error -> requireNonNull(mapper.apply(error), "null mapper return value")
-		);
-	}
-
-
-	/**
-	 * Handles operations results.
-	 *
-	 * @param success a consumer accepting the operation returned value
-	 * @param failure a consumer accepting the operation reported error
-	 *
-	 * @return this result
-	 *
-	 * @throws NullPointerException if either {@code success} or {@code failure} is null
-	 */
-	public Result<V, E> use(final Consumer<V> success, final Consumer<E> failure) {
-
-		if ( success == null ) {
-			throw new NullPointerException("null success consumer");
-		}
-
-		if ( failure == null ) {
-			throw new NullPointerException("null failure consumer");
-		}
-
-		return fold(
-				v -> {
-					success.accept(v);
-					return this;
-				},
-				e -> {
-					failure.accept(e);
-					return this;
-				}
 		);
 	}
 

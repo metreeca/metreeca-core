@@ -17,8 +17,9 @@
 
 package com.metreeca.gate;
 
-import com.metreeca.tray.Clock;
-import com.metreeca.tray.Vault;
+
+import com.metreeca.rest.services.Clock;
+import com.metreeca.rest.services.Vault;
 
 import io.jsonwebtoken.*;
 
@@ -34,10 +35,11 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import static com.metreeca.form.things.Codecs.UTF8;
-import static com.metreeca.tray.Clock.clock;
-import static com.metreeca.tray.Tray.tool;
-import static com.metreeca.tray.Vault.vault;
+import static com.metreeca.rest.services.Clock.clock;
+import static com.metreeca.rest.services.Vault.vault;
+import static com.metreeca.rest.Context.service;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
@@ -70,7 +72,7 @@ public final class Notary {
 	 */
 	public static Supplier<Notary> notary() {
 
-		return () -> new Notary(SignatureAlgorithm.HS256, tool(vault()).get(KeyVaultId).orElse(""));
+		return () -> new Notary(SignatureAlgorithm.HS256, service(vault()).get(KeyVaultId).orElse(""));
 
 	}
 
@@ -92,7 +94,7 @@ public final class Notary {
 
 		} else { // convert string to key
 
-			return new SecretKeySpec(key.getBytes(UTF8), algorithm.getJcaName());
+			return new SecretKeySpec(key.getBytes(UTF_8), algorithm.getJcaName());
 
 		}
 	}
@@ -103,7 +105,7 @@ public final class Notary {
 	private final SignatureAlgorithm algorithm;
 	private final Key key;
 
-	private final Clock clock=tool(clock());
+	private final Clock clock=service(clock());
 
 
 	/**

@@ -17,24 +17,9 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
-import com.metreeca.form.codecs.QueryParser;
-import com.metreeca.form.things.Values;
-
-import org.eclipse.rdf4j.model.IRI;
-
+import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
-
-import javax.json.JsonException;
-
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Strings.upper;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
@@ -49,11 +34,11 @@ public final class Request extends Message<Request> {
 	public static final String HEAD="HEAD"; // https://tools.ietf.org/html/rfc7231#section-4.3.2
 	public static final String POST="POST"; // https://tools.ietf.org/html/rfc7231#section-4.3.3
 	public static final String PUT="PUT"; // https://tools.ietf.org/html/rfc7231#section-4.3.4
+	public static final String PATCH="PATCH"; // https://tools.ietf.org/html/rfc5789#section-2
 	public static final String DELETE="DELETE"; // https://tools.ietf.org/html/rfc7231#section-4.3.5
 	public static final String CONNECT="CONNECT"; // https://tools.ietf.org/html/rfc7231#section-4.3.6
 	public static final String OPTIONS="OPTIONS"; // https://tools.ietf.org/html/rfc7231#section-4.3.7
 	public static final String TRACE="TRACE"; // https://tools.ietf.org/html/rfc7231#section-4.3.8
-	public static final String PATCH="PATCH"; // https://tools.ietf.org/html/rfc5789#section-2
 
 
 	private static final Collection<String> Safe=new HashSet<>(asList(
@@ -63,8 +48,8 @@ public final class Request extends Message<Request> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private IRI user=Form.none;
-	private Set<IRI> roles=singleton(Form.none);
+	private String user="";
+	private Set<String> roles=emptySet();
 
 	private String method="";
 	private String base="app:/";
@@ -82,8 +67,8 @@ public final class Request extends Message<Request> {
 	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
 	 * this request
 	 */
-	@Override public IRI item() {
-		return iri(base+path.substring(1));
+	@Override public String item() {
+		return base+path.substring(1);
 	}
 
 	/**
@@ -101,13 +86,31 @@ public final class Request extends Message<Request> {
 	/**
 	 * Creates a response for this request.
 	 *
+	 * @param status the status code for the response
+	 *
+	 * @return a new lazy response {@linkplain Response#request() associated} to this request
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
+	 */
+	public Future<Response> reply(final int status) {
+
+		if ( status < 100 || status > 599 ) { // 0 used internally
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		}
+
+		return reply(response -> response.status(status));
+	}
+
+	/**
+	 * Creates a response for this request.
+	 *
 	 * @param mapper the mapping function  used to initialize the new response; must return a non-null value
 	 *
-	 * @return a new response {@linkplain Response#request() associated} to this request
+	 * @return a new lazy response {@linkplain Response#request() associated} to this request
 	 *
 	 * @throws NullPointerException if {@code mapper} is null or return a null value
 	 */
-	public Responder reply(final Function<Response, Response> mapper) {
+	public Future<Response> reply(final Function<Response, Response> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -150,7 +153,7 @@ public final class Request extends Message<Request> {
 	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
 	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
 	 */
-	public boolean role(final IRI... roles) {
+	public boolean role(final String... roles) {
 		return role(asList(roles));
 	}
 
@@ -162,24 +165,13 @@ public final class Request extends Message<Request> {
 	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
 	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
 	 */
-	public boolean role(final Collection<IRI> roles) {
+	public boolean role(final Collection<String> roles) {
 
 		if ( roles == null ) {
 			throw new NullPointerException("null roles");
 		}
 
 		return !disjoint(this.roles, roles);
-	}
-
-
-	/**
-	 * Retrieves the stem IRI of this request.
-	 *
-	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
-	 * this request and appending a trailing slash if one is not already included in {@linkplain #path() path}
-	 */
-	public String stem() {
-		return base+path.substring(1)+(path.endsWith("/") ? "" : "/");
 	}
 
 
@@ -194,32 +186,30 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public Result<Query, Failure> query(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		try {
-
-			return Value(new QueryParser(shape, item().stringValue()).parse(query()));
-
-		} catch ( final JsonException e ) {
-
-			return Error(new Failure()
-					.status(Response.BadRequest)
-					.error("query-malformed")
-					.cause(e));
-
-		} catch ( final NoSuchElementException e ) {
-
-			return Error(new Failure()
-					.status(Response.UnprocessableEntity)
-					.error("query-illegal")
-					.cause(e));
-
-		}
-	}
+	//public Result<Query, Failure> query(final Shape shape) {
+	//
+	//	if ( shape == null ) {
+	//		throw new NullPointerException("null shape");
+	//	}
+	//
+	//	try {
+	//
+	//		return Value(new QueryParser(shape, item().stringValue()).parse(query()));
+	//
+	//	} catch ( final JsonException e ) {
+	//
+	//		return Error(new Failure(Response.BadRequest)
+	//				.error("query-malformed")
+	//				.cause(e));
+	//
+	//	} catch ( final NoSuchElementException e ) {
+	//
+	//		return Error(new Failure(Response.UnprocessableEntity)
+	//				.error("query-illegal")
+	//				.cause(e));
+	//
+	//	}
+	//}
 
 
 	//// Actor /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,21 +217,20 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the identifier of the request user.
 	 *
-	 * @return an absolute IRI identifying the user performing this request or {@link Form#none} if no user is
-	 * authenticated
+	 * @return an identifier for the user performing this request or the empty stringif no user is authenticated
 	 */
-	public IRI user() { return user; }
+	public String user() { return user; }
 
 	/**
-	 * Configures the the identifier of the request user.
+	 * Configures the identifier of the request user.
 	 *
-	 * @param user an absolute IRI identifying the user performing this request
+	 * @param user an identifier for the user performing this request or the empty stringif no user is authenticated
 	 *
 	 * @return this request
 	 *
 	 * @throws NullPointerException if {@code user} is null
 	 */
-	public Request user(final IRI user) {
+	public Request user(final String user) {
 
 		if ( user == null ) {
 			throw new NullPointerException("null user");
@@ -258,7 +247,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return a set of values uniquely identifying the roles attributed to the request {@linkplain #user() user}
 	 */
-	public Set<IRI> roles() { return unmodifiableSet(roles); }
+	public Set<String> roles() { return unmodifiableSet(roles); }
 
 	/**
 	 * Configures the roles attributed to the request user.
@@ -270,7 +259,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
 	 */
-	public Request roles(final IRI... roles) {
+	public Request roles(final String... roles) {
 		return roles(asList(roles));
 	}
 
@@ -284,9 +273,9 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
 	 */
-	public Request roles(final Collection<IRI> roles) {
+	public Request roles(final Collection<String> roles) {
 
-		if ( roles == null || roles.stream().anyMatch(Objects::isNull)) {
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null roles");
 		}
 
@@ -322,7 +311,7 @@ public final class Request extends Message<Request> {
 			throw new NullPointerException("null method");
 		}
 
-		this.method=upper(method);
+		this.method=method.toUpperCase(Locale.ROOT);
 
 		return this;
 	}
@@ -355,7 +344,7 @@ public final class Request extends Message<Request> {
 			throw new NullPointerException("null base");
 		}
 
-		if ( !Values.AbsoluteIRIPattern.matcher(base).matches() ) {
+		if ( !URI.create(base).isAbsolute() ) {
 			throw new IllegalArgumentException("not an absolute base IRI");
 		}
 
@@ -542,7 +531,7 @@ public final class Request extends Message<Request> {
 			throw new NullPointerException("null name");
 		}
 
-		return unmodifiableList(parameters.getOrDefault(name, list()));
+		return unmodifiableList(parameters.getOrDefault(name, emptyList()));
 	}
 
 	/**

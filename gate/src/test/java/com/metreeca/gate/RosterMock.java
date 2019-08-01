@@ -23,15 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.metreeca.form.things.Codecs.UTF8;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.ValuesTest.item;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 
 import static java.lang.Math.abs;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonMap;
 
 
 public final class RosterMock implements Roster {
@@ -109,7 +107,7 @@ public final class RosterMock implements Roster {
 
 	private Map.Entry<String, String> handle(final Map.Entry<String, String> entry, final String secret) {
 
-		entry.setValue(new String(secret.getBytes(UTF8), UTF8)); // a unique secret whose id hash is the handle
+		entry.setValue(new String(secret.getBytes(UTF_8), UTF_8)); // a unique secret whose id hash is the handle
 
 		return entry;
 
@@ -118,8 +116,8 @@ public final class RosterMock implements Roster {
 
 	private Result<Permit, String> permit(final Map.Entry<String, String> entry) {
 		return Value(new Permit(handle(entry),
-				item("users/"+entry.getKey()), set(),
-				map(entry("user", entry.getKey()))
+				"/users/"+entry.getKey(), emptySet(),
+				singletonMap("user", entry.getKey())
 		));
 	}
 

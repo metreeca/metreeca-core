@@ -17,36 +17,30 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.*;
-import com.metreeca.rest.bodies.JSONBody;
+import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.tree.Trace;
 
-import org.eclipse.rdf4j.model.IRI;
-
-import java.util.*;
 import java.util.function.Function;
 
 import javax.json.*;
 
-import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.things.Values.format;
-
-import static java.util.stream.Collectors.groupingBy;
+import static com.metreeca.rest.formats.JSONFormat.json;
 
 
 /**
  * HTTP processing failure.
  *
  * <p>Reports an error condition in an HTTP request processing operation; can be {@linkplain #apply(Response)
- * transferred} to the {@linkplain JSONBody JSON} body of an HTTP response like:</p>
+ * transferred} to the {@linkplain JSONFormat JSON} body of an HTTP response like:</p>
  *
  * <pre>{@code
  * <status>
  * Content-Type: application/json
  *
  * {
- *     "error": "<error>",  # a optional machine readable error type tag
- *     "cause": "<cause>",  # a optional a human readable error description
- *     "trace": <trace>     # a optional structured JSON error report
+ *     "error": "<error>",  # optional machine readable error tag
+ *     "notes": "<cause>",  # optional human readable error notes
+ *     "trace": <trace>     # optional structured JSON error trace
  * }
  * }</pre>
  */
@@ -68,15 +62,15 @@ public final class Failure implements Function<Response, Response> {
 	private int status=Response.BadRequest;
 
 	private String error;
-	private String label; // human readable cause label
-	private Throwable cause; // machine readable cause
-	private JsonValue trace;
+	private String notes;
 
+	private JsonValue trace;
+	private Throwable cause;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Configures the response status.
+	 * Configures response status.
 	 *
 	 * @param status the HTTP status code associated with the error condition defined by this failure
 	 *
@@ -96,7 +90,7 @@ public final class Failure implements Function<Response, Response> {
 	}
 
 	/**
-	 * Configures the error type.
+	 * Configures error tag.
 	 *
 	 * @param error a machine-readable tag for the error condition defined by this failure; ignored if empty
 	 *
@@ -118,49 +112,29 @@ public final class Failure implements Function<Response, Response> {
 	}
 
 	/**
-	 * Configures the error cause description.
+	 * Configures error notes.
 	 *
-	 * @param cause a human readable description of the error condition defined by this failure; ignored if empty
+	 * @param notes a human readable description of the error condition defined by this failure; ignored if empty
 	 *
 	 * @return this failure
 	 *
-	 * @throws NullPointerException if {@code cause} is null
+	 * @throws NullPointerException if {@code notes} is null
 	 */
-	public Failure cause(final String cause) {
+	public Failure notes(final String notes) {
 
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
+		if ( notes == null ) {
+			throw new NullPointerException("null notes");
 		}
 
-		if ( !cause.isEmpty() ) {
-			this.label=cause;
+		if ( !notes.isEmpty() ) {
+			this.notes=notes;
 		}
 
 		return this;
 	}
 
 	/**
-	 * Configures the error cause.
-	 *
-	 * @param cause the underlying throwable that caused the error condition defined by this failure
-	 *
-	 * @return this failure
-	 *
-	 * @throws NullPointerException if {@code cause} is null
-	 */
-	public Failure cause(final Throwable cause) {
-
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
-
-		this.cause=cause;
-
-		return this;
-	}
-
-	/**
-	 * Configures the error trace.
+	 * Configures error trace.
 	 *
 	 * @param trace a structured JSON report describing the error condition defined by this failure
 	 *
@@ -180,25 +154,42 @@ public final class Failure implements Function<Response, Response> {
 	}
 
 	/**
-	 * Configures the error trace.
+	 * Configures error trace.
 	 *
-	 * @param focus a shape focus validation report describing the error condition defined by this failure
+	 * @param trace a shape validation trace describing the error condition defined by this failure
 	 *
 	 * @return this failure
 	 *
-	 * @throws NullPointerException if {@code report} is null
+	 * @throws NullPointerException if {@code trace} is null
 	 */
-	public Failure trace(final Focus focus) {
+	public Failure trace(final Trace trace) {
 
-		if ( focus == null ) {
-			throw new NullPointerException("null focus report");
+		if ( trace == null ) {
+			throw new NullPointerException("null validation trace");
 		}
 
-		// !!! rewrite report value references to original target iri
-		// !!! rewrite references to external base IRI
-		// !!! support other formats with content negotiation
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
 
-		return trace(json(focus.prune(Issue.Level.Warning)));
+
+	/**
+	 * Configures error cause.
+	 *
+	 * @param cause the underlying throwable that caused the error condition defined by this failure
+	 *
+	 * @return this failure
+	 *
+	 * @throws NullPointerException if {@code cause} is null
+	 */
+	public Failure cause(final Throwable cause) {
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
+		this.cause=cause;
+
+		return this;
 	}
 
 
@@ -219,17 +210,34 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null response");
 		}
 
-		return new Response(response.request())
+		return response
 				.status(status)
 				.cause(cause)
-				.body(JSONBody.json(), ticket());
+				.body(json(), ticket());
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	@Override public String toString() {
-		return String.format("%d %s", status, ticket());
+
+		final JsonObjectBuilder builder=Json.createObjectBuilder();
+
+		if ( error != null ) {
+			builder.add("error", error);
+		}
+
+		if ( notes != null ) {
+			builder.add("notes", notes);
+		}
+
+		if ( trace != null ) {
+			builder.add("trace", trace);
+		}
+
+		if ( cause != null ) {
+			builder.add("cause", cause.getMessage());
+		}
+
+		return status+" "+builder.build();
 	}
 
 
@@ -243,10 +251,8 @@ public final class Failure implements Function<Response, Response> {
 			builder.add("error", error);
 		}
 
-		if ( label != null ) {
-			builder.add("cause", label);
-		} else if ( cause != null ) {
-			builder.add("cause", Optional.ofNullable(cause.getMessage()).orElseGet(cause::toString));
+		if ( notes != null ) {
+			builder.add("notes", notes);
 		}
 
 		if ( trace != null ) {
@@ -254,78 +260,6 @@ public final class Failure implements Function<Response, Response> {
 		}
 
 		return builder.build();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private JsonObject json(final Focus focus) {
-
-		final JsonObjectBuilder json=json(focus.getIssues());
-
-		focus.getFrames().forEach(frame -> {
-
-			final String value=format(frame.getValue());
-			final JsonObject fields=json(frame);
-
-			if ( !fields.isEmpty() ) {
-				json.add(value, fields);
-			}
-
-		});
-
-		return json.build();
-	}
-
-
-	private JsonObject json(final Frame frame) {
-
-		final JsonObjectBuilder json=json(frame.getIssues());
-
-		for (final Map.Entry<IRI, Focus> field : frame.getFields().entrySet()) {
-
-			final String property=format(field.getKey());
-			final JsonObject value=json(field.getValue());
-
-			if ( !value.isEmpty() ) {
-				json.add(property, value);
-			}
-
-		}
-
-		return json.build();
-	}
-
-
-	private JsonObjectBuilder json(final Collection<Issue> issues) {
-
-		final JsonObjectBuilder json=Json.createObjectBuilder();
-
-		final Map<Issue.Level, List<Issue>> levels=issues.stream().collect(groupingBy(Issue::getLevel));
-
-		Optional.ofNullable(levels.get(Issue.Level.Error)).ifPresent(errors ->
-				json.add("errors", json(errors, this::json))
-		);
-
-		Optional.ofNullable(levels.get(Issue.Level.Warning)).ifPresent(warnings ->
-				json.add("warnings", json(warnings, this::json))
-		);
-
-		return json;
-	}
-
-	private JsonString json(final Issue issue) {
-		return Json.createValue(issue.getMessage()+(pass(issue.getShape()) ? "" : " : "+issue.getShape()));
-	}
-
-
-	private <V> JsonArray json(final Iterable<V> errors, final Function<V, JsonValue> reporter) {
-
-		final JsonArrayBuilder json=Json.createArrayBuilder();
-
-		errors.forEach(item -> json.add(reporter.apply(item)));
-
-		return json.build();
 	}
 
 }

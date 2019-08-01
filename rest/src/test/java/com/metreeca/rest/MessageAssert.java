@@ -17,20 +17,19 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.Shape;
+import com.metreeca.tree.Shape;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
-import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.rest.bodies.DataBody.data;
-import static com.metreeca.rest.bodies.TextBody.text;
-import static com.metreeca.tray.Trace.clip;
+import static com.metreeca.rest.formats.DataFormat.data;
+import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.services.Logger.clip;
+import static com.metreeca.tree.shapes.And.and;
 
 import static org.assertj.core.api.Assertions.fail;
 
@@ -58,7 +57,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public A hasItem(final IRI item) {
+	public A hasItem(final String item) {
 
 		isNotNull();
 
@@ -183,7 +182,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( pass(shape) ) {
+		if ( and().equals(shape) ) {
 			failWithMessage("expected message to have a shape but has none", shape);
 		}
 
@@ -211,7 +210,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( !pass(shape) ) {
+		if ( !and().equals(shape)) {
 			failWithMessage("expected message to have no shape but has <%s>", shape);
 		}
 
@@ -221,7 +220,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public A hasBody(final Body<?> format) {
+	public A hasBody(final Format<?> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
@@ -230,7 +229,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		return hasBody(format, body -> {});
 	}
 
-	public <V> A hasBody(final Body<V> body, final Consumer<V> assertions) {
+	public <V> A hasBody(final Format<V> body, final Consumer<V> assertions) {
 
 		if ( body == null ) {
 			throw new NullPointerException("null body");
@@ -282,7 +281,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		return myself;
 	}
 
-	public A doesNotHaveBody(final Body<?> body) {
+	public A doesNotHaveBody(final Format<?> body) {
 
 		if ( body == null ) {
 			throw new NullPointerException("null body");

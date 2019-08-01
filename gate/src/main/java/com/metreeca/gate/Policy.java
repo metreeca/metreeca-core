@@ -17,8 +17,6 @@
 
 package com.metreeca.gate;
 
-import org.eclipse.rdf4j.model.IRI;
-
 import java.util.function.Supplier;
 
 
@@ -32,10 +30,10 @@ import java.util.function.Supplier;
 	/**
 	 * Retrieves the default policy factory.
 	 *
-	 * @return the default policy factory, which throws an exception reporting the tool as undefined
+	 * @return the default policy factory, which throws an exception reporting the service as undefined
 	 */
 	public static Supplier<Policy> policy() {
-		return () -> { throw new IllegalStateException("undefined policy tool"); };
+		return () -> { throw new IllegalStateException("undefined policy service"); };
 	}
 
 
@@ -52,6 +50,6 @@ import java.util.function.Supplier;
 	 *
 	 * @throws NullPointerException if either {@code handle} or {@code secret} is null
 	 */
-	public boolean verify(final IRI user, final String secret);
+	public boolean verify(final String user, final String secret);
 
 }

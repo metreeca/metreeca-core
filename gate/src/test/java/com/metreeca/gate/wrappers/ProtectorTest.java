@@ -17,11 +17,8 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.tray.ClockMock;
-import com.metreeca.tray.Tray;
+import com.metreeca.rest.*;
+import com.metreeca.rest.services.ClockMock;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,9 +28,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.metreeca.rest.HandlerTest.echo;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.tray.Clock.clock;
+import static com.metreeca.rest.services.Clock.clock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +42,7 @@ final class ProtectorTest {
 
 
 	private void exec(final Runnable... tasks) {
-		new Tray()
+		new Context()
 
 				.set(clock(), () -> clock.time(0))
 
@@ -55,13 +51,17 @@ final class ProtectorTest {
 				.clear();
 	}
 
+	private Handler handler() {
+		return request -> request.reply(Response.OK);
+	}
+
 
 	@Nested final class TransportSecurity {
 
 		@Test void testIsDisabledByDefault() {
 			exec(() -> new Protector()
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(new Request()
 							.method(Request.GET)
@@ -82,7 +82,7 @@ final class ProtectorTest {
 
 					.secure(true)
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(new Request()
 							.method(Request.GET)
@@ -104,7 +104,7 @@ final class ProtectorTest {
 
 					.secure(true)
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(new Request()
 							.method(Request.GET)
@@ -127,7 +127,7 @@ final class ProtectorTest {
 		@Test void testIsDisabledByDefault() {
 			exec(() -> new Protector()
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(new Request()
 							.method(Request.GET)
@@ -149,7 +149,7 @@ final class ProtectorTest {
 
 					.policy(true)
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(new Request()
 							.method(Request.GET)
@@ -207,7 +207,7 @@ final class ProtectorTest {
 		@Test void testIsDisabledByDefault() {
 			exec(() -> new Protector()
 
-					.wrap(echo())
+					.wrap(handler())
 
 					.handle(new Request()
 							.method(Request.GET)
@@ -231,7 +231,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.GET)
@@ -258,7 +258,7 @@ final class ProtectorTest {
 
 						.secure(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.GET)
@@ -283,7 +283,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.POST)
@@ -302,7 +302,7 @@ final class ProtectorTest {
 
 								.cookie(true)
 
-								.wrap(echo()),
+								.wrap(handler()),
 
 						request -> request.method(Request.GET),
 
@@ -320,7 +320,7 @@ final class ProtectorTest {
 
 							.cookie(true)
 
-							.wrap(echo());
+							.wrap(handler());
 
 					handler
 
@@ -350,7 +350,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.GET)
@@ -370,7 +370,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.POST)
@@ -389,7 +389,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.POST)
@@ -409,7 +409,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.POST)
@@ -429,7 +429,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.POST)
@@ -450,7 +450,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.POST)
@@ -476,7 +476,7 @@ final class ProtectorTest {
 
 						.cookie(true)
 
-						.wrap(echo())
+						.wrap(handler())
 
 						.handle(new Request()
 								.method(Request.POST)
@@ -497,7 +497,7 @@ final class ProtectorTest {
 
 								.cookie(Duration.ofDays(1).toMillis())
 
-								.wrap(echo()),
+								.wrap(handler()),
 
 						request -> {
 
@@ -521,7 +521,7 @@ final class ProtectorTest {
 
 								.cookie(true)
 
-								.wrap(echo()),
+								.wrap(handler()),
 
 						request -> request.method(Request.POST),
 

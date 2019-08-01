@@ -17,14 +17,9 @@
 
 package com.metreeca.gate;
 
-import org.eclipse.rdf4j.model.IRI;
-
 import java.util.*;
 
 import javax.json.Json;
-
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
 
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
@@ -39,8 +34,8 @@ public final class Permit {
 
 	private final String id;
 
-	private final IRI user;
-	private final Set<IRI> roles;
+	private final String user;
+	private final Set<String> roles;
 
 	private final Map<String, Object> profile;
 
@@ -60,7 +55,7 @@ public final class Permit {
 	 *
 	 * @throws NullPointerException if any of the arguments is null or contains null values
 	 */
-	public Permit(final String id, final IRI user, final Collection<IRI> roles, final Map<String, Object> profile) {
+	public Permit(final String id, final String user, final Collection<String> roles, final Map<String, Object> profile) {
 
 		if ( id == null ) {
 			throw new NullPointerException("null hash");
@@ -81,9 +76,9 @@ public final class Permit {
 		this.id=id;
 
 		this.user=user;
-		this.roles=set(roles);
+		this.roles=new LinkedHashSet<>(roles);
 
-		this.profile=map(profile.entrySet());
+		this.profile=new LinkedHashMap<>(profile);
 	}
 
 
@@ -104,7 +99,7 @@ public final class Permit {
 	 *
 	 * @return an IRI uniquely identifying the permit user
 	 */
-	public IRI user() {
+	public String user() {
 		return user;
 	}
 
@@ -113,7 +108,7 @@ public final class Permit {
 	 *
 	 * @return a set of IRIs uniquely identifying the roles attributed to the permit user
 	 */
-	public Set<IRI> roles() {
+	public Set<String> roles() {
 		return unmodifiableSet(roles);
 	}
 

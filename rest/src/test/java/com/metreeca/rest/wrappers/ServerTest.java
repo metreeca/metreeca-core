@@ -17,19 +17,17 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.tray.Tray;
+import com.metreeca.rest.*;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.things.Maps.entry;
+import java.util.*;
+
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.bodies.JSONBody.json;
-import static com.metreeca.rest.bodies.TextBody.text;
+import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.formats.TextFormat.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,14 +39,19 @@ final class ServerTest {
 
 	@Nested final class QueryParsing {
 
+		private Map.Entry<String, ? extends Collection<String>> parameter(final String name, final List<String> values) {
+			return new AbstractMap.SimpleImmutableEntry<>(name, values);
+		}
+
+
 		@Test void testPreprocessQueryParameters() {
-			new Tray().get(Server::new)
+			new Context().get(Server::new)
 
 					.wrap((Handler)request -> {
 
 						assertThat(request.parameters()).containsExactly(
-								entry("one", singletonList("1")),
-								entry("two", asList("2", "2"))
+								parameter("one", singletonList("1")),
+								parameter("two", asList("2", "2"))
 						);
 
 						return request.reply(response -> response.status(OK));
@@ -63,13 +66,13 @@ final class ServerTest {
 		}
 
 		@Test void testPreprocessBodyParameters() {
-			new Tray().get(Server::new)
+			new Context().get(Server::new)
 
 					.wrap((Handler)request -> {
 
 						assertThat(request.parameters()).containsExactly(
-								entry("one", singletonList("1")),
-								entry("two", asList("2", "2"))
+								parameter("one", singletonList("1")),
+								parameter("two", asList("2", "2"))
 						);
 
 						return request.reply(response -> response.status(OK));
@@ -85,12 +88,12 @@ final class ServerTest {
 		}
 
 		@Test void testPreprocessDontOverwriteExistingParameters() {
-			new Tray().get(Server::new)
+			new Context().get(Server::new)
 
 					.wrap((Handler)request -> {
 
 						assertThat(request.parameters()).containsExactly(
-								entry("existing", singletonList("true"))
+								parameter("existing", singletonList("true"))
 						);
 
 						return request.reply(response -> response.status(OK));
@@ -106,7 +109,7 @@ final class ServerTest {
 		}
 
 		@Test void testPreprocessQueryOnlyOnGET() {
-			new Tray().get(Server::new)
+			new Context().get(Server::new)
 
 					.wrap((Handler)request -> {
 
@@ -124,7 +127,7 @@ final class ServerTest {
 		}
 
 		@Test void testPreprocessBodyOnlyOnPOST() {
-			new Tray().get(Server::new)
+			new Context().get(Server::new)
 
 					.wrap((Handler)request -> {
 
@@ -147,13 +150,13 @@ final class ServerTest {
 	@Nested final class ErrorHandling {
 
 		@Test void testTrapStrayExceptions() {
-			new Tray().exec(() -> new Server()
+			new Context().exec(() -> new Server()
 
 					.wrap((Request request) -> { throw new UnsupportedOperationException("stray"); })
 
 					.handle(new Request())
 
-					.accept(response -> assertThat(response)
+					.accept(response -> ResponseAssert.assertThat(response)
 							.hasStatus(InternalServerError)
 							.hasBody(json())
 					)

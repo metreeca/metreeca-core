@@ -17,22 +17,18 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.bodies.TextBody;
-
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.StringReader;
 import java.util.function.Function;
 
-import static com.metreeca.form.things.Codecs.text;
-import static com.metreeca.form.things.Lists.list;
 import static com.metreeca.rest.MessageAssert.assertThat;
-import static com.metreeca.rest.bodies.ReaderBody.reader;
+import static com.metreeca.rest.formats.ReaderFormat.reader;
+import static com.metreeca.rest.formats.TextFormat.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static java.util.Collections.emptySet;
 
@@ -42,38 +38,37 @@ public final class MessageTest {
 	//// Headers ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testHeadersNormalizeHeaderNames() {
-
-		final TestMessage message=new TestMessage()
-				.headers("TEST-header", "value");
-
-		assertTrue(message.headers().keySet().contains("TEST-Header"));
+		assertThat(new MessageMock()
+				.headers("TEST-header", "value")
+		)
+				.hasHeader("TEST-Header");
 	}
 
 	@Test void testHeadersIgnoreHeaderCase() {
-		assertThat(new TestMessage().header("TEST-header", "value"))
+		assertThat(new MessageMock()
+				.header("TEST-header", "value")
+		)
 				.hasHeader("test-header", "value");
 	}
 
 	@Test void testHeadersIgnoreEmptyHeaders() {
-
-		final TestMessage message=new TestMessage()
-				.headers("test-header", emptySet());
-
-		assertTrue(message.headers().entrySet().isEmpty());
+		assertThat(new MessageMock()
+				.headers("test-header", emptySet())
+		)
+				.doesNotHaveHeader("test-header");
 	}
 
 	@Test void testHeadersOverwritesValues() {
-
-		final TestMessage message=new TestMessage()
+		assertThat(new MessageMock()
 				.header("test-header", "one")
-				.header("test-header", "two");
-
-		assertEquals(list("two"), list(message.headers("test-header")));
+				.header("test-header", "two")
+		)
+				.hasHeader("test-header", "two");
 	}
 
 	@Test void testDefaultsValues() {
 
-		final TestMessage message=new TestMessage()
+		final MessageMock message=new MessageMock()
 				.header("+present", "one")
 				.header("~present", "two")
 				.header("~missing", "two");
@@ -83,83 +78,43 @@ public final class MessageTest {
 
 	}
 
-	@Test void testHeadersAppendsValues() {
-
-		final TestMessage message=new TestMessage()
-				.header("+test-header", "one")
-				.header("+test-header", "two");
-
-		assertEquals(list("one", "two"), list(message.headers("test-header")));
-	}
-
-	@Test void testHeadersAppendsCookies() {
-
-		final TestMessage message=new TestMessage()
-				.header("set-cookie", "one")
-				.header("set-cookie", "two");
-
-		assertEquals(list("one", "two"), list(message.headers("set-cookie")));
-	}
-
-	@Test void testHeadersIgnoresEmptyAndDuplicateValues() {
-
-		final TestMessage message=new TestMessage()
-				.headers("test-header", "one", "two", "", "two");
-
-		assertEquals(list("one", "two"), list(message.headers("test-header")));
-	}
+	//@Test void testHeadersAppendsValues() {
+	//
+	//	final MessageMock message=new MessageMock()
+	//			.header("+test-header", "one")
+	//			.header("+test-header", "two");
+	//
+	//	assertEquals(list("one", "two"), list(message.headers("test-header")));
+	//}
+	//
+	//@Test void testHeadersAppendsCookies() {
+	//
+	//	final MessageMock message=new MessageMock()
+	//			.header("set-cookie", "one")
+	//			.header("set-cookie", "two");
+	//
+	//	assertEquals(list("one", "two"), list(message.headers("set-cookie")));
+	//}
+	//
+	//@Test void testHeadersIgnoresEmptyAndDuplicateValues() {
+	//
+	//	final MessageMock message=new MessageMock()
+	//			.headers("test-header", "one", "two", "", "two");
+	//
+	//	assertEquals(list("one", "two"), list(message.headers("test-header")));
+	//}
 
 
 	//// Body //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testBodyCaching() {
 
-		final TestMessage message=new TestMessage().body(reader(), () -> new StringReader("test"));
+		final MessageMock message=new MessageMock().body(reader(), () -> new StringReader("test"));
 
 		final Function<Message<?>, String> accessor=m -> m
-				.body(TextBody.text()).fold(value -> value, error -> fail("missing test body"));
+				.body(text()).fold(value -> value, error -> fail("missing test body"));
 
 		assertSame(accessor.apply(message), accessor.apply(message));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final class TestMessage extends Message<TestMessage> {
-
-		private final Request request=new Request();
-
-
-		@Override public IRI item() {
-				return RDF.NIL;
-		}
-
-		@Override public Request request() { return request; }
-
-	}
-
-	private static final class TestBody implements Body<String> {
-
-		private static final TestBody Instance=new TestBody();
-
-
-		private static TestBody test() { return Instance; }
-
-
-		@Override public Result<String, Failure> get(final Message<?> message) {
-			return message.body(reader()).value(supplier -> {
-				try (final Reader reader=supplier.get()) {
-					return text(reader);
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
-				}
-			});
-		}
-
-		@Override public <M extends Message<M>> M set(final M message, final String value) {
-			return message.header("content-type", "text/plain");
-		}
-
 	}
 
 }

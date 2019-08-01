@@ -17,15 +17,15 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.form.things.Codecs;
+import com.metreeca.rest.codecs.Codecs;
 
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.rest.bodies.InputBody.input;
-import static com.metreeca.rest.bodies.OutputBody.output;
-import static com.metreeca.rest.bodies.TextBody.text;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.TextFormat.text;
 
 
 public final class ResponseAssert extends MessageAssert<ResponseAssert, Response> {

@@ -19,20 +19,22 @@ package com.metreeca.rest;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.things.Values.iri;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 
 
 final class ResponseTest {
 
 	@Test void testResolveLocationURL() {
 
-		final Request request=new Request().base("http://example.com/").path("/path/");
-		final Response response=new Response(request).header("Location", "name");
+		final Request request=new Request().base("http://example.com/base/").path("/path/");
 
-		assertThat(response.item())
-				.isEqualTo(iri("http://example.com/path/name"));
+		assertThat(new Response(request).header("Location", "http://absolute.com/name"))
+				.as("absolute")
+				.hasItem("http://absolute.com/name");
+
+		assertThat(new Response(request).header("Location", "name"))
+				.as("relative")
+				.hasItem("http://example.com/base/path/name");
 
 	}
 

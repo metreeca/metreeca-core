@@ -26,15 +26,15 @@ import java.io.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.metreeca.rest.bodies.OutputBody.output;
-import static com.metreeca.rest.bodies.WriterBody.writer;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.WriterFormat.writer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class WorkerTest {
 
-	private Responder handler(final Request request) {
+	private Future<Response> handler(final Request request) {
 		return request.reply(response -> response
 
 				.status(Response.OK)

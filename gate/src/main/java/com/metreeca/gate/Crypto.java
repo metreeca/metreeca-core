@@ -24,8 +24,8 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static com.metreeca.form.things.Codecs.UTF8;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 
 
@@ -216,7 +216,7 @@ public interface Crypto {
 			throw new IllegalArgumentException("null text chunk");
 		}
 
-		return encode(id(stream(text).map(chunk -> chunk.getBytes(UTF8)).toArray(byte[][]::new)));
+		return encode(id(stream(text).map(chunk -> chunk.getBytes(UTF_8)).toArray(byte[][]::new)));
 	}
 
 

@@ -17,18 +17,17 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.form.things.Codecs;
 import com.metreeca.rest.*;
-import com.metreeca.tray.Trace;
-
-import org.eclipse.rdf4j.model.IRI;
+import com.metreeca.rest.codecs.Codecs;
+import com.metreeca.rest.services.Logger;
 
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Request.GET;
 import static com.metreeca.rest.Request.POST;
-import static com.metreeca.rest.bodies.TextBody.text;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.rest.services.Logger.logger;
 
 import static java.lang.String.format;
 
@@ -47,7 +46,7 @@ public final class Server implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Trace trace=tool(Trace.trace());
+	private final Logger logger=service(logger());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,14 +74,14 @@ public final class Server implements Wrapper {
 
 			} catch ( final RuntimeException e ) {
 
-				trace.error(this, format("%s %s > internal error", request.method(), request.item()), e);
+				logger.error(this, format("%s %s > internal error", request.method(), request.item()), e);
 
 				request
 
 						.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("exception-untrapped")
-								.cause("unable to process request: see server logs for details")
+								.notes("unable to process request: see server logs for details")
 								.cause(e)
 						)
 
@@ -116,12 +115,12 @@ public final class Server implements Wrapper {
 
 		final Request request=response.request();
 		final String method=request.method();
-		final IRI item=request.item();
+		final String item=request.item();
 
 		final int status=response.status();
 		final Throwable cause=response.cause().orElse(null);
 
-		trace.entry(status < 400 ? Trace.Level.Info : status < 500 ? Trace.Level.Warning : Trace.Level.Error,
+		logger.entry(status < 400 ? Logger.Level.Info : status < 500 ? Logger.Level.Warning : Logger.Level.Error,
 				this, () -> format("%s %s > %d", method, item, status), cause);
 
 		return response;

@@ -20,8 +20,8 @@ package com.metreeca.gate.wrappers;
 import com.metreeca.gate.Crypto;
 import com.metreeca.gate.Notary;
 import com.metreeca.rest.*;
-import com.metreeca.tray.Clock;
-import com.metreeca.tray.Trace;
+import com.metreeca.rest.services.Clock;
+import com.metreeca.rest.services.Logger;
 
 import java.net.URI;
 import java.util.Date;
@@ -31,9 +31,9 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
-import static com.metreeca.tray.Clock.clock;
-import static com.metreeca.tray.Trace.trace;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.services.Clock.clock;
+import static com.metreeca.rest.services.Logger.logger;
 
 import static java.lang.String.format;
 import static java.util.regex.Pattern.compile;
@@ -71,11 +71,11 @@ public final class Protector implements Wrapper {
 
 	private String policy="";
 
-	private final Notary notary=tool(notary());
-	private final Crypto crypto=tool(crypto());
+	private final Notary notary=service(notary());
+	private final Crypto crypto=service(crypto());
 
-	private final Clock clock=tool(clock());
-	private final Trace trace=tool(trace());
+	private final Clock clock=service(clock());
+	private final Logger logger=service(logger());
 
 
 	/**
@@ -250,7 +250,7 @@ public final class Protector implements Wrapper {
 
 				return request.reply(response -> response
 						.status(Response.TemporaryRedirect)
-						.header("Location", request.item().stringValue().replace("http:", "https:"))
+						.header("Location", request.item().replace("http:", "https:"))
 				);
 
 			} else {
@@ -329,7 +329,7 @@ public final class Protector implements Wrapper {
 
 			} else {
 
-				trace.warning(this, header.isEmpty() ? "missing XSRF header"
+				logger.warning(this, header.isEmpty() ? "missing XSRF header"
 						: cookie.isEmpty() ? "missing XSRF cookie"
 						: header.equals(cookie) ? "invalid XSRF token"
 						: "mismatched XSRF header/cookie"

@@ -9,6 +9,7 @@
         <module name="rest" />
         <module name="virtuoso" />
         <module name="stardog" />
+        <module name="tree" />
         <module name="rdf4j" />
         <module name="gae" />
         <module name="servlet" />
@@ -57,6 +58,7 @@
       <module name="tool" target="1.8" />
       <module name="tray" target="1.8" />
       <module name="tray (1)" target="1.8" />
+      <module name="tree" target="1.8" />
       <module name="virtuoso" target="1.8" />
     </bytecodeTargetLevel>
   </component>

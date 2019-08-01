@@ -19,8 +19,6 @@ package com.metreeca.gate.policies;
 
 import com.metreeca.gate.Policy;
 
-import org.eclipse.rdf4j.model.IRI;
-
 import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -48,23 +46,23 @@ public abstract class ComboPolicy implements Policy {
 	}
 
 
-	public static Policy no(final BiFunction<IRI, String, Long> counter) {
+	public static Policy no(final BiFunction<String, String, Long> counter) {
 		return maximum(0, counter);
 	}
 
-	public static Policy contains(final BiFunction<IRI, String, Long> counter) {
+	public static Policy contains(final BiFunction<String, String, Long> counter) {
 		return minimum(1, counter);
 	}
 
-	public static Policy minimum(final long minimum, final BiFunction<IRI, String, Long> counter) {
+	public static Policy minimum(final long minimum, final BiFunction<String, String, Long> counter) {
 		return between(minimum, Long.MAX_VALUE, counter);
 	}
 
-	public static Policy maximum(final long maximum, final BiFunction<IRI, String, Long> counter) {
+	public static Policy maximum(final long maximum, final BiFunction<String, String, Long> counter) {
 		return between(0, maximum, counter);
 	}
 
-	public static Policy between(final long minimum, final long maximum, final BiFunction<IRI, String, Long> counter) {
+	public static Policy between(final long minimum, final long maximum, final BiFunction<String, String, Long> counter) {
 		return (user, secret) -> {
 
 			final long count=counter.apply(user, secret);
@@ -74,56 +72,56 @@ public abstract class ComboPolicy implements Policy {
 	}
 
 
-	public static Policy only(final BiFunction<IRI, String, Long> counter) {
+	public static Policy only(final BiFunction<String, String, Long> counter) {
 		return (user, secret) -> counter.apply(user, secret) == secret.length();
 	}
 
 
-	public static BiFunction<IRI, String, Long> letters() {
+	public static BiFunction<String, String, Long> letters() {
 		return characters(Character::isLetter);
 	}
 
-	public static BiFunction<IRI, String, Long> uppercases() {
+	public static BiFunction<String, String, Long> uppercases() {
 		return characters(Character::isUpperCase);
 	}
 
-	public static BiFunction<IRI, String, Long> lowercases() {
+	public static BiFunction<String, String, Long> lowercases() {
 		return characters(Character::isLowerCase);
 	}
 
-	public static BiFunction<IRI, String, Long> digits() {
+	public static BiFunction<String, String, Long> digits() {
 		return characters(Character::isDigit);
 	}
 
-	public static BiFunction<IRI, String, Long> controls() {
+	public static BiFunction<String, String, Long> controls() {
 		return characters(Character::isISOControl);
 
 	}
 
-	public static BiFunction<IRI, String, Long> specials() {
+	public static BiFunction<String, String, Long> specials() {
 		return characters(c -> !Character.isLetterOrDigit(c) && !Character.isISOControl(c));
 	}
 
 
-	public static BiFunction<IRI, String, Long> blocks(final Character.UnicodeBlock... blocks) {
+	public static BiFunction<String, String, Long> blocks(final Character.UnicodeBlock... blocks) {
 		return characters(c -> stream(blocks).anyMatch(block -> block.equals(Character.UnicodeBlock.of(c))));
 	}
 
-	public static BiFunction<IRI, String, Long> scripts(final Character.UnicodeScript... scripts) {
+	public static BiFunction<String, String, Long> scripts(final Character.UnicodeScript... scripts) {
 		return characters(c -> stream(scripts).anyMatch(script -> script == Character.UnicodeScript.of(c)));
 	}
 
 
-	public static BiFunction<IRI, String, Long> characters() {
+	public static BiFunction<String, String, Long> characters() {
 		return characters(character -> true);
 	}
 
-	public static BiFunction<IRI, String, Long> characters(final IntPredicate classifier) {
+	public static BiFunction<String, String, Long> characters(final IntPredicate classifier) {
 		return (user, secret) -> secret.chars().filter(classifier).count();
 	}
 
 
-	public static BiFunction<IRI, String, Long> stopwords(final Function<IRI, Stream<String>> generator) {
+	public static BiFunction<String, String, Long> stopwords(final Function<String, Stream<String>> generator) {
 
 		if ( generator == null ) {
 			throw new NullPointerException("null generator");
@@ -136,7 +134,7 @@ public abstract class ComboPolicy implements Policy {
 				.count();
 	}
 
-	public static BiFunction<IRI, String, Long> sequences(final int length) {
+	public static BiFunction<String, String, Long> sequences(final int length) {
 
 		if ( length < 0 ) {
 			throw new IllegalArgumentException("negative length");
@@ -206,7 +204,7 @@ public abstract class ComboPolicy implements Policy {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public boolean verify(final IRI user, final String secret) {
+	@Override public boolean verify(final String user, final String secret) {
 		return delegate().verify(user, secret);
 	}
 

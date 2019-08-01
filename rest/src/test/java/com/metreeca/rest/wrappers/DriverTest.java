@@ -17,41 +17,41 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Shape;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
+import com.metreeca.tree.Shape;
 
-import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.Shape.optional;
-import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.Shape.role;
-import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Memoizing.memoizing;
-import static com.metreeca.form.shapes.When.when;
 import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.bodies.TextBody.text;
+import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.tree.Shape.optional;
+import static com.metreeca.tree.Shape.required;
+import static com.metreeca.tree.Shape.role;
+import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.When.when;
 
 
 final class DriverTest {
+
+	private static final String Root="root";
+	private static final String None="none";
 
 	private static final Shape RootShape=optional();
 	private static final Shape NoneShape=required();
 
 	private static final Shape TestShape=and(
-			when(role(Form.root), RootShape),
-			when(role(Form.none), NoneShape)
+			when(role(Root), RootShape),
+			when(role(None), NoneShape)
 	);
 
 
 	private static Request request() {
 		return new Request()
-				.user(Form.root)
-				.roles(Form.root)
+				.user(Root)
+				.roles(None)
 				.method(Request.GET)
 				.base("http://example.org/")
 				.path("/resource");
@@ -60,25 +60,6 @@ final class DriverTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testIgnoreUndefinedShape() {
-		new Driver(and())
-
-				.wrap((Handler)request -> {
-
-					assertThat(request).doesNotHaveShape();
-
-					return request.reply(response -> response);
-
-				})
-
-				.handle(request())
-
-				.accept(response -> assertThat(response)
-						.doesNotHaveHeader("Link")
-						.doesNotHaveShape()
-				);
-	}
-
 	@Test void testConfigureExchangeShape() {
 		new Driver(TestShape)
 
@@ -86,7 +67,7 @@ final class DriverTest {
 
 					assertThat(request)
 							.as("memoizing shape")
-							.hasShape(memoizing(TestShape));
+							.hasShape(TestShape);
 
 					return request.reply(response -> response.header("link", "existing"));
 
@@ -95,7 +76,7 @@ final class DriverTest {
 				.handle(request())
 
 				.accept(response -> assertThat(response).hasHeaders("Link",
-						"existing", "<http://example.org/resource?specs>; rel="+LDP.CONSTRAINED_BY
+						"existing", "<http://example.org/resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy"
 				));
 	}
 

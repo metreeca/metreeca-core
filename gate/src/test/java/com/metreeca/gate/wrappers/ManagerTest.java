@@ -17,36 +17,35 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.form.Form;
 import com.metreeca.gate.Roster;
 import com.metreeca.gate.RosterAssert;
 import com.metreeca.gate.RosterMock;
 import com.metreeca.rest.*;
-import com.metreeca.tray.ClockMock;
-import com.metreeca.tray.Tray;
+import com.metreeca.rest.services.ClockMock;
 
-import org.assertj.core.api.Assertions;
-import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static com.metreeca.form.things.JsonValues.field;
-import static com.metreeca.form.things.JsonValues.object;
-import static com.metreeca.form.things.JsonValues.value;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.truths.JsonAssert.assertThat;
+import javax.json.Json;
+import javax.json.JsonValue;
+
 import static com.metreeca.gate.Roster.roster;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.bodies.JSONBody.json;
-import static com.metreeca.tray.Clock.clock;
-import static com.metreeca.tray.Tray.tool;
+import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.services.Clock.clock;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.lang.Math.max;
+
+import static javax.json.Json.createValue;
 
 
 final class ManagerTest {
@@ -58,10 +57,10 @@ final class ManagerTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final ClockMock clock=new ClockMock();
-	private final Roster roster=new RosterMock(entry("faussone", "faussone"));
+	private final Roster roster=new RosterMock(new SimpleImmutableEntry<>("faussone", "faussone"));
 
 	private void exec(final Runnable... tasks) {
-		new Tray()
+		new Context()
 
 				.set(clock(), () -> clock.time(0))
 				.set(roster(), () -> roster)
@@ -76,7 +75,7 @@ final class ManagerTest {
 		return new Manager("/~", SoftTimeout, HardTimeout);
 	}
 
-	private Handler handler(final Function<IRI, Integer> status) {
+	private Handler handler(final Function<String, Integer> status) {
 		return request -> request.reply(response -> response.status(status.apply(request.user())));
 	}
 
@@ -89,10 +88,11 @@ final class ManagerTest {
 				.handle(new Request()
 						.method(Request.POST)
 						.path("/~")
-						.body(json(), object(
-								field("handle", "faussone"),
-								field("secret", "faussone")
-						))
+						.body(json(), Json.createObjectBuilder()
+								.add("handle", "faussone")
+								.add("secret", "faussone")
+								.build()
+						)
 				)
 
 				// handle requests
@@ -121,11 +121,11 @@ final class ManagerTest {
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+							.hasHeader("Cache-Control", cache -> assertThat(cache)
 									.contains("timeout=0")
 							)
 							.hasBody(json(), json -> assertThat(json)
-									.isEqualTo(object())
+									.isEmpty()
 							)
 					)
 			);
@@ -146,11 +146,11 @@ final class ManagerTest {
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+							.hasHeader("Cache-Control", cache -> assertThat(cache)
 									.contains("timeout=")
 							)
 							.hasBody(json(), json -> assertThat(json)
-									.hasField("user", value("faussone"))
+									.contains(new SimpleImmutableEntry<>("user", createValue("faussone")))
 							)
 					)
 			));
@@ -166,22 +166,23 @@ final class ManagerTest {
 							.method(Request.POST)
 							.base("http://examplecom/base/")
 							.path("/~")
-							.body(json(), object(
-									field("handle", "faussone"),
-									field("secret", "faussone")
-							))
+							.body(json(), Json.createObjectBuilder()
+									.add("handle", "faussone")
+									.add("secret", "faussone")
+									.build()
+							)
 					)
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-							.hasHeader("Set-Cookie", cookie  -> Assertions.assertThat(cookie)
+							.hasHeader("Set-Cookie", cookie -> assertThat(cookie)
 									.contains("Path=/base/")
 							)
-							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+							.hasHeader("Cache-Control", cache -> assertThat(cache)
 									.contains("timeout=")
 							)
 							.hasBody(json(), json -> assertThat(json)
-									.hasField("user", value("faussone"))
+									.contains(new SimpleImmutableEntry<>("user", createValue("faussone")))
 							)
 					)
 			);
@@ -196,28 +197,28 @@ final class ManagerTest {
 							.method(Request.POST)
 							.base("http://example.com/base/")
 							.path("/~")
-							.body(json(), object(
-									field("handle", "faussone"),
-									field("secret", "faussone"),
-									field("update", "new-secret")
-							))
+							.body(json(), Json.createObjectBuilder()
+									.add("handle", "faussone")
+									.add("secret", "faussone")
+									.add("update", "new-secret")
+									.build())
 					)
 
 					.accept(response -> {
 
 						assertThat(response)
 								.hasStatus(Response.OK)
-								.hasHeader("Set-Cookie", cookie  -> Assertions.assertThat(cookie)
+								.hasHeader("Set-Cookie", cookie -> assertThat(cookie)
 										.contains("Path=/base/")
 								)
-								.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+								.hasHeader("Cache-Control", cache -> assertThat(cache)
 										.contains("timeout=")
 								)
 								.hasBody(json(), json -> assertThat(json)
-										.hasField("user", value("faussone"))
+										.contains(new SimpleImmutableEntry<>("user", createValue("faussone")))
 								);
 
-						RosterAssert.assertThat(tool(roster()))
+						RosterAssert.assertThat(service(roster()))
 								.hasUser("faussone", "new-secret")
 								.doesNotHaveUser("faussone", "faussone");
 
@@ -234,20 +235,20 @@ final class ManagerTest {
 							.method(Request.POST)
 							.base("http://example.com/base/")
 							.path("/~")
-							.body(json(), object())
+							.body(json(), JsonValue.EMPTY_JSON_OBJECT)
 					)
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
-							.hasHeader("Set-Cookie", cookie -> Assertions.assertThat(cookie)
+							.hasHeader("Set-Cookie", cookie -> assertThat(cookie)
 									.startsWith(Manager.SessionCookie+"=;")
 									.contains("Path=/base/")
 							)
-							.hasHeader("Cache-Control", cache -> Assertions.assertThat(cache)
+							.hasHeader("Cache-Control", cache -> assertThat(cache)
 									.contains("timeout=0")
 							)
 							.hasBody(json(), json -> assertThat(json)
-									.isEqualTo(object())
+									.isEmpty()
 							)
 					)
 			);
@@ -262,17 +263,18 @@ final class ManagerTest {
 					.handle(new Request()
 							.method(Request.POST)
 							.path("/~")
-							.body(json(), object(
-									field("handle", "faussone"),
-									field("secret", "invalid")
-							))
+							.body(json(), Json.createObjectBuilder()
+									.add("handle", "faussone")
+									.add("secret", "invalid")
+									.build()
+							)
 					)
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.Forbidden)
 							.doesNotHaveHeader("Set-Cookie")
 							.hasBody(json(), json -> assertThat(json)
-									.hasField("error")
+									.containsKey("error")
 							)
 					)
 			);
@@ -286,16 +288,16 @@ final class ManagerTest {
 					.handle(new Request()
 							.method(Request.POST)
 							.path("/~")
-							.body(json(), object(
-									field("handle", "")
-							))
+							.body(json(), Json.createObjectBuilder()
+									.add("handle", "")
+									.build())
 					)
 
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.BadRequest)
 							.doesNotHaveHeader("Set-Cookie")
 							.hasBody(json(), json -> assertThat(json)
-									.hasField("error")
+									.containsKey("error")
 							)
 					)
 			);
@@ -380,7 +382,7 @@ final class ManagerTest {
 			@Test void testGranted() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> handler
 
@@ -406,7 +408,7 @@ final class ManagerTest {
 			@Test void testInvalidCookie() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, authorization) -> handler
 
@@ -488,7 +490,7 @@ final class ManagerTest {
 			@Test void testDeletion() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 
@@ -498,13 +500,13 @@ final class ManagerTest {
 									.method(Request.POST)
 									.path("/~")
 									.header("Cookie", cookie)
-									.body(json(), object())
+									.body(json(), JsonValue.EMPTY_JSON_OBJECT)
 							)
 
 							.accept(response -> assertThat(response)
 									.hasStatus(Response.OK)
 									.hasBody(json(), json -> assertThat(json)
-											.isEqualTo(object())
+											.isEmpty()
 									)
 							);
 
@@ -529,7 +531,7 @@ final class ManagerTest {
 			@Test void testHandleChange() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 
@@ -538,11 +540,12 @@ final class ManagerTest {
 							.handle(new Request()
 									.method(Request.POST)
 									.path("/~")
-									.body(json(), object(
-											field("handle", "faussone"),
-											field("secret", "faussone"),
-											field("update", "new-secret")
-									))
+									.body(json(), Json.createObjectBuilder()
+											.add("handle", "faussone")
+											.add("secret", "faussone")
+											.add("update", "new-secret")
+											.build()
+									)
 							)
 
 							.accept(response -> assertThat(response)
@@ -570,7 +573,7 @@ final class ManagerTest {
 			@Test void testExtension() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 
@@ -591,7 +594,7 @@ final class ManagerTest {
 									.hasStatus(Response.OK)
 
 									.as("token extended")
-									.hasHeader("Set-Cookie", extended -> Assertions.assertThat(extended)
+									.hasHeader("Set-Cookie", extended -> assertThat(extended)
 											.doesNotStartWith(cookie)
 									)
 
@@ -602,7 +605,7 @@ final class ManagerTest {
 			@Test void testSoftExpiry() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.equals(Form.none) ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 

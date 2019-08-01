@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 
 public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>, Result<V, E>> {
 
-	public static <V, E> ResultAssert<V, E>  assertThat(final Result<V, E> result) {
+	public static <V, E> ResultAssert<V, E> assertThat(final Result<V, E> result) {
 		return new ResultAssert<>(result);
 	}
 
@@ -45,7 +45,7 @@ public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>,
 
 	public ResultAssert<V, E> hasValue(final V expected) {
 		return hasValue(value -> {
-			if ( !Objects.equals(value, expected)) {
+			if ( !Objects.equals(value, expected) ) {
 				failWithMessage("expected result <%s> to have value <%s>", actual, expected);
 			}
 		});
@@ -59,7 +59,23 @@ public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>,
 
 		isNotNull();
 
-		actual.use(assertions, error -> failWithMessage("expected result <%s> to have value", actual));
+		actual.fold(
+
+				value -> {
+
+					assertions.accept(value);
+
+					return this;
+				},
+
+				error -> {
+
+					failWithMessage("expected result <%s> to have value", actual);
+
+					return this;
+				}
+
+		);
 
 		return this;
 	}
@@ -70,7 +86,7 @@ public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>,
 
 	public ResultAssert<V, E> hasError(final E expected) {
 		return hasError(error -> {
-			if ( !Objects.equals(error, expected)) {
+			if ( !Objects.equals(error, expected) ) {
 				failWithMessage("expected result <%s> to have error <%s>", actual, expected);
 			}
 		});
@@ -84,7 +100,24 @@ public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>,
 
 		isNotNull();
 
-		actual.use(value -> failWithMessage("expected result <%s> to have error", actual), assertions);
+		actual.fold(
+
+				value -> {
+					failWithMessage("expected result <%s> to have error", actual);
+
+					return this;
+
+				},
+
+				error -> {
+
+					assertions.accept(error);
+
+					return this;
+
+				}
+
+		);
 
 		return this;
 	}

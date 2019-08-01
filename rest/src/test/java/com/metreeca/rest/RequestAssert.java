@@ -18,7 +18,7 @@
 package com.metreeca.rest;
 
 
-import com.metreeca.form.things.Codecs;
+import com.metreeca.rest.codecs.Codecs;
 
 import org.assertj.core.api.Assertions;
 
@@ -27,8 +27,8 @@ import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.metreeca.rest.bodies.InputBody.input;
-import static com.metreeca.rest.bodies.TextBody.text;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.TextFormat.text;
 
 
 public final class RequestAssert extends MessageAssert<RequestAssert, Request> {

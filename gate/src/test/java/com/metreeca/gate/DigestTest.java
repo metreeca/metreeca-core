@@ -18,7 +18,7 @@
 package com.metreeca.gate;
 
 
-import com.metreeca.tray.Tray;
+import com.metreeca.rest.Context;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +32,7 @@ public abstract class DigestTest {
 
 
 	private void exec(final Runnable ...tasks) {
-		new Tray()
+		new Context()
 				.exec(tasks)
 				.clear();
 	}

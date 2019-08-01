@@ -18,7 +18,6 @@
 package com.metreeca.gate.wrappers;
 
 import com.metreeca.rest.*;
-import com.metreeca.tray.Tray;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 final class BearerTest {
 
 	private void exec(final Runnable... tasks) {
-		new Tray().exec(tasks).clear();
+		new Context().exec(tasks).clear();
 	}
 
 

@@ -18,9 +18,7 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-import com.metreeca.tray.Tray;
 
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -31,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class ControllerTest {
 
 	private void exec(final Runnable ...tasks) {
-		new Tray()
+		new Context()
 				.exec(tasks)
 				.clear();
 	}
@@ -58,11 +56,11 @@ final class ControllerTest {
 	}
 
 	@Test void testAcceptedControlled() {
-		exec(() -> new Controller(RDF.FIRST, RDF.REST)
+		exec(() -> new Controller("x", "y")
 
 				.wrap((Wrapper)handler -> request -> {
 
-					assertThat(request.roles()).containsOnly(RDF.FIRST);
+					assertThat(request.roles()).containsOnly("x");
 
 					return handler.handle(request);
 
@@ -70,31 +68,20 @@ final class ControllerTest {
 
 				.wrap(handler())
 
-				.handle(request().roles(RDF.FIRST))
+				.handle(request().roles("x"))
 
 				.accept(response -> assertThat(response).hasStatus(Response.OK))
 		);
 	}
 
 	@Test void testUnauthorized() {
-		exec(() -> new Controller(RDF.FIRST)
+		exec(() -> new Controller("x")
 
 				.wrap(handler())
 
-				.handle(request().roles(RDF.REST))
+				.handle(request().roles("y"))
 
 				.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
-		);
-	}
-
-	@Test void testForbidden() {
-		exec(() -> new Controller(RDF.FIRST)
-
-				.wrap(handler())
-
-				.handle(request().user(RDF.NIL))
-
-				.accept(response -> assertThat(response).hasStatus(Response.Forbidden))
 		);
 	}
 
