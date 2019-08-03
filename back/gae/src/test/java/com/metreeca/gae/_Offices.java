@@ -23,13 +23,14 @@ import com.metreeca.rest.wrappers.Driver;
 import static com.metreeca.tree.Shape.*;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.Kind.kind;
 import static com.metreeca.tree.shapes.MaxLength.maxLength;
 import static com.metreeca.tree.shapes.Type.type;
 
 
-public final class Offices extends Delegator {
+public final class _Offices extends Delegator {
 
-	public Offices() {
+	public _Offices() {
 		delegate(new Driver(role(
 
 				"staff"
@@ -39,6 +40,8 @@ public final class Offices extends Delegator {
 				field("label", "Offices"),
 
 				field("contains", and(
+
+						kind("Office"),
 
 						server().then(
 								field("code", and(required(), type("string"))),

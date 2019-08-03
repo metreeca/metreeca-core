@@ -79,8 +79,8 @@ public final class JSONFormat implements Format<JsonObject> {
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal to
-	 * {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal
+	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
 		return message.headers("Content-Type").stream().anyMatch(type -> MIMEPattern.matcher(type).matches())
@@ -109,12 +109,13 @@ public final class JSONFormat implements Format<JsonObject> {
 
 		})
 
-				: Error(new Failure().status(Response.UnsupportedMediaType));
+				: Error(new Failure()
+				.status(Response.UnsupportedMediaType).notes("missing JSON body"));
 	}
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the writer
-	 * supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
+	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
+	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final JsonObject value) {
 		return message

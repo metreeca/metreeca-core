@@ -15,25 +15,41 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gae;
+package com.metreeca.gae.formats;
 
-/**
- * Standard field names and data types.
- */
-public final class GAE {
+import com.metreeca.rest.*;
 
-	public static final String Label="label";
-	public static final String Comment="comment";
-	public static final String Contains="contains";
+import com.google.appengine.api.datastore.Entity;
 
-	public static final String String="string";
-	public static final String Integer="integer";
-	public static final String Decimal="decimal";
-	public static final String Date="date";
+import static com.metreeca.rest.formats.JSONFormat.json;
+
+
+public final class EntityFormat implements Format<Entity> {
+
+	private static final EntityFormat Instance=new EntityFormat();
+
+
+	/**
+	 * Retrieves the entity body format.
+	 *
+	 * @return the singleton entity body format instance
+	 */
+	public static EntityFormat entity() {
+		return Instance;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private GAE() {} // utility
+	private EntityFormat() {}
+
+
+	@Override public Result<Entity, Failure> get(final Message<?> message) {
+		return message.body(json()).process(json -> {
+
+			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		});
+	}
 
 }

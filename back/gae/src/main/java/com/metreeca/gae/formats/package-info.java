@@ -15,9 +15,17 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gae;
+/**
+ * Google App Engine message body formats.
+ *
+ * <p>Requires the following Maven dependency in your project:</p>
+ *
+ * <pre>{@code
+ * <dependency>
+ *      <groupId>com.metreeca</groupId>
+ *      <artifactId>gae</artifactId>
+ *      <version>${project.version}</version>
+ * </dependency>}</pre>
+ */
 
-final class DatastoreEngineTest {
-
-
-}
+package com.metreeca.gae.formats;

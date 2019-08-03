@@ -7,16 +7,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="rest" />
-        <module name="virtuoso" />
-        <module name="stardog" />
-        <module name="tree" />
-        <module name="rdf4j" />
+        <module name="gate" />
         <module name="gae" />
         <module name="servlet" />
-        <module name="gate" />
-        <module name="tray" />
-        <module name="form" />
-        <module name="sparql" />
+        <module name="tree" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

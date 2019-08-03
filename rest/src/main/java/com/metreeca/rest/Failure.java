@@ -39,7 +39,7 @@ import static com.metreeca.rest.formats.JSONFormat.json;
  *
  * {
  *     "error": "<error>",  # optional machine readable error tag
- *     "notes": "<cause>",  # optional human readable error notes
+ *     "notes": "<notes>",  # optional human readable error notes
  *     "trace": <trace>     # optional structured JSON error trace
  * }
  * }</pre>
@@ -70,7 +70,7 @@ public final class Failure implements Function<Response, Response> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Configures response status.
+	 * Configures the response status.
 	 *
 	 * @param status the HTTP status code associated with the error condition defined by this failure
 	 *
@@ -90,13 +90,14 @@ public final class Failure implements Function<Response, Response> {
 	}
 
 	/**
-	 * Configures error tag.
+	 * Configures the error tag.
 	 *
-	 * @param error a machine-readable tag for the error condition defined by this failure; ignored if empty
+	 * @param error a machine-readable tag for the error condition defined by this failure
 	 *
 	 * @return this failure
 	 *
-	 * @throws NullPointerException if {@code error} is null
+	 * @throws NullPointerException     if {@code error} is null
+	 * @throws IllegalArgumentException if {@code error} is empty
 	 */
 	public Failure error(final String error) {
 
@@ -104,21 +105,24 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null error");
 		}
 
-		if ( !error.isEmpty() ) {
-			this.error=error;
+		if ( error.isEmpty() ) {
+			throw new IllegalArgumentException("empty error");
 		}
+
+		this.error=error;
 
 		return this;
 	}
 
 	/**
-	 * Configures error notes.
+	 * Configures the error notes.
 	 *
-	 * @param notes a human readable description of the error condition defined by this failure; ignored if empty
+	 * @param notes a human readable description of the error condition defined by this failure
 	 *
 	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code notes} is null
+	 * @throws IllegalArgumentException if {@code notes} is empty
 	 */
 	public Failure notes(final String notes) {
 
@@ -126,9 +130,11 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null notes");
 		}
 
-		if ( !notes.isEmpty() ) {
-			this.notes=notes;
+		if ( notes.isEmpty() ) {
+			throw new IllegalArgumentException("empty notes");
 		}
+
+		this.notes=notes;
 
 		return this;
 	}
@@ -173,7 +179,33 @@ public final class Failure implements Function<Response, Response> {
 
 
 	/**
-	 * Configures error cause.
+	 * Configures the error cause.
+	 *
+	 * @param cause a human readable description of cause of the error condition defined by this failure
+	 *
+	 * @return this failure
+	 *
+	 * @throws NullPointerException     if {@code cause} is null
+	 * @throws IllegalArgumentException if {@code cause} is empty
+	 */
+
+	public Failure cause(final String cause) {
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
+		if ( cause.isEmpty() ) {
+			throw new IllegalArgumentException("empty cause");
+		}
+
+		this.cause=new RuntimeException(cause);
+
+		return this;
+	}
+
+	/**
+	 * Configures the error cause.
 	 *
 	 * @param cause the underlying throwable that caused the error condition defined by this failure
 	 *

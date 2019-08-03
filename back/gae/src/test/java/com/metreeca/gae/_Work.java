@@ -29,7 +29,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 
-final class _DatastoreTest {
+final class _Work {
 
 	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(
 			new LocalDatastoreServiceTestConfig()

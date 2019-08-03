@@ -17,26 +17,25 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.services._Engine;
+import com.metreeca.rest.services.Engine;
 
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services._Engine.engine;
+import static com.metreeca.rest.services.Engine.engine;
 
 
 public final class Relator extends Delegator {
 
-	private final _Engine engine=service(engine());
+	private final Engine engine=service(engine());
 
 
 	public Relator() {
-		delegate(((Handler)engine::relate)
+		delegate(engine
 
 				.with(handler -> request -> handler.handle(request).map(response -> response
 						.headers("+Vary", "Accept", "Prefer")
 				))
 
-				.with(handler -> request -> engine.exec(() -> handler.handle(request)))
+				.with(handler -> request -> engine.exec(() -> handler.handle(request))) // inside a single txn
 
 		);
 	}

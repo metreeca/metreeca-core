@@ -95,21 +95,21 @@ public interface Shape {
 
 	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////
 
-	public static final String role="role";
-	public static final String task="task";
-	public static final String view="view";
-	public static final String mode="mode";
+	public static final String Role="role";
+	public static final String Task="task";
+	public static final String View="view";
+	public static final String Mode="mode";
 
-	public static final String create="create";
-	public static final String relate="relate";
-	public static final String update="update";
-	public static final String delete="delete";
+	public static final String Create="create";
+	public static final String Relate="relate";
+	public static final String Update="update";
+	public static final String Delete="delete";
 
-	public static final String digest="digest";
-	public static final String detail="detail";
+	public static final String Digest="digest";
+	public static final String Detail="detail";
 
-	public static final String convey="convey";
-	public static final String filter="filter";
+	public static final String Convey="convey";
+	public static final String Filter="filter";
 
 
 	//// Shorthands ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,43 +128,43 @@ public interface Shape {
 
 	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Guard role(final String... roles) { return guard(role, roles); }
+	public static Guard role(final String... roles) { return guard(Role, roles); }
 
-	public static Guard task(final String... tasks) { return guard(task, tasks); }
+	public static Guard task(final String... tasks) { return guard(Task, tasks); }
 
-	public static Guard view(final String... views) { return guard(view, views); }
+	public static Guard view(final String... views) { return guard(View, views); }
 
-	public static Guard mode(final String... modes) { return guard(mode, modes); }
+	public static Guard mode(final String... modes) { return guard(Mode, modes); }
 
 
-	public static Guard create() { return task(create); }
+	public static Guard create() { return task(Create); }
 
-	public static Guard relate() { return task(relate); }
+	public static Guard relate() { return task(Relate); }
 
-	public static Guard update() { return task(update); }
+	public static Guard update() { return task(Update); }
 
-	public static Guard delete() { return task(delete); }
+	public static Guard delete() { return task(Delete); }
 
 
 	/*
 	 * Marks shapes as server-defined read-only.
 	 */
-	public static Guard server() { return task(relate, delete); }
+	public static Guard server() { return task(Relate, Delete); }
 
 	/*
 	 * Marks shapes as client-defined write-once.
 	 */
-	public static Guard client() { return task(create, relate, delete); }
+	public static Guard client() { return task(Create, Relate, Delete); }
 
 
-	public static Guard digest() { return view(digest); }
+	public static Guard digest() { return view(Digest); }
 
-	public static Guard detail() { return view(detail); }
+	public static Guard detail() { return view(Detail); }
 
 
-	public static Guard convey() { return mode(convey); }
+	public static Guard convey() { return mode(Convey); }
 
-	public static Guard filter() { return mode(filter); }
+	public static Guard filter() { return mode(Filter); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -15,23 +15,17 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gae;
+/**
+ * Google App Engine shared services.
+ *
+ * <p>Requires the following Maven dependency in your project:</p>
+ *
+ * <pre>{@code
+ * <dependency>
+ *      <groupId>com.metreeca</groupId>
+ *      <artifactId>gae</artifactId>
+ *      <version>${project.version}</version>
+ * </dependency>}</pre>
+ */
 
-import com.metreeca.rest.*;
-
-import com.google.appengine.api.datastore.Entity;
-
-import static com.metreeca.rest.formats.JSONFormat.json;
-
-
-public final class EntityFormat implements Format<Entity> {
-
-	@Override public Result<Entity, Failure> get(final Message<?> message) {
-		return message.body(json()).process(json -> {
-
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-
-		});
-	}
-
-}
+package com.metreeca.gae.services;
