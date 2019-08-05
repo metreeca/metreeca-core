@@ -141,7 +141,7 @@ public final class Datastore {
 	//
 	//	};
 	//}
-	//
+
 	//private <V, E extends Exception> CloseableIteration<V, E> iteration(final Iterator<V> iterator) {
 	//	return new AbstractCloseableIteration<V, E>() {
 	//

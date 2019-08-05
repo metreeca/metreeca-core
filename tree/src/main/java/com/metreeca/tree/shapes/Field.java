@@ -54,12 +54,12 @@ public final class Field implements Shape {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	public static Map<String, Shape> fields(final Shape shape) {
 		return shape == null ? emptyMap() : shape.map(new FieldProbe());
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final String name;
 	private final Shape shape;
@@ -154,7 +154,8 @@ public final class Field implements Shape {
 
 					.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new, mapping(Map.Entry::getValue,
 							collectingAndThen(toCollection(LinkedHashSet::new), set ->
-									set.size() == 1 ? set.iterator().next() : and(set)))));
+									set.size() == 1 ? set.iterator().next() : and(set))
+					)));
 		}
 
 	}

@@ -18,6 +18,10 @@
 package com.metreeca.gae.formats;
 
 import com.metreeca.rest.*;
+import com.metreeca.tree.Shape;
+import com.metreeca.tree.probes.Inferencer;
+import com.metreeca.tree.probes.Optimizer;
+import com.metreeca.tree.probes.Redactor;
 
 import com.google.appengine.api.datastore.Entity;
 
@@ -41,15 +45,33 @@ public final class EntityFormat implements Format<Entity> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private EntityFormat() {}
+	private EntityFormat() {} // singleton
 
 
 	@Override public Result<Entity, Failure> get(final Message<?> message) {
-		return message.body(json()).process(json -> {
+		return message.body(json()).value(json ->
+				new EntityDecoder().decode(json, shape(message), message.request().path())
+		);
+	}
 
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 
-		});
+	@Override public <M extends Message<M>> M set(final M message, final Entity value) {
+		return message.body(json(),
+				new EntityEncoder().encode(value, shape(message)) // !!! will see stale shape if changed after body is set…
+		);
+	}
+
+
+	private Shape shape(final Message<?> message) {
+		return message.shape()
+
+				.map(new Redactor(Shape.Role))
+				.map(new Redactor(Shape.Task))
+				.map(new Redactor(Shape.Detail))
+				.map(new Redactor(Shape.Mode, Shape.Convey))
+
+				.map(new Inferencer())
+				.map(new Optimizer());
 	}
 
 }

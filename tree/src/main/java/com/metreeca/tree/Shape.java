@@ -241,9 +241,9 @@ public interface Shape {
 
 		//// Term Constraints //////////////////////////////////////////////////////////////////////////////////////////
 
-		public V probe(final Type Type);
+		public V probe(final Type type);
 
-		public V probe(final Kind kind);
+		public V probe(final Clazz clazz);
 
 
 		public V probe(final MinExclusive minExclusive);

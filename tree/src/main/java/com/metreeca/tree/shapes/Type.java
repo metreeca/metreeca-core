@@ -41,21 +41,21 @@ public final class Type implements Shape {
 	 *
 	 * @throws NullPointerException if {@code type} is null
 	 */
-	public static Type type(final Object type) {
+	public static Type type(final String type) {
 		return new Type(type);
 	}
 
-	public static Optional<Object> type(final Shape shape) {
+	public static Optional<String> type(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new TypeProbe()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object type;
+	private final String type;
 
 
-	private Type(final Object type) {
+	private Type(final String type) {
 
 		if ( type == null ) {
 			throw new NullPointerException("null type");
@@ -67,7 +67,7 @@ public final class Type implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object getType() {
+	public String getType() {
 		return type;
 	}
 
@@ -100,24 +100,24 @@ public final class Type implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TypeProbe extends Inspector<Object> {
+	private static final class TypeProbe extends Inspector<String> {
 
-		@Override public Object probe(final Type type) {
+		@Override public String probe(final Type type) {
 			return type.getType();
 		}
 
-		@Override public Object probe(final And and) {
+		@Override public String probe(final And and) {
 			return type(and.getShapes());
 		}
 
-		@Override public Object probe(final Or or) {
+		@Override public String probe(final Or or) {
 			return type(or.getShapes());
 		}
 
 
-		private Object type(final Collection<Shape> shapes) {
+		private String type(final Collection<Shape> shapes) {
 
-			final Set<Object> types=shapes.stream()
+			final Set<String> types=shapes.stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());

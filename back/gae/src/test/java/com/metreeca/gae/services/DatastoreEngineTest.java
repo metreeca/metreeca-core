@@ -21,6 +21,7 @@ import com.metreeca.gae.GAE;
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.tree.shapes.Clazz;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -37,7 +38,6 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Kind.kind;
 import static com.metreeca.tree.shapes.Type.type;
 
 import static java.util.Arrays.asList;
@@ -83,7 +83,7 @@ final class DatastoreEngineTest {
 									.method(Request.GET)
 									.path("/offices/1")
 									.shape(and(
-											kind("Office"),
+											Clazz.clazz("Office"),
 											field(GAE.Label, and(required(), type(GAE.String)))
 									))
 							)

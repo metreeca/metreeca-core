@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
-
 
 final class _Work {
 
@@ -47,32 +45,22 @@ final class _Work {
 
 	@Test void test() {
 
-		//final Key root=KeyFactory.createKey("root", 1); // !!! name
+		final Entity employee=new Entity("Employee", "/employees/1");
 
-		final Entity entity=new Entity("Person");
+		employee.setProperty("name", "Alice");
 
-		entity.setProperty("name", "Alice");
+		final EmbeddedEntity office=new EmbeddedEntity();
 
-		final EmbeddedEntity address1=new EmbeddedEntity();
-		address1.setProperty("street", "100 Main Street");
-		address1.setProperty("locality", "Springfield");
-		address1.setProperty("region", "VA");
+		office.setKey(KeyFactory.createKey("Office", "/offices/1"));
 
-		final EmbeddedEntity address2=new EmbeddedEntity();
-		address2.setProperty("street", "Via di Lì");
-		address2.setProperty("locality", "Qui e Là");
-		address2.setProperty("region", "ZZ");
+		employee.setIndexedProperty("office", office);
 
-		entity.setIndexedProperty("address", asList(address1, address2));
 
 		final DatastoreService datastore=DatastoreServiceFactory.getDatastoreService();
-		datastore.put(entity);
 
-		final Query query=new Query("Person");
+		datastore.put(employee);
 
-		//final Query.FilterPredicate filter=new Query.FilterPredicate(
-		//		"name", Query.FilterOperator.EQUAL, "Alice"
-		//);
+		final Query query=new Query("Employee");
 
 		final Query.FilterPredicate filter=new Query.FilterPredicate(
 				"address.region", Query.FilterOperator.EQUAL, "ZZ"

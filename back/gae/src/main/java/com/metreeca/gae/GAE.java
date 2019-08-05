@@ -26,10 +26,11 @@ public final class GAE {
 	public static final String Comment="comment";
 	public static final String Contains="contains";
 
-	public static final String String="string";
-	public static final String Integer="integer";
-	public static final String Decimal="decimal";
-	public static final String Date="date";
+	public static final String Entity="Entity";
+	public static final String String="String";
+	public static final String Integer="Integer";
+	public static final String Decimal="Decimal";
+	public static final String Date="Date";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

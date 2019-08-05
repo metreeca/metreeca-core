@@ -58,7 +58,7 @@ public abstract class Traverser<V> implements Shape.Probe<V> {
 
 	@Override public V probe(final Type type) { return probe((Shape)type); }
 
-	@Override public V probe(final Kind kind) { return probe((Shape)kind); }
+	@Override public V probe(final Clazz clazz) { return probe((Shape)clazz); }
 
 
 	@Override public V probe(final MinExclusive minExclusive) { return probe((Shape)minExclusive); }

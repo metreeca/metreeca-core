@@ -26,40 +26,40 @@ import static java.util.stream.Collectors.toSet;
 
 
 /**
- * Kind value constraint.
+ * Class value constraint.
  *
- * <p>States that each value in the focus set is a member of a given resource kind.</p>
+ * <p>States that each value in the focus set is a member of a given resource class or one of its superclasses.</p>
  */
-public final class Kind implements Shape {
+public final class Clazz implements Shape {
 
-	public static Kind kind(final Object kind) {
-		return new Kind(kind);
+	public static Clazz clazz(final String clazz) {
+		return new Clazz(clazz);
 	}
 
-	public static Optional<Object> kind(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new KindProbe()));
+	public static Optional<String> clazz(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ClazzProbe()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object kind;
+	private final String clazz;
 
 
-	private Kind(final Object kind) {
+	private Clazz(final String clazz) {
 
-		if ( kind == null ) {
-			throw new NullPointerException("null kind");
+		if ( clazz == null ) {
+			throw new NullPointerException("null class");
 		}
 
-		this.kind=kind;
+		this.clazz=clazz;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object getKind() {
-		return kind;
+	public String getClazz() {
+		return clazz;
 	}
 
 
@@ -76,39 +76,39 @@ public final class Kind implements Shape {
 
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Kind
-				&& kind.equals(((Kind)object).kind);
+		return this == object || object instanceof Clazz
+				&& clazz.equals(((Clazz)object).clazz);
 	}
 
 	@Override public int hashCode() {
-		return kind.hashCode();
+		return clazz.hashCode();
 	}
 
 	@Override public String toString() {
-		return "kind("+kind+")";
+		return "kind("+clazz+")";
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class KindProbe extends Inspector<Object> {
+	private static final class ClazzProbe extends Inspector<String> {
 
-		@Override public Object probe(final Kind kind) {
-			return kind.getKind();
+		@Override public String probe(final Clazz clazz) {
+			return clazz.getClazz();
 		}
 
-		@Override public Object probe(final And and) {
-			return kind(and.getShapes());
+		@Override public String probe(final And and) {
+			return clazz(and.getShapes());
 		}
 
-		@Override public Object probe(final Or or) {
-			return kind(or.getShapes());
+		@Override public String probe(final Or or) {
+			return clazz(or.getShapes());
 		}
 
 
-		private Object kind(final Collection<Shape> shapes) {
+		private String clazz(final Collection<Shape> shapes) {
 
-			final Set<Object> kinds=shapes.stream()
+			final Set<String> kinds=shapes.stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());

@@ -80,6 +80,7 @@ public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>,
 		return this;
 	}
 
+
 	public ResultAssert<V, E> hasError() {
 		return hasError(value -> {});
 	}

@@ -20,7 +20,7 @@ package com.metreeca.tree.shapes;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Kind.kind;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.When.when;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class WhenTest {
 
 	@Test void testRejectFilteringConstraintsInTests() {
-		assertThatThrownBy(() -> when(and(kind("resource")), and()))
+		assertThatThrownBy(() -> when(and(Clazz.clazz("resource")), and()))
 				.isInstanceOf(UnsupportedOperationException.class);
 	}
 

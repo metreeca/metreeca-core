@@ -19,11 +19,12 @@ package com.metreeca.gae;
 
 import com.metreeca.rest.handlers.*;
 import com.metreeca.rest.wrappers.Driver;
+import com.metreeca.tree.shapes.Clazz;
 
 import static com.metreeca.tree.Shape.*;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Kind.kind;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.MaxLength.maxLength;
 import static com.metreeca.tree.shapes.Type.type;
 
@@ -41,7 +42,7 @@ public final class _Offices extends Delegator {
 
 				field("contains", and(
 
-						kind("Office"),
+						Clazz.clazz("Office"),
 
 						server().then(
 								field("code", and(required(), type("string"))),
