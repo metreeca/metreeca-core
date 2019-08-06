@@ -19,17 +19,44 @@ package com.metreeca.tree;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 
 /**
  * Shape value validation trace.
  */
 public final class Trace {
 
+	private static final Trace EmptyTrace=new Trace(emptySet(), emptyMap());
+
+
+	public static Trace trace() {
+		return EmptyTrace;
+	}
+
+	public static Trace trace(final String... issues) {
+		return new Trace(asList(issues), emptyMap());
+	}
+
+	public static Trace trace(final Collection<String> issues) {
+		return new Trace(issues, emptyMap());
+	}
+
+	public static Trace trace(final Collection<String> issues, final Map<String, Trace> fields) {
+		return new Trace(issues, fields);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final List<String> issues;
 	private final Map<String, Trace> fields;
 
 
-	public Trace(final List<String> issues, final Map<String, Trace> fields) {
+	private Trace(final Collection<String> issues, final Map<String, Trace> fields) {
 
 		if ( issues == null || issues.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null issues");
@@ -42,10 +69,32 @@ public final class Trace {
 			throw new NullPointerException("null fields");
 		}
 
-		this.issues=issues;
-		this.fields=fields;
+		this.issues=issues.stream()
+				.filter(issue -> !issue.isEmpty())
+				.collect(toList());
+
+		this.fields=fields.entrySet().stream()
+				.filter(field -> !field.getValue().isEmpty())
+				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 
+	public boolean isEmpty() {
+		return issues.isEmpty() && fields.isEmpty();
+	}
+
+
+	public List<String> getIssues() {
+		return unmodifiableList(issues);
+	}
+
+	public Map<String, Trace> getFields() {
+		return unmodifiableMap(fields);
+	}
+
+
+	@Override public String toString() {
+		return String.format("{\n\tissue: %s\n\tfields: %s\n}", issues, fields);
+	}
 
 }

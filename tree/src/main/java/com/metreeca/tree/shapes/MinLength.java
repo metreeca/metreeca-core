@@ -24,8 +24,7 @@ import com.metreeca.tree.Shape;
  * Lexical minimum length constraint.
  *
  * <p>States that the length of the lexical representation of each term in the focus set is greater than or equal to
- * the
- * given minimum value.</p>
+ * the given minimum value.</p>
  */
 public final class MinLength implements Shape {
 

@@ -18,6 +18,7 @@
 package com.metreeca.tree.shapes;
 
 import com.metreeca.tree.Shape;
+import com.metreeca.tree.probes.Redactor;
 
 import java.util.*;
 

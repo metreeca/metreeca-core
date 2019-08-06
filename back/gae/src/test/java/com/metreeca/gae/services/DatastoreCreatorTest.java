@@ -18,17 +18,13 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.rest.Context;
+import com.metreeca.gae.GAETest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
@@ -48,28 +44,7 @@ import static com.metreeca.tree.shapes.Type.type;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class DatastoreCreatorTest {
-
-	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(
-			new LocalDatastoreServiceTestConfig()
-	);
-
-
-	@BeforeEach void setUp() {
-		helper.setUp();
-	}
-
-	@AfterEach void tearDown() {
-		helper.tearDown();
-	}
-
-
-	private void exec(final Runnable... tasks) {
-		new Context()
-				.exec(tasks)
-				.clear();
-	}
-
+final class DatastoreCreatorTest  extends GAETest {
 
 	@Test void test() {
 		exec(() -> new DatastoreEngine()

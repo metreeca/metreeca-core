@@ -20,6 +20,7 @@ package com.metreeca.rest;
 import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Trace;
 
+import java.util.List;
 import java.util.function.Function;
 
 import javax.json.*;
@@ -57,10 +58,25 @@ public final class Failure implements Function<Response, Response> {
 	public static final String DataInvalid="data-invalid";
 
 
-	public static Failure failure(final Throwable cause) { // !!! review/remove
+	/**
+	 * Creates an internal server error failure.
+	 *
+	 * @param cause the internal server error
+	 *
+	 * @return a new failure with a {@value Response#InternalServerError} status code; no detail about {@code cause} is
+	 * disclosed to the client
+	 *
+	 * @throws NullPointerException if {@code cause} is null
+	 */
+	public static Failure internal(final RuntimeException cause) {
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
 		return new Failure()
 				.status(Response.InternalServerError)
-				.notes("see server logs for details")
+				.notes("unable to process request: see server logs for details")
 				.cause(cause);
 	}
 
@@ -129,7 +145,7 @@ public final class Failure implements Function<Response, Response> {
 	 *
 	 * @return this failure
 	 *
-	 * @throws NullPointerException if {@code notes} is null
+	 * @throws NullPointerException     if {@code notes} is null
 	 * @throws IllegalArgumentException if {@code notes} is empty
 	 */
 	public Failure notes(final String notes) {
@@ -182,7 +198,7 @@ public final class Failure implements Function<Response, Response> {
 			throw new NullPointerException("null validation trace");
 		}
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return trace(format(trace));
 	}
 
 
@@ -297,6 +313,27 @@ public final class Failure implements Function<Response, Response> {
 		if ( trace != null ) {
 			builder.add("trace", trace);
 		}
+
+		return builder.build();
+	}
+
+	private JsonObject format(final Trace trace) {
+
+		final JsonObjectBuilder builder=Json.createObjectBuilder();
+
+		final List<String> issues=trace.getIssues();
+
+		if ( !issues.isEmpty() ) {
+			builder.add("", Json.createArrayBuilder(issues));
+		}
+
+		trace.getFields().forEach((name, nested) -> {
+
+			if ( !nested.isEmpty() ) {
+				builder.add(name, format(nested));
+			}
+
+		});
 
 		return builder.build();
 	}

@@ -18,14 +18,11 @@
 package com.metreeca.gae.formats;
 
 import com.metreeca.gae.GAE;
+import com.metreeca.gae.GAETest;
 import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -44,21 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Arrays.asList;
 
 
-final class EntityDecoderTest {
-
-	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(
-			new LocalDatastoreServiceTestConfig()
-	);
-
-
-	@BeforeEach void setUp() {
-		helper.setUp();
-	}
-
-	@AfterEach void tearDown() {
-		helper.tearDown();
-	}
-
+final class EntityDecoderTest extends GAETest {
 
 	private Entity decode(final String json) {
 		return decode(json, and());

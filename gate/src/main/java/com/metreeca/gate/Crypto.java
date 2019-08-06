@@ -24,7 +24,6 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 
@@ -105,7 +104,7 @@ public interface Crypto {
 	 *
 	 * @return a new secure random generator instance based on the required {@code algorithm}
 	 *
-	 * @throws NullPointerException if {@code algorithm} is null
+	 * @throws NullPointerException          if {@code algorithm} is null
 	 * @throws UnsupportedOperationException if {@code algorithm} is not supported
 	 */
 	public static SecureRandom random(final String algorithm) {
@@ -132,7 +131,7 @@ public interface Crypto {
 	 *
 	 * @return a new message digest instance based on the required {@code algorithm}
 	 *
-	 * @throws NullPointerException if {@code algorithm} is null
+	 * @throws NullPointerException          if {@code algorithm} is null
 	 * @throws UnsupportedOperationException if {@code algorithm} is not supported
 	 */
 	public static MessageDigest digest(final String algorithm) {
@@ -204,7 +203,7 @@ public interface Crypto {
 	 * @return a textually {@linkplain #encode(byte...) encoded} {@linkplain #id(byte[]...) hash-based id} generated
 	 * from the supplied {@code text}
 	 *
-	 * @throws NullPointerException     if {@code text} is null or contains null values
+	 * @throws NullPointerException if {@code text} is null or contains null values
 	 */
 	public default String token(final String... text) {
 

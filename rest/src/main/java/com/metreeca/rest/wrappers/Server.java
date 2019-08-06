@@ -74,16 +74,11 @@ public final class Server implements Wrapper {
 
 			} catch ( final RuntimeException e ) {
 
-				logger.error(this, format("%s %s > internal error", request.method(), request.item()), e);
-
 				request
 
-						.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("exception-untrapped")
-								.notes("unable to process request: see server logs for details")
-								.cause(e)
-						)
+						.reply(Failure.internal(e))
+
+						.map(this::logging)
 
 						.accept(consumer);
 

@@ -66,6 +66,10 @@ public final class Field implements Shape {
 			throw new NullPointerException("null name");
 		}
 
+		if ( name.isEmpty() ) {
+			throw new IllegalArgumentException("empty name");
+		}
+
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}

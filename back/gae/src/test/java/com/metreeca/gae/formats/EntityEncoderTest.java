@@ -17,12 +17,10 @@
 
 package com.metreeca.gae.formats;
 
+import com.metreeca.gae.GAETest;
+
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
@@ -38,21 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Arrays.asList;
 
 
-final class EntityEncoderTest {
-
-	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(
-			new LocalDatastoreServiceTestConfig()
-	);
-
-
-	@BeforeEach void setUp() {
-		helper.setUp();
-	}
-
-	@AfterEach void tearDown() {
-		helper.tearDown();
-	}
-
+final class EntityEncoderTest extends GAETest {
 
 	private JsonObject encode(final Consumer<Entity> task) {
 

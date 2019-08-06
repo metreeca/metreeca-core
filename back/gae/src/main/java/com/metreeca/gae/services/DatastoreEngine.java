@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Failure.internal;
 
 import static java.lang.String.format;
 
@@ -50,7 +51,8 @@ public final class DatastoreEngine implements Engine {
 			case Request.PUT: throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 			case Request.DELETE: throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 
-			default: return request.reply(Failure.failure(new UnsupportedOperationException(format("%s method", request.method()))));
+			default:
+				return request.reply(internal(new UnsupportedOperationException(format("%s method", request.method()))));
 
 		}
 	}

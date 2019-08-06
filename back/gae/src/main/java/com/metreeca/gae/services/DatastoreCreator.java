@@ -28,11 +28,14 @@ import com.metreeca.tree.probes.Redactor;
 import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Failure.DataInvalid;
+import static com.metreeca.rest.Failure.internal;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 
@@ -44,9 +47,11 @@ final class DatastoreCreator {
 
 	Future<Response> handle(final Request request) {
 		return request.container() ? container(request)
-				: request.reply(Failure.failure(new UnsupportedOperationException("resource POST method")));
+				: request.reply(internal(new UnsupportedOperationException("resource POST method")));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> container(final Request request) {
 		return request
@@ -64,15 +69,23 @@ final class DatastoreCreator {
 
 				)
 
-				.body(entity())
+				.map(_request -> _request // extract and validate entity
 
-				.process(entity -> { // !!! validate against shape
+						.body(entity())
 
-					return Value(entity);
+						.process(entity -> Optional.of(new DatastoreValidator().validate(_request.shape(), entity))
+								.filter(trace -> !trace.isEmpty())
+								.map(trace -> Result.<Entity, Failure>Error(new Failure()
+										.status(Response.UnprocessableEntity)
+										.error(DataInvalid)
+										.trace(trace)
+								))
+								.orElseGet(() -> Value(entity))
+						)
 
-				})
+				)
 
-				.process(entity -> datastore.exec(service -> {
+				.process(entity -> datastore.exec(service -> { // assign entity a slug-based id
 
 					final String id=request.path()+request.header("Slug")
 							.map(Codecs::encode) // encode slug as IRI path component
@@ -87,7 +100,7 @@ final class DatastoreCreator {
 
 					if ( clashing ) {
 
-						return Error(Failure.failure(new IllegalStateException("clashing entity slug {"+key+"}")));
+						return Error(internal(new IllegalStateException("clashing entity slug {"+key+"}")));
 
 					} else {
 

@@ -18,14 +18,13 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.rest.Context;
+import com.metreeca.gae.GAETest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
@@ -40,28 +39,7 @@ import static com.metreeca.tree.shapes.Type.type;
 import static java.util.Arrays.asList;
 
 
-final class DatastoreRelatorTest {
-
-	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(
-			new LocalDatastoreServiceTestConfig()
-	);
-
-
-	@BeforeEach void setUp() {
-		helper.setUp();
-	}
-
-	@AfterEach void tearDown() {
-		helper.tearDown();
-	}
-
-
-	private void exec(final Runnable... tasks) {
-		new Context()
-				.exec(tasks)
-				.clear();
-	}
-
+final class DatastoreRelatorTest extends GAETest {
 
 	@Nested final class Container {
 
