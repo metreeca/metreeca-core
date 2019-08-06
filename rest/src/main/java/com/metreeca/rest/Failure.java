@@ -57,6 +57,14 @@ public final class Failure implements Function<Response, Response> {
 	public static final String DataInvalid="data-invalid";
 
 
+	public static Failure failure(final Throwable cause) { // !!! review/remove
+		return new Failure()
+				.status(Response.InternalServerError)
+				.notes("see server logs for details")
+				.cause(cause);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private int status=Response.BadRequest;
@@ -188,7 +196,6 @@ public final class Failure implements Function<Response, Response> {
 	 * @throws NullPointerException     if {@code cause} is null
 	 * @throws IllegalArgumentException if {@code cause} is empty
 	 */
-
 	public Failure cause(final String cause) {
 
 		if ( cause == null ) {

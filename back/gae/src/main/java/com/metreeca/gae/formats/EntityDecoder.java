@@ -40,6 +40,9 @@ import static java.util.stream.Collectors.toList;
 
 final class EntityDecoder {
 
+	private static final Shape EmptyShape=and();
+
+
 	Entity decode(final JsonObject json, final Shape shape, final String id) {
 
 		final Entity value=new Entity(clazz(shape).orElse("*"), id);
@@ -65,8 +68,8 @@ final class EntityDecoder {
 		return null; // unexpected
 	}
 
-	private Number number(final JsonNumber number, final Shape shape) {
-		return type(shape).orElse("").equals(GAE.Decimal) ? (Number)new Double(number.doubleValue())
+	private Number number(final JsonNumber number, final Shape shape) { // ;( removing casts boxes everything to double
+		return type(shape).orElse("").equals(GAE.Floating) ? (Number)new Double(number.doubleValue())
 				: number.isIntegral() ? (Number)new Long(number.longValue())
 				: (Number)new Double(number.doubleValue());
 	}
@@ -75,7 +78,6 @@ final class EntityDecoder {
 		switch ( type(shape).orElse("") ) {
 
 			case GAE.Date: return date(string);
-			case GAE.Entity: return entity(string);
 
 			default: return string.getString();
 
@@ -86,25 +88,14 @@ final class EntityDecoder {
 		return Date.from(OffsetDateTime.parse(string.getString()).toInstant());
 	}
 
-	private PropertyContainer entity(final JsonString string) {
-
-		final EmbeddedEntity entity=new EmbeddedEntity();
-
-		entity.setIndexedProperty("id", string.getString());
-
-		return entity;
-	}
-
 	private PropertyContainer entity(final JsonObject object, final Shape shape) {
 
 		final Map<String, Shape> fields=fields(shape);
-		final Shape empty=and();
-
 		final EmbeddedEntity entity=new EmbeddedEntity();
 
 		object.forEach((name, json) -> {
 
-			final Object value=value(json, fields.getOrDefault(name, empty));
+			final Object value=value(json, fields.getOrDefault(name, EmptyShape));
 
 			if ( value != null ) {
 				entity.setIndexedProperty(name, value); // !!! un/indexed from shape metadata?

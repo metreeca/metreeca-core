@@ -21,29 +21,26 @@ import com.metreeca.gae.GAE;
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.tree.shapes.Clazz;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.junit.jupiter.api.*;
 
-import javax.json.JsonValue;
-
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Type.type;
 
 import static java.util.Arrays.asList;
 
 
-final class DatastoreEngineTest {
+final class DatastoreRelatorTest {
 
 	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(
 			new LocalDatastoreServiceTestConfig()
@@ -66,7 +63,7 @@ final class DatastoreEngineTest {
 	}
 
 
-	@Nested final class Relate {
+	@Nested final class Container {
 
 		@Test void test() {
 			exec(
@@ -83,8 +80,8 @@ final class DatastoreEngineTest {
 									.method(Request.GET)
 									.path("/offices/1")
 									.shape(and(
-											Clazz.clazz("Office"),
-											field(GAE.Label, and(required(), type(GAE.String)))
+											clazz("Office"),
+											field("label", and(required(), type(GAE.String)))
 									))
 							)
 
@@ -99,23 +96,7 @@ final class DatastoreEngineTest {
 
 	}
 
-	@Nested final class Create {
-
-		@Test void testRejectPOSTToResources() {
-			exec(() -> new DatastoreEngine()
-
-					.handle(new Request()
-							.method(Request.POST)
-							.path("/resource")
-							.body(json(), JsonValue.EMPTY_JSON_OBJECT)
-					)
-
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.InternalServerError)
-					)
-
-			);
-		}
+	@Nested final class Resource {
 
 	}
 

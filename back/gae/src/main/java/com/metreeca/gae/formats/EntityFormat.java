@@ -54,10 +54,9 @@ public final class EntityFormat implements Format<Entity> {
 		);
 	}
 
-
 	@Override public <M extends Message<M>> M set(final M message, final Entity value) {
 		return message.body(json(),
-				new EntityEncoder().encode(value, shape(message)) // !!! will see stale shape if changed after body is set…
+				new EntityEncoder().encode(value, shape(message))
 		);
 	}
 

@@ -94,7 +94,8 @@ final class EntityEncoderTest {
 				.containsEntry("field", Json.createArrayBuilder()
 						.add(123)
 						.add("string")
-						.build());
+						.build()
+				);
 	}
 
 	@Test void testFormatEntityFields() {

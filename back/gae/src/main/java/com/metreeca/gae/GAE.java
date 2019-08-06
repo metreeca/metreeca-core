@@ -22,14 +22,18 @@ package com.metreeca.gae;
  */
 public final class GAE {
 
-	public static final String Label="label";
-	public static final String Comment="comment";
+	//// Properties ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static final String Contains="contains";
 
+
+	//// Data Types ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static final String Entity="Entity";
-	public static final String String="String";
+	public static final String Boolean="Boolean";
 	public static final String Integer="Integer";
-	public static final String Decimal="Decimal";
+	public static final String Floating="Floating";
+	public static final String String="String";
 	public static final String Date="Date";
 
 

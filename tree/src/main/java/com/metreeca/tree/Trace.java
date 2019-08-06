@@ -17,8 +17,35 @@
 
 package com.metreeca.tree;
 
+import java.util.*;
+
+
 /**
  * Shape value validation trace.
  */
 public final class Trace {
+
+	private final List<String> issues;
+	private final Map<String, Trace> fields;
+
+
+	public Trace(final List<String> issues, final Map<String, Trace> fields) {
+
+		if ( issues == null || issues.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null issues");
+		}
+
+		if ( fields == null
+				|| fields.keySet().stream().anyMatch(Objects::isNull)
+				|| fields.values().stream().anyMatch(Objects::isNull)
+		) {
+			throw new NullPointerException("null fields");
+		}
+
+		this.issues=issues;
+		this.fields=fields;
+	}
+
+
+
 }

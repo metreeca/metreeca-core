@@ -99,7 +99,7 @@ final class EntityDecoderTest {
 	}
 
 	@Test void testParseIntegerFieldsExpectedDouble() {
-		assertThat(decode("{ 'field': 123 }", field("field", type(GAE.Decimal))).getProperty("field"))
+		assertThat(decode("{ 'field': 123 }", field("field", type(GAE.Floating))).getProperty("field"))
 				.isEqualTo(123.0D);
 	}
 
@@ -110,11 +110,6 @@ final class EntityDecoderTest {
 	@Test void testParseStringFieldsAsExpectedDate() {
 		assertThat(decode("{ 'field': '2019-01-01T00:00Z' }", field("field", type(GAE.Date))).getProperty("field"))
 				.isEqualTo(Date.from(OffsetDateTime.parse("2019-01-01T00:00Z").toInstant()));
-	}
-
-	@Test void testParseStringFieldsAsExpectedObject() {
-		assertThat(decode("{ 'field': '/entities/123' }", field("field", type(GAE.Entity))).getProperty("field"))
-				.satisfies(entity -> assertThat(((PropertyContainer)entity).getProperty("id")).isEqualTo("/entities/123"));
 	}
 
 	@Test void testParseArrayFields() {
