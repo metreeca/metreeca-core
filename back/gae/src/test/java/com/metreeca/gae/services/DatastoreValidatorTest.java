@@ -61,7 +61,7 @@ final class DatastoreValidatorTest extends GAETest {
 		return validate(shape, entity);
 	}
 
-	private boolean validate(final Shape shape, final Object ...values) {
+	private boolean validate(final Shape shape, final Object... values) {
 
 		final Entity entity=new Entity("*", "*");
 
@@ -75,7 +75,7 @@ final class DatastoreValidatorTest extends GAETest {
 	}
 
 
-	private PropertyContainer entity(final Consumer<PropertyContainer> builder ) {
+	private PropertyContainer entity(final Consumer<PropertyContainer> builder) {
 
 		final EmbeddedEntity entity=new EmbeddedEntity();
 
@@ -276,6 +276,17 @@ final class DatastoreValidatorTest extends GAETest {
 
 			assertThat(validate(shape, 1, 2)).isTrue();
 			assertThat(validate(shape, 1, 2, 3)).isFalse();
+
+		});
+	}
+
+	@Test void testValidateMaxCountImpliedSingleton() {
+		exec(() -> {
+
+			final Shape shape=maxCount(1);
+
+			assertThat(validate(shape, 1)).as("single value").isTrue();
+			assertThat(validate(shape, new Object[] {1})).as("singleton list").isFalse();
 
 		});
 	}

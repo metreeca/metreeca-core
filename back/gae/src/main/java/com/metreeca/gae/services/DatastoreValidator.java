@@ -22,7 +22,6 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.Trace;
 import com.metreeca.tree.shapes.*;
 
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 
 import java.util.Collection;
@@ -37,44 +36,27 @@ import static com.metreeca.tree.shapes.Type.type;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 
 final class DatastoreValidator {
 
-	Trace validate(final Shape shape, final Entity entity) {
-		return validate(shape, singleton(entity));
-	}
+	Trace validate(final Shape shape, final Object value) {
+		if ( value instanceof PropertyContainer ) {
 
-	private Trace validate(final Shape shape, final Collection<?> focus) {
+			final Map<String, Shape> fields=fields(shape);
 
-		final Map<String, Shape> fields=fields(shape);
+			final Collection<String> issues=((PropertyContainer)value).getProperties().keySet().stream()
+					.filter(name -> !fields.containsKey(name))
+					.map(name -> "unexpected entity property {"+name+"}")
+					.collect(toList());
 
-		final Trace x=fields.isEmpty() ? trace() : trace(focus.stream()
+			return merge(trace(issues), shape.map(new ValidatorProbe(value)));
 
-				.flatMap(v -> {
+		} else {
 
-					if ( v instanceof PropertyContainer ) {
+			return shape.map(new ValidatorProbe(value));
 
-						return ((PropertyContainer)v).getProperties().keySet().stream()
-								.filter(name -> !fields.containsKey(name))
-								.map(name -> "unexpected entity property {"+name+"}");
-
-					} else {
-
-						return Stream.empty();
-
-					}
-
-				})
-
-				.collect(toSet())
-		);
-
-
-		final Trace y=shape.map(new ValidatorProbe(focus));
-
-		return merge(x, y);
+		}
 	}
 
 	private Trace merge(final Trace x, final Trace y) {
@@ -84,21 +66,27 @@ final class DatastoreValidator {
 		);
 	}
 
-	private String issue(final Shape shape) {
-		return shape.toString().replaceAll("\\s+", " ");
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final class ValidatorProbe implements Shape.Probe<Trace> {
 
-		private final Collection<?> focus;
+		private final Object value; // nullable
 
 
-		private ValidatorProbe(final Collection<?> focus) {
-			this.focus=focus;
+		private ValidatorProbe(final Object value) {
+			this.value=value;
 		}
+
+
+		private Collection<?> focus() {
+			return value instanceof Collection ? (Collection<?>)value : value == null ? emptySet() : singleton(value);
+		}
+
+		private String issue(final Shape shape) {
+			return shape.toString().replaceAll("\\s+", " ");
+		}
+
 
 
 		@Override public Trace probe(final Meta meta) {
@@ -140,7 +128,7 @@ final class DatastoreValidator {
 
 			final int limit=minLength.getLimit();
 
-			return trace(focus.stream()
+			return trace(focus().stream()
 					.map(Object::toString)
 					.filter(s -> s.length() < limit)
 					.map(s -> issue(minLength))
@@ -152,7 +140,7 @@ final class DatastoreValidator {
 
 			final int limit=maxLength.getLimit();
 
-			return trace(focus.stream()
+			return trace(focus().stream()
 					.map(Object::toString)
 					.filter(s -> s.length() > limit)
 					.map(s -> issue(maxLength))
@@ -170,7 +158,7 @@ final class DatastoreValidator {
 
 			// match the whole string: don't use compiled.asPredicate() (implemented using .find())
 
-			return trace(focus.stream()
+			return trace(focus().stream()
 					.map(Object::toString)
 					.filter(s -> !compiled.matcher(s).matches())
 					.map(s -> issue(pattern))
@@ -184,7 +172,7 @@ final class DatastoreValidator {
 
 			final Predicate<String> predicate=java.util.regex.Pattern.compile(expression).asPredicate();
 
-			return trace(focus.stream()
+			return trace(focus().stream()
 					.map(Object::toString)
 					.filter(s -> !predicate.test(s))
 					.map(s -> issue(like))
@@ -194,7 +182,7 @@ final class DatastoreValidator {
 
 		@Override public Trace probe(final MinCount minCount) {
 
-			final int count=focus.size();
+			final int count=focus().size();
 			final int limit=minCount.getLimit();
 
 			return count >= limit ? trace() : trace(issue(minCount));
@@ -202,39 +190,35 @@ final class DatastoreValidator {
 
 		@Override public Trace probe(final MaxCount maxCount) {
 
-			final int count=focus.size();
+			final int count=focus().size();
 			final int limit=maxCount.getLimit();
 
-			return count <= limit ? trace() : trace(issue(maxCount));
+			return limit > 1 ? count <= limit ? trace() : trace(issue(maxCount))
+					: value instanceof Collection ? trace(issue(maxCount)) : trace();
+
 		}
 
 		@Override public Trace probe(final In in) {
-			return in.getValues().containsAll(focus)? trace() : trace(issue(in));
+			return in.getValues().containsAll(focus()) ? trace() : trace(issue(in));
 		}
 
 		@Override public Trace probe(final All all) {
-			return focus.containsAll(all.getValues())? trace() : trace(issue(all));
+			return focus().containsAll(all.getValues()) ? trace() : trace(issue(all));
 		}
 
 		@Override public Trace probe(final Any any) {
-			return !disjoint(focus, any.getValues())? trace() : trace(issue(any));
+			return !disjoint(focus(), any.getValues()) ? trace() : trace(issue(any));
 		}
 
 		@Override public Trace probe(final Field field) {
-			return focus.stream()
+			return focus().stream()
 
 					.map(v -> {
 
 						if ( v instanceof PropertyContainer ) {
 
-							final Object value=((PropertyContainer)v).getProperty(field.getName());
-
-							final Collection<?> focus=value == null ? emptyList()
-									: value instanceof Collection ? (Collection<?>)value
-									: singleton(value);
-
-							return  trace(emptySet(), singletonMap(
-									field.getName(), validate(field.getShape(), focus)
+							return trace(emptySet(), singletonMap(field.getName(),
+									validate(field.getShape(), ((PropertyContainer)v).getProperty(field.getName()))
 							));
 
 						} else {
@@ -255,7 +239,7 @@ final class DatastoreValidator {
 		}
 
 		@Override public Trace probe(final Or or) {
-			return or.getShapes().stream().anyMatch(s -> s.map(this).isEmpty())? trace() : trace(issue(or));
+			return or.getShapes().stream().anyMatch(s -> s.map(this).isEmpty()) ? trace() : trace(issue(or));
 		}
 
 		@Override public Trace probe(final When when) {
