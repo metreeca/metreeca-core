@@ -18,7 +18,7 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.gae.GAETest;
+import com.metreeca.gae.GAETestBase;
 import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.*;
@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Arrays.asList;
 
 
-final class DatastoreValidatorTest extends GAETest {
+final class DatastoreValidatorTest extends GAETestBase {
 
 	private boolean validate(final Shape shape, final Object value) {
 
@@ -97,9 +97,9 @@ final class DatastoreValidatorTest extends GAETest {
 			assertThat(validate(type(GAE.Boolean), true)).isTrue();
 			assertThat(validate(type(GAE.Boolean), 1)).isFalse();
 
-			assertThat(validate(type(GAE.Integer), 1L)).isTrue();
-			assertThat(validate(type(GAE.Integer), 1)).isTrue();
-			assertThat(validate(type(GAE.Integer), "")).isFalse();
+			assertThat(validate(type(GAE.Integral), 1L)).isTrue();
+			assertThat(validate(type(GAE.Integral), 1)).isTrue();
+			assertThat(validate(type(GAE.Integral), "")).isFalse();
 
 			assertThat(validate(type(GAE.Floating), 1.0D)).isTrue();
 			assertThat(validate(type(GAE.Floating), 1.0F)).isTrue();

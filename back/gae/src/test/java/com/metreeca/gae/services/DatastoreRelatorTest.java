@@ -18,7 +18,7 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.gae.GAETest;
+import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -39,7 +39,7 @@ import static com.metreeca.tree.shapes.Type.type;
 import static java.util.Arrays.asList;
 
 
-final class DatastoreRelatorTest extends GAETest {
+final class DatastoreRelatorTest extends GAETestBase {
 
 	@Nested final class Container {
 

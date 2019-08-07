@@ -18,7 +18,7 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.gae.GAETest;
+import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -44,7 +44,7 @@ import static com.metreeca.tree.shapes.Type.type;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class DatastoreCreatorTest  extends GAETest {
+final class DatastoreCreatorTest  extends GAETestBase {
 
 	@Test void test() {
 		exec(() -> new DatastoreEngine()

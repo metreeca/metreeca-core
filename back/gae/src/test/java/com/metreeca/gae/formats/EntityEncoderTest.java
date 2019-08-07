@@ -17,7 +17,7 @@
 
 package com.metreeca.gae.formats;
 
-import com.metreeca.gae.GAETest;
+import com.metreeca.gae.GAETestBase;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Arrays.asList;
 
 
-final class EntityEncoderTest extends GAETest {
+final class EntityEncoderTest extends GAETestBase {
 
 	private JsonObject encode(final Consumer<Entity> task) {
 

@@ -18,7 +18,7 @@
 package com.metreeca.gae.formats;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.gae.GAETest;
+import com.metreeca.gae.GAETestBase;
 import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.Entity;
@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Arrays.asList;
 
 
-final class EntityDecoderTest extends GAETest {
+final class EntityDecoderTest extends GAETestBase {
 
 	private Entity decode(final String json) {
 		return decode(json, and());

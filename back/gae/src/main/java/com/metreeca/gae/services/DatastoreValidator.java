@@ -27,7 +27,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -44,7 +43,7 @@ import static java.util.stream.Collectors.toMap;
 final class DatastoreValidator {
 
 	Trace validate(final Shape shape, final Object value) {
-		if ( value instanceof PropertyContainer ) {
+		if ( GAE.Entity(value) ) {
 
 			final Map<String, Shape> fields=fields(shape);
 
@@ -110,12 +109,12 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.filter(invert(v
-							-> v instanceof PropertyContainer ? name.equals(GAE.Entity)
-							: v instanceof Boolean ? name.equals(GAE.Boolean)
-							: v instanceof Long || v instanceof Integer || v instanceof Short ? name.equals(GAE.Integer)
-							: v instanceof Double || v instanceof Float ? name.equals(GAE.Floating)
-							: v instanceof String ? name.equals(GAE.String)
-							: v instanceof Date && name.equals(GAE.Date)
+							-> GAE.Entity(v) ? name.equals(GAE.Entity)
+							: GAE.Boolean(v) ? name.equals(GAE.Boolean)
+							: GAE.Integral(v) ? name.equals(GAE.Integral)
+							: GAE.Floating(v) ? name.equals(GAE.Floating)
+							: GAE.String(v) ? name.equals(GAE.String)
+							: GAE.Date(v) && name.equals(GAE.Date)
 					))
 					.map(v -> issue(type))
 					.collect(toList())
@@ -245,7 +244,7 @@ final class DatastoreValidator {
 
 					.map(v -> {
 
-						if ( v instanceof PropertyContainer ) {
+						if ( GAE.Entity(v) ) {
 
 							return trace(emptySet(), singletonMap(field.getName(),
 									validate(field.getShape(), ((PropertyContainer)v).getProperty(field.getName()))

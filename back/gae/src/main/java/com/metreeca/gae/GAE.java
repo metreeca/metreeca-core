@@ -17,6 +17,13 @@
 
 package com.metreeca.gae;
 
+
+import com.google.appengine.api.datastore.*;
+
+import java.util.Date;
+import java.util.function.Function;
+
+
 /**
  * Standard field names and data types.
  */
@@ -31,10 +38,158 @@ public final class GAE {
 
 	public static final String Entity="Entity";
 	public static final String Boolean="Boolean";
-	public static final String Integer="Integer";
+	public static final String Integral="Integral";
 	public static final String Floating="Floating";
 	public static final String String="String";
 	public static final String Date="Date";
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Tests if an object is an entity value.
+	 *
+	 * @param o the object to be tested
+	 *
+	 * @return {@code true}, if {@code o} is an entity value; {@code false}, otherwise
+	 */
+	public static boolean Entity(final Object o) {
+		return o instanceof PropertyContainer;
+	}
+
+	/**
+	 * Tests if an object is a boolean value.
+	 *
+	 * @param o the object to be tested
+	 *
+	 * @return {@code true}, if {@code o} is a boolean value; {@code false}, otherwise
+	 */
+	public static boolean Boolean(final Object o) {
+		return o instanceof Boolean;
+	}
+
+	/**
+	 * Tests if an object is an integral numeric value.
+	 *
+	 * @param o the object to be tested
+	 *
+	 * @return {@code true}, if {@code o} is an integral numeric value; {@code false}, otherwise
+	 */
+	public static boolean Integral(final Object o) {
+		return o instanceof Long || o instanceof Integer || o instanceof Short;
+	}
+
+	/**
+	 * Tests if an object is a floating-point numeric value.
+	 *
+	 * @param o the object to be tested
+	 *
+	 * @return {@code true}, if {@code o} is a floating-point numeric value; {@code false}, otherwise
+	 */
+	public static boolean Floating(final Object o) {
+		return o instanceof Double || o instanceof Float;
+	}
+
+	/**
+	 * Tests if an object is a string value.
+	 *
+	 * @param o the object to be tested
+	 *
+	 * @return {@code true}, if {@code o} is a string value; {@code false}, otherwise
+	 */
+	public static boolean String(final Object o) {
+		return o instanceof String;
+	}
+
+	/**
+	 * Tests if an object is a date value.
+	 *
+	 * @param o the object to be tested
+	 *
+	 * @return {@code true}, if {@code o} is a date value; {@code false}, otherwise
+	 */
+	public static boolean Date(final Object o) {
+		return o instanceof Date;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Compares two object for ordering.
+	 *
+	 * <p>Comparison is consistent with Google Datastore <a href="https://cloud.google.com/appengine/docs/standard/java/datastore/entity-property-reference#properties_and_value_types">sorting
+	 * rules</a>, with the following deterministi c ordering for mixed value types:</p>
+	 *
+	 * <ul>
+	 *     <li>null values;</li>
+	 *     <li>integral values;</li>
+	 *     <li>date values;</li>
+	 *     <li>boolean values;</li>
+	 *     <li>string values;</li>
+	 *     <li>floating-point values;</li>
+	 *     <li>floating-point values;</li>
+	 *     <li>property container values (key order);</li>
+	 *     <li>other values (system-dependent order).</li>
+	 * </ul>
+	 *
+	 * @param x the first object to be compared.
+	 * @param y the second object to be compared.
+	 *
+	 * @return a negative integer, zero, or a positive integer as the {@code x} is less than, equal to, or greater than
+	 * {@code y}
+	 */
+	public static int compare(final Object x, final Object y) {
+		return x == null ? y == null ? 0 : -1 : y == null ? 1
+
+				: Integral(x) ? Integral(y) ? Integral(x, y) : -1 : Integral(y) ? 1
+
+				: Date(x) ? Date(y) ? Date(x, y) : -1 : Date(y) ? 1
+
+				: Boolean(x) ? Boolean(y) ? Boolean(x, y) : -1 : Boolean(y) ? 1
+
+				: String(x) ? String(y) ? String(x, y) : -1 : String(y) ? 1
+
+				: Floating(x) ? Floating(y) ? Double(x, y) : -1 : Floating(y) ? 1
+
+				: Entity(x) ? Entity(y) ? Entity(x, y) : -1 : Entity(y) ? 1
+
+				: Other(x, y);
+	}
+
+
+	private static int Integral(final Object x, final Object y) {
+		return Long.compare(((Number)x).longValue(), ((Number)y).longValue());
+	}
+
+	private static int Date(final Object x, final Object y) {
+		return ((Date)x).compareTo((Date)y);
+	}
+
+	private static int Boolean(final Object x, final Object y) {
+		return ((Boolean)x).compareTo((Boolean)y);
+	}
+
+	private static int String(final Object x, final Object y) {
+		return ((String)x).compareTo((String)y);
+	}
+
+	private static int Double(final Object x, final Object y) {
+		return Double.compare(((Number)x).doubleValue(), ((Number)y).doubleValue());
+	}
+
+	private static int Entity(final Object x, final Object y) {
+
+		final Function<Object, Key> key=o -> o instanceof Entity ? ((Entity)o).getKey()
+				: o instanceof EmbeddedEntity ? ((EmbeddedEntity)o).getKey()
+				: KeyFactory.createKey("*", "*");
+
+		return key.apply(x).compareTo(key.apply(y));
+	}
+
+	private static int Other(final Object x, final Object y) {
+		return Integer.compare(System.identityHashCode(x), System.identityHashCode(y));
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
