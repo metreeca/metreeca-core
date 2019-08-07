@@ -18,7 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.MessageMock;
-import com.metreeca.rest.codecs.Codecs;
+import com.metreeca.rest.Codecs;
 
 import org.junit.jupiter.api.Test;
 

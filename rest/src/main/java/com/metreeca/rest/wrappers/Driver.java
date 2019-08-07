@@ -114,9 +114,11 @@ public final class Driver implements Wrapper {
 
 		return request.method().equals(Request.GET) && request.query().equals(SpecsQuery)
 
-				? Optional.of(request.reply(response -> response.status(Response.OK)
+				? Optional.of(request.reply(response -> response
+				.status(Response.OK)
 				.header("Content-Type", "text/plain")
-				.body(text(), shape.toString())))
+				.body(text(), shape.toString())
+		))
 
 				: Optional.empty();
 	}

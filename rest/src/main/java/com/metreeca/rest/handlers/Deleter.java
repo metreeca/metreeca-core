@@ -19,7 +19,9 @@ package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.*;
 
-
+/**
+ * Model-driven resource deleter.
+ */
 public final class Deleter implements Handler {
 
 	@Override public Future<Response> handle(final Request request) {

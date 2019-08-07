@@ -19,7 +19,7 @@ package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
 import com.metreeca.rest.*;
-import com.metreeca.rest.codecs.Codecs;
+import com.metreeca.rest.Codecs;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inferencer;
 import com.metreeca.tree.probes.Optimizer;

@@ -17,10 +17,7 @@
 
 package com.metreeca.servlet;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.Context;
+import com.metreeca.rest.*;
 import com.metreeca.rest.services.Loader;
 import com.metreeca.rest.services.Storage;
 
@@ -43,7 +40,7 @@ import static java.util.Objects.requireNonNull;
 
 
 /**
- * J2EE gateway.
+ * Servlet gateway.
  *
  * <p>Provides a gateway between a web application managed by Servlet 3.1 container and resource handlers based on the
  * Metreeca/Link linked data framework:</p>
@@ -70,7 +67,8 @@ public abstract class Gateway implements Filter {
 	/*
 	 * Creates the main gateway handler.
 	 *
-	 * @param tray the shared tool tray; may be configured with additional application-specific services
+	 * @param context the shared service context; may be configured with additional application-specific services
+	 *
 	 * @return a non-null resource handler to be used as main entry point for serving requests
 	 */
 	protected abstract Handler load(final Context context);

@@ -17,8 +17,6 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.codecs.Codecs;
-
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;

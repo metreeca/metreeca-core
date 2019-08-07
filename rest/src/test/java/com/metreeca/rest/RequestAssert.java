@@ -18,8 +18,6 @@
 package com.metreeca.rest;
 
 
-import com.metreeca.rest.codecs.Codecs;
-
 import org.assertj.core.api.Assertions;
 
 import java.io.*;

@@ -24,7 +24,7 @@ import com.metreeca.rest.Response;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.KeyFactory;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
@@ -41,116 +41,125 @@ import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Type.type;
 
+import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class DatastoreCreatorTest  extends GAETestBase {
+final class DatastoreCreatorTest extends GAETestBase {
 
-	@Test void test() {
-		exec(() -> new DatastoreEngine()
+	@Nested final class Container {
 
-				.handle(new Request()
-						.method(Request.POST)
-						.path("/container/")
-						.shape(and(
-								clazz("Entity"),
-								field("label", and(required(), type(GAE.String)))
-						))
-						.header("Slug", "slug")
-						.body(json(), Json.createObjectBuilder()
-								.add("label", "entity")
-								.build()
-						)
-				)
+		@Test void testCreateResource() {
+			exec(() -> new DatastoreEngine()
 
-				.accept(response -> {
+					.handle(new Request()
+							.method(Request.POST)
+							.path("/container/")
+							.shape(and(
+									clazz("Entity"),
+									field("label", and(required(), type(GAE.String)))
+							))
+							.header("Slug", "slug")
+							.body(json(), Json.createObjectBuilder()
+									.add("label", "entity")
+									.build()
+							)
+					)
 
-					assertThat(response)
-							.hasStatus(Response.Created)
-							.hasHeader("Location", "/container/slug");
+					.accept(response -> {
 
-					service(datastore()).exec(service -> {
-						try {
+						assertThat(response)
+								.hasStatus(Response.Created)
+								.hasHeader("Location", "/container/slug");
 
-							final Entity entity=service.get(KeyFactory.createKey("Entity", "/container/slug"));
+						service(datastore()).exec(service -> {
+							try {
 
-							assertThat(entity.getProperties())
-									.containsEntry("label", "entity");
+								final Entity entity=service.get(createKey("Entity", "/container/slug"));
 
-							return this;
+								assertThat(entity.getProperties())
+										.containsEntry("label", "entity");
 
-						} catch ( final EntityNotFoundException e ) {
-							throw new RuntimeException(e);
-						}
-					});
+								return this;
 
-				})
+							} catch ( final EntityNotFoundException e ) {
+								throw new RuntimeException(e);
+							}
+						});
 
-		);
+					})
+
+			);
+		}
+
+		@Test void testRejectClashingSlug() {
+			exec(
+
+					() -> service(datastore()).exec(service ->
+							service.put(new Entity("Entity", "/id"))
+					),
+
+					() -> new DatastoreEngine()
+
+							.handle(new Request()
+									.method(Request.POST)
+									.path("/")
+									.shape(clazz("Entity"))
+									.header("Slug", "id")
+									.body(json(), JsonValue.EMPTY_JSON_OBJECT)
+							)
+
+							.accept(response -> assertThat(response)
+									.hasStatus(Response.InternalServerError)
+									.doesNotHaveHeader("Location")
+							)
+			);
+		}
+
+		@Test void testRejectInvalidPayload() {
+			exec(() -> new DatastoreEngine()
+
+					.handle(new Request()
+							.method(Request.POST)
+							.path("/")
+							.shape(field("label", type(GAE.String)))
+							.body(json(), Json.createObjectBuilder()
+									.add("label", 123)
+									.build()
+							)
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.UnprocessableEntity)
+							.doesNotHaveHeader("Location")
+							.hasBody(json(), json -> assertThat(json)
+									.containsEntry("error", Json.createValue(DataInvalid))
+									.containsKey("trace")
+							)
+					)
+			);
+		}
+
 	}
 
-	@Test void testRejectClashingSlug() {
-		exec(
+	@Nested final class Resource {
 
-				() -> service(datastore()).exec(service ->
-						service.put(new Entity("Entity", "/id"))
-				),
+		@Test void testReject() {
+			exec(() -> new DatastoreEngine()
 
-				() -> new DatastoreEngine()
+					.handle(new Request()
+							.method(Request.POST)
+							.path("/resource")
+							.body(json(), JsonValue.EMPTY_JSON_OBJECT)
+					)
 
-						.handle(new Request()
-								.method(Request.POST)
-								.path("/")
-								.shape(clazz("Entity"))
-								.header("Slug", "id")
-								.body(json(), JsonValue.EMPTY_JSON_OBJECT)
-						)
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.InternalServerError)
+					)
 
-						.accept(response -> assertThat(response)
-								.hasStatus(Response.InternalServerError)
-								.doesNotHaveHeader("Location")
-						)
-		);
-	}
+			);
+		}
 
-	@Test void testRejectInvalidPayload() {
-		exec(() -> new DatastoreEngine()
-
-				.handle(new Request()
-						.method(Request.POST)
-						.path("/")
-						.shape(field("label", type(GAE.String)))
-						.body(json(), Json.createObjectBuilder()
-								.add("label", 123)
-								.build()
-						)
-				)
-
-				.accept(response -> assertThat(response)
-						.hasStatus(Response.UnprocessableEntity)
-						.doesNotHaveHeader("Location")
-						.hasBody(json(), json -> assertThat(json)
-								.containsEntry("error", Json.createValue(DataInvalid))
-								.containsKey("trace")
-						)
-				)
-		);
-	}
-
-	@Test void testRejectPOSTToResources() {
-		exec(() -> new DatastoreEngine()
-
-				.handle(new Request()
-						.method(Request.POST)
-						.path("/resource")
-						.body(json(), JsonValue.EMPTY_JSON_OBJECT)
-				)
-
-				.accept(response -> assertThat(response)
-						.hasStatus(Response.InternalServerError)
-				)
-
-		);
 	}
 
 }

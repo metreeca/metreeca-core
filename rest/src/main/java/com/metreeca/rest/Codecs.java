@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.codecs;
+package com.metreeca.rest;
 
 import java.io.*;
 import java.net.*;

@@ -18,7 +18,7 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.codecs.Codecs;
+import com.metreeca.rest.Codecs;
 import com.metreeca.rest.services.Logger;
 
 import java.util.regex.Pattern;

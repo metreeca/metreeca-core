@@ -23,6 +23,9 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Engine.engine;
 
 
+/**
+ * Model-driven resource relator.
+ */
 public final class Relator extends Delegator {
 
 	private final Engine engine=service(engine());

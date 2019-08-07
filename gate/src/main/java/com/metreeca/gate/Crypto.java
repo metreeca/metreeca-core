@@ -200,7 +200,7 @@ public interface Crypto {
 	 *
 	 * @param text the text to be hashed
 	 *
-	 * @return a textually {@linkplain #encode(byte...) encoded} {@linkplain #id(byte[]...) hash-based id} generated
+	 * @return a textually {@linkplain #encode(byte...) encoded} {@linkplain #id(byte[][]) hash-based id} generated
 	 * from the supplied {@code text}
 	 *
 	 * @throws NullPointerException if {@code text} is null or contains null values

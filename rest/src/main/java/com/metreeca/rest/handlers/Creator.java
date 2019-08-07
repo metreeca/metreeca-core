@@ -34,7 +34,7 @@ import static java.util.UUID.randomUUID;
 
 
 /**
- * Resource creator.
+ * Model-driven resource creator.
  *
  * <p>Handles creation requests on the linked data container identified by the request {@linkplain Request#item() focus
  * item}, according to the following operating modes.</p>
@@ -78,8 +78,8 @@ import static java.util.UUID.randomUUID;
  */
 public final class Creator extends Delegator {
 
-
 	private final Engine engine=service(engine());
+
 
 	/**
 	 * Creates a resource creator with a UUID-based slug generator.
@@ -92,7 +92,7 @@ public final class Creator extends Delegator {
 	 * Creates a resource creator.
 	 *
 	 * @param slug a function mapping from the creation request to the name to be assigned to the newly created
-	 *             resource; must return a non-null value; empty
+	 *             resource; must return a non-null unique value
 	 *
 	 * @throws NullPointerException if {@code slug} is null
 	 */

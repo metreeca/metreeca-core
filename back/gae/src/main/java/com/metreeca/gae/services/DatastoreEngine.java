@@ -17,7 +17,9 @@
 
 package com.metreeca.gae.services;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.services.Engine;
 
 import java.util.function.Supplier;
@@ -51,8 +53,9 @@ public final class DatastoreEngine implements Engine {
 			case Request.PUT: throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 			case Request.DELETE: throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 
-			default:
-				return request.reply(internal(new UnsupportedOperationException(format("%s method", request.method()))));
+			default: return request.reply(
+					internal(new UnsupportedOperationException(format("%s method", request.method())))
+			);
 
 		}
 	}

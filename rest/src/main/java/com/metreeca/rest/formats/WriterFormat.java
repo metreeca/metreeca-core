@@ -19,7 +19,7 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
-import com.metreeca.rest.codecs.Codecs;
+import com.metreeca.rest.Codecs;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

@@ -23,9 +23,9 @@ import java.util.function.Supplier;
 
 
 /**
- * Storage engine.
+ * Model-driven storage engine.
  *
- * <p>Manages storage transactions and performs CRUD actions on resources and containers.</p>
+ * <p>Manages storage transactions and performs model-driven CRUD actions on resources and containers.</p>
  */
 public interface Engine extends Handler {
 

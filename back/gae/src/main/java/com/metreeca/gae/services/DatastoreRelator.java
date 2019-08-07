@@ -52,6 +52,8 @@ final class DatastoreRelator {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private Future<Response> container(final Request request) {
 		final com.metreeca.tree.Query query=null; // !!! parse query
 
@@ -107,7 +109,7 @@ final class DatastoreRelator {
 					// !!! set filters from filter shape
 					// !!! trim results to convey shape
 
-					// ;( projecting only properties actually included in the shape would lower costs as projection
+					// ;( projecting only properties actually included in the shape would lower costs, as projection
 					// queries are counted as small operations: unfortunately, a number of limitations apply:
 					// https://cloud.google.com/appengine/docs/standard/java/datastore/projectionqueries#Java_Limitations_on_projections
 					// https://cloud.google.com/appengine/docs/standard/java/datastore/projectionqueries#Java_Projections_and_multiple_valued_properties

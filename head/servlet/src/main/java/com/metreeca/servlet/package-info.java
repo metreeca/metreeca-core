@@ -55,30 +55,32 @@
  *
  * <pre>{@code package com.metreeca.demo;
  *
- * import com.metreeca.servlet.Gateway;
+ * import com.metreeca.rest.Context;
+ * import com.metreeca.rest.Handler;
+ * import com.metreeca.rest.Wrapper;
  * import com.metreeca.rest.wrappers.Server;
+ * import com.metreeca.servlet.Gateway;
  *
  * import javax.servlet.annotation.WebFilter;
  *
- * import static com.metreeca.rest.Tray.tool;
+ * import static com.metreeca.rest.Context.service;
  *
- * {@literal @}WebFilter("/*") public final class Demo extends Gateway { // define the path pattern managed by the app
+ * ＠WebFilter("/*") public final class Demo extends Gateway { // define the path pattern managed by the app
  *
- * {@literal @}Override protected Handler load(final Tray tray) {
- *      return tray
+ * ＠Override protected Handler load(final Context context) {
+ *      return context
  *
- *                 .set(Tool.factory(), () -> { return new ToolReplacement(); } // customize shared tools
+ *          .set(Service.factory(), () -> { return new ServiceReplacement(); } // customize shared services
  *
- *                 .exec(() -> { tool(Tool.factory()).exec(…); }) // initialize the app using the shared tools
+ *          .exec(() -> { service(Service.factory()).exec(…); }) // initialize the app using shared services
  *
- *                 .get(() -> new Server()
+ *          .get(() -> new Server()
  *
- *                         .wrap(new Wrapper() { … }) // configure system-wide wrappers
+ *               .wrap(new Wrapper() { … }) // configure system-wide wrappers
  *
- *                         .wrap(new Handler() { … }) // configure the app main handler
+ *               .wrap(new Handler() { … }) // configure the app main handler
  *
- *                 )
- *         );
+ *          );
  *     }
  *
  * } }</pre>

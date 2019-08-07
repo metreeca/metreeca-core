@@ -18,7 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.codecs.Codecs;
+import com.metreeca.rest.Codecs;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
