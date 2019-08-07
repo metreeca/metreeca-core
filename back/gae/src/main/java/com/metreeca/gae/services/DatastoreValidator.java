@@ -22,6 +22,8 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.Trace;
 import com.metreeca.tree.shapes.*;
 
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 
 import java.util.Collection;
@@ -84,6 +86,10 @@ final class DatastoreValidator {
 			return value instanceof Collection ? (Collection<?>)value : value == null ? emptySet() : singleton(value);
 		}
 
+		private <T> Predicate<T> invert(final Predicate<T> predicate) {
+			return t -> !predicate.test(t);
+		}
+
 		private String issue(final Shape shape) {
 			return shape.toString().replaceAll("\\s+", " ");
 		}
@@ -116,12 +122,18 @@ final class DatastoreValidator {
 			);
 		}
 
-		private <T> Predicate<T> invert(final Predicate<T> predicate) {
-			return t -> !predicate.test(t);
-		}
-
 		@Override public Trace probe(final Clazz clazz) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final String name=clazz.getName();
+
+			return trace(focus().stream()
+					.filter(invert(v
+							-> v instanceof Entity && ((Entity)v).getKey().getKind().equals(name)
+							|| v instanceof EmbeddedEntity && ((EmbeddedEntity)v).getKey().getKind().equals(name)
+					))
+					.map(v -> issue(clazz))
+					.collect(toList())
+			);
 		}
 
 
@@ -148,7 +160,7 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.map(Object::toString)
-					.filter(s -> s.length() < limit)
+					.filter(invert(s -> s.length() >= limit))
 					.map(s -> issue(minLength))
 					.collect(toList())
 			);
@@ -160,7 +172,7 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.map(Object::toString)
-					.filter(s -> s.length() > limit)
+					.filter(invert(s -> s.length() <= limit))
 					.map(s -> issue(maxLength))
 					.collect(toList())
 			);
@@ -178,7 +190,7 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.map(Object::toString)
-					.filter(s -> !compiled.matcher(s).matches())
+					.filter(invert(s -> compiled.matcher(s).matches()))
 					.map(s -> issue(pattern))
 					.collect(toList())
 			);
@@ -192,7 +204,7 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.map(Object::toString)
-					.filter(s -> !predicate.test(s))
+					.filter(invert(predicate))
 					.map(s -> issue(like))
 					.collect(toList())
 			);

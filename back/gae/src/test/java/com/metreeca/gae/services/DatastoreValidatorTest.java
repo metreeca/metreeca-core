@@ -21,9 +21,7 @@ import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETest;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PropertyContainer;
+import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -33,6 +31,7 @@ import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.In.in;
 import static com.metreeca.tree.shapes.Like.like;
@@ -48,6 +47,7 @@ import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.Pattern.pattern;
 import static com.metreeca.tree.shapes.Type.type;
 
+import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
@@ -78,7 +78,7 @@ final class DatastoreValidatorTest extends GAETest {
 	}
 
 
-	private PropertyContainer entity(final Consumer<PropertyContainer> builder) {
+	private EmbeddedEntity entity(final Consumer<EmbeddedEntity> builder) {
 
 		final EmbeddedEntity entity=new EmbeddedEntity();
 
@@ -117,21 +117,15 @@ final class DatastoreValidatorTest extends GAETest {
 	}
 
 	@Test void testValidateClazz() {
-		//exec(() -> {
-		//
-		//	final Shape shape=clazz("Employee");
-		//
-		//	// validate using type info retrieved from model
-		//
-		//	assertThat(validate(shape, "<employees/9999>", "<employees/9999> a :Employee")).isTrue();
-		//	assertThat(validate(shape, "<offices/9999>")).isFalse();
-		//
-		//	// validate using type info retrieved from graph
-		//
-		//	assertThat(validate(shape, "<employees/1370>")).isTrue();
-		//	assertThat(validate(shape, "<offices/1>")).isFalse();
-		//
-		//});
+		exec(() -> {
+
+			final Shape shape=clazz("Class");
+
+			assertThat(validate(shape, entity(entity -> entity.setKey(createKey("Class", "id"))))).isTrue();
+			assertThat(validate(shape, entity(entity -> entity.setKey(createKey("*", "id"))))).isFalse();
+			assertThat(validate(shape, 1)).isFalse();
+
+		});
 	}
 
 
