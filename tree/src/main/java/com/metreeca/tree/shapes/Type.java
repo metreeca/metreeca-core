@@ -33,16 +33,16 @@ import static java.util.stream.Collectors.toSet;
 public final class Type implements Shape {
 
 	/**
-	 * Creates a type constraint.
+	 * Creates a name constraint.
 	 *
-	 * @param type the expected value type
+	 * @param name the expected type name
 	 *
-	 * @return a new type constraint for the provided {@code type}
+	 * @return a new name constraint for the provided {@code name}
 	 *
-	 * @throws NullPointerException if {@code type} is null
+	 * @throws NullPointerException if {@code name} is null
 	 */
-	public static Type type(final String type) {
-		return new Type(type);
+	public static Type type(final String name) {
+		return new Type(name);
 	}
 
 	public static Optional<String> type(final Shape shape) {
@@ -52,23 +52,23 @@ public final class Type implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String type;
+	private final String name;
 
 
-	private Type(final String type) {
+	private Type(final String name) {
 
-		if ( type == null ) {
-			throw new NullPointerException("null type");
+		if ( name == null ) {
+			throw new NullPointerException("null name");
 		}
 
-		this.type=type;
+		this.name=name;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getType() {
-		return type;
+	public String getName() {
+		return name;
 	}
 
 
@@ -86,15 +86,15 @@ public final class Type implements Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Type
-				&& type.equals(((Type)object).type);
+				&& name.equals(((Type)object).name);
 	}
 
 	@Override public int hashCode() {
-		return type.hashCode();
+		return name.hashCode();
 	}
 
 	@Override public String toString() {
-		return "type("+type+")";
+		return "type("+name+")";
 	}
 
 
@@ -103,7 +103,7 @@ public final class Type implements Shape {
 	private static final class TypeProbe extends Inspector<String> {
 
 		@Override public String probe(final Type type) {
-			return type.getType();
+			return type.getName();
 		}
 
 		@Override public String probe(final And and) {
@@ -117,12 +117,12 @@ public final class Type implements Shape {
 
 		private String type(final Collection<Shape> shapes) {
 
-			final Set<String> types=shapes.stream()
+			final Set<String> names=shapes.stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());
 
-			return types.size() == 1 ? types.iterator().next() : null;
+			return names.size() == 1 ? names.iterator().next() : null;
 
 		}
 

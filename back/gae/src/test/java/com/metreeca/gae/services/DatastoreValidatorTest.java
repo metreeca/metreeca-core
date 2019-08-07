@@ -17,6 +17,7 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETest;
 import com.metreeca.tree.Shape;
 
@@ -25,6 +26,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
 import java.util.function.Consumer;
 
 import static com.metreeca.tree.Shape.required;
@@ -44,6 +46,7 @@ import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
 import static com.metreeca.tree.shapes.MinLength.minLength;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.Pattern.pattern;
+import static com.metreeca.tree.shapes.Type.type;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -86,38 +89,31 @@ final class DatastoreValidatorTest extends GAETest {
 
 
 	@Test void testValidateType() {
-		//exec(() -> {
-		//
-		//	assertThat(validate(type(Normalizer.Form.ValueType), "<x>")).isTrue();
-		//	assertThat(validate(type(Form.ValueType), "_:x")).isTrue();
-		//	assertThat(validate(type(Form.ValueType), "1")).isTrue();
-		//
-		//	assertThat(validate(type(Form.ResourceType), "<x>")).isTrue();
-		//	assertThat(validate(type(Form.ResourceType), "_:x")).isTrue();
-		//	assertThat(validate(type(Form.ResourceType), "1")).isFalse();
-		//
-		//	assertThat(validate(type(Form.BNodeType), "_:x")).isTrue();
-		//	assertThat(validate(type(Form.BNodeType), "1")).isFalse();
-		//
-		//	assertThat(validate(type(Form.IRIType), "<x>")).isTrue();
-		//	assertThat(validate(type(Form.IRIType), "_:x")).isFalse();
-		//
-		//	assertThat(validate(type(Form.LiteralType), "'x'")).isTrue();
-		//	assertThat(validate(type(Form.LiteralType), "1")).isTrue();
-		//	assertThat(validate(type(Form.LiteralType), "_:x")).isFalse();
-		//
-		//	assertThat(validate(type(XMLSchema.STRING), "'text'")).isTrue();
-		//	assertThat(validate(type(XMLSchema.STRING), "_:x")).isFalse();
-		//
-		//	assertThat(validate(type(RDF.LANGSTRING), "'text'@en")).isTrue();
-		//	assertThat(validate(type(RDF.LANGSTRING), "_:x")).isFalse();
-		//
-		//	assertThat(validate(type(GAE.Boolean), "true")).isTrue();
-		//	assertThat(validate(type(GAE.Boolean), "_:x")).isFalse();
-		//
-		//	assertThat(validate(type(Form.IRIType))).as("empty focus").isTrue();
-		//
-		//});
+		exec(() -> {
+
+			assertThat(validate(type(GAE.Entity), entity(entity -> {}))).isTrue();
+			assertThat(validate(type(GAE.Entity), 1)).isFalse();
+
+			assertThat(validate(type(GAE.Boolean), true)).isTrue();
+			assertThat(validate(type(GAE.Boolean), 1)).isFalse();
+
+			assertThat(validate(type(GAE.Integer), 1L)).isTrue();
+			assertThat(validate(type(GAE.Integer), 1)).isTrue();
+			assertThat(validate(type(GAE.Integer), "")).isFalse();
+
+			assertThat(validate(type(GAE.Floating), 1.0D)).isTrue();
+			assertThat(validate(type(GAE.Floating), 1.0F)).isTrue();
+			assertThat(validate(type(GAE.Floating), "")).isFalse();
+
+			assertThat(validate(type(GAE.String), "text")).isTrue();
+			assertThat(validate(type(GAE.String), 1)).isFalse();
+
+			assertThat(validate(type(GAE.Date), new Date())).isTrue();
+			assertThat(validate(type(GAE.Date), 1)).isFalse();
+
+			assertThat(validate(type("*"))).as("empty focus").isTrue();
+
+		});
 	}
 
 	@Test void testValidateClazz() {
@@ -333,9 +329,21 @@ final class DatastoreValidatorTest extends GAETest {
 	}
 
 
-	@Test void testValidateField() {}
+	@Test void testValidateField() {
+		exec(() -> {
 
-	@Test void testValidateExpectedEntityFields() {
+			final Shape shape=field("field", maxCount(2));
+
+			assertThat(validate(shape, entity(entity -> entity.setProperty("field", 1)))).isTrue();
+			assertThat(validate(shape, entity(entity -> entity.setProperty("field", asList(1, 2))))).isTrue();
+			assertThat(validate(shape, entity(entity -> entity.setProperty("field", asList(1, 2, 3))))).isFalse();
+
+			assertThat(validate(shape)).as("empty focus").isTrue();
+
+		});
+	}
+
+	@Test void testValidateFieldImpliedEntity() {
 		exec(() -> {
 
 			final Shape shape=field("field", required());
@@ -357,7 +365,6 @@ final class DatastoreValidatorTest extends GAETest {
 					.isTrue();
 
 		});
-
 	}
 
 

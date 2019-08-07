@@ -32,8 +32,8 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Clazz implements Shape {
 
-	public static Clazz clazz(final String clazz) {
-		return new Clazz(clazz);
+	public static Clazz clazz(final String name) {
+		return new Clazz(name);
 	}
 
 	public static Optional<String> clazz(final Shape shape) {
@@ -43,23 +43,23 @@ public final class Clazz implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String clazz;
+	private final String name;
 
 
-	private Clazz(final String clazz) {
+	private Clazz(final String name) {
 
-		if ( clazz == null ) {
-			throw new NullPointerException("null class");
+		if ( name == null ) {
+			throw new NullPointerException("null name");
 		}
 
-		this.clazz=clazz;
+		this.name=name;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getClazz() {
-		return clazz;
+	public String getName() {
+		return name;
 	}
 
 
@@ -77,15 +77,15 @@ public final class Clazz implements Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Clazz
-				&& clazz.equals(((Clazz)object).clazz);
+				&& name.equals(((Clazz)object).name);
 	}
 
 	@Override public int hashCode() {
-		return clazz.hashCode();
+		return name.hashCode();
 	}
 
 	@Override public String toString() {
-		return "kind("+clazz+")";
+		return "clazz("+name+")";
 	}
 
 
@@ -94,7 +94,7 @@ public final class Clazz implements Shape {
 	private static final class ClazzProbe extends Inspector<String> {
 
 		@Override public String probe(final Clazz clazz) {
-			return clazz.getClazz();
+			return clazz.getName();
 		}
 
 		@Override public String probe(final And and) {
@@ -108,12 +108,12 @@ public final class Clazz implements Shape {
 
 		private String clazz(final Collection<Shape> shapes) {
 
-			final Set<String> kinds=shapes.stream()
+			final Set<String> names=shapes.stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());
 
-			return kinds.size() == 1 ? kinds.iterator().next() : null;
+			return names.size() == 1 ? names.iterator().next() : null;
 
 		}
 

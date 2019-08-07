@@ -25,6 +25,7 @@ import com.metreeca.tree.shapes.*;
 import com.google.appengine.api.datastore.PropertyContainer;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -88,7 +89,6 @@ final class DatastoreValidator {
 		}
 
 
-
 		@Override public Trace probe(final Meta meta) {
 			return trace();
 		}
@@ -99,7 +99,25 @@ final class DatastoreValidator {
 
 
 		@Override public Trace probe(final Type type) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final String name=type.getName();
+
+			return trace(focus().stream()
+					.filter(invert(v
+							-> v instanceof PropertyContainer ? name.equals(GAE.Entity)
+							: v instanceof Boolean ? name.equals(GAE.Boolean)
+							: v instanceof Long || v instanceof Integer || v instanceof Short ? name.equals(GAE.Integer)
+							: v instanceof Double || v instanceof Float ? name.equals(GAE.Floating)
+							: v instanceof String ? name.equals(GAE.String)
+							: v instanceof Date && name.equals(GAE.Date)
+					))
+					.map(v -> issue(type))
+					.collect(toList())
+			);
+		}
+
+		private <T> Predicate<T> invert(final Predicate<T> predicate) {
+			return t -> !predicate.test(t);
 		}
 
 		@Override public Trace probe(final Clazz clazz) {
