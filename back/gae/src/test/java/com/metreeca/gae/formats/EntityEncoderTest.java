@@ -88,8 +88,9 @@ final class EntityEncoderTest extends GAETestBase {
 	}
 
 	@Test void testFormatCollectionFields() {
-		assertThat(encode(entity -> entity.setProperty("field", asList(123, "string"))))
+		assertThat(encode(entity -> entity.setProperty("field", asList(null, 123, "string"))))
 				.containsEntry("field", Json.createArrayBuilder()
+						.add(JsonValue.NULL)
 						.add(123)
 						.add("string")
 						.build()
@@ -101,6 +102,7 @@ final class EntityEncoderTest extends GAETestBase {
 
 			final EmbeddedEntity embedded=new EmbeddedEntity();
 
+			embedded.setProperty("null", null);
 			embedded.setProperty("nested", 123);
 
 			entity.setProperty("field", embedded);

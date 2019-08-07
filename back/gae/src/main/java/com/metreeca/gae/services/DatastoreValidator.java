@@ -171,7 +171,7 @@ final class DatastoreValidator {
 			final int limit=minLength.getLimit();
 
 			return trace(focus().stream()
-					.map(Object::toString)
+					.map(String::valueOf)
 					.filter(invert(s -> s.length() >= limit))
 					.collect(toMap(v -> issue(minLength), Collections::singleton))
 			);
@@ -182,7 +182,7 @@ final class DatastoreValidator {
 			final int limit=maxLength.getLimit();
 
 			return trace(focus().stream()
-					.map(Object::toString)
+					.map(String::valueOf)
 					.filter(invert(s -> s.length() <= limit))
 					.collect(toMap(v -> issue(maxLength), Collections::singleton))
 			);
@@ -199,7 +199,7 @@ final class DatastoreValidator {
 			// match the whole string: don't use compiled.asPredicate() (implemented using .find())
 
 			return trace(focus().stream()
-					.map(Object::toString)
+					.map(String::valueOf)
 					.filter(invert(s -> compiled.matcher(s).matches()))
 					.collect(toMap(v -> issue(pattern), Collections::singleton))
 			);
@@ -212,7 +212,7 @@ final class DatastoreValidator {
 			final Predicate<String> predicate=java.util.regex.Pattern.compile(expression).asPredicate();
 
 			return trace(focus().stream()
-					.map(Object::toString)
+					.map(String::valueOf)
 					.filter(invert(predicate))
 					.collect(toMap(v -> issue(like), Collections::singleton))
 			);

@@ -110,7 +110,8 @@ final class EntityDecoderTest extends GAETestBase {
 	}
 
 	@Test void testParseArrayFields() {
-		assertThat(decode("{ 'field': [123, 'string'] }").getProperty("field")).isEqualTo(asList(123L, "string"));
+		assertThat(decode("{ 'field': [null, 123, 'string'] }").getProperty("field"))
+				.isEqualTo(asList(null, 123L, "string"));
 	}
 
 	@Test void testParseObjectFields() {

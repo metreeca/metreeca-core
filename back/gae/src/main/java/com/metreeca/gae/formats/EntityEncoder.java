@@ -45,7 +45,7 @@ final class EntityEncoder {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private JsonValue value(final Object object, final Shape shape) {
-		return object == null ? null
+		return object == null ? JsonValue.NULL
 				: GAE.Entity(object) ? value((PropertyContainer)object, shape)
 				: GAE.Boolean(object) ? value((Boolean)object, shape)
 				: GAE.Floating(object) ? value(((Number)object).doubleValue(), shape)
@@ -90,7 +90,7 @@ final class EntityEncoder {
 
 			final JsonValue value=value(object, fields.getOrDefault(name, EmptyShape));
 
-			if ( value != null ) {
+			if ( value.getValueType() != JsonValue.ValueType.NULL ) {
 				builder.add(name, value);
 			}
 
