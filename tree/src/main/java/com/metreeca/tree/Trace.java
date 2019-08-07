@@ -18,64 +18,80 @@
 package com.metreeca.tree;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.singletonMap;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toMap;
 
 
 /**
- * Shape value validation trace.
+ * Shape validation trace.
  */
 public final class Trace {
 
-	private static final Trace EmptyTrace=new Trace(emptySet(), emptyMap());
+	private static final Trace EmptyTrace=new Trace(Stream.empty(), Stream.empty());
 
 
 	public static Trace trace() {
 		return EmptyTrace;
 	}
 
-	public static Trace trace(final String... issues) {
-		return new Trace(asList(issues), emptyMap());
+	public static Trace trace(final Trace... traces) {
+
+		if ( traces == null || Arrays.stream(traces).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null traces");
+		}
+
+		return new Trace(
+				Arrays.stream(traces).flatMap(trace -> trace.issues.entrySet().stream()),
+				Arrays.stream(traces).flatMap(trace -> trace.fields.entrySet().stream())
+		);
 	}
 
-	public static Trace trace(final Collection<String> issues) {
-		return new Trace(issues, emptyMap());
+	public static Trace trace(final String details, final Object... values) {
+		return new Trace(singletonMap(details, (Collection<Object>)asList(values)).entrySet().stream(), Stream.empty());
 	}
 
-	public static Trace trace(final Collection<String> issues, final Map<String, Trace> fields) {
-		return new Trace(issues, fields);
+	public static Trace trace(final Map<String, Collection<Object>> issues) {
+		return new Trace(issues.entrySet().stream(), Stream.empty());
+	}
+
+	public static Trace trace(final Map<String, Collection<Object>> issues, final Map<String, Trace> fields) {
+		return new Trace(issues.entrySet().stream(), fields.entrySet().stream());
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final List<String> issues;
+	private final Map<String, Collection<Object>> issues;
 	private final Map<String, Trace> fields;
 
 
-	private Trace(final Collection<String> issues, final Map<String, Trace> fields) {
+	private Trace(
+			final Stream<Map.Entry<String, Collection<Object>>> issues,
+			final Stream<Map.Entry<String, Trace>> fields
+	) {
 
-		if ( issues == null || issues.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null issues");
-		}
+		this.issues=issues
+				.filter(issue -> !issue.getKey().isEmpty())
+				.collect(toMap(
+						Map.Entry::getKey, entry -> unmodifiableSet(new LinkedHashSet<>(entry.getValue())),
+						(x, y) -> Stream.of(x, y).flatMap(Collection::stream).collect(toCollection(LinkedHashSet::new)),
+						LinkedHashMap::new
+				));
 
-		if ( fields == null
-				|| fields.keySet().stream().anyMatch(Objects::isNull)
-				|| fields.values().stream().anyMatch(Objects::isNull)
-		) {
-			throw new NullPointerException("null fields");
-		}
-
-		this.issues=issues.stream()
-				.filter(issue -> !issue.isEmpty())
-				.collect(toList());
-
-		this.fields=fields.entrySet().stream()
+		this.fields=fields
+				.filter(field -> !field.getKey().isEmpty())
 				.filter(field -> !field.getValue().isEmpty())
-				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+				.collect(toMap(
+						Map.Entry::getKey, Map.Entry::getValue,
+						(x, y) -> trace(x, y),
+						LinkedHashMap::new
+				));
 	}
 
 
@@ -84,8 +100,8 @@ public final class Trace {
 	}
 
 
-	public List<String> getIssues() {
-		return unmodifiableList(issues);
+	public Map<String, Collection<Object>> getIssues() {
+		return unmodifiableMap(issues);
 	}
 
 	public Map<String, Trace> getFields() {

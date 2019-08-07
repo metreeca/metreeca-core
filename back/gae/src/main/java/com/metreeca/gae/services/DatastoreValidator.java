@@ -27,16 +27,15 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static com.metreeca.tree.Trace.trace;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.Type.type;
 
 import static java.util.Collections.*;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 
@@ -47,25 +46,18 @@ final class DatastoreValidator {
 
 			final Map<String, Shape> fields=fields(shape);
 
-			final Collection<String> issues=((PropertyContainer)value).getProperties().keySet().stream()
+			final Map<String, Collection<Object>> issues=((PropertyContainer)value).getProperties().keySet().stream()
 					.filter(name -> !fields.containsKey(name))
 					.map(name -> "unexpected entity property {"+name+"}")
-					.collect(toList());
+					.collect(toMap(details -> details, details -> emptySet()));
 
-			return merge(trace(issues), shape.map(new ValidatorProbe(value)));
+			return trace(trace(issues), shape.map(new ValidatorProbe(value)));
 
 		} else {
 
 			return shape.map(new ValidatorProbe(value));
 
 		}
-	}
-
-	private Trace merge(final Trace x, final Trace y) {
-		return x.isEmpty() ? y : y.isEmpty() ? x : trace(
-				Stream.of(x, y).flatMap(t -> t.getIssues().stream()).collect(toList()),
-				Stream.of(x, y).flatMap(t -> t.getFields().entrySet().stream()).collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
-		);
 	}
 
 
@@ -116,8 +108,7 @@ final class DatastoreValidator {
 							: GAE.String(v) ? name.equals(GAE.String)
 							: GAE.Date(v) && name.equals(GAE.Date)
 					))
-					.map(v -> issue(type))
-					.collect(toList())
+					.collect(toMap(v -> issue(type), Collections::singleton))
 			);
 		}
 
@@ -130,11 +121,9 @@ final class DatastoreValidator {
 							-> v instanceof Entity && ((Entity)v).getKey().getKind().equals(name)
 							|| v instanceof EmbeddedEntity && ((EmbeddedEntity)v).getKey().getKind().equals(name)
 					))
-					.map(v -> issue(clazz))
-					.collect(toList())
+					.collect(toMap(v -> issue(clazz), Collections::singleton))
 			);
 		}
-
 
 		@Override public Trace probe(final MinExclusive minExclusive) {
 
@@ -142,8 +131,7 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.filter(invert(v -> GAE.compare(v, value) > 0))
-					.map(s -> issue(minExclusive))
-					.collect(toList())
+					.collect(toMap(v -> issue(minExclusive), Collections::singleton))
 			);
 		}
 
@@ -153,8 +141,7 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.filter(invert(v -> GAE.compare(v, value) < 0))
-					.map(s -> issue(maxExclusive))
-					.collect(toList())
+					.collect(toMap(v -> issue(maxExclusive), Collections::singleton))
 			);
 		}
 
@@ -164,8 +151,7 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.filter(invert(v -> GAE.compare(v, value) >= 0))
-					.map(s -> issue(minInclusive))
-					.collect(toList())
+					.collect(toMap(v -> issue(minInclusive), Collections::singleton))
 			);
 		}
 
@@ -175,8 +161,7 @@ final class DatastoreValidator {
 
 			return trace(focus().stream()
 					.filter(invert(v -> GAE.compare(v, value) <= 0))
-					.map(s -> issue(maxInclusive))
-					.collect(toList())
+					.collect(toMap(v -> issue(maxInclusive), Collections::singleton))
 			);
 		}
 
@@ -188,8 +173,7 @@ final class DatastoreValidator {
 			return trace(focus().stream()
 					.map(Object::toString)
 					.filter(invert(s -> s.length() >= limit))
-					.map(s -> issue(minLength))
-					.collect(toList())
+					.collect(toMap(v -> issue(minLength), Collections::singleton))
 			);
 		}
 
@@ -200,8 +184,7 @@ final class DatastoreValidator {
 			return trace(focus().stream()
 					.map(Object::toString)
 					.filter(invert(s -> s.length() <= limit))
-					.map(s -> issue(maxLength))
-					.collect(toList())
+					.collect(toMap(v -> issue(maxLength), Collections::singleton))
 			);
 		}
 
@@ -218,8 +201,7 @@ final class DatastoreValidator {
 			return trace(focus().stream()
 					.map(Object::toString)
 					.filter(invert(s -> compiled.matcher(s).matches()))
-					.map(s -> issue(pattern))
-					.collect(toList())
+					.collect(toMap(v -> issue(pattern), Collections::singleton))
 			);
 		}
 
@@ -232,8 +214,7 @@ final class DatastoreValidator {
 			return trace(focus().stream()
 					.map(Object::toString)
 					.filter(invert(predicate))
-					.map(s -> issue(like))
-					.collect(toList())
+					.collect(toMap(v -> issue(like), Collections::singleton))
 			);
 		}
 
@@ -274,7 +255,7 @@ final class DatastoreValidator {
 
 						if ( GAE.Entity(v) ) {
 
-							return trace(emptySet(), singletonMap(field.getName(),
+							return trace(emptyMap(), singletonMap(field.getName(),
 									validate(field.getShape(), ((PropertyContainer)v).getProperty(field.getName()))
 							));
 
@@ -286,13 +267,13 @@ final class DatastoreValidator {
 
 					})
 
-					.reduce(trace(), DatastoreValidator.this::merge);
+					.reduce(trace(), Trace::trace);
 		}
 
 		@Override public Trace probe(final And and) {
 			return and.getShapes().stream()
 					.map(s -> s.map(this))
-					.reduce(trace(), DatastoreValidator.this::merge);
+					.reduce(trace(), Trace::trace);
 		}
 
 		@Override public Trace probe(final Or or) {

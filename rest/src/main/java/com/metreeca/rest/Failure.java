@@ -20,7 +20,10 @@ package com.metreeca.rest;
 import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Trace;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.json.*;
@@ -317,14 +320,58 @@ public final class Failure implements Function<Response, Response> {
 		return builder.build();
 	}
 
+
 	private JsonObject format(final Trace trace) {
 
 		final JsonObjectBuilder builder=Json.createObjectBuilder();
 
-		final List<String> issues=trace.getIssues();
+		final Map<String, Collection<Object>> issues=trace.getIssues();
 
 		if ( !issues.isEmpty() ) {
-			builder.add("", Json.createArrayBuilder(issues));
+
+			final JsonObjectBuilder errors=Json.createObjectBuilder();
+
+			issues.forEach((detail, values) -> {
+
+				final JsonArrayBuilder objects=Json.createArrayBuilder();
+
+				values.forEach(value -> {
+					if ( value ==null ) {
+
+						objects.add(JsonValue.NULL);
+
+					} else if ( value instanceof Boolean ) {
+
+						objects.add((Boolean)value);
+
+					} else if ( value instanceof BigDecimal ) {
+
+						objects.add((BigDecimal)value);
+
+					} else if ( value instanceof BigInteger ) {
+
+						objects.add((BigInteger)value);
+
+					} else if ( value instanceof Double || value instanceof Float ) {
+
+						objects.add(((Number)value).doubleValue());
+
+					} else if ( value instanceof Number ) {
+
+						objects.add(((Number)value).longValue());
+
+					} else {
+
+						objects.add(value.toString());
+
+					}
+				});
+
+				errors.add(detail, objects.build());
+
+			});
+
+			builder.add("", errors);
 		}
 
 		trace.getFields().forEach((name, nested) -> {
