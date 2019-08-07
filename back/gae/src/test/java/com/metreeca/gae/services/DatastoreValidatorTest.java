@@ -138,6 +138,8 @@ final class DatastoreValidatorTest extends GAETestBase {
 			assertThat(validate(shape, 1)).isFalse();
 			assertThat(validate(shape, 0)).isFalse();
 
+			assertThat(validate(shape, "")).isTrue();
+
 			assertThat(validate(shape)).as("empty focus").isTrue();
 
 		});
@@ -151,6 +153,8 @@ final class DatastoreValidatorTest extends GAETestBase {
 			assertThat(validate(shape, 2)).isTrue();
 			assertThat(validate(shape, 10)).isFalse();
 			assertThat(validate(shape, 100)).isFalse();
+
+			assertThat(validate(shape, "")).isFalse();
 
 			assertThat(validate(shape)).as("empty focus").isTrue();
 
@@ -166,6 +170,8 @@ final class DatastoreValidatorTest extends GAETestBase {
 			assertThat(validate(shape, 1)).isTrue();
 			assertThat(validate(shape, 0)).isFalse();
 
+			assertThat(validate(shape, "")).isTrue();
+
 			assertThat(validate(shape)).as("empty focus").isTrue();
 
 		});
@@ -179,6 +185,8 @@ final class DatastoreValidatorTest extends GAETestBase {
 			assertThat(validate(shape, 2)).isTrue();
 			assertThat(validate(shape, 10)).isTrue();
 			assertThat(validate(shape, 100)).isFalse();
+
+			assertThat(validate(shape, "")).isFalse();
 
 			assertThat(validate(shape)).as("empty focus").isTrue();
 

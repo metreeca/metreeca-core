@@ -137,19 +137,47 @@ final class DatastoreValidator {
 
 
 		@Override public Trace probe(final MinExclusive minExclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final Object value=minExclusive.getValue();
+
+			return trace(focus().stream()
+					.filter(invert(v -> GAE.compare(v, value) > 0))
+					.map(s -> issue(minExclusive))
+					.collect(toList())
+			);
 		}
 
 		@Override public Trace probe(final MaxExclusive maxExclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final Object value=maxExclusive.getValue();
+
+			return trace(focus().stream()
+					.filter(invert(v -> GAE.compare(v, value) < 0))
+					.map(s -> issue(maxExclusive))
+					.collect(toList())
+			);
 		}
 
 		@Override public Trace probe(final MinInclusive minInclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final Object value=minInclusive.getValue();
+
+			return trace(focus().stream()
+					.filter(invert(v -> GAE.compare(v, value) >= 0))
+					.map(s -> issue(minInclusive))
+					.collect(toList())
+			);
 		}
 
 		@Override public Trace probe(final MaxInclusive maxInclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final Object value=maxInclusive.getValue();
+
+			return trace(focus().stream()
+					.filter(invert(v -> GAE.compare(v, value) <= 0))
+					.map(s -> issue(maxInclusive))
+					.collect(toList())
+			);
 		}
 
 
