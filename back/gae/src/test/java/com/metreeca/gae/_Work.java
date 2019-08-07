@@ -47,13 +47,15 @@ final class _Work {
 
 		final Entity employee=new Entity("Employee", "/employees/1");
 
-		employee.setProperty("name", "Alice");
+		employee.setProperty("label", "Employee 1");
 
 		final EmbeddedEntity office=new EmbeddedEntity();
 
 		office.setKey(KeyFactory.createKey("Office", "/offices/1"));
 
-		employee.setIndexedProperty("office", office);
+		office.setProperty("label", "Office 1");
+
+		employee.setProperty("office", office);
 
 
 		final DatastoreService datastore=DatastoreServiceFactory.getDatastoreService();
@@ -63,7 +65,7 @@ final class _Work {
 		final Query query=new Query("Employee");
 
 		final Query.FilterPredicate filter=new Query.FilterPredicate(
-				"address.region", Query.FilterOperator.EQUAL, "ZZ"
+				"office.label", Query.FilterOperator.EQUAL, "Office 1"
 		);
 
 		query.setFilter(filter);

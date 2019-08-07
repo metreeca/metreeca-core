@@ -22,6 +22,7 @@ import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
+import com.google.appengine.api.datastore.Text;
 
 import java.util.Map;
 
@@ -45,12 +46,13 @@ final class EntityEncoder {
 
 	private JsonValue value(final Object object, final Shape shape) {
 		return object == null ? null
+				: GAE.Entity(object) ? value((PropertyContainer)object, shape)
 				: GAE.Boolean(object) ? value((Boolean)object, shape)
 				: GAE.Floating(object) ? value(((Number)object).doubleValue(), shape)
 				: GAE.Integral(object) ? value(((Number)object).longValue(), shape)
 				: GAE.String(object) ? value((String)object, shape)
+				: object instanceof Text ? value(((Text)object).getValue(), shape)
 				: object instanceof Iterable ? value((Iterable<?>)object, shape)
-				: GAE.Entity(object) ? value((PropertyContainer)object, shape)
 				: error(object);
 	}
 

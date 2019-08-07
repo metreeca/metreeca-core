@@ -20,9 +20,7 @@ package com.metreeca.gae.formats;
 import com.metreeca.gae.GAE;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PropertyContainer;
+import com.google.appengine.api.datastore.*;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
@@ -35,6 +33,7 @@ import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.Type.type;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 
 
@@ -79,7 +78,11 @@ final class EntityDecoder {
 
 			case GAE.Date: return date(string);
 
-			default: return string.getString();
+			default:
+
+				final String value=string.getString();
+
+				return value.getBytes(UTF_8).length > 1500 ? new Text(value) : value;
 
 		}
 	}
@@ -98,7 +101,15 @@ final class EntityDecoder {
 			final Object value=value(json, fields.getOrDefault(name, EmptyShape));
 
 			if ( value != null ) {
-				entity.setIndexedProperty(name, value); // !!! un/indexed from shape metadata?
+				if ( GAE.Entity(value) ) { // !!! un/indexed from shape metadata?
+
+					entity.setIndexedProperty(name, value); // force embedded entity indexing
+
+				} else {
+
+					entity.setProperty(name, value);
+
+				}
 			}
 
 		});

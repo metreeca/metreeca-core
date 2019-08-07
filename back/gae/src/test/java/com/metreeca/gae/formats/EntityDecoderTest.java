@@ -23,10 +23,12 @@ import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
+import com.google.appengine.api.datastore.Text;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.json.Json;
@@ -86,8 +88,20 @@ final class EntityDecoderTest extends GAETestBase {
 				.isEqualTo(123.0D);
 	}
 
-	@Test void testParseStringFields() { // !!! reject overly long strings
+	@Test void testParseStringFields() {
 		assertThat(decode("{ 'field': 'string' }").getProperty("field")).isEqualTo("string");
+	}
+
+	@Test void testParseStringFieldsExceedingLimits() {
+
+		final char[] chars=new char[2000];
+
+		Arrays.fill(chars, '-');
+
+		final String string=new String(chars);
+
+		assertThat(decode("{ 'field': '"+string+"' }").getProperty("field"))
+				.isEqualTo(new Text(string));
 	}
 
 	@Test void testParseStringFieldsAsExpectedDate() {

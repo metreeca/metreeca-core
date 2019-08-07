@@ -21,8 +21,10 @@ import com.metreeca.gae.GAETestBase;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Text;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import javax.json.Json;
@@ -63,7 +65,7 @@ final class EntityEncoderTest extends GAETestBase {
 				.containsEntry("field", Json.createValue(123));
 	}
 
-	@Test void testFormatDouleFields() {
+	@Test void testFormatDoubleFields() {
 		assertThat(encode(entity -> entity.setProperty("field", 123.0)))
 				.containsEntry("field", Json.createValue(123.0D));
 	}
@@ -71,6 +73,18 @@ final class EntityEncoderTest extends GAETestBase {
 	@Test void testFormatStringFields() {
 		assertThat(encode(entity -> entity.setProperty("field", "string")))
 				.containsEntry("field", Json.createValue("string"));
+	}
+
+	@Test void testFormatStringFieldsExceedingLimits() {
+
+		final char[] chars=new char[2000];
+
+		Arrays.fill(chars, '-');
+
+		final String string=new String(chars);
+
+		assertThat(encode(entity -> entity.setProperty("field", new Text(string))))
+				.containsEntry("field", Json.createValue(string));
 	}
 
 	@Test void testFormatCollectionFields() {
