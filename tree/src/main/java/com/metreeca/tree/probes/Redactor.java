@@ -71,12 +71,8 @@ public final class Redactor extends Traverser<Shape> {
 			throw new NullPointerException("null axis");
 		}
 
-		if ( values == null ) {
+		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
-		}
-
-		if ( values.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null value");
 		}
 
 		this.axis=axis;
