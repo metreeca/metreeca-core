@@ -167,7 +167,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		isNotNull();
 
 		Assertions.assertThat(actual.headers(name))
-				.as("<%sh> message headers", name)
+				.as("<%s> message headers", name)
 				.containsExactly(values);
 
 		return myself;

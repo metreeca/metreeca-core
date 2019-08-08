@@ -27,11 +27,12 @@ import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.tree.Shape.optional;
-import static com.metreeca.tree.Shape.required;
-import static com.metreeca.tree.Shape.role;
+import static com.metreeca.tree.Shape.*;
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.When.when;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class DriverTest {
@@ -43,6 +44,7 @@ final class DriverTest {
 	private static final Shape NoneShape=required();
 
 	private static final Shape TestShape=and(
+			filter().then(minCount(1)),
 			when(role(Root), RootShape),
 			when(role(None), NoneShape)
 	);
@@ -66,17 +68,20 @@ final class DriverTest {
 				.wrap((Handler)request -> {
 
 					assertThat(request)
-							.as("memoizing shape")
 							.hasShape(TestShape);
 
-					return request.reply(response -> response.header("link", "existing"));
+					return request.reply(response -> response
+							.status(OK)
+							.header("link", "processed")
+					);
 
 				})
 
 				.handle(request())
 
 				.accept(response -> assertThat(response).hasHeaders("Link",
-						"existing", "<http://example.org/resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy"
+						"processed",
+						"<http://example.org/resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy"
 				));
 	}
 
@@ -85,11 +90,18 @@ final class DriverTest {
 
 				.wrap((Handler)request -> request.reply(response -> response))
 
-				.handle(request().query("specs"))
+				.handle(request()
+						.roles(None)
+						.query("specs")
+				)
 
 				.accept(response -> assertThat(response)
 						.hasStatus(OK)
-						.hasBody(text()));
+						.hasBody(text(), text -> assertThat(text)
+								.as("redacted according to role/mode")
+								.isEqualTo(NoneShape.toString())
+						)
+				);
 	}
 
 }

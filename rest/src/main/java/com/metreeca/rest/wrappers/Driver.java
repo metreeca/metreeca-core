@@ -27,24 +27,26 @@ import java.util.Optional;
 
 import static com.metreeca.rest.formats.TextFormat.text;
 
+import static java.lang.String.format;
+
 
 /**
  * Shape-based content driver.
  *
- * <p>Drives the lifecycle of linked data resources managed by the wrapped handler associating them to a {@linkplain
- * #Driver(Shape) shape} model:
+ * <p>Drives the lifecycle of linked data resources managed by wrapped handlers with a {@linkplain #Driver(Shape)
+ * shape} model:
  *
  * <ul>
  *
- * <li>associates the shape model to incoming requests as a {@linkplain Message#shape() shape};</li>
+ * <li>{@linkplain Message#shape() associates} the driving shape model to incoming requests;</li>
  *
- * <li>advertises the association between the response focus {@linkplain Response#item() item} and the shape model
+ * <li>advertises the association between response focus {@linkplain Response#item() items} and the driving shape model
  * through a "{@code Link: <resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy}" header;</li>
  *
- * <li>handles GET requests for the advertised shape model resource ({@code <resource?specs>}) with a response
+ * <li>handles GET requests for the advertised shape model resource ({@code <resource>?specs}) with a response
  * containing a textual description of the {@link #Driver(Shape) shape} model {@linkplain Redactor redacted} taking into
- * account the target resource task and the {@linkplain Request#roles() roles} of the current request {@linkplain
- * Request#user() user}.</li>
+ * account the {@linkplain Request#roles() roles} of the current request {@linkplain Request#user() user} and removing
+ * filtering-only constraints.</li>
  *
  * </ul>
  *
@@ -52,11 +54,10 @@ import static com.metreeca.rest.formats.TextFormat.text;
  *
  * <ul>
  *
- * <li>redacting the shape read associated with incoming request as a {@linkplain Message#shape() shape} according to
- * the task to be performed;</li>
+ * <li>redacting the shape {@linkplain Message#shape() associated} to incoming request according to the task to be performed;</li>
  *
- * <li>associating a shape to outgoing responses as  a {@linkplain Message#shape() shape} in order to drive further
- * processing (e.g. JSON body generation).</li>
+ * <li>{@linkplain Message#shape() associating} a shape to outgoing responses in order to drive further processing
+ * (e.g. JSON body mapping).</li>
  *
  * </ul>
  *
@@ -70,7 +71,7 @@ import static com.metreeca.rest.formats.TextFormat.text;
 public final class Driver implements Wrapper {
 
 	private static final String SpecsQuery="specs";
-	private static final String SpecsRelation="http://www.w3.org/ns/ldp#constrainedBy";
+	private static final String SpecsLink="http://www.w3.org/ns/ldp#constrainedBy";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,7 +118,12 @@ public final class Driver implements Wrapper {
 				? Optional.of(request.reply(response -> response
 				.status(Response.OK)
 				.header("Content-Type", "text/plain")
-				.body(text(), shape.toString())
+				.body(text(), shape
+						.map(new Redactor(Shape.Role, request.roles()))
+						.map(new Redactor(Shape.Mode, Shape.Convey))
+						.map(new Optimizer())
+						.toString()
+				)
 		))
 
 				: Optional.empty();
@@ -129,9 +135,9 @@ public final class Driver implements Wrapper {
 	}
 
 	private Response after(final Response response) {
-		return response.header("+Link", String.format(
-				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, SpecsRelation
-		));
+		return response.success() ? response.header("+Link", format(
+				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, SpecsLink
+		)) : response;
 	}
 
 }
