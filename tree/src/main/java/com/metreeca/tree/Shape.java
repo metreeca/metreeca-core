@@ -188,8 +188,8 @@ public interface Shape {
 	 *
 	 * @param shapes the shapes this shape is to be applied as a test condition
 	 *
-	 * @return this shape, if {@code shapes} is empty; a {@linkplain When#when(Shape, Shape) conditional} shape applying
-	 * this shape as test condition to {@code shapes}, otherwise
+	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
+	 * shapes}
 	 *
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
@@ -202,8 +202,8 @@ public interface Shape {
 	 *
 	 * @param shapes the shapes this shape is to be applied as a test condition
 	 *
-	 * @return this shape, if {@code shapes} is empty; a {@linkplain When#when(Shape, Shape) conditional} shape applying
-	 * this shape as test condition to {@code shapes}, otherwise
+	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
+	 * shapes}
 	 *
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
@@ -217,7 +217,7 @@ public interface Shape {
 			throw new NullPointerException("null shape");
 		}
 
-		return shapes.isEmpty() ? this : when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+		return when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
 	}
 
 
