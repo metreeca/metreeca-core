@@ -23,7 +23,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.metreeca</groupId>
-	<artifactId>link</artifactId>
+	<artifactId>metreeca-link</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
@@ -138,8 +138,6 @@
 	</dependencies>
 
 	<build>
-
-		<finalName>metreeca-${project.artifactId}-${project.version}</finalName>
 
 		<resources>
 

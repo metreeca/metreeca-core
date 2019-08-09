@@ -24,11 +24,11 @@
 
 	<parent>
 		<groupId>com.metreeca</groupId>
-		<artifactId>link</artifactId>
+		<artifactId>metreeca-link</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>gate</artifactId>
+	<artifactId>metreeca-gate</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
 	<name>Metreeca REST IAM Framework</name>
@@ -44,7 +44,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>rest</artifactId>
+			<artifactId>metreeca-rest</artifactId>
 			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
@@ -71,10 +71,9 @@
 		</dependency>
 
 
-
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>rest</artifactId>
+			<artifactId>metreeca-rest</artifactId>
 			<version>0.0.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>

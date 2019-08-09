@@ -24,11 +24,11 @@
 
 	<parent>
 		<groupId>com.metreeca</groupId>
-		<artifactId>head</artifactId>
+		<artifactId>metreeca-head</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>servlet</artifactId>
+	<artifactId>metreeca-servlet</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
 	<name>Metreeca Servlet Adapter</name>
@@ -38,7 +38,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>rest</artifactId>
+			<artifactId>metreeca-rest</artifactId>
 			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
