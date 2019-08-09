@@ -24,6 +24,9 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 import com.google.appengine.api.datastore.Text;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Map;
 
 import javax.json.*;
@@ -48,6 +51,7 @@ final class EntityEncoder {
 				: GAE.Floating(object) ? value(((Number)object).doubleValue(), shape)
 				: GAE.Integral(object) ? value(((Number)object).longValue(), shape)
 				: GAE.String(object) ? value((String)object, shape)
+				: GAE.Date(object) ? value((Date)object, shape)
 				: object instanceof Text ? value(((Text)object).getValue(), shape)
 				: object instanceof Iterable ? value((Iterable<?>)object, shape)
 				: error(object);
@@ -67,6 +71,10 @@ final class EntityEncoder {
 
 	private JsonValue value(final String string, final Shape shape) {
 		return Json.createValue(string);
+	}
+
+	private JsonValue value(final Date date, final Shape shape) {
+		return Json.createValue(Instant.ofEpochMilli(date.getTime()).truncatedTo(ChronoUnit.SECONDS).toString());
 	}
 
 	private JsonValue value(final Iterable<?> iterable, final Shape shape) {

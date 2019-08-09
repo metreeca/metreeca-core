@@ -25,6 +25,7 @@ import com.google.appengine.api.datastore.Text;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.function.Consumer;
 
 import javax.json.Json;
@@ -85,6 +86,11 @@ final class EntityEncoderTest extends GAETestBase {
 
 		assertThat(encode(entity -> entity.setProperty("field", new Text(string))))
 				.containsEntry("field", Json.createValue(string));
+	}
+
+	@Test void testFormatDateFields() {
+		assertThat(encode(entity -> entity.setProperty("field", new Date(0))))
+				.containsEntry("field", Json.createValue("1970-01-01T00:00:00Z"));
 	}
 
 	@Test void testFormatCollectionFields() {
