@@ -51,8 +51,7 @@ final class DatastoreCreatorTest extends GAETestBase {
 		@Test void testCreateResource() {
 			exec(() -> new DatastoreEngine()
 
-					.handle(new Request()
-							.method(Request.POST)
+					.create(new Request()
 							.path("/container/")
 							.shape(and(
 									clazz("Entity"),
@@ -100,8 +99,7 @@ final class DatastoreCreatorTest extends GAETestBase {
 
 					() -> new DatastoreEngine()
 
-							.handle(new Request()
-									.method(Request.POST)
+							.create(new Request()
 									.path("/")
 									.shape(clazz("Entity"))
 									.header("Slug", "id")
@@ -122,8 +120,7 @@ final class DatastoreCreatorTest extends GAETestBase {
 		@Test void testReject() {
 			exec(() -> new DatastoreEngine()
 
-					.handle(new Request()
-							.method(Request.POST)
+					.create(new Request()
 							.path("/resource")
 							.body(json(), JsonValue.EMPTY_JSON_OBJECT)
 					)

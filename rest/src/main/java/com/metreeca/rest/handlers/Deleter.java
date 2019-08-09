@@ -17,15 +17,25 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Request;
+import com.metreeca.tree.Shape;
+
+import static com.metreeca.rest.Wrapper.wrapper;
+
 
 /**
  * Model-driven resource deleter.
  */
-public final class Deleter implements Handler {
+public final class Deleter extends Actor { // !! tbd
 
-	@Override public Future<Response> handle(final Request request) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	public Deleter() {
+		delegate(deleter()
+
+				.with(connector())
+				.with(wrapper(Request::container, wrapper(), splitter(true)))
+				.with(throttler(Shape.Relate, Shape.Detail))
+
+		);
 	}
 
 }

@@ -25,9 +25,6 @@ import java.util.function.Supplier;
 
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Failure.internal;
-
-import static java.lang.String.format;
 
 
 public final class DatastoreEngine implements Engine {
@@ -83,24 +80,40 @@ public final class DatastoreEngine implements Engine {
 	}
 
 
-	@Override public Future<Response> handle(final Request request) {
+	@Override public Future<Response> create(final Request request) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");
 		}
 
-		switch ( request.method() ) {
+		return new DatastoreCreator().handle(request);
+	}
 
-			case Request.GET: return new DatastoreRelator().handle(request);
-			case Request.POST: return new DatastoreCreator().handle(request);
-			case Request.PUT: throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-			case Request.DELETE: throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	@Override public Future<Response> relate(final Request request) {
 
-			default: return request.reply(
-					internal(new UnsupportedOperationException(format("%s method", request.method())))
-			);
-
+		if ( request == null ) {
+			throw new NullPointerException("null request");
 		}
+
+		return new DatastoreRelator().handle(request);
+	}
+
+	@Override public Future<Response> update(final Request request) {
+
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
+
+		return new DatastoreUpdater().handle(request);
+	}
+
+	@Override public Future<Response> delete(final Request request) {
+
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
+
+		return new DatastoreDeleter().handle(request);
 	}
 
 }

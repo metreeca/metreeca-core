@@ -42,8 +42,8 @@ public final class Creator extends Actor { // !!! tbd
 	/**
 	 * Creates a resource creator.
 	 *
-	 * @param slug a function mapping from the creation request to the name to be assigned to the newly created
-	 *             resource; must return a non-null unique value
+	 * @param slug a function mapping from the creation request to the identifier to be assigned to the newly created
+	 *             resource; must return a non-null non-clashing value
 	 *
 	 * @throws NullPointerException if {@code slug} is null
 	 */
@@ -53,7 +53,7 @@ public final class Creator extends Actor { // !!! tbd
 			throw new NullPointerException("null slug");
 		}
 
-		delegate(handler()
+		delegate(creator()
 
 				.with(connector())
 				.with(splitter(true))
@@ -61,7 +61,7 @@ public final class Creator extends Actor { // !!! tbd
 				.with(validator())
 
 				.with(handler -> request -> consumer -> {
-					synchronized ( handler() ) { // attempt to serialize slug operations from multiple snapshot txns
+					synchronized ( creator() ) { // attempt to serialize slug operations from multiple snapshot txns
 						handler.handle(request.header("Slug",
 
 								Objects.requireNonNull(slug.apply(request), "null resource name")

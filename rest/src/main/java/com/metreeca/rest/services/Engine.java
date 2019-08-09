@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  * <p>Manages storage transactions, performs storage-specific shape/payload tasks and handles model-driven CRUD actions
  * on resources and containers.</p>
  */
-public interface Engine extends Handler {
+public interface Engine {
 
 	/**
 	 * Retrieves the default engine factory.
@@ -152,5 +152,16 @@ public interface Engine extends Handler {
 	 * @throws NullPointerException if {@code message} is null
 	 */
 	public <M extends Message<M>> Result<M, Failure> validate(final M message);
+
+
+	//// CRUD Actions //////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Future<Response> create(final Request request); // !!! tbd
+
+	public Future<Response> relate(final Request request); // !!! tbd
+
+	public Future<Response> update(final Request request); // !!! tbd
+
+	public Future<Response> delete(final Request request); // !!! tbd
 
 }

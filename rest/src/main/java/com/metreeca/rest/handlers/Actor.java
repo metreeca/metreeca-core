@@ -22,12 +22,19 @@ import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
+import com.metreeca.tree.probes.Traverser;
+import com.metreeca.tree.shapes.*;
 
 import java.util.function.Function;
 
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Response.Forbidden;
+import static com.metreeca.rest.Response.Unauthorized;
 import static com.metreeca.rest.services.Engine.engine;
-import static com.metreeca.tree.probes.Evaluator.empty;
+
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.util.function.Function.identity;
 
 
 /**
@@ -46,13 +53,14 @@ public abstract class Actor extends Delegator { // !!! tbd
 		);
 	}
 
-	protected Wrapper splitter(final boolean content) {
+
+	protected Wrapper splitter(final boolean traverse) {
 		return handler -> request -> handler.handle(request.shape(
-				content? engine.resource(request.shape()) : engine.container(request.shape())
+				traverse ? engine.resource(request.shape()) : engine.container(request.shape())
 		));
 	}
 
-	protected Wrapper throttler(final String task, final String view) { // !!! optimize/caching
+	protected Wrapper throttler(final String task, final String view) { // !!! optimize/cache
 		return handler -> request -> {
 
 			final Shape shape=request.shape();
@@ -93,23 +101,82 @@ public abstract class Actor extends Delegator { // !!! tbd
 					.map(new Optimizer())
 			);
 
-			return empty(baseline) ? request.reply(response -> response.status(Response.Forbidden))
-					: empty(authorized) ? request.reply(response -> response.status(Response.Unauthorized))
+			return baseline.map(new Evaluator()) != null ? request.reply(response -> response.status(Forbidden))
+					: authorized.map(new Evaluator()) != null ? request.reply(response -> response.status(Unauthorized))
 					: handler.handle(request.map(pre)).map(post);
 
 		};
 	}
+
 
 	protected Wrapper validator() {
 		return handler -> request -> engine.validate(request).fold(handler::handle, request::reply);
 	}
 
 	protected Wrapper trimmer() {
-		return handler -> request -> engine.trim(request).fold(handler::handle, request::reply);
+		return handler -> request -> handler.handle(request).map(response ->
+				response.success()? engine.trim(response).fold(identity(), response::map) : response
+		);
 	}
 
-	protected Handler handler() {
-		return engine;
+
+	protected Handler creator() {
+		return engine::create;
+	}
+
+	protected Handler relator() {
+		return engine::relate;
+	}
+
+	protected Handler updater() {
+		return engine::update;
+	}
+
+	protected Handler deleter() {
+		return engine::delete;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class Evaluator extends Traverser<Boolean> {
+
+		@Override public Boolean probe(final Meta meta) {
+			return true;
+		}
+
+
+		@Override public Boolean probe(final Field field) {
+			return null;
+		}
+
+		@Override public Boolean probe(final And and) {
+			return and.getShapes().stream()
+					.filter(shape -> !(shape instanceof Meta))
+					.map(shape -> shape.map(this))
+					.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
+		}
+
+		@Override public Boolean probe(final Or or) {
+			return or.getShapes().stream()
+					.filter(shape -> !(shape instanceof Meta))
+					.map(shape -> shape.map(this))
+					.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
+		}
+
+		@Override public Boolean probe(final When when) {
+
+			final Boolean test=when.getTest().map(this);
+			final Boolean pass=when.getPass().map(this);
+			final Boolean fail=when.getFail().map(this);
+
+			return TRUE.equals(test) ? pass
+					: FALSE.equals(test) ? fail
+					: TRUE.equals(pass) && TRUE.equals(fail) ? TRUE
+					: FALSE.equals(pass) && FALSE.equals(fail) ? FALSE
+					: null;
+		}
+
 	}
 
 }

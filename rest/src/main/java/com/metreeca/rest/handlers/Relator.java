@@ -17,28 +17,30 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.services.Engine;
+import com.metreeca.rest.Request;
 
-import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Engine.engine;
+import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.tree.Shape.Detail;
+import static com.metreeca.tree.Shape.Digest;
+import static com.metreeca.tree.Shape.Relate;
 
 
 /**
  * Model-driven resource relator.
  */
-public final class Relator extends Delegator {
-
-	private final Engine engine=service(engine());
-
+public final class Relator extends Actor { // !!! tbd
 
 	public Relator() {
-		delegate(engine
+		delegate(relator()
 
-				.with(handler -> request -> handler.handle(request).map(response -> response
-						.headers("+Vary", "Accept", "Prefer")
+				.with(connector())
+				.with(trimmer())
+				.with(wrapper(Request::container, wrapper(), splitter(true)))
+				.with(wrapper(Request::container, throttler(Relate, Digest), throttler(Relate, Detail)))
+
+				.with(handler -> request -> handler.handle(request).map(response ->
+						response.success()? response.headers("+Vary", "Accept", "Prefer") : response
 				))
-
-				.with(handler -> request -> engine.exec(() -> handler.handle(request))) // inside a single txn
 
 		);
 	}

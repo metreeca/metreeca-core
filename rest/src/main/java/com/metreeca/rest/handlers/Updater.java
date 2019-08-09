@@ -17,16 +17,27 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Request;
+import com.metreeca.tree.Shape;
+
+import static com.metreeca.rest.Wrapper.wrapper;
 
 
 /**
  * Model-driven resource updater.
  */
-public final class Updater implements Handler {
+public final class Updater extends Actor {
 
-	@Override public Future<Response> handle(final Request request) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	public Updater() {
+		delegate(updater()
+
+				.with(connector())
+				.with(wrapper(Request::container, splitter(false), splitter(true)))
+				.with(throttler(Shape.Update, Shape.Detail))
+				.with(validator())
+
+		);
+
 	}
 
 }

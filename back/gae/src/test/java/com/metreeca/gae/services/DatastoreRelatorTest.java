@@ -54,8 +54,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 					() -> new DatastoreEngine()
 
-							.handle(new Request()
-									.method(Request.GET)
+							.relate(new Request()
 									.path("/offices/1")
 									.shape(and(
 											clazz("Office"),

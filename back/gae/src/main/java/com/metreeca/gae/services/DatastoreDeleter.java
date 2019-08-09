@@ -17,32 +17,30 @@
 
 package com.metreeca.gae.services;
 
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Inferencer;
-import com.metreeca.tree.probes.Optimizer;
-import com.metreeca.tree.probes.Redactor;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+
+import static com.metreeca.gae.services.Datastore.datastore;
+import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Failure.internal;
 
 
-abstract class DatastoreProcessor {
+final class DatastoreDeleter extends DatastoreProcessor {
 
-	Shape convey(final Shape shape) { // !!! caching
-		return shape
+	private final Datastore datastore=service(datastore());
 
-				.map(new Redactor(Shape.Mode, Shape.Convey))
-				.map(new Optimizer())
 
-				.map(new Inferencer()) // !!! engine-specific inferencer
-				.map(new Optimizer());
+	Future<Response> handle(final Request request) {
+		return request.container() ? request.reply(internal(new UnsupportedOperationException("container DELETE method")))
+				: resource(request);
 	}
 
-	Shape filter(final Shape shape) { // !!! caching
-		return shape
 
-				.map(new Redactor(Shape.Mode, Shape.Filter))
-				.map(new Optimizer())
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				.map(new Inferencer()) // !!! engine-specific inferencer
-				.map(new Optimizer());
+	private Future<Response> resource(final Request request) {
+		throw new UnsupportedOperationException("to be implemented"); // !!!
 	}
 
 }

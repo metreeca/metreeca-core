@@ -17,32 +17,19 @@
 
 package com.metreeca.gae.services;
 
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Inferencer;
-import com.metreeca.tree.probes.Optimizer;
-import com.metreeca.tree.probes.Redactor;
+import com.metreeca.gae.GAETestBase;
+
+import org.junit.jupiter.api.Nested;
 
 
-abstract class DatastoreProcessor {
+final class DatastoreUpdaterTest extends GAETestBase {
 
-	Shape convey(final Shape shape) { // !!! caching
-		return shape
+	@Nested final class Container {
 
-				.map(new Redactor(Shape.Mode, Shape.Convey))
-				.map(new Optimizer())
-
-				.map(new Inferencer()) // !!! engine-specific inferencer
-				.map(new Optimizer());
 	}
 
-	Shape filter(final Shape shape) { // !!! caching
-		return shape
+	@Nested final class Resource {
 
-				.map(new Redactor(Shape.Mode, Shape.Filter))
-				.map(new Optimizer())
-
-				.map(new Inferencer()) // !!! engine-specific inferencer
-				.map(new Optimizer());
 	}
 
 }
