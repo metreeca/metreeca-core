@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 	private final Shape pass=Evaluator.pass();
 	private final Shape fail=fail();
-	private final Shape maybe=field("label");
+	private final Shape maybe=field("label", and());
 
 
 	@Test void testField() {

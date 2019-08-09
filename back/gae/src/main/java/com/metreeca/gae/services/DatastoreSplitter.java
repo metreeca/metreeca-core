@@ -17,27 +17,98 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.tree.Shape;
+import com.metreeca.tree.probes.Optimizer;
+import com.metreeca.tree.probes.Traverser;
+import com.metreeca.tree.shapes.*;
+
+import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Or.or;
+import static com.metreeca.tree.shapes.When.when;
+
+import static java.util.stream.Collectors.toList;
 
 
 final class DatastoreSplitter {
 
 	Shape container(final Shape shape) {
-		return null;
+
+		final ContainerProbe probe=new ContainerProbe();
+		final Shape container=shape.map(probe);
+
+		return probe.traversed() ? container.map(new Optimizer()) : shape;
 	}
 
 	Shape resource(final Shape shape) {
-		return null;
+
+		final SplitterProbe probe=new ResourceProbe();
+		final Shape resource=shape.map(probe);
+
+		return probe.traversed() ? resource.map(new Optimizer()) : shape;
 	}
 
 
-	//@Override public Shape apply(final Shape shape) {
-	//
-	//	final Shape split=shape
-	//			.map(new SplitterTraverser())
-	//			.map(new Optimizer());
-	//
-	//	return split.equals(and()) ? shape : split; // !!! ignore annotations
-	//}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private abstract static class SplitterProbe extends Traverser<Shape> {
+
+		private boolean traversed;
+
+
+		boolean traversed() {
+			return traversed;
+		}
+
+		Shape traversed(final Shape shape) {
+			try { return shape; } finally { this.traversed=true; }
+		}
+
+
+		@Override public Shape probe(final And and) {
+			return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
+		}
+
+		@Override public Shape probe(final Or or) {
+			return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
+		}
+
+		@Override public Shape probe(final When when) {
+			return when(
+					when.getTest().map(this),
+					when.getPass().map(this),
+					when.getFail().map(this)
+			);
+		}
+
+	}
+
+	private static final class ContainerProbe extends SplitterProbe {
+
+		@Override public Shape probe(final Shape shape) {
+			return shape;
+		}
+
+		@Override public Shape probe(final Field field) {
+			return field.getName().equals(GAE.Contains) ? traversed(and()) : field;
+		}
+
+	}
+
+	private static final class ResourceProbe extends SplitterProbe {
+
+		@Override public Shape probe(final Shape shape) {
+			return and();
+		}
+
+		@Override public Shape probe(final Guard guard) {
+			return guard;
+		}
+
+		@Override public Shape probe(final Field field) {
+			return field.getName().equals(GAE.Contains) ? traversed(field.getShape()) : and();
+		}
+
+	}
 
 }

@@ -19,7 +19,6 @@ package com.metreeca.tree.probes;
 
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Clazz;
-import com.metreeca.tree.shapes.Field;
 
 import org.junit.jupiter.api.Test;
 
@@ -71,7 +70,7 @@ final class PrunerTest {
 
 	@Test void testField() {
 
-		assertThat(prune(Field.field("value"))).as("dead").isEqualTo(and());
+		assertThat(prune(field("value", and()))).as("dead").isEqualTo(and());
 		assertThat(prune(field("value", maxCount(1)))).as("live").isEqualTo(field("value", maxCount(1)));
 
 	}

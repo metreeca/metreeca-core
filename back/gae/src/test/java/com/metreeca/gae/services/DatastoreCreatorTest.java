@@ -32,7 +32,6 @@ import javax.json.JsonValue;
 
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Failure.DataInvalid;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.required;
@@ -113,30 +112,6 @@ final class DatastoreCreatorTest extends GAETestBase {
 									.hasStatus(Response.InternalServerError)
 									.doesNotHaveHeader("Location")
 							)
-			);
-		}
-
-		@Test void testRejectInvalidPayload() {
-			exec(() -> new DatastoreEngine()
-
-					.handle(new Request()
-							.method(Request.POST)
-							.path("/")
-							.shape(field("label", type(GAE.String)))
-							.body(json(), Json.createObjectBuilder()
-									.add("label", 123)
-									.build()
-							)
-					)
-
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.UnprocessableEntity)
-							.doesNotHaveHeader("Location")
-							.hasBody(json(), json -> assertThat(json)
-									.containsEntry("error", Json.createValue(DataInvalid))
-									.containsKey("trace")
-							)
-					)
 			);
 		}
 

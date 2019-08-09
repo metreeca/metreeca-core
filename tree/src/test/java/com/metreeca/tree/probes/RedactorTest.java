@@ -50,7 +50,7 @@ final class RedactorTest {
 
 	@Test void testReplaceTargetedConditions() {
 
-		final Shape shape=field("type");
+		final Shape shape=field("type", and());
 		final Shape guard=guard("value", "first").then(shape);
 
 		assertThat(guard.map(first)).as("included value").isEqualTo(shape);
@@ -61,9 +61,9 @@ final class RedactorTest {
 
 	@Test void testRedactNestedShapes() {
 
-		final Shape x=field("x");
-		final Shape y=field("y");
-		final Shape z=field("z");
+		final Shape x=field("x", and());
+		final Shape y=field("y", and());
+		final Shape z=field("z", and());
 
 		final Shape guard=guard("value", "first");
 
@@ -87,8 +87,8 @@ final class RedactorTest {
 
 	@Test void testHandleWildcards() {
 
-		final Shape x=field("x");
-		final Shape y=field("y");
+		final Shape x=field("x", and());
+		final Shape y=field("y", and());
 
 		assertThat(and(guard("value", "first").then(x), guard("value", "rest").then(y)).map(any))
 				.as("wildcard")

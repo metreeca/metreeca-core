@@ -55,15 +55,11 @@ public final class Guard implements Shape {
 	private Guard(final String axis, final Collection<String> values) {
 
 		if ( axis == null ) {
-			throw new NullPointerException("null axis IRI");
+			throw new NullPointerException("null axis");
 		}
 
-		if ( values == null ) {
+		if ( values == null ||  values.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
-		}
-
-		if ( values.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null value");
 		}
 
 		this.axis=axis;

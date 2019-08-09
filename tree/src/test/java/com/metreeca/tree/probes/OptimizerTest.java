@@ -18,7 +18,6 @@
 package com.metreeca.tree.probes;
 
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.shapes.Field;
 
 import org.junit.jupiter.api.Test;
 
@@ -112,7 +111,7 @@ final class OptimizerTest {
 
 	@Test void testOptimizeAnd() {
 
-		assertThat(optimize(and(or(), Field.field("type")))).as("simplify constants").isEqualTo(or());
+		assertThat(optimize(and(or(), field("type", and())))).as("simplify constants").isEqualTo(or());
 		assertThat(optimize(and(x))).as("unwrap singletons").isEqualTo(x);
 		assertThat(optimize(and(x, x))).as("unwrap unique values").isEqualTo(x);
 		assertThat(optimize(and(x, x, y))).as("remove duplicates").isEqualTo(and(x, y));
@@ -122,7 +121,7 @@ final class OptimizerTest {
 
 	@Test void testOptimizeOr() {
 
-		assertThat(optimize(or(and(), Field.field("type")))).as("simplify constants").isEqualTo(and());
+		assertThat(optimize(or(and(), field("type", and())))).as("simplify constants").isEqualTo(and());
 		assertThat(optimize(or(x))).as("unwrap singletons").isEqualTo(x);
 		assertThat(optimize(or(x, x))).as("unwrap unique values").isEqualTo(x);
 		assertThat(optimize(or(x, x, y))).as("remove duplicates").isEqualTo(or(x, y));

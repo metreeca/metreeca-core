@@ -40,10 +40,6 @@ import static java.util.stream.Collectors.*;
  */
 public final class Field implements Shape {
 
-	public static Field field(final String name) {
-		return new Field(name, and());
-	}
-
 	public static Field field(final String name, final Shape shape) {
 		return new Field(name, shape);
 	}
