@@ -43,14 +43,14 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toMap;
 
 
-final class DatastoreValidator {
+final class DatastoreValidator extends DatastoreProcessor {
 
 	<M extends Message<M>> Result<M, Failure> validate(final M message) {
 		return message
 
 				.body(entity())
 
-				.process(entity -> Optional.of(validate(message.shape(), entity))
+				.process(entity -> Optional.of(validate(convey(message.shape()), entity))
 						.filter(trace -> !trace.isEmpty())
 						.map(trace -> Result.<M, Failure>Error(invalid(trace)))
 						.orElseGet(() -> Value(message))

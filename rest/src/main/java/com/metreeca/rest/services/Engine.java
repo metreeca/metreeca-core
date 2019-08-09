@@ -122,25 +122,28 @@ public interface Engine extends Handler {
 	 * Trims the message payload.
 	 *
 	 * <p>Rewrites the engine-specific message {@linkplain Message#body(Format) payload} retaining only the subset
-	 * compatible with the message {@linkplain Message#shape() shape}.</p>
+	 * compatible with the envelope of the message {@linkplain Message#shape() shape}.</p>
 	 *
 	 * @param message the message whose engine-specific payload is to be trimmed
 	 * @param <M>     the type of {@code message}
 	 *
-	 * @return the given {@code message} with an updated payload
+	 * @return a value providing access to the given {@code message} with an updated payload, if its engine-specific
+	 * {@linkplain Message#body(Format) payload} is well-formed and compatible with its {@linkplain Message#shape()
+	 * shape}; an error providing access to a failure possibly {@linkplain Failure#trace(Trace) containing} a validation
+	 * trace, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public <M extends Message<M>> M trim(final M message);
+	public <M extends Message<M>> Result<M, Failure> trim(final M message);
 
 	/**
 	 * Validates the message payload.
 	 *
-	 * <p>Rewrites the engine-specific {@linkplain Message#body(Format) message payload} retaining only the subset
-	 * compatible with the {@linkplain Message#shape() message shape}.</p>
+	 * <p>Validates the engine-specific message {@linkplain Message#body(Format) payload} against the message
+	 * {@linkplain Message#shape() shape}.</p>
 	 *
 	 * @param <M>     the type of {@code message}
-	 * @param message the message whose engine-specific payload is to be trimmed
+	 * @param message the message whose engine-specific payload is to be validated
 	 *
 	 * @return a value providing access to {@code message}, if its engine-specific {@linkplain Message#body(Format)
 	 * payload} is well-formed and compatible with its {@linkplain Message#shape() shape}; an error providing access to

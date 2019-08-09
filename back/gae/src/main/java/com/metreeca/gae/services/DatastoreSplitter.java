@@ -30,7 +30,7 @@ import static com.metreeca.tree.shapes.When.when;
 import static java.util.stream.Collectors.toList;
 
 
-final class DatastoreSplitter {
+final class DatastoreSplitter extends DatastoreProcessor {
 
 	Shape container(final Shape shape) {
 

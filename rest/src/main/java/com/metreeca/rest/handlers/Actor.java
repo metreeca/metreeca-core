@@ -104,8 +104,8 @@ public abstract class Actor extends Delegator { // !!! tbd
 		return handler -> request -> engine.validate(request).fold(handler::handle, request::reply);
 	}
 
-	private Wrapper trimmer() {
-		return handler -> request -> handler.handle(engine.trim(request));
+	protected Wrapper trimmer() {
+		return handler -> request -> engine.trim(request).fold(handler::handle, request::reply);
 	}
 
 	protected Handler handler() {

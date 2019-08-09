@@ -44,7 +44,7 @@ final class CreatorTest {
 						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 					}
 
-					@Override public <M extends Message<M>> M trim(final M message) {
+					@Override public <M extends Message<M>> Result<M, Failure> trim(final M message) {
 						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 					}
 

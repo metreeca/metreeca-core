@@ -18,10 +18,6 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Inferencer;
-import com.metreeca.tree.probes.Optimizer;
-import com.metreeca.tree.probes.Redactor;
 
 import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -36,7 +32,7 @@ import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 
 
-final class DatastoreCreator {
+final class DatastoreCreator extends DatastoreProcessor {
 
 	private final Datastore datastore=service(datastore());
 
@@ -51,14 +47,6 @@ final class DatastoreCreator {
 
 	private Future<Response> container(final Request request) {
 		return request
-
-				.shape(request.shape()
-
-						.map(new Redactor(Shape.Mode, Shape.Convey))
-						.map(new Inferencer())
-						.map(new Optimizer())
-
-				)
 
 				.body(entity())
 
@@ -91,7 +79,7 @@ final class DatastoreCreator {
 
 				}))
 
-				.value(entity -> datastore.exec(service -> {
+				.value(entity -> datastore.exec(service -> { // store entity
 
 					final Key created=service.put(entity);
 

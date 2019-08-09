@@ -64,13 +64,13 @@ public final class DatastoreEngine implements Engine {
 	}
 
 
-	@Override public <M extends Message<M>> M trim(final M message) {
+	@Override public <M extends Message<M>> Result<M, Failure> trim(final M message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
 		}
 
-		return null;
+		return new DatastoreTrimmer().trim(message);
 	}
 
 	@Override public <M extends Message<M>> Result<M, Failure> validate(final M message) {

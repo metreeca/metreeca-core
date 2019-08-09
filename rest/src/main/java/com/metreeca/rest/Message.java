@@ -498,9 +498,6 @@ public abstract class Message<T extends Message<T>> {
 		return format.set(self(), value);
 	}
 
-	public <V> T body(final Format<V> format, final Function<V, V> mapper) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

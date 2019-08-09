@@ -40,7 +40,7 @@ import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 
 
-final class DatastoreRelator {
+final class DatastoreRelator extends DatastoreProcessor {
 
 	private final Datastore datastore=service(datastore());
 
