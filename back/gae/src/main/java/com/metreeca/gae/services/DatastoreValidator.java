@@ -18,6 +18,9 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Message;
+import com.metreeca.rest.Result;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.Trace;
 import com.metreeca.tree.shapes.*;
@@ -26,11 +29,12 @@ import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
+import static com.metreeca.gae.formats.EntityFormat.entity;
+import static com.metreeca.rest.Failure.invalid;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tree.Trace.trace;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.Type.type;
@@ -41,7 +45,22 @@ import static java.util.stream.Collectors.toMap;
 
 final class DatastoreValidator {
 
-	Trace validate(final Shape shape, final Object value) {
+	<M extends Message<M>> Result<M, Failure> validate(final M message) {
+		return message
+
+				.body(entity())
+
+				.process(entity -> Optional.of(validate(message.shape(), entity))
+						.filter(trace -> !trace.isEmpty())
+						.map(trace -> Result.<M, Failure>Error(invalid(trace)))
+						.orElseGet(() -> Value(message))
+				);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Trace validate(final Shape shape, final Object value) {
 		if ( GAE.Entity(value) ) {
 
 			final Map<String, Shape> fields=fields(shape);

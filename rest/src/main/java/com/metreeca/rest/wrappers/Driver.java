@@ -19,7 +19,6 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Inferencer;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
@@ -92,9 +91,7 @@ public final class Driver implements Wrapper {
 			throw new NullPointerException("null shape");
 		}
 
-		this.shape=shape
-				.map(new Inferencer())
-				.map(new Optimizer());
+		this.shape=shape.map(new Optimizer());
 	}
 
 

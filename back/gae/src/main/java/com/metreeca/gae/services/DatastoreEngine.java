@@ -17,10 +17,9 @@
 
 package com.metreeca.gae.services;
 
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.services.Engine;
+import com.metreeca.tree.Shape;
 
 import java.util.function.Supplier;
 
@@ -45,7 +44,51 @@ public final class DatastoreEngine implements Engine {
 		return datastore.exec(service -> task.get());
 	}
 
+
+	@Override public Shape container(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return new DatastoreSplitter().container(shape);
+	}
+
+	@Override public Shape resource(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return new DatastoreSplitter().resource(shape);
+	}
+
+
+	@Override public <M extends Message<M>> M trim(final M message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		return null;
+	}
+
+	@Override public <M extends Message<M>> Result<M, Failure> validate(final M message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		return new DatastoreValidator().validate(message);
+	}
+
+
 	@Override public Future<Response> handle(final Request request) {
+
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
+
 		switch ( request.method() ) {
 
 			case Request.GET: return new DatastoreRelator().handle(request);

@@ -17,7 +17,6 @@
 
 package com.metreeca.gae.services;
 
-import com.metreeca.gae.GAE;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -25,7 +24,6 @@ import com.metreeca.tree.Query.Probe;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inferencer;
 import com.metreeca.tree.probes.Optimizer;
-import com.metreeca.tree.probes.Redactor;
 import com.metreeca.tree.queries.*;
 
 import com.google.appengine.api.datastore.Entity;
@@ -83,11 +81,6 @@ final class DatastoreRelator {
 
 				.shape(request.shape() // !!! identify/cache
 
-						.map(new Redactor(Shape.Role, request.roles()))
-						.map(new Redactor(Shape.Task, Shape.Relate))
-						.map(new Redactor(Shape.View, Shape.Detail))
-
-						.map(new Splitter(true, GAE.Contains))
 						.map(new Inferencer())
 						.map(new Optimizer())
 

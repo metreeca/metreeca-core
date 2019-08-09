@@ -39,9 +39,6 @@ import static java.util.stream.Collectors.toList;
 
 final class EntityDecoder {
 
-	private static final Shape EmptyShape=and();
-
-
 	Entity decode(final JsonObject json, final Shape shape, final String id) {
 
 		final Entity value=new Entity(clazz(shape).orElse("*"), id);
@@ -98,7 +95,7 @@ final class EntityDecoder {
 
 		object.forEach((name, json) -> {
 
-			final Object value=value(json, fields.getOrDefault(name, EmptyShape));
+			final Object value=value(json, fields.getOrDefault(name, and()));
 
 			if ( value != null ) {
 				if ( GAE.Entity(value) ) { // !!! un/indexed from shape metadata?

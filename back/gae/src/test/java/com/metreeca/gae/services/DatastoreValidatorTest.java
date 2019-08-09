@@ -19,6 +19,8 @@ package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
+import com.metreeca.gae.formats.EntityFormat;
+import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.*;
@@ -74,7 +76,13 @@ final class DatastoreValidatorTest extends GAETestBase {
 	}
 
 	private boolean validate(final Shape shape, final Entity entity) {
-		return new DatastoreValidator().validate(field("value", shape), entity).isEmpty();
+		return new DatastoreValidator()
+				.validate(new Request()
+						.shape(field("value", shape))
+						.body(EntityFormat.entity(), entity)
+				)
+				.value()
+				.isPresent();
 	}
 
 

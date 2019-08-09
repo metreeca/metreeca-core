@@ -15,8 +15,29 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Basic shape/query probes.
- */
+package com.metreeca.gae.services;
 
-package com.metreeca.tree.probes;
+import com.metreeca.tree.Shape;
+
+
+final class DatastoreSplitter {
+
+	Shape container(final Shape shape) {
+		return null;
+	}
+
+	Shape resource(final Shape shape) {
+		return null;
+	}
+
+
+	//@Override public Shape apply(final Shape shape) {
+	//
+	//	final Shape split=shape
+	//			.map(new SplitterTraverser())
+	//			.map(new Optimizer());
+	//
+	//	return split.equals(and()) ? shape : split; // !!! ignore annotations
+	//}
+
+}

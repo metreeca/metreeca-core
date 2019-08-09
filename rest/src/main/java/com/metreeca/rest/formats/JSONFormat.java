@@ -20,13 +20,13 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.*;
 
 import java.io.*;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParsingException;
 
+import static com.metreeca.rest.Failure.malformed;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -96,12 +96,7 @@ public final class JSONFormat implements Format<JsonObject> {
 
 			} catch ( final JsonParsingException e ) {
 
-				return Error(new Failure()
-						.status(Response.BadRequest)
-						.error(Failure.BodyMalformed)
-						.notes(Optional.ofNullable(e.getMessage()).orElse(""))
-						.cause(e)
-				);
+				return Error(malformed(e));
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -110,7 +105,9 @@ public final class JSONFormat implements Format<JsonObject> {
 		})
 
 				: Error(new Failure()
-				.status(Response.UnsupportedMediaType).notes("missing JSON body"));
+				.status(Response.UnsupportedMediaType)
+				.notes("missing JSON body")
+		);
 	}
 
 	/**

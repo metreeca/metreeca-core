@@ -34,9 +34,6 @@ import static com.metreeca.tree.shapes.Field.fields;
 
 final class EntityEncoder {
 
-	private static final Shape EmptyShape=and();
-
-
 	JsonObject encode(final Entity entity, final Shape shape) {
 		return value(entity, shape);
 	}
@@ -88,7 +85,7 @@ final class EntityEncoder {
 
 		entity.getProperties().forEach((name, object) -> {
 
-			final JsonValue value=value(object, fields.getOrDefault(name, EmptyShape));
+			final JsonValue value=value(object, fields.getOrDefault(name, and()));
 
 			if ( value.getValueType() != JsonValue.ValueType.NULL ) {
 				builder.add(name, value);

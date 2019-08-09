@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import javax.json.*;
@@ -62,12 +63,50 @@ public final class Failure implements Function<Response, Response> {
 
 
 	/**
-	 * Creates an internal server error failure.
+	 * Creates a failure for a payload parsing issue.
+	 *
+	 * @param cause the parsing error
+	 *
+	 * @return a new failure reporting {@code cause} with a {@value Response#BadRequest} status code
+	 *
+	 * @throws NullPointerException if {@code cause} is null
+	 */
+	public static Failure malformed(final Throwable cause) {
+		return new Failure()
+				.status(Response.BadRequest)
+				.error(BodyMalformed)
+				.notes(Optional.ofNullable(cause.getMessage()).orElse(""))
+				.cause(cause);
+	}
+
+	/**
+	 * Creates a failure for a payload validation issue.
+	 *
+	 * @param trace the validation trace
+	 *
+	 * @return a new failure reporting {@code trace} with a {@value Response#UnprocessableEntity} status code
+	 *
+	 * @throws NullPointerException if {@code trace} is null
+	 */
+	public static Failure invalid(final Trace trace) {
+
+		if ( trace == null ) {
+			throw new NullPointerException("null trace");
+		}
+
+		return new Failure()
+				.status(Response.UnprocessableEntity)
+				.error(DataInvalid)
+				.trace(trace);
+	}
+
+	/**
+	 * Creates a failure for an internal server error.
 	 *
 	 * @param cause the internal server error
 	 *
-	 * @return a new failure with a {@value Response#InternalServerError} status code; no detail about {@code cause} is
-	 * disclosed to the client
+	 * @return a new failure reporting {@code cause} with a {@value Response#InternalServerError} status code; no detail
+	 * about {@code cause} is disclosed to the client
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
@@ -336,7 +375,7 @@ public final class Failure implements Function<Response, Response> {
 				final JsonArrayBuilder objects=Json.createArrayBuilder();
 
 				values.forEach(value -> {
-					if ( value ==null ) {
+					if ( value == null ) {
 
 						objects.add(JsonValue.NULL);
 

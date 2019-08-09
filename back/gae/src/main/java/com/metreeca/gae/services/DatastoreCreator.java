@@ -17,9 +17,7 @@
 
 package com.metreeca.gae.services;
 
-import com.metreeca.gae.GAE;
 import com.metreeca.rest.*;
-import com.metreeca.rest.Codecs;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inferencer;
 import com.metreeca.tree.probes.Optimizer;
@@ -28,13 +26,11 @@ import com.metreeca.tree.probes.Redactor;
 import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Failure.DataInvalid;
 import static com.metreeca.rest.Failure.internal;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
@@ -58,32 +54,13 @@ final class DatastoreCreator {
 
 				.shape(request.shape()
 
-						.map(new Redactor(Shape.Role, request.roles()))
-						.map(new Redactor(Shape.Task, Shape.Create))
-						.map(new Redactor(Shape.View, Shape.Detail))
 						.map(new Redactor(Shape.Mode, Shape.Convey))
-
-						.map(new Splitter(true, GAE.Contains))
 						.map(new Inferencer())
 						.map(new Optimizer())
 
 				)
 
-				.map(_request -> _request // extract and validate entity
-
-						.body(entity())
-
-						.process(entity -> Optional.of(new DatastoreValidator().validate(_request.shape(), entity))
-								.filter(trace -> !trace.isEmpty())
-								.map(trace -> Result.<Entity, Failure>Error(new Failure()
-										.status(Response.UnprocessableEntity)
-										.error(DataInvalid)
-										.trace(trace)
-								))
-								.orElseGet(() -> Value(entity))
-						)
-
-				)
+				.body(entity())
 
 				.process(entity -> datastore.exec(service -> { // assign entity a slug-based id
 

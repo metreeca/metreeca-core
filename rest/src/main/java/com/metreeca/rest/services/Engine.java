@@ -18,6 +18,8 @@
 package com.metreeca.rest.services;
 
 import com.metreeca.rest.*;
+import com.metreeca.tree.Shape;
+import com.metreeca.tree.Trace;
 
 import java.util.function.Supplier;
 
@@ -25,7 +27,8 @@ import java.util.function.Supplier;
 /**
  * Model-driven storage engine.
  *
- * <p>Manages storage transactions and performs model-driven CRUD actions on resources and containers.</p>
+ * <p>Manages storage transactions, performs storage-specific shape/payload tasks and handles model-driven CRUD actions
+ * on resources and containers.</p>
  */
 public interface Engine extends Handler {
 
@@ -39,7 +42,35 @@ public interface Engine extends Handler {
 	}
 
 
-	//// Transactions //////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Transaction Management ////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Executes a task within a storage transaction.
+	 *
+	 * <p>If a transaction is not already active on the underlying storage, begins one and commits it on successful
+	 * task completion; if the task throws an exception, the transaction is rolled back and the exception rethrown; in
+	 * either case, no action is taken if the transaction was already terminated inside the task.</p>
+	 *
+	 * <p>Falls back to plain task execution if transactions are not supported by this engine.</p>
+	 *
+	 * @param task the task to be executed
+	 *
+	 * @throws NullPointerException if {@code task} is null
+	 */
+	public default void exec(final Runnable task) {
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		exec(() -> {
+
+			task.run();
+
+			return this;
+
+		});
+	}
 
 	/**
 	 * Executes a task within a storage transaction.
@@ -58,5 +89,65 @@ public interface Engine extends Handler {
 	 * @throws NullPointerException if {@code task} is null or returns a null value
 	 */
 	public <R> R exec(final Supplier<R> task);
+
+
+	//// Shape Splitting ///////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Extract the container shape from a combo container/resource shape.
+	 *
+	 * @param shape the (possibly) combined container/resource shape to be processed
+	 *
+	 * @return the container section extracted from {@code shape}, if one is presente, or {@code shape}, otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public Shape container(final Shape shape);
+
+	/**
+	 * Extract the resource shape from a combo container/resource shape.
+	 *
+	 * @param shape the (possibly) combined container/resource shape to be processed
+	 *
+	 * @return the resource section extracted from {@code shape}, if one is present, or {@code shape}, otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public Shape resource(final Shape shape);
+
+
+	//// Payload Management ////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Trims the message payload.
+	 *
+	 * <p>Rewrites the engine-specific message {@linkplain Message#body(Format) payload} retaining only the subset
+	 * compatible with the message {@linkplain Message#shape() shape}.</p>
+	 *
+	 * @param message the message whose engine-specific payload is to be trimmed
+	 * @param <M>     the type of {@code message}
+	 *
+	 * @return the given {@code message} with an updated payload
+	 *
+	 * @throws NullPointerException if {@code message} is null
+	 */
+	public <M extends Message<M>> M trim(final M message);
+
+	/**
+	 * Validates the message payload.
+	 *
+	 * <p>Rewrites the engine-specific {@linkplain Message#body(Format) message payload} retaining only the subset
+	 * compatible with the {@linkplain Message#shape() message shape}.</p>
+	 *
+	 * @param <M>     the type of {@code message}
+	 * @param message the message whose engine-specific payload is to be trimmed
+	 *
+	 * @return a value providing access to {@code message}, if its engine-specific {@linkplain Message#body(Format)
+	 * payload} is well-formed and compatible with its {@linkplain Message#shape() shape}; an error providing access to
+	 * a failure possibly {@linkplain Failure#trace(Trace) containing} a validation trace, otherwise
+	 *
+	 * @throws NullPointerException if {@code message} is null
+	 */
+	public <M extends Message<M>> Result<M, Failure> validate(final M message);
 
 }
