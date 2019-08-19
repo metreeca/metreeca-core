@@ -11,7 +11,7 @@ defaults:
   - scope:
       path: ""
     values:
-      project: "link"
+      project: "metreeca-link"
       version: "0.0.0-SNAPSHOT"
       tagline: "Metreeca Linked Data Framework"
       release: "https://github.com/metreeca/link/releases/tag/v0.0.0-SNAPSHOT"

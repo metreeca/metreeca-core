@@ -146,12 +146,6 @@
 				<filtering>true</filtering>
 			</resource>
 
-			<resource>
-				<directory>${basedir}/docs/_resources</directory>
-				<targetPath>${basedir}/docs</targetPath>
-				<filtering>true</filtering>
-			</resource>
-
 		</resources>
 
 		<plugins>
@@ -247,6 +241,42 @@
 
 			</plugin>
 
+			<plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+
+				<executions>
+					<execution>
+
+						<id>copy-jekyll-configuration</id>
+						<inherited>false</inherited>
+						<phase>site</phase>
+
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+
+						<configuration>
+
+							<outputDirectory>${basedir}/docs</outputDirectory>
+							<overwrite>true</overwrite>
+
+							<resources>
+								<resource>
+									<directory>${basedir}/docs/_resources</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+
+						</configuration>
+
+					</execution>
+				</executions>
+
+			</plugin>
+
 			<plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
 
 				<groupId>org.apache.maven.plugins</groupId>
@@ -317,7 +347,6 @@
 				</executions>
 
 			</plugin>
-
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-site-plugin -->
 
