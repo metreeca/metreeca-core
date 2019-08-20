@@ -56,7 +56,7 @@ public abstract class Traverser<V> implements Shape.Probe<V> {
 
 	//// Term Constraints //////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public V probe(final Type type) { return probe((Shape)type); }
+	@Override public V probe(final Datatype datatype) { return probe((Shape)datatype); }
 
 	@Override public V probe(final Clazz clazz) { return probe((Shape)clazz); }
 

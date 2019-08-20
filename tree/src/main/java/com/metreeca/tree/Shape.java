@@ -241,7 +241,7 @@ public interface Shape {
 
 		//// Term Constraints //////////////////////////////////////////////////////////////////////////////////////////
 
-		public V probe(final Type type);
+		public V probe(final Datatype datatype);
 
 		public V probe(final Clazz clazz);
 

@@ -20,6 +20,7 @@ package com.metreeca.gae.formats;
 import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
 import com.metreeca.tree.Shape;
+import com.metreeca.tree.shapes.Datatype;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
@@ -36,7 +37,7 @@ import javax.json.Json;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Type.type;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -84,7 +85,7 @@ final class EntityDecoderTest extends GAETestBase {
 	}
 
 	@Test void testParseIntegerFieldsExpectedDouble() {
-		assertThat(decode("{ 'field': 123 }", field("field", type(GAE.Floating))).getProperty("field"))
+		assertThat(decode("{ 'field': 123 }", field("field", Datatype.datatype(GAE.Floating))).getProperty("field"))
 				.isEqualTo(123.0D);
 	}
 
@@ -105,7 +106,7 @@ final class EntityDecoderTest extends GAETestBase {
 	}
 
 	@Test void testParseStringFieldsAsExpectedDate() {
-		assertThat(decode("{ 'field': '2019-01-01T00:00Z' }", field("field", type(GAE.Date))).getProperty("field"))
+		assertThat(decode("{ 'field': '2019-01-01T00:00Z' }", field("field", Datatype.datatype(GAE.Date))).getProperty("field"))
 				.isEqualTo(Date.from(OffsetDateTime.parse("2019-01-01T00:00Z").toInstant()));
 	}
 

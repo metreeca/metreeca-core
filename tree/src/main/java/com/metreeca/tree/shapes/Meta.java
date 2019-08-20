@@ -23,6 +23,7 @@ import com.metreeca.tree.probes.Traverser;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -76,6 +77,42 @@ public final class Meta implements Shape {
 				Map.Entry::getValue,
 				(x, y) -> Objects.equals(x, y) ? x : null
 		));
+	}
+
+
+	public static Optional<String> alias(final Shape shape) {
+		return meta(shape, Alias);
+	}
+
+	public static Optional<String> label(final Shape shape) {
+		return meta(shape, Label);
+	}
+
+	public static Optional<String> notes(final Shape shape) {
+		return meta(shape, Notes);
+	}
+
+	public static Optional<String> placeholder(final Shape shape) {
+		return meta(shape, Placeholder);
+	}
+
+	public static Optional<String> dflt(final Shape shape) {
+		return meta(shape, Default);
+	}
+
+	public static Optional<String> hint(final Shape shape) {
+		return meta(shape, Hint);
+	}
+
+	public static Optional<String> group(final Shape shape) {
+		return meta(shape, Group);
+	}
+
+
+	private static Optional<String> meta(final Shape shape, final String label) {
+		return Optional.ofNullable(metas(shape).get(label))
+				.filter(value -> value instanceof String)
+				.map(Object::toString);
 	}
 
 

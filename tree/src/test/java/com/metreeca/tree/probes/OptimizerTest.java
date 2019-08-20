@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Guard.guard;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
@@ -31,7 +32,6 @@ import static com.metreeca.tree.shapes.Meta.alias;
 import static com.metreeca.tree.shapes.Meta.label;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.Or.or;
-import static com.metreeca.tree.shapes.Type.type;
 import static com.metreeca.tree.shapes.When.when;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class OptimizerTest {
 
-	private static final Shape x=type("nil");
+	private static final Shape x=datatype("nil");
 	private static final Shape y=minCount(1);
 	private static final Shape z=maxCount(10);
 

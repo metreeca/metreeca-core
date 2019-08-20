@@ -18,13 +18,14 @@
 package com.metreeca.tree.probes;
 
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.shapes.Clazz;
 
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
+import static com.metreeca.tree.shapes.Clazz.clazz;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Like.like;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
@@ -37,7 +38,6 @@ import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
 import static com.metreeca.tree.shapes.MinLength.minLength;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.Pattern.pattern;
-import static com.metreeca.tree.shapes.Type.type;
 import static com.metreeca.tree.shapes.When.when;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,8 +50,8 @@ final class PrunerTest {
 		assertThat(prune(minCount(1))).as("MinCount").isEqualTo(minCount(1));
 		assertThat(prune(maxCount(1))).as("MaxCount").isEqualTo(maxCount(1));
 
-		assertThat(prune(Clazz.clazz("nil"))).as("Clazz").isEqualTo(Clazz.clazz("nil"));
-		assertThat(prune(type("nil"))).as("Type").isEqualTo(type("nil"));
+		assertThat(prune(clazz("nil"))).as("Clazz").isEqualTo(clazz("nil"));
+		assertThat(prune(datatype("nil"))).as("Type").isEqualTo(datatype("nil"));
 
 		assertThat(prune(all("nil"))).as("Universal").isEqualTo(all("nil"));
 		assertThat(prune(any("nil"))).as("Universal").isEqualTo(any("nil"));

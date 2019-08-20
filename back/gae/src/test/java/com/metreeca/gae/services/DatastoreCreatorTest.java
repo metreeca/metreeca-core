@@ -21,6 +21,7 @@ import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.tree.shapes.Datatype;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
@@ -38,7 +39,6 @@ import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Type.type;
 
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,13 +49,13 @@ final class DatastoreCreatorTest extends GAETestBase {
 	@Nested final class Container {
 
 		@Test void testCreateResource() {
-			exec(() -> new DatastoreEngine()
+			exec(() -> new DatastoreCreator()
 
-					.create(new Request()
+					.handle(new Request()
 							.path("/container/")
 							.shape(and(
 									clazz("Entity"),
-									field("label", and(required(), type(GAE.String)))
+									field("label", and(required(), Datatype.datatype(GAE.String)))
 							))
 							.header("Slug", "slug")
 							.body(json(), Json.createObjectBuilder()
@@ -97,9 +97,9 @@ final class DatastoreCreatorTest extends GAETestBase {
 							service.put(new Entity("Entity", "/id"))
 					),
 
-					() -> new DatastoreEngine()
+					() -> new DatastoreCreator()
 
-							.create(new Request()
+							.handle(new Request()
 									.path("/")
 									.shape(clazz("Entity"))
 									.header("Slug", "id")
@@ -118,9 +118,9 @@ final class DatastoreCreatorTest extends GAETestBase {
 	@Nested final class Resource {
 
 		@Test void testReject() {
-			exec(() -> new DatastoreEngine()
+			exec(() -> new DatastoreCreator()
 
-					.create(new Request()
+					.handle(new Request()
 							.path("/resource")
 							.body(json(), JsonValue.EMPTY_JSON_OBJECT)
 					)

@@ -31,7 +31,7 @@ import javax.json.*;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.fields;
-import static com.metreeca.tree.shapes.Type.type;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
@@ -65,13 +65,13 @@ final class EntityDecoder {
 	}
 
 	private Number number(final JsonNumber number, final Shape shape) { // ;( removing casts boxes everything to double
-		return type(shape).orElse("").equals(GAE.Floating) ? (Number)new Double(number.doubleValue())
+		return datatype(shape).orElse("").equals(GAE.Floating) ? (Number)new Double(number.doubleValue())
 				: number.isIntegral() ? (Number)new Long(number.longValue())
 				: (Number)new Double(number.doubleValue());
 	}
 
 	private Object string(final JsonString string, final Shape shape) {
-		switch ( type(shape).orElse("") ) {
+		switch ( datatype(shape).orElse("") ) {
 
 			case GAE.Date: return date(string);
 

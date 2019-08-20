@@ -72,6 +72,11 @@ public final class Failure implements Function<Response, Response> {
 	 * @throws NullPointerException if {@code cause} is null
 	 */
 	public static Failure malformed(final Throwable cause) {
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
 		return new Failure()
 				.status(Response.BadRequest)
 				.error(BodyMalformed)
@@ -110,7 +115,7 @@ public final class Failure implements Function<Response, Response> {
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
-	public static Failure internal(final RuntimeException cause) {
+	public static Failure internal(final Throwable cause) {
 
 		if ( cause == null ) {
 			throw new NullPointerException("null cause");

@@ -22,6 +22,7 @@ import com.metreeca.gae.GAETestBase;
 import com.metreeca.gae.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
+import com.metreeca.tree.shapes.Datatype;
 
 import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
 import static com.metreeca.tree.shapes.MinLength.minLength;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.Pattern.pattern;
-import static com.metreeca.tree.shapes.Type.type;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,27 +100,27 @@ final class DatastoreValidatorTest extends GAETestBase {
 	@Test void testValidateType() {
 		exec(() -> {
 
-			assertThat(validate(type(GAE.Entity), entity(entity -> {}))).isTrue();
-			assertThat(validate(type(GAE.Entity), 1)).isFalse();
+			assertThat(validate(Datatype.datatype(GAE.Entity), entity(entity -> {}))).isTrue();
+			assertThat(validate(Datatype.datatype(GAE.Entity), 1)).isFalse();
 
-			assertThat(validate(type(GAE.Boolean), true)).isTrue();
-			assertThat(validate(type(GAE.Boolean), 1)).isFalse();
+			assertThat(validate(Datatype.datatype(GAE.Boolean), true)).isTrue();
+			assertThat(validate(Datatype.datatype(GAE.Boolean), 1)).isFalse();
 
-			assertThat(validate(type(GAE.Integral), 1L)).isTrue();
-			assertThat(validate(type(GAE.Integral), 1)).isTrue();
-			assertThat(validate(type(GAE.Integral), "")).isFalse();
+			assertThat(validate(Datatype.datatype(GAE.Integral), 1L)).isTrue();
+			assertThat(validate(Datatype.datatype(GAE.Integral), 1)).isTrue();
+			assertThat(validate(Datatype.datatype(GAE.Integral), "")).isFalse();
 
-			assertThat(validate(type(GAE.Floating), 1.0D)).isTrue();
-			assertThat(validate(type(GAE.Floating), 1.0F)).isTrue();
-			assertThat(validate(type(GAE.Floating), "")).isFalse();
+			assertThat(validate(Datatype.datatype(GAE.Floating), 1.0D)).isTrue();
+			assertThat(validate(Datatype.datatype(GAE.Floating), 1.0F)).isTrue();
+			assertThat(validate(Datatype.datatype(GAE.Floating), "")).isFalse();
 
-			assertThat(validate(type(GAE.String), "text")).isTrue();
-			assertThat(validate(type(GAE.String), 1)).isFalse();
+			assertThat(validate(Datatype.datatype(GAE.String), "text")).isTrue();
+			assertThat(validate(Datatype.datatype(GAE.String), 1)).isFalse();
 
-			assertThat(validate(type(GAE.Date), new Date())).isTrue();
-			assertThat(validate(type(GAE.Date), 1)).isFalse();
+			assertThat(validate(Datatype.datatype(GAE.Date), new Date())).isTrue();
+			assertThat(validate(Datatype.datatype(GAE.Date), 1)).isFalse();
 
-			assertThat(validate(type("*"))).as("empty focus").isTrue();
+			assertThat(validate(Datatype.datatype("*"))).as("empty focus").isTrue();
 
 		});
 	}

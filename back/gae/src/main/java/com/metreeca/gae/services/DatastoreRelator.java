@@ -17,17 +17,15 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Query.Probe;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Inferencer;
-import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.queries.*;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
@@ -38,6 +36,10 @@ import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.tree.shapes.Clazz.clazz;
+import static com.metreeca.tree.shapes.Meta.hint;
+
+import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 
 final class DatastoreRelator extends DatastoreProcessor {
@@ -53,6 +55,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> container(final Request request) {
+
 		final com.metreeca.tree.Query query=null; // !!! parse query
 
 		return query.map(new Probe<Future<Response>>() {
@@ -77,50 +80,39 @@ final class DatastoreRelator extends DatastoreProcessor {
 	}
 
 	private Future<Response> resource(final Request request) {
-		return request
+		return request.reply(response -> datastore.exec(service -> {
 
-				.shape(request.shape() // !!! identify/cache
+			final Shape shape=convey(request.shape());
 
-						.map(new Inferencer())
-						.map(new Optimizer())
+			final String name=request.path();
+			final String kind=clazz(shape).orElse(GAE.Roots);
+			final String root=hint(shape).orElseGet(() -> name.substring(0, name.lastIndexOf('/')+1)); // path stem
 
-				)
+			final Query query=new Query(kind)
+					.setFilter(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
+							FilterOperator.EQUAL, createKey(createKey(GAE.Roots, root), kind, name)
+					));
 
-				.reply(response -> datastore.exec(service -> {
+			// !!! set filters from filter shape?
 
-					final Shape shape=request.shape();
+			// ;( projecting only properties actually included in the shape would lower costs, as projection queries
+			// are counted as small operations: unfortunately, a number of limitations apply:
+			// https://cloud.google.com/appengine/docs/standard/java/datastore/projectionqueries#Java_Limitations_on_projections
+			// https://cloud.google.com/appengine/docs/standard/java/datastore/projectionqueries#Java_Projections_and_multiple_valued_properties
 
+			return Optional.ofNullable(service.prepare(query).asSingleEntity())
 
-					final String kind="Office"; // !!! extract from shape w/in decoder
-					final String name=request.path();
+					.map(entity -> response
+							.status(OK)
+							.shape(shape)
+							.body(entity(), entity)
+					)
 
-					final Query query=new Query(kind)
-							.setFilter(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
-									FilterOperator.EQUAL, KeyFactory.createKey(kind, name)
-							));
+					.orElseGet(() -> response
+							.status(NotFound)
+					);
 
-					// !!! set filters from filter shape
-					// !!! trim results to convey shape
-
-					// ;( projecting only properties actually included in the shape would lower costs, as projection
-					// queries are counted as small operations: unfortunately, a number of limitations apply:
-					// https://cloud.google.com/appengine/docs/standard/java/datastore/projectionqueries#Java_Limitations_on_projections
-					// https://cloud.google.com/appengine/docs/standard/java/datastore/projectionqueries#Java_Projections_and_multiple_valued_properties
-
-					return Optional.ofNullable(service.prepare(query).asSingleEntity())
-
-							.map(entity -> response
-									.status(OK)
-									.shape(shape)
-									.body(entity(), entity)
-							)
-
-							.orElseGet(() -> response
-									.status(NotFound)
-							);
-
-				}));
+		}));
 	}
-
 
 }

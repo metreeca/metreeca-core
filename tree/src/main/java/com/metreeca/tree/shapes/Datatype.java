@@ -26,11 +26,11 @@ import static java.util.stream.Collectors.toSet;
 
 
 /**
- * Type value constraint.
+ * Datatype value constraint.
  *
- * <p>States that each value in the focus set has a given extended RDF datatype.</p>
+ * <p>States that each value in the focus set has a given datatype.</p>
  */
-public final class Type implements Shape {
+public final class Datatype implements Shape {
 
 	/**
 	 * Creates a name constraint.
@@ -41,11 +41,11 @@ public final class Type implements Shape {
 	 *
 	 * @throws NullPointerException if {@code name} is null
 	 */
-	public static Type type(final String name) {
-		return new Type(name);
+	public static Datatype datatype(final String name) {
+		return new Datatype(name);
 	}
 
-	public static Optional<String> type(final Shape shape) {
+	public static Optional<String> datatype(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new TypeProbe()));
 	}
 
@@ -55,7 +55,7 @@ public final class Type implements Shape {
 	private final String name;
 
 
-	private Type(final String name) {
+	private Datatype(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -85,8 +85,8 @@ public final class Type implements Shape {
 
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Type
-				&& name.equals(((Type)object).name);
+		return this == object || object instanceof Datatype
+				&& name.equals(((Datatype)object).name);
 	}
 
 	@Override public int hashCode() {
@@ -94,7 +94,7 @@ public final class Type implements Shape {
 	}
 
 	@Override public String toString() {
-		return "type("+name+")";
+		return "datatype("+name+")";
 	}
 
 
@@ -102,8 +102,8 @@ public final class Type implements Shape {
 
 	private static final class TypeProbe extends Inspector<String> {
 
-		@Override public String probe(final Type type) {
-			return type.getName();
+		@Override public String probe(final Datatype datatype) {
+			return datatype.getName();
 		}
 
 		@Override public String probe(final And and) {

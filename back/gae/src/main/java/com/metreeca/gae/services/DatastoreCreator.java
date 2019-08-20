@@ -38,8 +38,7 @@ final class DatastoreCreator extends DatastoreProcessor {
 
 
 	Future<Response> handle(final Request request) {
-		return request.container() ? container(request)
-				: request.reply(internal(new UnsupportedOperationException("resource POST method")));
+		return request.container() ? container(request) : resource(request);
 	}
 
 
@@ -52,11 +51,11 @@ final class DatastoreCreator extends DatastoreProcessor {
 
 				.process(entity -> datastore.exec(service -> { // assign entity a slug-based id
 
-					final String id=request.path()+request.header("Slug")
+					final String name=request.path()+request.header("Slug")
 							.map(Codecs::encode) // encode slug as IRI path component
 							.orElseGet(() -> UUID.randomUUID().toString()); // !! sequential generator
 
-					final Key key=KeyFactory.createKey(entity.getKind(), id);
+					final Key key=KeyFactory.createKey(entity.getKind(), name);
 
 					final boolean clashing=service.prepare(new Query(key.getKind())
 							.setFilter(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, key))
@@ -90,6 +89,10 @@ final class DatastoreCreator extends DatastoreProcessor {
 				}))
 
 				.fold(future -> future, request::reply);
+	}
+
+	private Future<Response> resource(final Request request) {
+		return request.reply(internal(new UnsupportedOperationException("resource POST method")));
 	}
 
 }

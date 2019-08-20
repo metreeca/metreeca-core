@@ -32,12 +32,15 @@ final class DatastoreUpdater extends DatastoreProcessor {
 
 
 	Future<Response> handle(final Request request) {
-		return request.container() ? request.reply(internal(new UnsupportedOperationException("container PUT method")))
-				: resource(request);
+		return request.container() ? container(request) : resource(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Future<Response> container(final Request request) {
+		return request.reply(internal(new UnsupportedOperationException("container PUT method")));
+	}
 
 	private Future<Response> resource(final Request request) {
 		throw new UnsupportedOperationException("to be implemented"); // !!!

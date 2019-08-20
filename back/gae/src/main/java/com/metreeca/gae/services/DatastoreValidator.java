@@ -37,7 +37,6 @@ import static com.metreeca.rest.Failure.invalid;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tree.Trace.trace;
 import static com.metreeca.tree.shapes.Field.fields;
-import static com.metreeca.tree.shapes.Type.type;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toMap;
@@ -114,9 +113,9 @@ final class DatastoreValidator extends DatastoreProcessor {
 		}
 
 
-		@Override public Trace probe(final Type type) {
+		@Override public Trace probe(final Datatype datatype) {
 
-			final String name=type.getName();
+			final String name=datatype.getName();
 
 			return trace(focus().stream()
 					.filter(invert(v
@@ -127,7 +126,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 							: GAE.String(v) ? name.equals(GAE.String)
 							: GAE.Date(v) && name.equals(GAE.Date)
 					))
-					.collect(toMap(v -> issue(type), Collections::singleton))
+					.collect(toMap(v -> issue(datatype), Collections::singleton))
 			);
 		}
 
@@ -280,7 +279,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 						} else {
 
-							return trace(issue(type(GAE.Entity)));
+							return trace(issue(Datatype.datatype(GAE.Entity)));
 
 						}
 

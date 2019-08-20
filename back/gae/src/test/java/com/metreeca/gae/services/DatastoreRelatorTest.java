@@ -22,7 +22,7 @@ import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
-import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.KeyFactory;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -33,40 +33,37 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Type.type;
 
-import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class DatastoreRelatorTest extends GAETestBase {
 
+	private Runnable dataset() {
+		return () -> service(datastore()).exec(datastore -> datastore.put(birt()));
+	}
+
+
 	@Nested final class Container {
 
 		@Test void test() {
-			exec(
-					() -> service(datastore()).exec(datastore -> datastore.put(asList(
-							new Entity("Office", "/offices/1"),
-							new Entity("Office", "/offices/2"),
-							new Entity("Employee", "/employees/2"),
-							new Entity("Employee", "/employees/2")
-					))),
+			exec(dataset(), () -> new DatastoreRelator()
 
-					() -> new DatastoreEngine()
+					.handle(new Request()
+							.path("/offices/1")
+							.shape(and(
+									clazz("Office"),
+									field("label", and(required(), datatype(GAE.String)))
+							))
+					)
 
-							.relate(new Request()
-									.path("/offices/1")
-									.shape(and(
-											clazz("Office"),
-											field("label", and(required(), type(GAE.String)))
-									))
-							)
-
-							.accept(response -> assertThat(response)
-									.hasStatus(Response.OK)
-									.hasShape()
-									.hasBody(entity())
-							)
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.OK)
+							.hasShape()
+							.hasBody(entity())
+					)
 
 			);
 		}
@@ -74,6 +71,47 @@ final class DatastoreRelatorTest extends GAETestBase {
 	}
 
 	@Nested final class Resource {
+
+		@Test void testRelateResource() {
+			exec(dataset(), () -> new DatastoreRelator()
+
+					.handle(new Request()
+							.path("/offices/1")
+							.shape(and(
+									clazz("Office"),
+									field("label", and(required(), datatype(GAE.String)))
+							))
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.OK)
+							.hasShape()
+							.hasBody(entity(), entity -> assertThat(entity.getKey())
+									.isEqualTo(KeyFactory.createKey(
+											KeyFactory.createKey(GAE.Roots, "/offices/"),
+											"Office", "/offices/1"
+									))
+							)
+					)
+
+			);
+		}
+
+		@Test void testHandleUnknownResources() {
+			exec(dataset(), () -> new DatastoreRelator()
+
+					.handle(new Request()
+							.path("/offices/9999")
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.NotFound)
+							.doesNotHaveShape()
+							.doesNotHaveBody(entity())
+					)
+
+			);
+		}
 
 	}
 
