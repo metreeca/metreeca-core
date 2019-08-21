@@ -118,18 +118,19 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 implements <a href="../../../../com/metreeca/rest/Wrapper.html" title="interface in com.metreeca.rest">Wrapper</a></pre>
 <div class="block">Shape-based content driver.
 
- <p>Drives the lifecycle of linked data resources managed by the wrapped handler associating them to a <a href="../../../../com/metreeca/rest/wrappers/Driver.html#Driver-com.metreeca.tree.Shape-">shape</a> model:
+ <p>Drives the lifecycle of linked data resources managed by wrapped handlers with a <a href="../../../../com/metreeca/rest/wrappers/Driver.html#Driver-com.metreeca.tree.Shape-">shape</a> model:
 
  <ul>
 
- <li>associates the shape model to incoming requests as a <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a>;</li>
+ <li><a href="../../../../com/metreeca/rest/Message.html#shape--">associates</a> the driving shape model to incoming requests;</li>
 
- <li>advertises the association between the response focus <a href="../../../../com/metreeca/rest/Response.html#item--">item</a> and the shape model
+ <li>advertises the association between response focus <a href="../../../../com/metreeca/rest/Response.html#item--">items</a> and the driving shape model
  through a "<code>Link: &lt;resource?specs&gt;; rel=http://www.w3.org/ns/ldp#constrainedBy</code>" header;</li>
 
- <li>handles GET requests for the advertised shape model resource (<code>&lt;resource?specs&gt;</code>) with a response
+ <li>handles GET requests for the advertised shape model resource (<code>&lt;resource&gt;?specs</code>) with a response
  containing a textual description of the <a href="../../../../com/metreeca/rest/wrappers/Driver.html#Driver-com.metreeca.tree.Shape-"><code>shape</code></a> model <a href="../../../../com/metreeca/tree/probes/Redactor.html" title="class in com.metreeca.tree.probes">redacted</a> taking into
- account the target resource task and the <a href="../../../../com/metreeca/rest/Request.html#roles--">roles</a> of the current request <a href="../../../../com/metreeca/rest/Request.html#user--">user</a>.</li>
+ account the <a href="../../../../com/metreeca/rest/Request.html#roles--">roles</a> of the current request <a href="../../../../com/metreeca/rest/Request.html#user--">user</a> and removing
+ filtering-only constraints.</li>
 
  </ul>
 
@@ -137,11 +138,10 @@ implements <a href="../../../../com/metreeca/rest/Wrapper.html" title="interface
 
  <ul>
 
- <li>redacting the shape read associated with incoming request as a <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a> according to
- the task to be performed;</li>
+ <li>redacting the shape <a href="../../../../com/metreeca/rest/Message.html#shape--">associated</a> to incoming request according to the task to be performed;</li>
 
- <li>associating a shape to outgoing responses as  a <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a> in order to drive further
- processing (e.g. JSON body generation).</li>
+ <li><a href="../../../../com/metreeca/rest/Message.html#shape--">associating</a> a shape to outgoing responses in order to drive further processing
+ (e.g. JSON body mapping).</li>
 
  </ul>
 

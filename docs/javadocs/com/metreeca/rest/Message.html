@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":6,"i13":10,"i14":10,"i15":10,"i16":6,"i17":10,"i18":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":6,"i12":10,"i13":10,"i14":10,"i15":6,"i16":10,"i17":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -168,110 +168,105 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>&lt;V&gt;&nbsp;<a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-java.util.function.Function-">body</a></span>(<a href="../../../com/metreeca/rest/Format.html" title="interface in com.metreeca.rest">Format</a>&lt;V&gt;&nbsp;format,
-    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;V,V&gt;&nbsp;mapper)</code>&nbsp;</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>&lt;V&gt;&nbsp;<a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-V-">body</a></span>(<a href="../../../com/metreeca/rest/Format.html" title="interface in com.metreeca.rest">Format</a>&lt;V&gt;&nbsp;format,
     V&nbsp;value)</code>
 <div class="block">Configures a body representation.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#charset--">charset</a></span>()</code>
 <div class="block">Retrieves the character encoding of this message.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#header-java.lang.String-">header</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name)</code>
 <div class="block">Retrieves message header value.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#header-java.lang.String-java.lang.String-">header</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
       <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</code>
 <div class="block">Configures message header value.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#headers--">headers</a></span>()</code>
 <div class="block">Retrieves message headers.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#headers-java.util.Map-">headers</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,? extends <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&gt;&nbsp;headers)</code>
 <div class="block">Configures message headers.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#headers-java.lang.String-">headers</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name)</code>
 <div class="block">Retrieves message header values.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#headers-java.lang.String-java.util.Collection-">headers</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
        <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;values)</code>
 <div class="block">Configures message header values.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#headers-java.lang.String-java.lang.String...-">headers</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
        <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;values)</code>
 <div class="block">Configures message header values.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#interactive--">interactive</a></span>()</code>
 <div class="block">Tests if this message is interactive.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>abstract <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#item--">item</a></span>()</code>
 <div class="block">Retrieves the focus item of this message.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#lift-com.metreeca.rest.Message-">lift</a></span>(<a href="../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;?&gt;&nbsp;message)</code>
 <div class="block">Lift a message into this message.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#link-java.lang.String-">link</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;item)</code>
 <div class="block">Creates a linked message.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>&lt;R&gt;&nbsp;R</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#map-java.util.function.Function-">map</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;<a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a>,R&gt;&nbsp;mapper)</code>
 <div class="block">Maps this message.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>abstract <a href="../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#request--">request</a></span>()</code>
 <div class="block">Retrieves the originating request for this message.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#shape--">shape</a></span>()</code>
 <div class="block">Retrieves the linked data shape.</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Message.html#shape-com.metreeca.tree.Shape-">shape</a></span>(<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;shape)</code>
 <div class="block">Configures the linked data shape.</div>
@@ -666,7 +661,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </a><a name="body-com.metreeca.rest.Format-V-">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>body</h4>
 <pre>public&nbsp;&lt;V&gt;&nbsp;<a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a>&nbsp;body(<a href="../../../com/metreeca/rest/Format.html" title="interface in com.metreeca.rest">Format</a>&lt;V&gt;&nbsp;format,
@@ -687,16 +682,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if either <code>body</code> or <code>value</code> is null</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></code> - if a body value was already <a href="../../../com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-">retrieved</a> from this message</dd>
 </dl>
-</li>
-</ul>
-<a name="body-com.metreeca.rest.Format-java.util.function.Function-">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>body</h4>
-<pre>public&nbsp;&lt;V&gt;&nbsp;<a href="../../../com/metreeca/rest/Message.html" title="type parameter in Message">T</a>&nbsp;body(<a href="../../../com/metreeca/rest/Format.html" title="interface in com.metreeca.rest">Format</a>&lt;V&gt;&nbsp;format,
-                  <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;V,V&gt;&nbsp;mapper)</pre>
 </li>
 </ul>
 </li>

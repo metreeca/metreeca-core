@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -109,7 +109,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a>, <a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dd>
+<dd><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dd>
 </dl>
 <hr>
 <br>
@@ -152,15 +152,49 @@ implements <a href="../../../../com/metreeca/rest/services/Engine.html" title="i
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="../../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#container-com.metreeca.tree.Shape-">container</a></span>(<a href="../../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;shape)</code>
+<div class="block">Extract the container shape from a combo container/resource shape.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#create-com.metreeca.rest.Request-">create</a></span>(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code><a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#delete-com.metreeca.rest.Request-">delete</a></span>(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>&lt;R&gt;&nbsp;R</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#exec-java.util.function.Supplier-">exec</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;R&gt;&nbsp;task)</code>
 <div class="block">Executes a task within a storage transaction.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#handle-com.metreeca.rest.Request-">handle</a></span>(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</code>
-<div class="block">Handles a request.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#relate-com.metreeca.rest.Request-">relate</a></span>(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code><a href="../../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#resource-com.metreeca.tree.Shape-">resource</a></span>(<a href="../../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;shape)</code>
+<div class="block">Extract the resource shape from a combo container/resource shape.</div>
+</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code>&lt;M extends <a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;M&gt;&gt;<br><a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;M,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#trim-M-">trim</a></span>(M&nbsp;message)</code>
+<div class="block">Trims the message payload.</div>
+</td>
+</tr>
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code><a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#update-com.metreeca.rest.Request-">update</a></span>(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</code>&nbsp;</td>
+</tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>&lt;M extends <a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;M&gt;&gt;<br><a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;M,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#validate-M-">validate</a></span>(M&nbsp;message)</code>
+<div class="block">Validates the message payload.</div>
 </td>
 </tr>
 </table>
@@ -176,14 +210,7 @@ implements <a href="../../../../com/metreeca/rest/services/Engine.html" title="i
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;com.metreeca.rest.services.<a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></h3>
-<code><a href="../../../../com/metreeca/rest/services/Engine.html#engine--">engine</a></code></li>
-</ul>
-<ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.com.metreeca.rest.Handler">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;com.metreeca.rest.<a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></h3>
-<code><a href="../../../../com/metreeca/rest/Handler.html#handler--">handler</a>, <a href="../../../../com/metreeca/rest/Handler.html#handler-java.util.function.Predicate-com.metreeca.rest.Handler-">handler</a>, <a href="../../../../com/metreeca/rest/Handler.html#handler-java.util.function.Predicate-com.metreeca.rest.Handler-com.metreeca.rest.Handler-">handler</a>, <a href="../../../../com/metreeca/rest/Handler.html#with-com.metreeca.rest.Wrapper-">with</a></code></li>
+<code><a href="../../../../com/metreeca/rest/services/Engine.html#engine--">engine</a>, <a href="../../../../com/metreeca/rest/services/Engine.html#exec-java.lang.Runnable-">exec</a></code></li>
 </ul>
 </li>
 </ul>
@@ -243,23 +270,148 @@ implements <a href="../../../../com/metreeca/rest/services/Engine.html" title="i
 </dl>
 </li>
 </ul>
-<a name="handle-com.metreeca.rest.Request-">
+<a name="container-com.metreeca.tree.Shape-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>container</h4>
+<pre>public&nbsp;<a href="../../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;container(<a href="../../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;shape)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html#container-com.metreeca.tree.Shape-">Engine</a></code></span></div>
+<div class="block">Extract the container shape from a combo container/resource shape.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../com/metreeca/rest/services/Engine.html#container-com.metreeca.tree.Shape-">container</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>shape</code> - the (possibly) combined container/resource shape to be processed</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the container section extracted from <code>shape</code>, if one is presente, or <code>shape</code>, otherwise</dd>
+</dl>
+</li>
+</ul>
+<a name="resource-com.metreeca.tree.Shape-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>resource</h4>
+<pre>public&nbsp;<a href="../../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;resource(<a href="../../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;shape)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html#resource-com.metreeca.tree.Shape-">Engine</a></code></span></div>
+<div class="block">Extract the resource shape from a combo container/resource shape.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../com/metreeca/rest/services/Engine.html#resource-com.metreeca.tree.Shape-">resource</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>shape</code> - the (possibly) combined container/resource shape to be processed</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the resource section extracted from <code>shape</code>, if one is present, or <code>shape</code>, otherwise</dd>
+</dl>
+</li>
+</ul>
+<a name="trim-com.metreeca.rest.Message-">
+<!--   -->
+</a><a name="trim-M-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>trim</h4>
+<pre>public&nbsp;&lt;M extends <a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;M&gt;&gt;&nbsp;<a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;M,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;&nbsp;trim(M&nbsp;message)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html#trim-M-">Engine</a></code></span></div>
+<div class="block">Trims the message payload.
+
+ <p>Rewrites the engine-specific message <a href="../../../../com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-">payload</a> retaining only the subset
+ compatible with the envelope of the message <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a>.</p></div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../com/metreeca/rest/services/Engine.html#trim-M-">trim</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></code></dd>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>M</code> - the type of <code>message</code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>message</code> - the message whose engine-specific payload is to be trimmed</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>a value providing access to the given <code>message</code> with an updated payload, if its engine-specific
+ <a href="../../../../com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-">payload</a> is well-formed and compatible with its <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a>; an error providing access to a failure possibly <a href="../../../../com/metreeca/rest/Failure.html#trace-com.metreeca.tree.Trace-">containing</a> a validation
+ trace, otherwise</dd>
+</dl>
+</li>
+</ul>
+<a name="validate-com.metreeca.rest.Message-">
+<!--   -->
+</a><a name="validate-M-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>validate</h4>
+<pre>public&nbsp;&lt;M extends <a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;M&gt;&gt;&nbsp;<a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;M,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;&nbsp;validate(M&nbsp;message)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html#validate-M-">Engine</a></code></span></div>
+<div class="block">Validates the message payload.
+
+ <p>Validates the engine-specific message <a href="../../../../com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-">payload</a> against the message
+ <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a>.</p></div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../com/metreeca/rest/services/Engine.html#validate-M-">validate</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></code></dd>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>M</code> - the type of <code>message</code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>message</code> - the message whose engine-specific payload is to be validated</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>a value providing access to <code>message</code>, if its engine-specific <a href="../../../../com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-">payload</a> is well-formed and compatible with its <a href="../../../../com/metreeca/rest/Message.html#shape--">shape</a>; an error providing access to
+ a failure possibly <a href="../../../../com/metreeca/rest/Failure.html#trace-com.metreeca.tree.Trace-">containing</a> a validation trace, otherwise</dd>
+</dl>
+</li>
+</ul>
+<a name="create-com.metreeca.rest.Request-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>create</h4>
+<pre>public&nbsp;<a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;&nbsp;create(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../com/metreeca/rest/services/Engine.html#create-com.metreeca.rest.Request-">create</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="relate-com.metreeca.rest.Request-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>relate</h4>
+<pre>public&nbsp;<a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;&nbsp;relate(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../com/metreeca/rest/services/Engine.html#relate-com.metreeca.rest.Request-">relate</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="update-com.metreeca.rest.Request-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>update</h4>
+<pre>public&nbsp;<a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;&nbsp;update(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../com/metreeca/rest/services/Engine.html#update-com.metreeca.rest.Request-">update</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="delete-com.metreeca.rest.Request-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>handle</h4>
-<pre>public&nbsp;<a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;&nbsp;handle(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/metreeca/rest/Handler.html#handle-com.metreeca.rest.Request-">Handler</a></code></span></div>
-<div class="block">Handles a request.</div>
+<h4>delete</h4>
+<pre>public&nbsp;<a href="../../../../com/metreeca/rest/Future.html" title="interface in com.metreeca.rest">Future</a>&lt;<a href="../../../../com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a>&gt;&nbsp;delete(<a href="../../../../com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a>&nbsp;request)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/metreeca/rest/Handler.html#handle-com.metreeca.rest.Request-">handle</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></dd>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>request</code> - the inbound request for the managed linked data resource</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>a lazy response generated for the managed linked data resource in reaction to <code>request</code>; lazy
- processing supports streaming processing inside ephemeral context like database connections and transactions</dd>
+<dd><code><a href="../../../../com/metreeca/rest/services/Engine.html#delete-com.metreeca.rest.Request-">delete</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></code></dd>
 </dl>
 </li>
 </ul>

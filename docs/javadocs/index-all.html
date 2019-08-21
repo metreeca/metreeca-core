@@ -80,11 +80,19 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Response.html#Accepted">Accepted</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Actor</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
+<dd>
+<div class="block">Model-driven abstract resource action handler.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#Actor--">Actor()</a></span> - Constructor for class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#Alias">Alias</a></span> - Static variable in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>
 <div class="block">Alias annotation.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#alias-java.lang.String-">alias(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#alias-com.metreeca.tree.Shape-">alias(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/metreeca/rest/wrappers/Aliaser.html" title="class in com.metreeca.rest.wrappers"><span class="typeNameLink">Aliaser</span></a> - Class in <a href="com/metreeca/rest/wrappers/package-summary.html">com.metreeca.rest.wrappers</a></dt>
 <dd>
@@ -178,8 +186,6 @@
 <dd>
 <div class="block">Configures a body representation.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/rest/Message.html#body-com.metreeca.rest.Format-java.util.function.Function-">body(Format&lt;V&gt;, Function&lt;V, V&gt;)</a></span> - Method in class com.metreeca.rest.<a href="com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Failure.html#BodyMalformed">BodyMalformed</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></dt>
 <dd>
 <div class="block">The machine readable error tag for failures due to malformed message body.</div>
@@ -312,7 +318,7 @@
 </dd>
 <dt><a href="com/metreeca/tree/probes/package-summary.html">com.metreeca.tree.probes</a> - package com.metreeca.tree.probes</dt>
 <dd>
-<div class="block">Basic shape probes.</div>
+<div class="block">Basic shape/query probes.</div>
 </dd>
 <dt><a href="com/metreeca/tree/queries/package-summary.html">com.metreeca.tree.queries</a> - package com.metreeca.tree.queries</dt>
 <dd>
@@ -336,9 +342,17 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Request.html#CONNECT">CONNECT</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#connector--">connector()</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#container-com.metreeca.tree.Shape-">container(Shape)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Request.html#container--">container()</a></span> - Method in class com.metreeca.rest.<a href="com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a></dt>
 <dd>
 <div class="block">Checks if this request targets a container.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#container-com.metreeca.tree.Shape-">container(Shape)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
+<dd>
+<div class="block">Extract the container shape from a combo container/resource shape.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gae/GAE.html#Contains">Contains</a></span> - Static variable in class com.metreeca.gae.<a href="com/metreeca/gae/GAE.html" title="class in com.metreeca.gae">GAE</a></dt>
 <dd>&nbsp;</dd>
@@ -376,19 +390,25 @@
 <dd>
 <div class="block">Configures cookie-based XSRF protection.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#create-com.metreeca.rest.Request-">create(Request)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gate/Notary.html#create-java.util.function.Consumer-">create(Consumer&lt;Claims&gt;)</a></span> - Method in class com.metreeca.gate.<a href="com/metreeca/gate/Notary.html" title="class in com.metreeca.gate">Notary</a></dt>
 <dd>
 <div class="block">Creates a signed claims-based JWT token.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#create-com.metreeca.rest.Request-">create(Request)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#Create">Create</a></span> - Static variable in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#create--">create()</a></span> - Static method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Response.html#Created">Created</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#creator--">creator()</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/metreeca/rest/handlers/Creator.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Creator</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
 <dd>
-<div class="block">Resource creator.</div>
+<div class="block">Model-driven resource creator.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Creator.html#Creator--">Creator()</a></span> - Constructor for class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Creator.html" title="class in com.metreeca.rest.handlers">Creator</a></dt>
 <dd>
@@ -454,6 +474,16 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#DatastoreEngine--">DatastoreEngine()</a></span> - Constructor for class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes"><span class="typeNameLink">Datatype</span></a> - Class in <a href="com/metreeca/tree/shapes/package-summary.html">com.metreeca.tree.shapes</a></dt>
+<dd>
+<div class="block">Datatype value constraint.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Datatype.html#datatype-java.lang.String-">datatype(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes">Datatype</a></dt>
+<dd>
+<div class="block">Creates a name constraint.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Datatype.html#datatype-com.metreeca.tree.Shape-">datatype(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes">Datatype</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gae/GAE.html#Date">Date</a></span> - Static variable in class com.metreeca.gae.<a href="com/metreeca/gae/GAE.html" title="class in com.metreeca.gae">GAE</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gae/GAE.html#Date-java.lang.Object-">Date(Object)</a></span> - Static method in class com.metreeca.gae.<a href="com/metreeca/gae/GAE.html" title="class in com.metreeca.gae">GAE</a></dt>
@@ -504,18 +534,26 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Delegator.html#Delegator--">Delegator()</a></span> - Constructor for class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Delegator.html" title="class in com.metreeca.rest.handlers">Delegator</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#delete-com.metreeca.rest.Request-">delete(Request)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Worker.html#delete-com.metreeca.rest.Handler-">delete(Handler)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Worker.html" title="class in com.metreeca.rest.handlers">Worker</a></dt>
 <dd>
 <div class="block">Configures the handler for the DELETE HTTP method.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Request.html#DELETE">DELETE</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Request.html" title="class in com.metreeca.rest">Request</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#delete-com.metreeca.rest.Request-">delete(Request)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#Delete">Delete</a></span> - Static variable in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#delete--">delete()</a></span> - Static method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/metreeca/rest/handlers/Deleter.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Deleter</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#deleter--">deleter()</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/metreeca/rest/handlers/Deleter.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Deleter</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
+<dd>
+<div class="block">Model-driven resource deleter.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Deleter.html#Deleter--">Deleter()</a></span> - Constructor for class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Deleter.html" title="class in com.metreeca.rest.handlers">Deleter</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/servlet/Gateway.html#destroy--">destroy()</a></span> - Method in class com.metreeca.servlet.<a href="com/metreeca/servlet/Gateway.html" title="class in com.metreeca.servlet">Gateway</a></dt>
@@ -525,6 +563,8 @@
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#detail--">detail()</a></span> - Static method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#dflt-java.lang.Object-">dflt(Object)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#dflt-com.metreeca.tree.Shape-">dflt(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gate/Crypto.html#digest-java.lang.String-">digest(String)</a></span> - Static method in interface com.metreeca.gate.<a href="com/metreeca/gate/Crypto.html" title="interface in com.metreeca.gate">Crypto</a></dt>
 <dd>
@@ -574,7 +614,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services"><span class="typeNameLink">Engine</span></a> - Interface in <a href="com/metreeca/rest/services/package-summary.html">com.metreeca.rest.services</a></dt>
 <dd>
-<div class="block">Storage engine.</div>
+<div class="block">Model-driven storage engine.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#engine--">engine()</a></span> - Static method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
 <dd>
@@ -616,6 +656,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Clazz.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Clazz.html" title="class in com.metreeca.tree.shapes">Clazz</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Datatype.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes">Datatype</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Guard.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Guard.html" title="class in com.metreeca.tree.shapes">Guard</a></dt>
@@ -645,8 +687,6 @@
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Or.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Or.html" title="class in com.metreeca.tree.shapes">Or</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Pattern.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Pattern.html" title="class in com.metreeca.tree.shapes">Pattern</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Type.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Type.html" title="class in com.metreeca.tree.shapes">Type</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/When.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/When.html" title="class in com.metreeca.tree.shapes">When</a></dt>
 <dd>&nbsp;</dd>
@@ -696,6 +736,10 @@
 <dd>
 <div class="block">Executes a set of task using shared ervices managed by this context.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#exec-java.lang.Runnable-">exec(Runnable)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
+<dd>
+<div class="block">Executes a task within a storage transaction.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#exec-java.util.function.Supplier-">exec(Supplier&lt;R&gt;)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
 <dd>
 <div class="block">Executes a task within a storage transaction.</div>
@@ -716,8 +760,6 @@
 <dd>
 <div class="block">Field structural constraint.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#field-java.lang.String-">field(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#field-java.lang.String-com.metreeca.tree.Shape-">field(String, Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#fields-com.metreeca.tree.Shape-">fields(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
@@ -822,9 +864,9 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Clazz.html#getName--">getName()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Clazz.html" title="class in com.metreeca.tree.shapes">Clazz</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#getName--">getName()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Datatype.html#getName--">getName()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes">Datatype</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Type.html#getName--">getName()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Type.html" title="class in com.metreeca.tree.shapes">Type</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#getName--">getName()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/queries/Items.html#getOffset--">getOffset()</a></span> - Method in class com.metreeca.tree.queries.<a href="com/metreeca/tree/queries/Items.html" title="class in com.metreeca.tree.queries">Items</a></dt>
 <dd>&nbsp;</dd>
@@ -884,6 +926,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#group-java.lang.String-">group(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#group-com.metreeca.tree.Shape-">group(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/metreeca/tree/shapes/Guard.html" title="class in com.metreeca.tree.shapes"><span class="typeNameLink">Guard</span></a> - Class in <a href="com/metreeca/tree/shapes/package-summary.html">com.metreeca.tree.shapes</a></dt>
 <dd>
 <div class="block">Parametric constraint.</div>
@@ -898,19 +942,13 @@
 </a>
 <h2 class="title">H</h2>
 <dl>
-<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#handle-com.metreeca.rest.Request-">handle(Request)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Handler.html#handle-com.metreeca.rest.Request-">handle(Request)</a></span> - Method in interface com.metreeca.rest.<a href="com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></dt>
 <dd>
 <div class="block">Handles a request.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Delegator.html#handle-com.metreeca.rest.Request-">handle(Request)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Delegator.html" title="class in com.metreeca.rest.handlers">Delegator</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Deleter.html#handle-com.metreeca.rest.Request-">handle(Request)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Deleter.html" title="class in com.metreeca.rest.handlers">Deleter</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Router.html#handle-com.metreeca.rest.Request-">handle(Request)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Router.html" title="class in com.metreeca.rest.handlers">Router</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Updater.html#handle-com.metreeca.rest.Request-">handle(Request)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Updater.html" title="class in com.metreeca.rest.handlers">Updater</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Worker.html#handle-com.metreeca.rest.Request-">handle(Request)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Worker.html" title="class in com.metreeca.rest.handlers">Worker</a></dt>
 <dd>&nbsp;</dd>
@@ -952,6 +990,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Clazz.html#hashCode--">hashCode()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Clazz.html" title="class in com.metreeca.tree.shapes">Clazz</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Datatype.html#hashCode--">hashCode()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes">Datatype</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#hashCode--">hashCode()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Guard.html#hashCode--">hashCode()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Guard.html" title="class in com.metreeca.tree.shapes">Guard</a></dt>
@@ -981,8 +1021,6 @@
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Or.html#hashCode--">hashCode()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Or.html" title="class in com.metreeca.tree.shapes">Or</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Pattern.html#hashCode--">hashCode()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Pattern.html" title="class in com.metreeca.tree.shapes">Pattern</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Type.html#hashCode--">hashCode()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Type.html" title="class in com.metreeca.tree.shapes">Type</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/When.html#hashCode--">hashCode()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/When.html" title="class in com.metreeca.tree.shapes">When</a></dt>
 <dd>&nbsp;</dd>
@@ -1021,6 +1059,8 @@
 <div class="block">Hint annotation.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#hint-java.lang.String-">hint(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#hint-com.metreeca.tree.Shape-">hint(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a name="I:I">
@@ -1110,12 +1150,16 @@
 <dd>
 <div class="block">Tests if this message is interactive.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/rest/Failure.html#internal-java.lang.RuntimeException-">internal(RuntimeException)</a></span> - Static method in class com.metreeca.rest.<a href="com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/Failure.html#internal-java.lang.Throwable-">internal(Throwable)</a></span> - Static method in class com.metreeca.rest.<a href="com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></dt>
 <dd>
-<div class="block">Creates an internal server error failure.</div>
+<div class="block">Creates a failure for an internal server error.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Response.html#InternalServerError">InternalServerError</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/Failure.html#invalid-com.metreeca.tree.Trace-">invalid(Trace)</a></span> - Static method in class com.metreeca.rest.<a href="com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></dt>
+<dd>
+<div class="block">Creates a failure for a payload validation issue.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Trace.html#isEmpty--">isEmpty()</a></span> - Method in class com.metreeca.tree.<a href="com/metreeca/tree/Trace.html" title="class in com.metreeca.tree">Trace</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Order.html#isInverse--">isInverse()</a></span> - Method in class com.metreeca.tree.<a href="com/metreeca/tree/Order.html" title="class in com.metreeca.tree">Order</a></dt>
@@ -1175,6 +1219,8 @@
 <div class="block">Label annotation.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#label-java.lang.String-">label(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#label-com.metreeca.tree.Shape-">label(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/metreeca/gate/wrappers/Launcher.html" title="class in com.metreeca.gate.wrappers"><span class="typeNameLink">Launcher</span></a> - Class in <a href="com/metreeca/gate/wrappers/package-summary.html">com.metreeca.gate.wrappers</a></dt>
 <dd>
@@ -1260,6 +1306,10 @@
 <dl>
 <dt><span class="memberNameLink"><a href="com/metreeca/gate/digests/PBKDF2Digest.html#main-java.lang.String...-">main(String...)</a></span> - Static method in class com.metreeca.gate.digests.<a href="com/metreeca/gate/digests/PBKDF2Digest.html" title="class in com.metreeca.gate.digests">PBKDF2Digest</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/Failure.html#malformed-java.lang.Throwable-">malformed(Throwable)</a></span> - Static method in class com.metreeca.rest.<a href="com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></dt>
+<dd>
+<div class="block">Creates a failure for a payload parsing issue.</div>
+</dd>
 <dt><a href="com/metreeca/gate/wrappers/Manager.html" title="class in com.metreeca.gate.wrappers"><span class="typeNameLink">Manager</span></a> - Class in <a href="com/metreeca/gate/wrappers/package-summary.html">com.metreeca.gate.wrappers</a></dt>
 <dd>
 <div class="block">Session manager.</div>
@@ -1300,6 +1350,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Clazz.html#map-com.metreeca.tree.Shape.Probe-">map(Shape.Probe&lt;T&gt;)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Clazz.html" title="class in com.metreeca.tree.shapes">Clazz</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Datatype.html#map-com.metreeca.tree.Shape.Probe-">map(Shape.Probe&lt;T&gt;)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes">Datatype</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#map-com.metreeca.tree.Shape.Probe-">map(Shape.Probe&lt;T&gt;)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Guard.html#map-com.metreeca.tree.Shape.Probe-">map(Shape.Probe&lt;T&gt;)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Guard.html" title="class in com.metreeca.tree.shapes">Guard</a></dt>
@@ -1329,8 +1381,6 @@
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Or.html#map-com.metreeca.tree.Shape.Probe-">map(Shape.Probe&lt;T&gt;)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Or.html" title="class in com.metreeca.tree.shapes">Or</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Pattern.html#map-com.metreeca.tree.Shape.Probe-">map(Shape.Probe&lt;T&gt;)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Pattern.html" title="class in com.metreeca.tree.shapes">Pattern</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Type.html#map-com.metreeca.tree.Shape.Probe-">map(Shape.Probe&lt;T&gt;)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Type.html" title="class in com.metreeca.tree.shapes">Type</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/When.html#map-com.metreeca.tree.Shape.Probe-">map(Shape.Probe&lt;T&gt;)</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/When.html" title="class in com.metreeca.tree.shapes">When</a></dt>
 <dd>&nbsp;</dd>
@@ -1498,6 +1548,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#notes-java.lang.String-">notes(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#notes-com.metreeca.tree.Shape-">notes(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Response.html#NotFound">NotFound</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Response.html#NotImplemented">NotImplemented</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a></dt>
@@ -1634,6 +1686,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#placeholder-java.lang.String-">placeholder(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Meta.html#placeholder-com.metreeca.tree.Shape-">placeholder(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Meta.html" title="class in com.metreeca.tree.shapes">Meta</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/metreeca/gate/Policy.html" title="interface in com.metreeca.gate"><span class="typeNameLink">Policy</span></a> - Interface in <a href="com/metreeca/gate/package-summary.html">com.metreeca.gate</a></dt>
 <dd>
 <div class="block">Secret policy.</div>
@@ -1728,7 +1782,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/probes/Traverser.html#probe-com.metreeca.tree.shapes.Guard-">probe(Guard)</a></span> - Method in class com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Traverser.html" title="class in com.metreeca.tree.probes">Traverser</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/probes/Traverser.html#probe-com.metreeca.tree.shapes.Type-">probe(Type)</a></span> - Method in class com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Traverser.html" title="class in com.metreeca.tree.probes">Traverser</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/probes/Traverser.html#probe-com.metreeca.tree.shapes.Datatype-">probe(Datatype)</a></span> - Method in class com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Traverser.html" title="class in com.metreeca.tree.probes">Traverser</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/probes/Traverser.html#probe-com.metreeca.tree.shapes.Clazz-">probe(Clazz)</a></span> - Method in class com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Traverser.html" title="class in com.metreeca.tree.probes">Traverser</a></dt>
 <dd>&nbsp;</dd>
@@ -1770,7 +1824,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.Probe.html#probe-com.metreeca.tree.shapes.Guard-">probe(Guard)</a></span> - Method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.Probe.html" title="interface in com.metreeca.tree">Shape.Probe</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.Probe.html#probe-com.metreeca.tree.shapes.Type-">probe(Type)</a></span> - Method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.Probe.html" title="interface in com.metreeca.tree">Shape.Probe</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.Probe.html#probe-com.metreeca.tree.shapes.Datatype-">probe(Datatype)</a></span> - Method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.Probe.html" title="interface in com.metreeca.tree">Shape.Probe</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.Probe.html#probe-com.metreeca.tree.shapes.Clazz-">probe(Clazz)</a></span> - Method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.Probe.html" title="interface in com.metreeca.tree">Shape.Probe</a></dt>
 <dd>&nbsp;</dd>
@@ -1900,12 +1954,20 @@
 <dd>
 <div class="block">Creates a new shape redactor.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#relate-com.metreeca.rest.Request-">relate(Request)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#relate-com.metreeca.rest.Request-">relate(Request)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#Relate">Relate</a></span> - Static variable in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#relate--">relate()</a></span> - Static method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/metreeca/rest/handlers/Relator.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Relator</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#relator--">relator()</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/metreeca/rest/handlers/Relator.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Relator</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
+<dd>
+<div class="block">Model-driven resource relator.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Relator.html#Relator--">Relator()</a></span> - Constructor for class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Relator.html" title="class in com.metreeca.rest.handlers">Relator</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gate/Roster.html#remove-java.lang.String-">remove(String)</a></span> - Method in interface com.metreeca.gate.<a href="com/metreeca/gate/Roster.html" title="interface in com.metreeca.gate">Roster</a></dt>
@@ -1942,8 +2004,14 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#required--">required()</a></span> - Static method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#resource-com.metreeca.tree.Shape-">resource(Shape)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Codecs.html#resource-java.lang.Object-java.lang.String-">resource(Object, String)</a></span> - Static method in class com.metreeca.rest.<a href="com/metreeca/rest/Codecs.html" title="class in com.metreeca.rest">Codecs</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#resource-com.metreeca.tree.Shape-">resource(Shape)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
+<dd>
+<div class="block">Extract the resource shape from a combo container/resource shape.</div>
+</dd>
 <dt><a href="com/metreeca/rest/Response.html" title="class in com.metreeca.rest"><span class="typeNameLink">Response</span></a> - Class in <a href="com/metreeca/rest/package-summary.html">com.metreeca.rest</a></dt>
 <dd>
 <div class="block">HTTP response.</div>
@@ -1984,6 +2052,8 @@
 <dd>
 <div class="block">Configures the roles attributed to the request user.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/GAE.html#Root">Root</a></span> - Static variable in class com.metreeca.gae.<a href="com/metreeca/gae/GAE.html" title="class in com.metreeca.gae">GAE</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/metreeca/gate/Roster.html" title="interface in com.metreeca.gate"><span class="typeNameLink">Roster</span></a> - Interface in <a href="com/metreeca/gate/package-summary.html">com.metreeca.gate</a></dt>
 <dd>
 <div class="block">User roster.</div>
@@ -2095,6 +2165,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gate/policies/ComboPolicy.html#specials--">specials()</a></span> - Static method in class com.metreeca.gate.policies.<a href="com/metreeca/gate/policies/ComboPolicy.html" title="class in com.metreeca.gate.policies">ComboPolicy</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#splitter-boolean-">splitter(boolean)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/metreeca/tree/queries/Stats.html" title="class in com.metreeca.tree.queries"><span class="typeNameLink">Stats</span></a> - Class in <a href="com/metreeca/tree/queries/package-summary.html">com.metreeca.tree.queries</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/queries/Stats.html#stats-com.metreeca.tree.Shape-java.lang.String...-">stats(Shape, String...)</a></span> - Static method in class com.metreeca.tree.queries.<a href="com/metreeca/tree/queries/Stats.html" title="class in com.metreeca.tree.queries">Stats</a></dt>
@@ -2181,6 +2253,8 @@
 <dd>
 <div class="block">Use this shape as a test condition.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#throttler-java.lang.String-java.lang.String-">throttler(String, String)</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gate/wrappers/Manager.html#TicketMalformed">TicketMalformed</a></span> - Static variable in class com.metreeca.gate.wrappers.<a href="com/metreeca/gate/wrappers/Manager.html" title="class in com.metreeca.gate.wrappers">Manager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Clock.html#time--">time()</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Clock.html" title="interface in com.metreeca.rest.services">Clock</a></dt>
@@ -2223,6 +2297,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Clazz.html#toString--">toString()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Clazz.html" title="class in com.metreeca.tree.shapes">Clazz</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Datatype.html#toString--">toString()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes">Datatype</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Field.html#toString--">toString()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes">Field</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Guard.html#toString--">toString()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Guard.html" title="class in com.metreeca.tree.shapes">Guard</a></dt>
@@ -2252,8 +2328,6 @@
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Or.html#toString--">toString()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Or.html" title="class in com.metreeca.tree.shapes">Or</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Pattern.html#toString--">toString()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Pattern.html" title="class in com.metreeca.tree.shapes">Pattern</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Type.html#toString--">toString()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Type.html" title="class in com.metreeca.tree.shapes">Type</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/When.html#toString--">toString()</a></span> - Method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/When.html" title="class in com.metreeca.tree.shapes">When</a></dt>
 <dd>&nbsp;</dd>
@@ -2289,15 +2363,13 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/probes/Traverser.html#Traverser--">Traverser()</a></span> - Constructor for class com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Traverser.html" title="class in com.metreeca.tree.probes">Traverser</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/metreeca/tree/shapes/Type.html" title="class in com.metreeca.tree.shapes"><span class="typeNameLink">Type</span></a> - Class in <a href="com/metreeca/tree/shapes/package-summary.html">com.metreeca.tree.shapes</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#trim-M-">trim(M)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#trim-M-">trim(M)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
 <dd>
-<div class="block">Type value constraint.</div>
+<div class="block">Trims the message payload.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Type.html#type-java.lang.String-">type(String)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Type.html" title="class in com.metreeca.tree.shapes">Type</a></dt>
-<dd>
-<div class="block">Creates a name constraint.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/metreeca/tree/shapes/Type.html#type-com.metreeca.tree.Shape-">type(Shape)</a></span> - Static method in class com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Type.html" title="class in com.metreeca.tree.shapes">Type</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#trimmer--">trimmer()</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a name="I:U">
@@ -2311,12 +2383,20 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/Response.html#UnsupportedMediaType">UnsupportedMediaType</a></span> - Static variable in class com.metreeca.rest.<a href="com/metreeca/rest/Response.html" title="class in com.metreeca.rest">Response</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#update-com.metreeca.rest.Request-">update(Request)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#update-com.metreeca.rest.Request-">update(Request)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#Update">Update</a></span> - Static variable in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/tree/Shape.html#update--">update()</a></span> - Static method in interface com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/metreeca/rest/handlers/Updater.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Updater</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#updater--">updater()</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/metreeca/rest/handlers/Updater.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Updater</span></a> - Class in <a href="com/metreeca/rest/handlers/package-summary.html">com.metreeca.rest.handlers</a></dt>
+<dd>
+<div class="block">Model-driven resource updater.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Updater.html#Updater--">Updater()</a></span> - Constructor for class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Updater.html" title="class in com.metreeca.rest.handlers">Updater</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/metreeca/gate/policies/ComboPolicy.html#uppercases--">uppercases()</a></span> - Static method in class com.metreeca.gate.policies.<a href="com/metreeca/gate/policies/ComboPolicy.html" title="class in com.metreeca.gate.policies">ComboPolicy</a></dt>
@@ -2343,6 +2423,14 @@
 </a>
 <h2 class="title">V</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/metreeca/gae/services/DatastoreEngine.html#validate-M-">validate(M)</a></span> - Method in class com.metreeca.gae.services.<a href="com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/services/Engine.html#validate-M-">validate(M)</a></span> - Method in interface com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></dt>
+<dd>
+<div class="block">Validates the message payload.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/metreeca/rest/handlers/Actor.html#validator--">validator()</a></span> - Method in class com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/metreeca/rest/wrappers/Validator.html" title="class in com.metreeca.rest.wrappers"><span class="typeNameLink">Validator</span></a> - Class in <a href="com/metreeca/rest/wrappers/package-summary.html">com.metreeca.rest.wrappers</a></dt>
 <dd>
 <div class="block">Validating preprocessor.</div>

@@ -33,7 +33,7 @@
 	<packaging>pom</packaging>
 
 	<name>Metreeca Server Adapters</name>
-	<description>Adapter kits for server providers.</description>
+	<description>Server adapter kits.</description>
 
 	<modules>
 

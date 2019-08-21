@@ -32,8 +32,8 @@
 	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Metreeca Storage Adapters</name>
-	<description>Adapter kits for storage providers.</description>
+	<name>Metreeca Backend Adapters</name>
+	<description>Backend adapter kits.</description>
 
 	<modules>
 

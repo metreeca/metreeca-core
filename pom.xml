@@ -333,7 +333,7 @@
 									<packages>com.metreeca.servlet*</packages>
 								</group>
 								<group>
-									<title>Storage Adapters</title>
+									<title>Backend Adapters</title>
 									<packages>com.metreeca.gae*</packages>
 								</group>
 							</groups>

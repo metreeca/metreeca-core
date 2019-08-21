@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":9,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":9,"i5":9,"i6":9,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -218,33 +218,45 @@ implements <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>static <a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#internal-java.lang.RuntimeException-">internal</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html?is-external=true" title="class or interface in java.lang">RuntimeException</a>&nbsp;cause)</code>
-<div class="block">Creates an internal server error failure.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#internal-java.lang.Throwable-">internal</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;cause)</code>
+<div class="block">Creates a failure for an internal server error.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
+<td class="colFirst"><code>static <a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#invalid-com.metreeca.tree.Trace-">invalid</a></span>(<a href="../../../com/metreeca/tree/Trace.html" title="class in com.metreeca.tree">Trace</a>&nbsp;trace)</code>
+<div class="block">Creates a failure for a payload validation issue.</div>
+</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code>static <a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#malformed-java.lang.Throwable-">malformed</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;cause)</code>
+<div class="block">Creates a failure for a payload parsing issue.</div>
+</td>
+</tr>
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#notes-java.lang.String-">notes</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;notes)</code>
 <div class="block">Configures the error notes.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#status-int-">status</a></span>(int&nbsp;status)</code>
 <div class="block">Configures the response status.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#toString--">toString</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#trace-javax.json.JsonValue-">trace</a></span>(javax.json.JsonValue&nbsp;trace)</code>
 <div class="block">Configures error trace.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Failure.html#trace-com.metreeca.tree.Trace-">trace</a></span>(<a href="../../../com/metreeca/tree/Trace.html" title="class in com.metreeca.tree">Trace</a>&nbsp;trace)</code>
 <div class="block">Configures error trace.</div>
@@ -332,20 +344,56 @@ implements <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="internal-java.lang.RuntimeException-">
+<a name="malformed-java.lang.Throwable-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>malformed</h4>
+<pre>public static&nbsp;<a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&nbsp;malformed(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;cause)</pre>
+<div class="block">Creates a failure for a payload parsing issue.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>cause</code> - the parsing error</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>a new failure reporting <code>cause</code> with a  status code</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>cause</code> is null</dd>
+</dl>
+</li>
+</ul>
+<a name="invalid-com.metreeca.tree.Trace-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>invalid</h4>
+<pre>public static&nbsp;<a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&nbsp;invalid(<a href="../../../com/metreeca/tree/Trace.html" title="class in com.metreeca.tree">Trace</a>&nbsp;trace)</pre>
+<div class="block">Creates a failure for a payload validation issue.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>trace</code> - the validation trace</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>a new failure reporting <code>trace</code> with a  status code</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>trace</code> is null</dd>
+</dl>
+</li>
+</ul>
+<a name="internal-java.lang.Throwable-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>internal</h4>
-<pre>public static&nbsp;<a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&nbsp;internal(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html?is-external=true" title="class or interface in java.lang">RuntimeException</a>&nbsp;cause)</pre>
-<div class="block">Creates an internal server error failure.</div>
+<pre>public static&nbsp;<a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&nbsp;internal(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;cause)</pre>
+<div class="block">Creates a failure for an internal server error.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>cause</code> - the internal server error</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a new failure with a  status code; no detail about <code>cause</code> is
- disclosed to the client</dd>
+<dd>a new failure reporting <code>cause</code> with a  status code; no detail
+ about <code>cause</code> is disclosed to the client</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>cause</code> is null</dd>
 </dl>

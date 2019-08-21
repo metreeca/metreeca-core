@@ -83,33 +83,21 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="#com.metreeca.gae.services">com.metreeca.gae.services</a></td>
-<td class="colLast">
-<div class="block">Google App Engine shared services.</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="#com.metreeca.gate.wrappers">com.metreeca.gate.wrappers</a></td>
 <td class="colLast">
 <div class="block">Identity and access management wrappers.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="#com.metreeca.rest">com.metreeca.rest</a></td>
 <td class="colLast">
 <div class="block">Linked Data REST API framework.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="#com.metreeca.rest.handlers">com.metreeca.rest.handlers</a></td>
 <td class="colLast">
 <div class="block">Basic handlers.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><a href="#com.metreeca.rest.services">com.metreeca.rest.services</a></td>
-<td class="colLast">
-<div class="block">Basic shared services.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -129,24 +117,6 @@
 </li>
 <li class="blockList">
 <ul class="blockList">
-<li class="blockList"><a name="com.metreeca.gae.services">
-<!--   -->
-</a>
-<h3>Uses of <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a> in <a href="../../../../com/metreeca/gae/services/package-summary.html">com.metreeca.gae.services</a></h3>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
-<caption><span>Classes in <a href="../../../../com/metreeca/gae/services/package-summary.html">com.metreeca.gae.services</a> that implement <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Class and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html" title="class in com.metreeca.gae.services">DatastoreEngine</a></span></code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-</li>
 <li class="blockList"><a name="com.metreeca.gate.wrappers">
 <!--   -->
 </a>
@@ -305,35 +275,47 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Creator.html" title="class in com.metreeca.rest.handlers">Creator</a></span></code>
-<div class="block">Resource creator.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Actor.html" title="class in com.metreeca.rest.handlers">Actor</a></span></code>
+<div class="block">Model-driven abstract resource action handler.</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Creator.html" title="class in com.metreeca.rest.handlers">Creator</a></span></code>
+<div class="block">Model-driven resource creator.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Delegator.html" title="class in com.metreeca.rest.handlers">Delegator</a></span></code>
 <div class="block">Delegating handler.</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Deleter.html" title="class in com.metreeca.rest.handlers">Deleter</a></span></code>&nbsp;</td>
-</tr>
 <tr class="rowColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Relator.html" title="class in com.metreeca.rest.handlers">Relator</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Deleter.html" title="class in com.metreeca.rest.handlers">Deleter</a></span></code>
+<div class="block">Model-driven resource deleter.</div>
+</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Relator.html" title="class in com.metreeca.rest.handlers">Relator</a></span></code>
+<div class="block">Model-driven resource relator.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Router.html" title="class in com.metreeca.rest.handlers">Router</a></span></code>
 <div class="block">Path-based request router.</div>
 </td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Updater.html" title="class in com.metreeca.rest.handlers">Updater</a></span></code>&nbsp;</td>
-</tr>
 <tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Updater.html" title="class in com.metreeca.rest.handlers">Updater</a></span></code>
+<div class="block">Model-driven resource updater.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Worker.html" title="class in com.metreeca.rest.handlers">Worker</a></span></code>
 <div class="block">Method-based request worker.</div>
@@ -350,9 +332,25 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>protected <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></td>
+<td class="colLast"><span class="typeNameLabel">Actor.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Actor.html#creator--">creator</a></span>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></td>
 <td class="colLast"><span class="typeNameLabel">Delegator.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Delegator.html#delegate--">delegate</a></span>()</code>
 <div class="block">Retrieves the delegate handler.</div>
 </td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></td>
+<td class="colLast"><span class="typeNameLabel">Actor.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Actor.html#deleter--">deleter</a></span>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></td>
+<td class="colLast"><span class="typeNameLabel">Actor.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Actor.html#relator--">relator</a></span>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></td>
+<td class="colLast"><span class="typeNameLabel">Actor.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Actor.html#updater--">updater</a></span>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a></code></td>
@@ -409,26 +407,6 @@
 <td class="colFirst"><code><a href="../../../../com/metreeca/rest/handlers/Worker.html" title="class in com.metreeca.rest.handlers">Worker</a></code></td>
 <td class="colLast"><span class="typeNameLabel">Worker.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/handlers/Worker.html#put-com.metreeca.rest.Handler-">put</a></span>(<a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a>&nbsp;handler)</code>
 <div class="block">Configures the handler for the PUT HTTP method.</div>
-</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li class="blockList"><a name="com.metreeca.rest.services">
-<!--   -->
-</a>
-<h3>Uses of <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a> in <a href="../../../../com/metreeca/rest/services/package-summary.html">com.metreeca.rest.services</a></h3>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing subinterfaces, and an explanation">
-<caption><span>Subinterfaces of <a href="../../../../com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a> in <a href="../../../../com/metreeca/rest/services/package-summary.html">com.metreeca.rest.services</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Interface and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code>interface&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a></span></code>
-<div class="block">Storage engine.</div>
 </td>
 </tr>
 </tbody>
