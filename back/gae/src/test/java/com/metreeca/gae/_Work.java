@@ -53,7 +53,7 @@ final class _Work extends GAETestBase {
 
 		final Query query=new Query("Employee")
 				.setFilter(new Query.FilterPredicate(
-						"office.label", Query.FilterOperator.EQUAL, "Office 1"
+						"office.__key__", Query.FilterOperator.EQUAL, createKey("Office", "/offices/1")
 				));
 
 
@@ -64,6 +64,9 @@ final class _Work extends GAETestBase {
 
 		results.forEach(entity -> System.out.println(((EmbeddedEntity)entity.getProperty("office")).getKey().getName()));
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void convert() {
 

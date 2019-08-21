@@ -23,12 +23,12 @@ import com.metreeca.tree.probes.Inferencer;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
-import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PropertyContainer;
 
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
-public final class EntityFormat implements Format<Entity> {
+public final class EntityFormat implements Format<PropertyContainer> {
 
 	private static final EntityFormat Instance=new EntityFormat();
 
@@ -48,13 +48,13 @@ public final class EntityFormat implements Format<Entity> {
 	private EntityFormat() {} // singleton
 
 
-	@Override public Result<Entity, Failure> get(final Message<?> message) {
+	@Override public Result<PropertyContainer, Failure> get(final Message<?> message) {
 		return message.body(json()).value(json ->
-				new EntityDecoder().decode(json, shape(message), message.request().path())
+				new EntityDecoder().decode(json, shape(message))
 		);
 	}
 
-	@Override public <M extends Message<M>> M set(final M message, final Entity value) {
+	@Override public <M extends Message<M>> M set(final M message, final PropertyContainer value) {
 		return message.body(json(),
 				new EntityEncoder().encode(value, shape(message))
 		);

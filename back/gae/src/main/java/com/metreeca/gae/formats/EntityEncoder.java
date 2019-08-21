@@ -20,7 +20,6 @@ package com.metreeca.gae.formats;
 import com.metreeca.gae.GAE;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 import com.google.appengine.api.datastore.Text;
 
@@ -37,7 +36,7 @@ import static com.metreeca.tree.shapes.Field.fields;
 
 final class EntityEncoder {
 
-	JsonObject encode(final Entity entity, final Shape shape) {
+	JsonObject encode(final PropertyContainer entity, final Shape shape) {
 		return value(entity, shape);
 	}
 

@@ -18,6 +18,7 @@
 package com.metreeca.gae.services;
 
 
+import com.metreeca.gae.GAE;
 import com.metreeca.rest.Failure;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
@@ -26,7 +27,6 @@ import com.metreeca.tree.probes.Traverser;
 import com.metreeca.tree.shapes.*;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PropertyContainer;
 
 import static com.metreeca.gae.formats.EntityFormat.entity;
@@ -44,24 +44,13 @@ final class DatastoreTrimmer extends DatastoreProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Object trim(final Shape shape, final Object object) {
-		return object instanceof Entity ? trim(shape, (Entity)object)
-				: object instanceof EmbeddedEntity ? trim(shape, (EmbeddedEntity)object)
+		return GAE.Entity(object) ? trim(shape, (PropertyContainer)object)
 				: object;
 	}
 
-	private Entity trim(final Shape shape, final Entity entity) {
-
-		final Entity target=new Entity(entity.getKey());
-
-		shape.map(new TrimmerProbe(entity, target));
-
-		return target;
-	}
-
-	private EmbeddedEntity trim(final Shape shape, final EmbeddedEntity entity) {
+	private EmbeddedEntity trim(final Shape shape, final PropertyContainer entity) {
 
 		final EmbeddedEntity target=new EmbeddedEntity();
-		target.setKey(entity.getKey());
 
 		shape.map(new TrimmerProbe(entity, target));
 

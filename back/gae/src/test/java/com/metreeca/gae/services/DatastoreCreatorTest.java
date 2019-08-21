@@ -21,10 +21,9 @@ import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.tree.shapes.Datatype;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Query;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -38,9 +37,9 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 
-import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -55,7 +54,7 @@ final class DatastoreCreatorTest extends GAETestBase {
 							.path("/container/")
 							.shape(and(
 									clazz("Entity"),
-									field("label", and(required(), Datatype.datatype(GAE.String)))
+									field("label", and(required(), datatype(GAE.String)))
 							))
 							.header("Slug", "slug")
 							.body(json(), Json.createObjectBuilder()
@@ -71,18 +70,15 @@ final class DatastoreCreatorTest extends GAETestBase {
 								.hasHeader("Location", "/container/slug");
 
 						service(datastore()).exec(service -> {
-							try {
 
-								final Entity entity=service.get(createKey("Entity", "/container/slug"));
+							final Entity entity=service.prepare(new Query("Entity").setFilter(new Query.FilterPredicate(
+									"label", Query.FilterOperator.EQUAL, "entity"
+							))).asSingleEntity();
 
-								assertThat(entity.getProperties())
-										.containsEntry("label", "entity");
+							assertThat(entity.getKey().getName()).isEqualTo("/container/slug");
 
-								return this;
+							return this;
 
-							} catch ( final EntityNotFoundException e ) {
-								throw new RuntimeException(e);
-							}
 						});
 
 					})
@@ -91,20 +87,22 @@ final class DatastoreCreatorTest extends GAETestBase {
 		}
 
 		@Test void testRejectClashingSlug() {
-			exec(
 
-					() -> service(datastore()).exec(service ->
-							service.put(new Entity("Entity", "/id"))
-					),
+			final Request request=new Request()
+					.path("/")
+					.shape(clazz("Entity"))
+					.header("Slug", "id")
+					.body(json(), JsonValue.EMPTY_JSON_OBJECT);
+
+			exec(
 
 					() -> new DatastoreCreator()
 
-							.handle(new Request()
-									.path("/")
-									.shape(clazz("Entity"))
-									.header("Slug", "id")
-									.body(json(), JsonValue.EMPTY_JSON_OBJECT)
-							)
+							.handle(request),
+
+					() -> new DatastoreCreator()
+
+							.handle(request)
 
 							.accept(response -> assertThat(response)
 									.hasStatus(Response.InternalServerError)

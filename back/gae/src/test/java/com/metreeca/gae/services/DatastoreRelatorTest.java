@@ -22,7 +22,7 @@ import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
-import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Entity;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -86,11 +86,8 @@ final class DatastoreRelatorTest extends GAETestBase {
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.OK)
 							.hasShape()
-							.hasBody(entity(), entity -> assertThat(entity.getKey())
-									.isEqualTo(KeyFactory.createKey(
-											KeyFactory.createKey(GAE.Roots, "/offices/"),
-											"Office", "/offices/1"
-									))
+							.hasBody(entity(), entity -> assertThat(((Entity)entity).getKey().getName())
+									.isEqualTo("/offices/1")
 							)
 					)
 

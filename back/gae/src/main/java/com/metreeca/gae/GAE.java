@@ -18,10 +18,16 @@
 package com.metreeca.gae;
 
 
+import com.metreeca.tree.Shape;
+
 import com.google.appengine.api.datastore.*;
 
 import java.util.Date;
 import java.util.function.Function;
+
+import static com.metreeca.tree.shapes.Clazz.clazz;
+
+import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 
 /**
@@ -31,7 +37,7 @@ public final class GAE {
 
 	//// Classes ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final String Roots="Roots";
+	public static final String Root="Root"; // !!! review/hide
 
 
 	//// Properties ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,8 +54,6 @@ public final class GAE {
 	public static final String String="String";
 	public static final String Date="Date";
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Tests if an object is an entity value.
@@ -118,7 +122,28 @@ public final class GAE {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Key Generation ////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Key key(final String path, final Shape shape) { // !!! tbd
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return clazz(shape)
+
+				.map(kind -> createKey(createKey(Root, path.substring(0, path.lastIndexOf('/')+1)), kind, path))
+
+				.orElseGet(() -> createKey(Root, path));
+
+	}
+
+
+	//// Sorting ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Compares two object for ordering.

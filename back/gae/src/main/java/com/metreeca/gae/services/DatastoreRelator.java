@@ -17,7 +17,6 @@
 
 package com.metreeca.gae.services;
 
-import com.metreeca.gae.GAE;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -26,20 +25,18 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.queries.*;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import java.util.Optional;
 
+import static com.metreeca.gae.GAE.key;
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
-import static com.metreeca.tree.shapes.Clazz.clazz;
-import static com.metreeca.tree.shapes.Meta.hint;
-
-import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 
 final class DatastoreRelator extends DatastoreProcessor {
@@ -83,17 +80,12 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return request.reply(response -> datastore.exec(service -> {
 
 			final Shape shape=convey(request.shape());
+			final Key key=key(request.path(), shape);
 
-			final String name=request.path();
-			final String kind=clazz(shape).orElse(GAE.Roots);
-			final String root=hint(shape).orElseGet(() -> name.substring(0, name.lastIndexOf('/')+1)); // path stem
-
-			final Query query=new Query(kind)
+			final Query query=new Query(key.getKind()) // !!! set filters from filter shape?
 					.setFilter(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
-							FilterOperator.EQUAL, createKey(createKey(GAE.Roots, root), kind, name)
+							FilterOperator.EQUAL, key
 					));
-
-			// !!! set filters from filter shape?
 
 			// ;( projecting only properties actually included in the shape would lower costs, as projection queries
 			// are counted as small operations: unfortunately, a number of limitations apply:

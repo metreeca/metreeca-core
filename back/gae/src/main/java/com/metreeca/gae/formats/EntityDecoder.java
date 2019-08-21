@@ -20,7 +20,9 @@ package com.metreeca.gae.formats;
 import com.metreeca.gae.GAE;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import com.google.appengine.api.datastore.PropertyContainer;
+import com.google.appengine.api.datastore.Text;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
@@ -29,9 +31,8 @@ import java.util.Map;
 import javax.json.*;
 
 import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Clazz.clazz;
-import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.fields;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
@@ -39,13 +40,9 @@ import static java.util.stream.Collectors.toList;
 
 final class EntityDecoder {
 
-	Entity decode(final JsonObject json, final Shape shape, final String id) {
+	PropertyContainer decode(final JsonObject json, final Shape shape) {
 
-		final Entity value=new Entity(clazz(shape).orElse("*"), id);
-
-		value.setPropertiesFrom(entity(json, shape));
-
-		return value;
+		return entity(json, shape);
 	}
 
 

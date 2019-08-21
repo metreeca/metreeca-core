@@ -19,11 +19,14 @@ package com.metreeca.gae.services;
 
 import com.metreeca.rest.*;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import java.util.UUID;
 
+import static com.metreeca.gae.GAE.key;
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
@@ -55,7 +58,7 @@ final class DatastoreCreator extends DatastoreProcessor {
 							.map(Codecs::encode) // encode slug as IRI path component
 							.orElseGet(() -> UUID.randomUUID().toString()); // !! sequential generator
 
-					final Key key=KeyFactory.createKey(entity.getKind(), name);
+					final Key key=key(name, convey(request.shape()));
 
 					final boolean clashing=service.prepare(new Query(key.getKind())
 							.setFilter(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, key))

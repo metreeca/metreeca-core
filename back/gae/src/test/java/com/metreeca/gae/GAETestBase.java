@@ -90,7 +90,7 @@ public abstract class GAETestBase {
 
 				final Entity office=new Entity("Office",
 						"/offices/"+_office.getString("code"),
-						createKey(GAE.Roots, "/offices/")
+						createKey(GAE.Root, "/offices/")
 				);
 
 				office.setProperty("code", _office.getString("code"));
@@ -122,7 +122,7 @@ public abstract class GAETestBase {
 
 				final Entity employee=new Entity("Employee",
 						"/employees/"+_employee.getString("code"),
-						createKey(GAE.Roots, "/employees/")
+						createKey(GAE.Root, "/employees/")
 				);
 
 				employee.setProperty("code", _employee.getString("code"));
