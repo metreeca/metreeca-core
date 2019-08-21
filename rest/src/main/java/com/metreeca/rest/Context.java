@@ -122,7 +122,7 @@ public final class Context {
 
 					return acquired;
 
-				} catch ( final RuntimeException e ) {
+				} catch ( final Throwable e ) {
 
 					services.remove(factory); // roll back acquisition marker
 
