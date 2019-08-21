@@ -20,13 +20,12 @@ package com.metreeca.gae.formats;
 import com.metreeca.gae.GAE;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.PropertyContainer;
-import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.*;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.json.*;
 
@@ -41,10 +40,11 @@ import static java.util.stream.Collectors.toList;
 final class EntityDecoder {
 
 	PropertyContainer decode(final JsonObject json, final Shape shape) {
-
 		return entity(json, shape);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Object value(final JsonValue value, final Shape shape) {
 
@@ -87,8 +87,21 @@ final class EntityDecoder {
 
 	private PropertyContainer entity(final JsonObject object, final Shape shape) {
 
-		final Map<String, Shape> fields=fields(shape);
 		final EmbeddedEntity entity=new EmbeddedEntity();
+
+		final String id=Optional.ofNullable(object.get("id"))
+				.filter(value -> value instanceof JsonString)
+				.map(value   -> ((JsonString)value).getString())
+				.orElse("*");
+
+		final String type=Optional.ofNullable(object.get("type"))
+				.filter(value -> value instanceof JsonString)
+				.map(value   -> ((JsonString)value).getString())
+				.orElse("*");
+
+		entity.setKey(KeyFactory.createKey(type, id));
+
+		final Map<String, Shape> fields=fields(shape);
 
 		object.forEach((name, json) -> {
 

@@ -22,9 +22,7 @@ import com.metreeca.gae.GAETestBase;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Datatype;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.PropertyContainer;
-import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -55,12 +53,10 @@ final class EntityDecoderTest extends GAETestBase {
 	}
 
 
-	@Test void testParseEntity() {
-		assertThat(decode("{}")).isEqualTo(new EmbeddedEntity());
-	}
-
-	@Test void testParseEntityWithId() {
-		//assertThat(decode("{}", clazz("Class"))).isEqualTo(new Entity("Class", "/"));
+	@Test void testDecodeEntity() {
+		assertThat(decode("{ 'id': '/path', 'type': 'Entity' }")).satisfies(entity -> {
+			assertThat(((EmbeddedEntity)entity).getKey()).isEqualTo(KeyFactory.createKey("Entity", "/path"));
+		});
 	}
 
 
@@ -68,30 +64,30 @@ final class EntityDecoderTest extends GAETestBase {
 		assertThat(decode("{ 'field': null }").hasProperty("field")).isFalse();
 	}
 
-	@Test void testParseBooleanFields() {
+	@Test void testDecodeBooleanFields() {
 		assertThat(decode("{ 'field': true }").getProperty("field")).isEqualTo(true);
 	}
 
-	@Test void testParseIntegerFields() {
+	@Test void testDecodeIntegerFields() {
 		assertThat(decode("{ 'field': 123 }").getProperty("field")).isEqualTo(123L);
 
 	}
 
-	@Test void testParseDoubleFields() {
+	@Test void testDecodeDoubleFields() {
 		assertThat(decode("{ 'field': 123.0 }").getProperty("field")).isEqualTo(123.0D);
 
 	}
 
-	@Test void testParseIntegerFieldsExpectedDouble() {
+	@Test void testDecodeIntegerFieldsExpectedDouble() {
 		assertThat(decode("{ 'field': 123 }", field("field", Datatype.datatype(GAE.Floating))).getProperty("field"))
 				.isEqualTo(123.0D);
 	}
 
-	@Test void testParseStringFields() {
+	@Test void testDecodeStringFields() {
 		assertThat(decode("{ 'field': 'string' }").getProperty("field")).isEqualTo("string");
 	}
 
-	@Test void testParseStringFieldsExceedingLimits() {
+	@Test void testDecodeStringFieldsExceedingLimits() {
 
 		final char[] chars=new char[2000];
 
@@ -103,20 +99,21 @@ final class EntityDecoderTest extends GAETestBase {
 				.isEqualTo(new Text(string));
 	}
 
-	@Test void testParseStringFieldsAsExpectedDate() {
+	@Test void testDecodeStringFieldsAsExpectedDate() {
 		assertThat(decode("{ 'field': '2019-01-01T00:00Z' }", field("field", Datatype.datatype(GAE.Date))).getProperty("field"))
 				.isEqualTo(Date.from(OffsetDateTime.parse("2019-01-01T00:00Z").toInstant()));
 	}
 
-	@Test void testParseArrayFields() {
+	@Test void testDecodeArrayFields() {
 		assertThat(decode("{ 'field': [null, 123, 'string'] }").getProperty("field"))
 				.isEqualTo(asList(null, 123L, "string"));
 	}
 
-	@Test void testParseObjectFields() {
-		assertThat(decode("{ 'field': { 'label' : 123 } }").getProperty("field")).satisfies(entity ->
-				assertThat(((PropertyContainer)entity).getProperty("label")).isEqualTo(123L)
-		);
+	@Test void testDecodeObjectFields() {
+		assertThat(decode("{ 'field': { 'id': '/path', 'type': 'Entity', 'label' : 123 } }").getProperty("field")).satisfies(entity -> {
+			assertThat(((EmbeddedEntity)entity).getKey()).isEqualTo(KeyFactory.createKey("Entity", "/path"));
+			assertThat(((PropertyContainer)entity).getProperty("label")).isEqualTo(123L);
+		});
 	}
 
 }

@@ -35,17 +35,14 @@ import static com.google.appengine.api.datastore.KeyFactory.createKey;
  */
 public final class GAE {
 
-	//// Classes ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// System Properties /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final String Root="Root"; // !!! review/hide
-
-
-	//// Properties ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final String Contains="contains";
+	public static final String id="id";
+	public static final String type="type";
+	public static final String contains="contains";
 
 
-	//// Datatypes /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// System Datatypes //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final String Entity="Entity";
 	public static final String Boolean="Boolean";
@@ -136,9 +133,9 @@ public final class GAE {
 
 		return clazz(shape)
 
-				.map(kind -> createKey(createKey(Root, path.substring(0, path.lastIndexOf('/')+1)), kind, path))
+				.map(kind -> createKey(createKey("*", path.substring(0, path.lastIndexOf('/')+1)), kind, path))
 
-				.orElseGet(() -> createKey(Root, path));
+				.orElseGet(() -> createKey("*", path));
 
 	}
 

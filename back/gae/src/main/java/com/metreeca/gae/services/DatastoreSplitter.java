@@ -90,7 +90,7 @@ final class DatastoreSplitter extends DatastoreProcessor {
 		}
 
 		@Override public Shape probe(final Field field) {
-			return field.getName().equals(GAE.Contains) ? traversed(and()) : field;
+			return field.getName().equals(GAE.contains) ? traversed(and()) : field;
 		}
 
 	}
@@ -106,7 +106,7 @@ final class DatastoreSplitter extends DatastoreProcessor {
 		}
 
 		@Override public Shape probe(final Field field) {
-			return field.getName().equals(GAE.Contains) ? traversed(field.getShape()) : and();
+			return field.getName().equals(GAE.contains) ? traversed(field.getShape()) : and();
 		}
 
 	}

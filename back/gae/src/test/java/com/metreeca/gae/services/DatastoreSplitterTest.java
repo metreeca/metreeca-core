@@ -52,7 +52,7 @@ final class DatastoreSplitterTest extends GAETestBase {
 					clazz("Clazz"),
 					field("field", and()),
 					or(clazz("Clazz"), field("field", and())),
-					field(GAE.Contains, and())
+					field(GAE.contains, and())
 
 			))).isEqualTo(and(
 
@@ -103,8 +103,8 @@ final class DatastoreSplitterTest extends GAETestBase {
 					),
 					or(
 							guard("axis"),
-							field(GAE.Contains, minCount(1)),
-							field(GAE.Contains, maxCount(1))
+							field(GAE.contains, minCount(1)),
+							field(GAE.contains, maxCount(1))
 					)
 
 			))).isEqualTo(
@@ -126,8 +126,8 @@ final class DatastoreSplitterTest extends GAETestBase {
 					field("field", and()),
 					and(field("field", and())),
 					or(
-							field(GAE.Contains, and()),
-							field(GAE.Contains, and())
+							field(GAE.contains, and()),
+							field(GAE.contains, and())
 					)
 
 			))).isEqualTo(

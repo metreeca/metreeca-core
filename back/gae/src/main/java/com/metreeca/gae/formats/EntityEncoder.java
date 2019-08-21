@@ -20,8 +20,7 @@ package com.metreeca.gae.formats;
 import com.metreeca.gae.GAE;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.PropertyContainer;
-import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -87,8 +86,18 @@ final class EntityEncoder {
 
 	private JsonObject value(final PropertyContainer entity, final Shape shape) {
 
-		final Map<String, Shape> fields=fields(shape);
 		final JsonObjectBuilder builder=Json.createObjectBuilder();
+
+		final Key key=entity instanceof Entity ? ((Entity)entity).getKey()
+				: entity instanceof EmbeddedEntity ? ((EmbeddedEntity)entity).getKey()
+				: null;
+
+		if ( key != null ) {
+			builder.add(GAE.id, key.getName());
+			builder.add(GAE.type, key.getKind());
+		}
+
+		final Map<String, Shape> fields=fields(shape);
 
 		entity.getProperties().forEach((name, object) -> {
 

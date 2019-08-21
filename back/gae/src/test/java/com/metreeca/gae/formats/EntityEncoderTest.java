@@ -19,9 +19,7 @@ package com.metreeca.gae.formats;
 
 import com.metreeca.gae.GAETestBase;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -51,32 +49,38 @@ final class EntityEncoderTest extends GAETestBase {
 	}
 
 
+	@Test void testHandleMetadata() {
+		assertThat(encode(entity -> {}))
+				.containsEntry("id", Json.createValue("/"));
+	}
+
 	@Test void testIgnoreNullFields() {
 		assertThat(encode(entity -> entity.setProperty("field", null)))
 				.doesNotContainKey("field");
 	}
 
-	@Test void testFormatBooleanFields() {
+
+	@Test void testEncodeBooleanFields() {
 		assertThat(encode(entity -> entity.setProperty("field", true)))
 				.containsEntry("field", JsonValue.TRUE);
 	}
 
-	@Test void testFormatIntegerFields() {
+	@Test void testEncodeIntegerFields() {
 		assertThat(encode(entity -> entity.setProperty("field", 123)))
 				.containsEntry("field", Json.createValue(123));
 	}
 
-	@Test void testFormatDoubleFields() {
+	@Test void testEncodeDoubleFields() {
 		assertThat(encode(entity -> entity.setProperty("field", 123.0)))
 				.containsEntry("field", Json.createValue(123.0D));
 	}
 
-	@Test void testFormatStringFields() {
+	@Test void testEncodeStringFields() {
 		assertThat(encode(entity -> entity.setProperty("field", "string")))
 				.containsEntry("field", Json.createValue("string"));
 	}
 
-	@Test void testFormatStringFieldsExceedingLimits() {
+	@Test void testEncodeStringFieldsExceedingLimits() {
 
 		final char[] chars=new char[2000];
 
@@ -88,12 +92,12 @@ final class EntityEncoderTest extends GAETestBase {
 				.containsEntry("field", Json.createValue(string));
 	}
 
-	@Test void testFormatDateFields() {
+	@Test void testEncodeDateFields() {
 		assertThat(encode(entity -> entity.setProperty("field", new Date(0))))
 				.containsEntry("field", Json.createValue("1970-01-01T00:00:00Z"));
 	}
 
-	@Test void testFormatCollectionFields() {
+	@Test void testEncodeCollectionFields() {
 		assertThat(encode(entity -> entity.setProperty("field", asList(null, 123, "string"))))
 				.containsEntry("field", Json.createArrayBuilder()
 						.add(JsonValue.NULL)
@@ -103,10 +107,12 @@ final class EntityEncoderTest extends GAETestBase {
 				);
 	}
 
-	@Test void testFormatEntityFields() {
+	@Test void testEncodeEmbeddedEntityFields() {
 		assertThat(encode(entity -> {
 
 			final EmbeddedEntity embedded=new EmbeddedEntity();
+
+			embedded.setKey(KeyFactory.createKey("Embedded", "/path"));
 
 			embedded.setProperty("null", null);
 			embedded.setProperty("nested", 123);
@@ -115,6 +121,8 @@ final class EntityEncoderTest extends GAETestBase {
 
 		})).containsEntry("field", Json.createObjectBuilder()
 
+				.add("id", "/path")
+				.add("type", "Embedded")
 				.add("nested", 123L)
 
 				.build()

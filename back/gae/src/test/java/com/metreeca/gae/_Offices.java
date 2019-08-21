@@ -43,7 +43,7 @@ public final class _Offices extends Delegator {
 						field("label", all("Offices"))
 				),
 
-				field(GAE.Contains, and(
+				field(GAE.contains, and(
 
 						clazz("Office"),
 
