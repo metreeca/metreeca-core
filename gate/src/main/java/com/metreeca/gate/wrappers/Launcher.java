@@ -53,10 +53,11 @@ public final class Launcher implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Handler wrap(final Handler handler) {
-		return request -> (
-				request.method().equals(Request.GET) && request.interactive() ? interactive : handler
-		).handle(request);
+	@Override public Handler wrap(final Handler handler) { // delegate only resources actually managed by handler
+		return request -> handler.handle(request).flatMap(response ->
+				response.status() > 0 && request.method().equals(Request.GET) && request.interactive() ?
+						interactive.handle(request) : consumer -> consumer.accept(response)
+		);
 	}
 
 }

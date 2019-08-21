@@ -25,7 +25,7 @@
  *      <groupId>com.metreeca</groupId>
  *      <artifactId>gae</artifactId>
  *      <version>${project.version}</version>
- * </dependency>
+ * </dependency>}</pre>
  */
 
 package com.metreeca.gae;
