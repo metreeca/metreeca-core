@@ -31,6 +31,15 @@ public final class DatastoreEngine implements Engine {
 
 	private final Datastore datastore=service(datastore());
 
+	private final DatastoreSplitter splitter=new DatastoreSplitter();
+	private final DatastoreTrimmer trimmer=new DatastoreTrimmer();
+	private final DatastoreValidator validator=new DatastoreValidator();
+
+	private final DatastoreCreator creator=new DatastoreCreator();
+	private final DatastoreRelator relator=new DatastoreRelator();
+	private final DatastoreUpdater updater=new DatastoreUpdater();
+	private final DatastoreDeleter deleter=new DatastoreDeleter();
+
 
 	@Override public <R> R exec(final Supplier<R> task) {
 
@@ -48,7 +57,7 @@ public final class DatastoreEngine implements Engine {
 			throw new NullPointerException("null shape");
 		}
 
-		return new DatastoreSplitter().container(shape);
+		return splitter.container(shape);
 	}
 
 	@Override public Shape resource(final Shape shape) {
@@ -57,7 +66,7 @@ public final class DatastoreEngine implements Engine {
 			throw new NullPointerException("null shape");
 		}
 
-		return new DatastoreSplitter().resource(shape);
+		return splitter.resource(shape);
 	}
 
 
@@ -67,7 +76,7 @@ public final class DatastoreEngine implements Engine {
 			throw new NullPointerException("null message");
 		}
 
-		return new DatastoreTrimmer().trim(message);
+		return trimmer.trim(message);
 	}
 
 	@Override public <M extends Message<M>> Result<M, Failure> validate(final M message) {
@@ -76,7 +85,7 @@ public final class DatastoreEngine implements Engine {
 			throw new NullPointerException("null message");
 		}
 
-		return new DatastoreValidator().validate(message);
+		return validator.validate(message);
 	}
 
 
@@ -86,7 +95,7 @@ public final class DatastoreEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new DatastoreCreator().handle(request);
+		return creator.handle(request);
 	}
 
 	@Override public Future<Response> relate(final Request request) {
@@ -95,7 +104,7 @@ public final class DatastoreEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new DatastoreRelator().handle(request);
+		return relator.handle(request);
 	}
 
 	@Override public Future<Response> update(final Request request) {
@@ -104,7 +113,7 @@ public final class DatastoreEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new DatastoreUpdater().handle(request);
+		return updater.handle(request);
 	}
 
 	@Override public Future<Response> delete(final Request request) {
@@ -113,7 +122,7 @@ public final class DatastoreEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new DatastoreDeleter().handle(request);
+		return deleter.handle(request);
 	}
 
 }
