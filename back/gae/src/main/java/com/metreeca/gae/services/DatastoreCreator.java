@@ -83,7 +83,7 @@ final class DatastoreCreator extends DatastoreProcessor {
 
 				.value(entity -> datastore.exec(service -> { // store entity
 
-					final Key created=service.put(entity);
+					final Key created=service.put(entity); // !!! explicitly test/create root entity?
 
 					return request.reply(response -> response
 							.status(Response.Created)

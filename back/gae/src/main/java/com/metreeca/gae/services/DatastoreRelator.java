@@ -24,10 +24,8 @@ import com.metreeca.tree.Query.Probe;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.queries.*;
 
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import java.util.Optional;
 
@@ -37,6 +35,9 @@ import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
+
+import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
+import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
 
 
 final class DatastoreRelator extends DatastoreProcessor {
@@ -83,9 +84,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final Key key=key(request.path(), shape);
 
 			final Query query=new Query(key.getKind()) // !!! set filters from filter shape?
-					.setFilter(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
-							FilterOperator.EQUAL, key
-					));
+					.setFilter(new Query.FilterPredicate(KEY_RESERVED_PROPERTY, EQUAL, key));
 
 			// ;( projecting only properties actually included in the shape would lower costs, as projection queries
 			// are counted as small operations: unfortunately, a number of limitations apply:

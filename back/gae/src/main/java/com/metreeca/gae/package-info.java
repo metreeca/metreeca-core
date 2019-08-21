@@ -26,13 +26,6 @@
  *      <artifactId>gae</artifactId>
  *      <version>${project.version}</version>
  * </dependency>
- *
- * <dependency>
- *      <groupId>com.google.appengine</groupId>
- *      <artifactId>appengine-api-1.0-sdk</artifactId>
- *      <version>${gae.version}</version>
- *      <scope>provided</scope>
- * </dependency>}</pre>
  */
 
 package com.metreeca.gae;

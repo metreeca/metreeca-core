@@ -32,9 +32,10 @@ import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 final class _Work extends GAETestBase {
 
-	@Test void test() {
+	@Test void test() throws EntityNotFoundException {
 
-		final Entity employee=new Entity("Employee", "/employees/1");
+		final Key root=createKey("*", "/employees/");
+		final Entity employee=new Entity("Employee", "/employees/1", root);
 
 		employee.setProperty("label", "Employee 1");
 
@@ -63,6 +64,8 @@ final class _Work extends GAETestBase {
 		System.out.println(results);
 
 		results.forEach(entity -> System.out.println(((EmbeddedEntity)entity.getProperty("office")).getKey().getName()));
+
+		System.out.println(datastore.get(root));
 	}
 
 
