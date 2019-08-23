@@ -2,7 +2,7 @@
 
 - JSON Object
 - URLEncoded JSON object
-- URLSearchParams encoded JSON object
+- URLSearchParams encoded JSON object (https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams)
     - beware of commas in values
     - numeric/boolean values must be specified as such in shape
     
@@ -46,7 +46,7 @@
     ">= <path>": <value>, // minInclusive
     "<= <path>": <value>, // maxInclusive
     
-    "#< <path>": <value>, // minLength
+    "#> <path>": <value>, // minLength
     "#< <path>": <value>, // maxLength
     
     "* <path>": "pattern", // pattern (regular expression matching)

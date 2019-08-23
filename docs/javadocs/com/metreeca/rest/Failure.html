@@ -427,12 +427,9 @@ implements <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function
 <div class="block">Configures the error tag.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>error</code> - a machine-readable tag for the error condition defined by this failure</dd>
+<dd><code>error</code> - a machine-readable tag for the error condition defined by this failure; ignored if null or empty</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>this failure</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>error</code> is null</dd>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if <code>error</code> is empty</dd>
 </dl>
 </li>
 </ul>
@@ -446,30 +443,9 @@ implements <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function
 <div class="block">Configures the error notes.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>notes</code> - a human readable description of the error condition defined by this failure</dd>
+<dd><code>notes</code> - a human readable description of the error condition defined by this failure; ignored if null or empty</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>this failure</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>notes</code> is null</dd>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if <code>notes</code> is empty</dd>
-</dl>
-</li>
-</ul>
-<a name="trace-javax.json.JsonValue-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>trace</h4>
-<pre>public&nbsp;<a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&nbsp;trace(javax.json.JsonValue&nbsp;trace)</pre>
-<div class="block">Configures error trace.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>trace</code> - a structured JSON report describing the error condition defined by this failure</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>this failure</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>trace</code> is null</dd>
 </dl>
 </li>
 </ul>
@@ -483,11 +459,28 @@ implements <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function
 <div class="block">Configures error trace.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>trace</code> - a shape validation trace describing the error condition defined by this failure</dd>
+<dd><code>trace</code> - a shape validation trace describing the error condition defined by this failure; ignored if null or empty</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>this failure</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>trace</code> is null</dd>
+</dl>
+</li>
+</ul>
+<a name="trace-javax.json.JsonValue-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>trace</h4>
+<pre>public&nbsp;<a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&nbsp;trace(javax.json.JsonValue&nbsp;trace)</pre>
+<div class="block">Configures error trace.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>trace</code> - a structured JSON report describing the error condition defined by this failure; ignored if null or
+              empty</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>this failure</dd>
 </dl>
 </li>
 </ul>
@@ -501,12 +494,9 @@ implements <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function
 <div class="block">Configures the error cause.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>cause</code> - a human readable description of cause of the error condition defined by this failure</dd>
+<dd><code>cause</code> - a human readable description of cause of the error condition defined by this failure; ignored if null or empty</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>this failure</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>cause</code> is null</dd>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if <code>cause</code> is empty</dd>
 </dl>
 </li>
 </ul>
@@ -520,11 +510,9 @@ implements <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function
 <div class="block">Configures the error cause.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>cause</code> - the underlying throwable that caused the error condition defined by this failure</dd>
+<dd><code>cause</code> - the underlying throwable that caused the error condition defined by this failure; ignored if null</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>this failure</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>cause</code> is null</dd>
 </dl>
 </li>
 </ul>
