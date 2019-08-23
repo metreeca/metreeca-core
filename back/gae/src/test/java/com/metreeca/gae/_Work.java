@@ -22,12 +22,20 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.metreeca.gae.services.Datastore.datastore;
+import static com.metreeca.rest.Context.service;
+
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 
 final class _Work extends GAETestBase {
 
-	@Test void test() throws EntityNotFoundException {
+	private Runnable dataset() {
+		return () -> service(datastore()).exec(datastore -> datastore.put(birt()));
+	}
+
+
+	@Test void work() throws EntityNotFoundException {
 
 		final Key root=createKey("*", "/employees/");
 		final Entity employee=new Entity("Employee", "/employees/1", root);
@@ -62,4 +70,14 @@ final class _Work extends GAETestBase {
 
 	}
 
+
+	@Test void test() {
+		exec(dataset(), () -> service(datastore()).exec(datastore -> {
+
+			System.out.println(datastore.prepare(new Query("Employee")).asList(FetchOptions.Builder.withDefaults()));
+
+			return this;
+
+		}));
+	}
 }

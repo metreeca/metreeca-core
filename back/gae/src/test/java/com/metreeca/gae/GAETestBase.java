@@ -22,14 +22,13 @@ import com.metreeca.rest.Context;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PropertyContainer;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.*;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -38,6 +37,7 @@ import javax.json.JsonValue;
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 import static java.lang.String.format;
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 
 
@@ -66,26 +66,29 @@ public abstract class GAETestBase {
 
 	//// BIRT Test Dataset /////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected Iterable<Entity> birt() {
-		return BIRT.Entities;
+	protected Collection<Entity> birt() {
+		return unmodifiableCollection(BIRT.Entities);
 	}
 
 
 	private static final class BIRT {
 
-		private static final Iterable<Entity> Entities=entities(
+		private static final Collection<Entity> Entities=entities(
 				Json.createReader(Codecs.input(GAETestBase.class, ".json")).readObject()
-		).collect(toList());
+		);
 
 
-		private static Stream<Entity> entities(final JsonObject _entities) {
-			return Stream.concat(
-					offices(_entities.getJsonArray("offices")),
-					employees(_entities.getJsonArray("employees"))
-			);
+		private static Collection<Entity> entities(final JsonObject _entities) {
+
+			final Collection<Entity> entities=new ArrayList<>();
+
+			entities.addAll(offices(_entities.getJsonArray("offices")));
+			entities.addAll(employees(_entities.getJsonArray("employees")));
+
+			return entities;
 		}
 
-		private static Stream<Entity> offices(final Collection<JsonValue> _offices) {
+		private static List<Entity> offices(final Collection<JsonValue> _offices) {
 			return _offices.stream().map(JsonValue::asJsonObject).map(_office -> {
 
 				final Entity office=new Entity("Office",
@@ -120,11 +123,12 @@ public abstract class GAETestBase {
 
 				return office;
 
-			});
+			}).collect(toList());
 		}
 
-		private static Stream<Entity> employees(final Collection<JsonValue> _employees) {
-			return _employees.stream().map(JsonValue::asJsonObject).map(_employee -> {
+		private static List<Entity> employees(final Collection<JsonValue> _employees) {
+
+			final List<Entity> employees=_employees.stream().map(JsonValue::asJsonObject).map(_employee -> {
 
 				final Entity employee=new Entity("Employee",
 						"/employees/"+_employee.getString("code"),
@@ -144,7 +148,7 @@ public abstract class GAETestBase {
 				final JsonObject _office=_employee.getJsonObject("office");
 				final EmbeddedEntity office=new EmbeddedEntity();
 
-				office.setKey(createKey("Office", format("/offices/%s", _office.getString("code"))));
+				office.setProperty("id", format("/offices/%s", _office.getString("code")));
 				office.setProperty("label", _office.getString("label"));
 
 				employee.setIndexedProperty("office", office);
@@ -153,7 +157,7 @@ public abstract class GAETestBase {
 
 					final EmbeddedEntity supervisor=new EmbeddedEntity();
 
-					supervisor.setKey(createKey("Employee", format("/employees/%s", _supervisor.getString("code"))));
+					supervisor.setProperty("id", format("/employees/%s", _supervisor.getString("code")));
 					supervisor.setProperty("label", _supervisor.getString("label"));
 
 					employee.setIndexedProperty("supervisor", supervisor);
@@ -162,7 +166,37 @@ public abstract class GAETestBase {
 
 				return employee;
 
+			}).collect(toList());
+
+			employees.forEach(supervisor -> {
+
+				final List<EmbeddedEntity> subordinates=employees.stream()
+
+						.filter(subordinate -> Optional.ofNullable((PropertyContainer)subordinate.getProperty("supervisor"))
+								.filter(_supervisor -> _supervisor.getProperty("id").equals(supervisor.getKey().getName()))
+								.isPresent()
+						)
+
+						.map(subordinate -> {
+
+							final EmbeddedEntity embedded=new EmbeddedEntity();
+
+							embedded.setProperty("id", subordinate.getKey().getName());
+							embedded.setProperty("label", subordinate.getProperty("label"));
+
+							return embedded;
+
+						})
+
+						.collect(toList());
+
+				if ( !subordinates.isEmpty() ) {
+					supervisor.setIndexedProperty("subordinates", subordinates);
+				}
+
 			});
+
+			return employees;
 		}
 
 	}

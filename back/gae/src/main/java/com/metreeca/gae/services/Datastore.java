@@ -128,36 +128,4 @@ public final class Datastore {
 
 	}
 
-	//private <V, R> Iterator<R> map(final Iterator<V> iterator, final Function<V, R> mapper) {
-	//	return new Iterator<R>() {
-	//
-	//		@Override public boolean hasNext() {
-	//			return iterator.hasNext();
-	//		}
-	//
-	//		@Override public R next() {
-	//			return mapper.apply(iterator.next());
-	//		}
-	//
-	//	};
-	//}
-
-	//private <V, E extends Exception> CloseableIteration<V, E> iteration(final Iterator<V> iterator) {
-	//	return new AbstractCloseableIteration<V, E>() {
-	//
-	//		@Override public boolean hasNext() {
-	//			return iterator.hasNext();
-	//		}
-	//
-	//		@Override public V next() {
-	//			return iterator.next();
-	//		}
-	//
-	//		@Override public void remove() {
-	//			throw new UnsupportedOperationException("read only iteration");
-	//		}
-	//
-	//	};
-	//}
-
 }

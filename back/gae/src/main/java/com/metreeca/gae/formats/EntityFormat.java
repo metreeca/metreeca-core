@@ -19,7 +19,6 @@ package com.metreeca.gae.formats;
 
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Inferencer;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
@@ -80,7 +79,6 @@ public final class EntityFormat implements Format<PropertyContainer> {
 				.map(new Redactor(Shape.Detail))
 				.map(new Redactor(Shape.Mode, Shape.Convey))
 
-				.map(new Inferencer())
 				.map(new Optimizer());
 	}
 
