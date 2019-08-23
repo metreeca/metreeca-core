@@ -30,18 +30,6 @@ import static java.util.Collections.unmodifiableList;
 
 public final class Stats implements Query {
 
-	//public static final com.metreeca.tree.Shape Shape=and(
-	//		field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
-	//		field(Form.min, maxCount(1)),
-	//		field(Form.max, maxCount(1)),
-	//		field(Form.stats, and(
-	//				field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
-	//				field(Form.min, maxCount(1)),
-	//				field(Form.max, maxCount(1))
-	//		))
-	//);
-
-
 	public static Stats stats(final Shape shape, final String... path) {
 		return new Stats(shape, asList(path));
 	}

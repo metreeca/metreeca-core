@@ -25,6 +25,8 @@ import com.metreeca.tree.probes.Redactor;
 
 import com.google.appengine.api.datastore.PropertyContainer;
 
+import javax.json.JsonValue;
+
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
@@ -45,18 +47,27 @@ public final class EntityFormat implements Format<PropertyContainer> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private final EntityDecoder decoder=new EntityDecoder();
+	private final EntityEncoder encoder=new EntityEncoder();
+
+
 	private EntityFormat() {} // singleton
+
+
+	public Object value(final JsonValue value, final Shape shape) {
+		return decoder.decode(value, shape);
+	}
 
 
 	@Override public Result<PropertyContainer, Failure> get(final Message<?> message) {
 		return message.body(json()).value(json ->
-				new EntityDecoder().decode(json, shape(message))
+				decoder.decode(json, shape(message))
 		);
 	}
 
 	@Override public <M extends Message<M>> M set(final M message, final PropertyContainer value) {
 		return message.body(json(),
-				new EntityEncoder().encode(value, shape(message))
+				encoder.encode(value, shape(message))
 		);
 	}
 

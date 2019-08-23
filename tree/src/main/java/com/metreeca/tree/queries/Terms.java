@@ -30,18 +30,6 @@ import static java.util.Collections.unmodifiableList;
 
 public final class Terms implements Query {
 
-	//public static final com.metreeca.tree.Shape Shape=and(
-	//		field(Form.items, and(
-	//				datatype(Form.BNodeType),
-	//				field(Form.count, and(maxCount(1), datatype(XMLSchema.INTEGER))),
-	//				field(Form.value, and(maxCount(1),
-	//						field(RDFS.LABEL, and(maxCount(1), datatype(XMLSchema.STRING))),
-	//						field(RDFS.COMMENT, and(maxCount(1), datatype(XMLSchema.STRING)))
-	//				))
-	//		))
-	//);
-
-
 	public static Terms terms(final Shape shape, final String... path) {
 		return new Terms(shape, asList(path));
 	}

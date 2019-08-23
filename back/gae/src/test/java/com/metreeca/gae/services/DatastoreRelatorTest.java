@@ -21,6 +21,7 @@ import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.Entity;
 import org.junit.jupiter.api.Nested;
@@ -30,6 +31,8 @@ import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.tree.Shape.optional;
+import static com.metreeca.tree.Shape.relate;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
@@ -37,6 +40,8 @@ import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import static java.util.Arrays.asList;
 
 
 final class DatastoreRelatorTest extends GAETestBase {
@@ -46,26 +51,55 @@ final class DatastoreRelatorTest extends GAETestBase {
 	}
 
 
+	private Shape employee() {
+		return and(
+
+				clazz("Employee"),
+
+				field("code", and(required(), datatype(GAE.String))),
+				field("label", and(required(), datatype(GAE.String))),
+				field("forename", and(required(), datatype(GAE.String))),
+				field("surname", and(required(), datatype(GAE.String))),
+				field("email", and(required(), datatype(GAE.String))),
+
+				field("title", and(required(), datatype(GAE.String))),
+				field("seniority", and(required(), datatype(GAE.Integral))),
+
+				field("office", and(required(), clazz("Office"), relate().then(
+						field("label", and(required(), datatype(GAE.String)))
+				))),
+
+				field("supervisor", and(optional(), clazz("Employee"), relate().then(
+						field("label", and(required(), datatype(GAE.String)))
+				)))
+
+		);
+	}
+
+
 	@Nested final class Container {
 
-		@Test void test() {
-			exec(dataset(), () -> new DatastoreRelator()
+		@Nested final class Items {
 
-					.handle(new Request()
-							.path("/offices/1")
-							.shape(and(
-									clazz("Office"),
-									field("label", and(required(), datatype(GAE.String)))
-							))
-					)
+			@Test void test() {
+				exec(dataset(), () -> new DatastoreRelator()
 
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.OK)
-							.hasShape()
-							.hasBody(entity())
-					)
+						.handle(new Request()
+								.path("/employees/")
+								.shape(employee())
+						)
 
-			);
+						.accept(response -> assertThat(response)
+								.hasStatus(Response.OK)
+								.hasShape()
+								.hasBody(entity(), entity-> assertThat(entity.getProperty(GAE.contains))
+										.isEqualTo(asList())
+								)
+						)
+
+				);
+			}
+
 		}
 
 	}

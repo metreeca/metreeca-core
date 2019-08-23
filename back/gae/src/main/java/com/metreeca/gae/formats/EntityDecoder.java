@@ -39,14 +39,7 @@ import static java.util.stream.Collectors.toList;
 
 final class EntityDecoder {
 
-	PropertyContainer decode(final JsonObject json, final Shape shape) {
-		return entity(json, shape);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Object value(final JsonValue value, final Shape shape) {
+	Object decode(final JsonValue value, final Shape shape) {
 
 		switch ( value.getValueType() ) {
 			case NULL: return null;
@@ -54,12 +47,19 @@ final class EntityDecoder {
 			case FALSE: return false;
 			case NUMBER: return number((JsonNumber)value, shape);
 			case STRING: return string((JsonString)value, shape);
-			case ARRAY: return value.asJsonArray().stream().map(v -> value(v, shape)).collect(toList());
+			case ARRAY: return value.asJsonArray().stream().map(v -> decode(v, shape)).collect(toList());
 			case OBJECT: return entity(value.asJsonObject(), shape);
 		}
 
 		return null; // unexpected
 	}
+
+	PropertyContainer decode(final JsonObject json, final Shape shape) {
+		return entity(json, shape);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Number number(final JsonNumber number, final Shape shape) { // ;( removing casts boxes everything to double
 		return datatype(shape).orElse("").equals(GAE.Floating) ? (Number)new Double(number.doubleValue())
@@ -105,7 +105,7 @@ final class EntityDecoder {
 
 		object.forEach((name, json) -> {
 
-			final Object value=value(json, fields.getOrDefault(name, and()));
+			final Object value=decode(json, fields.getOrDefault(name, and()));
 
 			if ( value != null ) {
 				if ( GAE.Entity(value) ) { // !!! un/indexed from shape metadata?

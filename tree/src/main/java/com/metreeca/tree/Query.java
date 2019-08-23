@@ -56,8 +56,6 @@ public interface Query {
 
 		public V probe(final Stats stats);
 
-		public V probe(final Links links);
-
 	}
 
 }

@@ -17,15 +17,17 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Query.Probe;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.queries.*;
+import com.metreeca.tree.queries.Items;
+import com.metreeca.tree.queries.Stats;
+import com.metreeca.tree.queries.Terms;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.*;
 
 import java.util.Optional;
 
@@ -35,14 +37,19 @@ import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
 import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 
 
 final class DatastoreRelator extends DatastoreProcessor {
 
 	private final Datastore datastore=service(datastore());
+	private final DatastoreSplitter splitter=new DatastoreSplitter();
 
 
 	Future<Response> handle(final Request request) {
@@ -53,28 +60,60 @@ final class DatastoreRelator extends DatastoreProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> container(final Request request) {
+		return request.query(request.shape(), entity()::value).fold( // !!! split/redact shape
 
-		final com.metreeca.tree.Query query=null; // !!! parse query
+				query -> query.map(new Probe<Future<Response>>() {
 
-		return query.map(new Probe<Future<Response>>() {
+					@Override public Future<Response> probe(final Items items) {
 
-			@Override public Future<Response> probe(final Items items) {
-				throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-			}
+						final Shape convey=convey(items.getShape()); // !!!
+						final Shape filter=filter(splitter.resource(items.getShape()));
 
-			@Override public Future<Response> probe(final Terms terms) {
-				throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-			}
+						final String kind=clazz(filter).orElse("*");
 
-			@Override public Future<Response> probe(final Stats stats) {
-				throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-			}
+						final Query query=new Query(kind); // !!! set filters from filter shape
 
-			@Override public Future<Response> probe(final Links links) {
-				throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-			}
+						return datastore.exec(service -> {
 
-		});
+							final Entity container=new Entity("*", request.path());
+
+							container.setProperty(GAE.contains,
+									stream(service.prepare(query).asIterable().spliterator(), false)
+											.map(entity -> {
+
+												final EmbeddedEntity resource=new EmbeddedEntity();
+
+												resource.setKey(entity.getKey());
+												resource.setPropertiesFrom(entity);
+
+												return resource;
+
+											})
+											.collect(toList())
+							);
+
+							return request.reply(response -> response // !!! headers?
+									.status(OK) // !!! review
+									.shape(convey)
+									.body(entity(), container)
+							);
+
+						});
+
+					}
+
+					@Override public Future<Response> probe(final Terms terms) {
+						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+					}
+
+					@Override public Future<Response> probe(final Stats stats) {
+						throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+					}
+
+				}),
+
+				request::reply
+		);
 	}
 
 	private Future<Response> resource(final Request request) {

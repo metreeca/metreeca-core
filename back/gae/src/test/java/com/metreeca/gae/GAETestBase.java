@@ -97,20 +97,26 @@ public abstract class GAETestBase {
 				office.setProperty("label", _office.getString("label"));
 
 				final JsonObject _country=_office.getJsonObject("country");
-				final EmbeddedEntity country=new EmbeddedEntity();
 
-				country.setKey(createKey("Country", format("http://sws.geonames.org/%s/", _country.getString("code"))));
-				country.setProperty("label", _country.getString("label"));
+				office.setProperty("country", _country.getString("label"));
 
-				office.setIndexedProperty("country", country);
+				//final EmbeddedEntity country=new EmbeddedEntity();
+				//
+				//country.setKey(createKey("Country", format("http://sws.geonames.org/%s/", _country.getString("code"))));
+				//country.setProperty("label", _country.getString("label"));
+				//
+				//office.setIndexedProperty("country", country);
 
 				final JsonObject _city=_office.getJsonObject("city");
-				final EmbeddedEntity city=new EmbeddedEntity();
 
-				city.setKey(createKey("City", format("http://sws.geonames.org/%s/", _city.getString("code"))));
-				city.setProperty("label", _city.getString("label"));
+				office.setProperty("city", _city.getString("label"));
 
-				office.setIndexedProperty("city", city);
+				//final EmbeddedEntity city=new EmbeddedEntity();
+				//
+				//city.setKey(createKey("City", format("http://sws.geonames.org/%s/", _city.getString("code"))));
+				//city.setProperty("label", _city.getString("label"));
+				//
+				//office.setIndexedProperty("city", city);
 
 				return office;
 

@@ -163,24 +163,13 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error tag.
 	 *
-	 * @param error a machine-readable tag for the error condition defined by this failure
+	 * @param error a machine-readable tag for the error condition defined by this failure; ignored if null or empty
 	 *
 	 * @return this failure
-	 *
-	 * @throws NullPointerException     if {@code error} is null
-	 * @throws IllegalArgumentException if {@code error} is empty
 	 */
 	public Failure error(final String error) {
 
-		if ( error == null ) {
-			throw new NullPointerException("null error");
-		}
-
-		if ( error.isEmpty() ) {
-			throw new IllegalArgumentException("empty error");
-		}
-
-		this.error=error;
+		this.error=(error == null || error.isEmpty()) ? null : error;
 
 		return this;
 	}
@@ -188,24 +177,13 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error notes.
 	 *
-	 * @param notes a human readable description of the error condition defined by this failure
+	 * @param notes a human readable description of the error condition defined by this failure; ignored if null or empty
 	 *
 	 * @return this failure
-	 *
-	 * @throws NullPointerException     if {@code notes} is null
-	 * @throws IllegalArgumentException if {@code notes} is empty
 	 */
 	public Failure notes(final String notes) {
 
-		if ( notes == null ) {
-			throw new NullPointerException("null notes");
-		}
-
-		if ( notes.isEmpty() ) {
-			throw new IllegalArgumentException("empty notes");
-		}
-
-		this.notes=notes;
+		this.notes=(notes == null || notes.isEmpty()) ? null : notes;
 
 		return this;
 	}
@@ -213,81 +191,57 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures error trace.
 	 *
-	 * @param trace a structured JSON report describing the error condition defined by this failure
-	 *
-	 * @return this failure
-	 *
-	 * @throws NullPointerException if {@code trace} is null
-	 */
-	public Failure trace(final JsonValue trace) {
-
-		if ( trace == null ) {
-			throw new NullPointerException("null trace");
-		}
-
-		this.trace=trace;
-
-		return this;
-	}
-
-	/**
-	 * Configures error trace.
-	 *
-	 * @param trace a shape validation trace describing the error condition defined by this failure
+	 * @param trace a shape validation trace describing the error condition defined by this failure; ignored if null or empty
 	 *
 	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code trace} is null
 	 */
 	public Failure trace(final Trace trace) {
-
-		if ( trace == null ) {
-			throw new NullPointerException("null validation trace");
-		}
-
-		return trace(format(trace));
+		return trace(trace == null || trace.isEmpty()? null : format(trace));
 	}
 
-
 	/**
-	 * Configures the error cause.
+	 * Configures error trace.
 	 *
-	 * @param cause a human readable description of cause of the error condition defined by this failure
+	 * @param trace a structured JSON report describing the error condition defined by this failure; ignored if null or
+	 *              empty
 	 *
 	 * @return this failure
-	 *
-	 * @throws NullPointerException     if {@code cause} is null
-	 * @throws IllegalArgumentException if {@code cause} is empty
 	 */
-	public Failure cause(final String cause) {
+	public Failure trace(final JsonValue trace) {
 
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
+		this.trace=trace == null
+				|| trace.equals(JsonValue.NULL)
+				|| trace.equals(JsonValue.EMPTY_JSON_OBJECT)
+				|| trace.equals(JsonValue.EMPTY_JSON_ARRAY)
+				|| trace.equals(Json.createValue(""))
 
-		if ( cause.isEmpty() ) {
-			throw new IllegalArgumentException("empty cause");
-		}
-
-		this.cause=new RuntimeException(cause);
+				? null : trace;
 
 		return this;
 	}
 
+
 	/**
 	 * Configures the error cause.
 	 *
-	 * @param cause the underlying throwable that caused the error condition defined by this failure
+	 * @param cause a human readable description of cause of the error condition defined by this failure; ignored if null or empty
 	 *
 	 * @return this failure
+	 */
+	public Failure cause(final String cause) {
+		return cause(cause == null || cause.isEmpty()? null : new RuntimeException(cause));
+	}
+
+	/**
+	 * Configures the error cause.
 	 *
-	 * @throws NullPointerException if {@code cause} is null
+	 * @param cause the underlying throwable that caused the error condition defined by this failure; ignored if null
+	 *
+	 * @return this failure
 	 */
 	public Failure cause(final Throwable cause) {
-
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
 
 		this.cause=cause;
 

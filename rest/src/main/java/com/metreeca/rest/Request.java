@@ -17,9 +17,20 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.rest.services.Engine;
+import com.metreeca.tree.Query;
+import com.metreeca.tree.Shape;
+
 import java.net.URI;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import javax.json.JsonException;
+import javax.json.JsonValue;
+
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
@@ -173,43 +184,6 @@ public final class Request extends Message<Request> {
 
 		return !disjoint(this.roles, roles);
 	}
-
-
-	/**
-	 * Retrieves the shape-based query of this request.
-	 *
-	 * @param shape the base shape for the query
-	 *
-	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
-	 * {@linkplain #query() query} string, if successfully parsed by the {@linkplain QueryParser query parser}; an error
-	 * providing access to the parsing failure, otherwise
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	//public Result<Query, Failure> query(final Shape shape) {
-	//
-	//	if ( shape == null ) {
-	//		throw new NullPointerException("null shape");
-	//	}
-	//
-	//	try {
-	//
-	//		return Value(new QueryParser(shape, item().stringValue()).parse(query()));
-	//
-	//	} catch ( final JsonException e ) {
-	//
-	//		return Error(new Failure(Response.BadRequest)
-	//				.error("query-malformed")
-	//				.cause(e));
-	//
-	//	} catch ( final NoSuchElementException e ) {
-	//
-	//		return Error(new Failure(Response.UnprocessableEntity)
-	//				.error("query-illegal")
-	//				.cause(e));
-	//
-	//	}
-	//}
 
 
 	//// Actor /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -402,6 +376,53 @@ public final class Request extends Message<Request> {
 	 */
 	public String query() {
 		return query;
+	}
+
+	/**
+	 * Retrieves the shape-based query of this request.
+	 *
+	 * @param shape the base shape for the query
+	 * @param parser a shape-based function mapping from JSON to {@linkplain Engine engine} specific values
+	 *
+	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
+	 * {@linkplain #query() query} string, if successfully parsed using the {@code parser}; an error
+	 * providing access to the parsing failure, otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public Result<Query, Failure> query(final Shape shape, final BiFunction<JsonValue, Shape, Object> parser) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( parser == null ) {
+			throw new NullPointerException("null parser");
+		}
+
+		try {
+
+			return Value(new QueryParser(shape, parser).parse(query()));
+
+		} catch ( final JsonException e ) {
+
+			return Error(new Failure()
+					.status(Response.BadRequest)
+					.error("query-malformed")
+					.notes(e.getMessage())
+					.cause(e)
+			);
+
+		} catch ( final NoSuchElementException e ) {
+
+			return Error(new Failure()
+					.status(Response.UnprocessableEntity)
+					.error("query-illegal")
+					.notes(e.getMessage())
+					.cause(e)
+			);
+
+		}
 	}
 
 	/**

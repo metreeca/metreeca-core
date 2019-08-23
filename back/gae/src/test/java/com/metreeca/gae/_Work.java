@@ -17,15 +17,10 @@
 
 package com.metreeca.gae;
 
-import com.metreeca.rest.Codecs;
-
 import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
-
-import javax.json.*;
 
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
@@ -65,77 +60,6 @@ final class _Work extends GAETestBase {
 
 		results.forEach(entity -> System.out.println(((EmbeddedEntity)entity.getProperty("office")).getKey().getName()));
 
-		System.out.println(datastore.get(root));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void convert() {
-
-		final JsonArrayBuilder builder=Json.createArrayBuilder();
-
-		Arrays.stream(Codecs.text(this, "_employees.csv").split("\\R"))
-				.skip(1)
-				.map(record -> record.split(","))
-				.map(this::employee)
-				.forEachOrdered(builder::add);
-
-		final JsonArray offices=builder.build();
-
-		Json.createWriter(System.out).write(offices);
-	}
-
-	private JsonObject office(final String... fields) {
-		return Json.createObjectBuilder()
-
-				.add("code", fields[0])
-				.add("label", fields[1])
-
-				.add("country", Json.createObjectBuilder()
-						.add("code", fields[2])
-						.add("label", fields[3])
-						.build()
-				)
-
-				.add("city", Json.createObjectBuilder()
-						.add("code", fields[4])
-						.add("label", fields[5])
-						.build()
-				)
-
-				.build();
-	}
-
-	private JsonObject employee(final String... fields) {
-		return Json.createObjectBuilder()
-
-				.add("code", fields[0])
-				.add("label", fields[1])
-				.add("forename", fields[2])
-				.add("surname", fields[3])
-				.add("email", fields[4])
-				.add("title", fields[5])
-				.add("seniority", Integer.parseInt(fields[6]))
-
-				.add("office", Json.createObjectBuilder()
-						.add("code", fields[7])
-						.add("label", fields[8])
-						.build()
-				)
-
-				.add("supervisor", Json.createObjectBuilder()
-						.add("code", fields[9])
-						.add("label", fields[10])
-						.build()
-				)
-
-				.build();
-	}
-
-
-	@Test void load() {
-		System.out.println(birt());
 	}
 
 }
