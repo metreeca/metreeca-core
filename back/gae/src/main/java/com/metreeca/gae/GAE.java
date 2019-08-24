@@ -39,6 +39,8 @@ public final class GAE {
 
 	public static final String id="id";
 	public static final String type="type";
+	public static final String label="label";
+
 	public static final String contains="contains";
 
 
