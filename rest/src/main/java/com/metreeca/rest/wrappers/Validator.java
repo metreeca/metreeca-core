@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 
+import static com.metreeca.tree.Trace.trace;
+
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
@@ -77,9 +79,12 @@ public final class Validator implements Wrapper {
 
 			return issues.isEmpty() ? handler.handle(request) : request.reply(new Failure()
 
-							.status(Response.UnprocessableEntity)
-							.error(Failure.DataInvalid)
-					// !!! .trace(report)
+					.status(Response.UnprocessableEntity)
+					.error(Failure.DataInvalid)
+					.trace(trace(issues.stream()
+							.map(issue -> trace(issue))
+							.collect(toList())
+					))
 
 			);
 

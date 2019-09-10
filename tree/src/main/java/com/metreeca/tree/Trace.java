@@ -40,20 +40,22 @@ public final class Trace {
 		return EmptyTrace;
 	}
 
-	public static Trace trace(final Trace... traces) {
+	public static Trace trace(final Trace... traces) {return trace(asList(traces));}
 
-		if ( traces == null || Arrays.stream(traces).anyMatch(Objects::isNull) ) {
+	public static Trace trace(final Collection<Trace> traces) {
+
+		if ( traces == null || traces.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null traces");
 		}
 
 		return new Trace(
-				Arrays.stream(traces).flatMap(trace -> trace.issues.entrySet().stream()),
-				Arrays.stream(traces).flatMap(trace -> trace.fields.entrySet().stream())
+				traces.stream().flatMap(trace -> trace.issues.entrySet().stream()),
+				traces.stream().flatMap(trace -> trace.fields.entrySet().stream())
 		);
 	}
 
-	public static Trace trace(final String details, final Object... values) {
-		return new Trace(singletonMap(details, (Collection<Object>)asList(values)).entrySet().stream(), Stream.empty());
+	public static Trace trace(final String issue, final Object... values) {
+		return new Trace(singletonMap(issue, (Collection<Object>)asList(values)).entrySet().stream(), Stream.empty());
 	}
 
 	public static Trace trace(final Map<String, Collection<Object>> issues) {
