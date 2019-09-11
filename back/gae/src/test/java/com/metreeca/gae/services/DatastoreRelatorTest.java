@@ -62,11 +62,6 @@ import static java.util.stream.StreamSupport.stream;
 
 final class DatastoreRelatorTest extends GAETestBase {
 
-	private Runnable dataset() {
-		return () -> service(datastore()).exec(datastore -> datastore.put(birt()));
-	}
-
-
 	private Shape employee() {
 		return and(
 
@@ -148,7 +143,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 
 			@Test void testUnfiltered() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request(""))
 
@@ -164,7 +159,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 			@Test void testSorted() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '_order': ['-office.label', 'seniority' ], '_offset': 10, '_limit': 5 }"))
 
@@ -192,7 +187,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 
 			@Test void testMinInclusive() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '>= seniority': 4 }"))
 
@@ -209,7 +204,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 
 			@Test void testLike() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '~label': 'ger' }"))
 
@@ -226,7 +221,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 
 			@Test void testUniversalEmpty() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '!subordinates.id': [] }"))
 
@@ -240,7 +235,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 			@Test void testUniversalSingleton() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '!subordinates.id': '/employees/1076' }"))
 
@@ -256,7 +251,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 			@Test void testUniversalMultiple() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '!subordinates.id': ['/employees/1076', '/employees/1056'] }"))
 
@@ -276,7 +271,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 
 			@Test void testExistentialEmpty() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ 'title': [] }"))
 
@@ -290,7 +285,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 			@Test void testExistentialSingleton() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ 'title': 'President' }"))
 
@@ -306,7 +301,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 			@Test void testExistentialMultiple() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ 'title': ['President', 'VP Sales'] }"))
 
@@ -361,7 +356,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 
 			@Test void testBasic() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '_terms': 'title' }"))
 
@@ -381,7 +376,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 			@Test void testFiltered() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '_terms': 'title', '>= seniority': 3 }"))
 
@@ -402,7 +397,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 			@Test void testNested() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '_terms': 'office.label' }"))
 
@@ -423,7 +418,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 			@Test void testEmbedded() {
-				exec(dataset(), () -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request("{ '_terms': 'supervisor' }"))
 
@@ -463,7 +458,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 	@Nested final class Resource {
 
 		@Test void testRelateResource() {
-			exec(dataset(), () -> new DatastoreRelator()
+			exec(load(birt()), () -> new DatastoreRelator()
 
 					.handle(new Request()
 							.path("/offices/1")
@@ -485,7 +480,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 		}
 
 		@Test void testHandleUnknownResources() {
-			exec(dataset(), () -> new DatastoreRelator()
+			exec(load(birt()), () -> new DatastoreRelator()
 
 					.handle(new Request()
 							.path("/offices/9999")

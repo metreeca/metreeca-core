@@ -30,10 +30,6 @@ import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 final class _Work extends GAETestBase {
 
-	private Runnable dataset() {
-		return () -> service(datastore()).exec(datastore -> datastore.put(birt()));
-	}
-
 
 	@Test void work() throws EntityNotFoundException {
 
@@ -72,7 +68,7 @@ final class _Work extends GAETestBase {
 
 
 	@Test void test() {
-		exec(dataset(), () -> service(datastore()).exec(datastore -> {
+		exec(load(birt()), () -> service(datastore()).exec(datastore -> {
 
 			System.out.println(datastore.prepare(new Query("Employee")).asList(FetchOptions.Builder.withDefaults()));
 

@@ -34,6 +34,9 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
+import static com.metreeca.gae.services.Datastore.datastore;
+import static com.metreeca.rest.Context.service;
+
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 import static java.lang.String.format;
@@ -46,6 +49,7 @@ public abstract class GAETestBase {
 	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(
 			new LocalDatastoreServiceTestConfig()
 	);
+
 
 
 	@BeforeEach void setUp() {
@@ -61,6 +65,10 @@ public abstract class GAETestBase {
 		new Context()
 				.exec(tasks)
 				.clear();
+	}
+
+	protected Runnable load(final Iterable<Entity> entities) {
+		return () -> service(datastore()).exec(datastore -> datastore.put(entities));
 	}
 
 

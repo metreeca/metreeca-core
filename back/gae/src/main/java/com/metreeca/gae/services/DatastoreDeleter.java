@@ -21,9 +21,16 @@ import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
+
+import static com.metreeca.gae.GAE.key;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;
+
+import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
+import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
 
 
 final class DatastoreDeleter extends DatastoreProcessor {
@@ -43,7 +50,27 @@ final class DatastoreDeleter extends DatastoreProcessor {
 	}
 
 	private Future<Response> resource(final Request request) {
-		throw new UnsupportedOperationException("to be implemented"); // !!!
+		return request.reply(response -> datastore.exec(service -> {
+
+			final Key key=key(request.path(), convey(request.shape()));
+
+			final Query query=new Query(key.getKind())
+					.setFilter(new Query.FilterPredicate(KEY_RESERVED_PROPERTY, EQUAL, key))
+					.setKeysOnly();
+
+			if ( service.prepare(query).asIterator().hasNext() ) {
+
+				service.delete(key);
+
+				return response.status(Response.NoContent);
+
+			} else {
+
+				return response.status(Response.NotFound);
+
+			}
+
+		}));
 	}
 
 }

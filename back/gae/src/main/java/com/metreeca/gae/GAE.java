@@ -135,10 +135,23 @@ public final class GAE {
 
 		return clazz(shape)
 
-				.map(kind -> createKey(createKey("*", path.substring(0, path.lastIndexOf('/')+1)), kind, path))
+				.map(kind -> key(path, kind))
 
 				.orElseGet(() -> createKey("*", path));
 
+	}
+
+	public  static Key key(final String path, final String kind) { // !!! tbd
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		if ( kind == null ) {
+			throw new NullPointerException("null kind");
+		}
+
+		return createKey(createKey("*", path.substring(0, path.lastIndexOf('/')+1)), kind, path);
 	}
 
 
