@@ -7,10 +7,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="rest" />
-        <module name="gate" />
+        <module name="virtuoso" />
+        <module name="rdf" />
+        <module name="stardog" />
+        <module name="tree" />
+        <module name="rdf4j" />
         <module name="gae" />
         <module name="servlet" />
-        <module name="tree" />
+        <module name="gate" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -41,11 +45,11 @@
       <module name="mill" target="1.8" />
       <module name="mill (1)" target="1.8" />
       <module name="node" target="1.8" />
+      <module name="rdf" target="1.8" />
       <module name="rdf4j" target="1.8" />
       <module name="rest" target="1.8" />
       <module name="self" target="1.8" />
       <module name="servlet" target="1.8" />
-      <module name="sparql" target="1.8" />
       <module name="spec" target="1.8" />
       <module name="spec (1)" target="1.8" />
       <module name="stardog" target="1.8" />

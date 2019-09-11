@@ -1,0 +1,122 @@
+/*
+ * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca/Link.
+ *
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.metreeca.rdf.services;
+
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.services.Snippets.Snippet;
+import com.metreeca.rest.services.Logger;
+import com.metreeca.tree.Shape;
+import com.metreeca.tree.probes.Optimizer;
+import com.metreeca.tree.probes.Redactor;
+
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.Collection;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.services.Snippets.list;
+import static com.metreeca.rdf.services.Snippets.nothing;
+import static com.metreeca.rdf.services.Snippets.snippet;
+
+import static java.lang.Math.max;
+import static java.lang.String.format;
+
+
+abstract class GraphProcessor {
+
+	static final Function<Shape, Shape> convey=shape -> shape
+			.map(new Redactor(Shape.Mode, Shape.Convey))
+			.map(new Optimizer());
+
+	static final Function<Shape, Shape> filter=shape -> shape
+			.map(new Redactor(Shape.Mode, Shape.Filter))
+			.map(new Optimizer());
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Logger logger;
+
+
+	GraphProcessor(final Logger logger) {
+
+		this.logger=logger;
+
+	}
+
+
+	//// Tracing ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	String compile(final Supplier<String> generator) {
+
+		final long start=System.currentTimeMillis();
+
+		final String query=generator.get();
+
+		final long stop=System.currentTimeMillis();
+
+		logger.debug(this, () -> format("executing %s", query.endsWith("\n") ? query : query+"\n"));
+		logger.debug(this, () -> format("generated in %d ms", max(1, stop-start)));
+
+		return query;
+	}
+
+	void evaluate(final Runnable task) {
+
+		final long start=System.currentTimeMillis();
+
+		task.run();
+
+		final long stop=System.currentTimeMillis();
+
+		logger.debug(this, () -> format("evaluated in %d ms", max(1, stop-start)));
+
+	}
+
+
+	//// SPARQL DSL ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static Snippet path(final Collection<IRI> path) {
+		return list(path.stream().map(Values::format), '/');
+	}
+
+
+	static Snippet path(final Object source, final Collection<IRI> path, final Object target) {
+		return source == null || path == null || path.isEmpty() || target == null ? nothing()
+				: snippet(source, " ", path(path), " ", target, " .\n");
+	}
+
+	static Snippet edge(final Object source, final IRI iri, final Object target) {
+		return source == null || iri == null || target == null ? nothing() : direct(iri)
+				? snippet(source, " ", Values.format(iri), " ", target, " .\n")
+				: snippet(target, " ", Values.format(inverse(iri)), " ", source, " .\n");
+	}
+
+
+	static Snippet var() {
+		return var(new Object());
+	}
+
+	static Snippet var(final Object object) {
+		return object == null ? nothing() : snippet((Object)"?", Snippets.id(object));
+	}
+
+}

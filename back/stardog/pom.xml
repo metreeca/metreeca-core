@@ -24,32 +24,39 @@
 
 	<parent>
 		<groupId>com.metreeca</groupId>
-		<artifactId>metreeca-link</artifactId>
+		<artifactId>metreeca-back</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>metreeca-back</artifactId>
+	<artifactId>stardog</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
 
-	<name>Metreeca Backend Adapters</name>
-	<description>Backend adapter kits.</description>
+	<name>Metreeca Stardog Adapter</name>
+	<description>Adapter kit for Stardog.</description>
 
-	<properties>
+	<dependencies>
 
-		<rdf4j.version>2.5.2</rdf4j.version> <!-- shared among rdf-based modules -->
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rdf</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+		</dependency>
 
-	</properties>
+		<dependency>
+			<groupId>com.complexible.stardog.rdf4j</groupId>
+			<artifactId>stardog-rdf4j</artifactId>
+			<version>6.1.1</version>
+		</dependency>
 
-	<modules>
+	</dependencies>
 
-		<module>gae</module>
+	<repositories>
 
-		<module>rdf</module>
-		<module>rdf4j</module>
-		<module>virtuoso</module>
-		<module>stardog</module>
+		<repository>
+			<id>stardog-public</id>
+			<url>http://maven.stardog.com</url>
+		</repository>
 
-	</modules>
+	</repositories>
 
 </project>

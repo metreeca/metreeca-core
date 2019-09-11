@@ -52,11 +52,11 @@ import com.metreeca.j2ee.Gateway;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.wrappers.Server;
-import com.metreeca.back.rdf4j.RDF4JMemory;
+import com.metreeca.rdf4j.RDF4JMemory;
 
 import javax.servlet.annotation.WebListener;
 
-import static com.metreeca.back.sparql.Graph.graph;
+import static com.metreeca.rdf.services.Graph.graph;
 
 
 @WebFilter(urlPatterns="/*") public final class Demo extends Gateway {

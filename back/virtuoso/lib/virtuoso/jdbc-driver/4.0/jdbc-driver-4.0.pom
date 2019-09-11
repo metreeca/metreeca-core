@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Copyright © 2013-2019 Metreeca srl. All rights reserved.
 
@@ -22,34 +20,23 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.metreeca</groupId>
-		<artifactId>metreeca-link</artifactId>
-		<version>0.0.0-SNAPSHOT</version>
-	</parent>
+	<groupId>virtuoso</groupId>
+	<artifactId>jdbc-driver</artifactId>
+	<version>4.0</version>
+	<packaging>jar</packaging>
 
-	<artifactId>metreeca-back</artifactId>
-	<version>0.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+	<url>http://vos.openlinksw.com/owiki/wiki/VOS/VOSDownload#For%20RDF4J%202.x</url>
 
-	<name>Metreeca Backend Adapters</name>
-	<description>Backend adapter kits.</description>
-
-	<properties>
-
-		<rdf4j.version>2.5.2</rdf4j.version> <!-- shared among rdf-based modules -->
-
-	</properties>
-
-	<modules>
-
-		<module>gae</module>
-
-		<module>rdf</module>
-		<module>rdf4j</module>
-		<module>virtuoso</module>
-		<module>stardog</module>
-
-	</modules>
+	<licenses>
+		<license>
+			<name>GNU General Public License Version 2 with Client Protocol Driver exemptions</name>
+			<url>https://github.com/openlink/virtuoso-opensource/blob/develop/7/LICENSE</url>
+			<distribution>manual</distribution>
+			<comments>
+				Metreeca usage of OpenLink Software's Virtuoso Open-Source components falls under the Client Protocol
+				Driver exemption.
+			</comments>
+		</license>
+	</licenses>
 
 </project>
