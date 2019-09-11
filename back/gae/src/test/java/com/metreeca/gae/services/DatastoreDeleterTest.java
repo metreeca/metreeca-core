@@ -48,7 +48,7 @@ final class DatastoreDeleterTest extends GAETestBase {
 			exec(() -> new DatastoreDeleter()
 
 					.handle(new Request()
-							.path("/offices/")
+							.path("/entities/")
 					)
 
 					.accept(response -> assertThat(response)

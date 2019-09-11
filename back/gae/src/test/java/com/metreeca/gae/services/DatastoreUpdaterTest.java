@@ -17,18 +17,103 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import static com.metreeca.gae.formats.EntityFormat.entity;
+import static com.metreeca.gae.services.Datastore.datastore;
+import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 
 
 final class DatastoreUpdaterTest extends GAETestBase {
 
 	@Nested final class Container {
 
+		@Test void testReject() {
+			exec(() -> new DatastoreUpdater()
+
+					.handle(new Request()
+							.path("/entities/")
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.InternalServerError)
+					)
+
+			);
+		}
+
 	}
 
+
 	@Nested final class Resource {
+
+		@Test void testUpdate() {
+
+			final Key key=GAE.key("/entities/1", "Entity");
+
+			final Entity original=new Entity(key);
+
+			original.setProperty("code", "1");
+			original.setProperty("label", "Entity 1");
+
+			final Entity updated=new Entity(key);
+
+			updated.setPropertiesFrom(original);
+			original.setProperty("label", "Entity 1 (Updated)");
+
+			exec(load(original), () -> new DatastoreUpdater()
+
+					.handle(new Request()
+							.path("/entities/1")
+							.shape(clazz("Entity"))
+							.body(entity(), updated)
+					)
+
+					.accept(response -> {
+
+						assertThat(response)
+								.hasStatus(Response.NoContent)
+								.doesNotHaveBody();
+
+						service(datastore()).exec(service -> {
+
+							Assertions.assertThat(service.prepare(new Query("Entity")).asIterable())
+									.containsExactly(updated);
+
+							return this;
+
+						});
+
+					}));
+		}
+
+
+		@Test void testRejectMissing() {
+			exec(() -> new DatastoreDeleter()
+
+					.handle(new Request()
+							.path("/entities/9999")
+					)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(Response.NotFound)
+							.doesNotHaveBody()
+					)
+
+			);
+		}
 
 	}
 

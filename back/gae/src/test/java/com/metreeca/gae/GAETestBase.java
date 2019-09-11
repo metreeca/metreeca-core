@@ -40,6 +40,7 @@ import static com.metreeca.rest.Context.service;
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 
@@ -65,6 +66,11 @@ public abstract class GAETestBase {
 		new Context()
 				.exec(tasks)
 				.clear();
+	}
+
+
+	protected Runnable load(final Entity... entities) {
+		return load(asList(entities));
 	}
 
 	protected Runnable load(final Iterable<Entity> entities) {
