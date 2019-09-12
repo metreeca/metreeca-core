@@ -29,9 +29,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -429,12 +427,14 @@ final class DatastoreRelatorTest extends GAETestBase {
 										.isEqualTo(terms(entities -> entities
 
 												.map(e -> (EmbeddedEntity)e.getProperty("supervisor"))
+												.filter(Objects::nonNull)
+
 												.map(e -> { // only id/label retained
 
 													final EmbeddedEntity supervisor=new EmbeddedEntity();
 
 													supervisor.setProperty("id", e.getProperty("id"));
-													supervisor.setProperty(GAE.label, e.getProperty("id"));
+													supervisor.setProperty(GAE.label, e.getProperty("label"));
 
 													return supervisor;
 
@@ -449,7 +449,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 		}
 
-		@Nested final class Stats {
+		@Nested final class Stats  {
 
 		}
 

@@ -103,12 +103,31 @@ final class DatastoreRelator extends DatastoreProcessor {
 	);
 
 
+	private static EmbeddedEntity embed(final Entity entity) {
+
+		final EmbeddedEntity resource=new EmbeddedEntity();
+
+		resource.setKey(entity.getKey());
+		resource.setPropertiesFrom(entity);
+
+		return resource;
+	}
+
+
 	private static String property(final Iterable<String> path) {
 		return String.join(".", path);  // !!! handle/reject path steps containing dots
 	}
 
 	private static String property(final String head, final String tail) {
 		return head.isEmpty() ? tail : head+"."+tail;  // !!! handle/reject path steps containing dots
+	}
+
+
+	private static Object get(final Object object, final List<String> path) {
+		return object == null ? null
+				: path.isEmpty()? object
+				: object instanceof PropertyContainer ? get(((PropertyContainer)object).getProperty(path.get(0)), path.subList(1, path.size()))
+				: null;
 	}
 
 
@@ -189,7 +208,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			container.setProperty(GAE.contains,
 					stream(service.prepare(query).asIterable(options).spliterator(), false)
 							.filter(predicate)
-							.map(this::embed) // ;( entities can't be embedded
+							.map(DatastoreRelator::embed) // ;( entities can't be embedded
 							.collect(toList())
 			);
 
@@ -203,14 +222,12 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Function<Response, Response> terms(final String path, final Terms terms) {
 
-		final String property=property(terms.getPath());
 		final Shape filter=filter(terms.getShape());
 
-		final Query query=query(filter); // !!! sampling sorting/limits
-
-		// !!! € if property is known to be of a scalar supported type retrieve using a projection
+		// !!! (€) if property is known to be of a scalar supported type retrieve using a projection
 		// https://cloud.google.com/appengine/docs/standard/java/javadoc/com/google/appengine/api/datastore/RawValue.html#getValue--
 
+		final Query query=query(filter); // !!! sampling sorting/limits
 		final Predicate<Object> predicate=predicate(filter);
 
 		return datastore.exec(service -> {
@@ -219,10 +236,11 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			container.setProperty(DatastoreRelator.terms,
 
-					stream(service.prepare(query).asIterable(Builder.withDefaults()).spliterator(), false)
+					stream(service.prepare(query).asIterable().spliterator(), false)
+
 							.filter(predicate)
 
-							.map(entity -> entity.getProperty(property))
+							.map(entity -> get(entity, terms.getPath()))
 							.filter(Objects::nonNull)
 
 							.collect(groupingBy(v -> v, counting()))
@@ -286,17 +304,6 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		return Optional.ofNullable(shape.map(new PredicateProbe())).orElse(o -> true);
 
-	}
-
-
-	private EmbeddedEntity embed(final Entity entity) {
-
-		final EmbeddedEntity resource=new EmbeddedEntity();
-
-		resource.setKey(entity.getKey());
-		resource.setPropertiesFrom(entity);
-
-		return resource;
 	}
 
 
