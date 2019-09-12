@@ -224,9 +224,14 @@ public final class GAE {
 
 		final Function<Object, Key> key=o -> o instanceof Entity ? ((Entity)o).getKey()
 				: o instanceof EmbeddedEntity ? ((EmbeddedEntity)o).getKey()
-				: KeyFactory.createKey("*", "*");
+				: null;
 
-		return key.apply(x).compareTo(key.apply(y));
+		final Key kx=key.apply(x);
+		final Key ky=key.apply(y);
+
+		return kx == null ? ky == null ? 0 : -1
+				: ky == null ? 1
+				: kx.compareTo(ky);
 	}
 
 	private static int Other(final Object x, final Object y) {
