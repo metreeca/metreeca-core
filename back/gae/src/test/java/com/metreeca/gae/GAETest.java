@@ -17,9 +17,7 @@
 
 package com.metreeca.gae;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -97,6 +95,20 @@ final class GAETest extends GAETestBase {
 
 			assertThat(compare(1.0, new EmbeddedEntity())).isLessThan(0);
 			assertThat(compare(new EmbeddedEntity(), 1.0)).isGreaterThan(0);
+		}
+
+		@Test void testKeys() {
+
+			final Key a=KeyFactory.createKey("*", "a");
+			final Key b=KeyFactory.createKey("*", "b");
+
+			assertThat(compare(a, b)).isLessThan(0);
+			assertThat(compare(a, a)).isEqualTo(0);
+			assertThat(compare(b, a)).isGreaterThan(0);
+
+			assertThat(compare("", a)).isLessThan(0);
+			assertThat(compare(a, "")).isGreaterThan(0);
+
 		}
 
 		@Test void testEntities() {

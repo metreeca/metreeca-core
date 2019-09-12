@@ -23,7 +23,9 @@ import com.metreeca.tree.Shape;
 import com.google.appengine.api.datastore.*;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.metreeca.tree.shapes.Clazz.clazz;
 
@@ -53,36 +55,49 @@ public final class GAE {
 	public static final String max="max";
 
 
-	//// System Datatypes //////////////////////////////////////////////////////////////////////////////////////////////
+	//// System Datatypes (Sorting Order) //////////////////////////////////////////////////////////////////////////////
 
-	public static final String Entity="Entity";
-	public static final String Boolean="Boolean";
 	public static final String Integral="Integral";
-	public static final String Floating="Floating";
-	public static final String String="String";
 	public static final String Date="Date";
+	public static final String Boolean="Boolean";
+	public static final String String="String";
+	public static final String Floating="Floating";
+	public static final String Key="Key";
+	public static final String Entity="Entity";
 
 
 	public static String type(final Object value) {
-		return Entity(value)? Entity
-				: Boolean(value)? Boolean
-				: Integral(value)? Integral
-				: Floating(value)? Floating
-				: String(value)? String
-				: Date(value)? Date
+		return Integral(value) ? Integral
+				: Date(value) ? Date
+				: Boolean(value) ? Boolean
+				: String(value) ? String
+				: Floating(value) ? Floating
+				: Key(value) ? Key
+				: Entity(value) ? Entity
 				: null;
 	}
 
 
 	/**
-	 * Tests if an object is an entity value.
+	 * Tests if an object is an integral numeric value.
 	 *
 	 * @param o the object to be tested
 	 *
-	 * @return {@code true}, if {@code o} is an entity value; {@code false}, otherwise
+	 * @return {@code true}, if {@code o} is an integral numeric value; {@code false}, otherwise
 	 */
-	public static boolean Entity(final Object o) {
-		return o instanceof PropertyContainer;
+	public static boolean Integral(final Object o) {
+		return o instanceof Long || o instanceof Integer || o instanceof Short;
+	}
+
+	/**
+	 * Tests if an object is a date value.
+	 *
+	 * @param o the object to be tested
+	 *
+	 * @return {@code true}, if {@code o} is a date value; {@code false}, otherwise
+	 */
+	public static boolean Date(final Object o) {
+		return o instanceof Date;
 	}
 
 	/**
@@ -97,14 +112,14 @@ public final class GAE {
 	}
 
 	/**
-	 * Tests if an object is an integral numeric value.
+	 * Tests if an object is a string value.
 	 *
 	 * @param o the object to be tested
 	 *
-	 * @return {@code true}, if {@code o} is an integral numeric value; {@code false}, otherwise
+	 * @return {@code true}, if {@code o} is a string value; {@code false}, otherwise
 	 */
-	public static boolean Integral(final Object o) {
-		return o instanceof Long || o instanceof Integer || o instanceof Short;
+	public static boolean String(final Object o) {
+		return o instanceof String;
 	}
 
 	/**
@@ -119,25 +134,25 @@ public final class GAE {
 	}
 
 	/**
-	 * Tests if an object is a string value.
+	 * Tests if an object is a daastore key value.
 	 *
 	 * @param o the object to be tested
 	 *
-	 * @return {@code true}, if {@code o} is a string value; {@code false}, otherwise
+	 * @return {@code true}, if {@code o} is a datastore key value; {@code false}, otherwise
 	 */
-	public static boolean String(final Object o) {
-		return o instanceof String;
+	public static boolean Key(final Object o) {
+		return o instanceof Key;
 	}
 
 	/**
-	 * Tests if an object is a date value.
+	 * Tests if an object is an entity value.
 	 *
 	 * @param o the object to be tested
 	 *
-	 * @return {@code true}, if {@code o} is a date value; {@code false}, otherwise
+	 * @return {@code true}, if {@code o} is an entity value; {@code false}, otherwise
 	 */
-	public static boolean Date(final Object o) {
-		return o instanceof Date;
+	public static boolean Entity(final Object o) {
+		return o instanceof PropertyContainer;
 	}
 
 
@@ -190,7 +205,7 @@ public final class GAE {
 	 * Compares two object for ordering.
 	 *
 	 * <p>Comparison is consistent with Google Datastore <a href="https://cloud.google.com/appengine/docs/standard/java/datastore/entity-property-reference#properties_and_value_types">sorting
-	 * rules</a>, with the following deterministi c ordering for mixed value types:</p>
+	 * rules</a>, with the following deterministic ordering for mixed value types:</p>
 	 *
 	 * <ul>
 	 *     <li>null values;</li>
@@ -199,8 +214,8 @@ public final class GAE {
 	 *     <li>boolean values;</li>
 	 *     <li>string values;</li>
 	 *     <li>floating-point values;</li>
-	 *     <li>floating-point values;</li>
-	 *     <li>property container values (key order);</li>
+	 *     <li>datastore key values;</li>
+	 *     <li>property container values (label/id/key order);</li>
 	 *     <li>other values (system-dependent order).</li>
 	 * </ul>
 	 *
@@ -222,6 +237,8 @@ public final class GAE {
 				: String(x) ? String(y) ? String(x, y) : -1 : String(y) ? 1
 
 				: Floating(x) ? Floating(y) ? Double(x, y) : -1 : Floating(y) ? 1
+
+				: Key(x) ? Key(y) ? Key(x, y) : -1 : Key(y) ? 1
 
 				: Entity(x) ? Entity(y) ? Entity(x, y) : -1 : Entity(y) ? 1
 
@@ -249,18 +266,28 @@ public final class GAE {
 		return Double.compare(((Number)x).doubleValue(), ((Number)y).doubleValue());
 	}
 
+	private static int Key(final Object x, final Object y) {
+		return ((Key)x).compareTo((Key)y);
+	}
+
 	private static int Entity(final Object x, final Object y) {
 
-		final Function<Object, Key> key=o -> o instanceof Entity ? ((Entity)o).getKey()
-				: o instanceof EmbeddedEntity ? ((EmbeddedEntity)o).getKey()
-				: null;
+		final Function<Object, Object> order=v -> Stream.<Function<Object, Object>>of(
 
-		final Key kx=key.apply(x);
-		final Key ky=key.apply(y);
+				o -> ((PropertyContainer)o).getProperty(label),
+				o -> ((PropertyContainer)o).getProperty(id),
 
-		return kx == null ? ky == null ? 0 : -1
-				: ky == null ? 1
-				: kx.compareTo(ky);
+				o -> o instanceof Entity ? ((Entity)o).getKey() : null,
+				o -> o instanceof EmbeddedEntity ? ((EmbeddedEntity)o).getKey() : null
+
+		)
+
+				.map(f -> f.apply(v))
+				.filter(Objects::nonNull)
+				.findFirst()
+				.orElse(null);
+
+		return compare(order.apply(x), order.apply(y));
 	}
 
 	private static int Other(final Object x, final Object y) {

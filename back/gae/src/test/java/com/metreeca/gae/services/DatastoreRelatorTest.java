@@ -459,20 +459,17 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.filter(filter)
 						.collect(toList());
 
+				final List<Object> values=employees.stream()
+						.map(path)
+						.filter(Objects::nonNull)
+						.collect(toList());
+
 
 				final PropertyContainer expected=new EmbeddedEntity();
 
-				final long count=employees.size();
-
-				final Object min=employees.stream()
-						.map(path)
-						.collect(minBy(GAE::compare))
-						.orElse(null);
-
-				final Object max=employees.stream()
-						.map(path)
-						.collect(maxBy(GAE::compare))
-						.orElse(null);
+				final long count=values.size();
+				final Object min=values.stream().min(GAE::compare).orElse(null);
+				final Object max=values.stream().max(GAE::compare).orElse(null);
 
 				expected.setProperty(GAE.count, count);
 				expected.setProperty(GAE.min, min);
@@ -552,14 +549,14 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testEmbedded() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '_stats': 'office' }"))
+						.handle(request("{ '_stats': 'supervisor' }"))
 
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
-												e -> e.getProperty("office"),
+												e -> e.getProperty("supervisor"),
 												e -> true
 										))
 								)
