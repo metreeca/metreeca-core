@@ -43,6 +43,15 @@ public final class GAE {
 
 	public static final String contains="contains";
 
+	public static final String terms="terms";
+	public static final String term="term";
+
+	public static final String stats="stats";
+
+	public static final String count="count";
+	public static final String min="min";
+	public static final String max="max";
+
 
 	//// System Datatypes //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,6 +61,17 @@ public final class GAE {
 	public static final String Floating="Floating";
 	public static final String String="String";
 	public static final String Date="Date";
+
+
+	public static String type(final Object value) {
+		return Entity(value)? Entity
+				: Boolean(value)? Boolean
+				: Integral(value)? Integral
+				: Floating(value)? Floating
+				: String(value)? String
+				: Date(value)? Date
+				: null;
+	}
 
 
 	/**
@@ -123,6 +143,15 @@ public final class GAE {
 
 	//// Key Generation ////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static Key root(final String path) { // !!! tbd
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return createKey("*", path.substring(0, path.lastIndexOf('/')+1));
+	}
+
 	public static Key key(final String path, final Shape shape) { // !!! tbd
 
 		if ( path == null ) {
@@ -141,7 +170,7 @@ public final class GAE {
 
 	}
 
-	public  static Key key(final String path, final String kind) { // !!! tbd
+	public static Key key(final String path, final String kind) { // !!! tbd
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
@@ -151,7 +180,7 @@ public final class GAE {
 			throw new NullPointerException("null kind");
 		}
 
-		return createKey(createKey("*", path.substring(0, path.lastIndexOf('/')+1)), kind, path);
+		return createKey(root(path), kind, path);
 	}
 
 

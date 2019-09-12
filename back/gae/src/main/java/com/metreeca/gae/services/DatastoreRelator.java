@@ -59,51 +59,42 @@ import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
 import static com.google.appengine.api.datastore.Query.FilterOperator.GREATER_THAN_OR_EQUAL;
 import static com.google.appengine.api.datastore.Query.FilterOperator.IN;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 
 
 final class DatastoreRelator extends DatastoreProcessor {
 
-	public static final String terms="terms";
-	public static final String term="term";
-
-	public static final String min="min";
-	public static final String max="max";
-
-	public static final String stats="stats";
-
-	public static final String count="count";
-
-
 	private static final Shape TermsShape=and(
-			field(terms, and(multiple(),
-					field(term, and(required(),
+			field(GAE.terms, and(multiple(),
+					field(GAE.term, and(required(),
 							field(GAE.label, and(optional(), datatype(GAE.String)))
 					)),
-					field(count, and(required(), datatype(GAE.Integral)))
+					field(GAE.count, and(required(), datatype(GAE.Integral)))
 			))
 	);
 
 	private static final Shape StatsShape=and(
 
-			field(count, and(required(), datatype(GAE.Integral))),
-			field(min, optional()),
-			field(max, optional()),
+			field(GAE.count, and(required(), datatype(GAE.Integral))),
+			field(GAE.min, optional()),
+			field(GAE.max, optional()),
 
-			field(stats, and(multiple(),
+			field(GAE.stats, and(multiple(),
 					field(GAE.type, and(required(), datatype(GAE.String))),
-					field(count, and(required(), datatype(GAE.Integral))),
-					field(min, required()),
-					field(max, required())
+					field(GAE.count, and(required(), datatype(GAE.Integral))),
+					field(GAE.min, required()),
+					field(GAE.max, required())
 			))
 
 	);
 
 
 	private static EmbeddedEntity embed(final Entity entity) {
+
+		if ( entity == null ) {
+			throw new NullPointerException("null entity");
+		}
 
 		final EmbeddedEntity resource=new EmbeddedEntity();
 
@@ -125,7 +116,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private static Object get(final Object object, final List<String> path) {
 		return object == null ? null
-				: path.isEmpty()? object
+				: path.isEmpty() ? object
 				: object instanceof PropertyContainer ? get(((PropertyContainer)object).getProperty(path.get(0)), path.subList(1, path.size()))
 				: null;
 	}
@@ -203,7 +194,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		return datastore.exec(service -> {
 
-			final Entity container=new Entity("*", path);
+			final Entity container=new Entity(GAE.root(path));
 
 			container.setProperty(GAE.contains,
 					stream(service.prepare(query).asIterable(options).spliterator(), false)
@@ -232,9 +223,9 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		return datastore.exec(service -> {
 
-			final Entity container=new Entity("*", path);
+			final Entity container=new Entity(GAE.root(path));
 
-			container.setProperty(DatastoreRelator.terms,
+			container.setProperty(GAE.terms,
 
 					stream(service.prepare(query).asIterable().spliterator(), false)
 
@@ -256,8 +247,8 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 								final EmbeddedEntity embedded=new EmbeddedEntity();
 
-								embedded.setProperty(term, entry.getKey());
-								embedded.setProperty(count, entry.getValue());
+								embedded.setProperty(GAE.term, entry.getKey());
+								embedded.setProperty(GAE.count, entry.getValue());
 
 								return embedded;
 
@@ -277,12 +268,109 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Function<Response, Response> stats(final String path, final Stats stats) {
 
-		final Entity container=new Entity("*", path);
+		final Shape filter=filter(stats.getShape());
 
-		return response -> response
-				.status(OK)
-				.shape(StatsShape)
-				.body(entity(), container);
+		// !!! (€) if property is known to be of a scalar supported type retrieve using a projection
+		// https://cloud.google.com/appengine/docs/standard/java/javadoc/com/google/appengine/api/datastore/RawValue.html#getValue--
+
+		final Query query=query(filter); // !!! sampling sorting/limits
+		final Predicate<Object> predicate=predicate(filter);
+
+		final class Range {
+
+			private final long count;
+
+			private final Object min;
+			private final Object max;
+
+			private Range(final long count, final Object min, final Object max) {
+
+				this.count=count;
+
+				this.min=min;
+				this.max=max;
+			}
+
+
+			private int order(final Range range) {
+				return -Long.compare(count, range.count);
+			}
+
+			private Range merge(final Range range) {
+				return new Range(
+						count+range.count,
+						GAE.compare(min, range.min) <= 0 ? min : range.min,
+						GAE.compare(max, range.max) >= 0 ? max : range.max
+				);
+			}
+
+			private void set(final PropertyContainer container) {
+
+				container.setProperty(GAE.count, count);
+				container.setProperty(GAE.min, min);
+				container.setProperty(GAE.max, max);
+
+			}
+
+		}
+
+		return datastore.exec(service -> {
+
+			final Map<String, Range> ranges=stream(service.prepare(query).asIterable().spliterator(), false)
+
+					.filter(predicate)
+
+					.map(entity -> get(entity, stats.getPath()))
+					.filter(Objects::nonNull)
+
+					.collect(groupingBy(GAE::type, reducing(null, v -> new Range(1, v, v), (x, y) ->
+							x == null ? y : y == null ? x : x.merge(y)
+					)));
+
+			final Entity container=new Entity(GAE.root(path));
+
+			if ( ranges.isEmpty() ) {
+
+				container.setProperty(GAE.count, 0L);
+
+			} else {
+
+				ranges.values().stream() // global stats
+						.reduce(Range::merge)
+						.orElse(new Range(0, null, null)) // unexpected
+						.set(container);
+
+				container.setProperty(GAE.stats, ranges.entrySet().stream() // type-specific stats
+
+						.sorted(Map.Entry.<String, Range>comparingByValue(Range::order) // decreasing count
+								.thenComparing(Map.Entry.comparingByKey()) // increasing type
+						)
+
+						.map(entry -> {
+
+							final EmbeddedEntity item=new EmbeddedEntity();
+
+							item.setProperty(GAE.type, entry.getKey());
+							entry.getValue().set(item);
+
+							return item;
+
+						})
+
+						.collect(toList())
+
+				);
+
+			}
+
+
+			return response -> response
+					.status(OK)
+					.shape(StatsShape)
+					.body(entity(), container);
+
+		});
+
 	}
 
 

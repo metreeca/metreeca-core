@@ -52,9 +52,8 @@ import static com.google.appengine.api.datastore.Query.FilterOperator.IN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 
 
@@ -67,8 +66,9 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 				convey().then(
 
+						field(GAE.label, and(required(), datatype(GAE.String))),
+
 						field("code", and(required(), datatype(GAE.String))),
-						field("label", and(required(), datatype(GAE.String))),
 						field("forename", and(required(), datatype(GAE.String))),
 						field("surname", and(required(), datatype(GAE.String))),
 						field("email", and(required(), datatype(GAE.String))),
@@ -77,7 +77,8 @@ final class DatastoreRelatorTest extends GAETestBase {
 						field("seniority", and(required(), datatype(GAE.Integral))),
 
 						field("office", and(required(), clazz("Office"), relate().then(
-								field("label", and(required(), datatype(GAE.String)))
+								field(GAE.id, and(required(), datatype(GAE.String))),
+								field(GAE.label, and(required(), datatype(GAE.String)))
 						))),
 
 						field("supervisor", and(optional(), clazz("Employee"), relate().then(
@@ -361,7 +362,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(entity(), entity -> assertThat(entity.getProperty(DatastoreRelator.terms))
+								.hasBody(entity(), entity -> assertThat(entity.getProperty(GAE.terms))
 										.isEqualTo(terms(entities -> entities
 
 												.map(e -> e.getProperty("title"))
@@ -381,7 +382,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(entity(), entity -> assertThat(entity.getProperty(DatastoreRelator.terms))
+								.hasBody(entity(), entity -> assertThat(entity.getProperty(GAE.terms))
 										.isEqualTo(terms(entities -> entities
 
 												.filter(e -> GAE.compare(e.getProperty("seniority"), 3) >= 0)
@@ -402,7 +403,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(entity(), entity -> assertThat(entity.getProperty(DatastoreRelator.terms))
+								.hasBody(entity(), entity -> assertThat(entity.getProperty(GAE.terms))
 										.isEqualTo(terms(entities -> entities
 
 												.map(e -> (PropertyContainer)e.getProperty("office"))
@@ -423,7 +424,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(entity(), entity -> assertThat(entity.getProperty(DatastoreRelator.terms))
+								.hasBody(entity(), entity -> assertThat(entity.getProperty(GAE.terms))
 										.isEqualTo(terms(entities -> entities
 
 												.map(e -> (EmbeddedEntity)e.getProperty("supervisor"))
@@ -449,7 +450,123 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 		}
 
-		@Nested final class Stats  {
+		@Nested final class Stats {
+
+			private Map<String, Object> stats(final Function<Entity, Object> path, final Predicate<Entity> filter) {
+
+				final List<Entity> employees=birt().stream()
+						.filter(e -> e.getKey().getKind().equals("Employee"))
+						.filter(filter)
+						.collect(toList());
+
+
+				final PropertyContainer expected=new EmbeddedEntity();
+
+				final long count=employees.size();
+
+				final Object min=employees.stream()
+						.map(path)
+						.collect(minBy(GAE::compare))
+						.orElse(null);
+
+				final Object max=employees.stream()
+						.map(path)
+						.collect(maxBy(GAE::compare))
+						.orElse(null);
+
+				expected.setProperty(GAE.count, count);
+				expected.setProperty(GAE.min, min);
+				expected.setProperty(GAE.max, max);
+
+
+				final EmbeddedEntity stats=new EmbeddedEntity();
+
+				stats.setProperty(GAE.type, Optional.ofNullable(GAE.type(min)).orElse(GAE.type(max)));
+				stats.setProperty(GAE.count, count);
+				stats.setProperty(GAE.min, min);
+				stats.setProperty(GAE.max, max);
+
+				expected.setProperty(GAE.stats, singletonList(stats));
+
+				return expected.getProperties();
+			}
+
+
+			@Test void testBasic() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("{ '_stats': 'seniority' }"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(stats(
+												e -> e.getProperty("seniority"),
+												e -> true
+										))
+								)
+						)
+
+				);
+			}
+
+			@Test void testFiltered() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("{ '_stats': 'seniority', 'office.id': '/offices/1' }"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(stats(
+												e -> e.getProperty("seniority"),
+												e -> ((PropertyContainer)e.getProperty("office")).getProperty("id").equals("/offices/1")
+										))
+								)
+						)
+
+				);
+			}
+
+			@Test void testNested() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("{ '_stats': 'office.label' }"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(stats(
+												e -> ((PropertyContainer)e.getProperty("office")).getProperty("label"),
+												e -> true
+										))
+								)
+						)
+
+				);
+			}
+
+			@Test void testEmbedded() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("{ '_stats': 'office' }"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(stats(
+												e -> e.getProperty("office"),
+												e -> true
+										))
+								)
+						)
+
+				);
+			}
 
 		}
 
@@ -457,33 +574,34 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 	@Nested final class Resource {
 
-		@Test void testRelateResource() {
+		@Test void testRelate() {
 			exec(load(birt()), () -> new DatastoreRelator()
 
 					.handle(new Request()
-							.path("/offices/1")
-							.shape(and(
-									clazz("Office"),
-									field(GAE.label, and(required(), datatype(GAE.String)))
-							))
+							.path("/employees/1002")
+							.shape(employee())
 					)
 
 					.accept(response -> assertThat(response)
 							.hasStatus(OK)
 							.hasShape()
-							.hasBody(entity(), entity -> assertThat(((Entity)entity).getKey().getName())
-									.isEqualTo("/offices/1")
+							.hasBody(entity(), entity -> assertThat(entity)
+									.isEqualTo(birt().stream()
+											.filter(e -> e.getKey().getName().equals(response.request().path()))
+											.findFirst()
+											.orElse(null)
+									)
 							)
 					)
 
 			);
 		}
 
-		@Test void testHandleUnknownResources() {
+		@Test void testReportMissing() {
 			exec(load(birt()), () -> new DatastoreRelator()
 
 					.handle(new Request()
-							.path("/offices/9999")
+							.path("/employees/9999")
 					)
 
 					.accept(response -> assertThat(response)

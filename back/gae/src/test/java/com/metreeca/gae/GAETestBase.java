@@ -157,7 +157,7 @@ public abstract class GAETestBase {
 
 				employee.setProperty("email", _employee.getString("email"));
 				employee.setProperty("title", _employee.getString("title"));
-				employee.setProperty("seniority", _employee.getJsonNumber("seniority").intValue());
+				employee.setProperty("seniority", _employee.getJsonNumber("seniority").longValue()); // integrals stored as longs
 
 				final JsonObject _office=_employee.getJsonObject("office");
 				final EmbeddedEntity office=new EmbeddedEntity();
