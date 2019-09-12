@@ -22,20 +22,28 @@ import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.*;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+
 
 /**
  * Standard field names and data types.
  */
 public final class GAE {
+
+	private static final Pattern DotPattern=Pattern.compile("\\.");
+
 
 	//// System Properties /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -196,6 +204,96 @@ public final class GAE {
 		}
 
 		return createKey(root(path), kind, path);
+	}
+
+
+	//// Entity Utilities //////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static Key key(final PropertyContainer container) {
+
+		if ( container == null ) {
+			throw new NullPointerException("null container");
+		}
+
+		return container instanceof Entity ? ((Entity)container).getKey()
+				: container instanceof EmbeddedEntity ? ((EmbeddedEntity)container).getKey()
+				: null;
+	}
+
+	public static String kind(final PropertyContainer container) {
+
+		if ( container == null ) {
+			throw new NullPointerException("null container");
+		}
+
+		final Key key=key(container);
+
+		return key != null ? key.getKind() : null;
+	}
+
+
+	public static Object get(final PropertyContainer container, final String path) {
+		return get(container, DotPattern.split(path));
+	}
+
+	public static Object get(final PropertyContainer container, final String... path) {
+		return get(container, asList(path));
+	}
+
+	public static Object get(final PropertyContainer container, final Iterable<String> path) {
+		return get(container, null, path);
+	}
+
+
+	public static <T> T get(final PropertyContainer container, final T fallback, final String path) {
+		return get(container, fallback, DotPattern.split(path));
+	}
+
+	public static <T> T get(final PropertyContainer container, final T fallback, final String... path) {
+		return get(container, fallback, asList(path));
+	}
+
+	@SuppressWarnings("unchecked") public static <T> T get(final PropertyContainer container, final T fallback, final Iterable<String> path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		Object value=container;
+
+		for (final String step : path) {
+
+			if ( step == null ) {
+				throw new NullPointerException("null step");
+			}
+
+			value=(value instanceof PropertyContainer) ? ((PropertyContainer)value).getProperty(step)
+
+					: (value instanceof Collection) ? ((Collection<?>)value).stream()
+					.map(v -> v instanceof PropertyContainer ? ((PropertyContainer)v).getProperty(step) : null)
+					.filter(Objects::nonNull)
+					.flatMap(v -> v instanceof Collection ? ((Collection<?>)v).stream() : Stream.of(v))
+					.collect(toList())
+
+					: null;
+		}
+
+		return value != null ? (T)value : fallback;
+	}
+
+
+	public static EmbeddedEntity embed(final Entity entity) {
+
+		if ( entity == null ) {
+			throw new NullPointerException("null entity");
+		}
+
+		final EmbeddedEntity resource=new EmbeddedEntity();
+
+		resource.setKey(entity.getKey());
+		resource.setPropertiesFrom(entity);
+
+		return resource;
 	}
 
 

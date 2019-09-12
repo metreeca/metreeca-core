@@ -39,6 +39,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.metreeca.gae.GAE.key;
+import static com.metreeca.gae.GAE.kind;
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
@@ -55,9 +56,7 @@ import static com.metreeca.tree.shapes.Field.field;
 
 import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
 import static com.google.appengine.api.datastore.FetchOptions.Builder;
-import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
-import static com.google.appengine.api.datastore.Query.FilterOperator.GREATER_THAN_OR_EQUAL;
-import static com.google.appengine.api.datastore.Query.FilterOperator.IN;
+import static com.google.appengine.api.datastore.Query.FilterOperator.*;
 
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
@@ -88,21 +87,6 @@ final class DatastoreRelator extends DatastoreProcessor {
 			))
 
 	);
-
-
-	private static EmbeddedEntity embed(final Entity entity) {
-
-		if ( entity == null ) {
-			throw new NullPointerException("null entity");
-		}
-
-		final EmbeddedEntity resource=new EmbeddedEntity();
-
-		resource.setKey(entity.getKey());
-		resource.setPropertiesFrom(entity);
-
-		return resource;
-	}
 
 
 	private static String property(final Iterable<String> path) {
@@ -190,7 +174,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		// retrieve data
 
-		logger.info(DatastoreRelator.this, String.format("executing query %s", query));
+		logger.info(this, String.format("executing query %s", query));
 
 		return datastore.exec(service -> {
 
@@ -199,7 +183,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			container.setProperty(GAE.contains,
 					stream(service.prepare(query).asIterable(options).spliterator(), false)
 							.filter(predicate)
-							.map(DatastoreRelator::embed) // ;( entities can't be embedded
+							.map(GAE::embed) // ;( entities can't be embedded
 							.collect(toList())
 			);
 
@@ -363,7 +347,6 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			}
 
-
 			return response -> response
 					.status(OK)
 					.shape(StatsShape)
@@ -508,11 +491,11 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Query.Filter probe(final MinExclusive minExclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return new Query.FilterPredicate(path, GREATER_THAN, minExclusive.getValue());
 		}
 
 		@Override public Query.Filter probe(final MaxExclusive maxExclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return new Query.FilterPredicate(path, LESS_THAN, maxExclusive.getValue());
 		}
 
 		@Override public Query.Filter probe(final MinInclusive minInclusive) {
@@ -520,20 +503,20 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 		@Override public Query.Filter probe(final MaxInclusive maxInclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return new Query.FilterPredicate(path, LESS_THAN_OR_EQUAL, maxInclusive.getValue());
 		}
 
 
 		@Override public Query.Filter probe(final MinLength minLength) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return null; // handled by predicate
 		}
 
 		@Override public Query.Filter probe(final MaxLength maxLength) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return null; // handled by predicate
 		}
 
 		@Override public Query.Filter probe(final Pattern pattern) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return null; // handled by predicate
 		}
 
 		@Override public Query.Filter probe(final Like like) {
@@ -550,7 +533,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 		@Override public Query.Filter probe(final In in) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return null; // handled by predicate
 		}
 
 		@Override public Query.Filter probe(final All all) {
@@ -614,26 +597,30 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Predicate<Object> probe(final Datatype datatype) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final String name=datatype.getName();
+
+			return values -> stream(values).allMatch(value ->
+					name.equals(GAE.type(value))
+			);
 		}
 
 		@Override public Predicate<Object> probe(final Clazz clazz) {
 
 			final String name=clazz.getName();
 
-			return values -> stream(values).allMatch(value
-					-> value instanceof Entity && ((Entity)value).getKey().getKind().equals(name)
-					|| value instanceof EmbeddedEntity && ((EmbeddedEntity)value).getKey().getKind().equals(name)
+			return values -> stream(values).allMatch(value ->
+					value instanceof PropertyContainer && name.equals(kind((PropertyContainer)value))
 			);
 		}
 
 
 		@Override public Predicate<Object> probe(final MinExclusive minExclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return null; // handled by query
 		}
 
 		@Override public Predicate<Object> probe(final MaxExclusive maxExclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return null; // handled by query
 		}
 
 		@Override public Predicate<Object> probe(final MinInclusive minInclusive) {
@@ -641,28 +628,45 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 		@Override public Predicate<Object> probe(final MaxInclusive maxInclusive) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+			return null; // handled by query
 		}
 
 
 		@Override public Predicate<Object> probe(final MinLength minLength) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final int limit=minLength.getLimit();
+
+			return values -> stream(values).allMatch(value ->
+					(value == null ? 0 : value.toString().length()) >= limit
+			);
 		}
 
 		@Override public Predicate<Object> probe(final MaxLength maxLength) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final int limit=maxLength.getLimit();
+
+			return values -> stream(values).allMatch(value ->
+					(value == null ? 0 : value.toString().length()) <= limit
+			);
 		}
 
 		@Override public Predicate<Object> probe(final Pattern pattern) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final java.util.regex.Pattern regex=java.util.regex.Pattern.compile(
+					String.format("(?%s:%s)", pattern.getFlags(), pattern.getText())
+			);
+
+			return values -> stream(values).allMatch(value ->
+					value != null && regex.matcher(value.toString()).matches()
+			);
 		}
 
 		@Override public Predicate<Object> probe(final Like like) {
 
-			final java.util.regex.Pattern pattern=java.util.regex.Pattern.compile(like.toExpression());
+			final java.util.regex.Pattern regex=java.util.regex.Pattern.compile(like.toExpression());
 
 			return values -> stream(values).allMatch(value ->
-					value != null && pattern.matcher(value.toString()).find()
+					value != null && regex.matcher(value.toString()).find()
 			);
 		}
 
@@ -682,7 +686,12 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 		@Override public Predicate<Object> probe(final In in) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final Set<Object> range=in.getValues();
+
+			return range.isEmpty()? values -> true : values -> stream(values).allMatch(value ->
+					value != null && range.contains(value)
+			);
 		}
 
 		@Override public Predicate<Object> probe(final All all) {

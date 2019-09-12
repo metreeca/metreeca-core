@@ -185,8 +185,8 @@ final class QueryParser {
 							: key.startsWith(">") ? filter(path(key.substring(1), shape), minExclusive(value, shape))
 							: key.startsWith("<") ? filter(path(key.substring(1), shape), maxExclusive(value, shape))
 
-							: key.startsWith("#<") ? filter(path(key.substring(2), shape), minLength(value))
-							: key.startsWith("#>") ? filter(path(key.substring(2), shape), maxLength(value))
+							: key.startsWith("#>") ? filter(path(key.substring(2), shape), minLength(value))
+							: key.startsWith("#<") ? filter(path(key.substring(2), shape), maxLength(value))
 							: key.startsWith("*") ? filter(path(key.substring(1), shape), pattern(value))
 							: key.startsWith("~") ? filter(path(key.substring(1), shape), like(value))
 
