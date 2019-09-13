@@ -23,7 +23,9 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PropertyContainer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +36,6 @@ import java.util.stream.Stream;
 
 import static com.metreeca.gae.GAE.get;
 import static com.metreeca.gae.formats.EntityFormat.entity;
-import static com.metreeca.gae.services.Datastore.datastore;
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.tree.Shape.*;
@@ -54,7 +54,6 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 
 final class DatastoreRelatorTest extends GAETestBase {
@@ -321,7 +320,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e -> get(e, emptyList() ,"subordinates").size() >= 2))
+										.isEqualTo(items(e -> get(e, emptyList(), "subordinates").size() >= 2))
 								)
 						)
 
@@ -335,7 +334,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e -> get(e, emptyList() ,"subordinates").size() <= 2))
+										.isEqualTo(items(e -> get(e, emptyList(), "subordinates").size() <= 2))
 								)
 						)
 
@@ -487,38 +486,46 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 		@Nested final class Terms {
 
-			private <T> List<EmbeddedEntity> terms(final Function<Stream<Entity>, Stream<Object>> expected) {
+			private Map<String, Object> terms(final Function<Entity, Object> path, final Predicate<Entity> filter) {
 
-				return service(datastore()).exec(service -> expected
+				final List<Entity> employees=birt().stream()
+						.filter(e -> e.getKey().getKind().equals("Employee"))
+						.filter(filter)
+						.collect(toList());
 
-						.apply(
-								stream(service.prepare(new Query()).asIterable().spliterator(), false)
-										.filter(e -> e.getKey().getKind().equals("Employee"))
+				final List<Object> values=employees.stream()
+						.map(path)
+						.filter(Objects::nonNull)
+						.collect(toList());
+
+				final Map<Object, Long> terms=values.stream()
+						.collect(groupingBy(t -> t, counting()));
+
+
+				final PropertyContainer expected=new EmbeddedEntity();
+
+				expected.setProperty(GAE.terms, terms.entrySet().stream()
+
+						.sorted(Comparator.<Map.Entry<Object, Long>>
+								comparingLong(Map.Entry::getValue).reversed()
+								.thenComparing(Map.Entry::getKey, GAE::compare)
 						)
 
-						.collect(groupingBy(e -> e, counting()))
-
-						.entrySet()
-						.stream()
-						.sorted(((Comparator<Map.Entry<Object, Long>>)
-								(x, y) -> -Long.compare(x.getValue(), y.getValue())) // decreasing count
-								.thenComparing((x, y) -> GAE.compare(x.getKey(), y.getKey())) // increasing value
-						)
 						.map(entry -> {
 
-							final EmbeddedEntity embedded=new EmbeddedEntity();
+							final EmbeddedEntity term=new EmbeddedEntity();
 
-							embedded.setProperty("term", entry.getKey());
-							embedded.setProperty("count", entry.getValue());
+							term.setProperty(GAE.term, entry.getKey());
+							term.setProperty(GAE.count, entry.getValue());
 
-							return embedded;
+							return term;
 
 						})
 
 						.collect(toList())
-
 				);
 
+				return expected.getProperties();
 			}
 
 
@@ -530,11 +537,10 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(entity(), entity -> assertThat(entity.getProperty(GAE.terms))
-										.isEqualTo(terms(entities -> entities
-
-												.map(e -> e.getProperty("title"))
-
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(terms(
+												e -> e.getProperty("title"),
+												e -> true
 										))
 								)
 						)
@@ -550,12 +556,10 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(entity(), entity -> assertThat(entity.getProperty(GAE.terms))
-										.isEqualTo(terms(entities -> entities
-
-												.filter(e -> GAE.compare(e.getProperty("seniority"), 3) >= 0)
-												.map(e -> e.getProperty("title"))
-
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(terms(
+												e -> e.getProperty("title"),
+												e -> get(e, 0L, "seniority") >= 3
 										))
 								)
 						)
@@ -571,12 +575,10 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(entity(), entity -> assertThat(entity.getProperty(GAE.terms))
-										.isEqualTo(terms(entities -> entities
-
-												.map(e -> (PropertyContainer)e.getProperty("office"))
-												.map(e -> e.getProperty(GAE.label))
-
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(terms(
+												e -> get(e, "office.label"),
+												e -> true
 										))
 								)
 						)
@@ -592,23 +594,10 @@ final class DatastoreRelatorTest extends GAETestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(entity(), entity -> assertThat(entity.getProperty(GAE.terms))
-										.isEqualTo(terms(entities -> entities
-
-												.map(e -> (EmbeddedEntity)e.getProperty("supervisor"))
-												.filter(Objects::nonNull)
-
-												.map(e -> { // only id/label retained
-
-													final EmbeddedEntity supervisor=new EmbeddedEntity();
-
-													supervisor.setProperty("id", e.getProperty("id"));
-													supervisor.setProperty(GAE.label, e.getProperty("label"));
-
-													return supervisor;
-
-												})
-
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(terms(
+												e -> e.getProperty("supervisor"),
+												e -> true
 										))
 								)
 						)
@@ -687,7 +676,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
 												e -> e.getProperty("seniority"),
-												e -> ((PropertyContainer)e.getProperty("office")).getProperty("id").equals("/offices/1")
+												e -> get(e, "office.id").equals("/offices/1")
 										))
 								)
 						)
@@ -705,7 +694,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 								.hasShape()
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
-												e -> ((PropertyContainer)e.getProperty("office")).getProperty("label"),
+												e -> get(e, "office.label"),
 												e -> true
 										))
 								)

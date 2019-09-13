@@ -93,7 +93,7 @@
 			"forename": "Gerard",
 			"surname": "Bondur",
 			"email": "gbondur@example.com",
-			"title": "Sale Manager (EMEA)",
+			"title": "Sales Manager (EMEA)",
 			"seniority": 4,
 			"office": { "code": "4", "label": "Paris (France)" },
 			"supervisor": { "code": "1056", "label": "Mary Patterson " }
