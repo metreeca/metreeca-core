@@ -75,13 +75,13 @@ public final class GAE {
 
 
 	public static String type(final Object value) {
-		return Integral(value) ? Integral
-				: Date(value) ? Date
-				: Boolean(value) ? Boolean
-				: String(value) ? String
-				: Floating(value) ? Floating
-				: Key(value) ? Key
-				: Entity(value) ? Entity
+		return isIntegral(value) ? Integral
+				: isDate(value) ? Date
+				: isBoolean(value) ? Boolean
+				: isString(value) ? String
+				: isFloating(value) ? Floating
+				: isKey(value) ? Key
+				: isEntity(value) ? Entity
 				: null;
 	}
 
@@ -93,7 +93,7 @@ public final class GAE {
 	 *
 	 * @return {@code true}, if {@code o} is an integral numeric value; {@code false}, otherwise
 	 */
-	public static boolean Integral(final Object o) {
+	public static boolean isIntegral(final Object o) {
 		return o instanceof Long || o instanceof Integer || o instanceof Short;
 	}
 
@@ -104,7 +104,7 @@ public final class GAE {
 	 *
 	 * @return {@code true}, if {@code o} is a date value; {@code false}, otherwise
 	 */
-	public static boolean Date(final Object o) {
+	public static boolean isDate(final Object o) {
 		return o instanceof Date;
 	}
 
@@ -115,7 +115,7 @@ public final class GAE {
 	 *
 	 * @return {@code true}, if {@code o} is a boolean value; {@code false}, otherwise
 	 */
-	public static boolean Boolean(final Object o) {
+	public static boolean isBoolean(final Object o) {
 		return o instanceof Boolean;
 	}
 
@@ -126,7 +126,7 @@ public final class GAE {
 	 *
 	 * @return {@code true}, if {@code o} is a string value; {@code false}, otherwise
 	 */
-	public static boolean String(final Object o) {
+	public static boolean isString(final Object o) {
 		return o instanceof String;
 	}
 
@@ -137,7 +137,7 @@ public final class GAE {
 	 *
 	 * @return {@code true}, if {@code o} is a floating-point numeric value; {@code false}, otherwise
 	 */
-	public static boolean Floating(final Object o) {
+	public static boolean isFloating(final Object o) {
 		return o instanceof Double || o instanceof Float;
 	}
 
@@ -148,7 +148,7 @@ public final class GAE {
 	 *
 	 * @return {@code true}, if {@code o} is a datastore key value; {@code false}, otherwise
 	 */
-	public static boolean Key(final Object o) {
+	public static boolean isKey(final Object o) {
 		return o instanceof Key;
 	}
 
@@ -159,7 +159,7 @@ public final class GAE {
 	 *
 	 * @return {@code true}, if {@code o} is an entity value; {@code false}, otherwise
 	 */
-	public static boolean Entity(final Object o) {
+	public static boolean isEntity(final Object o) {
 		return o instanceof PropertyContainer;
 	}
 
@@ -326,19 +326,19 @@ public final class GAE {
 	public static int compare(final Object x, final Object y) {
 		return x == null ? y == null ? 0 : -1 : y == null ? 1
 
-				: Integral(x) ? Integral(y) ? Integral(x, y) : -1 : Integral(y) ? 1
+				: isIntegral(x) ? isIntegral(y) ? Integral(x, y) : -1 : isIntegral(y) ? 1
 
-				: Date(x) ? Date(y) ? Date(x, y) : -1 : Date(y) ? 1
+				: isDate(x) ? isDate(y) ? Date(x, y) : -1 : isDate(y) ? 1
 
-				: Boolean(x) ? Boolean(y) ? Boolean(x, y) : -1 : Boolean(y) ? 1
+				: isBoolean(x) ? isBoolean(y) ? Boolean(x, y) : -1 : isBoolean(y) ? 1
 
-				: String(x) ? String(y) ? String(x, y) : -1 : String(y) ? 1
+				: isString(x) ? isString(y) ? String(x, y) : -1 : isString(y) ? 1
 
-				: Floating(x) ? Floating(y) ? Double(x, y) : -1 : Floating(y) ? 1
+				: isFloating(x) ? isFloating(y) ? Floating(x, y) : -1 : isFloating(y) ? 1
 
-				: Key(x) ? Key(y) ? Key(x, y) : -1 : Key(y) ? 1
+				: isKey(x) ? isKey(y) ? Key(x, y) : -1 : isKey(y) ? 1
 
-				: Entity(x) ? Entity(y) ? Entity(x, y) : -1 : Entity(y) ? 1
+				: isEntity(x) ? isEntity(y) ? Entity(x, y) : -1 : isEntity(y) ? 1
 
 				: Other(x, y);
 	}
@@ -360,7 +360,7 @@ public final class GAE {
 		return ((String)x).compareTo((String)y);
 	}
 
-	private static int Double(final Object x, final Object y) {
+	private static int Floating(final Object x, final Object y) {
 		return Double.compare(((Number)x).doubleValue(), ((Number)y).doubleValue());
 	}
 

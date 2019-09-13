@@ -109,11 +109,11 @@ final class DatastoreRelatorTest extends GAETestBase {
 		@Nested final class Items {
 
 			private Map<String, Object> items(final Predicate<Entity> filter) {
-				return items(filter, comparing(Entity::getKey), 0, 0);
+				return items(filter, 0, 0, comparing(Entity::getKey));
 			}
 
 			private Map<String, Object> items(final Predicate<Entity> filter,
-					final Comparator<Entity> order, final int offset, final int limit
+					final int offset, final int limit, final Comparator<Entity> order
 			) {
 
 				final Stream<EmbeddedEntity> a=birt().stream()
@@ -157,12 +157,51 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e -> true, Comparator.<Entity, String>
+										.isEqualTo(items(e -> true, 10, 5, Comparator.<Entity, String>
 
 												comparing(e -> (String)get(e, "office.label")).reversed()
-												.thenComparingLong(e -> (long)get(e, "seniority")
+												.thenComparingLong(e -> (long)get(e, "seniority"))
 
-												), 10, 5))
+										))
+								)
+						)
+
+				);
+			}
+
+
+			@Test void testMultipleInequalityFilter() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("{ '>= seniority': 2, '>= code': '1370' }"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(items(e -> get(e, 0L, "seniority") >= 2
+												&& get(e, "", "code").compareTo("1370") >= 0
+										))
+								)
+						)
+
+				);
+			}
+
+			@Test void testInconsistentInequalityAndOrder() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("{ '>= seniority': 2, '_order': 'code' }"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(items(e -> get(e, 0L, "seniority") >= 2, 0, 0,
+
+												comparing(e -> get(e, "", "code"))
+
+										))
 								)
 						)
 

@@ -44,12 +44,12 @@ final class EntityEncoder {
 
 	private JsonValue value(final Object object, final Shape shape) {
 		return object == null ? JsonValue.NULL
-				: GAE.Entity(object) ? value((PropertyContainer)object, shape)
-				: GAE.Boolean(object) ? value((Boolean)object, shape)
-				: GAE.Floating(object) ? value(((Number)object).doubleValue(), shape)
-				: GAE.Integral(object) ? value(((Number)object).longValue(), shape)
-				: GAE.String(object) ? value((String)object, shape)
-				: GAE.Date(object) ? value((Date)object, shape)
+				: GAE.isEntity(object) ? value((PropertyContainer)object, shape)
+				: GAE.isBoolean(object) ? value((Boolean)object, shape)
+				: GAE.isFloating(object) ? value(((Number)object).doubleValue(), shape)
+				: GAE.isIntegral(object) ? value(((Number)object).longValue(), shape)
+				: GAE.isString(object) ? value((String)object, shape)
+				: GAE.isDate(object) ? value((Date)object, shape)
 				: object instanceof Text ? value(((Text)object).getValue(), shape)
 				: object instanceof Iterable ? value((Iterable<?>)object, shape)
 				: error(object);

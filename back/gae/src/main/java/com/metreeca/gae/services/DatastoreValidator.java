@@ -60,7 +60,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Trace validate(final Shape shape, final Object value) {
-		if ( GAE.Entity(value) ) {
+		if ( GAE.isEntity(value) ) {
 
 			final Map<String, Shape> fields=fields(shape);
 
@@ -119,12 +119,12 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 			return trace(focus().stream()
 					.filter(invert(v
-							-> GAE.Entity(v) ? name.equals(GAE.Entity)
-							: GAE.Boolean(v) ? name.equals(GAE.Boolean)
-							: GAE.Integral(v) ? name.equals(GAE.Integral)
-							: GAE.Floating(v) ? name.equals(GAE.Floating)
-							: GAE.String(v) ? name.equals(GAE.String)
-							: GAE.Date(v) && name.equals(GAE.Date)
+							-> GAE.isEntity(v) ? name.equals(GAE.Entity)
+							: GAE.isBoolean(v) ? name.equals(GAE.Boolean)
+							: GAE.isIntegral(v) ? name.equals(GAE.Integral)
+							: GAE.isFloating(v) ? name.equals(GAE.Floating)
+							: GAE.isString(v) ? name.equals(GAE.String)
+							: GAE.isDate(v) && name.equals(GAE.Date)
 					))
 					.collect(toMap(v -> issue(datatype), Collections::singleton))
 			);
@@ -271,7 +271,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 					.map(v -> {
 
-						if ( GAE.Entity(v) ) {
+						if ( GAE.isEntity(v) ) {
 
 							return trace(emptyMap(), singletonMap(field.getName(),
 									validate(field.getShape(), ((PropertyContainer)v).getProperty(field.getName()))

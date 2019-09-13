@@ -44,7 +44,7 @@ final class DatastoreTrimmer extends DatastoreProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Object trim(final Shape shape, final Object object) {
-		return GAE.Entity(object) ? trim(shape, (PropertyContainer)object)
+		return GAE.isEntity(object) ? trim(shape, (PropertyContainer)object)
 				: object;
 	}
 

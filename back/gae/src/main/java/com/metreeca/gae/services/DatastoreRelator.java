@@ -22,6 +22,7 @@ import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.services.Logger;
+import com.metreeca.tree.Order;
 import com.metreeca.tree.Query.Probe;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Traverser;
@@ -38,8 +39,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.metreeca.gae.GAE.key;
-import static com.metreeca.gae.GAE.kind;
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
@@ -58,6 +57,9 @@ import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
 import static com.google.appengine.api.datastore.FetchOptions.Builder;
 import static com.google.appengine.api.datastore.Query.FilterOperator.*;
 
+import static java.util.Comparator.comparing;
+import static java.util.Map.Entry.comparingByKey;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 
@@ -98,14 +100,6 @@ final class DatastoreRelator extends DatastoreProcessor {
 	}
 
 
-	private static Object get(final Object object, final List<String> path) {
-		return object == null ? null
-				: path.isEmpty() ? object
-				: object instanceof PropertyContainer ? get(((PropertyContainer)object).getProperty(path.get(0)), path.subList(1, path.size()))
-				: null;
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Datastore datastore=service(datastore());
@@ -123,6 +117,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Future<Response> container(final Request request) {
 		return request.query(splitter.resource(request.shape()), entity()::value)
+
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 
 					@Override public Function<Response, Response> probe(final Items items) {
@@ -138,127 +133,72 @@ final class DatastoreRelator extends DatastoreProcessor {
 					}
 
 				}))
+
 				.fold(request::reply, request::reply);
 	}
 
 
-	private Function<Response, Response> items(final String path, final Items items) { // !!! refactor
+	private Function<Response, Response> items(final String path, final Items items) {
 
-		final Shape convey=convey(items.getShape());
-		final Shape filter=filter(items.getShape());
+		final Shape shape=items.getShape();
 
-		final Query query=query(filter); // !!! hard sampling sorting/limits?
-		final Predicate<Object> predicate=predicate(filter);
+		final List<Order> orders=items.getOrders();
+		final int offset=items.getOffset();
+		final int limit=items.getLimit();
 
-		items.getOrders().forEach(order -> query.addSort(
-				property(order.getPath()),
-				order.isInverse() ? SortDirection.DESCENDING : SortDirection.ASCENDING
+		final Entity container=new Entity(GAE.root(path));
+
+		container.setProperty(GAE.contains, entities(shape, orders, offset, limit, entities -> entities
+
+				.map(GAE::embed) // ;( entities can't be embedded
+				.collect(toList())
+
 		));
 
-		if ( query.getSortPredicates().isEmpty() ) {
+		return response -> response
+				.status(OK) // containers are virtual and respond always with 200 OK
+				.shape(convey(shape))
+				.body(entity(), container);
 
-			query.addSort(KEY_RESERVED_PROPERTY); // force a consistent default ordering
-
-		}
-
-		// !!! re-sort as postprocessor if inequalities are used and sorting criteria are not consistent
-
-
-		// compile fetch options // !!! support cursors
-
-		final FetchOptions options=Builder.withDefaults();
-
-		Optional.of(items.getOffset()).filter(offset -> offset > 0).ifPresent(options::offset);
-		Optional.of(items.getLimit()).filter(limit -> limit > 0).ifPresent(options::limit);
-
-
-		// retrieve data
-
-		logger.info(this, String.format("executing query %s", query));
-
-		return datastore.exec(service -> {
-
-			final Entity container=new Entity(GAE.root(path));
-
-			container.setProperty(GAE.contains,
-					stream(service.prepare(query).asIterable(options).spliterator(), false)
-							.filter(predicate)
-							.map(GAE::embed) // ;( entities can't be embedded
-							.collect(toList())
-			);
-
-			return response -> response
-					.status(OK) // containers are virtual and respond always with 200 OK
-					.shape(convey)
-					.body(entity(), container);
-
-		});
 	}
 
 	private Function<Response, Response> terms(final String path, final Terms terms) {
 
-		final Shape filter=filter(terms.getShape());
+		final Entity container=new Entity(GAE.root(path));
 
-		// !!! (€) if property is known to be of a scalar supported type retrieve using a projection
-		// https://cloud.google.com/appengine/docs/standard/java/javadoc/com/google/appengine/api/datastore/RawValue.html#getValue--
+		container.setProperty(GAE.terms, values(terms.getShape(), terms.getPath(), values -> values
 
-		final Query query=query(filter); // !!! sampling sorting/limits
-		final Predicate<Object> predicate=predicate(filter);
+				.collect(groupingBy(v -> v, counting()))
+				.entrySet()
+				.stream()
 
-		return datastore.exec(service -> {
+				.sorted(Map.Entry
+						.<Object, Long>comparingByValue().reversed() // decreasing count
+						.thenComparing(comparingByKey(GAE::compare)) // increasing value
+				)
 
-			final Entity container=new Entity(GAE.root(path));
+				.map(entry -> {
 
-			container.setProperty(GAE.terms,
+					final EmbeddedEntity embedded=new EmbeddedEntity();
 
-					stream(service.prepare(query).asIterable().spliterator(), false)
+					embedded.setProperty(GAE.term, entry.getKey());
+					embedded.setProperty(GAE.count, entry.getValue());
 
-							.filter(predicate)
+					return embedded;
 
-							.map(entity -> get(entity, terms.getPath()))
-							.filter(Objects::nonNull)
+				})
 
-							.collect(groupingBy(v -> v, counting()))
-							.entrySet()
-							.stream()
+				.collect(toList())
+		));
 
-							.sorted(((Comparator<Map.Entry<Object, Long>>)
-									(x, y) -> -Long.compare(x.getValue(), y.getValue())) // decreasing count
-									.thenComparing((x, y) -> GAE.compare(x.getKey(), y.getKey())) // increasing value
-							)
-
-							.map(entry -> {
-
-								final EmbeddedEntity embedded=new EmbeddedEntity();
-
-								embedded.setProperty(GAE.term, entry.getKey());
-								embedded.setProperty(GAE.count, entry.getValue());
-
-								return embedded;
-
-							})
-
-							.collect(toList())
-			);
-
-			return response -> response
-					.status(OK)
-					.shape(TermsShape)
-					.body(entity(), container);
-
-		});
+		return response -> response
+				.status(OK)
+				.shape(TermsShape)
+				.body(entity(), container);
 
 	}
 
 	private Function<Response, Response> stats(final String path, final Stats stats) {
-
-		final Shape filter=filter(stats.getShape());
-
-		// !!! (€) if property is known to be of a scalar supported type retrieve using a projection
-		// https://cloud.google.com/appengine/docs/standard/java/javadoc/com/google/appengine/api/datastore/RawValue.html#getValue--
-
-		final Query query=query(filter); // !!! sampling sorting/limits
-		final Predicate<Object> predicate=predicate(filter);
 
 		final class Range {
 
@@ -298,82 +238,55 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		}
 
-		return datastore.exec(service -> {
+		final Map<String, Range> ranges=values(stats.getShape(), stats.getPath(), values -> values
 
-			final Map<String, Range> ranges=stream(service.prepare(query).asIterable().spliterator(), false)
+				.collect(groupingBy(GAE::type, reducing(null, v -> new Range(1, v, v), (x, y) ->
+						x == null ? y : y == null ? x : x.merge(y)
+				)))
 
-					.filter(predicate)
+		);
 
-					.map(entity -> get(entity, stats.getPath()))
-					.filter(Objects::nonNull)
+		final Entity container=new Entity(GAE.root(path));
 
-					.collect(groupingBy(GAE::type, reducing(null, v -> new Range(1, v, v), (x, y) ->
-							x == null ? y : y == null ? x : x.merge(y)
-					)));
+		if ( ranges.isEmpty() ) {
 
-			final Entity container=new Entity(GAE.root(path));
+			container.setProperty(GAE.count, 0L);
 
-			if ( ranges.isEmpty() ) {
+		} else {
 
-				container.setProperty(GAE.count, 0L);
+			ranges.values().stream() // global stats
+					.reduce(Range::merge)
+					.orElse(new Range(0, null, null)) // unexpected
+					.set(container);
 
-			} else {
+			container.setProperty(GAE.stats, ranges.entrySet().stream() // type-specific stats
 
-				ranges.values().stream() // global stats
-						.reduce(Range::merge)
-						.orElse(new Range(0, null, null)) // unexpected
-						.set(container);
+					.sorted(Map.Entry
+							.<String, Range>comparingByValue(Range::order) // decreasing count
+							.thenComparing(comparingByKey()) // increasing type
+					)
 
-				container.setProperty(GAE.stats, ranges.entrySet().stream() // type-specific stats
+					.map(entry -> {
 
-						.sorted(Map.Entry.<String, Range>comparingByValue(Range::order) // decreasing count
-								.thenComparing(Map.Entry.comparingByKey()) // increasing type
-						)
+						final EmbeddedEntity item=new EmbeddedEntity();
 
-						.map(entry -> {
+						item.setProperty(GAE.type, entry.getKey());
+						entry.getValue().set(item);
 
-							final EmbeddedEntity item=new EmbeddedEntity();
+						return item;
 
-							item.setProperty(GAE.type, entry.getKey());
-							entry.getValue().set(item);
+					})
 
-							return item;
+					.collect(toList())
 
-						})
+			);
 
-						.collect(toList())
+		}
 
-				);
-
-			}
-
-			return response -> response
-					.status(OK)
-					.shape(StatsShape)
-					.body(entity(), container);
-
-		});
-
-	}
-
-
-	private Query query(final Shape filter) {
-
-		final Query query=new Query(clazz(filter).orElse("*"));
-
-		Optional.ofNullable(filter.map(new FilterProbe(""))).ifPresent(query::setFilter);
-
-		// sort first on inequality filtered paths
-		// see https://cloud.google.com/appengine/docs/standard/java/datastore/query-restrictions#properties_used_in_inequality_filters_must_be_sorted_first
-
-		filter.map(new InequalityProbe("")).distinct().forEach(query::addSort);
-
-		return query;
-	}
-
-	private Predicate<Object> predicate(final Shape shape) {
-
-		return Optional.ofNullable(shape.map(new PredicateProbe())).orElse(o -> true);
+		return response -> response
+				.status(OK)
+				.shape(StatsShape)
+				.body(entity(), container);
 
 	}
 
@@ -384,7 +297,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return request.reply(response -> datastore.exec(service -> {
 
 			final Shape shape=convey(request.shape());
-			final Key key=key(request.path(), shape);
+			final Key key=GAE.key(request.path(), shape);
 
 			final Query query=new Query(key.getKind()) // !!! set filters from filter shape?
 					.setFilter(new Query.FilterPredicate(KEY_RESERVED_PROPERTY, EQUAL, key));
@@ -412,10 +325,156 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private <R> R values(
+			final Shape shape,
+			final Iterable<String> path,
+			final Function<Stream<Object>, R> task
+	) {
+
+		return entities(shape, null, 0, 0, entities -> task.apply(entities
+
+				// !!! (€) if property is known to be of a scalar supported type retrieve using a projection
+				// https://cloud.google.com/appengine/docs/standard/java/javadoc/com/google/appengine/api/datastore/RawValue.html#getValue--
+
+				.map(entity -> GAE.get(entity, path))
+
+				.filter(Objects::nonNull)
+
+		));
+	}
+
+	private <R> R entities(
+			final Shape shape,
+			final List<Order> orders, final int offset, final int limit,
+			final Function<Stream<Entity>, R> task
+	) {
+
+		// ;( inequality filters are limited to at most one property: identify them and assign to query/predicate
+		// see https://cloud.google.com/appengine/docs/standard/java/datastore/query-restrictions#inequality_filters_are_limited_to_at_most_one_property
+
+		final Shape filter=filter(shape);
+		final List<String> inequalities=inequalities(filter);
+
+		final Query query=query(filter, orders, inequalities);
+
+		final FetchOptions options=Builder.withDefaults(); // !!! support cursors // !!! hard sampling limits?
+
+		if ( offset > 0 ) { options.offset(offset); }
+		if ( limit > 0 ) { options.limit(limit); }
+
+		final Optional<Predicate<Object>> predicate=predicate(filter, inequalities); // handle residual constraints
+		final Optional<Comparator<Entity>> sorter=sorter(orders, inequalities); // handle inconsistent sorting/inequalities
+
+		logger.info(this, String.format("executing query %s", query));
+
+		return datastore.exec(service -> Optional.of(stream(service.prepare(query).asIterable(options).spliterator(), false))
+				.map(entities -> predicate.map(entities::filter).orElse(entities))
+				.map(entities -> sorter.map(entities::sorted).orElse(entities))
+				.map(task)
+				.get()
+		);
+
+	}
+
+
+	private List<String> inequalities(final Shape shape) {
+		return shape
+
+				.map(new InequalityProbe(""))
+				.collect(groupingBy(identity(), counting()))
+
+				.entrySet()
+				.stream()
+
+				.sorted(Map.Entry.<String, Long>comparingByValue().reversed()) // prefer multiple constrains // !!! (€) most selective
+
+				.map(Map.Entry::getKey)
+				.collect(toList());
+	}
+
+
+	private Query query(final Shape shape, final List<Order> orders, final List<String> inequalities) {
+
+		final Query query=new Query(clazz(shape).orElse("*"));
+
+		filter(shape, inequalities).ifPresent(query::setFilter);
+
+		// ;( properties used in inequality filters must be sorted first
+		// see https://cloud.google.com/appengine/docs/standard/java/datastore/query-restrictions#properties_used_in_inequality_filters_must_be_sorted_first
+
+		inequalities.forEach(query::addSort);
+
+		if ( orders != null && consistent(inequalities, orders) ) {
+
+			orders.stream().skip(inequalities.size()).forEach(order -> query.addSort(
+					property(order.getPath()),
+					order.isInverse() ? SortDirection.DESCENDING : SortDirection.ASCENDING
+			));
+
+			query.addSort(KEY_RESERVED_PROPERTY); // force a consistent default/residual ordering
+
+		}
+
+		return query;
+	}
+
+	private Optional<Comparator<Entity>> sorter(final List<Order> orders, final List<String> inequalities) {
+		return Optional.ofNullable((orders == null || consistent(inequalities, orders)) ? null : orders.stream()
+
+				.map(order -> {
+
+					final List<String> path=order.getPath();
+					final boolean inverse=order.isInverse();
+
+					final Comparator<Entity> comparator=(x, y) -> GAE.compare(GAE.get(x, path), GAE.get(y, path));
+
+					return inverse ? comparator.reversed() : comparator;
+
+				})
+
+				.reduce(Comparator::thenComparing)
+				.map(comparator -> comparator.thenComparing(comparing(Entity::getKey)))
+				.orElse(comparing(Entity::getKey))
+		);
+	}
+
+	private Optional<Query.Filter> filter(final Shape shape, final List<String> inequalities) {
+		return Optional.ofNullable(shape.map(new FilterProbe("",
+				inequalities.isEmpty() ? inequalities : inequalities.subList(0, 1)
+		)));
+	}
+
+	private Optional<Predicate<Object>> predicate(final Shape shape, final List<String> inequalities) {
+		return Optional.ofNullable(shape.map(new PredicateProbe("",
+				inequalities.isEmpty() ? inequalities : inequalities.subList(1, inequalities.size())
+		)));
+	}
+
+
+	private boolean consistent(final List<String> inequalities, final List<Order> orders) {
+		return inequalities.isEmpty() || !orders.isEmpty() && property(orders.get(0).getPath()).equals(inequalities.get(0));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private abstract static class RelatorProbe<T> extends Traverser<T> {
+
+		@Override public T probe(final Guard guard) {
+			throw new UnsupportedOperationException(guard.toString());
+		}
+
+		@Override public T probe(final When when) {
+			throw new UnsupportedOperationException(when.toString());
+		}
+
+	}
+
+
 	/**
 	 * Identifies paths subject to inequality constraints.
 	 */
-	private static final class InequalityProbe extends Traverser<Stream<String>> {
+	private static final class InequalityProbe extends RelatorProbe<Stream<String>> {
 
 		private final String path;
 
@@ -430,18 +489,21 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 
-		@Override public Stream<String> probe(final Guard guard) {
-			throw new UnsupportedOperationException(guard.toString());
+		@Override public Stream<String> probe(final MinExclusive minExclusive) {
+			return Stream.of(path);
 		}
 
+		@Override public Stream<String> probe(final MaxExclusive maxExclusive) {
+			return Stream.of(path);
+		}
 
-		@Override public Stream<String> probe(final MinExclusive minExclusive) { return Stream.of(path); }
+		@Override public Stream<String> probe(final MinInclusive minInclusive) {
+			return Stream.of(path);
+		}
 
-		@Override public Stream<String> probe(final MaxExclusive maxExclusive) {return Stream.of(path); }
-
-		@Override public Stream<String> probe(final MinInclusive minInclusive) { return Stream.of(path); }
-
-		@Override public Stream<String> probe(final MaxInclusive maxInclusive) { return Stream.of(path); }
+		@Override public Stream<String> probe(final MaxInclusive maxInclusive) {
+			return Stream.of(path);
+		}
 
 
 		@Override public Stream<String> probe(final Field field) {
@@ -456,85 +518,44 @@ final class DatastoreRelator extends DatastoreProcessor {
 			return or.getShapes().stream().flatMap(shape -> shape.map(this));
 		}
 
-		@Override public Stream<String> probe(final When when) {
-			throw new UnsupportedOperationException(when.toString());
-		}
-
 	}
 
-	private static final class FilterProbe implements Shape.Probe<Query.Filter> {
+	private static final class FilterProbe extends RelatorProbe<Query.Filter> {
 
 		private final String path;
+		private final List<String> inequalities;
 
 
-		private FilterProbe(final String path) {
+		private FilterProbe(final String path, final List<String> inequalities) {
 			this.path=path;
-		}
-
-
-		@Override public Query.Filter probe(final Meta meta) {
-			return null;
-		}
-
-		@Override public Query.Filter probe(final Guard guard) {
-			throw new UnsupportedOperationException(guard.toString());
-		}
-
-
-		@Override public Query.Filter probe(final Datatype datatype) {
-			return null; // handled by predicate
-		}
-
-		@Override public Query.Filter probe(final Clazz clazz) {
-			return null; // top-level handled by query / nested handled by predicate
+			this.inequalities=inequalities;
 		}
 
 
 		@Override public Query.Filter probe(final MinExclusive minExclusive) {
-			return new Query.FilterPredicate(path, GREATER_THAN, minExclusive.getValue());
+			return inequalities.contains(path)
+					? new Query.FilterPredicate(path, GREATER_THAN, minExclusive.getValue())
+					: null;
 		}
 
 		@Override public Query.Filter probe(final MaxExclusive maxExclusive) {
-			return new Query.FilterPredicate(path, LESS_THAN, maxExclusive.getValue());
+			return inequalities.contains(path)
+					? new Query.FilterPredicate(path, LESS_THAN, maxExclusive.getValue())
+					: null;
 		}
 
 		@Override public Query.Filter probe(final MinInclusive minInclusive) {
-			return new Query.FilterPredicate(path, GREATER_THAN_OR_EQUAL, minInclusive.getValue());
+			return inequalities.contains(path)
+					? new Query.FilterPredicate(path, GREATER_THAN_OR_EQUAL, minInclusive.getValue())
+					: null;
 		}
 
 		@Override public Query.Filter probe(final MaxInclusive maxInclusive) {
-			return new Query.FilterPredicate(path, LESS_THAN_OR_EQUAL, maxInclusive.getValue());
+			return inequalities.contains(path)
+					? new Query.FilterPredicate(path, LESS_THAN_OR_EQUAL, maxInclusive.getValue())
+					: null;
 		}
 
-
-		@Override public Query.Filter probe(final MinLength minLength) {
-			return null; // handled by predicate
-		}
-
-		@Override public Query.Filter probe(final MaxLength maxLength) {
-			return null; // handled by predicate
-		}
-
-		@Override public Query.Filter probe(final Pattern pattern) {
-			return null; // handled by predicate
-		}
-
-		@Override public Query.Filter probe(final Like like) {
-			return null; // handled by predicate
-		}
-
-
-		@Override public Query.Filter probe(final MinCount minCount) {
-			return null; // handled by predicate
-		}
-
-		@Override public Query.Filter probe(final MaxCount maxCount) {
-			return null; // handled by predicate
-		}
-
-		@Override public Query.Filter probe(final In in) {
-			return null; // handled by predicate
-		}
 
 		@Override public Query.Filter probe(final All all) {
 
@@ -559,7 +580,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Query.Filter probe(final Field field) {
-			return field.getShape().map(new FilterProbe(property(path, field.getName())));
+			return field.getShape().map(new FilterProbe(property(path, field.getName()), inequalities));
 		}
 
 
@@ -579,20 +600,17 @@ final class DatastoreRelator extends DatastoreProcessor {
 			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 		}
 
-		@Override public Query.Filter probe(final When when) {
-			throw new UnsupportedOperationException(when.toString());
-		}
-
 	}
 
-	private static final class PredicateProbe implements Shape.Probe<Predicate<Object>> {
+	private static final class PredicateProbe extends RelatorProbe<Predicate<Object>> {
 
-		@Override public Predicate<Object> probe(final Meta meta) {
-			return null;
-		}
+		private final String path;
+		private final List<String> inequalities;
 
-		@Override public Predicate<Object> probe(final Guard guard) {
-			throw new UnsupportedOperationException(guard.toString());
+
+		private PredicateProbe(final String path, final List<String> inequalities) {
+			this.path=path;
+			this.inequalities=inequalities;
 		}
 
 
@@ -605,30 +623,50 @@ final class DatastoreRelator extends DatastoreProcessor {
 			);
 		}
 
-		@Override public Predicate<Object> probe(final Clazz clazz) {
+		@Override public Predicate<Object> probe(final Clazz clazz) { // top level handled by Query
 
 			final String name=clazz.getName();
 
-			return values -> stream(values).allMatch(value ->
-					value instanceof PropertyContainer && name.equals(kind((PropertyContainer)value))
+			return path.isEmpty() ? null : values -> stream(values).allMatch(value ->
+					value instanceof PropertyContainer && name.equals(GAE.kind((PropertyContainer)value))
 			);
 		}
 
 
 		@Override public Predicate<Object> probe(final MinExclusive minExclusive) {
-			return null; // handled by query
+
+			final Object limit=minExclusive.getValue();
+
+			return inequalities.contains(path)
+					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) > 0)
+					: null;
 		}
 
 		@Override public Predicate<Object> probe(final MaxExclusive maxExclusive) {
-			return null; // handled by query
+
+			final Object limit=maxExclusive.getValue();
+
+			return inequalities.contains(path)
+					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) < 0)
+					: null;
 		}
 
 		@Override public Predicate<Object> probe(final MinInclusive minInclusive) {
-			return null; // handled by query
+
+			final Object limit=minInclusive.getValue();
+
+			return inequalities.contains(path)
+					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) >= 0)
+					: null;
 		}
 
 		@Override public Predicate<Object> probe(final MaxInclusive maxInclusive) {
-			return null; // handled by query
+
+			final Object limit=maxInclusive.getValue();
+
+			return inequalities.contains(path)
+					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) <= 0)
+					: null;
 		}
 
 
@@ -689,24 +727,16 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Set<Object> range=in.getValues();
 
-			return range.isEmpty()? values -> true : values -> stream(values).allMatch(value ->
+			return range.isEmpty() ? values -> true : values -> stream(values).allMatch(value ->
 					value != null && range.contains(value)
 			);
-		}
-
-		@Override public Predicate<Object> probe(final All all) {
-			return null; // handled by query
-		}
-
-		@Override public Predicate<Object> probe(final Any any) {
-			return null; // handled by query
 		}
 
 
 		@Override public Predicate<Object> probe(final Field field) {
 
 			final String name=field.getName();
-			final Predicate<Object> predicate=field.getShape().map(this);
+			final Predicate<Object> predicate=field.getShape().map(new PredicateProbe(property(path, field.getName()), inequalities));
 
 			return predicate == null ? null : values -> stream(values).allMatch(value ->
 					value instanceof PropertyContainer && predicate.test(((PropertyContainer)value).getProperty(name))
@@ -736,10 +766,6 @@ final class DatastoreRelator extends DatastoreProcessor {
 			return predicates.isEmpty() ? null
 					: predicates.size() == 1 ? predicates.get(0)
 					: values -> predicates.stream().anyMatch(predicate -> predicate.test(values));
-		}
-
-		@Override public Predicate<Object> probe(final When when) {
-			throw new UnsupportedOperationException(when.toString());
 		}
 
 

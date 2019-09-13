@@ -108,7 +108,7 @@ final class EntityDecoder {
 			final Object value=decode(json, fields.getOrDefault(name, and()));
 
 			if ( value != null ) {
-				if ( GAE.Entity(value) ) { // !!! un/indexed from shape metadata?
+				if ( GAE.isEntity(value) ) { // !!! un/indexed from shape metadata?
 
 					entity.setIndexedProperty(name, value); // force embedded entity indexing
 
