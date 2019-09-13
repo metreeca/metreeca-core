@@ -40,6 +40,7 @@ import static com.metreeca.tree.shapes.Any.any;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.In.in;
 import static com.metreeca.tree.shapes.Like.like;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static com.metreeca.tree.shapes.MaxExclusive.maxExclusive;
@@ -226,58 +227,6 @@ final class QueryParserTest {
 
 	@Test void testParseRootFilters() {
 
-		items("{ '>>': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("min count")
-				.isEqualTo(filter(shape, minCount(1)))
-		);
-
-		items("{ '<<': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("max count")
-				.isEqualTo(filter(shape, maxCount(1)))
-		);
-
-
-		items("{ '>=': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("min inclusive")
-				.isEqualTo(filter(shape, minInclusive(One)))
-		);
-
-		items("{ '<=': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("max inclusive")
-				.isEqualTo(filter(shape, maxInclusive(One)))
-		);
-
-		items("{ '>': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("min exclusive")
-				.isEqualTo(filter(shape, minExclusive(One)))
-		);
-
-		items("{ '<': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("max exclusive")
-				.isEqualTo(filter(shape, maxExclusive(One)))
-		);
-
-		items("{ '~': 'words' }", shape, edges -> assertThat(edges.getShape())
-				.as("like")
-				.isEqualTo(filter(shape, like("words")))
-		);
-
-		items("{ '*': 'pattern' }", shape, edges -> assertThat(edges.getShape())
-				.as("pattern")
-				.isEqualTo(filter(shape, pattern("pattern")))
-		);
-
-		items("{ '#<': 123 }", shape, edges -> assertThat(edges.getShape())
-				.as("min length")
-				.isEqualTo(filter(shape, minLength(123)))
-		);
-
-		items("{ '#>': 123 }", shape, edges -> assertThat(edges.getShape())
-				.as("max length")
-				.isEqualTo(filter(shape, maxLength(123)))
-		);
-
-
 		items("{ '@': 'class' }", shape, edges -> assertThat(edges.getShape())
 				.as("class")
 				.isEqualTo(filter(shape, clazz("class")))
@@ -289,8 +238,77 @@ final class QueryParserTest {
 		);
 
 
+		items("{ '>': 1 }", shape, edges -> assertThat(edges.getShape())
+				.as("min exclusive")
+				.isEqualTo(filter(shape, minExclusive(One)))
+		);
+
+		items("{ '<': 1 }", shape, edges -> assertThat(edges.getShape())
+				.as("max exclusive")
+				.isEqualTo(filter(shape, maxExclusive(One)))
+		);
+
+		items("{ '>=': 1 }", shape, edges -> assertThat(edges.getShape())
+				.as("min inclusive")
+				.isEqualTo(filter(shape, minInclusive(One)))
+		);
+
+		items("{ '<=': 1 }", shape, edges -> assertThat(edges.getShape())
+				.as("max inclusive")
+				.isEqualTo(filter(shape, maxInclusive(One)))
+		);
+
+
+		items("{ '$>': 123 }", shape, edges -> assertThat(edges.getShape())
+				.as("min length")
+				.isEqualTo(filter(shape, minLength(123)))
+		);
+
+		items("{ '$<': 123 }", shape, edges -> assertThat(edges.getShape())
+				.as("max length")
+				.isEqualTo(filter(shape, maxLength(123)))
+		);
+
+		items("{ '*': 'pattern' }", shape, edges -> assertThat(edges.getShape())
+				.as("pattern")
+				.isEqualTo(filter(shape, pattern("pattern")))
+		);
+
+		items("{ '~': 'words' }", shape, edges -> assertThat(edges.getShape())
+				.as("like")
+				.isEqualTo(filter(shape, like("words")))
+		);
+
+
+		items("{ '#>': 1 }", shape, edges -> assertThat(edges.getShape())
+				.as("min count")
+				.isEqualTo(filter(shape, minCount(1)))
+		);
+
+		items("{ '#<': 1 }", shape, edges -> assertThat(edges.getShape())
+				.as("max count")
+				.isEqualTo(filter(shape, maxCount(1)))
+		);
+
+
+		items("{ '{}': [] }", shape, edges -> assertThat(edges.getShape())
+				.as("in (empty)")
+				.isEqualTo(filter(shape, in()))
+		);
+
+		items("{ '{}': 'head' }", shape, edges -> assertThat(edges.getShape())
+				.as("in (singleton)")
+				.isEqualTo(filter(shape, in("head")))
+		);
+
+		items("{ '{}': ['head', 'tail'] }", shape, edges -> assertThat(edges.getShape())
+				.as("in (multiple)")
+				.isEqualTo(filter(shape, in("head", "tail")))
+		);
+
+
 		items("{ '!': [] }", shape, edges -> assertThat(edges.getShape())
-				.as("empty (empty)")
+				.as("universal (empty)")
 				.isEqualTo(filter(shape, all()))
 		);
 

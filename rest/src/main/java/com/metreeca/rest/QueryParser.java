@@ -178,18 +178,20 @@ final class QueryParser {
 					return key.startsWith("^") ? filter(path(key.substring(1), shape), datatype(value))
 							: key.startsWith("@") ? filter(path(key.substring(1), shape), clazz(value))
 
-							: key.startsWith(">>") ? filter(path(key.substring(2), shape), minCount(value))
-							: key.startsWith("<<") ? filter(path(key.substring(2), shape), maxCount(value))
 							: key.startsWith(">=") ? filter(path(key.substring(2), shape), minInclusive(value, shape))
 							: key.startsWith("<=") ? filter(path(key.substring(2), shape), maxInclusive(value, shape))
 							: key.startsWith(">") ? filter(path(key.substring(1), shape), minExclusive(value, shape))
 							: key.startsWith("<") ? filter(path(key.substring(1), shape), maxExclusive(value, shape))
 
-							: key.startsWith("#>") ? filter(path(key.substring(2), shape), minLength(value))
-							: key.startsWith("#<") ? filter(path(key.substring(2), shape), maxLength(value))
+							: key.startsWith("$>") ? filter(path(key.substring(2), shape), minLength(value))
+							: key.startsWith("$<") ? filter(path(key.substring(2), shape), maxLength(value))
 							: key.startsWith("*") ? filter(path(key.substring(1), shape), pattern(value))
 							: key.startsWith("~") ? filter(path(key.substring(1), shape), like(value))
 
+							: key.startsWith("#>") ? filter(path(key.substring(2), shape), minCount(value))
+							: key.startsWith("#<") ? filter(path(key.substring(2), shape), maxCount(value))
+
+							: key.startsWith("{}") ? filter(path(key.substring(2), shape), in(value, shape))
 							: key.startsWith("!") ? filter(path(key.substring(1), shape), all(value, shape))
 							: key.startsWith("?") ? filter(path(key.substring(1), shape), any(value, shape))
 
@@ -440,6 +442,13 @@ final class QueryParser {
 		return value instanceof JsonNumber
 				? MaxCount.maxCount(((JsonNumber)value).intValue())
 				: error("length is not a number");
+	}
+
+	private Shape in(final JsonValue value, final Shape shape) {
+		return value.getValueType() == JsonValue.ValueType.NULL
+				? error("value is null")
+				: In.in(values(value, shape)
+		);
 	}
 
 	private Shape all(final JsonValue value, final Shape shape) {

@@ -270,6 +270,7 @@ public interface Shape {
 
 		public V probe(final MaxCount maxCount);
 
+
 		public V probe(final In in);
 
 		public V probe(final All all);

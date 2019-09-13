@@ -46,15 +46,16 @@
     ">= <path>": <value>, // minInclusive
     "<= <path>": <value>, // maxInclusive
     
-    "#> <path>": <value>, // minLength
-    "#< <path>": <value>, // maxLength
+    "$> <path>": <value>, // minLength
+    "$< <path>": <value>, // maxLength
     
     "* <path>": "pattern", // pattern (regular expression matching)
     "~ <path>": "keywords", // like (stemmed word search)
     
-    ">> <path>": <integer>, // minCount
-    "<< <path>": <integer>, // maxCount
+    "#> <path>": <integer>, // minCount
+    "#< <path>": <integer>, // maxCount
     
+    "{} <path>": <value> | [<value>(, <value>)*], // in
     "! <path>": <value> | [<value>(, <value>)*], // all
     "? <path>": <value> | [<value>(, <value>)*], // any
         
