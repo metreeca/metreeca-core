@@ -348,6 +348,36 @@
 
 			</plugin>
 
+			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+
+				<executions>
+					<execution>
+
+						<id>clean-docs-folder</id>
+						<phase>clean</phase>
+						<inherited>false</inherited>
+
+						<goals>
+							<goal>clean</goal>
+						</goals>
+
+						<configuration>
+							<filesets>
+								<fileset><directory>docs/_site</directory></fileset>
+								<fileset><directory>docs/javadocs</directory></fileset>
+								<fileset><directory>docs/reports</directory></fileset>
+							</filesets>
+						</configuration>
+
+					</execution>
+				</executions>
+
+			</plugin>
+
 			<plugin> <!-- https://maven.apache.org/plugins/maven-site-plugin -->
 
 				<groupId>org.apache.maven.plugins</groupId>
