@@ -17,6 +17,7 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.rest.*;
 
 import com.google.appengine.api.datastore.Entity;
@@ -26,7 +27,6 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import java.util.UUID;
 
-import static com.metreeca.gae.GAE.key;
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
@@ -54,11 +54,11 @@ final class DatastoreCreator extends DatastoreProcessor {
 
 				.process(entity -> datastore.exec(service -> { // assign entity a slug-based id
 
-					final String name=request.path()+request.header("Slug")
+					final String path=request.path()+request.header("Slug")
 							.map(Codecs::encode) // encode slug as IRI path component
 							.orElseGet(() -> UUID.randomUUID().toString()); // !! sequential generator
 
-					final Key key=key(name, convey(request.shape()));
+					final Key key=GAE.key(path, convey(request.shape()));
 
 					final boolean clashing=service.prepare(new Query(key.getKind())
 							.setFilter(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, key))

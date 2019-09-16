@@ -92,14 +92,14 @@ final class EntityDecoder {
 		final String id=Optional.ofNullable(object.get("id"))
 				.filter(value -> value instanceof JsonString)
 				.map(value   -> ((JsonString)value).getString())
-				.orElse("*");
+				.orElse("");
 
 		final String type=Optional.ofNullable(object.get("type"))
 				.filter(value -> value instanceof JsonString)
 				.map(value   -> ((JsonString)value).getString())
-				.orElse("*");
+				.orElse("");
 
-		entity.setKey(KeyFactory.createKey(type, id));
+		entity.setKey(GAE.key(id, type));
 
 		final Map<String, Shape> fields=fields(shape);
 

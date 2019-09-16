@@ -65,7 +65,7 @@ final class DatastoreDeleterTest extends GAETestBase {
 		private List<Entity> entities(final String... codes) {
 			return Arrays.stream(codes).map(code -> {
 
-				final Entity entity=new Entity(GAE.key(String.format("/entities/%s", code), "Entity"));
+				final Entity entity=new Entity(GAE.key(String.format("/entities/%s", code)));
 
 				entity.setProperty("code", code);
 

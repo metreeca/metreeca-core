@@ -17,6 +17,7 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
@@ -41,7 +42,7 @@ final class DatastoreTrimmerTest extends GAETestBase {
 
 	private Map<String, Object> trim(final Shape shape, final Consumer<Entity> builder) {
 
-		final Entity entity=new Entity("*", "*");
+		final Entity entity=new Entity(GAE.key("/entities/test"));
 
 		builder.accept(entity);
 

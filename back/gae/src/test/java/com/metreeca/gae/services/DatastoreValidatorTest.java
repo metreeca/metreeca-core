@@ -24,7 +24,8 @@ import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Datatype;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import com.google.appengine.api.datastore.Entity;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -48,9 +49,7 @@ import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
 import static com.metreeca.tree.shapes.MinLength.minLength;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.Pattern.pattern;
-import static com.metreeca.tree.shapes.Datatype.datatype;
 
-import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
@@ -60,7 +59,7 @@ final class DatastoreValidatorTest extends GAETestBase {
 
 	private boolean validate(final Shape shape, final Object value) {
 
-		final Entity entity=new Entity("*", "*");
+		final Entity entity=new Entity(GAE.key("/entities/test"));
 
 		entity.setProperty("value", value);
 
@@ -69,7 +68,7 @@ final class DatastoreValidatorTest extends GAETestBase {
 
 	private boolean validate(final Shape shape, final Object... values) {
 
-		final Entity entity=new Entity("*", "*");
+		final Entity entity=new Entity(GAE.key("/entities/test"));
 
 		entity.setProperty("value", asList(values));
 
@@ -120,7 +119,7 @@ final class DatastoreValidatorTest extends GAETestBase {
 			assertThat(validate(Datatype.datatype(GAE.Date), new Date())).isTrue();
 			assertThat(validate(Datatype.datatype(GAE.Date), 1)).isFalse();
 
-			assertThat(validate(Datatype.datatype("*"))).as("empty focus").isTrue();
+			assertThat(validate(Datatype.datatype("Any"))).as("empty focus").isTrue();
 
 		});
 	}
@@ -130,8 +129,8 @@ final class DatastoreValidatorTest extends GAETestBase {
 
 			final Shape shape=clazz("Class");
 
-			assertThat(validate(shape, entity(entity -> entity.setKey(createKey("Class", "id"))))).isTrue();
-			assertThat(validate(shape, entity(entity -> entity.setKey(createKey("*", "id"))))).isFalse();
+			assertThat(validate(shape, entity(entity -> entity.setKey(GAE.key("/id", "Class"))))).isTrue();
+			assertThat(validate(shape, entity(entity -> entity.setKey(GAE.key("/id", "Else"))))).isFalse();
 			assertThat(validate(shape, 1)).isFalse();
 
 		});

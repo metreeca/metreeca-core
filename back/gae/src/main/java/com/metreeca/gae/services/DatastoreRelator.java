@@ -146,9 +146,9 @@ final class DatastoreRelator extends DatastoreProcessor {
 		final int offset=items.getOffset();
 		final int limit=items.getLimit();
 
-		final Entity container=new Entity(GAE.root(path));
+		final Entity container=new Entity(GAE.key(path));
 
-		container.setProperty(GAE.contains, entities(shape, orders, offset, limit, entities -> entities
+		container.setProperty(GAE.contains, entities(path, shape, orders, offset, limit, entities -> entities
 
 				.map(GAE::embed) // ;( entities can't be embedded
 				.collect(toList())
@@ -164,9 +164,9 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Function<Response, Response> terms(final String path, final Terms terms) {
 
-		final Entity container=new Entity(GAE.root(path));
+		final Entity container=new Entity(GAE.key(path));
 
-		container.setProperty(GAE.terms, values(terms.getShape(), terms.getPath(), values -> values
+		container.setProperty(GAE.terms, values(path, terms.getShape(), terms.getPath(), values -> values
 
 				.collect(groupingBy(v -> v, counting()))
 				.entrySet()
@@ -238,7 +238,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		}
 
-		final Map<String, Range> ranges=values(stats.getShape(), stats.getPath(), values -> values
+		final Map<String, Range> ranges=values(path, stats.getShape(), stats.getPath(), values -> values
 
 				.collect(groupingBy(GAE::type, reducing(null, v -> new Range(1, v, v), (x, y) ->
 						x == null ? y : y == null ? x : x.merge(y)
@@ -246,7 +246,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		);
 
-		final Entity container=new Entity(GAE.root(path));
+		final Entity container=new Entity(GAE.key(path));
 
 		if ( ranges.isEmpty() ) {
 
@@ -326,17 +326,17 @@ final class DatastoreRelator extends DatastoreProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private <R> R values(
-			final Shape shape,
-			final Iterable<String> path,
+			final String path, final Shape shape,
+			final Iterable<String> steps,
 			final Function<Stream<Object>, R> task
 	) {
 
-		return entities(shape, null, 0, 0, entities -> task.apply(entities
+		return entities(path, shape, null, 0, 0, entities -> task.apply(entities
 
 				// !!! (€) if property is known to be of a scalar supported type retrieve using a projection
 				// https://cloud.google.com/appengine/docs/standard/java/javadoc/com/google/appengine/api/datastore/RawValue.html#getValue--
 
-				.map(entity -> GAE.get(entity, path))
+				.map(entity -> GAE.get(entity, steps))
 
 				.filter(Objects::nonNull)
 
@@ -344,7 +344,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 	}
 
 	private <R> R entities(
-			final Shape shape,
+			final String path, final Shape shape,
 			final List<Order> orders, final int offset, final int limit,
 			final Function<Stream<Entity>, R> task
 	) {
@@ -355,7 +355,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		final Shape filter=filter(shape);
 		final List<String> inequalities=inequalities(filter);
 
-		final Query query=query(filter, orders, inequalities);
+		final Query query=query(path, filter, orders, inequalities);
 
 		final FetchOptions options=Builder.withDefaults(); // !!! support cursors // !!! hard sampling limits?
 
@@ -393,9 +393,13 @@ final class DatastoreRelator extends DatastoreProcessor {
 	}
 
 
-	private Query query(final Shape shape, final List<Order> orders, final List<String> inequalities) {
+	private Query query(final String path, final Shape shape, final List<Order> orders, final List<String> inequalities) {
 
-		final Query query=new Query(clazz(shape).orElse("*"));
+		final Key ancestor=GAE.key(path);
+
+		final Query query=clazz(shape)
+				.map(clazz -> new Query(clazz, ancestor))
+				.orElseGet(() -> new Query(ancestor));
 
 		filter(shape, inequalities).ifPresent(query::setFilter);
 

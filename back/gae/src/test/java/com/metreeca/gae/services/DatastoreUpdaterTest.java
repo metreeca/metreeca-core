@@ -33,7 +33,6 @@ import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.tree.shapes.Clazz.clazz;
 
 
 final class DatastoreUpdaterTest extends GAETestBase {
@@ -61,23 +60,22 @@ final class DatastoreUpdaterTest extends GAETestBase {
 
 		@Test void testUpdate() {
 
-			final Key key=GAE.key("/entities/1", "Entity");
+			final Key key=GAE.key("/entities/test");
 
 			final Entity original=new Entity(key);
 
-			original.setProperty("code", "1");
-			original.setProperty("label", "Entity 1");
+			original.setProperty("code", "test");
+			original.setProperty("label", "Entity");
 
 			final Entity updated=new Entity(key);
 
 			updated.setPropertiesFrom(original);
-			original.setProperty("label", "Entity 1 (Updated)");
+			original.setProperty("label", "Entity (Updated)");
 
 			exec(load(original), () -> new DatastoreUpdater()
 
 					.handle(new Request()
-							.path("/entities/1")
-							.shape(clazz("Entity"))
+							.path(key.getName())
 							.body(entity(), updated)
 					)
 

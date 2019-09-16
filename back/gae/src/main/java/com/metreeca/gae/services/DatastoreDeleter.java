@@ -17,6 +17,7 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -24,7 +25,6 @@ import com.metreeca.rest.Response;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 
-import static com.metreeca.gae.GAE.key;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;
@@ -52,7 +52,7 @@ final class DatastoreDeleter extends DatastoreProcessor {
 	private Future<Response> resource(final Request request) {
 		return request.reply(response -> datastore.exec(service -> {
 
-			final Key key=key(request.path(), convey(request.shape()));
+			final Key key=GAE.key(request.path(), convey(request.shape()));
 
 			final Query query=new Query(key.getKind())
 					.setFilter(new Query.FilterPredicate(KEY_RESERVED_PROPERTY, EQUAL, key))

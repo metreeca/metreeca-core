@@ -17,18 +17,67 @@
 
 package com.metreeca.gae;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
 import static com.metreeca.gae.GAE.compare;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 
+import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class GAETest extends GAETestBase {
+
+	@Nested final class Keys {
+
+		@Test void testHierarchy() {
+
+			assertThat(GAE.key("/"))
+					.isEqualTo(createKey(
+							GAE.Entity, "/"));
+
+			assertThat(GAE.key("/container/"))
+					.isEqualTo(createKey(
+							GAE.Entity, "/container/"));
+
+			assertThat(GAE.key("/resource"))
+					.isEqualTo(createKey(
+							GAE.Entity, "/resource"));
+
+			assertThat(GAE.key("/container/resource"))
+					.isEqualTo(createKey(createKey(
+							GAE.Entity, "/container/"),
+							GAE.Entity, "/container/resource"));
+
+			assertThat(GAE.key("/container/container/resource"))
+					.isEqualTo(createKey(createKey(createKey(
+							GAE.Entity, "/container/"),
+							GAE.Entity, "/container/container/"),
+							GAE.Entity, "/container/container/resource"));
+
+		}
+
+		@Test void testTyping() {
+
+			assertThat(GAE.key("/container/resource", clazz("Kind")))
+					.isEqualTo(createKey(createKey(
+							GAE.Entity, "/container/"),
+							"Kind", "/container/resource"));
+
+			assertThat(GAE.key("/container/resource", "Kind"))
+					.isEqualTo(createKey(createKey(
+							GAE.Entity, "/container/"),
+							"Kind", "/container/resource"));
+
+		}
+
+	}
 
 	@Nested final class Compare {
 
@@ -99,8 +148,8 @@ final class GAETest extends GAETestBase {
 
 		@Test void testKeys() {
 
-			final Key a=KeyFactory.createKey("*", "a");
-			final Key b=KeyFactory.createKey("*", "b");
+			final Key a=createKey("*", "a");
+			final Key b=createKey("*", "b");
 
 			assertThat(compare(a, b)).isLessThan(0);
 			assertThat(compare(a, a)).isEqualTo(0);
@@ -116,7 +165,7 @@ final class GAETest extends GAETestBase {
 			final Entity a=new Entity("*", "a");
 			final EmbeddedEntity b=new EmbeddedEntity();
 
-			b.setKey(KeyFactory.createKey("*", "b"));
+			b.setKey(createKey("*", "b"));
 
 			assertThat(compare(a, b)).isLessThan(0);
 			assertThat(compare(a, a)).isEqualTo(0);

@@ -17,6 +17,7 @@
 
 package com.metreeca.gae.formats;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
 
 import com.google.appengine.api.datastore.*;
@@ -41,7 +42,7 @@ final class EntityEncoderTest extends GAETestBase {
 
 	private JsonObject encode(final Consumer<Entity> task) {
 
-		final Entity entity=new Entity("*", "/");
+		final Entity entity=new Entity(GAE.key("/"));
 
 		task.accept(entity);
 

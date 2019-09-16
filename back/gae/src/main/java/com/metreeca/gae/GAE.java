@@ -166,13 +166,13 @@ public final class GAE {
 
 	//// Key Generation ////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Key root(final String path) { // !!! tbd
+	public static Key key(final String path) { // !!! tbd
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
 		}
 
-		return createKey("*", path.substring(0, path.lastIndexOf('/')+1));
+		return key(path, "");
 	}
 
 	public static Key key(final String path, final Shape shape) { // !!! tbd
@@ -185,25 +185,46 @@ public final class GAE {
 			throw new NullPointerException("null shape");
 		}
 
-		return clazz(shape)
-
-				.map(kind -> key(path, kind))
-
-				.orElseGet(() -> createKey("*", path));
+		return key(path, clazz(shape).orElse(""));
 
 	}
 
-	public static Key key(final String path, final String kind) { // !!! tbd
+	/**
+	 * Creates a datastore key for a resource.
+	 *
+	 * @param path the path of the resource; falls back to {@code "/"} if empty
+	 * @param type the type of the resource; falls back to {@value Entity} if empty
+	 *
+	 * @return a datastore key for the resource identified by {@code path} and {@code type}
+	 *
+	 * @throws NullPointerException     if either {@code path} or {@code type} is null
+	 * @throws IllegalArgumentException if {@code path} is not empty and doesn't include a leading slash
+	 */
+	public static Key key(final String path, final String type) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
 		}
 
-		if ( kind == null ) {
-			throw new NullPointerException("null kind");
+		if ( !path.isEmpty() && !path.startsWith("/") ) {
+			throw new IllegalArgumentException("illegal path {"+path+"}");
 		}
 
-		return createKey(root(path), kind, path);
+		if ( type == null ) {
+			throw new NullPointerException("null type");
+		}
+
+		Key ancestor=null;
+
+		for (int slash=0; slash >= 0; slash=path.indexOf('/', slash+1)) {
+			if ( slash > 0 && slash+1 < path.length() ) { // ignore leading/trailing slashes
+
+				ancestor=createKey(ancestor, Entity, path.substring(0, slash+1));
+
+			}
+		}
+
+		return createKey(ancestor, type.isEmpty()? Entity : type, path.isEmpty()? "/" : path);
 	}
 
 

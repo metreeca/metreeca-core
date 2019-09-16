@@ -22,7 +22,6 @@ import com.metreeca.rest.Context;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PropertyContainer;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.junit.jupiter.api.AfterEach;
@@ -36,8 +35,6 @@ import javax.json.JsonValue;
 
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
-
-import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -105,10 +102,10 @@ public abstract class GAETestBase {
 		private static List<Entity> offices(final Collection<JsonValue> _offices) {
 			return _offices.stream().map(JsonValue::asJsonObject).map(_office -> {
 
-				final Entity office=new Entity("Office",
+				final Entity office=new Entity(GAE.key(
 						"/offices/"+_office.getString("code"),
-						createKey("*", "/offices/")
-				);
+						"Office"
+				));
 
 				office.setProperty("code", _office.getString("code"));
 				office.setProperty("label", _office.getString("label"));
@@ -144,10 +141,10 @@ public abstract class GAETestBase {
 
 			final List<Entity> employees=_employees.stream().map(JsonValue::asJsonObject).map(_employee -> {
 
-				final Entity employee=new Entity("Employee",
+				final Entity employee=new Entity(GAE.key(
 						"/employees/"+_employee.getString("code"),
-						createKey("*", "/employees/")
-				);
+						"Employee"
+				));
 
 				employee.setProperty("code", _employee.getString("code"));
 				employee.setProperty("label", _employee.getString("label"));
@@ -186,10 +183,7 @@ public abstract class GAETestBase {
 
 				final List<EmbeddedEntity> subordinates=employees.stream()
 
-						.filter(subordinate -> Optional.ofNullable((PropertyContainer)subordinate.getProperty("supervisor"))
-								.filter(_supervisor -> _supervisor.getProperty("id").equals(supervisor.getKey().getName()))
-								.isPresent()
-						)
+						.filter (subordinate -> supervisor.getKey().getName().equals(GAE.get(subordinate, "supervisor.id")))
 
 						.map(subordinate -> {
 
