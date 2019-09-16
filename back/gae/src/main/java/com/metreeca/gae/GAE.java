@@ -193,7 +193,7 @@ public final class GAE {
 	 * Creates a datastore key for a resource.
 	 *
 	 * @param path the path of the resource; falls back to {@code "/"} if empty
-	 * @param type the type of the resource; falls back to {@value Entity} if empty
+	 * @param type the type of the resource; falls back to {@value #Entity} if empty
 	 *
 	 * @return a datastore key for the resource identified by {@code path} and {@code type}
 	 *
