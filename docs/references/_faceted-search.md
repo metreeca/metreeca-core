@@ -23,12 +23,22 @@
     <criterion> ::= "[-+]?<path>"
 
     <items response> ::= {
-        "this": "<target-iri>"
-        "contains": [<term>(, <term>)*]
+        "id": "<target>"
+        "contains": [<item>(, <item>)*]
     }
     
     
 # Terms Query
+
+    <items response> ::= {
+        "id": "<target>"
+        "terms": [<term>(, <term>)*]
+    }
+    
+    <term> ::= {
+        "value": item,
+        "count": <count>
+    }
 
 # Stats Query
  

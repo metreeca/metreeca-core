@@ -50,12 +50,11 @@ public final class GAE {
 	public static final String id="id";
 	public static final String type="type";
 	public static final String label="label";
+	public static final String value="value";
 
 	public static final String contains="contains";
 
 	public static final String terms="terms";
-	public static final String term="term";
-
 	public static final String stats="stats";
 
 	public static final String count="count";

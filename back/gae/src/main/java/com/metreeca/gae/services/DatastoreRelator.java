@@ -68,7 +68,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private static final Shape TermsShape=and(
 			field(GAE.terms, and(multiple(),
-					field(GAE.term, and(required(),
+					field(GAE.value, and(required(),
 							field(GAE.label, and(optional(), datatype(GAE.String)))
 					)),
 					field(GAE.count, and(required(), datatype(GAE.Integral)))
@@ -157,7 +157,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		return response -> response
 				.status(OK) // containers are virtual and respond always with 200 OK
-				.shape(convey(shape))
+				.shape(field(GAE.contains, convey(shape)))
 				.body(entity(), container);
 
 	}
@@ -181,7 +181,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 					final EmbeddedEntity embedded=new EmbeddedEntity();
 
-					embedded.setProperty(GAE.term, entry.getKey());
+					embedded.setProperty(GAE.value, entry.getKey());
 					embedded.setProperty(GAE.count, entry.getValue());
 
 					return embedded;

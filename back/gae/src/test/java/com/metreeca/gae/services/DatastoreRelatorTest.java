@@ -554,7 +554,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 							final EmbeddedEntity term=new EmbeddedEntity();
 
-							term.setProperty(GAE.term, entry.getKey());
+							term.setProperty(GAE.value, entry.getKey());
 							term.setProperty(GAE.count, entry.getValue());
 
 							return term;
