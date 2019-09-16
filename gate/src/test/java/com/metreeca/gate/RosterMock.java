@@ -39,7 +39,9 @@ public final class RosterMock implements Roster {
 
 	@SafeVarargs public RosterMock(final Map.Entry<String, String> ...entries) {
 		for (final Map.Entry<String, String> entry : entries) {
-			insert(entry.getKey(), entry.getValue());
+
+			users.put(entry.getKey(), entry.getValue());
+
 		}
 	}
 
@@ -48,25 +50,6 @@ public final class RosterMock implements Roster {
 		return resolve(handle)
 				.map(this::permit)
 				.orElseGet(this::error);
-	}
-
-	@Override public Result<Permit, String> insert(final String handle, final String secret) {
-
-		users.put(handle, secret);
-
-		return lookup(handle);
-	}
-
-	@Override public Result<Permit, String> remove(final String handle) {
-		return resolve(handle).map(entry -> {
-
-			try {
-				return permit(entry);
-			} finally {
-				users.remove(entry.getKey());
-			}
-
-		}).orElseGet(this::error);
 	}
 
 

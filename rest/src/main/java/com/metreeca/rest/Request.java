@@ -191,7 +191,7 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the identifier of the request user.
 	 *
-	 * @return an identifier for the user performing this request or the empty stringif no user is authenticated
+	 * @return an identifier for the user performing this request or the empty string if no user is authenticated
 	 */
 	public String user() { return user; }
 

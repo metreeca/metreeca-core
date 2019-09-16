@@ -147,6 +147,11 @@ public interface Shape {
 
 
 	/*
+	 * Marks shapes as server-defined internal.
+	 */
+	public static Guard hidden() { return task(Delete); }
+
+	/*
 	 * Marks shapes as server-defined read-only.
 	 */
 	public static Guard server() { return task(Relate, Delete); }
