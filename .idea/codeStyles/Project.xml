@@ -165,7 +165,6 @@
       <option name="SPACE_AROUND_MULTIPLICATIVE_OPERATORS" value="false" />
       <option name="SPACE_AROUND_SHIFT_OPERATORS" value="false" />
       <option name="KEEP_SIMPLE_METHODS_IN_ONE_LINE" value="true" />
-      <option name="PARENT_SETTINGS_INSTALLED" value="true" />
       <indentOptions>
         <option name="INDENT_SIZE" value="4" />
         <option name="CONTINUATION_INDENT_SIZE" value="8" />
@@ -175,7 +174,6 @@
     </codeStyleSettings>
     <codeStyleSettings language="Dart">
       <option name="KEEP_FIRST_COLUMN_COMMENT" value="false" />
-      <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
       <option name="SPACE_AROUND_ASSIGNMENT_OPERATORS" value="false" />
       <option name="SPACE_AROUND_ADDITIVE_OPERATORS" value="false" />
       <option name="SPACE_AROUND_MULTIPLICATIVE_OPERATORS" value="false" />
@@ -185,7 +183,6 @@
       <option name="SPACE_WITHIN_CATCH_PARENTHESES" value="true" />
       <option name="SPACE_WITHIN_SWITCH_PARENTHESES" value="true" />
       <option name="BINARY_OPERATION_SIGN_ON_NEXT_LINE" value="true" />
-      <option name="PARENT_SETTINGS_INSTALLED" value="true" />
       <indentOptions>
         <option name="INDENT_SIZE" value="4" />
         <option name="CONTINUATION_INDENT_SIZE" value="8" />

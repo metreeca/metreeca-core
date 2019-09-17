@@ -519,7 +519,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 		@Override public Stream<String> probe(final Or or) {
-			return or.getShapes().stream().flatMap(shape -> shape.map(this));
+			throw new UnsupportedOperationException("disjunctive inequality operators {"+or+"}");
 		}
 
 	}
@@ -601,7 +601,15 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 		@Override public Query.Filter probe(final Or or) {
-			throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+			final List<Query.Filter> filters=or.getShapes().stream()
+					.map(shape -> shape.map(this))
+					.filter(Objects::nonNull)
+					.collect(toList());
+
+			return filters.isEmpty() ? null
+					: filters.size() == 1 ? filters.get(0)
+					: new Query.CompositeFilter(Query.CompositeFilterOperator.OR, filters);
 		}
 
 	}

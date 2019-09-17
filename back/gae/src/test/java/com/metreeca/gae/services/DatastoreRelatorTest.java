@@ -43,8 +43,12 @@ import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.MaxInclusive.maxInclusive;
+import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
+import static com.metreeca.tree.shapes.Or.or;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -519,6 +523,21 @@ final class DatastoreRelatorTest extends GAETestBase {
 						)
 
 				);
+			}
+
+
+			@Test void testOrInequalities() {
+				exec(load(birt()), () -> assertThatThrownBy(() -> new DatastoreRelator()
+
+						.handle(new Request()
+								.path("/employees/")
+								.shape(and(employee(), or(
+										field("seniority", minInclusive(3)),
+										field("code", maxInclusive("1500"))
+								)))
+						)
+
+				).isInstanceOf(UnsupportedOperationException.class));
 			}
 
 		}
