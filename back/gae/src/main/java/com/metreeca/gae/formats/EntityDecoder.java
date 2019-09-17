@@ -20,9 +20,12 @@ package com.metreeca.gae.formats;
 import com.metreeca.gae.GAE;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import com.google.appengine.api.datastore.PropertyContainer;
+import com.google.appengine.api.datastore.Text;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +45,7 @@ final class EntityDecoder {
 	Object decode(final JsonValue value, final Shape shape) {
 
 		switch ( value.getValueType() ) {
+
 			case NULL: return null;
 			case TRUE: return true;
 			case FALSE: return false;
@@ -49,9 +53,11 @@ final class EntityDecoder {
 			case STRING: return string((JsonString)value, shape);
 			case ARRAY: return value.asJsonArray().stream().map(v -> decode(v, shape)).collect(toList());
 			case OBJECT: return entity(value.asJsonObject(), shape);
+
+			default: throw new UnsupportedOperationException("unsupported JSON value {"+value+"}");
+
 		}
 
-		return null; // unexpected
 	}
 
 	PropertyContainer decode(final JsonObject json, final Shape shape) {
@@ -70,20 +76,58 @@ final class EntityDecoder {
 	private Object string(final JsonString string, final Shape shape) {
 		switch ( datatype(shape).orElse("") ) {
 
+			case GAE.Integral: return integral(string);
 			case GAE.Date: return date(string);
+			case GAE.Boolean: return bool(string);
+			case GAE.Floating: return floating(string);
 
 			default:
 
-				final String value=string.getString();
-
-				return value.getBytes(UTF_8).length > 1500 ? new Text(value) : value;
+				return string(string);
 
 		}
 	}
 
-	private Date date(final JsonString string) {
-		return Date.from(OffsetDateTime.parse(string.getString()).toInstant());
+
+	private Object bool(final JsonString string) {
+		try {
+			return Boolean.parseBoolean(string.getString());
+		} catch ( final NumberFormatException e ) {
+			return string(string);
+		}
 	}
+
+	private Object integral(final JsonString string) {
+		try {
+			return Long.parseLong(string.getString());
+		} catch ( final NumberFormatException e ) {
+			return string(string);
+		}
+	}
+
+	private Object floating(final JsonString string) {
+		try {
+			return Double.parseDouble(string.getString());
+		} catch ( final NumberFormatException e ) {
+			return string(string);
+		}
+	}
+
+	private Date date(final JsonString string) {
+		try {
+			return Date.from(OffsetDateTime.parse(string.getString()).toInstant());
+		} catch ( final DateTimeParseException e ) {
+			return (Date)string(string);
+		}
+	}
+
+	private Object string(final JsonString string) {
+
+		final String value=string.getString();
+
+		return value.getBytes(UTF_8).length > 1500 ? new Text(value) : value;
+	}
+
 
 	private PropertyContainer entity(final JsonObject object, final Shape shape) {
 
@@ -91,12 +135,12 @@ final class EntityDecoder {
 
 		final String id=Optional.ofNullable(object.get("id"))
 				.filter(value -> value instanceof JsonString)
-				.map(value   -> ((JsonString)value).getString())
+				.map(value -> ((JsonString)value).getString())
 				.orElse("");
 
 		final String type=Optional.ofNullable(object.get("type"))
 				.filter(value -> value instanceof JsonString)
-				.map(value   -> ((JsonString)value).getString())
+				.map(value -> ((JsonString)value).getString())
 				.orElse("");
 
 		entity.setKey(GAE.key(id, type));

@@ -20,7 +20,6 @@ package com.metreeca.gae.formats;
 import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.shapes.Datatype;
 
 import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Test;
@@ -33,6 +32,7 @@ import java.util.Date;
 import javax.json.Json;
 
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,8 +78,8 @@ final class EntityDecoderTest extends GAETestBase {
 
 	}
 
-	@Test void testDecodeIntegerFieldsExpectedDouble() {
-		assertThat(decode("{ 'field': 123 }", field("field", Datatype.datatype(GAE.Floating))).getProperty("field"))
+	@Test void testDecodeIntegerFieldsExpecteFloating() {
+		assertThat(decode("{ 'field': 123 }", field("field", datatype(GAE.Floating))).getProperty("field"))
 				.isEqualTo(123.0D);
 	}
 
@@ -99,9 +99,24 @@ final class EntityDecoderTest extends GAETestBase {
 				.isEqualTo(new Text(string));
 	}
 
+	@Test void testDecodeStringFieldsAsExpectedIntegral() {
+		assertThat(decode("{ 'field': '123' }", field("field", datatype(GAE.Integral))).getProperty("field"))
+				.isEqualTo(123L);
+	}
+
 	@Test void testDecodeStringFieldsAsExpectedDate() {
-		assertThat(decode("{ 'field': '2019-01-01T00:00Z' }", field("field", Datatype.datatype(GAE.Date))).getProperty("field"))
+		assertThat(decode("{ 'field': '2019-01-01T00:00Z' }", field("field", datatype(GAE.Date))).getProperty("field"))
 				.isEqualTo(Date.from(OffsetDateTime.parse("2019-01-01T00:00Z").toInstant()));
+	}
+
+	@Test void testDecodeStringFieldsAsExpectedBoolean() {
+		assertThat(decode("{ 'field': 'true' }", field("field", datatype(GAE.Boolean))).getProperty("field"))
+				.isEqualTo(true);
+	}
+
+	@Test void testDecodeStringFieldsAsExpectedFloating() {
+		assertThat(decode("{ 'field': '123' }", field("field", datatype(GAE.Floating))).getProperty("field"))
+				.isEqualTo(123.0D);
 	}
 
 	@Test void testDecodeArrayFields() {
