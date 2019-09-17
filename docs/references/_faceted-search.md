@@ -69,8 +69,8 @@
     "! <path>": <value> | [<value>(, <value>)*], // all
     "? <path>": <value> | [<value>(, <value>)*], // any
         
-    "<path>": <value>, //  shorthand for { "?": <value> }
-    "<path>": [<value>(, <value>)*] // shorthand for { "?": [<value>(, <value>)*] }
+    "<path>": <value>, //  shorthand for "? <path": <value>
+    "<path>": [<value>(, <value>)*] // shorthand for "? <path>": [<value>(, <value>)*]
     
 }
 ```
