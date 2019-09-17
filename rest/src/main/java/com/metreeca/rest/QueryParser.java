@@ -179,9 +179,12 @@ final class QueryParser {
 	}
 
 	private Object strings(final Collection<String> values) {
-		return values.stream()
+
+		final List<String> strings=values.stream()
 				.flatMap(value -> Arrays.stream(value.split(",")))
 				.collect(toList());
+
+		return strings.size() == 1 ? strings.get(0) : strings;
 	}
 
 
