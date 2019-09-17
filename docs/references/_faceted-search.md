@@ -65,7 +65,7 @@
     "#> <path>": <integer>, // minCount
     "#< <path>": <integer>, // maxCount
     
-    "{} <path>": <value> | [<value>(, <value>)*], // in
+    "% <path>": <value> | [<value>(, <value>)*], // in
     "! <path>": <value> | [<value>(, <value>)*], // all
     "? <path>": <value> | [<value>(, <value>)*], // any
         

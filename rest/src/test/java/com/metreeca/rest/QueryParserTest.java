@@ -181,7 +181,6 @@ final class QueryParserTest {
 				.isInstanceOf(JsonException.class);
 	}
 
-
 	@Test void testParseSortingCriteria() {
 
 		items("{ '_order': '' }", shape, edges -> assertThat(edges.getOrders())
@@ -224,6 +223,7 @@ final class QueryParserTest {
 		);
 
 	}
+
 
 	@Test void testParseRootFilters() {
 
@@ -291,17 +291,17 @@ final class QueryParserTest {
 		);
 
 
-		items("{ '{}': [] }", shape, edges -> assertThat(edges.getShape())
+		items("{ '%': [] }", shape, edges -> assertThat(edges.getShape())
 				.as("in (empty)")
 				.isEqualTo(filter(shape, in()))
 		);
 
-		items("{ '{}': 'head' }", shape, edges -> assertThat(edges.getShape())
+		items("{ '%': 'head' }", shape, edges -> assertThat(edges.getShape())
 				.as("in (singleton)")
 				.isEqualTo(filter(shape, in("head")))
 		);
 
-		items("{ '{}': ['head', 'tail'] }", shape, edges -> assertThat(edges.getShape())
+		items("{ '%': ['head', 'tail'] }", shape, edges -> assertThat(edges.getShape())
 				.as("in (multiple)")
 				.isEqualTo(filter(shape, in("head", "tail")))
 		);

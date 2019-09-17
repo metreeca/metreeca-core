@@ -403,7 +403,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testInEmpty() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '{}subordinates.label': [] }"))
+						.handle(request("{ '%subordinates.label': [] }"))
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
@@ -417,7 +417,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testInSingleton() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '{}subordinates.label': 'Yoshimi Kato' }"))
+						.handle(request("{ '%subordinates.label': 'Yoshimi Kato' }"))
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
@@ -433,7 +433,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testInMultiple() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '{}subordinates.label': ['Jeff Firrelli', 'Mary Patterson'] }"))
+						.handle(request("{ '%subordinates.label': ['Jeff Firrelli', 'Mary Patterson'] }"))
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())

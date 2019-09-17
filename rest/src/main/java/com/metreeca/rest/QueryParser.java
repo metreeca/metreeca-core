@@ -189,8 +189,10 @@ final class QueryParser {
 
 	private Shape filter(final JsonObject query) {
 		return and(query.entrySet().stream()
+
 				.filter(entry -> !entry.getKey().startsWith("_")) // ignore reserved properties
 				.filter(entry -> !entry.getValue().equals(JsonValue.NULL)) // ignore null properties
+
 				.map(entry -> { // longest matches first
 
 					final String key=entry.getKey();
@@ -212,13 +214,14 @@ final class QueryParser {
 							: key.startsWith("#>") ? filter(path(key.substring(2), shape), minCount(value))
 							: key.startsWith("#<") ? filter(path(key.substring(2), shape), maxCount(value))
 
-							: key.startsWith("{}") ? filter(path(key.substring(2), shape), in(value, shape))
+							: key.startsWith("%") ? filter(path(key.substring(1), shape), in(value, shape))
 							: key.startsWith("!") ? filter(path(key.substring(1), shape), all(value, shape))
 							: key.startsWith("?") ? filter(path(key.substring(1), shape), any(value, shape))
 
 							: filter(path(key, shape), any(value, shape));
 
 				})
+
 				.collect(toList())
 		);
 	}
@@ -379,7 +382,7 @@ final class QueryParser {
 
 	private List<Object> values(final JsonValue value, final Shape shape) {
 		return (value instanceof JsonArray ? ((JsonArray)value).stream() : Stream.of(value))
-				.map(value1 -> value(value1, shape))
+				.map(v -> value(v, shape))
 				.collect(toList());
 	}
 
