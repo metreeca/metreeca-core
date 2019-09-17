@@ -173,6 +173,21 @@ final class DatastoreRelatorTest extends GAETestBase {
 				);
 			}
 
+			@Test void testSortedOnEmptyPath() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("{ '_order': '' }"))
+
+						.accept(response -> assertThat(response)
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(items(e -> true, 0, 0, comparing(Entity::getKey)))
+								)
+						)
+
+				);
+			}
+
+
 
 			@Test void testMultipleInequalityFilter() {
 				exec(load(birt()), () -> new DatastoreRelator()

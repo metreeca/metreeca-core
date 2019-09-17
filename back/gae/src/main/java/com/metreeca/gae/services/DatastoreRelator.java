@@ -411,11 +411,13 @@ final class DatastoreRelator extends DatastoreProcessor {
 		if ( orders != null && consistent(inequalities, orders) ) {
 
 			orders.stream().skip(inequalities.size()).forEach(order -> query.addSort(
-					property(order.getPath()),
+					order.getPath().isEmpty() ? KEY_RESERVED_PROPERTY : property(order.getPath()),
 					order.isInverse() ? SortDirection.DESCENDING : SortDirection.ASCENDING
 			));
 
-			query.addSort(KEY_RESERVED_PROPERTY); // force a consistent default/residual ordering
+			if ( orders.stream().noneMatch(o -> o.getPath().isEmpty()) ) { // omit if already included
+				query.addSort(KEY_RESERVED_PROPERTY); // force a consistent default/residual ordering
+			}
 
 		}
 
@@ -430,7 +432,9 @@ final class DatastoreRelator extends DatastoreProcessor {
 					final List<String> path=order.getPath();
 					final boolean inverse=order.isInverse();
 
-					final Comparator<Entity> comparator=(x, y) -> GAE.compare(GAE.get(x, path), GAE.get(y, path));
+					final Comparator<Entity> comparator=comparing(
+							path.isEmpty() ? Entity::getKey : e -> GAE.get(e, path), GAE::compare
+					);
 
 					return inverse ? comparator.reversed() : comparator;
 
