@@ -63,8 +63,8 @@ final class QueryParserTest {
 	private static final Shape shape=field("head", field("tail", and()));
 
 
-	private void items(final String json, final Shape shape, final Consumer<Items> tester) {
-		query(json, shape, new TestQueryProbe() {
+	private void items(final String query, final Shape shape, final Consumer<Items> tester) {
+		query(query, shape, new TestQueryProbe() {
 
 			@Override public Boolean probe(final Items items) {
 
@@ -76,8 +76,8 @@ final class QueryParserTest {
 		});
 	}
 
-	private void terms(final String json, final Shape shape, final Consumer<Terms> tester) {
-		query(json, shape, new TestQueryProbe() {
+	private void terms(final String query, final Shape shape, final Consumer<Terms> tester) {
+		query(query, shape, new TestQueryProbe() {
 
 			@Override public Boolean probe(final Terms terms) {
 
@@ -89,8 +89,8 @@ final class QueryParserTest {
 		});
 	}
 
-	private void stats(final String json, final Shape shape, final Consumer<Stats> tester) {
-		query(json, shape, new TestQueryProbe() {
+	private void stats(final String query, final Shape shape, final Consumer<Stats> tester) {
+		query(query, shape, new TestQueryProbe() {
 
 			@Override public Boolean probe(final Stats stats) {
 
@@ -103,13 +103,13 @@ final class QueryParserTest {
 	}
 
 
-	private void query(final String json, final Shape shape, final Query.Probe<Boolean> probe) {
-		assertThat(parse(json, shape).map(probe))
+	private void query(final String query, final Shape shape, final Query.Probe<Boolean> probe) {
+		assertThat(parse(query, shape).map(probe))
 				.as("query processed")
 				.isTrue();
 	}
 
-	private Query parse(final String json, final Shape shape) {
+	private Query parse(final String query, final Shape shape) {
 		return new QueryParser(shape, (value, shape1) ->
 
 				value.equals(JsonValue.TRUE) ? true
@@ -119,7 +119,7 @@ final class QueryParserTest {
 						: value instanceof JsonString ? ((JsonString)value).getString()
 						: null
 
-		).parse(json.replace('\'', '"'));
+		).parse(query.replace('\'', '"'));
 	}
 
 	private Shape filter(final Shape shape, final Shape filter) {
@@ -461,7 +461,7 @@ final class QueryParserTest {
 
 	@Test void testParseTermsQuery() {
 
-		terms("{ '_terms': 'head.tail' }", shape, items -> {
+		final Consumer<Terms> test=items -> {
 
 			assertThat(filter(shape, and()))
 					.as("shape")
@@ -471,13 +471,16 @@ final class QueryParserTest {
 					.as("path")
 					.containsExactly("head", "tail");
 
-		});
+		};
+
+		terms("{ '_terms': 'head.tail' }", shape, test);
+		terms("_terms=head.tail", shape, test);
 
 	}
 
 	@Test void testParseStatsQuery() {
 
-		stats("{ '_stats': 'head.tail' }", shape, stats -> {
+		final Consumer<Stats> test=stats -> {
 
 			assertThat(filter(shape, and()))
 					.as("shape")
@@ -487,7 +490,10 @@ final class QueryParserTest {
 					.as("path")
 					.containsExactly("head", "tail");
 
-		});
+		};
+
+		stats("{ '_stats': 'head.tail' }", shape, test);
+		stats("_stats=head.tail", shape, test);
 
 	}
 

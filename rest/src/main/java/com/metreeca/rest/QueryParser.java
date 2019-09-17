@@ -26,7 +26,6 @@ import com.metreeca.tree.queries.Terms;
 import com.metreeca.tree.shapes.*;
 
 import java.io.StringReader;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
@@ -137,30 +136,52 @@ final class QueryParser {
 	private Query form(final String query) {
 		return json(Json.createObjectBuilder(Codecs.parameters(query).entrySet().stream()
 
-				.map(field -> new SimpleImmutableEntry<>(field.getKey(), Optional.of(field.getValue())
-
-						.filter(values -> field.getKey().equals("_offset") || field.getKey().equals("_limit"))
-
-						.flatMap(values -> values.stream()
-								.map(s -> {
-									try { return (Object)Integer.parseInt(s); } catch ( NumberFormatException e ) {
-										return null;
-									}
-								})
-								.filter(Objects::nonNull)
-								.findFirst()
-						)
-
-						.orElseGet(() -> field.getValue().stream()
-								.flatMap(value -> Arrays.stream(value.split(",")))
-								.collect(toList())
-						)
-
-				))
-
-				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
+				.collect(toMap(Map.Entry::getKey, this::value))
 
 		).build());
+	}
+
+
+	private Object value(final Map.Entry<String, List<String>> field) {
+
+		final String key=field.getKey();
+		final List<String> values=field.getValue();
+
+		return key.equals("_terms") || key.equals("_stats") ? path(values)
+				: key.equals("_offset") || key.equals("_limit") ? integer(values)
+				: strings(values);
+
+	}
+
+
+	private Object path(final List<String> values) {
+		return values.size() == 1 ? values.get(0) : strings(values);
+	}
+
+	private Object integer(final List<String> values) {
+		if ( values.size() == 1 ) {
+
+			try {
+
+				return Long.parseLong(values.get(0));
+
+			} catch ( final NumberFormatException e ) {
+
+				return strings(values);
+
+			}
+
+		} else {
+
+			return strings(values);
+
+		}
+	}
+
+	private Object strings(final Collection<String> values) {
+		return values.stream()
+				.flatMap(value -> Arrays.stream(value.split(",")))
+				.collect(toList());
 	}
 
 
