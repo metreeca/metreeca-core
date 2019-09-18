@@ -80,6 +80,7 @@ final class EntityDecoder {
 			case GAE.Date: return date(string);
 			case GAE.Boolean: return bool(string);
 			case GAE.Floating: return floating(string);
+			case GAE.Entity: return entity(string, shape);
 
 			default:
 
@@ -128,41 +129,52 @@ final class EntityDecoder {
 		return value.getBytes(UTF_8).length > 1500 ? new Text(value) : value;
 	}
 
+	private Object entity(final JsonString string, final Shape shape) {
+
+		final EmbeddedEntity entity=new EmbeddedEntity();
+
+		entity.setKey(GAE.key(string.getString(), shape));
+
+		return entity;
+	}
+
 
 	private PropertyContainer entity(final JsonObject object, final Shape shape) {
 
 		final EmbeddedEntity entity=new EmbeddedEntity();
 
-		final String id=Optional.ofNullable(object.get("id"))
+		final String id=Optional.ofNullable(object.get(GAE.id))
 				.filter(value -> value instanceof JsonString)
 				.map(value -> ((JsonString)value).getString())
 				.orElse("");
 
-		final String type=Optional.ofNullable(object.get("type"))
+		final String type=Optional.ofNullable(object.get(GAE.type))
 				.filter(value -> value instanceof JsonString)
 				.map(value -> ((JsonString)value).getString())
 				.orElse("");
 
-		entity.setKey(GAE.key(id, type));
+		entity.setKey(type.isEmpty() ? GAE.key(id, shape) : GAE.key(id, type));
 
 		final Map<String, Shape> fields=fields(shape);
 
 		object.forEach((name, json) -> {
+			if ( !name.equals(GAE.id) && !name.equals(GAE.type) ) {
 
-			final Object value=decode(json, fields.getOrDefault(name, and()));
+				final Object value=decode(json, fields.getOrDefault(name, and()));
 
-			if ( value != null ) {
-				if ( GAE.isEntity(value) ) { // !!! un/indexed from shape metadata?
+				if ( value != null ) {
+					if ( GAE.isEntity(value) ) { // !!! un/indexed from shape metadata?
 
-					entity.setIndexedProperty(name, value); // force embedded entity indexing
+						entity.setIndexedProperty(name, value); // force embedded entity indexing
 
-				} else {
+					} else {
 
-					entity.setProperty(name, value);
+						entity.setProperty(name, value);
 
+					}
 				}
-			}
 
+			}
 		});
 
 		return entity;

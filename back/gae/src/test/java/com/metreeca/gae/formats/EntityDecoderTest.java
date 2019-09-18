@@ -32,6 +32,7 @@ import java.util.Date;
 import javax.json.Json;
 
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 
@@ -78,7 +79,7 @@ final class EntityDecoderTest extends GAETestBase {
 
 	}
 
-	@Test void testDecodeIntegerFieldsExpecteFloating() {
+	@Test void testDecodeIntegerFieldsExpectedFloating() {
 		assertThat(decode("{ 'field': 123 }", field("field", datatype(GAE.Floating))).getProperty("field"))
 				.isEqualTo(123.0D);
 	}
@@ -119,16 +120,38 @@ final class EntityDecoderTest extends GAETestBase {
 				.isEqualTo(123.0D);
 	}
 
+	@Test void testDecodeStringFieldsAsExpectedEntity() {
+		assertThat(decode("{ 'field': '/path' }", field("field", and(datatype(GAE.Entity), clazz("Expected")))).getProperty("field"))
+				.satisfies(entity -> assertThat(((EmbeddedEntity)entity).getKey()).isEqualTo(GAE.key("/path", "Expected")));
+	}
+
+
 	@Test void testDecodeArrayFields() {
 		assertThat(decode("{ 'field': [null, 123, 'string'] }").getProperty("field"))
 				.isEqualTo(asList(null, 123L, "string"));
 	}
 
+
+	@Test void testDecodeObjectFieldsEmpty() {
+		assertThat(decode("{ 'field': {} }").getProperty("field"))
+
+				.satisfies(entity -> assertThat(((EmbeddedEntity)entity).getKey()).isEqualTo(GAE.key("", "")));
+	}
+
 	@Test void testDecodeObjectFields() {
-		assertThat(decode("{ 'field': { 'id': '/path', 'type': 'Entity', 'label' : 123 } }").getProperty("field")).satisfies(entity -> {
-			assertThat(((EmbeddedEntity)entity).getKey()).isEqualTo(KeyFactory.createKey("Entity", "/path"));
-			assertThat(((PropertyContainer)entity).getProperty("label")).isEqualTo(123L);
-		});
+		assertThat(decode("{ 'field': { 'id': '/path', 'type': 'Class', 'label' : 123 } }").getProperty("field"))
+
+				.isInstanceOf(EmbeddedEntity.class)
+
+				.satisfies(entity -> assertThat(((EmbeddedEntity)entity).getKey()).isEqualTo(GAE.key("/path", "Class")))
+				.satisfies(entity -> assertThat(((PropertyContainer)entity).getProperties().keySet()).containsOnly("label"))
+				.satisfies(entity -> assertThat(((PropertyContainer)entity).getProperty("label")).isEqualTo(123L));
+	}
+
+	@Test void testDecodeObjectFieldsWithExpectedType() {
+		assertThat(decode("{ 'field': { 'id': '/path' } }", field("field", clazz("Class"))).getProperty("field"))
+
+				.satisfies(entity -> assertThat(((EmbeddedEntity)entity).getKey()).isEqualTo(GAE.key("/path", "Class")));
 	}
 
 }

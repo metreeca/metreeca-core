@@ -36,6 +36,8 @@ import javax.json.JsonValue;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 
+import static com.google.appengine.api.datastore.KeyFactory.createKey;
+
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
@@ -112,25 +114,21 @@ public abstract class GAETestBase {
 
 				final JsonObject _country=_office.getJsonObject("country");
 
-				office.setProperty("country", _country.getString("label"));
+				final EmbeddedEntity country=new EmbeddedEntity();
 
-				//final EmbeddedEntity country=new EmbeddedEntity();
-				//
-				//country.setKey(createKey("Country", format("http://sws.geonames.org/%s/", _country.getString("code"))));
-				//country.setProperty("label", _country.getString("label"));
-				//
-				//office.setIndexedProperty("country", country);
+				country.setKey(createKey("Country", format("http://sws.geonames.org/%s/", _country.getString("code"))));
+				country.setProperty("label", _country.getString("label"));
+
+				office.setIndexedProperty("country", country);
 
 				final JsonObject _city=_office.getJsonObject("city");
 
-				office.setProperty("city", _city.getString("label"));
+				final EmbeddedEntity city=new EmbeddedEntity();
 
-				//final EmbeddedEntity city=new EmbeddedEntity();
-				//
-				//city.setKey(createKey("City", format("http://sws.geonames.org/%s/", _city.getString("code"))));
-				//city.setProperty("label", _city.getString("label"));
-				//
-				//office.setIndexedProperty("city", city);
+				city.setKey(createKey("City", format("http://sws.geonames.org/%s/", _city.getString("code"))));
+				city.setProperty("label", _city.getString("label"));
+
+				office.setIndexedProperty("city", city);
 
 				return office;
 
@@ -159,7 +157,7 @@ public abstract class GAETestBase {
 				final JsonObject _office=_employee.getJsonObject("office");
 				final EmbeddedEntity office=new EmbeddedEntity();
 
-				office.setProperty("id", format("/offices/%s", _office.getString("code")));
+				office.setKey(GAE.key(format("/offices/%s", _office.getString("code")), "Office"));
 				office.setProperty("label", _office.getString("label"));
 
 				employee.setIndexedProperty("office", office);
@@ -168,7 +166,7 @@ public abstract class GAETestBase {
 
 					final EmbeddedEntity supervisor=new EmbeddedEntity();
 
-					supervisor.setProperty("id", format("/employees/%s", _supervisor.getString("code")));
+					supervisor.setKey(GAE.key(format("/employees/%s", _supervisor.getString("code")), "Employee"));
 					supervisor.setProperty("label", _supervisor.getString("label"));
 
 					employee.setIndexedProperty("supervisor", supervisor);
@@ -189,7 +187,7 @@ public abstract class GAETestBase {
 
 							final EmbeddedEntity embedded=new EmbeddedEntity();
 
-							embedded.setProperty("id", subordinate.getKey().getName());
+							embedded.setKey(subordinate.getKey());
 							embedded.setProperty("label", subordinate.getProperty("label"));
 
 							return embedded;

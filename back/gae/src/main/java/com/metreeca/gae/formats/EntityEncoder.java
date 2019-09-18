@@ -94,7 +94,7 @@ final class EntityEncoder {
 
 		if ( key != null ) {
 			builder.add(GAE.id, key.getName());
-			builder.add(GAE.type, key.getKind());
+			//builder.add(GAE.type, key.getKind());
 		}
 
 		final Map<String, Shape> fields=fields(shape);

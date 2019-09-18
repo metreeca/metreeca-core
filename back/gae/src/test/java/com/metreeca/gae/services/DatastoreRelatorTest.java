@@ -80,17 +80,14 @@ final class DatastoreRelatorTest extends GAETestBase {
 						field("seniority", and(required(), datatype(GAE.Integral))),
 
 						field("office", and(required(), clazz("Office"), relate().then(
-								field(GAE.id, and(required(), datatype(GAE.String))),
 								field(GAE.label, and(required(), datatype(GAE.String)))
 						))),
 
 						field("supervisor", and(optional(), clazz("Employee"), relate().then(
-								field(GAE.id, and(required(), datatype(GAE.String))),
 								field(GAE.label, and(required(), datatype(GAE.String)))
 						))),
 
 						field("subordinates", and(multiple(), clazz("Employee"), relate().then(
-								field(GAE.id, and(required(), datatype(GAE.String))),
 								field(GAE.label, and(required(), datatype(GAE.String)))
 						)))
 
@@ -138,7 +135,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			}
 
 
-			@Test void testUnfiltered() {
+			@Test void testPlain() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(request(""))
@@ -153,6 +150,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 				);
 			}
+
 
 			@Test void testSorted() {
 				exec(load(birt()), () -> new DatastoreRelator()
@@ -186,7 +184,6 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 				);
 			}
-
 
 
 			@Test void testMultipleInequalityFilter() {
@@ -741,7 +738,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testFiltered() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '_stats': 'seniority', 'office.id': '/offices/1' }"))
+						.handle(request("_stats=seniority&office=/offices/1"))
 
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
@@ -749,7 +746,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
 												e -> e.getProperty("seniority"),
-												e -> get(e, "office.id").equals("/offices/1")
+												e -> get(e, new EmbeddedEntity(), "office").getKey().equals(GAE.key("/offices/1", "Office"))
 										))
 								)
 						)

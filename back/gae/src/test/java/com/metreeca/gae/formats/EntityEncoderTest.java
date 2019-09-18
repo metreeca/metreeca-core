@@ -113,7 +113,7 @@ final class EntityEncoderTest extends GAETestBase {
 
 			final EmbeddedEntity embedded=new EmbeddedEntity();
 
-			embedded.setKey(KeyFactory.createKey("Embedded", "/path"));
+			embedded.setKey(GAE.key("/path", "Embedded"));
 
 			embedded.setProperty("null", null);
 			embedded.setProperty("nested", 123);
@@ -123,7 +123,6 @@ final class EntityEncoderTest extends GAETestBase {
 		})).containsEntry("field", Json.createObjectBuilder()
 
 				.add("id", "/path")
-				.add("type", "Embedded")
 				.add("nested", 123L)
 
 				.build()

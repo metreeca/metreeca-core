@@ -48,10 +48,11 @@ public final class GAE {
 	//// System Properties /////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final String id="id";
-	public static final String type="type";
-	public static final String label="label";
 	public static final String value="value";
+	public static final String type="type";
+	public static final String language="language";
 
+	public static final String label="label";
 	public static final String contains="contains";
 
 	public static final String terms="terms";

@@ -67,7 +67,6 @@ import static java.util.stream.StreamSupport.stream;
 final class DatastoreRelator extends DatastoreProcessor {
 
 	private static final Shape TermShape=and(
-			field(GAE.id, and(optional(), datatype(GAE.String))),
 			field(GAE.label, and(optional(), datatype(GAE.String)))
 	);
 
@@ -119,7 +118,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 	//// Container /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> container(final Request request) {
-		return request.query(splitter.resource(request.shape()), entity()::value)
+		return request.query(splitter.resource(expand(request.shape())), entity()::value)
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 

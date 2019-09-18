@@ -24,17 +24,24 @@ import com.metreeca.tree.probes.Redactor;
 
 abstract class DatastoreProcessor {
 
+	Shape expand(final Shape shape) { // !!! caching
+		return shape
+
+				.map(new DatastoreInferencer())
+				.map(new Optimizer());
+	}
+
 	Shape convey(final Shape shape) { // !!! caching
 		return shape
 
-				.map(new Redactor(Shape.Mode, Shape.Convey)) // !!! engine-specific inferencer
+				.map(new Redactor(Shape.Mode, Shape.Convey))
 				.map(new Optimizer());
 	}
 
 	Shape filter(final Shape shape) { // !!! caching
 		return shape
 
-				.map(new Redactor(Shape.Mode, Shape.Filter)) // !!! engine-specific inferencer
+				.map(new Redactor(Shape.Mode, Shape.Filter))
 				.map(new Optimizer());
 	}
 
