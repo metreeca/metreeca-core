@@ -268,10 +268,10 @@ public final class GAE {
 				throw new NullPointerException("null step");
 			}
 
-			value=(value instanceof PropertyContainer) ? ((PropertyContainer)value).getProperty(step)
+			value=(isEntity(value)) ? ((PropertyContainer)value).getProperty(step)
 
 					: (value instanceof Collection) ? ((Collection<?>)value).stream()
-					.map(v -> v instanceof PropertyContainer ? ((PropertyContainer)v).getProperty(step) : null)
+					.map(v -> isEntity(v) ? ((PropertyContainer)v).getProperty(step) : null)
 					.filter(Objects::nonNull)
 					.flatMap(v -> v instanceof Collection ? ((Collection<?>)v).stream() : Stream.of(v))
 					.collect(toList())

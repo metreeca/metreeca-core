@@ -40,6 +40,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.metreeca.gae.GAE.isEntity;
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
@@ -515,19 +516,19 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Stream<String> probe(final MinExclusive minExclusive) {
-			return Stream.of(minExclusive.getValue() instanceof EmbeddedEntity? key(path) : path);
+			return Stream.of(isEntity(minExclusive.getValue()) ? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MaxExclusive maxExclusive) {
-			return Stream.of(maxExclusive.getValue() instanceof EmbeddedEntity? key(path) : path);
+			return Stream.of(isEntity(maxExclusive.getValue()) ? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MinInclusive minInclusive) {
-			return Stream.of(minInclusive.getValue() instanceof EmbeddedEntity? key(path) : path);
+			return Stream.of(isEntity(minInclusive.getValue()) ? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MaxInclusive maxInclusive) {
-			return Stream.of(maxInclusive.getValue() instanceof EmbeddedEntity? key(path) : path);
+			return Stream.of(isEntity(maxInclusive.getValue()) ? key(path) : path);
 		}
 
 
@@ -561,7 +562,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=minExclusive.getValue();
 
-			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+			return inequalities.contains(isEntity(limit) ? key(path) : path)
 					? op(path, GREATER_THAN, limit)
 					: null;
 		}
@@ -570,7 +571,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=maxExclusive.getValue();
 
-			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+			return inequalities.contains(isEntity(limit) ? key(path) : path)
 					? op(path, LESS_THAN, limit)
 					: null;
 		}
@@ -579,7 +580,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=minInclusive.getValue();
 
-			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+			return inequalities.contains(isEntity(limit) ? key(path) : path)
 					? op(path, GREATER_THAN_OR_EQUAL, limit)
 					: null;
 		}
@@ -588,7 +589,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=maxInclusive.getValue();
 
-			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+			return inequalities.contains(isEntity(limit) ? key(path) : path)
 					? op(path, LESS_THAN_OR_EQUAL, limit)
 					: null;
 		}
@@ -607,9 +608,9 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			return values.isEmpty() ? null
 					: values.size() == 1 ? op(path, EQUAL, values.iterator().next())
-					: values.stream().noneMatch(v -> v instanceof EmbeddedEntity) ? new FilterPredicate(path, IN, values)
-					: values.stream().allMatch(v -> v instanceof EmbeddedEntity) ? new FilterPredicate(key(path), IN,
-					values.stream().map(value -> ((EmbeddedEntity)value).getKey()).collect(toList())
+					: values.stream().noneMatch(v -> isEntity(v)) ? new FilterPredicate(path, IN, values)
+					: values.stream().allMatch(v -> isEntity(v)) ? new FilterPredicate(key(path), IN,
+					values.stream().map(GAE::key).collect(toList())
 			)
 					: or(values.stream().map(value -> op(path, EQUAL, value)).collect(toList()));
 		}
@@ -651,8 +652,8 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		private FilterPredicate op(final String path, final Query.FilterOperator op, final Object value) {
-			return value instanceof EmbeddedEntity
-					? new FilterPredicate(key(path), op, ((EmbeddedEntity)value).getKey())
+			return isEntity(value)
+					? new FilterPredicate(key(path), op, GAE.key(value))
 					: new FilterPredicate(path, op, value);
 		}
 
@@ -694,7 +695,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=minExclusive.getValue();
 
-			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+			return inequalities.contains(isEntity(limit) ? key(path) : path)
 					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) > 0)
 					: null;
 		}
@@ -703,7 +704,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=maxExclusive.getValue();
 
-			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+			return inequalities.contains(isEntity(limit) ? key(path) : path)
 					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) < 0)
 					: null;
 		}
@@ -712,7 +713,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=minInclusive.getValue();
 
-			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+			return inequalities.contains(isEntity(limit) ? key(path) : path)
 					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) >= 0)
 					: null;
 		}
@@ -721,7 +722,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=maxInclusive.getValue();
 
-			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+			return inequalities.contains(isEntity(limit) ? key(path) : path)
 					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) <= 0)
 					: null;
 		}
@@ -732,7 +733,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final int limit=minLength.getLimit();
 
 			return values -> stream(values).allMatch(value ->
-					(value == null ? 0 : value.toString().length()) >= limit
+					string(value).length() >= limit
 			);
 		}
 
@@ -741,7 +742,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final int limit=maxLength.getLimit();
 
 			return values -> stream(values).allMatch(value ->
-					(value == null ? 0 : value.toString().length()) <= limit
+					string(value).length() <= limit
 			);
 		}
 
@@ -752,7 +753,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			);
 
 			return values -> stream(values).allMatch(value ->
-					value != null && regex.matcher(value.toString()).matches()
+					 regex.matcher(string(value)).matches()
 			);
 		}
 
@@ -761,7 +762,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final java.util.regex.Pattern regex=java.util.regex.Pattern.compile(like.toExpression());
 
 			return values -> stream(values).allMatch(value ->
-					value != null && regex.matcher(value.toString()).find()
+					 regex.matcher(string(value)).find()
 			);
 		}
 
@@ -782,10 +783,15 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		@Override public Predicate<Object> probe(final In in) {
 
-			final Set<Object> range=in.getValues();
+			final Function<Object, Object> mapper=value ->
+					isEntity(value) ? GAE.key(value) : value;
+
+			final Set<Object> range=in.getValues().stream()
+					.map(mapper)
+					.collect(toSet());
 
 			return range.isEmpty() ? values -> true : values -> stream(values).allMatch(value ->
-					value != null && range.contains(value)
+					value != null && range.contains(mapper.apply(value))
 			);
 		}
 
@@ -796,7 +802,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final Predicate<Object> predicate=field.getShape().map(new PredicateProbe(property(path, field.getName()), inequalities));
 
 			return predicate == null ? null : values -> stream(values).allMatch(value ->
-					value instanceof PropertyContainer && predicate.test(((PropertyContainer)value).getProperty(name))
+					isEntity(value) && predicate.test(((PropertyContainer)value).getProperty(name))
 			);
 		}
 
@@ -836,6 +842,13 @@ final class DatastoreRelator extends DatastoreProcessor {
 			return value == null ? Stream.empty()
 					: value instanceof Collection ? ((Collection<?>)value).stream()
 					: Stream.of(value);
+		}
+
+
+		private String string(final Object value) {
+			return value == null ? ""
+					: isEntity(value) ? Optional.ofNullable(GAE.key(value)).map(Key::getName).orElse("")
+					: value.toString();
 		}
 
 	}
