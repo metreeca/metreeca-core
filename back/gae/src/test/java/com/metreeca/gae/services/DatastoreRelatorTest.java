@@ -23,9 +23,7 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PropertyContainer;
+import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -154,13 +152,16 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testFiltered() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("seniority=4"))
+						.handle(request(">seniority=3&office=/offices/1"))
 
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e -> get(e, 0L, "seniority") == 4))
+										.isEqualTo(items(e
+												-> get(e, 0L, "seniority") > 3
+												&& get(e, new EmbeddedEntity(), "office").getKey().equals(GAE.key("/offices/1", "Office"))
+										))
 								)
 						)
 
@@ -463,7 +464,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testAllEmpty() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '!subordinates.id': [] }"))
+						.handle(request("{ '!subordinates': [] }"))
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
@@ -477,13 +478,16 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testAllSingleton() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '!subordinates.id': '/employees/1076' }"))
+						.handle(request("{ '!subordinates': '/employees/1076' }"))
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e -> get(e, emptyList(), "subordinates.id").contains(
-												"/employees/1076"
-										)))
+										.isEqualTo(items(e -> get(e, Collections.<EmbeddedEntity>emptyList(), "subordinates")
+												.stream()
+												.map(EmbeddedEntity::getKey)
+												.collect(toList())
+												.contains(GAE.key("/employees/1076", "Employee"))
+										))
 								)
 						)
 
@@ -493,13 +497,19 @@ final class DatastoreRelatorTest extends GAETestBase {
 			@Test void testAllMultiple() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '!subordinates.id': ['/employees/1076', '/employees/1056'] }"))
+						.handle(request("{ '!subordinates': ['/employees/1076', '/employees/1056'] }"))
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e -> get(e, emptyList(), "subordinates.id").containsAll(asList(
-												"/employees/1076", "/employees/1056"
-										))))
+										.isEqualTo(items(e -> get(e, Collections.<EmbeddedEntity>emptyList(), "subordinates")
+												.stream()
+												.map(EmbeddedEntity::getKey)
+												.collect(toList())
+												.containsAll(asList(
+														GAE.key("/employees/1076", "Employee"),
+														GAE.key("/employees/1056", "Employee")
+												))
+										))
 								)
 						)
 
@@ -547,6 +557,28 @@ final class DatastoreRelatorTest extends GAETestBase {
 										.isEqualTo(items(e -> asList("President", "VP Sales").contains(
 												get(e, "", "title")
 										)))
+								)
+						)
+
+				);
+			}
+
+			@Test void testAnyMultipleEntities() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("office=/offices/1&office=/offices/2"))
+
+						.accept(response -> assertThat(response)
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(items(e -> {
+
+											final Key office=((EmbeddedEntity)e.getProperty("office")).getKey();
+											final Key office1=GAE.key("/offices/1", "Office");
+											final Key office2=GAE.key("/offices/2", "Office");
+
+											return office.equals(office1) || office.equals(office2);
+
+										}))
 								)
 						)
 

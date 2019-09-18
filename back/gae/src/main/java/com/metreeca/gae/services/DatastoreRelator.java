@@ -32,6 +32,7 @@ import com.metreeca.tree.queries.Terms;
 import com.metreeca.tree.shapes.*;
 
 import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 
 import java.util.*;
@@ -302,7 +303,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final Key key=GAE.key(request.path(), shape);
 
 			final Query query=new Query(key.getKind()) // !!! set filters from filter shape?
-					.setFilter(new Query.FilterPredicate(KEY_RESERVED_PROPERTY, EQUAL, key));
+					.setFilter(new FilterPredicate(KEY_RESERVED_PROPERTY, EQUAL, key));
 
 			// ;( projecting only properties actually included in the shape would lower costs, as projection queries
 			// are counted as small operations: unfortunately, a number of limitations apply:
@@ -544,45 +545,34 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		@Override public Query.Filter probe(final MinExclusive minExclusive) {
 			return inequalities.contains(path)
-					? new Query.FilterPredicate(path, GREATER_THAN, minExclusive.getValue())
+					? op(path, GREATER_THAN, minExclusive.getValue())
 					: null;
 		}
 
 		@Override public Query.Filter probe(final MaxExclusive maxExclusive) {
 			return inequalities.contains(path)
-					? new Query.FilterPredicate(path, LESS_THAN, maxExclusive.getValue())
+					? op(path, LESS_THAN, maxExclusive.getValue())
 					: null;
 		}
 
 		@Override public Query.Filter probe(final MinInclusive minInclusive) {
 			return inequalities.contains(path)
-					? new Query.FilterPredicate(path, GREATER_THAN_OR_EQUAL, minInclusive.getValue())
+					? op(path, GREATER_THAN_OR_EQUAL, minInclusive.getValue())
 					: null;
 		}
 
 		@Override public Query.Filter probe(final MaxInclusive maxInclusive) {
 			return inequalities.contains(path)
-					? new Query.FilterPredicate(path, LESS_THAN_OR_EQUAL, maxInclusive.getValue())
+					? op(path, LESS_THAN_OR_EQUAL, maxInclusive.getValue())
 					: null;
 		}
 
 
 		@Override public Query.Filter probe(final All all) {
-
-			final Set<Object> values=all.getValues();
-
-			return values.isEmpty() ? null
-					: values.size() == 1 ? equal(values.iterator().next())
-					: new Query.CompositeFilter(Query.CompositeFilterOperator.AND, values.stream()
-					.map(this::equal)
+			return and(all.getValues().stream()
+					.map(value -> op(path, EQUAL, value))
 					.collect(toList())
 			);
-		}
-
-		private Query.FilterPredicate equal(final Object value) {
-			return value instanceof EmbeddedEntity
-					? new Query.FilterPredicate(path+"."+KEY_RESERVED_PROPERTY, EQUAL, ((EmbeddedEntity)value).getKey())
-					: new Query.FilterPredicate(path, EQUAL, value);
 		}
 
 		@Override public Query.Filter probe(final Any any) {
@@ -590,8 +580,12 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final Set<Object> values=any.getValues();
 
 			return values.isEmpty() ? null
-					: values.size() == 1 ? equal(values.iterator().next())
-					: new Query.FilterPredicate(path, IN, values);
+					: values.size() == 1 ? op(path, EQUAL, values.iterator().next())
+					: values.stream().noneMatch(v -> v instanceof EmbeddedEntity)? new FilterPredicate(path, IN, values)
+					: values.stream().allMatch(v -> v instanceof EmbeddedEntity)? new FilterPredicate(key(path), IN,
+					values.stream().map(value -> ((EmbeddedEntity)value).getKey()).collect(toList())
+			)
+					: or(values.stream().map(value -> op(path, EQUAL, value)).collect(toList()));
 		}
 
 
@@ -601,27 +595,44 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Query.Filter probe(final And and) {
-
-			final List<Query.Filter> filters=and.getShapes().stream()
+			return and(and.getShapes().stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
-					.collect(toList());
+					.collect(toList())
+			);
+		}
 
+		@Override public Query.Filter probe(final Or or) {
+			return or(or.getShapes().stream()
+					.map(shape -> shape.map(this))
+					.filter(Objects::nonNull)
+					.collect(toList())
+			);
+		}
+
+
+		private Query.Filter and(final List<Query.Filter> filters) {
 			return filters.isEmpty() ? null
 					: filters.size() == 1 ? filters.get(0)
 					: new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
 		}
 
-		@Override public Query.Filter probe(final Or or) {
-
-			final List<Query.Filter> filters=or.getShapes().stream()
-					.map(shape -> shape.map(this))
-					.filter(Objects::nonNull)
-					.collect(toList());
-
+		private Query.Filter or(final List<Query.Filter> filters) {
 			return filters.isEmpty() ? null
 					: filters.size() == 1 ? filters.get(0)
 					: new Query.CompositeFilter(Query.CompositeFilterOperator.OR, filters);
+		}
+
+
+		private FilterPredicate op(final String path, final Query.FilterOperator op, final Object value) {
+			return value instanceof EmbeddedEntity
+					? new FilterPredicate(key(path), op, ((EmbeddedEntity)value).getKey())
+					: new FilterPredicate(path, op, value);
+		}
+
+
+		private String key(final String path) {
+			return path+"."+KEY_RESERVED_PROPERTY;
 		}
 
 	}

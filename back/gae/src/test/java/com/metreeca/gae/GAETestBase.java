@@ -51,7 +51,6 @@ public abstract class GAETestBase {
 	);
 
 
-
 	@BeforeEach void setUp() {
 		helper.setUp();
 	}
@@ -181,7 +180,12 @@ public abstract class GAETestBase {
 
 				final List<EmbeddedEntity> subordinates=employees.stream()
 
-						.filter (subordinate -> supervisor.getKey().getName().equals(GAE.get(subordinate, "supervisor.id")))
+						.filter(subordinate -> {
+
+							final EmbeddedEntity _supervisor=(EmbeddedEntity)subordinate.getProperty("supervisor");
+
+							return _supervisor != null && _supervisor.getKey().equals(supervisor.getKey());
+						})
 
 						.map(subordinate -> {
 
