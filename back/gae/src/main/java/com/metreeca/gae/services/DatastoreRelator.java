@@ -572,11 +572,17 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final Set<Object> values=all.getValues();
 
 			return values.isEmpty() ? null
-					: values.size() == 1 ? new Query.FilterPredicate(path, EQUAL, values.iterator().next())
+					: values.size() == 1 ? equal(values.iterator().next())
 					: new Query.CompositeFilter(Query.CompositeFilterOperator.AND, values.stream()
-					.map(value -> new Query.FilterPredicate(path, EQUAL, value))
+					.map(this::equal)
 					.collect(toList())
 			);
+		}
+
+		private Query.FilterPredicate equal(final Object value) {
+			return value instanceof EmbeddedEntity
+					? new Query.FilterPredicate(path+"."+KEY_RESERVED_PROPERTY, EQUAL, ((EmbeddedEntity)value).getKey())
+					: new Query.FilterPredicate(path, EQUAL, value);
 		}
 
 		@Override public Query.Filter probe(final Any any) {
@@ -584,7 +590,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final Set<Object> values=any.getValues();
 
 			return values.isEmpty() ? null
-					: values.size() == 1 ? new Query.FilterPredicate(path, EQUAL, values.iterator().next())
+					: values.size() == 1 ? equal(values.iterator().next())
 					: new Query.FilterPredicate(path, IN, values);
 		}
 

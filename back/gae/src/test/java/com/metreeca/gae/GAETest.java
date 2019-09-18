@@ -17,22 +17,39 @@
 
 package com.metreeca.gae;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
 import static com.metreeca.gae.GAE.compare;
+import static com.metreeca.gae.services.Datastore.datastore;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 
+import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class GAETest extends GAETestBase {
+
+	@Test void test() {
+		exec(load(birt()), () -> service(datastore()).exec(service -> {
+
+			final Query query=new Query("Employee");
+
+			query.setFilter(new Query.FilterPredicate("office."+ KEY_RESERVED_PROPERTY,
+					Query.FilterOperator.EQUAL, GAE.key("/offices/4", "Office")));
+
+			System.out.println(service.prepare(query).asList(FetchOptions.Builder.withDefaults()));
+
+			return this;
+
+		}));
+	}
+
 
 	@Nested final class Keys {
 

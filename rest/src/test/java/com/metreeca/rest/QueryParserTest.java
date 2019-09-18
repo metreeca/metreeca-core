@@ -23,6 +23,7 @@ import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.queries.Items;
 import com.metreeca.tree.queries.Stats;
 import com.metreeca.tree.queries.Terms;
+import com.metreeca.tree.shapes.Field;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -110,13 +111,13 @@ final class QueryParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new QueryParser(shape, (value, shape1) ->
+		return new QueryParser(shape, (value, _shape) ->
 
 				value.equals(JsonValue.TRUE) ? true
 						: value.equals(JsonValue.FALSE) ? false
 						: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
 						: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
-						: value instanceof JsonString ? ((JsonString)value).getString()
+						: value instanceof JsonString ? ((JsonString)value).getString()+datatype(_shape).map(t -> "^"+t).orElse("")
 						: null
 
 		).parse(query.replace('\'', '"'));
@@ -357,6 +358,16 @@ final class QueryParserTest {
 				.isEqualTo(filter(shape, field("head", field("tail", any(One, Ten)))))
 		);
 
+	}
+
+	@Test void testParseShapedFilters() {
+
+		final Field shape=field("value", datatype("type"));
+
+		items("{ 'value': '4' }", shape, items -> assertThat(items.getShape())
+				.as("typed value")
+				.isEqualTo(filter(shape, field("value", any("4^type"))))
+		);
 	}
 
 

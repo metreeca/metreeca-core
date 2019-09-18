@@ -151,6 +151,22 @@ final class DatastoreRelatorTest extends GAETestBase {
 				);
 			}
 
+			@Test void testFiltered() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("seniority=4"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(items(e -> get(e, 0L, "seniority") == 4))
+								)
+						)
+
+				);
+			}
+
 
 			@Test void testSorted() {
 				exec(load(birt()), () -> new DatastoreRelator()

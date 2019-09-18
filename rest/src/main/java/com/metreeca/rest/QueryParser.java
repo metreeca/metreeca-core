@@ -38,7 +38,6 @@ import static com.metreeca.tree.Order.decreasing;
 import static com.metreeca.tree.Order.increasing;
 import static com.metreeca.tree.queries.Items.items;
 import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Field.fields;
 
 import static java.util.Collections.emptyList;
@@ -201,27 +200,27 @@ final class QueryParser {
 					final String key=entry.getKey();
 					final JsonValue value=entry.getValue();
 
-					return key.startsWith("^") ? filter(path(key.substring(1), shape), datatype(value))
-							: key.startsWith("@") ? filter(path(key.substring(1), shape), clazz(value))
+					return key.startsWith("^") ? filter(key.substring(1), value, shape, this::datatype)
+							: key.startsWith("@") ? filter(key.substring(1), value, shape, this::clazz)
 
-							: key.startsWith(">=") ? filter(path(key.substring(2), shape), minInclusive(value, shape))
-							: key.startsWith("<=") ? filter(path(key.substring(2), shape), maxInclusive(value, shape))
-							: key.startsWith(">") ? filter(path(key.substring(1), shape), minExclusive(value, shape))
-							: key.startsWith("<") ? filter(path(key.substring(1), shape), maxExclusive(value, shape))
+							: key.startsWith(">=") ? filter(key.substring(2), value, shape, this::minInclusive)
+							: key.startsWith("<=") ? filter(key.substring(2), value, shape, this::maxInclusive)
+							: key.startsWith(">") ? filter(key.substring(1), value, shape, this::minExclusive)
+							: key.startsWith("<") ? filter(key.substring(1), value, shape, this::maxExclusive)
 
-							: key.startsWith("$>") ? filter(path(key.substring(2), shape), minLength(value))
-							: key.startsWith("$<") ? filter(path(key.substring(2), shape), maxLength(value))
-							: key.startsWith("*") ? filter(path(key.substring(1), shape), pattern(value))
-							: key.startsWith("~") ? filter(path(key.substring(1), shape), like(value))
+							: key.startsWith("$>") ? filter(key.substring(2), value, shape, this::minLength)
+							: key.startsWith("$<") ? filter(key.substring(2), value, shape, this::maxLength)
+							: key.startsWith("*") ? filter(key.substring(1), value, shape, this::pattern)
+							: key.startsWith("~") ? filter(key.substring(1), value, shape, this::like)
 
-							: key.startsWith("#>") ? filter(path(key.substring(2), shape), minCount(value))
-							: key.startsWith("#<") ? filter(path(key.substring(2), shape), maxCount(value))
+							: key.startsWith("#>") ? filter(key.substring(2), value, shape, this::minCount)
+							: key.startsWith("#<") ? filter(key.substring(2), value, shape, this::maxCount)
 
-							: key.startsWith("%") ? filter(path(key.substring(1), shape), in(value, shape))
-							: key.startsWith("!") ? filter(path(key.substring(1), shape), all(value, shape))
-							: key.startsWith("?") ? filter(path(key.substring(1), shape), any(value, shape))
+							: key.startsWith("%") ? filter(key.substring(1), value, shape, this::in)
+							: key.startsWith("!") ? filter(key.substring(1), value, shape, this::all)
+							: key.startsWith("?") ? filter(key.substring(1), value, shape, this::any)
 
-							: filter(path(key, shape), any(value, shape));
+							: filter(key, value, shape, this::any);
 
 				})
 
@@ -229,8 +228,17 @@ final class QueryParser {
 		);
 	}
 
-	private Shape filter(final List<String> path, final Shape shape) {
-		return path.isEmpty() ? shape : field(path.get(0), filter(path.subList(1, path.size()), shape));
+
+	private Shape filter(final String path,
+			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper) {
+		return filter(steps(path), value, shape, mapper);
+	}
+
+	private Shape filter(final List<String> path,
+			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper) {
+
+		return path.isEmpty() ? mapper.apply(value, shape)
+				: Field.field(head(path), filter(tail(path), value, field(head(path), shape), mapper));
 	}
 
 
@@ -254,6 +262,22 @@ final class QueryParser {
 				.map((path) -> path(path.getString(), shape))
 
 				.orElse(null);
+	}
+
+
+	private List<String> path(final CharSequence path, final Shape shape) {
+		return path(steps(path), shape);
+	}
+
+	private List<String> path(final List<String> path, final Shape shape) {
+
+		if ( !path.isEmpty() ) {
+
+			path(tail(path), field(head(path), shape)); // validate tail
+
+		}
+
+		return path; // return whole path
 	}
 
 
@@ -323,9 +347,9 @@ final class QueryParser {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<String> path(final CharSequence path, final Shape shape) {
+	private List<String> steps(final CharSequence path) {
 
-		final Collection<String> steps=new ArrayList<>();
+		final List<String> steps=new ArrayList<>();
 
 		final Matcher matcher=StepPattern.matcher(path);
 
@@ -347,37 +371,34 @@ final class QueryParser {
 			throw new JsonException("malformed path ["+path+"]");
 		}
 
-		return path(steps, shape);
+		return steps;
 	}
 
-	private List<String> path(final Iterable<String> steps, final Shape shape) {
 
-		final List<String> path=new ArrayList<>();
+	private String head(final List<String> path) {
+		return path.get(0);
+	}
 
-		Shape reference=shape;
+	private List<String> tail(final List<String> path) {
+		return path.subList(1, path.size());
+	}
 
-		for (final String step : steps) {
 
-			final Map<String, Shape> fields=fields(reference);
+	private Shape field(final String label, final Shape shape) {
 
-			final Map<String, String> index=new HashMap<>();
+		final Map<String, Shape> fields=fields(shape);
+		final Map<String, String> index=new HashMap<>();
 
-			fields.keySet().forEach(label -> index.put(label, label));
-			// !!! aliases(reference).forEach((alias, label) -> index.put(alias, label)
+		fields.keySet().forEach(name -> index.put(name, name));
+		// !!! aliases(reference).forEach((alias, label) -> index.put(alias, label)
 
-			final String label=index.get(step);
+		final String name=index.get(label);
 
-			if ( label == null ) {
-				throw new NoSuchElementException("unknown path step ["+step+"]");
-			}
-
-			path.add(label);
-			reference=fields.get(label);
-
+		if ( name == null ) {
+			throw new NoSuchElementException("unknown path step ["+label+"]");
 		}
 
-		return path;
-
+		return fields.get(name);
 	}
 
 
@@ -396,13 +417,13 @@ final class QueryParser {
 
 	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape datatype(final JsonValue value) {
+	private Shape datatype(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString
 				? Datatype.datatype(((JsonString)value).getString())
 				: error("datatype value is not a string");
 	}
 
-	private Shape clazz(final JsonValue value) {
+	private Shape clazz(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString
 				? Clazz.clazz(((JsonString)value).getString())
 				: error("class value is not a string");
@@ -434,38 +455,38 @@ final class QueryParser {
 	}
 
 
-	private Shape minLength(final JsonValue value) {
+	private Shape minLength(final JsonValue value, final Shape shape) {
 		return value instanceof JsonNumber
 				? MinLength.minLength(((JsonNumber)value).intValue())
 				: error("length is not a number");
 	}
 
-	private Shape maxLength(final JsonValue value) {
+	private Shape maxLength(final JsonValue value, final Shape shape) {
 		return value instanceof JsonNumber
 				? MaxLength.maxLength(((JsonNumber)value).intValue())
 				: error("length is not a number");
 	}
 
-	private Shape pattern(final JsonValue value) {
+	private Shape pattern(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString
 				? ((JsonString)value).getString().isEmpty() ? and() : Pattern.pattern(((JsonString)value).getString())
 				: error("pattern is not a string");
 	}
 
-	private Shape like(final JsonValue value) {
+	private Shape like(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString
 				? ((JsonString)value).getString().isEmpty() ? and() : Like.like(((JsonString)value).getString())
 				: error("pattern is not a string");
 	}
 
 
-	private Shape minCount(final JsonValue value) {
+	private Shape minCount(final JsonValue value, final Shape shape) {
 		return value instanceof JsonNumber
 				? MinCount.minCount(((JsonNumber)value).intValue())
 				: error("length is not a number");
 	}
 
-	private Shape maxCount(final JsonValue value) {
+	private Shape maxCount(final JsonValue value, final Shape shape) {
 		return value instanceof JsonNumber
 				? MaxCount.maxCount(((JsonNumber)value).intValue())
 				: error("length is not a number");
