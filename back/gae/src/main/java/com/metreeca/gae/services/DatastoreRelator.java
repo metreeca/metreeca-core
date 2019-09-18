@@ -66,11 +66,14 @@ import static java.util.stream.StreamSupport.stream;
 
 final class DatastoreRelator extends DatastoreProcessor {
 
+	private static final Shape TermShape=and(
+			field(GAE.id, and(optional(), datatype(GAE.String))),
+			field(GAE.label, and(optional(), datatype(GAE.String)))
+	);
+
 	private static final Shape TermsShape=and(
 			field(GAE.terms, and(multiple(),
-					field(GAE.value, and(required(),
-							field(GAE.label, and(optional(), datatype(GAE.String)))
-					)),
+					field(GAE.value, and(required(), TermShape)),
 					field(GAE.count, and(required(), datatype(GAE.Integral)))
 			))
 	);
@@ -78,14 +81,14 @@ final class DatastoreRelator extends DatastoreProcessor {
 	private static final Shape StatsShape=and(
 
 			field(GAE.count, and(required(), datatype(GAE.Integral))),
-			field(GAE.min, optional()),
-			field(GAE.max, optional()),
+			field(GAE.min, and(optional(), TermShape)),
+			field(GAE.max, and(optional(), TermShape)),
 
 			field(GAE.stats, and(multiple(),
 					field(GAE.type, and(required(), datatype(GAE.String))),
 					field(GAE.count, and(required(), datatype(GAE.Integral))),
-					field(GAE.min, required()),
-					field(GAE.max, required())
+					field(GAE.min, and(required(), TermShape)),
+					field(GAE.max, and(required(), TermShape))
 			))
 
 	);
