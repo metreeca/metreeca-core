@@ -94,6 +94,11 @@ final class DatastoreRelator extends DatastoreProcessor {
 	);
 
 
+	private static String key(final String path) {
+		return path+"."+KEY_RESERVED_PROPERTY;
+	}
+
+
 	private static String property(final Iterable<String> path) {
 		return String.join(".", path);  // !!! handle/reject path steps containing dots
 	}
@@ -510,19 +515,19 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Stream<String> probe(final MinExclusive minExclusive) {
-			return Stream.of(path);
+			return Stream.of(minExclusive.getValue() instanceof EmbeddedEntity? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MaxExclusive maxExclusive) {
-			return Stream.of(path);
+			return Stream.of(maxExclusive.getValue() instanceof EmbeddedEntity? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MinInclusive minInclusive) {
-			return Stream.of(path);
+			return Stream.of(minInclusive.getValue() instanceof EmbeddedEntity? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MaxInclusive maxInclusive) {
-			return Stream.of(path);
+			return Stream.of(maxInclusive.getValue() instanceof EmbeddedEntity? key(path) : path);
 		}
 
 
@@ -553,26 +558,38 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Query.Filter probe(final MinExclusive minExclusive) {
-			return inequalities.contains(path)
-					? op(path, GREATER_THAN, minExclusive.getValue())
+
+			final Object limit=minExclusive.getValue();
+
+			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+					? op(path, GREATER_THAN, limit)
 					: null;
 		}
 
 		@Override public Query.Filter probe(final MaxExclusive maxExclusive) {
-			return inequalities.contains(path)
-					? op(path, LESS_THAN, maxExclusive.getValue())
+
+			final Object limit=maxExclusive.getValue();
+
+			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+					? op(path, LESS_THAN, limit)
 					: null;
 		}
 
 		@Override public Query.Filter probe(final MinInclusive minInclusive) {
-			return inequalities.contains(path)
-					? op(path, GREATER_THAN_OR_EQUAL, minInclusive.getValue())
+
+			final Object limit=minInclusive.getValue();
+
+			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+					? op(path, GREATER_THAN_OR_EQUAL, limit)
 					: null;
 		}
 
 		@Override public Query.Filter probe(final MaxInclusive maxInclusive) {
-			return inequalities.contains(path)
-					? op(path, LESS_THAN_OR_EQUAL, maxInclusive.getValue())
+
+			final Object limit=maxInclusive.getValue();
+
+			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
+					? op(path, LESS_THAN_OR_EQUAL, limit)
 					: null;
 		}
 
@@ -639,11 +656,6 @@ final class DatastoreRelator extends DatastoreProcessor {
 					: new FilterPredicate(path, op, value);
 		}
 
-
-		private String key(final String path) {
-			return path+"."+KEY_RESERVED_PROPERTY;
-		}
-
 	}
 
 	private static final class PredicateProbe extends RelatorProbe<Predicate<Object>> {
@@ -672,7 +684,8 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final String name=clazz.getName();
 
 			return path.isEmpty() ? null : values -> stream(values).allMatch(value ->
-					value instanceof PropertyContainer && name.equals(GAE.kind((PropertyContainer)value))
+					Optional.ofNullable(GAE.key(value)).map(Key::getKind).filter(kind -> kind.equals(name)).isPresent()
+
 			);
 		}
 
@@ -681,7 +694,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=minExclusive.getValue();
 
-			return inequalities.contains(path)
+			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
 					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) > 0)
 					: null;
 		}
@@ -690,7 +703,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=maxExclusive.getValue();
 
-			return inequalities.contains(path)
+			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
 					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) < 0)
 					: null;
 		}
@@ -699,7 +712,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=minInclusive.getValue();
 
-			return inequalities.contains(path)
+			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
 					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) >= 0)
 					: null;
 		}
@@ -708,7 +721,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			final Object limit=maxInclusive.getValue();
 
-			return inequalities.contains(path)
+			return inequalities.contains(limit instanceof EmbeddedEntity? key(path) : path)
 					? values -> stream(values).allMatch(value -> GAE.compare(value, limit) <= 0)
 					: null;
 		}

@@ -226,26 +226,10 @@ public final class GAE {
 
 	//// Entity Utilities //////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static Key key(final PropertyContainer container) {
-
-		if ( container == null ) {
-			throw new NullPointerException("null container");
-		}
-
-		return container instanceof Entity ? ((Entity)container).getKey()
-				: container instanceof EmbeddedEntity ? ((EmbeddedEntity)container).getKey()
+	public static Key key(final Object object) {
+		return object instanceof Entity ? ((Entity)object).getKey()
+				: object instanceof EmbeddedEntity ? ((EmbeddedEntity)object).getKey()
 				: null;
-	}
-
-	public static String kind(final PropertyContainer container) {
-
-		if ( container == null ) {
-			throw new NullPointerException("null container");
-		}
-
-		final Key key=key(container);
-
-		return key != null ? key.getKind() : null;
 	}
 
 

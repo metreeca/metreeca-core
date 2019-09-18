@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.metreeca.gae.GAE.get;
+import static com.metreeca.gae.GAE.key;
 import static com.metreeca.gae.formats.EntityFormat.entity;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -160,7 +161,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e
 												-> get(e, 0L, "seniority") > 3
-												&& get(e, new EmbeddedEntity(), "office").getKey().equals(GAE.key("/offices/1", "Office"))
+												&& get(e, new EmbeddedEntity(), "office").getKey().equals(key("/offices/1", "Office"))
 										))
 								)
 						)
@@ -486,7 +487,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 												.stream()
 												.map(EmbeddedEntity::getKey)
 												.collect(toList())
-												.contains(GAE.key("/employees/1076", "Employee"))
+												.contains(key("/employees/1076", "Employee"))
 										))
 								)
 						)
@@ -506,8 +507,8 @@ final class DatastoreRelatorTest extends GAETestBase {
 												.map(EmbeddedEntity::getKey)
 												.collect(toList())
 												.containsAll(asList(
-														GAE.key("/employees/1076", "Employee"),
-														GAE.key("/employees/1056", "Employee")
+														key("/employees/1076", "Employee"),
+														key("/employees/1056", "Employee")
 												))
 										))
 								)
@@ -573,8 +574,8 @@ final class DatastoreRelatorTest extends GAETestBase {
 										.isEqualTo(items(e -> {
 
 											final Key office=((EmbeddedEntity)e.getProperty("office")).getKey();
-											final Key office1=GAE.key("/offices/1", "Office");
-											final Key office2=GAE.key("/offices/2", "Office");
+											final Key office1=key("/offices/1", "Office");
+											final Key office2=key("/offices/2", "Office");
 
 											return office.equals(office1) || office.equals(office2);
 
@@ -598,6 +599,32 @@ final class DatastoreRelatorTest extends GAETestBase {
 						)
 
 				).isInstanceOf(UnsupportedOperationException.class));
+			}
+
+
+			@Test void testInequalitiesOnEntity() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request(">office=/offices/1&<supervisor=/employees/1500"))
+
+						.accept(response -> assertThat(response)
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(items(e -> {
+
+											final Key office=key(e.getProperty("office"));
+											final Key supervisor=key(e.getProperty("supervisor"));
+
+											final Key office1=key("/offices/1", "Office");
+											final Key employee1500=key("/employees/1500", "Employee");
+
+											return office.compareTo(office1) > 0
+													&&  supervisor != null && supervisor.compareTo(employee1500) < 0;
+
+										}))
+								)
+						)
+
+				);
 			}
 
 		}
@@ -796,7 +823,7 @@ final class DatastoreRelatorTest extends GAETestBase {
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
 												e -> e.getProperty("seniority"),
-												e -> get(e, new EmbeddedEntity(), "office").getKey().equals(GAE.key("/offices/1", "Office"))
+												e -> get(e, new EmbeddedEntity(), "office").getKey().equals(key("/offices/1", "Office"))
 										))
 								)
 						)
