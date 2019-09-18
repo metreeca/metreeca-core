@@ -166,48 +166,43 @@ public final class GAE {
 
 	//// Key Generation ////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Key key(final String path) { // !!! tbd
+	public static Key key(final String id) { // !!! tbd
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
+		if ( id == null ) {
+			throw new NullPointerException("null id");
 		}
 
-		return key(path, "");
+		return key(id, "");
 	}
 
-	public static Key key(final String path, final Shape shape) { // !!! tbd
+	public static Key key(final String id, final Shape shape) { // !!! tbd
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
+		if ( id == null ) {
+			throw new NullPointerException("null id");
 		}
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		return key(path, clazz(shape).orElse(""));
+		return key(id, clazz(shape).orElse(""));
 
 	}
 
 	/**
 	 * Creates a datastore key for a resource.
 	 *
-	 * @param path the path of the resource; falls back to {@code "/"} if empty
+	 * @param id the id of the resource; falls back to {@code "/"} if empty
 	 * @param type the type of the resource; falls back to {@value #Entity} if empty
 	 *
-	 * @return a datastore key for the resource identified by {@code path} and {@code type}
+	 * @return a datastore key for the resource identified by {@code id} and {@code type}
 	 *
-	 * @throws NullPointerException     if either {@code path} or {@code type} is null
-	 * @throws IllegalArgumentException if {@code path} is not empty and doesn't include a leading slash
+	 * @throws NullPointerException     if either {@code id} or {@code type} is null
 	 */
-	public static Key key(final String path, final String type) {
+	public static Key key(final String id, final String type) {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		if ( !path.isEmpty() && !path.startsWith("/") ) {
-			throw new IllegalArgumentException("illegal path {"+path+"}");
+		if ( id == null ) {
+			throw new NullPointerException("null id");
 		}
 
 		if ( type == null ) {
@@ -216,15 +211,17 @@ public final class GAE {
 
 		Key ancestor=null;
 
-		for (int slash=0; slash >= 0; slash=path.indexOf('/', slash+1)) {
-			if ( slash > 0 && slash+1 < path.length() ) { // ignore leading/trailing slashes
+		if ( id.startsWith("/") ) {
+			for (int slash=0; slash >= 0; slash=id.indexOf('/', slash+1)) {
+				if ( slash > 0 && slash+1 < id.length() ) { // ignore leading/trailing slashes
 
-				ancestor=createKey(ancestor, Entity, path.substring(0, slash+1));
+					ancestor=createKey(ancestor, Entity, id.substring(0, slash+1));
 
+				}
 			}
 		}
 
-		return createKey(ancestor, type.isEmpty()? Entity : type, path.isEmpty()? "/" : path);
+		return createKey(ancestor, type.isEmpty()? Entity : type, id.isEmpty()? "/" : id);
 	}
 
 

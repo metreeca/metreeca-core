@@ -17,19 +17,17 @@
 
 package com.metreeca.gae;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import static com.metreeca.gae.GAE.compare;
-import static com.metreeca.gae.services.Datastore.datastore;
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 
-import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -76,6 +74,15 @@ final class GAETest extends GAETestBase {
 					.isEqualTo(createKey(createKey(
 							GAE.Entity, "/container/"),
 							"Kind", "/container/resource"));
+
+		}
+
+
+		@Test void testExternal () {
+
+			assertThat(GAE.key("http://example.com/path", clazz("Kind")))
+					.isEqualTo(createKey(
+							"Kind", "http://example.com/path"));
 
 		}
 
