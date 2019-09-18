@@ -171,10 +171,10 @@ final class GAETest extends GAETestBase {
 
 		@Test void testEntities() {
 
-			final Entity a=new Entity("*", "a");
+			final Entity a=new Entity(GAE.Entity, "a");
 			final EmbeddedEntity b=new EmbeddedEntity();
 
-			b.setKey(createKey("*", "b"));
+			b.setKey(createKey(GAE.Entity, "b"));
 
 			assertThat(compare(a, b)).isLessThan(0);
 			assertThat(compare(a, a)).isEqualTo(0);
@@ -185,7 +185,6 @@ final class GAETest extends GAETestBase {
 
 			assertThat(compare(a, new EmbeddedEntity())).isGreaterThan(0);
 			assertThat(compare(new EmbeddedEntity(), a)).isLessThan(0);
-			assertThat(compare(new EmbeddedEntity(), new EmbeddedEntity())).isEqualTo(0);
 
 		}
 

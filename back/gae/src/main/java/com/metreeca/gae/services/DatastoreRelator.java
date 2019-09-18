@@ -175,9 +175,18 @@ final class DatastoreRelator extends DatastoreProcessor {
 				.entrySet()
 				.stream()
 
-				.sorted(Map.Entry
-						.<Object, Long>comparingByValue().reversed() // decreasing count
-						.thenComparing(comparingByKey(GAE::compare)) // increasing value
+				.sorted(Map.Entry.<Object, Long>
+
+						comparingByValue().reversed() // decreasing count
+
+						.thenComparing(comparingByKey(
+
+								comparing(v -> GAE.get(v, "", GAE.label)) // increasing label
+
+										.thenComparing(GAE::compare) // increasing value
+
+						))
+
 				)
 
 				.map(entry -> {
@@ -581,8 +590,8 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			return values.isEmpty() ? null
 					: values.size() == 1 ? op(path, EQUAL, values.iterator().next())
-					: values.stream().noneMatch(v -> v instanceof EmbeddedEntity)? new FilterPredicate(path, IN, values)
-					: values.stream().allMatch(v -> v instanceof EmbeddedEntity)? new FilterPredicate(key(path), IN,
+					: values.stream().noneMatch(v -> v instanceof EmbeddedEntity) ? new FilterPredicate(path, IN, values)
+					: values.stream().allMatch(v -> v instanceof EmbeddedEntity) ? new FilterPredicate(key(path), IN,
 					values.stream().map(value -> ((EmbeddedEntity)value).getKey()).collect(toList())
 			)
 					: or(values.stream().map(value -> op(path, EQUAL, value)).collect(toList()));

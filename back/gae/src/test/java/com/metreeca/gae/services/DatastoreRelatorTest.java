@@ -626,7 +626,9 @@ final class DatastoreRelatorTest extends GAETestBase {
 
 						.sorted(Comparator.<Map.Entry<Object, Long>>
 								comparingLong(Map.Entry::getValue).reversed()
-								.thenComparing(Map.Entry::getKey, GAE::compare)
+								.thenComparing(Map.Entry::getKey,
+										comparing(v -> get(v, "", GAE.label)).thenComparing(GAE::compare)
+								)
 						)
 
 						.map(entry -> {

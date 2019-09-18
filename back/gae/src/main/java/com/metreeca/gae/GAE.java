@@ -22,10 +22,7 @@ import com.metreeca.tree.Shape;
 
 import com.google.appengine.api.datastore.*;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Objects;
-import java.util.function.Function;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -33,7 +30,9 @@ import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static com.google.appengine.api.datastore.KeyFactory.createKey;
 
+import static java.lang.System.identityHashCode;
 import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
 
@@ -192,12 +191,12 @@ public final class GAE {
 	/**
 	 * Creates a datastore key for a resource.
 	 *
-	 * @param id the id of the resource; falls back to {@code "/"} if empty
+	 * @param id   the id of the resource; falls back to {@code "/"} if empty
 	 * @param type the type of the resource; falls back to {@value #Entity} if empty
 	 *
 	 * @return a datastore key for the resource identified by {@code id} and {@code type}
 	 *
-	 * @throws NullPointerException     if either {@code id} or {@code type} is null
+	 * @throws NullPointerException if either {@code id} or {@code type} is null
 	 */
 	public static Key key(final String id, final String type) {
 
@@ -211,7 +210,7 @@ public final class GAE {
 
 		Key ancestor=null;
 
-		if ( id.startsWith("/") ) {
+		if ( id.startsWith("/") ) { // ignore external ids
 			for (int slash=0; slash >= 0; slash=id.indexOf('/', slash+1)) {
 				if ( slash > 0 && slash+1 < id.length() ) { // ignore leading/trailing slashes
 
@@ -221,7 +220,7 @@ public final class GAE {
 			}
 		}
 
-		return createKey(ancestor, type.isEmpty()? Entity : type, id.isEmpty()? "/" : id);
+		return createKey(ancestor, type.isEmpty() ? Entity : type, id.isEmpty() ? "/" : id);
 	}
 
 
@@ -250,34 +249,34 @@ public final class GAE {
 	}
 
 
-	public static Object get(final PropertyContainer container, final String path) {
+	public static Object get(final Object container, final String path) {
 		return get(container, DotPattern.split(path));
 	}
 
-	public static Object get(final PropertyContainer container, final String... path) {
+	public static Object get(final Object container, final String... path) {
 		return get(container, asList(path));
 	}
 
-	public static Object get(final PropertyContainer container, final Iterable<String> path) {
+	public static Object get(final Object container, final Iterable<String> path) {
 		return get(container, null, path);
 	}
 
 
-	public static <T> T get(final PropertyContainer container, final T fallback, final String path) {
+	public static <T> T get(final Object container, final T fallback, final String path) {
 		return get(container, fallback, DotPattern.split(path));
 	}
 
-	public static <T> T get(final PropertyContainer container, final T fallback, final String... path) {
+	public static <T> T get(final Object container, final T fallback, final String... path) {
 		return get(container, fallback, asList(path));
 	}
 
-	@SuppressWarnings("unchecked") public static <T> T get(final PropertyContainer container, final T fallback, final Iterable<String> path) {
+	@SuppressWarnings("unchecked") public static <T> T get(final Object object, final T fallback, final Iterable<String> path) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
 		}
 
-		Object value=container;
+		Object value=object;
 
 		for (final String step : path) {
 
@@ -388,26 +387,15 @@ public final class GAE {
 
 	private static int Entity(final Object x, final Object y) {
 
-		final Function<Object, Object> order=v -> Stream.<Function<Object, Object>>of(
+		final Comparator<PropertyContainer> comparator=comparing(container -> // ensure total ordering
+				Optional.ofNullable(key(container)).orElseGet(() -> createKey(Entity, identityHashCode(container)))
+		);
 
-				o -> ((PropertyContainer)o).getProperty(label),
-				o -> ((PropertyContainer)o).getProperty(id),
-
-				o -> o instanceof Entity ? ((Entity)o).getKey() : null,
-				o -> o instanceof EmbeddedEntity ? ((EmbeddedEntity)o).getKey() : null
-
-		)
-
-				.map(f -> f.apply(v))
-				.filter(Objects::nonNull)
-				.findFirst()
-				.orElse(null);
-
-		return compare(order.apply(x), order.apply(y));
+		return comparator.compare((PropertyContainer)x, (PropertyContainer)y);
 	}
 
 	private static int Other(final Object x, final Object y) {
-		return Integer.compare(System.identityHashCode(x), System.identityHashCode(y));
+		return Integer.compare(identityHashCode(x), identityHashCode(y));
 	}
 
 
