@@ -34,11 +34,19 @@
     <name>Metreeca Google App Engine Adapter</name>
     <description>Adapter kit for Google App Engine.</description>
 
-    <properties>
+    <dependencyManagement>
+        <dependencies>
 
-        <gae.version>1.9.76</gae.version> <!-- https://search.maven.org/search?q=g:com.google.appengine -->
+            <dependency> <!-- https://search.maven.org/search?q=a:google-cloud-bom -->
+                <groupId>com.google.cloud</groupId>
+                <artifactId>google-cloud-bom</artifactId>
+                <version>0.110.0-alpha</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
-    </properties>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
 
@@ -49,9 +57,8 @@
 	    </dependency>
 
         <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>${gae.version}</version>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-datastore</artifactId>
         </dependency>
 
 
@@ -60,20 +67,6 @@
             <artifactId>metreeca-rest</artifactId>
             <version>0.0.0-SNAPSHOT</version>
             <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-stubs</artifactId>
-            <version>${gae.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-testing</artifactId>
-            <version>${gae.version}</version>
             <scope>test</scope>
         </dependency>
 

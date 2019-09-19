@@ -17,198 +17,185 @@
 
 package com.metreeca.gae;
 
+import com.metreeca.gae.services.DatastoreService;
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Context;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import org.junit.jupiter.api.AfterEach;
+import com.google.cloud.datastore.Batch;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.EntityValue;
+import com.google.cloud.datastore.testing.LocalDatastoreHelper;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import static com.metreeca.gae.services.Datastore.datastore;
+import static com.metreeca.gae.services.DatastoreService.datastore;
 import static com.metreeca.rest.Context.service;
 
-import static com.google.appengine.api.datastore.KeyFactory.createKey;
-
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 
 
 public abstract class GAETestBase {
 
-	private static final LocalServiceTestHelper helper=new LocalServiceTestHelper(
-			new LocalDatastoreServiceTestConfig()
-	);
+	private static final LocalDatastoreHelper helper=LocalDatastoreHelper.create(1.0);
 
 
-	@BeforeEach void setUp() {
-		helper.setUp();
+	@BeforeAll static void start() throws IOException, InterruptedException {
+		helper.start();
 	}
 
-	@AfterEach void tearDown() {
-		helper.tearDown();
+	@AfterAll static void stop() throws IOException, InterruptedException, TimeoutException {
+		helper.stop();
+	}
+
+	@BeforeEach void reset() throws IOException {
+		helper.reset();
 	}
 
 
 	protected void exec(final Runnable... tasks) {
 		new Context()
+				.set(datastore(), () -> new DatastoreService(helper.getOptions()))
 				.exec(tasks)
 				.clear();
 	}
 
 
-	protected Runnable load(final Entity... entities) {
-		return load(asList(entities));
-	}
+	protected Runnable load(final Supplier<? extends Iterable<Entity>> entities) {
+		return () -> service(datastore()).exec(datastore -> {
 
-	protected Runnable load(final Iterable<Entity> entities) {
-		return () -> service(datastore()).exec(datastore -> datastore.put(entities));
+			final Batch batch=datastore.newBatch();
+
+			service(entities).forEach(batch::put); // cache for future use
+
+			return batch.submit();
+
+		});
 	}
 
 
 	//// BIRT Test Dataset /////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected Collection<Entity> birt() {
-		return unmodifiableCollection(BIRT.Entities);
-	}
+	protected Supplier<Collection<Entity>> birt() {
+		return () -> {
 
-
-	private static final class BIRT {
-
-		private static final Collection<Entity> Entities=entities(
-				Json.createReader(Codecs.input(GAETestBase.class, ".json")).readObject()
-		);
-
-
-		private static Collection<Entity> entities(final JsonObject _entities) {
+			final JsonObject _entities=Json.createReader(Codecs.input(GAETestBase.class, ".json")).readObject();
 
 			final Collection<Entity> entities=new ArrayList<>();
 
 			entities.addAll(offices(_entities.getJsonArray("offices")));
 			entities.addAll(employees(_entities.getJsonArray("employees")));
 
-			return entities;
-		}
+			return unmodifiableCollection(entities);
 
-		private static List<Entity> offices(final Collection<JsonValue> _offices) {
-			return _offices.stream().map(JsonValue::asJsonObject).map(_office -> {
-
-				final Entity office=new Entity(GAE.key(
-						"/offices/"+_office.getString("code"),
-						"Office"
-				));
-
-				office.setProperty("code", _office.getString("code"));
-				office.setProperty("label", _office.getString("label"));
-
-				final JsonObject _country=_office.getJsonObject("country");
-
-				final EmbeddedEntity country=new EmbeddedEntity();
-
-				country.setKey(createKey("Country", format("http://sws.geonames.org/%s/", _country.getString("code"))));
-				country.setProperty("label", _country.getString("label"));
-
-				office.setIndexedProperty("country", country);
-
-				final JsonObject _city=_office.getJsonObject("city");
-
-				final EmbeddedEntity city=new EmbeddedEntity();
-
-				city.setKey(createKey("City", format("http://sws.geonames.org/%s/", _city.getString("code"))));
-				city.setProperty("label", _city.getString("label"));
-
-				office.setIndexedProperty("city", city);
-
-				return office;
-
-			}).collect(toList());
-		}
-
-		private static List<Entity> employees(final Collection<JsonValue> _employees) {
-
-			final List<Entity> employees=_employees.stream().map(JsonValue::asJsonObject).map(_employee -> {
-
-				final Entity employee=new Entity(GAE.key(
-						"/employees/"+_employee.getString("code"),
-						"Employee"
-				));
-
-				employee.setProperty("code", _employee.getString("code"));
-				employee.setProperty("label", _employee.getString("label"));
-
-				employee.setProperty("forename", _employee.getString("forename"));
-				employee.setProperty("surname", _employee.getString("surname"));
-
-				employee.setProperty("email", _employee.getString("email"));
-				employee.setProperty("title", _employee.getString("title"));
-				employee.setProperty("seniority", _employee.getJsonNumber("seniority").longValue()); // integrals stored as longs
-
-				final JsonObject _office=_employee.getJsonObject("office");
-				final EmbeddedEntity office=new EmbeddedEntity();
-
-				office.setKey(GAE.key(format("/offices/%s", _office.getString("code")), "Office"));
-				office.setProperty("label", _office.getString("label"));
-
-				employee.setIndexedProperty("office", office);
-
-				Optional.ofNullable(_employee.getJsonObject("supervisor")).ifPresent(_supervisor -> {
-
-					final EmbeddedEntity supervisor=new EmbeddedEntity();
-
-					supervisor.setKey(GAE.key(format("/employees/%s", _supervisor.getString("code")), "Employee"));
-					supervisor.setProperty("label", _supervisor.getString("label"));
-
-					employee.setIndexedProperty("supervisor", supervisor);
-
-				});
-
-				return employee;
-
-			}).collect(toList());
-
-			employees.forEach(supervisor -> {
-
-				final List<EmbeddedEntity> subordinates=employees.stream()
-
-						.filter(subordinate -> {
-
-							final EmbeddedEntity _supervisor=(EmbeddedEntity)subordinate.getProperty("supervisor");
-
-							return _supervisor != null && _supervisor.getKey().equals(supervisor.getKey());
-						})
-
-						.map(subordinate -> {
-
-							final EmbeddedEntity embedded=new EmbeddedEntity();
-
-							embedded.setKey(subordinate.getKey());
-							embedded.setProperty("label", subordinate.getProperty("label"));
-
-							return embedded;
-
-						})
-
-						.collect(toList());
-
-				if ( !subordinates.isEmpty() ) {
-					supervisor.setIndexedProperty("subordinates", subordinates);
-				}
-
-			});
-
-			return employees;
-		}
-
+		};
 	}
+
+
+	private static List<Entity> offices(final Collection<JsonValue> _offices) {
+
+		final DatastoreService datastore=service(datastore());
+
+		return _offices.stream().map(JsonValue::asJsonObject).map(_office -> {
+
+			final JsonObject _country=_office.getJsonObject("country");
+			final JsonObject _city=_office.getJsonObject("city");
+
+			return Entity
+
+					.newBuilder(datastore.key("/offices/"+_office.getString("code"), "Office"))
+
+					.set("code", _office.getString("code"))
+					.set("label", _office.getString("label"))
+
+					.set("country", Entity
+							.newBuilder(datastore.key(format("http://sws.geonames.org/%s/", _country.getString("code")), "Location"))
+							.set("label", _country.getString("label"))
+							.build()
+					)
+
+					.set("city", Entity
+							.newBuilder(datastore.key(format("http://sws.geonames.org/%s/", _city.getString("code")), "Location"))
+							.set("label", _city.getString("label"))
+							.build()
+					)
+
+					.build();
+
+		}).collect(toList());
+	}
+
+	private static List<Entity> employees(final Collection<JsonValue> _employees) {
+
+		final DatastoreService datastore=service(datastore());
+
+		return _employees.stream().map(JsonValue::asJsonObject).map(_employee -> {
+
+			final JsonObject _office=_employee.getJsonObject("office");
+			final JsonObject _supervisor=_employee.getJsonObject("supervisor");
+
+			final Entity.Builder employee=Entity
+
+					.newBuilder(datastore.key("/employees/"+_employee.getString("code"), "Employee"))
+
+					.set("code", _employee.getString("code"))
+					.set("label", _employee.getString("label"))
+					.set("forename", _employee.getString("forename"))
+					.set("surname", _employee.getString("surname"))
+
+					.set("email", _employee.getString("email"))
+					.set("title", _employee.getString("title"))
+					.set("seniority", _employee.getJsonNumber("seniority").longValue()) // integrals stored as longs
+
+
+					.set("office", Entity
+							.newBuilder(datastore.key(format("/offices/%s", _office.getString("code")), "Office"))
+							.set("label", _office.getString("label"))
+							.build()
+					);
+
+			Optional.ofNullable(_supervisor).ifPresent(s -> employee.set("supervisor", Entity
+					.newBuilder(datastore.key(format("/employees/%s", s.getString("code")), "Employee"))
+					.set("label", s.getString("label"))
+					.build()
+			));
+
+			final List<EntityValue> subordinates=_employees.stream().map(JsonValue::asJsonObject)
+
+					.filter(_subordinate -> _subordinate.containsKey("supervisor")
+							&& _subordinate.getJsonObject("supervisor").getString("code").equals(_employee.getString("code"))
+					)
+
+					.map(_subordinate -> Entity
+							.newBuilder(datastore.key("/employees/"+_subordinate.getString("code"), "Employee"))
+							.set("label", _subordinate.getString("label"))
+							.build()
+					)
+
+					.map(EntityValue::of)
+
+					.collect(toList());
+
+			if ( !subordinates.isEmpty() ) {
+				employee.set("subordinates", subordinates);
+			}
+
+			return employee.build();
+
+		}).collect(toList());
+	}
+
+
 
 }

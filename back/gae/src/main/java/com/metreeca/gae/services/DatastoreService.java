@@ -17,10 +17,14 @@
 
 package com.metreeca.gae.services;
 
-import com.google.appengine.api.datastore.*;
+import com.metreeca.tree.Shape;
+
+import com.google.cloud.datastore.*;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static java.util.Objects.requireNonNull;
 
@@ -28,22 +32,20 @@ import static java.util.Objects.requireNonNull;
 /**
  * Google Cloud Datastore.
  *
- * <p>Manages task execution on Cloud Datastore .</p>
+ * <p>Manages task execution on Cloud Datastore.</p>
  *
  * <p>Nested task executions on the datastore from the same thread will share the same transaction through a {@link
  * ThreadLocal} context variable.</p>
  */
-public final class Datastore {
+public final class DatastoreService {
 
 	/**
 	 * Retrieves the default datastore factory.
 	 *
 	 * @return the default datastore factory, which creates datastores with the default configuration
 	 */
-	public static Supplier<Datastore> datastore() {
-		return () -> new Datastore(DatastoreServiceConfig.Builder.withDefaults()
-				.implicitTransactionManagementPolicy(ImplicitTransactionManagementPolicy.AUTO)
-		);
+	public static Supplier<DatastoreService> datastore() {
+		return () -> new DatastoreService(DatastoreOptions.getDefaultInstance());
 	}
 
 
@@ -52,23 +54,74 @@ public final class Datastore {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final DatastoreService datastore;
+	private final Datastore datastore;
 
 
 	/**
 	 * Create a new datastore.
 	 *
-	 * @param config the datastore configuration
+	 * @param options the datastore options
 	 *
-	 * @throws NullPointerException if {@code config} is null
+	 * @throws NullPointerException if {@code options} is null
 	 */
-	public Datastore(final DatastoreServiceConfig config) {
+	public DatastoreService(final DatastoreOptions options) {
 
-		if ( config == null ) {
-			throw new NullPointerException("null config");
+		if ( options == null ) {
+			throw new NullPointerException("null options");
 		}
 
-		this.datastore=DatastoreServiceFactory.getDatastoreService(config);
+		this.datastore=options.getService();
+	}
+
+
+	public Key key(final String id, final Shape shape) { // !!! tbd
+
+		if ( id == null ) {
+			throw new NullPointerException("null id");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return key(id, clazz(shape).orElse(""));
+	}
+
+	/**
+	 * Creates a datastore key for a resource.
+	 *
+	 * @param id   the id of the resource; falls back to {@code /} if empty
+	 * @param type the type of the resource; falls back to {@code Entity} if empty
+	 *
+	 * @return a datastore key for the resource identified by {@code id} and {@code type}
+	 *
+	 * @throws NullPointerException if either {@code id} or {@code type} is null
+	 */
+	public Key key(final String id, final String type) {
+
+		if ( id == null ) {
+			throw new NullPointerException("null id");
+		}
+
+		if ( type == null ) {
+			throw new NullPointerException("null type");
+		}
+
+		final KeyFactory factory=datastore.newKeyFactory();
+
+		if ( id.startsWith("/") ) { // ignore external ids
+			for (int slash=0; slash >= 0; slash=id.indexOf('/', slash+1)) {
+				if ( slash > 0 && slash+1 < id.length() ) { // ignore leading/trailing slashes
+
+					factory.addAncestor(PathElement.of("Entity", id.substring(0, slash+1)));
+
+				}
+			}
+		}
+
+		return factory
+				.setKind(type.isEmpty() ? "Entity" : type)
+				.newKey(id.isEmpty() ? "/" : id);
 	}
 
 
@@ -86,7 +139,7 @@ public final class Datastore {
 	 *
 	 * @throws NullPointerException if {@code task} is null or returns a null value
 	 */
-	public <V> V exec(final Function<DatastoreService, V> task) {
+	public <V> V exec(final Function<Datastore, V> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -98,9 +151,7 @@ public final class Datastore {
 
 		} else {
 
-			final Transaction txn=datastore.beginTransaction(TransactionOptions.Builder.withDefaults()
-				.setXG(true)
-			);
+			final Transaction txn=datastore.newTransaction();
 
 			context.set(txn);
 
