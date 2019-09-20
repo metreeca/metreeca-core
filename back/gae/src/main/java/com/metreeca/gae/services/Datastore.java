@@ -19,6 +19,7 @@ package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 
 import java.util.function.Function;
@@ -49,6 +50,21 @@ public final class Datastore {
 
 
 	private static final ThreadLocal<Transaction> context=new ThreadLocal<>();
+
+
+	static ValueType datatype(final Object value) {
+		return value == null ? ValueType.NULL
+				: value instanceof String ? ValueType.STRING
+				: value instanceof FullEntity ? ValueType.ENTITY
+				: value instanceof Key ? ValueType.KEY
+				: value instanceof Long ? ValueType.LONG
+				: value instanceof Double ? ValueType.DOUBLE
+				: value instanceof Boolean ? ValueType.BOOLEAN
+				: value instanceof Timestamp ? ValueType.TIMESTAMP
+				: value instanceof Blob ? ValueType.BLOB
+				: value instanceof LatLng ? ValueType.LAT_LNG
+				: ValueType.RAW_VALUE;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
