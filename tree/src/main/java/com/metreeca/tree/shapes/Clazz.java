@@ -32,21 +32,21 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Clazz implements Shape {
 
-	public static Clazz clazz(final String name) {
+	public static Clazz clazz(final Object name) {
 		return new Clazz(name);
 	}
 
-	public static Optional<String> clazz(final Shape shape) {
+	public static Optional<Object> clazz(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ClazzProbe()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String name;
+	private final Object name;
 
 
-	private Clazz(final String name) {
+	private Clazz(final Object name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -58,7 +58,7 @@ public final class Clazz implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getName() {
+	public Object getName() {
 		return name;
 	}
 
@@ -91,24 +91,24 @@ public final class Clazz implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class ClazzProbe extends Inspector<String> {
+	private static final class ClazzProbe extends Inspector<Object> {
 
-		@Override public String probe(final Clazz clazz) {
+		@Override public Object probe(final Clazz clazz) {
 			return clazz.getName();
 		}
 
-		@Override public String probe(final And and) {
+		@Override public Object probe(final And and) {
 			return clazz(and.getShapes());
 		}
 
-		@Override public String probe(final Or or) {
+		@Override public Object probe(final Or or) {
 			return clazz(or.getShapes());
 		}
 
 
-		private String clazz(final Collection<Shape> shapes) {
+		private Object clazz(final Collection<Shape> shapes) {
 
-			final Set<String> names=shapes.stream()
+			final Set<Object> names=shapes.stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());

@@ -33,29 +33,29 @@ import static java.util.stream.Collectors.toSet;
 public final class Datatype implements Shape {
 
 	/**
-	 * Creates a name constraint.
+	 * Creates a datatype constraint.
 	 *
-	 * @param name the expected type name
+	 * @param name the expected datatype name
 	 *
-	 * @return a new name constraint for the provided {@code name}
+	 * @return a new datatype constraint for the provided {@code name}
 	 *
 	 * @throws NullPointerException if {@code name} is null
 	 */
-	public static Datatype datatype(final String name) {
+	public static Datatype datatype(final Object name) {
 		return new Datatype(name);
 	}
 
-	public static Optional<String> datatype(final Shape shape) {
+	public static Optional<Object> datatype(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new TypeProbe()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String name;
+	private final Object name;
 
 
-	private Datatype(final String name) {
+	private Datatype(final Object name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -67,7 +67,7 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getName() {
+	public Object getName() {
 		return name;
 	}
 
@@ -100,24 +100,24 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TypeProbe extends Inspector<String> {
+	private static final class TypeProbe extends Inspector<Object> {
 
-		@Override public String probe(final Datatype datatype) {
+		@Override public Object probe(final Datatype datatype) {
 			return datatype.getName();
 		}
 
-		@Override public String probe(final And and) {
+		@Override public Object probe(final And and) {
 			return type(and.getShapes());
 		}
 
-		@Override public String probe(final Or or) {
+		@Override public Object probe(final Or or) {
 			return type(or.getShapes());
 		}
 
 
-		private String type(final Collection<Shape> shapes) {
+		private Object type(final Collection<Shape> shapes) {
 
-			final Set<String> names=shapes.stream()
+			final Set<Object> names=shapes.stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());

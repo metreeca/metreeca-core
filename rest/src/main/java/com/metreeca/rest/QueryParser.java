@@ -386,10 +386,10 @@ final class QueryParser {
 
 	private Shape field(final String label, final Shape shape) {
 
-		final Map<String, Shape> fields=fields(shape);
-		final Map<String, String> index=new HashMap<>();
+		final Map<Object, Shape> fields=fields(shape);
+		final Map<Object, String> index=new HashMap<>();
 
-		fields.keySet().forEach(name -> index.put(name, name));
+		fields.keySet().forEach(name -> index.put(name, name.toString()));
 		// !!! aliases(reference).forEach((alias, label) -> index.put(alias, label)
 
 		final String name=index.get(label);
