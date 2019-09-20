@@ -17,14 +17,18 @@
 
 package com.metreeca.gae.formats;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.gae.services.Datastore;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
+import com.google.cloud.datastore.BaseKey;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
+
+import java.util.Optional;
 
 import javax.json.JsonValue;
 
@@ -71,7 +75,12 @@ public final class EntityFormat implements Format<Entity> {
 
 			return entity instanceof Entity ? (Entity)entity : Entity.newBuilder(
 
-					datastore.key(message.request().path(), entity.getKey().getKind()), entity
+					datastore.key(
+							message.request().path(),
+							Optional.ofNullable(entity.getKey()).map(BaseKey::getKind).orElse(GAE.Resource)
+					),
+
+					entity
 
 			).build();
 

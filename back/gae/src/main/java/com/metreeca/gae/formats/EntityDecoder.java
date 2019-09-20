@@ -131,9 +131,7 @@ final class EntityDecoder {
 	}
 
 	private Value<?> entity(final JsonString string, final Shape shape) {
-		return EntityValue.of(Entity.newBuilder(
-				datastore.key(string.getString(), clazz(shape).map(Object::toString).orElse(GAE.Resource))
-		).build());
+		return EntityValue.of(Entity.newBuilder(datastore.key(string.getString(), shape)).build());
 	}
 
 

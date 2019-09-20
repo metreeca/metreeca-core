@@ -18,6 +18,7 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
+import com.metreeca.tree.Shape;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
@@ -26,6 +27,8 @@ import java.util.Date;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static com.google.cloud.datastore.ValueType.*;
 
@@ -225,6 +228,10 @@ public final class Datastore {
 		}
 
 		return null;
+	}
+
+	public Key key(final String path, final Shape shape) {
+		return key(path, clazz(shape).map(Object::toString).orElse(GAE.Resource));
 	}
 
 	/**
