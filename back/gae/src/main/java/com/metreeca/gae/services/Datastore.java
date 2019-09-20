@@ -23,12 +23,14 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.cloud.datastore.ValueType.*;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -54,6 +56,10 @@ public final class Datastore {
 
 	private static final ThreadLocal<Transaction> context=new ThreadLocal<>();
 
+
+	static Set<Value<?>> values(final Set<Object> objects) {
+		return objects.stream().map(Datastore::value).collect(toSet());
+	}
 
 	static Value<?> value(final Object object) {
 		return object == null ? NullValue.of()
