@@ -17,27 +17,27 @@
 
 package com.metreeca.gae.services;
 
+import com.metreeca.gae.GAE;
 import com.metreeca.gae.GAETestBase;
 
 import com.google.cloud.datastore.PathElement;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.gae.services.DatastoreService.datastore;
+import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class DatastoreServiceTest extends GAETestBase {
+final class DatastoreTest extends GAETestBase {
 
 	@Nested final class Keys {
 
 		@Test void testHierarchy() {
 			exec(() -> {
 
-				final DatastoreService datastore=service(datastore());
+				final Datastore datastore=service(datastore());
 
 				assertThat(datastore.key("/", "Entity"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
@@ -63,7 +63,7 @@ final class DatastoreServiceTest extends GAETestBase {
 				assertThat(datastore.key("/container/resource", "Entity"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
-								.addAncestor(PathElement.of("Entity", "/container/"))
+								.addAncestor(PathElement.of(GAE.Resource, "/container/"))
 								.setKind("Entity")
 								.newKey("/container/resource")
 						));
@@ -71,8 +71,8 @@ final class DatastoreServiceTest extends GAETestBase {
 				assertThat(datastore.key("/container/container/resource", "Entity"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
-								.addAncestor(PathElement.of("Entity", "/container/"))
-								.addAncestor(PathElement.of("Entity", "/container/container/"))
+								.addAncestor(PathElement.of(GAE.Resource, "/container/"))
+								.addAncestor(PathElement.of(GAE.Resource, "/container/container/"))
 								.setKind("Entity")
 								.newKey("/container/container/resource")
 						));
@@ -84,10 +84,10 @@ final class DatastoreServiceTest extends GAETestBase {
 		@Test void testTyping() {
 			exec(() -> {
 
-				final DatastoreService datastore=service(datastore());
+				final Datastore datastore=service(datastore());
 
 
-				assertThat(datastore.key("/resource", clazz("Class")))
+				assertThat(datastore.key("/resource", "Class"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.setKind("Class")
@@ -108,9 +108,9 @@ final class DatastoreServiceTest extends GAETestBase {
 		@Test void testExternal() {
 			exec(() -> {
 
-				final DatastoreService datastore=service(datastore());
+				final Datastore datastore=service(datastore());
 
-				assertThat(datastore.key("http://example.com/path", clazz("Class")))
+				assertThat(datastore.key("http://example.com/path", "Class"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.setKind("Class")

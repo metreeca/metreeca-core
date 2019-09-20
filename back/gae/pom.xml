@@ -31,8 +31,8 @@
     <artifactId>metreeca-gae</artifactId>
     <version>0.0.0-SNAPSHOT</version>
 
-    <name>Metreeca Google App Engine Adapter</name>
-    <description>Adapter kit for Google App Engine.</description>
+    <name>Metreeca Google Cloud Adapter</name>
+    <description>Adapter kit for Google Cloud.</description>
 
     <dependencyManagement>
         <dependencies>

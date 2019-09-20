@@ -23,6 +23,11 @@ package com.metreeca.gae;
  */
 public final class GAE {
 
+	//// System Classes ////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final String Resource="Resource";
+
+
 	//// System Properties /////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final String id="id";
@@ -44,20 +49,22 @@ public final class GAE {
 	//// Sorting ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Compares object for ordering.
+	 * Compares values.
 	 *
-	 * <p>Comparison is consistent with Google Datastore <a href="https://cloud.google.com/appengine/docs/standard/java/datastore/entity-property-reference#properties_and_value_types">sorting
+	 * <p>Comparison is consistent with Google Datastore <a href="https://cloud.google.com/datastore/docs/concepts/entities#value_type_ordering">sorting
 	 * rules</a>, with the following deterministic ordering for mixed value types:</p>
 	 *
 	 * <ul>
 	 *     <li>null values;</li>
-	 *     <li>integral values;</li>
-	 *     <li>date values;</li>
+	 *     <li>integer values;</li>
+	 *     <li>timestamp values;</li>
 	 *     <li>boolean values;</li>
+	 *     <li>blob values;</li>
 	 *     <li>string values;</li>
-	 *     <li>floating-point values;</li>
-	 *     <li>datastore key values;</li>
-	 *     <li>property container values (label/id/key order);</li>
+	 *     <li>double values;</li>
+	 *     <li>point values;</li>
+	 *     <li>key values;</li>
+	 *     <li>entity values;</li>
 	 *     <li>other values (system-dependent order).</li>
 	 * </ul>
 	 *
@@ -67,7 +74,7 @@ public final class GAE {
 	 * @return a negative integer, zero, or a positive integer as the {@code x} is less than, equal to, or greater than
 	 * {@code y}
 	 */
-	//public static int compare(final Object x, final Object y) {
+	//public static int compare(final Value x, final Value y) {
 	//	return x == null ? y == null ? 0 : -1 : y == null ? 1
 	//
 	//			: isIntegral(x) ? isIntegral(y) ? Integral(x, y) : -1 : isIntegral(y) ? 1
@@ -76,9 +83,13 @@ public final class GAE {
 	//
 	//			: isBoolean(x) ? isBoolean(y) ? Boolean(x, y) : -1 : isBoolean(y) ? 1
 	//
+	//          // !!! blobs
+	//
 	//			: isString(x) ? isString(y) ? String(x, y) : -1 : isString(y) ? 1
 	//
 	//			: isFloating(x) ? isFloating(y) ? Floating(x, y) : -1 : isFloating(y) ? 1
+	//
+	//          // !!! points
 	//
 	//			: isKey(x) ? isKey(y) ? Key(x, y) : -1 : isKey(y) ? 1
 	//
@@ -127,7 +138,6 @@ public final class GAE {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private GAE() {} // utility
 
 }

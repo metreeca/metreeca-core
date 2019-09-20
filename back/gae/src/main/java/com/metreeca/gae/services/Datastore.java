@@ -17,14 +17,12 @@
 
 package com.metreeca.gae.services;
 
-import com.metreeca.tree.Shape;
+import com.metreeca.gae.GAE;
 
 import com.google.cloud.datastore.*;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static java.util.Objects.requireNonNull;
 
@@ -37,15 +35,16 @@ import static java.util.Objects.requireNonNull;
  * <p>Nested task executions on the datastore from the same thread will share the same transaction through a {@link
  * ThreadLocal} context variable.</p>
  */
-public final class DatastoreService {
+public final class Datastore {
+
 
 	/**
 	 * Retrieves the default datastore factory.
 	 *
 	 * @return the default datastore factory, which creates datastores with the default configuration
 	 */
-	public static Supplier<DatastoreService> datastore() {
-		return () -> new DatastoreService(DatastoreOptions.getDefaultInstance());
+	public static Supplier<Datastore> datastore() {
+		return () -> new Datastore(DatastoreOptions.getDefaultInstance());
 	}
 
 
@@ -54,7 +53,7 @@ public final class DatastoreService {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Datastore datastore;
+	private final com.google.cloud.datastore.Datastore datastore;
 
 
 	/**
@@ -64,7 +63,7 @@ public final class DatastoreService {
 	 *
 	 * @throws NullPointerException if {@code options} is null
 	 */
-	public DatastoreService(final DatastoreOptions options) {
+	public Datastore(final DatastoreOptions options) {
 
 		if ( options == null ) {
 			throw new NullPointerException("null options");
@@ -74,54 +73,71 @@ public final class DatastoreService {
 	}
 
 
-	public Key key(final String id, final Shape shape) { // !!! tbd
-
-		if ( id == null ) {
-			throw new NullPointerException("null id");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return key(id, clazz(shape).orElse(""));
-	}
-
 	/**
-	 * Creates a datastore key for a resource.
+	 * Creates an incomplete key for a resource type.
 	 *
-	 * @param id   the id of the resource; falls back to {@code /} if empty
-	 * @param type the type of the resource; falls back to {@code Entity} if empty
+	 * @param type the type of the resource
 	 *
-	 * @return a datastore key for the resource identified by {@code id} and {@code type}
+	 * @return an incomplete datastore key for the resource {@code type}
 	 *
-	 * @throws NullPointerException if either {@code id} or {@code type} is null
+	 * @throws NullPointerException     if {@code type} is null
+	 * @throws IllegalArgumentException if {@code type} is empty
 	 */
-	public Key key(final String id, final String type) {
-
-		if ( id == null ) {
-			throw new NullPointerException("null id");
-		}
+	public IncompleteKey key(final String type) {
 
 		if ( type == null ) {
 			throw new NullPointerException("null type");
 		}
 
-		final KeyFactory factory=datastore.newKeyFactory();
+		if ( type.isEmpty() ) {
+			throw new IllegalArgumentException("empty type");
+		}
+
+		return null;
+	}
+
+	/**
+	 * Creates a datastore key for a typed resource.
+	 *
+	 * @param id   the id of the resource
+	 * @param type the type of the resource
+	 *
+	 * @return a datastore key for the resource identified by {@code id} and {@code type}
+	 *
+	 * @throws NullPointerException     if either {@code id} or {@code type} is null
+	 * @throws IllegalArgumentException if either {@code id} or {@code type} is empty
+	 */
+	public Key key(final String id, final String type) {
+
+		if ( type == null ) {
+			throw new NullPointerException("null type");
+		}
+
+		if ( type.isEmpty() ) {
+			throw new IllegalArgumentException("empty type");
+		}
+
+		if ( id == null ) {
+			throw new NullPointerException("null id");
+		}
+
+		if ( id.isEmpty() ) {
+			throw new IllegalArgumentException("empty id");
+		}
+
+		final KeyFactory factory=datastore.newKeyFactory().setKind(type);
 
 		if ( id.startsWith("/") ) { // ignore external ids
 			for (int slash=0; slash >= 0; slash=id.indexOf('/', slash+1)) {
 				if ( slash > 0 && slash+1 < id.length() ) { // ignore leading/trailing slashes
 
-					factory.addAncestor(PathElement.of("Entity", id.substring(0, slash+1)));
+					factory.addAncestor(PathElement.of(GAE.Resource, id.substring(0, slash+1)));
 
 				}
 			}
 		}
 
-		return factory
-				.setKind(type.isEmpty() ? "Entity" : type)
-				.newKey(id.isEmpty() ? "/" : id);
+		return factory.newKey(id);
 	}
 
 
@@ -139,7 +155,7 @@ public final class DatastoreService {
 	 *
 	 * @throws NullPointerException if {@code task} is null or returns a null value
 	 */
-	public <V> V exec(final Function<Datastore, V> task) {
+	public <V> V exec(final Function<com.google.cloud.datastore.Datastore, V> task) {
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");

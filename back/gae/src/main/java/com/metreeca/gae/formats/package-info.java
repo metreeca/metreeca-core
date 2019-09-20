@@ -16,7 +16,7 @@
  */
 
 /**
- * Google Cloud adapter.
+ * Google Cloud message body formats.
  *
  * <p>Requires the following Maven dependency in your project:</p>
  *
@@ -28,4 +28,4 @@
  * </dependency>}</pre>
  */
 
-package com.metreeca.gae;
+package com.metreeca.gae.formats;

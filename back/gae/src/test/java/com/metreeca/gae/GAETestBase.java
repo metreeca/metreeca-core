@@ -17,7 +17,7 @@
 
 package com.metreeca.gae;
 
-import com.metreeca.gae.services.DatastoreService;
+import com.metreeca.gae.services.Datastore;
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Context;
 
@@ -38,7 +38,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import static com.metreeca.gae.services.DatastoreService.datastore;
+import static com.metreeca.gae.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 
 import static java.lang.String.format;
@@ -66,7 +66,7 @@ public abstract class GAETestBase {
 
 	protected void exec(final Runnable... tasks) {
 		new Context()
-				.set(datastore(), () -> new DatastoreService(helper.getOptions()))
+				.set(datastore(), () -> new Datastore(helper.getOptions()))
 				.exec(tasks)
 				.clear();
 	}
@@ -105,7 +105,7 @@ public abstract class GAETestBase {
 
 	private static List<Entity> offices(final Collection<JsonValue> _offices) {
 
-		final DatastoreService datastore=service(datastore());
+		final Datastore datastore=service(datastore());
 
 		return _offices.stream().map(JsonValue::asJsonObject).map(_office -> {
 
@@ -138,7 +138,7 @@ public abstract class GAETestBase {
 
 	private static List<Entity> employees(final Collection<JsonValue> _employees) {
 
-		final DatastoreService datastore=service(datastore());
+		final Datastore datastore=service(datastore());
 
 		return _employees.stream().map(JsonValue::asJsonObject).map(_employee -> {
 
@@ -195,7 +195,5 @@ public abstract class GAETestBase {
 
 		}).collect(toList());
 	}
-
-
 
 }

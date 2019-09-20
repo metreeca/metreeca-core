@@ -117,7 +117,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-09-18 09:24:27 +0000</string>
+	<string>2019-09-19 10:21:52 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro</string>
 	<key>MovementHandleVisible</key>
@@ -235,6 +235,106 @@
 			<string>1.0000 cm = 10.0000 mm</string>
 			<key>GraphicsList</key>
 			<array>
+				<dict>
+					<key>Bounds</key>
+					<string>{{727.67970023048952, 45.354331120168126}, {53.67699999999968, 21.261062622070312}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FitText</key>
+					<string>YES</string>
+					<key>Flow</key>
+					<string>Resize</string>
+					<key>ID</key>
+					<integer>140</integer>
+					<key>Link</key>
+					<dict>
+						<key>url</key>
+						<string>https://cloud.google.com/datastore/docs/concepts/entities#properties_and_value_types</string>
+					</dict>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+					<key>Text</key>
+					<dict>
+						<key>Text</key>
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf600
+{\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
+
+\f0\fs18 \cf0 data model}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>center</string>
+					</dict>
+					<key>Wrap</key>
+					<string>NO</string>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{663.30709263245888, 45.354331120168126}, {47.511999999998807, 21.261062622070312}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FitText</key>
+					<string>YES</string>
+					<key>Flow</key>
+					<string>Resize</string>
+					<key>ID</key>
+					<integer>141</integer>
+					<key>Link</key>
+					<dict>
+						<key>url</key>
+						<string>https://cloud.google.com/datastore/docs/</string>
+					</dict>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+					<key>Text</key>
+					<dict>
+						<key>Text</key>
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf600
+{\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
+
+\f0\fs18 \cf0 Datastore}</string>
+						<key>TextAlongPathGlyphAnchor</key>
+						<string>center</string>
+					</dict>
+					<key>Wrap</key>
+					<string>NO</string>
+				</dict>
 				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
@@ -1570,56 +1670,6 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{733.48845357694552, 66.614173832746928}, {53.67699999999968, 21.261062622070312}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>FitText</key>
-					<string>YES</string>
-					<key>Flow</key>
-					<string>Resize</string>
-					<key>ID</key>
-					<integer>110</integer>
-					<key>Link</key>
-					<dict>
-						<key>url</key>
-						<string>https://cloud.google.com/appengine/docs/standard/java/datastore/entity-property-reference#Java_Properties_and_value_types</string>
-					</dict>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-					</dict>
-					<key>Text</key>
-					<dict>
-						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf600
-{\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
-
-\f0\fs18 \cf0 data model}</string>
-						<key>TextAlongPathGlyphAnchor</key>
-						<string>center</string>
-					</dict>
-					<key>Wrap</key>
-					<string>NO</string>
-				</dict>
-				<dict>
-					<key>Bounds</key>
 					<string>{{488.58313652564237, 481.88976815178637}, {224.83801902178186, 30.522125244140625}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
@@ -1880,56 +1930,6 @@
 						<string>center</string>
 						<key>VerticalPad</key>
 						<real>4</real>
-					</dict>
-					<key>Wrap</key>
-					<string>NO</string>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{676.13145357694555, 39.685039730147111}, {111.03399999999965, 21.261062622070312}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>FitText</key>
-					<string>YES</string>
-					<key>Flow</key>
-					<string>Resize</string>
-					<key>ID</key>
-					<integer>103</integer>
-					<key>Link</key>
-					<dict>
-						<key>url</key>
-						<string>https://cloud.google.com/appengine/docs/standard/java/datastore/</string>
-					</dict>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-					</dict>
-					<key>Text</key>
-					<dict>
-						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf600
-{\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
-
-\f0\fs18 \cf0 Cloud Datastore Overview}</string>
-						<key>TextAlongPathGlyphAnchor</key>
-						<string>center</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
