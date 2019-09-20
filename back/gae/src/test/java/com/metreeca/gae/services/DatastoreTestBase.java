@@ -15,9 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gae;
+package com.metreeca.gae.services;
 
-import com.metreeca.gae.services.Datastore;
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Context;
 
@@ -46,7 +45,7 @@ import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 
 
-public abstract class GAETestBase {
+public abstract class DatastoreTestBase {
 
 	private static final LocalDatastoreHelper helper=LocalDatastoreHelper.create(1.0);
 
@@ -90,7 +89,7 @@ public abstract class GAETestBase {
 	protected Supplier<Collection<Entity>> birt() {
 		return () -> {
 
-			final JsonObject _entities=Json.createReader(Codecs.input(GAETestBase.class, ".json")).readObject();
+			final JsonObject _entities=Json.createReader(Codecs.input(DatastoreTestBase.class, ".json")).readObject();
 
 			final Collection<Entity> entities=new ArrayList<>();
 

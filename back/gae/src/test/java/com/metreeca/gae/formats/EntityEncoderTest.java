@@ -18,7 +18,7 @@
 package com.metreeca.gae.formats;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.gae.GAETestBase;
+import com.metreeca.gae.services.DatastoreTestBase;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Arrays.asList;
 
 
-final class EntityEncoderTest extends GAETestBase {
+final class EntityEncoderTest extends DatastoreTestBase {
 
 	private JsonObject encode(final Consumer<Entity.Builder> task) {
 

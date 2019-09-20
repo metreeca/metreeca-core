@@ -18,7 +18,6 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.gae.GAETestBase;
 import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
 
@@ -38,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
-final class DatastoreTrimmerTest extends GAETestBase {
+final class DatastoreTrimmerTest extends DatastoreTestBase {
 
 	private Map<String, Value<?>> trim(final Shape shape, final Consumer<Entity.Builder> builder) {
 

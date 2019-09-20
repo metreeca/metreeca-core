@@ -18,7 +18,6 @@
 package com.metreeca.gae.services;
 
 import com.metreeca.gae.GAE;
-import com.metreeca.gae.GAETestBase;
 import com.metreeca.tree.Shape;
 
 import org.junit.jupiter.api.Nested;
@@ -36,7 +35,7 @@ import static com.metreeca.tree.shapes.Or.or;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class DatastoreSplitterTest extends GAETestBase {
+final class DatastoreSplitterTest extends DatastoreTestBase {
 
 	@Nested final class Container {
 

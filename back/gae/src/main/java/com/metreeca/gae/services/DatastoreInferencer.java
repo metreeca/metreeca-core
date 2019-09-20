@@ -21,6 +21,7 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.*;
 
+import com.google.cloud.datastore.Value;
 import com.google.cloud.datastore.ValueType;
 
 import java.util.Set;
@@ -68,7 +69,7 @@ public final class DatastoreInferencer extends Inspector<Shape> {
 	@Override public Shape probe(final In in) {
 
 		final Set<Object> values=in.getValues();
-		final Set<Object> types=values.stream().map(Datastore::datatype).collect(toSet());
+		final Set<Object> types=values.stream().map(Datastore::value).map(Value::getType).collect(toSet());
 
 		final Shape count=maxCount(values.size());
 		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();

@@ -17,7 +17,7 @@
 
 package com.metreeca.gae.formats;
 
-import com.metreeca.gae.GAETestBase;
+import com.metreeca.gae.services.DatastoreTestBase;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.datastore.*;
@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Arrays.asList;
 
 
-final class EntityDecoderTest extends GAETestBase {
+final class EntityDecoderTest extends DatastoreTestBase {
 
 	private FullEntity<?> decode(final String json) {
 		return decode(json, and());
