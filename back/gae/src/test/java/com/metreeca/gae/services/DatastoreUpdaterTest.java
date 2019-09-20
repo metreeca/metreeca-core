@@ -60,7 +60,7 @@ final class DatastoreUpdaterTest extends DatastoreTestBase {
 
 				final Datastore service=service(datastore());
 
-				final Key key=service.key("/entities/test", GAE.Resource);
+				final Key key=service.key(GAE.Resource, "/entities/test");
 
 				final Entity original=Entity.newBuilder(key)
 						.set("code", "test")
@@ -111,7 +111,7 @@ final class DatastoreUpdaterTest extends DatastoreTestBase {
 					.handle(new Request()
 							.path("/entities/9999")
 							.body(entity(), Entity.newBuilder(service(datastore()).key(
-									"/entities/9999", "Test")
+									"Test", "/entities/9999")
 							).build())
 					)
 

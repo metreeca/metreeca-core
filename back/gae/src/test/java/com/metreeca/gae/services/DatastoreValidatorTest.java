@@ -84,7 +84,7 @@ final class DatastoreValidatorTest extends DatastoreTestBase {
 
 
 	private Key key(final String type, final String id) {
-		return service(datastore()).key(id, type);
+		return service(datastore()).key(type, id);
 	}
 
 	private FullEntity<?> entity(final Consumer<FullEntity.Builder<IncompleteKey>> task) {

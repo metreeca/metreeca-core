@@ -65,7 +65,7 @@ final class DatastoreDeleterTest extends DatastoreTestBase {
 
 		private List<Entity> entities(final String... codes) {
 			return Arrays.stream(codes).map(code -> Entity
-					.newBuilder(service(datastore()).key(format("/entities/%s", code), GAE.Resource))
+					.newBuilder(service(datastore()).key(GAE.Resource, format("/entities/%s", code)))
 					.set("code", code)
 					.build()
 			).collect(toList());

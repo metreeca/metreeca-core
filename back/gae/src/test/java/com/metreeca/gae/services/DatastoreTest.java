@@ -116,28 +116,28 @@ final class DatastoreTest extends DatastoreTestBase {
 
 				final Datastore datastore=service(datastore());
 
-				assertThat(datastore.key("/", "Entity"))
+				assertThat(datastore.key("Entity", "/"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.setKind("Entity")
 								.newKey("/")
 						));
 
-				assertThat(datastore.key("/container/", "Entity"))
+				assertThat(datastore.key("Entity", "/container/"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.setKind("Entity")
 								.newKey("/container/")
 						));
 
-				assertThat(datastore.key("/resource", "Entity"))
+				assertThat(datastore.key("Entity", "/resource"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.setKind("Entity")
 								.newKey("/resource")
 						));
 
-				assertThat(datastore.key("/container/resource", "Entity"))
+				assertThat(datastore.key("Entity", "/container/resource"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.addAncestor(PathElement.of(GAE.Resource, "/container/"))
@@ -145,7 +145,7 @@ final class DatastoreTest extends DatastoreTestBase {
 								.newKey("/container/resource")
 						));
 
-				assertThat(datastore.key("/container/container/resource", "Entity"))
+				assertThat(datastore.key("Entity", "/container/container/resource"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.addAncestor(PathElement.of(GAE.Resource, "/container/"))
@@ -164,14 +164,14 @@ final class DatastoreTest extends DatastoreTestBase {
 				final Datastore datastore=service(datastore());
 
 
-				assertThat(datastore.key("/resource", "Class"))
+				assertThat(datastore.key("Class", "/resource"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.setKind("Class")
 								.newKey("/resource")
 						));
 
-				assertThat(datastore.key("/resource", "Class"))
+				assertThat(datastore.key("Class", "/resource"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.setKind("Class")
@@ -187,7 +187,7 @@ final class DatastoreTest extends DatastoreTestBase {
 
 				final Datastore datastore=service(datastore());
 
-				assertThat(datastore.key("http://example.com/path", "Class"))
+				assertThat(datastore.key("Class", "http://example.com/path"))
 						.isEqualTo(datastore.exec(_datastore -> _datastore
 								.newKeyFactory()
 								.setKind("Class")

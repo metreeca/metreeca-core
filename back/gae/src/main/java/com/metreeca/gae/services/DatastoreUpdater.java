@@ -54,7 +54,7 @@ final class DatastoreUpdater extends DatastoreProcessor {
 
 				.value(entity -> request.reply(response -> datastore.exec(datastore -> {
 
-					final Key key=this.datastore.key(request.path(), convey(request.shape()));
+					final Key key=this.datastore.key(convey(request.shape()), request.path());
 
 					final KeyQuery query=Query.newKeyQueryBuilder()
 							.setKind(key.getKind())

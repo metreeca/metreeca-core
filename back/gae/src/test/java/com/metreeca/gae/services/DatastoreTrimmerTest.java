@@ -41,7 +41,7 @@ final class DatastoreTrimmerTest extends DatastoreTestBase {
 
 	private Map<String, Value<?>> trim(final Shape shape, final Consumer<Entity.Builder> builder) {
 
-		final Entity.Builder entity=Entity.newBuilder(service(datastore()).key("/entities/test", GAE.Resource));
+		final Entity.Builder entity=Entity.newBuilder(service(datastore()).key(GAE.Resource, "/entities/test"));
 
 		builder.accept(entity);
 

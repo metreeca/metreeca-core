@@ -230,22 +230,22 @@ public final class Datastore {
 		return null;
 	}
 
-	public Key key(final String path, final Shape shape) {
-		return key(path, clazz(shape).map(Object::toString).orElse(GAE.Resource));
+	public Key key(final Shape shape, final String path) { // !!! tbd
+		return key(clazz(shape).map(Object::toString).orElse(GAE.Resource), path);
 	}
 
 	/**
 	 * Creates a datastore key for a typed resource.
 	 *
-	 * @param id   the id of the resource
 	 * @param type the type of the resource
 	 *
+	 * @param id   the id of the resource
 	 * @return a datastore key for the resource identified by {@code id} and {@code type}
 	 *
 	 * @throws NullPointerException     if either {@code id} or {@code type} is null
 	 * @throws IllegalArgumentException if either {@code id} or {@code type} is empty
 	 */
-	public Key key(final String id, final String type) {
+	public Key key(final String type, final String id) {
 
 		if ( type == null ) {
 			throw new NullPointerException("null type");

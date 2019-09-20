@@ -55,7 +55,7 @@ final class DatastoreCreator extends DatastoreProcessor {
 							.orElseGet(() -> UUID.randomUUID().toString()); // !! sequential generator
 
 
-					final Key key=datastore.key(path, convey(request.shape()));
+					final Key key=datastore.key(convey(request.shape()), path);
 
 					final boolean clashing=service.run(Query.newKeyQueryBuilder()
 							.setKind(key.getKind())

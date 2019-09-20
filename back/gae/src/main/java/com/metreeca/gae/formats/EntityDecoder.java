@@ -131,7 +131,7 @@ final class EntityDecoder {
 	}
 
 	private Value<?> entity(final JsonString string, final Shape shape) {
-		return EntityValue.of(Entity.newBuilder(datastore.key(string.getString(), shape)).build());
+		return EntityValue.of(Entity.newBuilder(datastore.key(shape, string.getString())).build());
 	}
 
 
@@ -153,7 +153,7 @@ final class EntityDecoder {
 
 		final FullEntity.Builder<?> builder=id.isEmpty()
 				? type.isEmpty() ? FullEntity.newBuilder() : FullEntity.newBuilder(datastore.key(type))
-				: FullEntity.newBuilder(datastore.key(id, type.isEmpty() ? GAE.Resource : type));
+				: FullEntity.newBuilder(datastore.key(type.isEmpty() ? GAE.Resource : type, id));
 
 		final Map<Object, Shape> fields=fields(shape);
 

@@ -51,7 +51,7 @@ final class DatastoreDeleter extends DatastoreProcessor {
 	private Future<Response> resource(final Request request) {
 		return request.reply(response -> datastore.exec(service -> {
 
-			final Key key=datastore.key(request.path(), convey(request.shape()));
+			final Key key=datastore.key(convey(request.shape()), request.path());
 
 			final KeyQuery query=Query.newKeyQueryBuilder()
 					.setKind(key.getKind())
