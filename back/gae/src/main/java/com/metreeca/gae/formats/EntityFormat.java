@@ -76,7 +76,8 @@ public final class EntityFormat implements Format<Entity> {
 			return entity instanceof Entity ? (Entity)entity : Entity.newBuilder(
 
 					datastore.key(
-							Optional.ofNullable(entity.getKey()).map(BaseKey::getKind).orElse(GAE.Resource), message.request().path()
+							Optional.ofNullable(entity.getKey()).map(BaseKey::getKind).orElse(GAE.Resource),
+							message.request().path()
 					),
 
 					entity
