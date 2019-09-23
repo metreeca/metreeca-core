@@ -188,7 +188,6 @@ public final class Datastore {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final com.google.cloud.datastore.Datastore datastore;
-	private final KeyFactory factory;
 
 
 	/**
@@ -205,7 +204,6 @@ public final class Datastore {
 		}
 
 		this.datastore=options.getService();
-		this.factory=datastore.newKeyFactory();
 	}
 
 
@@ -229,7 +227,7 @@ public final class Datastore {
 			throw new IllegalArgumentException("empty type");
 		}
 
-		return factory.setKind(type).newKey();
+		return datastore.newKeyFactory().setKind(type).newKey();
 	}
 
 	public Key key(final Shape shape, final String path) { // !!! tbd
@@ -265,7 +263,7 @@ public final class Datastore {
 			throw new IllegalArgumentException("empty id");
 		}
 
-		final KeyFactory factory=this.factory.setKind(type);
+		final KeyFactory factory=datastore.newKeyFactory().setKind(type);
 
 		if ( id.startsWith("/") ) { // ignore external ids
 			for (int slash=0; slash >= 0; slash=id.indexOf('/', slash+1)) {

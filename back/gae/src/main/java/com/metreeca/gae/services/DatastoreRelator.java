@@ -61,7 +61,6 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.Direction.ASCENDING;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.Direction.DESCENDING;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
-import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAncestor;
 import static com.google.cloud.datastore.ValueType.LONG;
 import static com.google.cloud.datastore.ValueType.STRING;
@@ -143,6 +142,11 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 		return value;
+	}
+
+
+	private static <V> V unsupported(final String message) {
+		throw new UnsupportedOperationException(message);
 	}
 
 
@@ -399,7 +403,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		final Shape filter=filter(shape);
 		final List<String> inequalities=inequalities(filter);
 
-		final EntityQuery query=query(path, filter, orders, offset, limit, inequalities);
+		final EntityQuery query=query(path, filter, orders, inequalities);
 
 		final Optional<Predicate<Value<?>>> predicate=predicate(filter, inequalities); // handle residual constraints
 		final Optional<Comparator<EntityValue>> sorter=sorter(orders, inequalities); // handle inconsistent sorting/inequalities
@@ -407,10 +411,18 @@ final class DatastoreRelator extends DatastoreProcessor {
 		logger.info(this, String.format("executing query %s", query));
 
 		return datastore.exec(service -> Optional.of(stream(spliteratorUnknownSize(service.run(query), ORDERED), false))
+
 				.map(entities -> entities.map(EntityValue::of))
 				.map(entities -> predicate.map(entities::filter).orElse(entities))
+
+				// handle offset/limit after postprocessing filter/sort
+
 				.map(entities -> sorter.map(entities::sorted).orElse(entities))
+				.map(entities -> offset > 0 ? entities.skip(offset) : entities)
+				.map(entities -> limit > 0 ? entities.limit(limit) : entities)
+
 				.map(task)
+
 				.get()
 		);
 
@@ -434,7 +446,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 	private EntityQuery query(final String path, final Shape shape,
-			final List<Order> orders, final int offset, final int limit,
+			final List<Order> orders,
 			final List<String> inequalities
 	) {
 
@@ -467,9 +479,6 @@ final class DatastoreRelator extends DatastoreProcessor {
 			}
 
 		}
-
-		if ( offset > 0 ) { builder.setOffset(offset); }
-		if ( limit > 0 ) { builder.setLimit(offset); }
 
 		return builder.build();
 	}
@@ -516,11 +525,11 @@ final class DatastoreRelator extends DatastoreProcessor {
 	private abstract static class RelatorProbe<T> extends Traverser<T> {
 
 		@Override public T probe(final Guard guard) {
-			throw new UnsupportedOperationException(guard.toString());
+			return unsupported(guard.toString());
 		}
 
 		@Override public T probe(final When when) {
-			throw new UnsupportedOperationException(when.toString());
+			return unsupported(when.toString());
 		}
 
 	}
@@ -570,7 +579,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 		@Override public Stream<String> probe(final Or or) {
-			throw new UnsupportedOperationException("disjunctive inequality operators {"+or+"}");
+			return unsupported("disjunctive inequality operators {"+or+"}");
 		}
 
 	}
@@ -588,27 +597,27 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Filter probe(final MinExclusive minExclusive) {
-			return inequality(value(minExclusive.getValue()), PropertyFilter::gt);
+			return filter(value(minExclusive.getValue()), PropertyFilter::gt, inequalities);
 		}
 
 		@Override public Filter probe(final MaxExclusive maxExclusive) {
-			return inequality(value(maxExclusive.getValue()), PropertyFilter::lt);
+			return filter(value(maxExclusive.getValue()), PropertyFilter::lt, inequalities);
 
 		}
 
 		@Override public Filter probe(final MinInclusive minInclusive) {
-			return inequality(value(minInclusive.getValue()), PropertyFilter::ge);
+			return filter(value(minInclusive.getValue()), PropertyFilter::ge, inequalities);
 		}
 
 		@Override public Filter probe(final MaxInclusive maxInclusive) {
-			return inequality(value(maxInclusive.getValue()), PropertyFilter::le);
+			return filter(value(maxInclusive.getValue()), PropertyFilter::le, inequalities);
 		}
 
 
 		@Override public Filter probe(final All all) {
 			return and(all.getValues().stream()
 					.map(Datastore::value)
-					.map(value -> eq(path, value))
+					.map(value -> filter(value, PropertyFilter::eq, null))
 					.collect(toList())
 			);
 		}
@@ -618,12 +627,8 @@ final class DatastoreRelator extends DatastoreProcessor {
 			final Set<Object> values=any.getValues();
 
 			return values.isEmpty() ? null
-					: values.size() == 1 ? eq(path, value(values.iterator().next()))
-					: values.stream().noneMatch(v -> isEntity(v)) ? in(path, values)
-					: values.stream().allMatch(v -> isEntity(v)) ? in(key(path),
-					values.stream().map(GAE::key).collect(toList())
-			)
-					: or(values.stream().map(value -> eq(path, value)).collect(toList()));
+					: values.size() == 1 ? filter(value(values.iterator().next()), PropertyFilter::eq, null)
+					: null;
 		}
 
 
@@ -652,29 +657,31 @@ final class DatastoreRelator extends DatastoreProcessor {
 		private Filter and(final List<Filter> filters) {
 			return filters.isEmpty() ? null
 					: filters.size() == 1 ? filters.get(0)
-					: and(filters);
+					: StructuredQuery.CompositeFilter.and( // ;( no collection constructor
+							filters.get(0), filters.subList(1, filters.size()).toArray(new Filter[filters.size()-1])
+			);
 		}
 
 		private Filter or(final List<Filter> filters) {
 			return filters.isEmpty() ? null
 					: filters.size() == 1 ? filters.get(0)
-					: StructuredQuery.CompositeFilter.or(filters);
+					: unsupported("disjunctive queries");
 		}
 
 
-		private Filter inequality(final Object limit, final BiFunction<String, Value<?>, Filter> op) {
-			if ( limit instanceof BaseEntity ) {
+		private Filter filter(final Value<?> value, final BiFunction<String, Value<?>, Filter> op, final Collection<String> inequalities) {
+			if ( value .getType() == ValueType.ENTITY) {
 
-				final String key=key(path);
-				final IncompleteKey key1=((BaseEntity<?>)limit).getKey();
+				final String property=key(path);
+				final IncompleteKey key=((EntityValue)value).get().getKey();
 
-				return inequalities.contains(key) && (key1 instanceof Key)
-						? op.apply(key, KeyValue.of((Key)key1))
+				return (inequalities == null || inequalities.contains(property)) && (key instanceof Key)
+						? op.apply(property, KeyValue.of((Key)key))
 						: null;
 
 			} else {
 
-				return inequalities.contains(path) ? op.apply(path, value(limit)) : null;
+				return (inequalities == null || inequalities.contains(path)) ? op.apply(path, value) : null;
 
 			}
 		}
@@ -812,15 +819,25 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		@Override public Predicate<Value<?>> probe(final In in) {
 
-			final Function<Object, Object> mapper=value ->
-					isEntity(value) ? GAE.key(value) : value;
-
-			final Set<Object> range=in.getValues().stream()
-					.map(mapper)
+			final Set<Value<?>> range=in.getValues().stream()
+					.map(Datastore::value)
+					.map(this::target)
 					.collect(toSet());
 
-			return range.isEmpty() ? values -> true : values -> stream(values).allMatch(value ->
-					value != null && range.contains(mapper.apply(value))
+			return range.isEmpty() ? null : values -> stream(values).allMatch(value ->
+					range.contains(target(value))
+			);
+		}
+
+		@Override public Predicate<Value<?>> probe(final Any any) {
+
+			final Set<Value<?>> range=any.getValues().stream()
+					.map(Datastore::value)
+					.map(this::target)
+					.collect(toSet());
+
+			return range.size() <= 1 ? null : values -> stream(values).anyMatch(value -> // singleton handled by query
+					range.contains(target(value))
 			);
 		}
 
@@ -863,28 +880,35 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 
-		private int count(final Object value) {
-			return value == null ? 0
-					: value instanceof Collection ? ((Collection<?>)value).size()
+		private int count(final Value<?> value) {
+			return value.getType() == ValueType.NULL ? 0
+					: value.getType() == ValueType.LIST ? ((ListValue)value).get().size()
 					: 1;
 		}
 
-		private Stream<Value<?>> stream(final Object value) {
-			return value == null ? Stream.empty()
-					: value instanceof Collection ? ((Collection<?>)value).stream().map(Datastore::value)
-					: Stream.of(value(value));
+		private Stream<? extends Value<?>> stream(final Value<?> value) {
+			return value.getType() == ValueType.NULL ? Stream.empty()
+					: value.getType() == ValueType.LIST ? ((ListValue)value).get().stream()
+					: Stream.of(value);
 		}
 
 
 		private String string(final Value<?> value) {
-			return value.getType() == ValueType.ENTITY
-
-					? Optional.ofNullable(((EntityValue)value).get().getKey())
+			return Optional.of(value)
+					.filter(v -> v.getType() == ValueType.ENTITY)
+					.map(v -> ((EntityValue)v).get().getKey())
 					.filter(k -> k instanceof Key)
 					.map(k -> ((Key)k).getName())
-					.orElse("")
+					.orElse(value.get().toString());
+		}
 
-					: value.get().toString();
+		private Value<?> target(final Value<?> value) {
+			return Optional.of(value)
+					.filter(v -> v.getType() == ValueType.ENTITY)
+					.map(v -> ((EntityValue)v).get().getKey())
+					.filter(k -> k instanceof Key)
+					.map(k -> (Value)KeyValue.of((Key)k))
+					.orElse(value);
 		}
 
 	}

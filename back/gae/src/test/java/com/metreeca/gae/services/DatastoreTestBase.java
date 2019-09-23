@@ -20,9 +20,7 @@ package com.metreeca.gae.services;
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Context;
 
-import com.google.cloud.datastore.Batch;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityValue;
+import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.testing.LocalDatastoreHelper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -158,13 +156,13 @@ public abstract class DatastoreTestBase {
 					.set("seniority", _employee.getJsonNumber("seniority").longValue()) // integrals stored as longs
 
 
-					.set("office", Entity
+					.set("office", FullEntity
 							.newBuilder(datastore.key("Office", format("/offices/%s", _office.getString("code"))))
 							.set("label", _office.getString("label"))
 							.build()
 					);
 
-			Optional.ofNullable(_supervisor).ifPresent(s -> employee.set("supervisor", Entity
+			Optional.ofNullable(_supervisor).ifPresent(s -> employee.set("supervisor", FullEntity
 					.newBuilder(datastore.key("Employee", format("/employees/%s", s.getString("code"))))
 					.set("label", s.getString("label"))
 					.build()
@@ -176,7 +174,7 @@ public abstract class DatastoreTestBase {
 							&& _subordinate.getJsonObject("supervisor").getString("code").equals(_employee.getString("code"))
 					)
 
-					.map(_subordinate -> Entity
+					.map(_subordinate -> FullEntity
 							.newBuilder(datastore.key("Employee", "/employees/"+_subordinate.getString("code")))
 							.set("label", _subordinate.getString("label"))
 							.build()

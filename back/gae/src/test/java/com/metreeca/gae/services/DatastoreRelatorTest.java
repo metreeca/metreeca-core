@@ -52,7 +52,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static java.util.Comparator.comparing;
@@ -245,7 +244,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 			@Test void testDatatype() {
 				exec(load(birt()), () -> new DatastoreRelator()
 
-						.handle(request("{ '^seniority': 'Integral' }"))
+						.handle(request("{ '^seniority': 'LONG' }"))
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
@@ -433,11 +432,12 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e -> singleton("Yoshimi Kato").containsAll(e.contains("subordinates")
-												? e.getList("subordinates").stream()
+										.isEqualTo(items(e ->  e.contains("subordinates") && singleton("Yoshimi Kato").containsAll(
+
+												e.getList("subordinates").stream()
 												.map(v -> ((EntityValue)v).get().getString("label"))
 												.collect(Collectors.<String>toList())
-												: emptyList()
+
 										)))
 								)
 						)
@@ -452,11 +452,12 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 						.accept(response -> assertThat(response)
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e -> asList("Jeff Firrelli", "Mary Patterson").containsAll(e.contains("subordinates")
-												? e.getList("subordinates").stream()
-												.map(v -> ((EntityValue)v).get().getString("label"))
-												.collect(Collectors.<String>toList())
-												: emptyList()
+										.isEqualTo(items(e -> e.contains("subordinates") && asList("Jeff Firrelli", "Mary Patterson").containsAll(
+
+												e.getList("subordinates").stream()
+														.map(v -> ((EntityValue)v).get().getString("label"))
+														.collect(Collectors.<String>toList())
+
 										)))
 								)
 						)
@@ -615,7 +616,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 										.isEqualTo(items(e -> {
 
 											final FullEntity<IncompleteKey> office=e.getEntity("office");
-											final FullEntity<IncompleteKey> supervisor=e.getEntity("supervisor");
+											final FullEntity<IncompleteKey> supervisor=e.contains("supervisor") ? e.getEntity("supervisor") : null;
 
 											final Key office1=key("/offices/1", "Office");
 											final Key employee1500=key("/employees/1500", "Employee");
@@ -643,7 +644,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 				final List<Value<?>> values=employees.stream()
 						.map(path)
-						.filter(Objects::nonNull)
+						.filter(v -> v.getType() != ValueType.NULL)
 						.collect(toList());
 
 				final Map<Value<?>, Long> terms=values.stream()
@@ -748,7 +749,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 								.hasShape()
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(terms(
-												e -> e.getValue("supervisor"),
+												e -> e.contains("supervisor") ? e.getValue("supervisor") : NullValue.of(),
 												e -> true
 										))
 								)
@@ -770,30 +771,31 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 				final List<Value<?>> values=employees.stream()
 						.map(path)
-						.filter(Objects::nonNull)
+						.filter(v -> v.getType() != ValueType.NULL)
 						.collect(toList());
 
 
 				final long count=values.size();
-				final Object min=values.stream().min(Datastore::compare).orElse(null);
-				final Object max=values.stream().max(Datastore::compare).orElse(null);
+
+				final Value<?> min=values.stream().min(Datastore::compare).orElse(NullValue.of());
+				final Value<?> max=values.stream().max(Datastore::compare).orElse(NullValue.of());
 
 				return FullEntity.newBuilder()
 
 						.set(GAE.count, count)
-						.set(GAE.min, Datastore.value(min))
-						.set(GAE.max, Datastore.value(max))
+						.set(GAE.min, min)
+						.set(GAE.max, max)
 
 						.set(GAE.stats, ListValue.of(FullEntity.newBuilder()
 
 								.set(GAE.type, Optional
-										.ofNullable(Datastore.value(min).getType().toString())
-										.orElse(Datastore.value(max).getType().toString())
+										.ofNullable(min.getType().toString())
+										.orElse(max.getType().toString())
 								)
 
 								.set(GAE.count, count)
-								.set(GAE.min, Datastore.value(min))
-								.set(GAE.max, Datastore.value(max))
+								.set(GAE.min, min)
+								.set(GAE.max, max)
 
 								.build()
 						))
@@ -870,7 +872,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 								.hasShape()
 								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
-												e -> e.getValue("supervisor"),
+												e -> e.contains("supervisor") ? e.getValue("supervisor") : NullValue.of(),
 												e -> true
 										))
 								)
