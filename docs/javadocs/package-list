@@ -1,10 +1,10 @@
-com.metreeca.gae
-com.metreeca.gae.formats
-com.metreeca.gae.services
 com.metreeca.gate
 com.metreeca.gate.digests
 com.metreeca.gate.policies
 com.metreeca.gate.wrappers
+com.metreeca.gcloud
+com.metreeca.gcloud.formats
+com.metreeca.gcloud.services
 com.metreeca.rest
 com.metreeca.rest.formats
 com.metreeca.rest.handlers

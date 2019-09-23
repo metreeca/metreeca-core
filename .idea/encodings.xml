@@ -3,7 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/back" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/back/gae" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/back/gcloud" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/gate" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/head" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/head/servlet" charset="UTF-8" />

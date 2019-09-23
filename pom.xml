@@ -334,7 +334,7 @@
 								</group>
 								<group>
 									<title>Backend Adapters</title>
-									<packages>com.metreeca.gae*</packages>
+									<packages>com.metreeca.gcloud*</packages>
 								</group>
 							</groups>
 

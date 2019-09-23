@@ -37,7 +37,7 @@
 
 	<modules>
 
-		<module>gae</module>
+		<module>gcloud</module>
 
 	</modules>
 

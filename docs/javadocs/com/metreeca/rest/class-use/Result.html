@@ -83,21 +83,21 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="#com.metreeca.gae.formats">com.metreeca.gae.formats</a></td>
-<td class="colLast">
-<div class="block">Google App Engine message body formats.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><a href="#com.metreeca.gae.services">com.metreeca.gae.services</a></td>
-<td class="colLast">
-<div class="block">Google App Engine shared services.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><a href="#com.metreeca.gate">com.metreeca.gate</a></td>
 <td class="colLast">
 <div class="block">Identity and Access management framework.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="#com.metreeca.gcloud.formats">com.metreeca.gcloud.formats</a></td>
+<td class="colLast">
+<div class="block">Google Cloud message body formats.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="#com.metreeca.gcloud.services">com.metreeca.gcloud.services</a></td>
+<td class="colLast">
+<div class="block">Google Cloud shared services.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -123,46 +123,6 @@
 </li>
 <li class="blockList">
 <ul class="blockList">
-<li class="blockList"><a name="com.metreeca.gae.formats">
-<!--   -->
-</a>
-<h3>Uses of <a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a> in <a href="../../../../com/metreeca/gae/formats/package-summary.html">com.metreeca.gae.formats</a></h3>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Methods in <a href="../../../../com/metreeca/gae/formats/package-summary.html">com.metreeca.gae.formats</a> that return <a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code><a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;com.google.appengine.api.datastore.PropertyContainer,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
-<td class="colLast"><span class="typeNameLabel">EntityFormat.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/formats/EntityFormat.html#get-com.metreeca.rest.Message-">get</a></span>(<a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;?&gt;&nbsp;message)</code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li class="blockList"><a name="com.metreeca.gae.services">
-<!--   -->
-</a>
-<h3>Uses of <a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a> in <a href="../../../../com/metreeca/gae/services/package-summary.html">com.metreeca.gae.services</a></h3>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Methods in <a href="../../../../com/metreeca/gae/services/package-summary.html">com.metreeca.gae.services</a> that return <a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code>&lt;M extends <a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;M&gt;&gt;<br><a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;M,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
-<td class="colLast"><span class="typeNameLabel">DatastoreEngine.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#trim-M-">trim</a></span>(M&nbsp;message)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>&lt;M extends <a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;M&gt;&gt;<br><a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;M,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
-<td class="colLast"><span class="typeNameLabel">DatastoreEngine.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/gae/services/DatastoreEngine.html#validate-M-">validate</a></span>(M&nbsp;message)</code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-</li>
 <li class="blockList"><a name="com.metreeca.gate">
 <!--   -->
 </a>
@@ -200,6 +160,46 @@
 <td class="colLast"><span class="typeNameLabel">Roster.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/gate/Roster.html#lookup-java.lang.String-">lookup</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;handle)</code>
 <div class="block">Looks up a user up.</div>
 </td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.metreeca.gcloud.formats">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a> in <a href="../../../../com/metreeca/gcloud/formats/package-summary.html">com.metreeca.gcloud.formats</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../com/metreeca/gcloud/formats/package-summary.html">com.metreeca.gcloud.formats</a> that return <a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;com.google.cloud.datastore.Entity,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
+<td class="colLast"><span class="typeNameLabel">EntityFormat.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/gcloud/formats/EntityFormat.html#get-com.metreeca.rest.Message-">get</a></span>(<a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;?&gt;&nbsp;message)</code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.metreeca.gcloud.services">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a> in <a href="../../../../com/metreeca/gcloud/services/package-summary.html">com.metreeca.gcloud.services</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../com/metreeca/gcloud/services/package-summary.html">com.metreeca.gcloud.services</a> that return <a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;M extends <a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;M&gt;&gt;<br><a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;M,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
+<td class="colLast"><span class="typeNameLabel">DatastoreEngine.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/gcloud/services/DatastoreEngine.html#trim-M-">trim</a></span>(M&nbsp;message)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;M extends <a href="../../../../com/metreeca/rest/Message.html" title="class in com.metreeca.rest">Message</a>&lt;M&gt;&gt;<br><a href="../../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;M,<a href="../../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
+<td class="colLast"><span class="typeNameLabel">DatastoreEngine.</span><code><span class="memberNameLink"><a href="../../../../com/metreeca/gcloud/services/DatastoreEngine.html#validate-M-">validate</a></span>(M&nbsp;message)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>
