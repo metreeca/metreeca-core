@@ -2,9 +2,9 @@ com.metreeca.gate
 com.metreeca.gate.digests
 com.metreeca.gate.policies
 com.metreeca.gate.wrappers
-com.metreeca.gcloud
-com.metreeca.gcloud.formats
-com.metreeca.gcloud.services
+com.metreeca.gcp
+com.metreeca.gcp.formats
+com.metreeca.gcp.services
 com.metreeca.rest
 com.metreeca.rest.formats
 com.metreeca.rest.handlers
