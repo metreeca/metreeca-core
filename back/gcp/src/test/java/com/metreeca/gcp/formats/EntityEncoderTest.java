@@ -18,6 +18,7 @@
 package com.metreeca.gcp.formats;
 
 import com.metreeca.gcp.GCP;
+import com.metreeca.gcp.services.Datastore;
 import com.metreeca.gcp.services.DatastoreTestBase;
 
 import com.google.cloud.Timestamp;
@@ -44,11 +45,12 @@ final class EntityEncoderTest extends DatastoreTestBase {
 
 	private JsonObject encode(final Consumer<Entity.Builder> task) {
 
-		final Entity.Builder entity=Entity.newBuilder(service(datastore()).key(GCP.Resource, "/"));
+		final Datastore datastore=service(datastore());
+		final Entity.Builder entity=Entity.newBuilder(datastore.key(GCP.Resource, "/"));
 
 		task.accept(entity);
 
-		return new EntityEncoder().encode(entity.build(), and());
+		return new EntityEncoder(datastore).encode(entity.build(), and());
 	}
 
 

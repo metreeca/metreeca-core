@@ -48,7 +48,7 @@ final class EntityDecoderTest extends DatastoreTestBase {
 	}
 
 	private FullEntity<?> decode(final String json, final Shape shape) {
-		return new EntityDecoder().decode(
+		return new EntityDecoder(service(datastore())).decode(
 				Json.createReader(new StringReader(json.replace('\'', '"'))).readObject(), shape
 		);
 	}

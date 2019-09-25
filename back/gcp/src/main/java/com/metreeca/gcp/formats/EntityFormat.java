@@ -60,12 +60,16 @@ public final class EntityFormat implements Format<Entity> {
 
 	private final Datastore datastore;
 
-	private final EntityDecoder decoder=new EntityDecoder();
-	private final EntityEncoder encoder=new EntityEncoder();
+	private final EntityDecoder decoder;
+	private final EntityEncoder encoder;
 
 
 	private EntityFormat(final Datastore datastore) {
+
 		this.datastore=datastore;
+
+		this.decoder=new EntityDecoder(this.datastore);
+		this.encoder=new EntityEncoder(this.datastore);
 	}
 
 

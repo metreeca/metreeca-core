@@ -18,6 +18,7 @@
 package com.metreeca.gcp.formats;
 
 import com.metreeca.gcp.GCP;
+import com.metreeca.gcp.services.Datastore;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.datastore.*;
@@ -32,6 +33,14 @@ import static com.metreeca.tree.shapes.Field.fields;
 
 
 final class EntityEncoder {
+
+	private final Datastore datastore;
+
+
+	EntityEncoder(final Datastore datastore) {
+		this.datastore=datastore;
+	}
+
 
 	JsonObject encode(final Entity entity, final Shape shape) {
 		return value(EntityValue.of(entity), shape);

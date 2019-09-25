@@ -31,8 +31,6 @@ import java.util.Optional;
 
 import javax.json.*;
 
-import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
@@ -43,7 +41,12 @@ import static java.util.stream.Collectors.toList;
 
 final class EntityDecoder {
 
-	private final Datastore datastore=service(datastore());
+	private final Datastore datastore;
+
+
+	EntityDecoder(final Datastore datastore) {
+		this.datastore=datastore;
+	}
 
 
 	Object decode(final JsonValue value, final Shape shape) {
