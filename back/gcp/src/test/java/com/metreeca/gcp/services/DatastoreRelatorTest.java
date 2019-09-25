@@ -32,7 +32,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.metreeca.gcp.formats.EntityFormat.entity;
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.OK;

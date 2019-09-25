@@ -166,7 +166,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 	//// Container /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> container(final Request request) {
-		return request.query(splitter.resource(expand(request.shape())), entity()::value)
+		return request.query(splitter.resource(expand(request.shape())), entity(datastore)::value)
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 
@@ -209,7 +209,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK) // containers are virtual and respond always with 200 OK
 				.shape(field(GCP.contains, convey(shape)))
-				.body(entity(), container);
+				.body(entity(datastore), container);
 
 	}
 
@@ -245,7 +245,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK)
 				.shape(TermsShape)
-				.body(entity(), container);
+				.body(entity(datastore), container);
 
 	}
 
@@ -337,7 +337,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK)
 				.shape(StatsShape)
-				.body(entity(), container.build());
+				.body(entity(datastore), container.build());
 
 	}
 
@@ -360,7 +360,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 					.map(entity -> response
 							.status(OK)
 							.shape(shape)
-							.body(entity(), entity)
+							.body(entity(datastore), entity)
 					)
 
 					.orElseGet(() -> response

@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.metreeca.gcp.formats.EntityFormat.entity;
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.tree.shapes.And.and;
@@ -45,7 +44,7 @@ final class DatastoreTrimmerTest extends DatastoreTestBase {
 
 		builder.accept(entity);
 
-		return new DatastoreTrimmer()
+		return new DatastoreTrimmer(service(datastore()))
 				.trim(new Request()
 						.shape(shape)
 						.body(entity(), entity.build())

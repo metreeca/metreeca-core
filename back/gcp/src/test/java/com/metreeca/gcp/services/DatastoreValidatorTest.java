@@ -18,7 +18,6 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
-import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
 
@@ -73,10 +72,10 @@ final class DatastoreValidatorTest extends DatastoreTestBase {
 	}
 
 	private boolean validate(final Shape shape, final Entity entity) {
-		return new DatastoreValidator()
+		return new DatastoreValidator(service(datastore()))
 				.validate(new Request()
 						.shape(field("value", shape))
-						.body(EntityFormat.entity(), entity)
+						.body(entity(), entity)
 				)
 				.value()
 				.isPresent();
@@ -97,7 +96,7 @@ final class DatastoreValidatorTest extends DatastoreTestBase {
 	}
 
 
-	@Test void testValidateType() {
+	@Test void testValidateDatatype() {
 		exec(() -> {
 
 			assertThat(validate(datatype(ValueType.ENTITY), EntityValue.of(entity(entity -> {})))).isTrue();
@@ -129,7 +128,7 @@ final class DatastoreValidatorTest extends DatastoreTestBase {
 			final Shape shape=clazz("Class");
 
 			assertThat(validate(shape, EntityValue.of(entity(entity -> entity.setKey(key("Class", "/id")))))).isTrue();
-			assertThat(validate(shape, EntityValue.of(entity(entity -> entity.setKey(key("Else", "/id")))))).isFalse();
+			assertThat(validate(shape, EntityValue.of(entity(entity -> entity.setKey(key("Other", "/id")))))).isFalse();
 			assertThat(validate(shape, LongValue.of(1))).isFalse();
 
 		});

@@ -25,7 +25,6 @@ import com.google.cloud.datastore.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.gcp.formats.EntityFormat.entity;
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;

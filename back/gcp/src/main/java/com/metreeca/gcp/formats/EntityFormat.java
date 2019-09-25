@@ -32,35 +32,41 @@ import java.util.Optional;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
 public final class EntityFormat implements Format<Entity> {
 
-	private static final EntityFormat Instance=new EntityFormat();
-
-
 	/**
-	 * Retrieves the entity body format.
+	 * Creates an entity body format for a target datastore.
 	 *
-	 * @return the singleton entity body format instance
+	 * @param datastore the datastore where entities are expected to be stored
+	 *
+	 * @return a new entity body format instance for the target {@code datastore}
+	 *
+	 * @throws NullPointerException if {@code datastore} is nulll
 	 */
-	public static EntityFormat entity() {
-		return Instance;
+	public static EntityFormat entity(final Datastore datastore) {
+
+		if ( datastore == null ) {
+			throw new NullPointerException("null datastore");
+		}
+
+		return new EntityFormat(datastore);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Datastore datastore=service(datastore());
+	private final Datastore datastore;
 
 	private final EntityDecoder decoder=new EntityDecoder();
 	private final EntityEncoder encoder=new EntityEncoder();
 
 
-	private EntityFormat() {} // singleton
+	private EntityFormat(final Datastore datastore) {
+		this.datastore=datastore;
+	}
 
 
 	public Object value(final JsonValue value, final Shape shape) {
@@ -91,6 +97,21 @@ public final class EntityFormat implements Format<Entity> {
 		return message.body(json(),
 				encoder.encode(value, shape(message))
 		);
+	}
+
+
+
+	private boolean equals(final EntityFormat format) {
+		return false;
+	}
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof EntityFormat
+				&& datastore.equals(((EntityFormat)object).datastore);
+	}
+
+	@Override public int hashCode() {
+		return datastore.hashCode();
 	}
 
 

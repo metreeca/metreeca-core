@@ -46,7 +46,7 @@ final class DatastoreCreator extends DatastoreProcessor {
 	private Future<Response> container(final Request request) {
 		return request
 
-				.body(entity())
+				.body(entity(datastore))
 
 				.process(entity -> datastore.exec(service -> { // assign entity a slug-based id
 

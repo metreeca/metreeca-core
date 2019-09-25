@@ -32,8 +32,16 @@ import static com.metreeca.gcp.formats.EntityFormat.entity;
 
 final class DatastoreTrimmer extends DatastoreProcessor {
 
+	private final Datastore datastore;
+
+
+	DatastoreTrimmer(final Datastore datastore) {
+		this.datastore=datastore;
+	}
+
+
 	<M extends Message<M>> Result<M, Failure> trim(final M message) {
-		return message.body(entity()).value(entity -> message.body(entity(),
+		return message.body(entity(datastore)).value(entity -> message.body(entity(datastore),
 				(Entity)trim(convey(message.shape()), EntityValue.of(entity)).get()
 		));
 	}

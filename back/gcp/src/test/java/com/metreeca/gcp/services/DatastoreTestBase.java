@@ -17,6 +17,7 @@
 
 package com.metreeca.gcp.services;
 
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Context;
 
@@ -60,6 +61,10 @@ public abstract class DatastoreTestBase {
 		helper.reset();
 	}
 
+
+	protected EntityFormat entity() {
+		return EntityFormat.entity(service(datastore()));
+	}
 
 	protected void exec(final Runnable... tasks) {
 		new Context()

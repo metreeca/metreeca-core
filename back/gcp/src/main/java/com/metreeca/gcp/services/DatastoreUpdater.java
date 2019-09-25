@@ -50,7 +50,7 @@ final class DatastoreUpdater extends DatastoreProcessor {
 	private Future<Response> resource(final Request request) {
 		return request
 
-				.body(entity())
+				.body(entity(datastore))
 
 				.value(entity -> request.reply(response -> datastore.exec(datastore -> {
 

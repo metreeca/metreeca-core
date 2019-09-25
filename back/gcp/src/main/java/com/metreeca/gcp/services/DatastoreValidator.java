@@ -43,10 +43,18 @@ import static java.util.stream.Collectors.toMap;
 
 final class DatastoreValidator extends DatastoreProcessor {
 
+	private final Datastore datastore;
+
+
+	DatastoreValidator(final Datastore datastore) {
+		this.datastore=datastore;
+	}
+
+
 	<M extends Message<M>> Result<M, Failure> validate(final M message) {
 		return message
 
-				.body(entity())
+				.body(entity(datastore))
 
 				.process(entity -> Optional.of(validate(convey(message.shape()), EntityValue.of(entity)))
 						.filter(trace -> !trace.isEmpty())
