@@ -31,10 +31,10 @@ import java.util.Optional;
 
 import javax.json.Json;
 
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.things.JsonValues.object;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Values.*;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.things.JsonValues.object;
+import static com.metreeca.tree.things.Maps.entry;
+import static com.metreeca.tree.things.Values.*;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;

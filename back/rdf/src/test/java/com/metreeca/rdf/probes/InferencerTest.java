@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.probes;
 
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Lists;
+import com.metreeca.tree.shapes.*;
+import com.metreeca.tree.things.Lists;
 import com.metreeca.rdf.Form;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
@@ -29,11 +29,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.shapes.Clazz.clazz;
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Values.inverse;
+import static com.metreeca.tree.shapes.All.all;
+import static com.metreeca.tree.shapes.Clazz.clazz;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.things.Lists.list;
+import static com.metreeca.tree.things.Values.inverse;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;

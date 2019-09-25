@@ -117,14 +117,14 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.5.0</version>
+			<version>5.5.2</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency> <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.12.2</version>
+			<version>3.13.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -334,7 +334,7 @@
 								</group>
 								<group>
 									<title>Backend Adapters</title>
-									<packages>com.metreeca.gae*</packages>
+									<packages>com.metreeca.gcloud*:com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*</packages>
 								</group>
 							</groups>
 
@@ -344,6 +344,36 @@
 
 					</execution>
 
+				</executions>
+
+			</plugin>
+
+			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+
+				<executions>
+					<execution>
+
+						<id>clean-docs-folder</id>
+						<phase>clean</phase>
+						<inherited>false</inherited>
+
+						<goals>
+							<goal>clean</goal>
+						</goals>
+
+						<configuration>
+							<filesets>
+								<fileset><directory>docs/_site</directory></fileset>
+								<fileset><directory>docs/javadocs</directory></fileset>
+								<fileset><directory>docs/reports</directory></fileset>
+							</filesets>
+						</configuration>
+
+					</execution>
 				</executions>
 
 			</plugin>

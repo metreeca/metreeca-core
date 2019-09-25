@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.codecs;
 
-import com.metreeca.form.Shape;
-import com.metreeca.form.shapes.Or;
+import com.metreeca.tree.Shape;
+import com.metreeca.tree.shapes.Or;
 import com.metreeca.rdf.Form;
 import com.metreeca.rdf.ValuesTest;
 
@@ -40,20 +40,20 @@ import java.util.function.Function;
 
 import javax.json.*;
 
-import static com.metreeca.form.Shape.multiple;
-import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.things.JsonValues.array;
-import static com.metreeca.form.things.JsonValues.object;
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Maps.union;
-import static com.metreeca.form.things.Values.*;
-import static com.metreeca.form.things.ValuesTest.item;
+import static com.metreeca.tree.Shape.multiple;
+import static com.metreeca.tree.Shape.required;
+import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.MaxCount.maxCount;
+import static com.metreeca.tree.things.JsonValues.array;
+import static com.metreeca.tree.things.JsonValues.object;
+import static com.metreeca.tree.things.Lists.list;
+import static com.metreeca.tree.things.Maps.entry;
+import static com.metreeca.tree.things.Maps.map;
+import static com.metreeca.tree.things.Maps.union;
+import static com.metreeca.tree.things.Values.*;
+import static com.metreeca.tree.things.ValuesTest.item;
 import static com.metreeca.rdf.Values.bnode;
 import static com.metreeca.rdf.Values.format;
 import static com.metreeca.rdf.Values.iri;

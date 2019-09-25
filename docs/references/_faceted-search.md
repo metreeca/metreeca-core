@@ -23,12 +23,22 @@
     <criterion> ::= "[-+]?<path>"
 
     <items response> ::= {
-        "this": "<target-iri>"
-        "contains": [<term>(, <term>)*]
+        "id": "<target>"
+        "contains": [<item>(, <item>)*]
     }
     
     
 # Terms Query
+
+    <items response> ::= {
+        "id": "<target>"
+        "terms": [<term>(, <term>)*]
+    }
+    
+    <term> ::= {
+        "value": item,
+        "count": <count>
+    }
 
 # Stats Query
  
@@ -46,20 +56,21 @@
     ">= <path>": <value>, // minInclusive
     "<= <path>": <value>, // maxInclusive
     
-    "#> <path>": <value>, // minLength
-    "#< <path>": <value>, // maxLength
+    "$> <path>": <value>, // minLength
+    "$< <path>": <value>, // maxLength
     
     "* <path>": "pattern", // pattern (regular expression matching)
     "~ <path>": "keywords", // like (stemmed word search)
     
-    ">> <path>": <integer>, // minCount
-    "<< <path>": <integer>, // maxCount
+    "#> <path>": <integer>, // minCount
+    "#< <path>": <integer>, // maxCount
     
+    "% <path>": <value> | [<value>(, <value>)*], // in
     "! <path>": <value> | [<value>(, <value>)*], // all
     "? <path>": <value> | [<value>(, <value>)*], // any
         
-    "<path>": <value>, //  shorthand for { "?": <value> }
-    "<path>": [<value>(, <value>)*] // shorthand for { "?": [<value>(, <value>)*] }
+    "<path>": <value>, //  shorthand for "? <path": <value>
+    "<path>": [<value>(, <value>)*] // shorthand for "? <path>": [<value>(, <value>)*]
     
 }
 ```

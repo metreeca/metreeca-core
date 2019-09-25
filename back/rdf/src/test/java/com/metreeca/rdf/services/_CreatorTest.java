@@ -35,8 +35,8 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.function.Function;
 
-import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.tree.queries.Edges.edges;
+import static com.metreeca.tree.things.ValuesTest.*;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.*;

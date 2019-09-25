@@ -40,30 +40,26 @@ import static java.util.stream.Collectors.*;
  */
 public final class Field implements Shape {
 
-	public static Field field(final String name, final Shape shape) {
+	public static Field field(final Object name, final Shape shape) {
 		return new Field(name, shape);
 	}
 
 
-	public static Map<String, Shape> fields(final Shape shape) {
+	public static Map<Object, Shape> fields(final Shape shape) {
 		return shape == null ? emptyMap() : shape.map(new FieldProbe());
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String name;
+	private final Object name;
 	private final Shape shape;
 
 
-	private Field(final String name, final Shape shape) {
+	private Field(final Object name, final Shape shape) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
-		}
-
-		if ( name.isEmpty() ) {
-			throw new IllegalArgumentException("empty name");
 		}
 
 		if ( shape == null ) {
@@ -77,7 +73,7 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getName() {
+	public Object getName() {
 		return name;
 	}
 
@@ -115,30 +111,30 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class FieldProbe extends Traverser<Map<String, Shape>> {
+	private static final class FieldProbe extends Traverser<Map<Object, Shape>> {
 
-		@Override public Map<String, Shape> probe(final Shape shape) { return emptyMap();}
+		@Override public Map<Object, Shape> probe(final Shape shape) { return emptyMap();}
 
 
-		@Override public Map<String, Shape> probe(final Field field) {
+		@Override public Map<Object, Shape> probe(final Field field) {
 			return singletonMap(field.getName(), field.getShape());
 		}
 
 
-		@Override public Map<String, Shape> probe(final And and) {
+		@Override public Map<Object, Shape> probe(final And and) {
 			return fields(and.getShapes().stream());
 		}
 
-		@Override public Map<String, Shape> probe(final Or or) {
+		@Override public Map<Object, Shape> probe(final Or or) {
 			return fields(or.getShapes().stream());
 		}
 
-		@Override public Map<String, Shape> probe(final When when) {
+		@Override public Map<Object, Shape> probe(final When when) {
 			return fields(Stream.of(when.getPass(), when.getFail()));
 		}
 
 
-		private Map<String, Shape> fields(final Stream<Shape> stream) {
+		private Map<Object, Shape> fields(final Stream<Shape> stream) {
 			return stream
 
 					// collect name-to-shape mappings from nested shapes

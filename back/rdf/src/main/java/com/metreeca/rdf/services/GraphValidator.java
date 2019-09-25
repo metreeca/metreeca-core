@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf.services;
 
-import com.metreeca.form.*;
-import com.metreeca.form.shapes.*;
-import com.metreeca.form.things.Values;
+import com.metreeca.tree.*;
+import com.metreeca.tree.shapes.*;
+import com.metreeca.tree.things.Values;
 import com.metreeca.rdf.Values;
 import com.metreeca.tray.Trace;
 
@@ -33,16 +33,16 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Focus.focus;
-import static com.metreeca.form.Frame.frame;
-import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.things.Lists.concat;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Snippets.source;
-import static com.metreeca.form.things.Values.*;
-import static com.metreeca.form.things.Snippets.list;
+import static com.metreeca.tree.Focus.focus;
+import static com.metreeca.tree.Frame.frame;
+import static com.metreeca.tree.Issue.issue;
+import static com.metreeca.tree.things.Lists.concat;
+import static com.metreeca.tree.things.Maps.entry;
+import static com.metreeca.tree.things.Maps.map;
+import static com.metreeca.tree.things.Sets.set;
+import static com.metreeca.tree.things.Snippets.source;
+import static com.metreeca.tree.things.Values.*;
+import static com.metreeca.tree.things.Snippets.list;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 

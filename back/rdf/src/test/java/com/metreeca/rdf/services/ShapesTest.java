@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.services;
 
-import com.metreeca.form.Form;
+import com.metreeca.tree.Form;
 import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf.probes.Outliner;
 import com.metreeca.tree.Shape;
@@ -31,8 +31,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.things.ValuesTest.*;
+import static com.metreeca.tree.probes.Evaluator.pass;
+import static com.metreeca.tree.things.ValuesTest.*;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.services.Shapes.container;

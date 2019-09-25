@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import javax.json.*;
 
-import static com.metreeca.form.shapes.Field.fields;
+import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.rdf.Form.BNodeType;
 import static com.metreeca.rdf.Form.IRIType;
 import static com.metreeca.rdf.Form.ResourceType;

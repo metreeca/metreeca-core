@@ -43,7 +43,7 @@
 
 	<modules>
 
-		<module>gae</module>
+		<module>gcloud</module>
 
 		<module>rdf</module>
 		<module>rdf4j</module>

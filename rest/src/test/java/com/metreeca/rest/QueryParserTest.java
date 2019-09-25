@@ -23,6 +23,7 @@ import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.queries.Items;
 import com.metreeca.tree.queries.Stats;
 import com.metreeca.tree.queries.Terms;
+import com.metreeca.tree.shapes.Field;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,7 @@ import static com.metreeca.tree.shapes.Any.any;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.In.in;
 import static com.metreeca.tree.shapes.Like.like;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static com.metreeca.tree.shapes.MaxExclusive.maxExclusive;
@@ -62,8 +64,8 @@ final class QueryParserTest {
 	private static final Shape shape=field("head", field("tail", and()));
 
 
-	private void items(final String json, final Shape shape, final Consumer<Items> tester) {
-		query(json, shape, new TestQueryProbe() {
+	private void items(final String query, final Shape shape, final Consumer<Items> tester) {
+		query(query, shape, new TestQueryProbe() {
 
 			@Override public Boolean probe(final Items items) {
 
@@ -75,8 +77,8 @@ final class QueryParserTest {
 		});
 	}
 
-	private void terms(final String json, final Shape shape, final Consumer<Terms> tester) {
-		query(json, shape, new TestQueryProbe() {
+	private void terms(final String query, final Shape shape, final Consumer<Terms> tester) {
+		query(query, shape, new TestQueryProbe() {
 
 			@Override public Boolean probe(final Terms terms) {
 
@@ -88,8 +90,8 @@ final class QueryParserTest {
 		});
 	}
 
-	private void stats(final String json, final Shape shape, final Consumer<Stats> tester) {
-		query(json, shape, new TestQueryProbe() {
+	private void stats(final String query, final Shape shape, final Consumer<Stats> tester) {
+		query(query, shape, new TestQueryProbe() {
 
 			@Override public Boolean probe(final Stats stats) {
 
@@ -102,23 +104,23 @@ final class QueryParserTest {
 	}
 
 
-	private void query(final String json, final Shape shape, final Query.Probe<Boolean> probe) {
-		assertThat(parse(json, shape).map(probe))
+	private void query(final String query, final Shape shape, final Query.Probe<Boolean> probe) {
+		assertThat(parse(query, shape).map(probe))
 				.as("query processed")
 				.isTrue();
 	}
 
-	private Query parse(final String json, final Shape shape) {
-		return new QueryParser(shape, (value, shape1) ->
+	private Query parse(final String query, final Shape shape) {
+		return new QueryParser(shape, (value, _shape) ->
 
 				value.equals(JsonValue.TRUE) ? true
 						: value.equals(JsonValue.FALSE) ? false
-						: value instanceof JsonNumber && ((JsonNumber)value).isIntegral()? ((JsonNumber)value).longValue()
-						: value instanceof JsonNumber? ((JsonNumber)value).doubleValue()
-						: value instanceof JsonString ? ((JsonString)value).getString()
+						: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
+						: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
+						: value instanceof JsonString ? ((JsonString)value).getString()+datatype(_shape).map(t -> "^"+t).orElse("")
 						: null
 
-		).parse(json.replace('\'', '"'));
+		).parse(query.replace('\'', '"'));
 	}
 
 	private Shape filter(final Shape shape, final Shape filter) {
@@ -180,142 +182,159 @@ final class QueryParserTest {
 				.isInstanceOf(JsonException.class);
 	}
 
-
 	@Test void testParseSortingCriteria() {
 
-		items("{ '_order': '' }", shape, edges -> assertThat(edges.getOrders())
+		items("{ '_order': '' }", shape, items -> assertThat(items.getOrders())
 				.as("empty path")
 				.containsExactly(increasing())
 		);
 
-		items("{ '_order': '+' }", shape, edges -> assertThat(edges.getOrders())
+		items("{ '_order': '+' }", shape, items -> assertThat(items.getOrders())
 				.as("empty path increasing")
 				.containsExactly(increasing())
 		);
 
-		items("{ '_order': '-' }", shape, edges -> assertThat(edges.getOrders())
+		items("{ '_order': '-' }", shape, items -> assertThat(items.getOrders())
 				.as("empty path decreasing")
 				.containsExactly(decreasing())
 		);
 
-		items("{ '_order': 'head.tail' }", shape, edges -> assertThat(edges.getOrders())
+		items("{ '_order': 'head.tail' }", shape, items -> assertThat(items.getOrders())
 				.as("path")
 				.containsExactly(increasing("head", "tail"))
 		);
 
-		items("{ '_order': '+head.tail' }", shape, edges -> assertThat(edges.getOrders())
+		items("{ '_order': '+head.tail' }", shape, items -> assertThat(items.getOrders())
 				.as("path increasing")
 				.containsExactly(increasing("head", "tail"))
 		);
 
-		items("{ '_order': '-head.tail' }", shape, edges -> assertThat(edges.getOrders())
+		items("{ '_order': '-head.tail' }", shape, items -> assertThat(items.getOrders())
 				.as("path decreasing")
 				.containsExactly(decreasing("head", "tail")));
 
-		items("{ '_order': [] }", shape, edges -> assertThat(edges.getOrders()).
+		items("{ '_order': [] }", shape, items -> assertThat(items.getOrders()).
 				as("empty list")
 				.isEmpty()
 		);
 
-		items("{ '_order': ['+head', '-head.tail'] }", shape, edges -> assertThat(edges.getOrders())
+		items("{ '_order': ['+head', '-head.tail'] }", shape, items -> assertThat(items.getOrders())
 				.as("list")
 				.containsExactly(increasing("head"), decreasing("head", "tail"))
 		);
 
 	}
 
+
 	@Test void testParseRootFilters() {
 
-		items("{ '>>': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("min count")
-				.isEqualTo(filter(shape, minCount(1)))
-		);
-
-		items("{ '<<': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("max count")
-				.isEqualTo(filter(shape, maxCount(1)))
-		);
-
-
-		items("{ '>=': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("min inclusive")
-				.isEqualTo(filter(shape, minInclusive(One)))
-		);
-
-		items("{ '<=': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("max inclusive")
-				.isEqualTo(filter(shape, maxInclusive(One)))
-		);
-
-		items("{ '>': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("min exclusive")
-				.isEqualTo(filter(shape, minExclusive(One)))
-		);
-
-		items("{ '<': 1 }", shape, edges -> assertThat(edges.getShape())
-				.as("max exclusive")
-				.isEqualTo(filter(shape, maxExclusive(One)))
-		);
-
-		items("{ '~': 'words' }", shape, edges -> assertThat(edges.getShape())
-				.as("like")
-				.isEqualTo(filter(shape, like("words")))
-		);
-
-		items("{ '*': 'pattern' }", shape, edges -> assertThat(edges.getShape())
-				.as("pattern")
-				.isEqualTo(filter(shape, pattern("pattern")))
-		);
-
-		items("{ '#<': 123 }", shape, edges -> assertThat(edges.getShape())
-				.as("min length")
-				.isEqualTo(filter(shape, minLength(123)))
-		);
-
-		items("{ '#>': 123 }", shape, edges -> assertThat(edges.getShape())
-				.as("max length")
-				.isEqualTo(filter(shape, maxLength(123)))
-		);
-
-
-		items("{ '@': 'class' }", shape, edges -> assertThat(edges.getShape())
+		items("{ '@': 'class' }", shape, items -> assertThat(items.getShape())
 				.as("class")
 				.isEqualTo(filter(shape, clazz("class")))
 		);
 
-		items("{ '^': 'datatype' }", shape, edges -> assertThat(edges.getShape())
+		items("{ '^': 'datatype' }", shape, items -> assertThat(items.getShape())
 				.as("type")
 				.isEqualTo(filter(shape, datatype("datatype")))
 		);
 
 
-		items("{ '!': [] }", shape, edges -> assertThat(edges.getShape())
-				.as("empty (empty)")
+		items("{ '>': 1 }", shape, items -> assertThat(items.getShape())
+				.as("min exclusive")
+				.isEqualTo(filter(shape, minExclusive(One)))
+		);
+
+		items("{ '<': 1 }", shape, items -> assertThat(items.getShape())
+				.as("max exclusive")
+				.isEqualTo(filter(shape, maxExclusive(One)))
+		);
+
+		items("{ '>=': 1 }", shape, items -> assertThat(items.getShape())
+				.as("min inclusive")
+				.isEqualTo(filter(shape, minInclusive(One)))
+		);
+
+		items("{ '<=': 1 }", shape, items -> assertThat(items.getShape())
+				.as("max inclusive")
+				.isEqualTo(filter(shape, maxInclusive(One)))
+		);
+
+
+		items("{ '$>': 123 }", shape, items -> assertThat(items.getShape())
+				.as("min length")
+				.isEqualTo(filter(shape, minLength(123)))
+		);
+
+		items("{ '$<': 123 }", shape, items -> assertThat(items.getShape())
+				.as("max length")
+				.isEqualTo(filter(shape, maxLength(123)))
+		);
+
+		items("{ '*': 'pattern' }", shape, items -> assertThat(items.getShape())
+				.as("pattern")
+				.isEqualTo(filter(shape, pattern("pattern")))
+		);
+
+		items("{ '~': 'words' }", shape, items -> assertThat(items.getShape())
+				.as("like")
+				.isEqualTo(filter(shape, like("words")))
+		);
+
+
+		items("{ '#>': 1 }", shape, items -> assertThat(items.getShape())
+				.as("min count")
+				.isEqualTo(filter(shape, minCount(1)))
+		);
+
+		items("{ '#<': 1 }", shape, items -> assertThat(items.getShape())
+				.as("max count")
+				.isEqualTo(filter(shape, maxCount(1)))
+		);
+
+
+		items("{ '%': [] }", shape, items -> assertThat(items.getShape())
+				.as("in (empty)")
+				.isEqualTo(filter(shape, in()))
+		);
+
+		items("{ '%': 'head' }", shape, items -> assertThat(items.getShape())
+				.as("in (singleton)")
+				.isEqualTo(filter(shape, in("head")))
+		);
+
+		items("{ '%': ['head', 'tail'] }", shape, items -> assertThat(items.getShape())
+				.as("in (multiple)")
+				.isEqualTo(filter(shape, in("head", "tail")))
+		);
+
+
+		items("{ '!': [] }", shape, items -> assertThat(items.getShape())
+				.as("universal (empty)")
 				.isEqualTo(filter(shape, all()))
 		);
 
-		items("{ '!': 'head' }", shape, edges -> assertThat(edges.getShape())
+		items("{ '!': 'head' }", shape, items -> assertThat(items.getShape())
 				.as("universal (singleton)")
 				.isEqualTo(filter(shape, all("head")))
 		);
 
-		items("{ '!': ['head', 'tail'] }", shape, edges -> assertThat(edges.getShape())
+		items("{ '!': ['head', 'tail'] }", shape, items -> assertThat(items.getShape())
 				.as("universal (multiple)")
 				.isEqualTo(filter(shape, all("head", "tail")))
 		);
 
 
-		items("{ '?': [] }", shape, edges -> assertThat(edges.getShape())
+		items("{ '?': [] }", shape, items -> assertThat(items.getShape())
 				.as("existential (empty)")
 				.isEqualTo(filter(shape, any()))
 		);
 
-		items("{ '?': 'head' }", shape, edges -> assertThat(edges.getShape())
+		items("{ '?': 'head' }", shape, items -> assertThat(items.getShape())
 				.as("existential (singleton)")
 				.isEqualTo(filter(shape, any("head")))
 		);
 
-		items("{ '?': ['head', 'tail'] }", shape, edges -> assertThat(edges.getShape())
+		items("{ '?': ['head', 'tail'] }", shape, items -> assertThat(items.getShape())
 				.as("existential (multiple)")
 				.isEqualTo(filter(shape, any("head", "tail")))
 		);
@@ -324,28 +343,38 @@ final class QueryParserTest {
 
 	@Test void testParsePathFilters() {
 
-		items("{ '>= head.tail': 1 }", shape, edges -> assertThat(edges.getShape())
+		items("{ '>= head.tail': 1 }", shape, items -> assertThat(items.getShape())
 				.as("nested filter")
 				.isEqualTo(filter(shape, field("head", field("tail", minInclusive(One)))))
 		);
 
-		items("{ 'head.tail': 1 }", shape, edges -> assertThat(edges.getShape())
+		items("{ 'head.tail': 1 }", shape, items -> assertThat(items.getShape())
 				.as("nested filter singleton shorthand")
 				.isEqualTo(filter(shape, field("head", field("tail", any(One)))))
 		);
 
-		items("{ 'head.tail': [1, 10] }", shape, edges -> assertThat(edges.getShape())
+		items("{ 'head.tail': [1, 10] }", shape, items -> assertThat(items.getShape())
 				.as("nested filter multiple shorthand")
 				.isEqualTo(filter(shape, field("head", field("tail", any(One, Ten)))))
 		);
 
 	}
 
+	@Test void testParseShapedFilters() {
+
+		final Field shape=field("value", datatype("type"));
+
+		items("{ 'value': '4' }", shape, items -> assertThat(items.getShape())
+				.as("typed value")
+				.isEqualTo(filter(shape, field("value", any("4^type"))))
+		);
+	}
+
 
 	@Test void testIgnoreNullFilters() {
 
-		items("{ '>': null }", shape, edges -> assertThat(edges.getShape()).isEqualTo(shape));
-		items("{ 'head': null }", shape, edges -> assertThat(edges.getShape()).isEqualTo(shape));
+		items("{ '>': null }", shape, items -> assertThat(items.getShape()).isEqualTo(shape));
+		items("{ 'head': null }", shape, items -> assertThat(items.getShape()).isEqualTo(shape));
 
 	}
 
@@ -361,15 +390,15 @@ final class QueryParserTest {
 		);
 
 		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ '_order': 'nil' }", shape, edges -> {})
+				items("{ '_order': 'nil' }", shape, items -> {})
 		);
 
 		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ '>= nil': 1 }", shape, edges -> {})
+				items("{ '>= nil': 1 }", shape, items -> {})
 		);
 
 		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ 'head.nil': 1 }", shape, edges -> {})
+				items("{ 'head.nil': 1 }", shape, items -> {})
 		);
 
 	}
@@ -385,15 +414,15 @@ final class QueryParserTest {
 		);
 
 		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ '_order': 'nil' }", and(), edges -> {})
+				items("{ '_order': 'nil' }", and(), items -> {})
 		);
 
 		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ '>= nil': 1 }", and(), edges -> {})
+				items("{ '>= nil': 1 }", and(), items -> {})
 		);
 
 		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ 'head.nil': 1 }", and(), edges -> {})
+				items("{ 'head.nil': 1 }", and(), items -> {})
 		);
 
 	}
@@ -403,24 +432,24 @@ final class QueryParserTest {
 
 	@Test void testParsePlainQuery() {
 
-		items("head=x&head.tail=y&head.tail=w+z", shape, edges -> assertThat(edges.getShape())
+		items("head=x&head.tail=y&head.tail=w+z", shape, items -> assertThat(items.getShape())
 				.isEqualTo(filter(shape, field("head", and(
 						any("x"),
 						field("tail", any("y", "w z"))
 				)))));
 
-		items("head=x&head.tail=y&_order=-head.tail&_order=head&_offset=1&_limit=2", shape, edges -> {
+		items("head=x&head.tail=y&_order=-head.tail&_order=head&_offset=1&_limit=2", shape, items -> {
 
-			assertThat(edges.getOrders())
+			assertThat(items.getOrders())
 					.containsExactly(decreasing("head", "tail"), increasing("head"));
 
-			assertThat(edges.getOffset())
+			assertThat(items.getOffset())
 					.isEqualTo(1);
 
-			assertThat(edges.getLimit())
+			assertThat(items.getLimit())
 					.isEqualTo(2);
 
-			assertThat(edges.getShape())
+			assertThat(items.getShape())
 					.isEqualTo(filter(shape, field("head", and(
 							any("x"),
 							field("tail", any("y"))
@@ -431,11 +460,11 @@ final class QueryParserTest {
 
 	@Test void testParseItemsQuery() {
 
-		items("{ '_offset': 1, '_limit': 2 }", shape, edges -> {
+		items("{ '_offset': 1, '_limit': 2 }", shape, items -> {
 
-			assertThat(edges.getShape()).as("shape").isEqualTo(filter(shape, and()));
-			assertThat(edges.getOffset()).as("offset").isEqualTo(1);
-			assertThat(edges.getLimit()).as("limit").isEqualTo(2);
+			assertThat(items.getShape()).as("shape").isEqualTo(filter(shape, and()));
+			assertThat(items.getOffset()).as("offset").isEqualTo(1);
+			assertThat(items.getLimit()).as("limit").isEqualTo(2);
 
 		});
 
@@ -443,13 +472,13 @@ final class QueryParserTest {
 
 	@Test void testParseTermsQuery() {
 
-		terms("{ '_terms': 'head.tail' }", shape, items -> {
+		terms("{ '_terms': 'head.tail' }", shape, terms -> {
 
 			assertThat(filter(shape, and()))
 					.as("shape")
-					.isEqualTo(items.getShape());
+					.isEqualTo(terms.getShape());
 
-			assertThat(items.getPath())
+			assertThat(terms.getPath())
 					.as("path")
 					.containsExactly("head", "tail");
 
@@ -468,6 +497,41 @@ final class QueryParserTest {
 			assertThat(stats.getPath())
 					.as("path")
 					.containsExactly("head", "tail");
+
+		});
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testParseFormBasedQueries() {
+
+		items("~head=keyword", shape, items -> {
+
+			assertThat(items.getShape()).isEqualTo(filter(shape, field("head", like("keyword"))));
+
+		});
+
+		items("_order=%2Bhead.tail&_offset=1&_limit=2", shape, items -> {
+
+			assertThat(items.getOrders()).containsExactly(increasing("head", "tail"));
+			assertThat(items.getOffset()).isEqualTo(1L);
+			assertThat(items.getLimit()).isEqualTo(2L);
+
+		});
+
+		terms("_terms=head.tail", shape, terms -> {
+
+			assertThat(filter(shape, and())).isEqualTo(terms.getShape());
+			assertThat(terms.getPath()).containsExactly("head", "tail");
+
+		});
+
+		stats("_stats=head.tail", shape, stats -> {
+
+			assertThat(filter(shape, and())).isEqualTo(stats.getShape());
+			assertThat(stats.getPath()).containsExactly("head", "tail");
 
 		});
 

@@ -47,10 +47,10 @@ public final class Permit {
 	 *                accepted as a handle for {@linkplain Roster#lookup(String) looking up} the user in the roster;
 	 *                must change on credential and account status updates and user {@linkplain Roster#login(String,
 	 *                String) login}/{@linkplain Roster#logout(String) logout}
-	 * @param user    an IRI uniquely identifying the user
-	 * @param roles   a set of IRIs uniquely identifying the roles attributed to the user
+	 * @param user    an id uniquely identifying the user
+	 * @param roles   a set of ids uniquely identifying the roles attributed to the user
 	 * @param profile a front-end profile for the user, providing information such as name, email, picture and
-	 *                operational roles; usually {@linkplain Json#createObjectBuilder(Map)}  converted} to JSON before
+	 *                operational roles; usually {@linkplain Json#createObjectBuilder(Map)} converted} to JSON before
 	 *                use
 	 *
 	 * @throws NullPointerException if any of the arguments is null or contains null values
@@ -87,7 +87,7 @@ public final class Permit {
 	/**
 	 * Retrieves the permit id.
 	 *
-	 * @return an opaque handle uniquely identifying the permit user at the time the permit was create
+	 * @return an opaque handle uniquely identifying the permit user at the time the permit was created
 	 */
 	public String id() {
 		return id;
@@ -97,7 +97,7 @@ public final class Permit {
 	/**
 	 * Retrieves the permit user.
 	 *
-	 * @return an IRI uniquely identifying the permit user
+	 * @return an id uniquely identifying the permit user
 	 */
 	public String user() {
 		return user;
@@ -106,7 +106,7 @@ public final class Permit {
 	/**
 	 * Retrieves the permit user roles.
 	 *
-	 * @return a set of IRIs uniquely identifying the roles attributed to the permit user
+	 * @return a set of ids uniquely identifying the roles attributed to the permit user
 	 */
 	public Set<String> roles() {
 		return unmodifiableSet(roles);

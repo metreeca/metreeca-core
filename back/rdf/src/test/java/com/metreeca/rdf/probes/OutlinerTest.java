@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.tree.truths.ModelAssert.assertThat;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;

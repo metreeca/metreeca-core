@@ -17,12 +17,12 @@
 
 package com.metreeca.rdf.services;
 
-import com.metreeca.form.Query;
-import com.metreeca.form.Shape;
-import com.metreeca.form.queries.Edges;
-import com.metreeca.form.queries.Items;
-import com.metreeca.form.queries.Stats;
-import com.metreeca.form.things.Shapes;
+import com.metreeca.tree.Query;
+import com.metreeca.tree.Shape;
+import com.metreeca.tree.queries.Edges;
+import com.metreeca.tree.queries.Items;
+import com.metreeca.tree.queries.Stats;
+import com.metreeca.tree.things.Shapes;
 import com.metreeca.rdf.Form;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
@@ -39,11 +39,11 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.things.Lists.concat;
-import static com.metreeca.form.things.Shapes.container;
-import static com.metreeca.form.things.Shapes.resource;
+import static com.metreeca.tree.queries.Edges.edges;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.things.Lists.concat;
+import static com.metreeca.tree.things.Shapes.container;
+import static com.metreeca.tree.things.Shapes.resource;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Engine.engine;
 import static com.metreeca.rest.Message.link;
@@ -73,7 +73,7 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
  * property to the RDF description of the container items matched by the {@linkplain Shapes#resource(Shape) resource
  * section} of redacted shape;</li>
  *
- * <li>contained items are selected as required by the LDP container {@linkplain com.metreeca.form.things.Shapes
+ * <li>contained items are selected as required by the LDP container {@linkplain com.metreeca.tree.things.Shapes
  * profile} identified by {@code rdf:type} and LDP properties in the request shape;</li>
  *
  * <li>if the request contains a filtering {@linkplain Request#query(Shape) query}, only matching container item

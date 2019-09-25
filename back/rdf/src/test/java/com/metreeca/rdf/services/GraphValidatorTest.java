@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf.services;
 
-import com.metreeca.form.*;
-import com.metreeca.form.shapes.Field;
-import com.metreeca.form.truths.ModelAssert;
+import com.metreeca.tree.*;
+import com.metreeca.tree.shapes.Field;
+import com.metreeca.tree.truths.ModelAssert;
 import com.metreeca.rdf.Form;
 import com.metreeca.tray.Trace;
 
@@ -32,31 +32,31 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.form.shapes.All.all;
-import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Any.any;
-import static com.metreeca.form.shapes.Clazz.clazz;
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.In.in;
-import static com.metreeca.form.shapes.Like.like;
-import static com.metreeca.form.shapes.MaxCount.maxCount;
-import static com.metreeca.form.shapes.MaxExclusive.maxExclusive;
-import static com.metreeca.form.shapes.MaxInclusive.maxInclusive;
-import static com.metreeca.form.shapes.MaxLength.maxLength;
-import static com.metreeca.form.shapes.MinCount.minCount;
-import static com.metreeca.form.shapes.MinExclusive.minExclusive;
-import static com.metreeca.form.shapes.MinInclusive.minInclusive;
-import static com.metreeca.form.shapes.MinLength.minLength;
-import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.Pattern.pattern;
-import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Values.integer;
-import static com.metreeca.form.things.Values.inverse;
-import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.form.things.ValuesTest.decode;
-import static com.metreeca.form.things.ValuesTest.item;
-import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.tree.shapes.All.all;
+import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Any.any;
+import static com.metreeca.tree.shapes.Clazz.clazz;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.In.in;
+import static com.metreeca.tree.shapes.Like.like;
+import static com.metreeca.tree.shapes.MaxCount.maxCount;
+import static com.metreeca.tree.shapes.MaxExclusive.maxExclusive;
+import static com.metreeca.tree.shapes.MaxInclusive.maxInclusive;
+import static com.metreeca.tree.shapes.MaxLength.maxLength;
+import static com.metreeca.tree.shapes.MinCount.minCount;
+import static com.metreeca.tree.shapes.MinExclusive.minExclusive;
+import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
+import static com.metreeca.tree.shapes.MinLength.minLength;
+import static com.metreeca.tree.shapes.Or.or;
+import static com.metreeca.tree.shapes.Pattern.pattern;
+import static com.metreeca.tree.things.Sets.set;
+import static com.metreeca.tree.things.Values.integer;
+import static com.metreeca.tree.things.Values.inverse;
+import static com.metreeca.tree.things.Values.literal;
+import static com.metreeca.tree.things.ValuesTest.decode;
+import static com.metreeca.tree.things.ValuesTest.item;
+import static com.metreeca.tree.things.ValuesTest.term;
 import static com.metreeca.tray.Tray.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;

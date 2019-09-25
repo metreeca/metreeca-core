@@ -31,14 +31,14 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.things.JsonValues.object;
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Maps.entry;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Values.*;
-import static com.metreeca.form.truths.JsonAssert.assertThat;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.things.JsonValues.object;
+import static com.metreeca.tree.things.Lists.list;
+import static com.metreeca.tree.things.Maps.entry;
+import static com.metreeca.tree.things.Maps.map;
+import static com.metreeca.tree.things.Values.*;
+import static com.metreeca.tree.truths.JsonAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
 import static com.metreeca.rest.formats.JSONAssert.assertThat;

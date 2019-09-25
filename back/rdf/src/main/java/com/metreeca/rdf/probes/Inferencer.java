@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.probes;
 
-import com.metreeca.form.*;
-import com.metreeca.form.shapes.*;
+import com.metreeca.tree.*;
+import com.metreeca.tree.shapes.*;
 import com.metreeca.rdf.Form;
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
@@ -32,9 +32,9 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.Set;
 
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.Or.or;
-import static com.metreeca.form.shapes.When.when;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.Or.or;
+import static com.metreeca.tree.shapes.When.when;
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.tree.shapes.And.and;

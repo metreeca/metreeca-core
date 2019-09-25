@@ -18,8 +18,8 @@
 package com.metreeca.rdf.services;
 
 
-import com.metreeca.form.Form;
-import com.metreeca.form.things.Shapes;
+import com.metreeca.tree.Form;
+import com.metreeca.tree.things.Shapes;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.services.Engine;
@@ -28,7 +28,7 @@ import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.form.things.Shapes.resource;
+import static com.metreeca.tree.things.Shapes.resource;
 import static com.metreeca.rdf.services.Shapes.resource;
 import static com.metreeca.rest.Engine.engine;
 import static com.metreeca.rest.Wrapper.wrapper;

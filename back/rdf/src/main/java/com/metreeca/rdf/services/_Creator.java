@@ -18,10 +18,10 @@
 package com.metreeca.rdf.services;
 
 
-import com.metreeca.form.Form;
-import com.metreeca.form.Issue.Level;
-import com.metreeca.form.Shape;
-import com.metreeca.form.things.Shapes;
+import com.metreeca.tree.Form;
+import com.metreeca.tree.Issue.Level;
+import com.metreeca.tree.Shape;
+import com.metreeca.tree.things.Shapes;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
@@ -40,9 +40,9 @@ import java.util.function.BiFunction;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.form.things.Shapes.container;
-import static com.metreeca.form.things.Values.iri;
-import static com.metreeca.form.things.Values.statement;
+import static com.metreeca.tree.things.Shapes.container;
+import static com.metreeca.tree.things.Values.iri;
+import static com.metreeca.tree.things.Values.statement;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
@@ -113,7 +113,7 @@ import static java.util.stream.Collectors.toList;
  * Engine#engine() engine};</li>
  *
  * <li>the target container identified by the request focus item is connected to the newly created resource as required
- * by the LDP container {@linkplain com.metreeca.form.things.Shapes profile} identified by {@code rdf:type} and LDP
+ * by the LDP container {@linkplain com.metreeca.tree.things.Shapes profile} identified by {@code rdf:type} and LDP
  * properties in the request shape.</li>
  *
  * </ul>

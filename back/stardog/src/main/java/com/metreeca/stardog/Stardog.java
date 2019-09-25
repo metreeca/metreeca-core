@@ -25,7 +25,7 @@ import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.form.things.Values.iri;
+import static com.metreeca.tree.things.Values.iri;
 
 import static org.eclipse.rdf4j.IsolationLevels.READ_COMMITTED;
 

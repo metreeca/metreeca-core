@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.form.things.Formats;
+import com.metreeca.tree.things.Formats;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.codecs.JSONCodec;
 import com.metreeca.rdf.wrappers.Rewriter;
@@ -42,7 +42,7 @@ import java.util.List;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import static com.metreeca.form.probes.Evaluator.pass;
+import static com.metreeca.tree.probes.Evaluator.pass;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.Result.Error;

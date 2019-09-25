@@ -138,7 +138,7 @@ Parametric guards for the [role](../javadocs/com/metreeca/form/Form.html#role) a
 
 | shorthand | usage context |
 |-------|-------------|
-|[role](../javadocs/com/metreeca/form/Shape.html#role-java.util.Set-com.metreeca.form.Shape...-)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …)| target shapes are to be considered only if the sets of [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the user performing a request contains at least one of the given role values |
+|[role](../javadocs/com/metreeca/form/Shape.html#role-java.util.Set-com.metreeca.tree.Shape...-)([value](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Value.html), …)| target shapes are to be considered only if the sets of [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the user performing a request contains at least one of the given role values |
 
 
 ## Task Axis
@@ -147,12 +147,12 @@ Parametric guards for the [task](../javadocs/com/metreeca/form/Form.html#task) a
 
 | shorthand                                                    | HTTP/S method   | usage context                                                |
 | ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
-| [create](../javadocs/com/metreeca/form/Shape.html#create-com.metreeca.form.Shape...-)() | POST            | resource creation                                            |
-| [relate](../javadocs/com/metreeca/form/Shape.html#relate-com.metreeca.form.Shape...-)() | GET             | resource retrieval                                           |
-| [update](../javadocs/com/metreeca/form/Shape.html#update-com.metreeca.form.Shape...-)([) | PUT             | resource updating                                            |
-| [delete](../javadocs/com/metreeca/form/Shape.html#delete-com.metreeca.form.Shape...-)() | DELETE          | resouce deletion                                             |
-| [client](../javadocs/com/metreeca/form/Shape.html#server-com.metreeca.form.Shape...-)() | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
-| [server](../javadocs/com/metreeca/form/Shape.html#server-com.metreeca.form.Shape...-)() | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
+| [create](../javadocs/com/metreeca/form/Shape.html#create-com.metreeca.tree.Shape...-)() | POST            | resource creation                                            |
+| [relate](../javadocs/com/metreeca/form/Shape.html#relate-com.metreeca.tree.Shape...-)() | GET             | resource retrieval                                           |
+| [update](../javadocs/com/metreeca/form/Shape.html#update-com.metreeca.tree.Shape...-)([) | PUT             | resource updating                                            |
+| [delete](../javadocs/com/metreeca/form/Shape.html#delete-com.metreeca.tree.Shape...-)() | DELETE          | resouce deletion                                             |
+| [client](../javadocs/com/metreeca/form/Shape.html#server-com.metreeca.tree.Shape...-)() | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
+| [server](../javadocs/com/metreeca/form/Shape.html#server-com.metreeca.tree.Shape...-)() | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
 
 ## View Axis
 
@@ -160,8 +160,8 @@ Parametric guards for the [view](../javadocs/com/metreeca/form/Form.html#view) a
 
 | shorthand                                                    | usage context                                              |
 | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| [digest](../javadocs/com/metreeca/form/Shape.html#digest-com.metreeca.form.Shape...-)() | short resource description, e.g. inside search result sets |
-| [detail](../javadocs/com/metreeca/form/Shape.html#detail-com.metreeca.form.Shape...-)() | full resource description                                  |
+| [digest](../javadocs/com/metreeca/form/Shape.html#digest-com.metreeca.tree.Shape...-)() | short resource description, e.g. inside search result sets |
+| [detail](../javadocs/com/metreeca/form/Shape.html#detail-com.metreeca.tree.Shape...-)() | full resource description                                  |
 
 ## Mode Axis
 
@@ -169,5 +169,5 @@ Parametric guards for the [mode](../javadocs/com/metreeca/form/Form.html#mode) a
 
 | shorthand                                                    | usage pattern                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [convey](../javadocs/com/metreeca/form/Shape.html#convey-com.metreeca.form.Shape...-)() | target shapes are to be used only for validating incoming data or extracting outgoing data and not for selecting existing resources to be processed |
-| [filter](../javadocs/com/metreeca/form/Shape.html#filter-com.metreeca.form.Shape...-)() | target shapes are to be used only for selecting existing resources to be processed and not for validating incoming data or extracting outgoing data |
+| [convey](../javadocs/com/metreeca/form/Shape.html#convey-com.metreeca.tree.Shape...-)() | target shapes are to be used only for validating incoming data or extracting outgoing data and not for selecting existing resources to be processed |
+| [filter](../javadocs/com/metreeca/form/Shape.html#filter-com.metreeca.tree.Shape...-)() | target shapes are to be used only for selecting existing resources to be processed and not for validating incoming data or extracting outgoing data |

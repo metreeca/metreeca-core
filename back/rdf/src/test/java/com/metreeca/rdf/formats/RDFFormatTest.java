@@ -28,9 +28,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.truths.ModelAssert.assertThat;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.truths.ModelAssert.assertThat;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;

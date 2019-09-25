@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.codecs;
 
-import com.metreeca.form.Form;
+import com.metreeca.tree.Form;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
 
@@ -43,17 +43,17 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-import static com.metreeca.form.Shape.required;
-import static com.metreeca.form.shapes.And.and;
-import static com.metreeca.form.shapes.Datatype.datatype;
-import static com.metreeca.form.shapes.Field.field;
-import static com.metreeca.form.shapes.Meta.alias;
-import static com.metreeca.form.things.JsonValues.value;
-import static com.metreeca.form.things.Lists.list;
-import static com.metreeca.form.things.Maps.map;
-import static com.metreeca.form.things.Maps.union;
-import static com.metreeca.form.things.Values.*;
-import static com.metreeca.form.things.ValuesTest.term;
+import static com.metreeca.tree.Shape.required;
+import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.Meta.alias;
+import static com.metreeca.tree.things.JsonValues.value;
+import static com.metreeca.tree.things.Lists.list;
+import static com.metreeca.tree.things.Maps.map;
+import static com.metreeca.tree.things.Maps.union;
+import static com.metreeca.tree.things.Values.*;
+import static com.metreeca.tree.things.ValuesTest.term;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rest.Codecs.decode;

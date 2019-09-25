@@ -58,7 +58,7 @@ public final class Optimizer extends Traverser<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final String name=field.getName();
+		final Object name=field.getName();
 		final Shape shape=field.getShape().map(this);
 
 		return shape.equals(or()) ? and() : field(name, shape);
@@ -138,15 +138,17 @@ public final class Optimizer extends Traverser<Shape> {
 			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter
 	) {
 
-		final Shape.Probe<Map.Entry<String, Shape>> splitter=new Inspector<Map.Entry<String, Shape>>() {
+		final class Id {}
+
+		final Shape.Probe<Map.Entry<Object, Shape>> splitter=new Inspector<Map.Entry<Object, Shape>>() {
 
 			private int id;
 
-			@Override public Map.Entry<String, Shape> probe(final Shape shape) {
-				return new SimpleImmutableEntry<>("#"+id++, shape); // assign non-fields a unique step
+			@Override public Map.Entry<Object, Shape> probe(final Shape shape) {
+				return new SimpleImmutableEntry<>(new Id(), shape); // assign non-fields a unique step
 			}
 
-			@Override public Map.Entry<String, Shape> probe(final Field field) {
+			@Override public Map.Entry<Object, Shape> probe(final Field field) {
 				return new SimpleImmutableEntry<>(field.getName(), field.getShape());
 			}
 
@@ -157,17 +159,17 @@ public final class Optimizer extends Traverser<Shape> {
 				.map(shape -> shape.map(this)) // optimize nested shapes
 				.flatMap(shape -> shape.map(lifter)) // merge nested collections
 
-				.map(shape -> shape.map(splitter)) // split fields into Map.Entry<IRI, Shape>
+				.map(shape -> shape.map(splitter)) // split fields into Map.Entry<Object, Shape>
 
 				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<IRI, List<Shape>>
 						LinkedHashMap::new, mapping(Map.Entry::getValue, toList())))
 
 				.entrySet().stream().flatMap(e -> { // reassemble fields merging and optimizing multiple definitions
 
-					final String name=e.getKey();
+					final Object name=e.getKey();
 					final List<Shape> values=e.getValue();
 
-					return name.startsWith("#") ? values.stream()
+					return name instanceof Id ? values.stream()
 							: Stream.of(field(name, packer.apply(values).map(this)));
 
 				})

@@ -56,9 +56,8 @@ public interface Roster {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	/**
-	 * Looks up a user.
+	 * Looks up a user up.
 	 *
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 *
@@ -70,34 +69,7 @@ public interface Roster {
 	public Result<Permit, String> lookup(final String handle);
 
 	/**
-	 * Inserts a user.
-	 *
-	 * @param handle a handle uniquely identifying the user to be inserted into this roster (e.g. username, email, …)
-	 * @param secret the initial secret for the user identified by {@code handle}
-	 *
-	 * @return a value result with the current permit for the user identified by {@code handle}, if successful inserted
-	 * into this roster using {@code secret}; an error result with a roster-specific error tag, otherwise
-	 *
-	 * @throws NullPointerException if either {@code handle} or {@code secret} is null
-	 */
-	public Result<Permit, String> insert(final String handle, final String secret);
-
-	/**
-	 * Removes a user.
-	 *
-	 * @param handle a handle uniquely identifying the user to be removed from this roster (e.g. username, email,
-	 *               current session id, …)
-	 *
-	 * @return a value result with the current permit for the user identified by {@code handle}, if successful removed
-	 * from this roster; an error result with a roster-specific error tag, otherwise
-	 *
-	 * @throws NullPointerException if {@code handle} is null
-	 */
-	public Result<Permit, String> remove(final String handle);
-
-
-	/**
-	 * Logs a user in.
+	 * Logs in a user.
 	 *
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 * @param secret the current secret for the user identified by {@code handle}
@@ -110,7 +82,7 @@ public interface Roster {
 	public Result<Permit, String> login(final String handle, final String secret);
 
 	/**
-	 * Logs a user in with an updated secret.
+	 * Logs in a user with an updated secret.
 	 *
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 * @param secret the current secret for the user identified by {@code handle}
@@ -125,7 +97,7 @@ public interface Roster {
 	public Result<Permit, String> login(final String handle, final String secret, final String update);
 
 	/**
-	 * Logs a user out.
+	 * Logs out a user.
 	 *
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 *

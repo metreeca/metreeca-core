@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.services;
 
-import com.metreeca.form.*;
-import com.metreeca.form.probes.Outliner;
+import com.metreeca.tree.*;
+import com.metreeca.tree.probes.Outliner;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tray.Trace;
@@ -35,13 +35,13 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.form.Focus.focus;
-import static com.metreeca.form.Frame.frame;
-import static com.metreeca.form.Issue.issue;
-import static com.metreeca.form.probes.Evaluator.pass;
-import static com.metreeca.form.queries.Edges.edges;
-import static com.metreeca.form.things.Sets.set;
-import static com.metreeca.form.things.Structures.description;
+import static com.metreeca.tree.Focus.focus;
+import static com.metreeca.tree.Frame.frame;
+import static com.metreeca.tree.Issue.issue;
+import static com.metreeca.tree.probes.Evaluator.pass;
+import static com.metreeca.tree.queries.Edges.edges;
+import static com.metreeca.tree.things.Sets.set;
+import static com.metreeca.tree.things.Structures.description;
 import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.tray.Trace.trace;
 import static com.metreeca.tray.Tray.tool;
