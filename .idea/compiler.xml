@@ -7,10 +7,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="servlet" />
-        <module name="gate" />
-        <module name="gcloud" />
-        <module name="rest" />
         <module name="tree" />
+        <module name="rest" />
+        <module name="gate" />
+        <module name="gcp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -31,7 +31,7 @@
       <module name="fore" target="1.8" />
       <module name="form" target="1.8" />
       <module name="gate" target="1.8" />
-      <module name="gcloud" target="1.8" />
+      <module name="gcp" target="1.8" />
       <module name="head" target="1.8" />
       <module name="j2ee" target="1.8" />
       <module name="jeep" target="1.8" />
