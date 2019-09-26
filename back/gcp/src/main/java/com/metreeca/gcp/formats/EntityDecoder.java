@@ -35,6 +35,7 @@ import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
+import static com.metreeca.tree.shapes.Meta.index;
 
 import static java.util.stream.Collectors.toList;
 
@@ -166,11 +167,14 @@ final class EntityDecoder {
 		object.forEach((name, json) -> {
 			if ( !name.equals(GCP.id) && !name.equals(GCP.type) ) {
 
-				final Value<?> value=value(json, fields.getOrDefault(name, and()));
+				final Shape nested=fields.getOrDefault(name, and());
+				final Value<?> value=value(json, nested);
 
 				if ( value.getType() != ValueType.NULL ) {
-					builder.set(name, value);
-					// !!! control indexing with annotations (value.toBuilder().setExcludeFromIndexes(true/false)
+					builder.set(name, value.toBuilder()
+							.setExcludeFromIndexes(!index(nested).orElse(true))
+							.build()
+					);
 				}
 
 			}

@@ -35,6 +35,7 @@ import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.Meta.index;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,87 +56,87 @@ final class EntityDecoderTest extends DatastoreTestBase {
 
 
 	@Test void testDecodeEntity() {
-		exec(()-> assertThat(decode("{ 'id': '/path', 'type': 'Class' }")).satisfies(entity -> {
+		exec(() -> assertThat(decode("{ 'id': '/path', 'type': 'Class' }")).satisfies(entity -> {
 			assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path"));
 		}));
 	}
 
 
 	@Test void testIgnoreNullFields() {
-		exec(()-> assertThat(decode("{ 'field': null }").contains("field")).isFalse());
+		exec(() -> assertThat(decode("{ 'field': null }").contains("field")).isFalse());
 	}
 
 	@Test void testDecodeBooleanFields() {
-		exec(()-> assertThat(decode("{ 'field': true }").getBoolean("field")).isEqualTo(true));
+		exec(() -> assertThat(decode("{ 'field': true }").getBoolean("field")).isEqualTo(true));
 	}
 
 	@Test void testDecodeLongFields() {
-		exec(()-> assertThat(decode("{ 'field': 123 }").getLong("field")).isEqualTo(123L));
+		exec(() -> assertThat(decode("{ 'field': 123 }").getLong("field")).isEqualTo(123L));
 	}
 
 	@Test void testDecodeDoubleFields() {
-		exec(()-> assertThat(decode("{ 'field': 123.0 }").getDouble("field")).isEqualTo(123.0D));
+		exec(() -> assertThat(decode("{ 'field': 123.0 }").getDouble("field")).isEqualTo(123.0D));
 	}
 
 	@Test void testDecodeIntegerFieldsExpectedDouble() {
-		exec(()-> assertThat(decode("{ 'field': 123 }", field("field", datatype(ValueType.DOUBLE))).getDouble("field"))
+		exec(() -> assertThat(decode("{ 'field': 123 }", field("field", datatype(ValueType.DOUBLE))).getDouble("field"))
 				.isEqualTo(123.0D)
 		);
 	}
 
 	@Test void testDecodeStringFields() {
-		exec(()-> assertThat(decode("{ 'field': 'string' }").getString("field"))
+		exec(() -> assertThat(decode("{ 'field': 'string' }").getString("field"))
 				.isEqualTo("string")
 		);
 	}
 
 	@Test void testDecodeStringFieldsAsExpectedLong() {
-		exec(()-> assertThat(decode("{ 'field': '123' }", field("field", datatype(ValueType.LONG))).getLong("field"))
+		exec(() -> assertThat(decode("{ 'field': '123' }", field("field", datatype(ValueType.LONG))).getLong("field"))
 				.isEqualTo(123L)
 		);
 	}
 
 	@Test void testDecodeStringFieldsAsExpectedTimestamp() {
-		exec(()-> assertThat(decode("{ 'field': '2019-01-01T00:00:00.123Z' }", field("field", datatype(ValueType.TIMESTAMP))).getTimestamp("field").toDate())
+		exec(() -> assertThat(decode("{ 'field': '2019-01-01T00:00:00.123Z' }", field("field", datatype(ValueType.TIMESTAMP))).getTimestamp("field").toDate())
 				.isEqualTo(Date.from(OffsetDateTime.parse("2019-01-01T00:00:00.123Z").toInstant()))
 		);
 	}
 
 	@Test void testDecodeStringFieldsAsExpectedBoolean() {
-		exec(()-> assertThat(decode("{ 'field': 'true' }", field("field", datatype(ValueType.BOOLEAN))).getBoolean("field"))
+		exec(() -> assertThat(decode("{ 'field': 'true' }", field("field", datatype(ValueType.BOOLEAN))).getBoolean("field"))
 				.isEqualTo(true)
 		);
 	}
 
 	@Test void testDecodeStringFieldsAsExpectedDouble() {
-		exec(()-> assertThat(decode("{ 'field': '123' }", field("field", datatype(ValueType.DOUBLE))).getDouble("field"))
+		exec(() -> assertThat(decode("{ 'field': '123' }", field("field", datatype(ValueType.DOUBLE))).getDouble("field"))
 				.isEqualTo(123.0D)
 		);
 	}
 
 	@Test void testDecodeStringFieldsAsExpectedEntity() {
-		exec(()-> assertThat(decode("{ 'field': '/path' }", field("field", and(datatype(ValueType.ENTITY), clazz("Class")))).getEntity("field"))
+		exec(() -> assertThat(decode("{ 'field': '/path' }", field("field", and(datatype(ValueType.ENTITY), clazz("Class")))).getEntity("field"))
 				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path")))
 		);
 	}
 
 
 	@Test void testDecodeArrayFields() {
-		exec(()-> assertThat(decode("{ 'field': [null, 123, 'string'] }").getList("field"))
+		exec(() -> assertThat(decode("{ 'field': [null, 123, 'string'] }").getList("field"))
 				.isEqualTo(asList(NullValue.of(), LongValue.of(123L), StringValue.of("string")))
 		);
 	}
 
 
 	@Test void testDecodeObjectFieldsEmpty() {
-		exec(()-> assertThat(decode("{ 'field': {} }").getEntity("field"))
+		exec(() -> assertThat(decode("{ 'field': {} }").getEntity("field"))
 
 				.satisfies(entity -> assertThat(entity.hasKey()).isFalse())
 		);
 	}
 
 	@Test void testDecodeObjectFields() {
-		exec(()-> assertThat(decode("{ 'field': { 'id': '/path', 'type': 'Class', 'value' : 123 } }").getEntity("field"))
+		exec(() -> assertThat(decode("{ 'field': { 'id': '/path', 'type': 'Class', 'value' : 123 } }").getEntity("field"))
 
 				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path")))
 				.satisfies(entity -> assertThat(entity.getProperties().keySet()).containsOnly("value"))
@@ -144,10 +145,29 @@ final class EntityDecoderTest extends DatastoreTestBase {
 	}
 
 	@Test void testDecodeObjectFieldsWithExpectedType() {
-		exec(()-> assertThat(decode("{ 'field': { 'id': '/path' } }", field("field", clazz("Class"))).getEntity("field"))
+		exec(() -> assertThat(decode("{ 'field': { 'id': '/path' } }", field("field", clazz("Class"))).getEntity("field"))
 
 				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path")))
 		);
+	}
+
+
+	@Test void testHandleIndexingAnnotations() {
+		exec(() -> {
+
+			assertThat(decode("{ 'field': 'string' }", field("field", and())).getValue("field").excludeFromIndexes())
+					.as("indexed by default")
+					.isFalse();
+
+			assertThat(decode("{ 'field': 'string' }", field("field", index(true))).getValue("field").excludeFromIndexes())
+					.as("included")
+					.isFalse();
+
+			assertThat(decode("{ 'field': 'string' }", field("field", index(false))).getValue("field").excludeFromIndexes())
+					.as("excluded")
+					.isTrue();
+
+		});
 	}
 
 }
