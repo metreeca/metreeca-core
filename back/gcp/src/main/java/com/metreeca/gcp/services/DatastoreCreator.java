@@ -17,6 +17,7 @@
 
 package com.metreeca.gcp.services;
 
+import com.metreeca.gcp.GCP;
 import com.metreeca.rest.*;
 
 import com.google.cloud.datastore.*;
@@ -29,6 +30,7 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 
 
 final class DatastoreCreator extends DatastoreProcessor {
@@ -55,7 +57,9 @@ final class DatastoreCreator extends DatastoreProcessor {
 							.orElseGet(() -> UUID.randomUUID().toString()); // !! sequential generator
 
 
-					final Key key=datastore.key(convey(request.shape()), path);
+					final Key key=service.newKeyFactory()
+							.setKind(clazz(convey(request.shape())).map(Object::toString).orElse(GCP.Resource))
+							.newKey(path);
 
 					final boolean clashing=service.run(Query.newKeyQueryBuilder()
 							.setKind(key.getKind())
@@ -63,15 +67,9 @@ final class DatastoreCreator extends DatastoreProcessor {
 							.build()
 					).hasNext();
 
-					if ( clashing ) {
-
-						return Error(internal(new IllegalStateException("clashing entity slug {"+key+"}")));
-
-					} else {
-
-						return Value(Entity.newBuilder(key, entity).build());
-
-					}
+					return clashing
+							? Error(internal(new IllegalStateException("clashing entity slug {"+key+"}")))
+							: Value(Entity.newBuilder(key, entity).build());
 
 				}))
 

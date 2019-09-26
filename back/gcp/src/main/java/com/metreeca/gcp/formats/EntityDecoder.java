@@ -134,7 +134,10 @@ final class EntityDecoder {
 	}
 
 	private Value<?> entity(final JsonString string, final Shape shape) {
-		return EntityValue.of(Entity.newBuilder(datastore.key(shape, string.getString())).build());
+		return EntityValue.of(Entity.newBuilder(datastore.newKeyFactory()
+				.setKind(clazz(shape).map(Object::toString).orElse(GCP.Resource))
+				.newKey(string.getString())
+		).build());
 	}
 
 
@@ -155,8 +158,8 @@ final class EntityDecoder {
 				.orElseGet(() -> clazz(shape).map(Object::toString).orElse(""));
 
 		final FullEntity.Builder<?> builder=id.isEmpty()
-				? type.isEmpty() ? FullEntity.newBuilder() : FullEntity.newBuilder(datastore.key(type))
-				: FullEntity.newBuilder(datastore.key(type.isEmpty() ? GCP.Resource : type, id));
+				? type.isEmpty() ? FullEntity.newBuilder() : FullEntity.newBuilder(datastore.newKeyFactory().setKind(type).newKey())
+				: FullEntity.newBuilder(datastore.newKeyFactory().setKind(type.isEmpty() ? GCP.Resource : type).newKey(id));
 
 		final Map<Object, Shape> fields=fields(shape);
 

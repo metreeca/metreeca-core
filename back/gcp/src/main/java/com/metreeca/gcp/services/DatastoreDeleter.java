@@ -17,6 +17,7 @@
 
 package com.metreeca.gcp.services;
 
+import com.metreeca.gcp.GCP;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -28,6 +29,7 @@ import com.google.cloud.datastore.Query;
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 
@@ -51,7 +53,9 @@ final class DatastoreDeleter extends DatastoreProcessor {
 	private Future<Response> resource(final Request request) {
 		return request.reply(response -> datastore.exec(service -> {
 
-			final Key key=datastore.key(convey(request.shape()), request.path());
+			final Key key=service.newKeyFactory()
+					.setKind(clazz(convey(request.shape())).map(Object::toString).orElse(GCP.Resource))
+					.newKey(request.path());
 
 			final KeyQuery query=Query.newKeyQueryBuilder()
 					.setKind(key.getKind())

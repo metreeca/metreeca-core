@@ -56,7 +56,7 @@ final class EntityDecoderTest extends DatastoreTestBase {
 
 	@Test void testDecodeEntity() {
 		exec(()-> assertThat(decode("{ 'id': '/path', 'type': 'Class' }")).satisfies(entity -> {
-			assertThat(entity.getKey()).isEqualTo(service(datastore()).key("Class", "/path"));
+			assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path"));
 		}));
 	}
 
@@ -115,7 +115,7 @@ final class EntityDecoderTest extends DatastoreTestBase {
 
 	@Test void testDecodeStringFieldsAsExpectedEntity() {
 		exec(()-> assertThat(decode("{ 'field': '/path' }", field("field", and(datatype(ValueType.ENTITY), clazz("Class")))).getEntity("field"))
-				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).key("Class", "/path")))
+				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path")))
 		);
 	}
 
@@ -137,7 +137,7 @@ final class EntityDecoderTest extends DatastoreTestBase {
 	@Test void testDecodeObjectFields() {
 		exec(()-> assertThat(decode("{ 'field': { 'id': '/path', 'type': 'Class', 'value' : 123 } }").getEntity("field"))
 
-				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).key("Class", "/path")))
+				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path")))
 				.satisfies(entity -> assertThat(entity.getProperties().keySet()).containsOnly("value"))
 				.satisfies(entity -> assertThat(entity.getLong("value")).isEqualTo(123L))
 		);
@@ -146,7 +146,7 @@ final class EntityDecoderTest extends DatastoreTestBase {
 	@Test void testDecodeObjectFieldsWithExpectedType() {
 		exec(()-> assertThat(decode("{ 'field': { 'id': '/path' } }", field("field", clazz("Class"))).getEntity("field"))
 
-				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).key("Class", "/path")))
+				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path")))
 		);
 	}
 

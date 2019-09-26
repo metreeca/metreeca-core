@@ -46,7 +46,7 @@ final class EntityEncoderTest extends DatastoreTestBase {
 	private JsonObject encode(final Consumer<Entity.Builder> task) {
 
 		final Datastore datastore=service(datastore());
-		final Entity.Builder entity=Entity.newBuilder(datastore.key(GCP.Resource, "/"));
+		final Entity.Builder entity=Entity.newBuilder(datastore.newKeyFactory().setKind(GCP.Resource).newKey("/"));
 
 		task.accept(entity);
 
@@ -123,7 +123,7 @@ final class EntityEncoderTest extends DatastoreTestBase {
 
 	@Test void testEncodeEmbeddedEntityFields() {
 		exec(() -> assertThat(encode(entity -> entity.set("field", Entity
-				.newBuilder(service(datastore()).key("Embedded", "/path"))
+				.newBuilder(service(datastore()).newKeyFactory().setKind("Embedded").newKey("/path"))
 				.setNull("null")
 				.set("nested", 123)
 				.build()

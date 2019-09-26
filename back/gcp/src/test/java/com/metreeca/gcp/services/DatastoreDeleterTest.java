@@ -21,9 +21,7 @@ import com.metreeca.gcp.GCP;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityQuery;
-import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +63,7 @@ final class DatastoreDeleterTest extends DatastoreTestBase {
 
 		private List<Entity> entities(final String... codes) {
 			return Arrays.stream(codes).map(code -> Entity
-					.newBuilder(service(datastore()).key(GCP.Resource, format("/entities/%s", code)))
+					.newBuilder(service(datastore()).newKeyFactory().setKind(GCP.Resource).newKey(format("/entities/%s", code)))
 					.set("code", code)
 					.build()
 			).collect(toList());

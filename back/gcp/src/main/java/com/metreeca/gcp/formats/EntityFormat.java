@@ -24,9 +24,7 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
-import com.google.cloud.datastore.BaseKey;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.FullEntity;
+import com.google.cloud.datastore.*;
 
 import java.util.Optional;
 
@@ -99,10 +97,9 @@ public final class EntityFormat implements Format<Entity> {
 
 			return entity instanceof Entity ? (Entity)entity : Entity.newBuilder(
 
-					datastore.key(
-							Optional.ofNullable(entity.getKey()).map(BaseKey::getKind).orElse(GCP.Resource),
-							message.request().path()
-					),
+					datastore.newKeyFactory()
+							.setKind(Optional.ofNullable(entity.getKey()).map(BaseKey::getKind).orElse(GCP.Resource))
+							.newKey(message.request().path()),
 
 					entity
 

@@ -60,7 +60,7 @@ final class DatastoreUpdaterTest extends DatastoreTestBase {
 
 				final Datastore service=service(datastore());
 
-				final Key key=service.key(GCP.Resource, "/entities/test");
+				final Key key=service.newKeyFactory().setKind(GCP.Resource).newKey("/entities/test");
 
 				final Entity original=Entity.newBuilder(key)
 						.set("code", "test")
@@ -110,8 +110,7 @@ final class DatastoreUpdaterTest extends DatastoreTestBase {
 
 					.handle(new Request()
 							.path("/entities/9999")
-							.body(EntityFormat.entity(), Entity.newBuilder(service(datastore()).key(
-									"Test", "/entities/9999")
+							.body(EntityFormat.entity(), Entity.newBuilder(service(datastore()).newKeyFactory().setKind("Test").newKey("/entities/9999")
 							).build())
 					)
 

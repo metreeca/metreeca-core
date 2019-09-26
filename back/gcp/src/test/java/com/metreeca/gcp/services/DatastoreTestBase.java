@@ -17,7 +17,6 @@
 
 package com.metreeca.gcp.services;
 
-import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Context;
 
@@ -112,19 +111,19 @@ public abstract class DatastoreTestBase {
 
 			return Entity
 
-					.newBuilder(datastore.key("Office", "/offices/"+_office.getString("code")))
+					.newBuilder(datastore.newKeyFactory().setKind("Office").newKey("/offices/"+_office.getString("code")))
 
 					.set("code", _office.getString("code"))
 					.set("label", _office.getString("label"))
 
 					.set("country", Entity
-							.newBuilder(datastore.key("Location", format("http://sws.geonames.org/%s/", _country.getString("code"))))
+							.newBuilder(datastore.newKeyFactory().setKind("Location").newKey(format("http://sws.geonames.org/%s/", _country.getString("code"))))
 							.set("label", _country.getString("label"))
 							.build()
 					)
 
 					.set("city", Entity
-							.newBuilder(datastore.key("Location", format("http://sws.geonames.org/%s/", _city.getString("code"))))
+							.newBuilder(datastore.newKeyFactory().setKind("Location").newKey(format("http://sws.geonames.org/%s/", _city.getString("code"))))
 							.set("label", _city.getString("label"))
 							.build()
 					)
@@ -145,7 +144,7 @@ public abstract class DatastoreTestBase {
 
 			final Entity.Builder employee=Entity
 
-					.newBuilder(datastore.key("Employee", "/employees/"+_employee.getString("code")))
+					.newBuilder(datastore.newKeyFactory().setKind("Employee").newKey("/employees/"+_employee.getString("code")))
 
 					.set("code", _employee.getString("code"))
 					.set("label", _employee.getString("label"))
@@ -158,13 +157,13 @@ public abstract class DatastoreTestBase {
 
 
 					.set("office", FullEntity
-							.newBuilder(datastore.key("Office", format("/offices/%s", _office.getString("code"))))
+							.newBuilder(datastore.newKeyFactory().setKind("Office").newKey(format("/offices/%s", _office.getString("code"))))
 							.set("label", _office.getString("label"))
 							.build()
 					);
 
 			Optional.ofNullable(_supervisor).ifPresent(s -> employee.set("supervisor", FullEntity
-					.newBuilder(datastore.key("Employee", format("/employees/%s", s.getString("code"))))
+					.newBuilder(datastore.newKeyFactory().setKind("Employee").newKey(format("/employees/%s", s.getString("code"))))
 					.set("label", s.getString("label"))
 					.build()
 			));
@@ -176,7 +175,7 @@ public abstract class DatastoreTestBase {
 					)
 
 					.map(_subordinate -> FullEntity
-							.newBuilder(datastore.key("Employee", "/employees/"+_subordinate.getString("code")))
+							.newBuilder(datastore.newKeyFactory().setKind("Employee").newKey("/employees/"+_subordinate.getString("code")))
 							.set("label", _subordinate.getString("label"))
 							.build()
 					)

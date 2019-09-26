@@ -17,9 +17,6 @@
 
 package com.metreeca.gcp.services;
 
-import com.metreeca.gcp.GCP;
-import com.metreeca.tree.Shape;
-
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 
@@ -27,8 +24,6 @@ import java.util.Date;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.metreeca.tree.shapes.Clazz.clazz;
 
 import static com.google.cloud.datastore.ValueType.*;
 
@@ -46,6 +41,8 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Datastore {
 
+	private static final ThreadLocal<Transaction> context=new ThreadLocal<>();
+
 
 	/**
 	 * Retrieves the default datastore factory.
@@ -57,8 +54,7 @@ public final class Datastore {
 	}
 
 
-	private static final ThreadLocal<Transaction> context=new ThreadLocal<>();
-
+	//// Value Factories ///////////////////////////////////////////////////////////////////////////////////////////////
 
 	static Set<Value<?>> values(final Set<Object> objects) {
 		return objects.stream().map(Datastore::value).collect(toSet());
@@ -208,74 +204,12 @@ public final class Datastore {
 
 
 	/**
-	 * Creates an incomplete key for a resource type.
+	 * Creates a key factory for this datastore.
 	 *
-	 * @param type the type of the resource
-	 *
-	 * @return an incomplete datastore key for the resource {@code type}
-	 *
-	 * @throws NullPointerException     if {@code type} is null
-	 * @throws IllegalArgumentException if {@code type} is empty
+	 * @return a new key factory for this datastore.
 	 */
-	public IncompleteKey key(final String type) {
-
-		if ( type == null ) {
-			throw new NullPointerException("null type");
-		}
-
-		if ( type.isEmpty() ) {
-			throw new IllegalArgumentException("empty type");
-		}
-
-		return datastore.newKeyFactory().setKind(type).newKey();
-	}
-
-	public Key key(final Shape shape, final String path) { // !!! tbd
-		return key(clazz(shape).map(Object::toString).orElse(GCP.Resource), path);
-	}
-
-	/**
-	 * Creates a datastore key for a typed resource.
-	 *
-	 * @param type the type of the resource
-	 *
-	 * @param id   the id of the resource
-	 * @return a datastore key for the resource identified by {@code id} and {@code type}
-	 *
-	 * @throws NullPointerException     if either {@code id} or {@code type} is null
-	 * @throws IllegalArgumentException if either {@code id} or {@code type} is empty
-	 */
-	public Key key(final String type, final String id) {
-
-		if ( type == null ) {
-			throw new NullPointerException("null type");
-		}
-
-		if ( type.isEmpty() ) {
-			throw new IllegalArgumentException("empty type");
-		}
-
-		if ( id == null ) {
-			throw new NullPointerException("null id");
-		}
-
-		if ( id.isEmpty() ) {
-			throw new IllegalArgumentException("empty id");
-		}
-
-		final KeyFactory factory=datastore.newKeyFactory().setKind(type);
-
-		if ( id.startsWith("/") ) { // ignore external ids
-			for (int slash=0; slash >= 0; slash=id.indexOf('/', slash+1)) {
-				if ( slash > 0 && slash+1 < id.length() ) { // ignore leading/trailing slashes
-
-					factory.addAncestor(PathElement.of(GCP.Resource, id.substring(0, slash+1)));
-
-				}
-			}
-		}
-
-		return factory.newKey(id);
+	public KeyFactory newKeyFactory() {
+		return datastore.newKeyFactory();
 	}
 
 

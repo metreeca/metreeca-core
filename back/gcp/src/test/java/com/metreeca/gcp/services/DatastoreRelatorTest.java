@@ -100,7 +100,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 	@Nested final class Container {
 
 		private Key key(final String id, final String type) {
-			return service(datastore()).key(type, id);
+			return service(datastore()).newKeyFactory().setKind(type).newKey(id);
 		}
 
 		private Request request(final String query) {

@@ -17,16 +17,12 @@
 
 package com.metreeca.gcp.services;
 
-import com.metreeca.gcp.GCP;
-
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.gcp.services.Datastore.compare;
-import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.rest.Context.service;
 
 import static com.google.cloud.Timestamp.now;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,97 +101,6 @@ final class DatastoreTest extends DatastoreTestBase {
 
 		@Test void testOthers() {
 			assertThat(compare(ListValue.of(emptyList()), ListValue.of(emptyList()))).isEqualTo(0);
-		}
-
-	}
-
-	@Nested final class Keys {
-
-		@Test void testHierarchy() {
-			exec(() -> {
-
-				final Datastore datastore=service(datastore());
-
-				assertThat(datastore.key("Entity", "/"))
-						.isEqualTo(datastore.exec(_datastore -> _datastore
-								.newKeyFactory()
-								.setKind("Entity")
-								.newKey("/")
-						));
-
-				assertThat(datastore.key("Entity", "/container/"))
-						.isEqualTo(datastore.exec(_datastore -> _datastore
-								.newKeyFactory()
-								.setKind("Entity")
-								.newKey("/container/")
-						));
-
-				assertThat(datastore.key("Entity", "/resource"))
-						.isEqualTo(datastore.exec(_datastore -> _datastore
-								.newKeyFactory()
-								.setKind("Entity")
-								.newKey("/resource")
-						));
-
-				assertThat(datastore.key("Entity", "/container/resource"))
-						.isEqualTo(datastore.exec(_datastore -> _datastore
-								.newKeyFactory()
-								.addAncestor(PathElement.of(GCP.Resource, "/container/"))
-								.setKind("Entity")
-								.newKey("/container/resource")
-						));
-
-				assertThat(datastore.key("Entity", "/container/container/resource"))
-						.isEqualTo(datastore.exec(_datastore -> _datastore
-								.newKeyFactory()
-								.addAncestor(PathElement.of(GCP.Resource, "/container/"))
-								.addAncestor(PathElement.of(GCP.Resource, "/container/container/"))
-								.setKind("Entity")
-								.newKey("/container/container/resource")
-						));
-
-			});
-
-		}
-
-		@Test void testTyping() {
-			exec(() -> {
-
-				final Datastore datastore=service(datastore());
-
-
-				assertThat(datastore.key("Class", "/resource"))
-						.isEqualTo(datastore.exec(_datastore -> _datastore
-								.newKeyFactory()
-								.setKind("Class")
-								.newKey("/resource")
-						));
-
-				assertThat(datastore.key("Class", "/resource"))
-						.isEqualTo(datastore.exec(_datastore -> _datastore
-								.newKeyFactory()
-								.setKind("Class")
-								.newKey("/resource")
-						));
-
-			});
-		}
-
-
-		@Test void testExternal() {
-			exec(() -> {
-
-				final Datastore datastore=service(datastore());
-
-				assertThat(datastore.key("Class", "http://example.com/path"))
-						.isEqualTo(datastore.exec(_datastore -> _datastore
-								.newKeyFactory()
-								.setKind("Class")
-								.newKey("http://example.com/path")
-						));
-
-			});
-
 		}
 
 	}

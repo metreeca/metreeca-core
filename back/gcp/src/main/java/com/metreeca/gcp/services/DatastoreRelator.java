@@ -194,7 +194,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		final int offset=items.getOffset();
 		final int limit=items.getLimit();
 
-		final Entity container=Entity.newBuilder(datastore.key(GCP.Resource, path))
+		final Entity container=Entity.newBuilder(datastore.newKeyFactory().setKind(GCP.Resource).newKey(path))
 
 				.set(GCP.contains, this.<List<EntityValue>>entities(shape, orders, offset, limit, entities -> entities
 
@@ -217,7 +217,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		final Comparator<Map.Entry<? extends Value<?>, Long>> byLabel=comparing(x -> label(x.getKey()));
 		final Comparator<Map.Entry<? extends Value<?>, Long>> byValue=comparing(Map.Entry::getKey, Datastore::compare);
 
-		final Entity container=Entity.newBuilder(datastore.key(GCP.Resource, path))
+		final Entity container=Entity.newBuilder(datastore.newKeyFactory().setKind(GCP.Resource).newKey(path))
 
 				.set(GCP.terms, this.<List<EntityValue>>values(terms.getShape(), terms.getPath(), values -> values
 
@@ -296,7 +296,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		);
 
-		final Entity.Builder container=Entity.newBuilder(datastore.key(GCP.Resource, path));
+		final Entity.Builder container=Entity.newBuilder(datastore.newKeyFactory().setKind(GCP.Resource).newKey(path));
 
 		if ( ranges.isEmpty() ) {
 
@@ -346,7 +346,10 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return request.reply(response -> datastore.exec(service -> {
 
 			final Shape shape=convey(request.shape());
-			final Key key=datastore.key(shape, request.path());
+
+			final Key key=service.newKeyFactory()
+					.setKind(clazz(shape).map(Object::toString).orElse(GCP.Resource))
+					.newKey(request.path());
 
 			// ;( projecting only properties actually included in the shape would lower costs, as projection queries
 			// are counted as small operations: unfortunately, a number of limitations apply:
