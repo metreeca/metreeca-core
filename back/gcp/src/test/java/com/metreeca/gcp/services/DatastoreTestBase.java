@@ -62,10 +62,6 @@ public abstract class DatastoreTestBase {
 	}
 
 
-	protected EntityFormat entity() {
-		return EntityFormat.entity(service(datastore()));
-	}
-
 	protected void exec(final Runnable... tasks) {
 		new Context()
 				.set(datastore(), () -> new Datastore(helper.getOptions()))

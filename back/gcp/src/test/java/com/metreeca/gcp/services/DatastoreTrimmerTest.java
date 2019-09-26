@@ -18,6 +18,7 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
 
@@ -47,9 +48,9 @@ final class DatastoreTrimmerTest extends DatastoreTestBase {
 		return new DatastoreTrimmer(service(datastore()))
 				.trim(new Request()
 						.shape(shape)
-						.body(entity(), entity.build())
+						.body(EntityFormat.entity(), entity.build())
 				)
-				.process(message -> message.body(entity()))
+				.process(message -> message.body(EntityFormat.entity()))
 				.fold(BaseEntity::getProperties, failure -> fail("missing message body"));
 	}
 

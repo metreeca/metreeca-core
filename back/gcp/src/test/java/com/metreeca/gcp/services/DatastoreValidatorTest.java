@@ -18,6 +18,7 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
 
@@ -75,7 +76,7 @@ final class DatastoreValidatorTest extends DatastoreTestBase {
 		return new DatastoreValidator(service(datastore()))
 				.validate(new Request()
 						.shape(field("value", shape))
-						.body(entity(), entity)
+						.body(EntityFormat.entity(), entity)
 				)
 				.value()
 				.isPresent();

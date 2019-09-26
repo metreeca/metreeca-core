@@ -32,10 +32,24 @@ import java.util.Optional;
 
 import javax.json.JsonValue;
 
+import static com.metreeca.gcp.services.Datastore.datastore;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
 public final class EntityFormat implements Format<Entity> {
+
+	/**
+	 * Creates an entity body format for the shared datastore.
+	 *
+	 * <p><strong>Warning</strong> / Must be invoked only by tasks {@linkplain Context#exec(Runnable...) running inside}
+	 * a service context</p>
+	 *
+	 * @return a new entity body format instance for the {@linkplain Datastore#datastore() shared datastore}
+	 */
+	public static EntityFormat entity() {
+		return entity(service(datastore()));
+	}
 
 	/**
 	 * Creates an entity body format for a target datastore.
@@ -102,7 +116,6 @@ public final class EntityFormat implements Format<Entity> {
 				encoder.encode(value, shape(message))
 		);
 	}
-
 
 
 	private boolean equals(final EntityFormat format) {

@@ -18,6 +18,7 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -76,7 +77,7 @@ final class DatastoreUpdaterTest extends DatastoreTestBase {
 
 						.handle(new Request()
 								.path(key.getName())
-								.body(entity(), updated)
+								.body(EntityFormat.entity(), updated)
 						)
 
 						.accept(response -> {
@@ -109,7 +110,7 @@ final class DatastoreUpdaterTest extends DatastoreTestBase {
 
 					.handle(new Request()
 							.path("/entities/9999")
-							.body(entity(), Entity.newBuilder(service(datastore()).key(
+							.body(EntityFormat.entity(), Entity.newBuilder(service(datastore()).key(
 									"Test", "/entities/9999")
 							).build())
 					)
