@@ -57,11 +57,9 @@ import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 
-import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.Direction.ASCENDING;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.Direction.DESCENDING;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
-import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAncestor;
 import static com.google.cloud.datastore.ValueType.LONG;
 import static com.google.cloud.datastore.ValueType.STRING;
 
@@ -198,7 +196,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		final Entity container=Entity.newBuilder(datastore.key(GCP.Resource, path))
 
-				.set(GCP.contains, this.<List<EntityValue>>entities(path, shape, orders, offset, limit, entities -> entities
+				.set(GCP.contains, this.<List<EntityValue>>entities(shape, orders, offset, limit, entities -> entities
 
 						.collect(toList())
 
@@ -221,7 +219,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		final Entity container=Entity.newBuilder(datastore.key(GCP.Resource, path))
 
-				.set(GCP.terms, this.<List<EntityValue>>values(path, terms.getShape(), terms.getPath(), values -> values
+				.set(GCP.terms, this.<List<EntityValue>>values(terms.getShape(), terms.getPath(), values -> values
 
 						.collect(groupingBy(v -> v, counting()))
 						.entrySet()
@@ -290,7 +288,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		}
 
 
-		final Map<String, Range> ranges=values(path, stats.getShape(), stats.getPath(), values -> values
+		final Map<String, Range> ranges=values(stats.getShape(), stats.getPath(), values -> values
 
 				.collect(groupingBy(v -> v.getType().toString(), reducing(null, v -> new Range(1, v, v), (x, y) ->
 						x == null ? y : y == null ? x : x.merge(y)
@@ -374,12 +372,12 @@ final class DatastoreRelator extends DatastoreProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private <R> R values(
-			final String path, final Shape shape,
+			final Shape shape,
 			final Iterable<String> steps,
 			final Function<Stream<? extends Value<?>>, R> task
 	) {
 
-		return entities(path, shape, null, 0, 0, entities -> task.apply(entities
+		return entities(shape, null, 0, 0, entities -> task.apply(entities
 
 				// !!! (€) if property is known to be of a scalar supported type retrieve using a projection
 				// https://cloud.google.com/appengine/docs/standard/java/javadoc/com/google/appengine/api/datastore/RawValue.html#getValue--
@@ -392,7 +390,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 	}
 
 	private <R> R entities(
-			final String path, final Shape shape,
+			final Shape shape,
 			final List<Order> orders, final int offset, final int limit,
 			final Function<Stream<EntityValue>, R> task
 	) { // !!! support cursors // !!! hard sampling limits?
@@ -403,7 +401,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		final Shape filter=filter(shape);
 		final List<String> inequalities=inequalities(filter);
 
-		final EntityQuery query=query(path, filter, orders, inequalities);
+		final EntityQuery query=query(filter, orders, inequalities);
 
 		final Optional<Predicate<Value<?>>> predicate=predicate(filter, inequalities); // handle residual constraints
 		final Optional<Comparator<EntityValue>> sorter=sorter(orders, inequalities); // handle inconsistent sorting/inequalities
@@ -445,22 +443,12 @@ final class DatastoreRelator extends DatastoreProcessor {
 	}
 
 
-	private EntityQuery query(final String path, final Shape shape,
-			final List<Order> orders,
-			final List<String> inequalities
-	) {
+	private EntityQuery query(final Shape shape, final List<Order> orders, final List<String> inequalities) {
 
+		final EntityQuery.Builder builder=Query.newEntityQueryBuilder()
+				.setKind(clazz(shape).map(Object::toString).orElse(GCP.Resource));
 
-		final EntityQuery.Builder builder=Query.newEntityQueryBuilder();
-
-		clazz(shape).ifPresent(clazz -> builder.setKind(clazz.toString()));
-
-		final Filter ancestor=hasAncestor(datastore.key(GCP.Resource, path));
-
-		builder.setFilter(filter(shape, inequalities)
-				.map(filter -> (Filter)and(ancestor, filter))
-				.orElse(ancestor)
-		);
+		filter(shape, inequalities).ifPresent(builder::setFilter);
 
 		// ;( properties used in inequality filters must be sorted first
 		// see https://cloud.google.com/appengine/docs/standard/java/datastore/query-restrictions#properties_used_in_inequality_filters_must_be_sorted_first
