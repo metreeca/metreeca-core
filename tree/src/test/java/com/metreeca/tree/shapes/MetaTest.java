@@ -17,13 +17,7 @@
 
 package com.metreeca.tree.shapes;
 
-import com.metreeca.tree.Shape;
-
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map;
 
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
@@ -34,106 +28,80 @@ import static com.metreeca.tree.shapes.When.when;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-
 final class MetaTest {
 
-	@Nested final class MetasTest {
+	@Test void testCollectMetadataFromAnnotationShapes() {
+		assertThat(label(label("label")))
+				.as("collected from metadata")
+				.contains("label");
+	}
 
-		@Test void testCollectMetadataFromAnnotationShapes() {
-			assertThat(metas(label("label")))
-					.as("collected from metadata")
-					.containsOnly(
-							entry(Shape.Label, "label")
-					);
-		}
+	@Test void testCollectMetadataFromLogicalShapes() {
 
-		@Test void testCollectMetadataFromLogicalShapes() {
+		assertThat(label(and(
+				label("label"),
+				notes("notes")
+		)))
+				.as("collected from conjunctions")
+				.contains("label");
 
-			assertThat(metas(and(
-					label("label"),
-					notes("notes")
-			)))
-					.as("collected from conjunctions")
-					.containsOnly(
-							entry(Shape.Label, "label"),
-							entry(Shape.Notes, "notes")
-					);
+		assertThat(label(or(
+				label("label"),
+				notes("notes")
+		)))
+				.as("collected from disjunctions")
+				.contains("label");
 
-			assertThat(metas(or(
-					label("label"),
-					notes("notes")
-			)))
-					.as("collected from disjunctions")
-					.containsOnly(
-							entry(Shape.Label, "label"),
-							entry(Shape.Notes, "notes")
-					);
+		assertThat(label(when(
+				and(),
+				label("label"),
+				notes("notes")
+		)))
+				.as("collected from option")
+				.contains("label");
 
-			assertThat(metas(when(
-					and(),
-					label("label"),
-					notes("notes")
-			)))
-					.as("collected from option")
-					.containsOnly(
-							entry(Shape.Label, "label"),
-							entry(Shape.Notes, "notes")
-					);
-		}
+	}
 
-		@Test void testCollectMetadataFromNestedLogicalShapes() {
+	@Test void testCollectMetadataFromNestedLogicalShapes() {
 
-			assertThat(metas(and(
-					and(
-							label("label"),
-							notes("notes")
-					),
-					or(
-							alias("alias"),
-							placeholder("placeholder")
-					)
-			)))
-					.as("collected from nested logical shapes")
-					.containsOnly(
-							entry(Shape.Label, "label"),
-							entry(Shape.Notes, "notes"),
-							entry(Shape.Alias, "alias"),
-							entry(Shape.Placeholder, "placeholder")
-					);
-
-		}
-
-
-		@Test void testCollectDuplicateMetadata() {
-			assertThat(metas(and(
-					label("label"),
-					label("label")
-			))).containsOnly(
-					entry(Shape.Label, "label")
-			);
-		}
-
-		@Test void testIgnoreConflictingMetadata() {
-			assertThat(metas(and(
-					label("label"),
-					label("other")
-			))).isEmpty();
-		}
-
-
-		@Test void testIgnoreMetadataFromStructuralShapes() {
-
-			assertThat(metas(field("value", field("value", label("label")))))
-					.as("ignored in fields")
-					.isEmpty();
-
-		}
+		assertThat(label(and(
+				and(
+						placeholder("placeholder"),
+						notes("notes")
+				),
+				or(
+						alias("alias"),
+						label("label")
+				)
+		)))
+				.as("collected from nested logical shapes")
+				.contains("label");
 
 	}
 
 
-	private <K, V> Map.Entry<K, V> entry(final K key, final V value) {
-		return new SimpleImmutableEntry<>(key, value);
+	@Test void testCollectDuplicateMetadata() {
+		assertThat(label(and(
+				label("label"),
+				label("label")
+		)))
+				.contains("label");
+	}
+
+	@Test void testIgnoreConflictingMetadata() {
+		assertThat(label(and(
+				label("label"),
+				label("other")
+		))).isEmpty();
+	}
+
+
+	@Test void testIgnoreMetadataFromStructuralShapes() {
+
+		assertThat(label(field("value", field("value", label("label")))))
+				.as("ignored in fields")
+				.isEmpty();
+
 	}
 
 }
