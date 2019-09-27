@@ -17,9 +17,10 @@
 
 package com.metreeca.rdf.services;
 
+import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Form;
 import com.metreeca.rdf.ModelAssert;
-import com.metreeca.rdf.probes.Outliner;
+import com.metreeca.rdf._probes.Outliner;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
@@ -79,7 +80,7 @@ import static java.util.stream.Collectors.toSet;
 
 						.satisfies(shape -> assertThat(fields(shape).keySet())
 								.as("all fields retained")
-								.isEqualTo(fields(Employees.map(new Optimizer())).keySet())
+								.isEqualTo(fields(Employees.map(new _Optimizer())).keySet())
 						)
 
 						.satisfies(shape -> assertThat(metas(shape))
@@ -102,7 +103,7 @@ import static java.util.stream.Collectors.toSet;
 
 						.satisfies(shape -> assertThat(fields(shape))
 								.as("only container fields retained")
-								.isEqualTo(fields(Container.map(new Optimizer())))
+								.isEqualTo(fields(Container.map(new _Optimizer())))
 						)
 
 						.satisfies(shape -> assertThat(metas(shape))
@@ -118,7 +119,7 @@ import static java.util.stream.Collectors.toSet;
 			@Test void testForwardResourceShape() {
 				assertThat(entity(Employee))
 						.as("only resource shape found")
-						.isEqualTo(Employee.map(new Optimizer()));
+						.isEqualTo(Employee.map(new _Optimizer()));
 			}
 
 		}
@@ -130,7 +131,7 @@ import static java.util.stream.Collectors.toSet;
 
 						.satisfies(shape -> assertThat(fields(shape))
 								.as("only resource fields retained")
-								.isEqualTo(fields(Employee.map(new Optimizer())))
+								.isEqualTo(fields(Employee.map(new _Optimizer())))
 						)
 
 						.satisfies(shape -> assertThat(metas(shape))
@@ -148,7 +149,7 @@ import static java.util.stream.Collectors.toSet;
 
 						.satisfies(shape -> assertThat(fields(shape))
 								.as("only container fields retained")
-								.isEqualTo(fields(Container.map(new Optimizer())))
+								.isEqualTo(fields(Container.map(new _Optimizer())))
 						)
 
 						.satisfies(shape -> assertThat(metas(shape))
@@ -164,7 +165,7 @@ import static java.util.stream.Collectors.toSet;
 			@Test void testForwardResourceShape() {
 				assertThat(resource(Employee))
 						.as("only resource shape found")
-						.isEqualTo(Employee.map(new Optimizer()));
+						.isEqualTo(Employee.map(new _Optimizer()));
 			}
 
 			@Test void testPreserveExistingAnnotations() {
@@ -228,7 +229,7 @@ import static java.util.stream.Collectors.toSet;
 					.map(new Redactor(Shape.View))
 					.map(new Redactor(Shape.Mode))
 					.map(new Redactor(Shape.Role))
-					.map(new Optimizer());
+					.map(new _Optimizer());
 		}
 
 

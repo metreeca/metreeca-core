@@ -21,7 +21,6 @@ import com.metreeca.tree.shapes.*;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Traverser;
-import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -40,14 +39,12 @@ import static com.metreeca.tree.Shape.filter;
 import static com.metreeca.tree.probes.Evaluator.pass;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.Memoizing.*;
-import static com.metreeca.tree.shapes.Meta.metas;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
 import static com.metreeca.tree.things.Maps.entry;
 import static com.metreeca.tree.things.Sets.set;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.tree.Shape.filter;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
@@ -129,7 +126,7 @@ public final class Shapes {
 	);
 
 	private static final Function<Shape, Shape> entity=(
-			shape -> and(metadata(shape), shape).map(new Optimizer())
+			shape -> and(metadata(shape), shape).map(new _Optimizer())
 	);
 
 	private static final Function<Shape, Shape> container=(

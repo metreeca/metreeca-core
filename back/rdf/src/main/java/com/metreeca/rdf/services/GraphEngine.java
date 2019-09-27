@@ -17,6 +17,7 @@
 
 package com.metreeca.rdf.services;
 
+import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.*;
 import com.metreeca.tree.probes.Outliner;
 import com.metreeca.rest.Request;
@@ -35,6 +36,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.tree.Focus.focus;
 import static com.metreeca.tree.Frame.frame;
 import static com.metreeca.tree.Issue.issue;
@@ -58,8 +61,8 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class GraphEngine implements Engine {
 
-	private final Graph graph=tool(graph());
-	private final Trace trace=tool(trace());
+	private final Graph graph=service(graph());
+	private final Logger trace=service(logger());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

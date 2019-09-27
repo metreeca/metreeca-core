@@ -18,9 +18,9 @@
 package com.metreeca.rdf.codecs;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.probes.Inferencer;
+import com.metreeca.rdf._probes.Inferencer;
+import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
 import org.eclipse.rdf4j.model.*;
@@ -53,11 +53,12 @@ import static java.util.stream.Collectors.toCollection;
 
 abstract class JSONEncoder extends JSONCodec {
 
+
 	private static final Function<Shape, Shape> ShapeCompiler=s -> s
 			.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
-			.map(new Optimizer())
+			.map(new _Optimizer())
 			.map(new Inferencer()) // infer implicit constraints to drive json shorthands
-			.map(new Optimizer());
+			.map(new _Optimizer());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,8 +114,8 @@ abstract class JSONEncoder extends JSONCodec {
 	private JsonValue json(final Collection<Statement> model,
 			final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
 
-		final IRI datatype=datatype(shape).orElse(null);
-		final Map<String, Shape> fields=fields(shape);
+		final Object datatype=datatype(shape).orElse(null);
+		final Map<Object, Shape> fields=fields(shape);
 
 		final boolean inlineable=IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype);
 
@@ -155,16 +156,16 @@ abstract class JSONEncoder extends JSONCodec {
 
 			} else { // write direct/inverse fields as specified by the shape
 
-				final Map<String, String> aliases=aliases(shape);
+				final Map<IRI, String> aliases=aliases(shape);
 
-				for (final Map.Entry<String, Shape> entry : fields.entrySet()) {
+				for (final Map.Entry<Object, Shape> entry : fields.entrySet()) {
 
-					final IRI predicate=entry.getKey();
+					final IRI predicate=Values.iri(entry.getKey());
 					final boolean direct=direct(predicate);
 
 					final Shape nestedShape=entry.getValue();
 
-					final String alias=Optional.ofNullable(aliases.get(entry.getKey()))
+					final String alias=Optional.ofNullable(aliases.get(predicate))
 							.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue());
 
 					final Collection<? extends Value> values=direct
@@ -189,6 +190,7 @@ abstract class JSONEncoder extends JSONCodec {
 
 		}
 	}
+
 
 	private JsonValue json(final Literal literal, final Shape shape) {
 

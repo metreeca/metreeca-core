@@ -21,6 +21,7 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Traverser;
 import com.metreeca.tree.shapes.*;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RioSetting;
@@ -31,7 +32,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.tree.shapes.Meta.alias;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -39,7 +42,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 
 abstract class JSONCodec {
@@ -73,7 +75,7 @@ abstract class JSONCodec {
 	 *
 	 * <p>Defaults to {@code null}.</p>
 	 */
-	public static final RioSetting<com.metreeca.tree.Shape> RioShape=new RioSettingImpl<>(
+	public static final RioSetting<Shape> RioShape=new RioSettingImpl<>(
 			JSONCodec.class.getName()+"#Shape", "Resource shape", null
 	);
 
@@ -86,14 +88,14 @@ abstract class JSONCodec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected Map<String, String> aliases(final Shape shape) {
+	protected Map<IRI, String> aliases(final Shape shape) {
 
 		if ( shape == null ) { return emptyMap(); } else {
 
-			final Map<String, String> aliases=new LinkedHashMap<>();
+			final Map<IRI, String> aliases=new LinkedHashMap<>();
 
-			aliases.putAll(shape.map(new SystemAliasesProbe(JSONCodec.Reserved)));
-			aliases.putAll(shape.map(new UserAliasesProbe(JSONCodec.Reserved)));
+			aliases.putAll(shape.map(new SystemAliasesProbe(Reserved)));
+			aliases.putAll(shape.map(new UserAliasesProbe(Reserved)));
 
 			return aliases;
 		}
@@ -102,28 +104,28 @@ abstract class JSONCodec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private abstract static class AliasesProbe extends Traverser<Map<String, String>> {
+	private abstract static class AliasesProbe extends Traverser<Map<IRI, String>> {
 
-		@Override public Map<String, String> probe(final Shape shape) { return emptyMap(); }
+		@Override public Map<IRI, String> probe(final Shape shape) { return emptyMap(); }
 
 
-		@Override public Map<String, String> probe(final And and) {
+		@Override public Map<IRI, String> probe(final And and) {
 			return aliases(and.getShapes());
 		}
 
-		@Override public Map<String, String> probe(final Or or) {
+		@Override public Map<IRI, String> probe(final Or or) {
 			return aliases(or.getShapes());
 		}
 
-		@Override public Map<String, String> probe(final When when) {
+		@Override public Map<IRI, String> probe(final When when) {
 			return aliases(asList(when.getPass(), when.getFail()));
 		}
 
 
-		private Map<String, String> aliases(final Collection<Shape> shapes) {
+		private Map<IRI, String> aliases(final Collection<Shape> shapes) {
 			return shapes.stream()
 
-					// collect edge-to-alias mappings from nested shapes
+					// collect field-to-alias mappings from nested shapes
 
 					.flatMap(shape -> shape.map(this).entrySet().stream())
 
@@ -131,13 +133,13 @@ abstract class JSONCodec {
 
 					.distinct()
 
-					// group by edge and remove edges mapped to multiple aliases
+					// group by field and remove edges mapped to multiple aliases
 
 					.collect(groupingBy(Map.Entry::getKey)).values().stream()
 					.filter(group -> group.size() == 1)
 					.map(group -> group.get(0))
 
-					// group by alias and remove aliases mapped from multiple edges
+					// group by alias and remove aliases mapped from multiple fields
 
 					.collect(groupingBy(Map.Entry::getValue)).values().stream()
 					.filter(group -> group.size() == 1)
@@ -163,16 +165,16 @@ abstract class JSONCodec {
 		}
 
 
-		@Override public Map<String, String> probe(final Field field) {
+		@Override public Map<IRI, String> probe(final Field field) {
 
-			final String name=field.getName();
+			final IRI name=iri(field.getName());
 
 			return Optional
-					.of(NamedIRIPattern.matcher(name))
+					.of(NamedIRIPattern.matcher(name.stringValue()))
 					.filter(Matcher::find)
 					.map(matcher -> matcher.group("name"))
 					.filter(alias -> !reserved.contains(alias))
-					.map(alias -> singletonMap(name, alias))
+					.map(alias -> singletonMap(name, direct(name) ? alias : alias+"Of"))
 					.orElse(emptyMap());
 		}
 
@@ -188,53 +190,15 @@ abstract class JSONCodec {
 		}
 
 
-		@Override public Map<String, String> probe(final Field field) {
+		@Override public Map<IRI, String> probe(final Field field) {
 
-			final String name=field.getName();
+			final IRI name=iri(field.getName());
 			final Shape shape=field.getShape();
 
-			return Optional
-					.ofNullable(shape.map(new AliasProbe()))
+			return alias(shape)
 					.filter(alias -> !reserved.contains(alias))
 					.map(alias -> singletonMap(name, alias))
 					.orElse(emptyMap());
-		}
-
-	}
-
-
-	private static final class AliasProbe extends Traverser<String> {
-
-		@Override public String probe(final Meta meta) {
-			return meta.getValue().equals(com.metreeca.tree.Shape.Alias) ? meta.getValue().toString() : null;
-		}
-
-		@Override public String probe(final Field field) { return null; }
-
-
-		@Override public String probe(final And and) {
-			return alias(and.getShapes());
-		}
-
-		@Override public String probe(final Or or) {
-			return alias(or.getShapes());
-		}
-
-		@Override public String probe(final When when) {
-			return alias(asList(when.getPass(), when.getFail()));
-		}
-
-
-		private String alias(final Collection<Shape> shapes) {
-			return Optional
-					.of(shapes.stream()
-							.map(shape -> shape.map(this))
-							.filter(alias -> alias != null && !alias.isEmpty())
-							.collect(toSet())
-					)
-					.filter(aliases -> aliases.size() == 1)
-					.map(aliases -> aliases.iterator().next())
-					.orElse(null);
 		}
 
 	}

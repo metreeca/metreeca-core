@@ -19,7 +19,6 @@
 package com.metreeca.rdf.services;
 
 
-import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;

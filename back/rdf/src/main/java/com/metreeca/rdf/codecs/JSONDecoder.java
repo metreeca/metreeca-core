@@ -18,9 +18,9 @@
 package com.metreeca.rdf.codecs;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.probes.Inferencer;
+import com.metreeca.rdf._probes.Inferencer;
+import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
 import org.eclipse.rdf4j.model.*;
@@ -38,15 +38,15 @@ import java.util.stream.Stream;
 
 import javax.json.*;
 
-import static com.metreeca.tree.shapes.Field.fields;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf._Form.BNodeType;
 import static com.metreeca.rdf._Form.IRIType;
 import static com.metreeca.rdf._Form.ResourceType;
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.tree.Shape.Convey;
 import static com.metreeca.tree.Shape.Mode;
 import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.fields;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -61,9 +61,9 @@ abstract class JSONDecoder extends JSONCodec {
 
 	private static final Function<Shape, Shape> ShapeCompiler=s -> s
 			.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
-			.map(new Optimizer())
+			.map(new _Optimizer())
 			.map(new Inferencer()) // infer implicit constraints to drive json shorthands
-			.map(new Optimizer());
+			.map(new _Optimizer());
 
 
 	private static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
@@ -163,7 +163,7 @@ abstract class JSONDecoder extends JSONCodec {
 		final String type=type(object);
 
 		final String datatype=type.isEmpty()
-				? datatype(shape).map(Value::stringValue).orElse("")
+				? datatype(shape).map(Values::iri).map(Value::stringValue).orElse("")
 				: type;
 
 		final Value value=(thiz.isEmpty() && type.isEmpty() && focus != null) ? focus
@@ -187,7 +187,7 @@ abstract class JSONDecoder extends JSONCodec {
 	private Map.Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
 
 		final String text=string.getString();
-		final IRI type=datatype(shape).orElse(XMLSchema.STRING);
+		final IRI type=datatype(shape).filter(o -> o instanceof IRI).map(o -> (IRI)o).orElse(XMLSchema.STRING);
 
 		final Value value=ResourceType.equals(type) ? resource(text)
 				: BNodeType.equals(type) ? bnode(text)
@@ -199,7 +199,7 @@ abstract class JSONDecoder extends JSONCodec {
 
 	private Map.Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).orElse(null);
+		final IRI datatype=datatype(shape).map(Values::iri).orElse(null);
 
 		final Literal value
 
@@ -223,7 +223,7 @@ abstract class JSONDecoder extends JSONCodec {
 
 	private Map.Entry<Value, Stream<Statement>> properties(final JsonObject object, final Shape shape, final Resource source) {
 
-		final Map<String, Shape> fields=fields(shape);
+		final Map<Object, Shape> fields=fields(shape);
 
 		return entry(source, object.entrySet().stream()
 				.filter(field -> !Reserved.contains(field.getKey()))

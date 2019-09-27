@@ -15,8 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.probes;
+package com.metreeca.rdf._probes;
 
+import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.And;
@@ -29,9 +30,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.tree.shapes.All.all;
 
 import static java.util.Arrays.asList;
@@ -73,17 +72,17 @@ public final class Outliner extends Inspector<Stream<Statement>> {
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return sources.stream()
 				.filter(source -> source instanceof Resource)
-				.map(source -> statement((Resource)source, RDF.TYPE, clazz.getIRI()));
+				.map(source -> statement((Resource)source, RDF.TYPE, iri(clazz.getName())));
 	}
 
 	@Override public Stream<Statement> probe(final Field field) {
 
-		final IRI iri=field.getIRI();
+		final IRI iri=iri(field.getName());
 		final Shape shape=field.getShape();
 
 		return Stream.concat(
 
-				all(shape).map(targets -> targets.stream().flatMap(target -> sources.stream().flatMap(source -> direct(iri)
+				all(shape).map(targets -> targets.stream().map(Values::value).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
 
 						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
 						: target instanceof Resource ? Stream.of(statement((Resource)target, inverse(iri), source)) : Stream.empty()
@@ -106,7 +105,7 @@ public final class Outliner extends Inspector<Stream<Statement>> {
 
 				all(and).map(values -> and.getShapes().stream()
 
-						.flatMap(shape -> shape.map(new Outliner(values)))
+						.flatMap(shape -> shape.map(new Outliner(values(values))))
 
 				).orElseGet(Stream::empty)
 

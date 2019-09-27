@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.probes;
+package com.metreeca.rdf._probes;
 
 import com.metreeca.tree.Shape;
 
@@ -27,12 +27,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.tree.truths.ModelAssert.assertThat;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.field;
 
 import static java.util.stream.Collectors.toSet;
@@ -42,11 +42,11 @@ final class OutlinerTest {
 
 	@Test void testOutlineFields() {
 
-		assertThat(outline(field(RDF.VALUE, RDF.REST), RDF.FIRST))
+		assertThat(outline(field(RDF.VALUE, all(RDF.REST)), RDF.FIRST))
 				.as("direct field")
 				.isEqualTo(decode("rdf:first rdf:value rdf:rest."));
 
-		assertThat(outline(field(inverse(RDF.VALUE), RDF.REST), RDF.FIRST))
+		assertThat(outline(field(inverse(RDF.VALUE), all(RDF.REST)), RDF.FIRST))
 				.as("inverse field")
 				.isEqualTo(decode("rdf:rest rdf:value rdf:first."));
 

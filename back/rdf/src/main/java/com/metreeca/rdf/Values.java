@@ -43,6 +43,7 @@ import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -474,6 +475,34 @@ public final class Values {
 
 
 	///// Converters ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static IRI iri(final Object object) {
+		return as(object, IRI.class);
+	}
+
+	public static Value value(final Object object) {
+		return as(object, Value.class);
+	}
+
+	public static Set<Value> values(final Collection<Object> values) {
+		return values.stream().map(Values::value).collect(toSet());
+	}
+
+
+	private static <T> T as(final Object object, final Class<T> type) {
+		if ( object == null || type.isInstance(object) ) {
+
+			return type.cast(object);
+
+		} else {
+
+			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
+					object.getClass().getName(), type.getName()
+			));
+
+		}
+	}
+
 
 	public static Optional<String> iri(final Value value) {
 		return value instanceof IRI ? Optional.of(value.stringValue()) : Optional.empty();

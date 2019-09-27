@@ -20,11 +20,15 @@ package com.metreeca.rdf.codecs;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.*;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
@@ -33,22 +37,50 @@ import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Meta.alias;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 
 
 final class JSONCodecTest {
 
-	private Map<String, String> aliases(final Shape shape) {
+	//// !!! ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static JsonArray array(final Object... items) {
+		return Json.createArrayBuilder(asList(items)).build();
+	}
+
+	static JsonObject object(final Map<String, Object> fields) {
+		return Json.createObjectBuilder(fields).build();
+	}
+
+
+
+	@SafeVarargs static <T> List<T> list(final T... items) {
+		return asList(items);
+	}
+
+	static <K, V> Map<K, V> map() {
+		return emptyMap();
+	}
+
+	@SafeVarargs  static <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
+		return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
+		return new AbstractMap.SimpleImmutableEntry<>(key, value);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Map<IRI, String> aliases(final Shape shape) {
 		return new JSONCodec() {}.aliases(shape);
 	}
 
-
-	private <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
-		return Stream.of(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-	}
 
 
 

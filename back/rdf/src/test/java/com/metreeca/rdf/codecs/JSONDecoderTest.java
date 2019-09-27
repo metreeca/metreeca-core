@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.codecs;
 
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rdf._Form;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -42,13 +42,18 @@ import javax.json.JsonValue;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
 import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createValue;
 
 
@@ -83,7 +88,7 @@ final class JSONDecoderTest {
 
 
 	private Map.Entry<Value, Collection<Statement>> value(final Value value) {
-		return value(value, list());
+		return value(value, emptyList());
 	}
 
 	private Map.Entry<Value, Collection<Statement>> value(final Value value, final Collection<Statement> model) {
@@ -97,13 +102,13 @@ final class JSONDecoderTest {
 
 		@Test void testArray() {
 
-			assertThat(values(array("one", "two")).keySet())
+			assertThat(values(createArrayBuilder().add("one").add("two").build()).keySet())
 					.as("value array")
-					.isEqualTo(set(literal("one"), literal("two")));
+					.containsOnly(literal("one"), literal("two"));
 
 			assertThat(values(createValue("one")).keySet())
 					.as("singleton value")
-					.isEqualTo(set(literal("one")));
+					.containsOnly(literal("one"));
 
 		}
 
@@ -113,53 +118,75 @@ final class JSONDecoderTest {
 
 		@Test void testResource() {
 
-			assertThat(value(object(entry("_this", "_:id"))))
+			assertThat(value(createObjectBuilder().add("_this", "_:id").build()))
 					.isEqualTo(value(bnode("id")));
 
-			assertThat(value(object(entry("_this", "id"))))
+			assertThat(value(createObjectBuilder().add("_this", "id").build()))
 					.isEqualTo(value(item("id")));
 
+		}
+
+		@Test void test() {
+
+			final IRI id=iri(ValuesTest.Base, "id");
+
+			final Function<String, JsonObject> object=path -> createObjectBuilder()
+					.add("_this", "id")
+					.add(String.format(path, RDF.VALUE), RDF.NIL.stringValue())
+					.build();
+
+			assertThat(value(object.apply("^<%s>"), field(inverse(RDF.VALUE), datatype(_Form.IRIType))))
+					.as("bracketed inverse field")
+					.isEqualTo(value(id, singletonList(statement(RDF.NIL, RDF.VALUE, id))));
 		}
 
 		@Test void testIRI() {
 
 			final IRI id=iri(ValuesTest.Base, "id");
 
-			final Function<String, JsonObject> object=path -> object(
-					entry("_this", "id"),
-					entry(String.format(path, RDF.VALUE), RDF.NIL.stringValue())
-			);
+			final Function<String, JsonObject> object=path -> createObjectBuilder()
+					.add("_this", "id")
+					.add(String.format(path, RDF.VALUE), RDF.NIL.stringValue())
+					.build();
 
 			assertThat(value(object.apply("<%s>"), field(RDF.VALUE, datatype(_Form.IRIType))))
 					.as("bracketed direct field")
-					.isEqualTo(value(id, list(statement(id, RDF.VALUE, RDF.NIL))));
+					.isEqualTo(value(id, singletonList(statement(id, RDF.VALUE, RDF.NIL))));
 
 			assertThat(value(object.apply("^<%s>"), field(inverse(RDF.VALUE), datatype(_Form.IRIType))))
 					.as("bracketed inverse field")
-					.isEqualTo(value(id, list(statement(RDF.NIL, RDF.VALUE, id))));
+					.isEqualTo(value(id, singletonList(statement(RDF.NIL, RDF.VALUE, id))));
 
 			assertThat(value(object.apply("%s"), field(RDF.VALUE, datatype(_Form.IRIType))))
 					.as("naked direct field")
-					.isEqualTo(value(id, list(statement(id, RDF.VALUE, RDF.NIL))));
+					.isEqualTo(value(id, singletonList(statement(id, RDF.VALUE, RDF.NIL))));
 
 			assertThat(value(object.apply("^%s"), field(inverse(RDF.VALUE), datatype(_Form.IRIType))))
 					.as("naked inverse field")
-					.isEqualTo(value(id, list(statement(RDF.NIL, RDF.VALUE, id))));
+					.isEqualTo(value(id, singletonList(statement(RDF.NIL, RDF.VALUE, id))));
 
 			assertThat(value(object.apply("value"), field(RDF.VALUE, datatype(_Form.IRIType))))
 					.as("aliased field")
-					.isEqualTo(value(id, list(statement(id, RDF.VALUE, RDF.NIL))));
+					.isEqualTo(value(id, singletonList(statement(id, RDF.VALUE, RDF.NIL))));
 
 		}
 
 
 		@Test void testTypedLiteral() {
-			assertThat(value(object(entry("_this", "2019-04-02"), entry("_type", XMLSchema.DATE.stringValue()))))
+			assertThat(value(createObjectBuilder()
+					.add("_this", "2019-04-02")
+					.add("_type", XMLSchema.DATE.stringValue())
+					.build()
+			))
 					.isEqualTo(value(literal("2019-04-02", XMLSchema.DATE)));
 		}
 
 		@Test void testTaggedLiteral() {
-			assertThat(value(object(entry("_this", "string"), entry("_type", "@en"))))
+			assertThat(value(createObjectBuilder()
+					.add("_this", "string")
+					.add("_type", "@en")
+					.build()
+			))
 					.isEqualTo(value(literal("string", "en")));
 		}
 

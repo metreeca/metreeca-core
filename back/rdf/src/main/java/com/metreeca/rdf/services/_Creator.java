@@ -30,7 +30,6 @@ import com.metreeca.rest.services.Engine;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.rest.wrappers.Throttler;
 import com.metreeca.tray.Trace;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;

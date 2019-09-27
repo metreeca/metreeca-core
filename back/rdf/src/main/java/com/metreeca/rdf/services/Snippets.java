@@ -33,7 +33,7 @@ import static java.util.Collections.emptyIterator;
 /**
  * Source code generation utilities.
  */
-public final class Snippets {
+final class Snippets {
 
 	private static final Pattern VariablePattern=Pattern.compile("\\{\\w+}"); // e.g. {value}
 

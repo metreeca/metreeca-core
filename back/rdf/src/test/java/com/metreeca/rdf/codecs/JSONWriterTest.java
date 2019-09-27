@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf.codecs;
 
+import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rdf._Form;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Or;
-import com.metreeca.rdf._Form;
-import com.metreeca.rdf.ValuesTest;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -40,25 +40,13 @@ import java.util.function.Function;
 
 import javax.json.*;
 
+import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.ValuesTest.decode;
+import static com.metreeca.rdf.ValuesTest.item;
+import static com.metreeca.rdf.codecs.JSONCodecTest.*;
+import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.tree.Shape.multiple;
 import static com.metreeca.tree.Shape.required;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.MaxCount.maxCount;
-import static com.metreeca.tree.things.JsonValues.array;
-import static com.metreeca.tree.things.JsonValues.object;
-import static com.metreeca.tree.things.Lists.list;
-import static com.metreeca.tree.things.Maps.entry;
-import static com.metreeca.tree.things.Maps.map;
-import static com.metreeca.tree.things.Maps.union;
-import static com.metreeca.tree.things.Values.*;
-import static com.metreeca.tree.things.ValuesTest.item;
-import static com.metreeca.rdf.Values.bnode;
-import static com.metreeca.rdf.Values.format;
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.ValuesTest.decode;
-import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
@@ -98,9 +86,9 @@ final class JSONWriterTest  {
 
 	@Test void testTypedObjects() {
 
-		final Function<Object, JsonValue> values=(v) -> array(union(
-				map(entry("_this", format(bnode()))),
-				map(entry(value, list(v)))
+		final Function<Object, JsonValue> values=v -> array(map(
+				entry("_this", format(bnode())),
+				entry(value, list(v))
 		));
 
 		assertEquivalent("boolean", values.apply(true), write(decode("_:focus rdf:value true .")));
@@ -284,13 +272,13 @@ final class JSONWriterTest  {
 		);
 
 		assertThat(json)
-				.isEqualTo(object(
+				.isEqualTo(object(map(
 						entry("_this", "/container/"),
 						entry("contains", list(
 								"/container/x",
 								"/container/y"
 						))
-				));
+				)));
 	}
 
 	@Test void testRelativizeProvedIRIBackReferences() {

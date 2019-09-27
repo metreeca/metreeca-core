@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.codecs;
 
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rdf._Form;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.BNode;
@@ -31,19 +31,16 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.things.JsonValues.object;
-import static com.metreeca.tree.things.Lists.list;
-import static com.metreeca.tree.things.Maps.entry;
-import static com.metreeca.tree.things.Maps.map;
-import static com.metreeca.tree.things.Values.*;
-import static com.metreeca.tree.truths.JsonAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
 import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 
 final class JSONEncoderTest {
@@ -57,7 +54,10 @@ final class JSONEncoderTest {
 
 
 	private JsonValue expected(final Object value) {
-		return object(entry("_this", ((Value)focus).toString()), entry("value", list(value)));
+		return JSONCodecTest.object(JSONCodecTest.map(
+				JSONCodecTest.entry("_this", ((Value)focus).toString()),
+				JSONCodecTest.entry("value", asList(value))
+		));
 	}
 
 
@@ -67,7 +67,7 @@ final class JSONEncoderTest {
 
 	private JsonValue actual(final Value value, final Shape shape) {
 		return encoder().json(
-				list(statement(focus, RDF.VALUE, value)),
+				singletonList(statement(focus, RDF.VALUE, value)),
 				field(RDF.VALUE, shape),
 				focus
 		);
@@ -80,7 +80,7 @@ final class JSONEncoderTest {
 
 		@Test void testBNode() {
 			assertThat(actual(bnode()))
-					.isEqualTo(expected(map()));
+					.isEqualTo(expected(JSONCodecTest.map()));
 		}
 
 		@Test void testBNodeWithBackLink() {
@@ -89,15 +89,15 @@ final class JSONEncoderTest {
 			final BNode y=bnode("y");
 
 			assertThat(encoder().json(
-					list(statement(x, RDF.VALUE, y), statement(y, RDF.VALUE, x)),
+					asList(statement(x, RDF.VALUE, y), statement(y, RDF.VALUE, x)),
 					field(RDF.VALUE, and(required(), field(RDF.VALUE, required()))),
 					x
 			))
-					.isEqualTo(object(map(
-							entry("_this", "_:x"),
-							entry("value", map(
-									entry("value", map(
-											entry("_this","_:x")
+					.isEqualTo(JSONCodecTest.object(JSONCodecTest.map(
+							JSONCodecTest.entry("_this", "_:x"),
+							JSONCodecTest.entry("value", JSONCodecTest.map(
+									JSONCodecTest.entry("value", JSONCodecTest.map(
+											JSONCodecTest.entry("_this","_:x")
 									))
 							))
 					)));
@@ -109,14 +109,14 @@ final class JSONEncoderTest {
 			final BNode y=bnode("y");
 
 			assertThat(encoder().json(
-					list(statement(x, RDF.VALUE, y), statement(y, RDF.VALUE, x)),
+					asList(statement(x, RDF.VALUE, y), statement(y, RDF.VALUE, x)),
 					field(RDF.VALUE, and(required(), field(RDF.VALUE, and(required(), datatype(_Form.ResourceType))))),
 					x
 			))
-					.isEqualTo(object(map(
-							entry("_this", "_:x"),
-							entry("value", map(
-									entry("value", "_:x")
+					.isEqualTo(JSONCodecTest.object(JSONCodecTest.map(
+							JSONCodecTest.entry("_this", "_:x"),
+							JSONCodecTest.entry("value", JSONCodecTest.map(
+									JSONCodecTest.entry("value", "_:x")
 							))
 					)));
 		}
@@ -124,7 +124,7 @@ final class JSONEncoderTest {
 
 		@Test void testIRI() {
 			assertThat(actual(item("id")))
-					.isEqualTo(expected(map(entry("_this", "/id"))));
+					.isEqualTo(expected(JSONCodecTest.map(JSONCodecTest.entry("_this", "/id"))));
 		}
 
 		@Test void testProvedIRI() {
@@ -141,17 +141,17 @@ final class JSONEncoderTest {
 
 		@Test void testTypedString() {
 			assertThat(actual(literal("2019-04-03", XMLSchema.DATE)))
-					.isEqualTo(expected(map(
-							entry("_this", "2019-04-03"),
-							entry("_type", XMLSchema.DATE.stringValue())
+					.isEqualTo(expected(JSONCodecTest.map(
+							JSONCodecTest.entry("_this", "2019-04-03"),
+							JSONCodecTest.entry("_type", XMLSchema.DATE.stringValue())
 					)));
 		}
 
 		@Test void testTaggedString() {
 			assertThat(actual(literal("string", "en")))
-					.isEqualTo(expected(map(
-							entry("_this", "string"),
-							entry("_type", "@en")
+					.isEqualTo(expected(JSONCodecTest.map(
+							JSONCodecTest.entry("_this", "string"),
+							JSONCodecTest.entry("_type", "@en")
 					)));
 		}
 
@@ -172,9 +172,9 @@ final class JSONEncoderTest {
 
 		@Test void testDouble() {
 			assertThat(actual(literal(123.0)))
-					.isEqualTo(expected(map(
-							entry("_this", "123.0"),
-							entry("_type", XMLSchema.DOUBLE.stringValue())
+					.isEqualTo(expected(JSONCodecTest.map(
+							JSONCodecTest.entry("_this", "123.0"),
+							JSONCodecTest.entry("_type", XMLSchema.DOUBLE.stringValue())
 					)));
 		}
 

@@ -15,13 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.probes;
+package com.metreeca.rdf._probes;
 
-import com.metreeca.tree.shapes.*;
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf._Form;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
+import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -30,13 +30,11 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.Set;
 
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Or.or;
-import static com.metreeca.tree.shapes.When.when;
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.literal;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.In.in;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.Or.or;
@@ -57,13 +55,13 @@ public final class Inferencer extends Inspector<Shape> {
 
 
 	@Override public Shape probe(final Meta meta) {
-		return meta.getIRI().equals(Shape.Hint) ? and(meta, datatype(_Form.ResourceType)) : meta;
+		return meta.getLabel().equals(Shape.Hint) ? and(meta, datatype(_Form.ResourceType)) : meta;
 	}
 
 
 	@Override public Shape probe(final Datatype datatype) {
-		return datatype.getIRI().equals(XMLSchema.BOOLEAN) ? and(datatype,
-				In.in(literal(false), literal(true)), maxCount(1)
+		return datatype.getName().equals(XMLSchema.BOOLEAN) ? and(datatype,
+				in(literal(false), literal(true)), maxCount(1)
 		) : datatype;
 	}
 
@@ -82,7 +80,7 @@ public final class Inferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final In in) {
 
-		final Set<Value> values=in.getValues();
+		final Set<Value> values=values(in.getValues());
 		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
@@ -94,7 +92,7 @@ public final class Inferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final IRI iri=field.getIRI();
+		final IRI iri=iri(field.getName());
 		final Shape shape=field.getShape().map(this);
 
 		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(_Form.ResourceType))), datatype(_Form.ResourceType))

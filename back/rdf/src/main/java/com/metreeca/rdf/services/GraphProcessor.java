@@ -18,10 +18,10 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.rdf.services.Snippets.Snippet;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -44,11 +44,11 @@ abstract class GraphProcessor {
 
 	static final Function<Shape, Shape> convey=shape -> shape
 			.map(new Redactor(Shape.Mode, Shape.Convey))
-			.map(new Optimizer());
+			.map(new _Optimizer());
 
 	static final Function<Shape, Shape> filter=shape -> shape
 			.map(new Redactor(Shape.Mode, Shape.Filter))
-			.map(new Optimizer());
+			.map(new _Optimizer());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

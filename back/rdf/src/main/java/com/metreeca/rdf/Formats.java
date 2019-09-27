@@ -31,6 +31,9 @@ import static java.util.Collections.sort;
 import static java.util.stream.Collectors.toList;
 
 
+/**
+ * RDF file format utilities.
+ */
 public final class Formats {
 
 	private static final Pattern MimePattern=
