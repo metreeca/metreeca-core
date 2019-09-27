@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -75,7 +76,7 @@ final class ManagerTest {
 		return new Manager("/~", SoftTimeout, HardTimeout);
 	}
 
-	private Handler handler(final Function<String, Integer> status) {
+	private Handler handler(final Function<Optional<Object>, Integer> status) {
 		return request -> request.reply(response -> response.status(status.apply(request.user())));
 	}
 
@@ -382,7 +383,7 @@ final class ManagerTest {
 			@Test void testGranted() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isPresent() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> handler
 
@@ -408,7 +409,7 @@ final class ManagerTest {
 			@Test void testInvalidCookie() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isPresent() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, authorization) -> handler
 
@@ -490,7 +491,7 @@ final class ManagerTest {
 			@Test void testDeletion() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isPresent() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 
@@ -531,7 +532,7 @@ final class ManagerTest {
 			@Test void testHandleChange() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isPresent() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 
@@ -573,7 +574,7 @@ final class ManagerTest {
 			@Test void testExtension() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isPresent() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 
@@ -605,7 +606,7 @@ final class ManagerTest {
 			@Test void testSoftExpiry() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.isEmpty() ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isPresent() ? Response.Unauthorized : Response.OK))
 
 				).accept((handler, cookie) -> {
 

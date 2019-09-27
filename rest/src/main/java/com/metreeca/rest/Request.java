@@ -59,8 +59,8 @@ public final class Request extends Message<Request> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String user="";
-	private Set<String> roles=emptySet();
+	private Optional<Object> user=Optional.empty();
+	private Set<Object> roles=emptySet();
 
 	private String method="";
 	private String base="app:/";
@@ -191,26 +191,21 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the identifier of the request user.
 	 *
-	 * @return an identifier for the user performing this request or the empty string if no user is authenticated
+	 * @return an optional identifier for the user performing this request or the empty optional if no user is
+	 * authenticated
 	 */
-	public String user() { return user; }
+	public Optional<Object> user() { return user; }
 
 	/**
 	 * Configures the identifier of the request user.
 	 *
-	 * @param user an identifier for the user performing this request or the empty stringif no user is authenticated
+	 * @param user an identifier for the user performing this request or {@code null} if no user is authenticated
 	 *
 	 * @return this request
-	 *
-	 * @throws NullPointerException if {@code user} is null
 	 */
-	public Request user(final String user) {
+	public Request user(final Object user) {
 
-		if ( user == null ) {
-			throw new NullPointerException("null user");
-		}
-
-		this.user=user;
+		this.user=Optional.ofNullable(user);
 
 		return this;
 	}
@@ -221,7 +216,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return a set of values uniquely identifying the roles attributed to the request {@linkplain #user() user}
 	 */
-	public Set<String> roles() { return unmodifiableSet(roles); }
+	public Set<Object> roles() { return unmodifiableSet(roles); }
 
 	/**
 	 * Configures the roles attributed to the request user.
@@ -233,7 +228,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
 	 */
-	public Request roles(final String... roles) {
+	public Request roles(final Object... roles) {
 		return roles(asList(roles));
 	}
 
@@ -247,7 +242,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
 	 */
-	public Request roles(final Collection<String> roles) {
+	public Request roles(final Collection<Object> roles) {
 
 		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null roles");
@@ -381,12 +376,12 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the shape-based query of this request.
 	 *
-	 * @param shape the base shape for the query
+	 * @param shape  the base shape for the query
 	 * @param parser a shape-based function mapping from JSON to {@linkplain Engine engine} specific values
 	 *
 	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
-	 * {@linkplain #query() query} string, if successfully parsed using the {@code parser}; an error
-	 * providing access to the parsing failure, otherwise
+	 * {@linkplain #query() query} string, if successfully parsed using the {@code parser}; an error providing access to
+	 * the parsing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
