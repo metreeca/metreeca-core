@@ -42,15 +42,18 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.services.Snippets.*;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Any.any;
 import static com.metreeca.tree.shapes.Or.or;
 
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 
 
 final class GraphRetriever extends GraphProcessor implements Query.Probe<Collection<Statement>> {
@@ -249,7 +252,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 	@Override public Collection<Statement> probe(final Stats stats) {
 
 		final Shape shape=stats.getShape();
-		final List<IRI> path=stats.getPath();
+		final List<IRI> path=stats.getPath().stream().map(Values::iri).collect(toList());
 
 		final Model model=new LinkedHashModel();
 
@@ -343,7 +346,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 	@Override public Collection<Statement> probe(final Terms items) {
 
 		final Shape shape=items.getShape();
-		final List<IRI> path=items.getPath();
+		final List<IRI> path=items.getPath().stream().map(Values::iri).collect(toList());
 
 		final Model model=new LinkedHashModel();
 
@@ -449,6 +452,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 	private static Snippet roots(final Shape shape) { // root universal constraints
 		return all(shape)
+				.map(Values::values)
 				.map(values -> values(shape, values))
 				.orElse(null);
 	}
@@ -465,7 +469,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 		return snippet(orders.stream()
 				.filter(order -> !order.getPath().isEmpty()) // root already retrieved
 				.map(order -> snippet(
-						"optional { {root} {path} {order} }\n", var(root), path(order.getPath()), var(order))
+						"optional { {root} {path} {order} }\n", var(root), path(order.getPath().stream().map(Values::iri).collect(toList())), var(order))
 				)
 		);
 	}
@@ -523,7 +527,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 		@Override public Stream<Integer> probe(final Field field) {
 
-			final IRI iri=field.getIRI();
+			final IRI iri=iri(field.getName());
 			final Shape shape=field.getShape();
 
 			final Integer source=identifier.apply(focus);
@@ -580,7 +584,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 		@Override public Snippet probe(final Datatype datatype) {
 
-			final IRI iri=datatype.getIRI();
+			final IRI iri=iri(datatype.getName());
 
 			return iri.equals(_Form.ValueType) ? nothing() : snippet(
 
@@ -598,23 +602,23 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 		}
 
 		@Override public Snippet probe(final Clazz clazz) {
-			return snippet(var(source), " a/rdfs:subClassOf* ", format(clazz.getIRI()), " .");
+			return snippet(var(source), " a/rdfs:subClassOf* ", format(iri(clazz.getName())), " .");
 		}
 
 		@Override public Snippet probe(final MinExclusive minExclusive) {
-			return snippet("filter ( {source} > {value} )", var(source), format(minExclusive.getValue()));
+			return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.getValue())));
 		}
 
 		@Override public Snippet probe(final MaxExclusive maxExclusive) {
-			return snippet("filter ( {source} < {value} )", var(source), format(maxExclusive.getValue()));
+			return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.getValue())));
 		}
 
 		@Override public Snippet probe(final MinInclusive minInclusive) {
-			return snippet("filter ( {source} >= {value} )", var(source), format(minInclusive.getValue()));
+			return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.getValue())));
 		}
 
 		@Override public Snippet probe(final MaxInclusive maxInclusive) {
-			return snippet("filter ( {source} <= {value} )", var(source), format(maxInclusive.getValue()));
+			return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.getValue())));
 		}
 
 		@Override public Snippet probe(final Pattern pattern) {
@@ -666,11 +670,11 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 		@Override public Snippet probe(final Field field) {
 
-			final IRI iri=field.getIRI();
+			final IRI iri=iri(field.getName());
 			final Shape shape=field.getShape();
 
-			final Optional<Set<Value>> all=all(shape);
-			final Optional<Set<Value>> any=any(shape);
+			final Optional<Set<Value>> all=all(shape).map(Values::values);
+			final Optional<Set<Value>> any=any(shape).map(Values::values);
 
 			final Optional<Value> singleton=any
 					.filter(values -> values.size() == 1)
@@ -733,7 +737,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 		@Override public Snippet probe(final Field field) {
 
-			final IRI iri=field.getIRI();
+			final IRI iri=iri(field.getName());
 			final Shape shape=field.getShape();
 
 			return snippet( // (€) optional unless universal constraints are present

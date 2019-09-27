@@ -18,7 +18,6 @@
 package com.metreeca.rdf.services;
 
 
-import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf.ValueAssert;
 import com.metreeca.rdf.Values;
 import com.metreeca.rest.*;
@@ -35,8 +34,7 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.function.Function;
 
-import static com.metreeca.tree.queries.Edges.edges;
-import static com.metreeca.tree.things.ValuesTest.*;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.*;
@@ -46,6 +44,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.services.Engine.engine;
+import static com.metreeca.tree.queries.Items.items;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Or.or;
 
@@ -91,7 +90,7 @@ final class _CreatorTest {
 											.hasField("cause")
 									);
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("storage unchanged")
 									.isEmpty();
 
@@ -121,7 +120,7 @@ final class _CreatorTest {
 											.hasField("cause")
 									);
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("storage unchanged")
 									.isEmpty();
 
@@ -160,9 +159,10 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							final IRI container=response
+							final IRI container=iri(response
 									.request()
-									.item();
+									.item()
+							);
 
 							final IRI resource=response
 									.header("Location")
@@ -177,14 +177,14 @@ final class _CreatorTest {
 									.as("resource created with IRI stemmed on request focus")
 									.hasNamespace(container.stringValue());
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("resource description stored into the graph")
 									.hasSubset(
 											statement(resource, term("forename"), literal("Tino")),
 											statement(resource, term("surname"), literal("Faussone"))
 									);
 
-							ModelAssert.assertThat(model())
+							assertThat(model())
 									.as("basic container connected to resource description")
 									.hasSubset(
 											statement(container, LDP.CONTAINS, resource)
@@ -204,14 +204,16 @@ final class _CreatorTest {
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
-							ValueAssert.assertThat(response.item())
+							final IRI item=iri(response.item());
+
+							ValueAssert.assertThat(item)
 									.as("resource created with computed IRI")
 									.isEqualTo(item("employees/slug"));
 
-							ModelAssert.assertThat(model())
+							assertThat(model())
 									.hasSubset(
-											statement(response.item(), term("forename"), literal("Tino")),
-											statement(response.item(), term("surname"), literal("Faussone"))
+											statement(item, term("forename"), literal("Tino")),
+											statement(item, term("surname"), literal("Faussone"))
 									);
 
 						}));
@@ -232,7 +234,7 @@ final class _CreatorTest {
 											.hasField("error")
 									);
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -257,7 +259,7 @@ final class _CreatorTest {
 											.hasField("error")
 									);
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -314,9 +316,9 @@ final class _CreatorTest {
 
 							ValueAssert.assertThat(location)
 									.as("resource created with IRI stemmed on request focus")
-									.hasNamespace(response.request().item().stringValue());
+									.hasNamespace(response.request().item());
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("resource description stored into the graph")
 									.hasSubset(
 											statement(location, RDF.TYPE, term("Employee")),
@@ -346,7 +348,7 @@ final class _CreatorTest {
 									.as("resource created with computed IRI")
 									.isEqualTo(item("employees/slug"));
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("resource description stored into the graph")
 									.hasSubset(
 											statement(location, RDF.TYPE, term("Employee")),
@@ -370,7 +372,7 @@ final class _CreatorTest {
 									.doesNotHaveHeader("Location")
 									.doesNotHaveBody();
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -389,7 +391,7 @@ final class _CreatorTest {
 									.doesNotHaveHeader("Location")
 									.doesNotHaveBody();
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -408,7 +410,7 @@ final class _CreatorTest {
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -430,7 +432,7 @@ final class _CreatorTest {
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("graph unchanged")
 									.isEmpty();
 
@@ -450,7 +452,7 @@ final class _CreatorTest {
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
 
-							ModelAssert.assertThat(service(engine()).relate(response.item(), edges(and())))
+							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("graph unchanged")
 									.isEmpty();
 

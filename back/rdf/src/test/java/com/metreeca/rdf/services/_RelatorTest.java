@@ -17,11 +17,13 @@
 
 package com.metreeca.rdf.services;
 
+import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf._Form;
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.JSONAssert;
+import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -29,12 +31,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
-import static com.metreeca.rdf.services.Graph.graph;
-import static com.metreeca.rdf.services.GraphTest.model;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.services.Graph.graph;
+import static com.metreeca.rdf.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.services.Engine.engine;
@@ -45,16 +50,15 @@ import static com.metreeca.tree.shapes.When.when;
 
 import static org.assertj.core.data.MapEntry.entry;
 
+import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
+
 import static javax.json.Json.createObjectBuilder;
-
-
-import static com.metreeca.rdf.ModelAssert.assertThat;
-
 
 
 final class _RelatorTest {
 
-	private void exec(final Runnable ...tasks) {
+	private void exec(final Runnable... tasks) {
 		new Context()
 				.set(engine(), GraphEngine::new)
 				.set(graph(), GraphTest::graph)
@@ -65,7 +69,7 @@ final class _RelatorTest {
 
 
 	@SafeVarargs private final String query(final Map.Entry<String, ?>... entries) {
-		return createObjectBuilder(map(entries)).build().toString();
+		return createObjectBuilder(Stream.of(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue))).build().toString();
 	}
 
 	private Map.Entry<String, String> path(final String path) {
@@ -73,7 +77,7 @@ final class _RelatorTest {
 	}
 
 	private Map.Entry<String, Map<String, Object>> filter(final String path, final Object value) {
-		return entry("filter", map(entry(path, value)));
+		return entry("filter", singletonMap(path, value));
 	}
 
 
@@ -103,7 +107,7 @@ final class _RelatorTest {
 
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 										.as("response RDF body contains a resource description")
-										.hasStatement(response.item(), null, null)
+										.hasStatement(iri(response.item()), null, null)
 								)
 						)
 				);
@@ -193,23 +197,23 @@ final class _RelatorTest {
 
 						.handle(shaped().query(query(
 								path("subordinate"),
-								filter("seniority", map(entry(">=", 2)))
+								filter("seniority", singletonMap(">=", 2))
 						)))
 
 						.accept(response -> assertThat(response)
 
-										.hasStatus(Response.NotImplemented)
+								.hasStatus(Response.NotImplemented)
 
-										.hasBody(json(), json -> JSONAssert.assertThat(json)
-												.hasField("cause")
-										)
+								.hasBody(json(), json -> JSONAssert.assertThat(json)
+										.hasField("cause")
+								)
 
 								.hasStatus(Response.OK)
 
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
 										.as("items retrieved")
-										.hasSubset(graph(
+										.hasSubset(model(
 												"construct {\n"
 														+"\n"
 														+"\t<employees/1102> ldp:contains ?employee.\n"
@@ -226,6 +230,7 @@ final class _RelatorTest {
 														+"}"
 										))
 
+								)
 						)
 				);
 			}
@@ -234,7 +239,7 @@ final class _RelatorTest {
 			@Test void testUnauthorized() {
 				exec(() -> new _Relator()
 
-						.handle(shaped().shape(when(guard(_Form.role, _Form.root), field(RDF.TYPE))))
+						.handle(shaped().shape(when(guard(Shape.Role, _Form.root), field(RDF.TYPE))))
 
 						.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
 
@@ -328,7 +333,7 @@ final class _RelatorTest {
 			@Test void testBrowseFiltered() {
 				exec(() -> new _Relator()
 
-						.handle(simple().query(query(filter("seniority", map(entry(">=", 2))))))
+						.handle(simple().query(query(filter("seniority", singletonMap(">=", 2)))))
 
 						.accept(response -> assertThat(response)
 								.hasStatus(Response.UnprocessableEntity)
@@ -360,7 +365,7 @@ final class _RelatorTest {
 								.hasShape()
 
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
-										.hasStatement(response.item(), LDP.CONTAINS, null)
+										.hasStatement(iri(response.item()), LDP.CONTAINS, null)
 										.hasSubset(model("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
 								)
 						)

@@ -28,17 +28,20 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.function.Function;
 
-import static com.metreeca.rdf.ValuesTest.decode;
-import static com.metreeca.rdf.ValuesTest.small;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.ValuesTest.*;
+import static com.metreeca.rdf.services.Graph.graph;
+import static com.metreeca.rdf.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.services.Engine.engine;
 
 
 final class _UpdaterTest {
 
-	private void exec(final Runnable ...tasks) {
+	private void exec(final Runnable... tasks) {
 		new Context()
 				.set(engine(), GraphEngine::new)
 				.set(graph(), GraphTest::graph)

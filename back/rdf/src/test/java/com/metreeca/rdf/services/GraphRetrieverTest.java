@@ -127,7 +127,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testEmptyShape() {
 			exec(() -> assertThat(query(
 
-					edges(and())
+					items(and())
 
 			)).isEmpty());
 		}
@@ -135,7 +135,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testEmptyResultSet() {
 			exec(() -> assertThat(query(
 
-					edges(field(RDF.TYPE, all(RDF.NIL)))
+					items(field(RDF.TYPE, all(RDF.NIL)))
 
 			)).isEmpty());
 		}
@@ -143,7 +143,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testEmptyProjection() {
 			exec(() -> assertThat(query(
 
-					edges(any(item("employees/1002"), item("employees/1056")))
+					items(any(item("employees/1002"), item("employees/1056")))
 
 			)).isIsomorphicTo(graph( // empty template => symmetric+labelled concise bounded description
 
@@ -179,7 +179,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMatching() {
 			exec(() -> assertThat(query(
 
-					edges(field(RDF.TYPE, all(term("Employee"))))
+					items(field(RDF.TYPE, all(term("Employee"))))
 
 			)).isIsomorphicTo(graph(
 
@@ -211,23 +211,23 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 						.collect(toList());
 
 
-				Assertions.assertThat(actual.apply(edges(shape)))
+				Assertions.assertThat(actual.apply(items(shape)))
 						.as("default (on value)")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?employee"));
 
-				Assertions.assertThat(actual.apply(edges(shape, increasing(RDFS.LABEL))))
+				Assertions.assertThat(actual.apply(items(shape, increasing(RDFS.LABEL))))
 						.as("custom increasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?label"));
 
-				Assertions.assertThat(actual.apply(edges(shape, decreasing(RDFS.LABEL))))
+				Assertions.assertThat(actual.apply(items(shape, decreasing(RDFS.LABEL))))
 						.as("custom decreasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?label)"));
 
-				Assertions.assertThat(actual.apply(edges(shape, increasing(term("office")), increasing(RDFS.LABEL))))
+				Assertions.assertThat(actual.apply(items(shape, increasing(term("office")), increasing(RDFS.LABEL))))
 						.as("custom combined")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?office ?label"));
 
-				Assertions.assertThat(actual.apply(edges(shape, decreasing())))
+				Assertions.assertThat(actual.apply(items(shape, decreasing())))
 						.as("custom on root")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?employee)"));
 
@@ -378,7 +378,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMeta() {
 			exec(() -> assertThat(query(
 
-					edges(meta(RDF.VALUE, RDF.NIL))
+					items(meta(RDF.VALUE, RDF.NIL))
 
 			)).as("ignore annotations")
 					.isEmpty());
@@ -386,7 +386,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 		@Test void testGuard() {
 			exec(() -> assertThatThrownBy(() ->
-					query(edges(guard(RDF.VALUE, RDF.NIL)))
+					query(items(guard(RDF.VALUE, RDF.NIL)))
 
 			).as("reject partially redacted shapes")
 					.isInstanceOf(UnsupportedOperationException.class));
@@ -401,13 +401,13 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 				assertThat(query(
 
-						edges(field(term("code"), datatype(XMLSchema.INTEGER)))
+						items(field(term("code"), datatype(XMLSchema.INTEGER)))
 
 				)).isEmpty();
 
 				assertThat(query(
 
-						edges(field(term("code"), datatype(XMLSchema.STRING)))
+						items(field(term("code"), datatype(XMLSchema.STRING)))
 
 				)).isIsomorphicTo(graph(
 
@@ -430,7 +430,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testClazz() {
 			exec(() -> assertThat(query(
 
-					edges(and(field(RDF.TYPE), clazz(term("Employee"))))
+					items(and(field(RDF.TYPE), clazz(term("Employee"))))
 
 			)).isIsomorphicTo(graph(
 
@@ -454,7 +454,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMinExclusiveConstraint() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("seniority"), minExclusive(literal(integer(3)))))
+					items(field(term("seniority"), minExclusive(literal(integer(3)))))
 
 			)).isIsomorphicTo(graph(
 
@@ -475,7 +475,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMaxExclusiveConstraint() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("seniority"), maxExclusive(literal(integer(3)))))
+					items(field(term("seniority"), maxExclusive(literal(integer(3)))))
 
 			)).isIsomorphicTo(graph(
 
@@ -496,7 +496,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMinInclusiveConstraint() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("seniority"), minInclusive(literal(integer(3)))))
+					items(field(term("seniority"), minInclusive(literal(integer(3)))))
 
 			)).isIsomorphicTo(graph(
 
@@ -517,7 +517,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMaxInclusiveConstraint() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("seniority"), maxInclusive(literal(integer(3)))))
+					items(field(term("seniority"), maxInclusive(literal(integer(3)))))
 
 			)).isIsomorphicTo(graph(
 
@@ -539,7 +539,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMinLength() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("forename"), minLength(5)))
+					items(field(term("forename"), minLength(5)))
 
 			)).isIsomorphicTo(graph(
 
@@ -560,7 +560,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMaxLength() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("forename"), maxLength(5)))
+					items(field(term("forename"), maxLength(5)))
 
 			)).isIsomorphicTo(graph(
 
@@ -581,7 +581,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testPattern() {
 			exec(() -> assertThat(query(
 
-					edges(field(RDFS.LABEL, pattern("\\bgerard\\b", "i")))
+					items(field(RDFS.LABEL, pattern("\\bgerard\\b", "i")))
 
 			)).isIsomorphicTo(graph(
 
@@ -602,7 +602,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testLike() {
 			exec(() -> assertThat(query(
 
-					edges(field(RDFS.LABEL, like("ger bo")))
+					items(field(RDFS.LABEL, like("ger bo")))
 
 			)).isIsomorphicTo(graph(
 
@@ -627,7 +627,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMinCount() {
 			exec(() -> assertThatThrownBy(() -> query(
 
-					edges(field(term("employee"), minCount(3)))
+					items(field(term("employee"), minCount(3)))
 
 			)).isInstanceOf(UnsupportedOperationException.class));
 		}
@@ -635,7 +635,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testMaxCount() {
 			exec(() -> assertThatThrownBy(() -> query(
 
-					edges(field(term("employee"), maxCount(3)))
+					items(field(term("employee"), maxCount(3)))
 
 			)).isInstanceOf(UnsupportedOperationException.class));
 		}
@@ -644,7 +644,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testIn() {
 			exec(() -> assertThatThrownBy(() -> query(
 
-					edges(field(term("office"), in(item("employees/1621"), item("employees/1625"))))
+					items(field(term("office"), in(item("employees/1621"), item("employees/1625"))))
 
 			)).isInstanceOf(UnsupportedOperationException.class));
 		}
@@ -653,7 +653,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testAllDirect() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("employee"),
+					items(field(term("employee"),
 							all(item("employees/1002"), item("employees/1056"))
 					))
 
@@ -676,7 +676,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testAllInverse() {
 			exec(() -> assertThat(query(
 
-					edges(field(inverse(term("office")),
+					items(field(inverse(term("office")),
 							all(item("employees/1002"), item("employees/1056"))
 					))
 
@@ -699,7 +699,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testAllRoot() {
 			exec(() -> assertThat(query(
 
-					edges(and(
+					items(and(
 							all(item("employees/1002"), item("employees/1056")),
 							field(RDF.TYPE)
 					))
@@ -725,7 +725,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testAllSingleton() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("employee"), all(item("employees/1002"))))
+					items(field(term("employee"), all(item("employees/1002"))))
 
 			)).isIsomorphicTo(graph(
 
@@ -747,7 +747,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testAny() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("employee"),
+					items(field(term("employee"),
 							any(item("employees/1002"), item("employees/1056")))
 					)
 
@@ -770,7 +770,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testAnySingleton() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("employee"),
+					items(field(term("employee"),
 							any(item("employees/1002")))
 					)
 
@@ -793,7 +793,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testAnyRoot() {
 			exec(() -> assertThat(query(
 
-					edges(and(
+					items(and(
 							any(item("employees/1002"), item("employees/1056")),
 							field(RDFS.LABEL)
 					))
@@ -826,7 +826,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testField() {
 			exec(() -> assertThat(query(
 
-					edges(field(term("country")))
+					items(field(term("country")))
 
 			)).isIsomorphicTo(graph(
 
@@ -851,7 +851,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testAnd() {
 			exec(() -> assertThat(query(
 
-					edges(and(
+					items(and(
 							field(term("country")),
 							field(term("city"))
 					))
@@ -875,7 +875,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testOr() {
 			exec(() -> assertThat(query(
 
-					edges(and(
+					items(and(
 							field(RDF.TYPE),
 							or(
 									clazz(term("Office")),
@@ -907,7 +907,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		@Test void testWhen() {
 			exec(() -> assertThatThrownBy(() -> query(
 
-					edges(when(guard(RDF.VALUE, RDF.NIL), clazz(RDFS.LITERAL)))
+					items(when(guard(RDF.VALUE, RDF.NIL), clazz(RDFS.LITERAL)))
 
 			)).isInstanceOf(UnsupportedOperationException.class));
 		}
@@ -920,7 +920,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 	@Test void testUseIndependentPatternsAndFilters() {
 		exec(() -> assertThat(query(
 
-				edges(and(
+				items(and(
 						field(term("employee")),
 						filter().then(field(term("employee"), any(item("employees/1002"), item("employees/1188"))))
 				))
