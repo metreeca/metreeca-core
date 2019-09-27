@@ -19,7 +19,7 @@ package com.metreeca.rdf.codecs;
 
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Or;
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -279,7 +279,7 @@ final class JSONWriterTest  {
 		final JsonStructure json=write(
 				decode("</container/> ldp:contains </container/x>, </container/y>."),
 				focus,
-				field(LDP.CONTAINS, and(multiple(), datatype(Form.IRIType))),
+				field(LDP.CONTAINS, and(multiple(), datatype(_Form.IRIType))),
 				focus.stringValue()
 		);
 
@@ -300,7 +300,7 @@ final class JSONWriterTest  {
 		final JsonStructure json=write(
 				decode("</container/> rdf:value </container/>."),
 				focus,
-				field(RDF.VALUE, and(required(), datatype(Form.IRIType))),
+				field(RDF.VALUE, and(required(), datatype(_Form.IRIType))),
 				focus.stringValue()
 		);
 
@@ -391,7 +391,7 @@ final class JSONWriterTest  {
 				write(
 						decode("_:focus rdf:value rdf:nil."),
 						bnode("focus"),
-						field(RDF.VALUE, and(datatype(Form.IRIType), maxCount(1)))
+						field(RDF.VALUE, and(datatype(_Form.IRIType), maxCount(1)))
 				));
 	}
 
@@ -410,7 +410,7 @@ final class JSONWriterTest  {
 		assertThat(write(
 				decode("_:x rdf:value _:y ."),
 				bnode("x"),
-				and(datatype(Form.BNodeType), field(RDF.VALUE, datatype(Form.BNodeType)))
+				and(datatype(_Form.BNodeType), field(RDF.VALUE, datatype(_Form.BNodeType)))
 		))
 				.as("unreferenced proved blank")
 				.isEqualTo(object(map(entry("value", list(map())))));
@@ -418,7 +418,7 @@ final class JSONWriterTest  {
 		assertThat(write(
 				decode("_:x rdf:value _:x ."),
 				bnode("x"),
-				and(datatype(Form.BNodeType), field(RDF.VALUE, datatype(Form.BNodeType)))
+				and(datatype(_Form.BNodeType), field(RDF.VALUE, datatype(_Form.BNodeType)))
 		))
 				.as("back-referenced proved blank")
 				.isEqualTo(object(map(

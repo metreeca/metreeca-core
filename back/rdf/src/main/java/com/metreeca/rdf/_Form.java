@@ -25,7 +25,7 @@ import static com.metreeca.rdf.Values.iri;
 /**
  * Shape constraints RDF vocabulary.
  */
-public final class Form {
+public final class _Form {
 
 	public static final String Namespace="app://form.metreeca.com/terms#";
 
@@ -64,6 +64,6 @@ public final class Form {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Form() {}
+	private _Form() {}
 
 }

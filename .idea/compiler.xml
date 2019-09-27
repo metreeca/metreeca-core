@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <directory url="file://$PROJECT_DIR$/back/rdf4j" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/stardog" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/virtuoso" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/codecs" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/formats" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/handlers" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/probes" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/services" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/wrappers" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/test/java/com/metreeca/rdf/codecs" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/test/java/com/metreeca/rdf/formats" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/test/java/com/metreeca/rdf/handlers" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/test/java/com/metreeca/rdf/probes" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/test/java/com/metreeca/rdf/services" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/test/java/com/metreeca/rdf/wrappers" includeSubdirectories="true" />
+    </excludeFromCompile>
     <annotationProcessing>
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -10,11 +27,11 @@
         <module name="virtuoso" />
         <module name="rdf" />
         <module name="stardog" />
-        <module name="gate" />
+        <module name="tree" />
         <module name="rdf4j" />
         <module name="gae" />
         <module name="servlet" />
-        <module name="tree" />
+        <module name="gate" />
         <module name="gcloud" />
       </profile>
     </annotationProcessing>

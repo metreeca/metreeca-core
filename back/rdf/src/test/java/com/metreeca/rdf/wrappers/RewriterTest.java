@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.wrappers;
 
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
@@ -251,7 +251,7 @@ final class RewriterTest {
 
 	@Test void testJSONRewriting() {
 
-		final Shape TestShape=field(internal("p"), and(required(), datatype(Form.IRIType)));
+		final Shape TestShape=field(internal("p"), and(required(), datatype(_Form.IRIType)));
 
 		new Context()
 

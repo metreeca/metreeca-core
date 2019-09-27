@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.codecs;
 
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
 
@@ -130,23 +130,23 @@ final class JSONDecoderTest {
 					entry(String.format(path, RDF.VALUE), RDF.NIL.stringValue())
 			);
 
-			assertThat(value(object.apply("<%s>"), field(RDF.VALUE, datatype(Form.IRIType))))
+			assertThat(value(object.apply("<%s>"), field(RDF.VALUE, datatype(_Form.IRIType))))
 					.as("bracketed direct field")
 					.isEqualTo(value(id, list(statement(id, RDF.VALUE, RDF.NIL))));
 
-			assertThat(value(object.apply("^<%s>"), field(inverse(RDF.VALUE), datatype(Form.IRIType))))
+			assertThat(value(object.apply("^<%s>"), field(inverse(RDF.VALUE), datatype(_Form.IRIType))))
 					.as("bracketed inverse field")
 					.isEqualTo(value(id, list(statement(RDF.NIL, RDF.VALUE, id))));
 
-			assertThat(value(object.apply("%s"), field(RDF.VALUE, datatype(Form.IRIType))))
+			assertThat(value(object.apply("%s"), field(RDF.VALUE, datatype(_Form.IRIType))))
 					.as("naked direct field")
 					.isEqualTo(value(id, list(statement(id, RDF.VALUE, RDF.NIL))));
 
-			assertThat(value(object.apply("^%s"), field(inverse(RDF.VALUE), datatype(Form.IRIType))))
+			assertThat(value(object.apply("^%s"), field(inverse(RDF.VALUE), datatype(_Form.IRIType))))
 					.as("naked inverse field")
 					.isEqualTo(value(id, list(statement(RDF.NIL, RDF.VALUE, id))));
 
-			assertThat(value(object.apply("value"), field(RDF.VALUE, datatype(Form.IRIType))))
+			assertThat(value(object.apply("value"), field(RDF.VALUE, datatype(_Form.IRIType))))
 					.as("aliased field")
 					.isEqualTo(value(id, list(statement(id, RDF.VALUE, RDF.NIL))));
 
@@ -173,21 +173,21 @@ final class JSONDecoderTest {
 
 		@Test void testTypedString() {
 
-			assertThat(value(createValue("_:id"), datatype(Form.ResourceType)))
+			assertThat(value(createValue("_:id"), datatype(_Form.ResourceType)))
 					.isEqualTo(value(bnode("id")));
 
-			assertThat(value(createValue("id"), datatype(Form.ResourceType)))
+			assertThat(value(createValue("id"), datatype(_Form.ResourceType)))
 					.isEqualTo(value(iri(ValuesTest.Base, "id")));
 
 
-			assertThat(value(createValue("_:id"), datatype(Form.BNodeType)))
+			assertThat(value(createValue("_:id"), datatype(_Form.BNodeType)))
 					.isEqualTo(value(bnode("id")));
 
-			assertThat(value(createValue("id"), datatype(Form.BNodeType)))
+			assertThat(value(createValue("id"), datatype(_Form.BNodeType)))
 					.isEqualTo(value(bnode("id")));
 
 
-			assertThat(value(createValue("id"), datatype(Form.IRIType)))
+			assertThat(value(createValue("id"), datatype(_Form.IRIType)))
 					.isEqualTo(value(iri(ValuesTest.Base, "id")));
 
 

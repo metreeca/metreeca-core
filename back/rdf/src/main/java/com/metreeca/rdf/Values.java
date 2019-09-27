@@ -118,9 +118,9 @@ public final class Values {
 
 	public static boolean is(final Value value, final IRI datatype) {
 		return value != null && (type(value).equals(datatype)
-				|| value instanceof Resource && Form.ResourceType.equals(datatype)
-				|| value instanceof Literal && Form.LiteralType.equals(datatype)
-				|| Form.ValueType.equals(datatype)
+				|| value instanceof Resource && _Form.ResourceType.equals(datatype)
+				|| value instanceof Literal && _Form.LiteralType.equals(datatype)
+				|| _Form.ValueType.equals(datatype)
 		);
 	}
 
@@ -163,8 +163,8 @@ public final class Values {
 
 	public static IRI type(final Value value) {
 		return value == null ? null
-				: value instanceof BNode ? Form.BNodeType
-				: value instanceof IRI ? Form.IRIType
+				: value instanceof BNode ? _Form.BNodeType
+				: value instanceof IRI ? _Form.IRIType
 				: value instanceof Literal ? ((Literal)value).getDatatype()
 				: null; // unexpected
 	}

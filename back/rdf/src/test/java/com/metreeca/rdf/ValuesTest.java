@@ -18,7 +18,6 @@
 package com.metreeca.rdf;
 
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.shapes.Field;
 
 import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.IRI;
@@ -40,6 +39,9 @@ import java.util.stream.Stream;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.tree.Shape.*;
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Clazz.clazz;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.tree.shapes.MaxLength.maxLength;
 import static com.metreeca.tree.shapes.Meta.meta;
@@ -79,10 +81,6 @@ public final class ValuesTest {
 	}
 
 
-	public static Field field(final IRI name, final Shape shape) {
-		return Field.field(name.stringValue(), shape);
-	}
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final String Base="http://example.com/";
@@ -98,7 +96,7 @@ public final class ValuesTest {
 			convey().then(
 
 					server().then(
-							field(RDF.TYPE, and(required(), datatype(Form.IRIType))),
+							field(RDF.TYPE, and(required(), datatype(_Form.IRIType))),
 							field(RDFS.LABEL, Textual),
 							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
 					),
@@ -116,12 +114,12 @@ public final class ValuesTest {
 									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
 
 							field(term("supervisor"), and(
-									optional(), datatype(Form.IRIType), clazz(term("Employee")),
+									optional(), datatype(_Form.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							)),
 
 							field(term("subordinate"), and(
-									optional(), datatype(Form.IRIType), clazz(term("Employee")),
+									optional(), datatype(_Form.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							))
 
@@ -138,7 +136,7 @@ public final class ValuesTest {
 	public static final Shape Employees=role(Manager, Salesman).then(
 			meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
 			meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-			meta(LDP.MEMBERSHIP_RESOURCE, term("Employee"))
+			meta(LDP.MEMBERSHIP_RESOURCE, term("Employee")),
 			convey().then(
 					field(RDFS.LABEL, Textual),
 					field(RDFS.COMMENT, Textual),
@@ -155,7 +153,7 @@ public final class ValuesTest {
 			entry("xsd", XMLSchema.NAMESPACE),
 			entry("ldp", LDP.NAMESPACE),
 			entry("skos", SKOS.NAMESPACE),
-			entry("form", Form.Namespace)
+			entry("form", _Form.Namespace)
 	).collect(toMap(MapEntry::getKey, MapEntry::getValue)));
 
 	private static final String TurtlePrefixes=Prefixes.entrySet().stream()

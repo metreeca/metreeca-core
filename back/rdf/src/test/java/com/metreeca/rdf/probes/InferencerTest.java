@@ -19,7 +19,7 @@ package com.metreeca.rdf.probes;
 
 import com.metreeca.tree.shapes.*;
 import com.metreeca.tree.things.Lists;
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 
@@ -51,7 +51,7 @@ final class InferencerTest {
 	@Test void testHint() {
 
 		assertImplies("hinted shapes are resources",
-				hint(RDF.NIL), datatype(Form.ResourceType));
+				hint(RDF.NIL), datatype(_Form.ResourceType));
 
 	}
 
@@ -77,7 +77,7 @@ final class InferencerTest {
 
 	@Test void testClazz() {
 		assertImplies("classed values are resources",
-				clazz(RDF.NIL), datatype(Form.ResourceType));
+				clazz(RDF.NIL), datatype(_Form.ResourceType));
 	}
 
 	@Test void testRange() {
@@ -93,40 +93,40 @@ final class InferencerTest {
 	@Test void testField() {
 
 		assertImplies("field subjects are resources",
-				field(RDF.VALUE), datatype(Form.ResourceType));
+				field(RDF.VALUE), datatype(_Form.ResourceType));
 
 		assertImplies("field subjects are iris if explicitly typed",
-				and(field(RDF.VALUE), datatype(Form.IRIType)), datatype(Form.IRIType));
+				and(field(RDF.VALUE), datatype(_Form.IRIType)), datatype(_Form.IRIType));
 
 		assertImplies("reverse field objects are resources",
-				field(inverse(RDF.VALUE)), datatype(Form.ResourceType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
+				field(inverse(RDF.VALUE)), datatype(_Form.ResourceType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
 
 		assertImplies("reverse field objects are iris if explicitly typed",
-				field(inverse(RDF.VALUE), datatype(Form.IRIType)), datatype(Form.IRIType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
+				field(inverse(RDF.VALUE), datatype(_Form.IRIType)), datatype(_Form.IRIType), (s, i) -> field(s.getIRI(), and(s.getShape(), i)));
 
 		assertImplies("both subject and object of a rdf:type field are resources",
-				field(RDF.TYPE), datatype(Form.ResourceType),
+				field(RDF.TYPE), datatype(_Form.ResourceType),
 				(s, i) -> and(field(s.getIRI(), and(s.getShape(), i)), i));
 
 		assertImplies("nested shapes are expanded",
-				field(RDF.VALUE, clazz(RDF.NIL)), datatype(Form.ResourceType),
-				(s, i) -> and(field(s.getIRI(), and(and(s.getShape(), i), datatype(Form.ResourceType))), datatype(Form.ResourceType)));
+				field(RDF.VALUE, clazz(RDF.NIL)), datatype(_Form.ResourceType),
+				(s, i) -> and(field(s.getIRI(), and(and(s.getShape(), i), datatype(_Form.ResourceType))), datatype(_Form.ResourceType)));
 	}
 
 	@Test void testConjunction() {
-		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Form.ResourceType),
+		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(_Form.ResourceType),
 				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer and() stripped by optimization
 	}
 
 	@Test void testDisjunction() {
-		assertImplies("nested shapes are expanded", Or.or(clazz(RDF.NIL)), datatype(Form.ResourceType),
+		assertImplies("nested shapes are expanded", Or.or(clazz(RDF.NIL)), datatype(_Form.ResourceType),
 				(s, i) -> and(Lists.concat(s.getShapes(), list(i)))); // outer or() stripped by optimization
 	}
 
 	@Test void testOption() { // !!! uncomment when filtering constraints are accepted by when()
 		assertImplies("nested shapes are expanded",
 				when(and()/* !!! clazz(RDF.NIL) */, clazz(RDF.NIL), clazz(RDF.NIL)),
-				datatype(Form.ResourceType),
+				datatype(_Form.ResourceType),
 				(s, i) -> when(and()/* !!! and(s.getTest(), i)*/, and(s.getPass(), i), and(s.getFail(), i))
 		);
 	}

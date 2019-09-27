@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.*;
 
@@ -102,7 +102,7 @@ final class RDFFormatTest {
 
 					.reply(response -> response
 							.status(Response.OK)
-							.shape(field(LDP.CONTAINS, datatype(Form.IRIType)))
+							.shape(field(LDP.CONTAINS, datatype(_Form.IRIType)))
 							.body(rdf(), decode("</context/container/> ldp:contains </context/container/x>."))
 					)
 

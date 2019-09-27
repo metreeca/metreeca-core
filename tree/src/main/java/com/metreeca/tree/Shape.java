@@ -135,13 +135,13 @@ public interface Shape {
 
 	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Guard role(final String... roles) { return guard(Role, roles); }
+	public static Guard role(final Object... roles) { return guard(Role, roles); }
 
-	public static Guard task(final String... tasks) { return guard(Task, tasks); }
+	public static Guard task(final Object... tasks) { return guard(Task, tasks); }
 
-	public static Guard view(final String... views) { return guard(View, views); }
+	public static Guard view(final Object... views) { return guard(View, views); }
 
-	public static Guard mode(final String... modes) { return guard(Mode, modes); }
+	public static Guard mode(final Object... modes) { return guard(Mode, modes); }
 
 
 	public static Guard create() { return task(Create); }

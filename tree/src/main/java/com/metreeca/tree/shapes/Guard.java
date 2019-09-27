@@ -37,11 +37,11 @@ import static java.util.stream.Collectors.joining;
  */
 public final class Guard implements Shape {
 
-	public static Guard guard(final String axis, final String... values) {
+	public static Guard guard(final String axis, final Object... values) {
 		return guard(axis, asList(values));
 	}
 
-	public static Guard guard(final String axis, final Collection<String> values) {
+	public static Guard guard(final String axis, final Collection<Object> values) {
 		return new Guard(axis, values);
 	}
 
@@ -49,10 +49,10 @@ public final class Guard implements Shape {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final String axis;
-	private final Set<String> values;
+	private final Set<Object> values;
 
 
-	private Guard(final String axis, final Collection<String> values) {
+	private Guard(final String axis, final Collection<Object> values) {
 
 		if ( axis == null ) {
 			throw new NullPointerException("null axis");
@@ -73,7 +73,7 @@ public final class Guard implements Shape {
 		return axis;
 	}
 
-	public Set<String> getValues() {
+	public Set<Object> getValues() {
 		return unmodifiableSet(values);
 	}
 
@@ -102,6 +102,7 @@ public final class Guard implements Shape {
 
 	@Override public String toString() {
 		return "guard("+axis+(values.isEmpty() ? "" : values.stream()
+				.map(Object::toString)
 				.collect(joining(", ", " = ", ""))
 		)+")";
 	}

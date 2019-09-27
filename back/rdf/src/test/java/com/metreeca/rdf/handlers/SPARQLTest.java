@@ -88,7 +88,7 @@ final class SPARQLTest {
 	}
 
 	private Request authenticated(final Request request) {
-		return request.roles(Form.root);
+		return request.roles(_Form.root);
 	}
 
 

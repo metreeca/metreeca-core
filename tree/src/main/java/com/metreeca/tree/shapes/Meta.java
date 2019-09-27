@@ -101,15 +101,15 @@ public final class Meta implements Shape {
 	}
 
 
-	public static Meta meta(final String label, final Object value) {
+	public static Meta meta(final Object label, final Object value) {
 		return new Meta(label, value);
 	}
 
-	public static Optional<Object> meta(final String label, final Shape shape) {
+	public static Optional<Object> meta(final Object label, final Shape shape) {
 		return Optional.ofNullable(shape.map(new MetaProbe(label)));
 	}
 
-	private static <T> Optional<T> meta(final String label, final Shape shape, final Class<T> clazz) {
+	private static <T> Optional<T> meta(final Object label, final Shape shape, final Class<T> clazz) {
 		return meta(label, shape)
 				.filter(clazz::isInstance)
 				.map(clazz::cast);
@@ -118,11 +118,11 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String label;
+	private final Object label;
 	private final Object value;
 
 
-	private Meta(final String label, final Object value) {
+	private Meta(final Object label, final Object value) {
 
 		if ( label == null ) {
 			throw new NullPointerException("null label");
@@ -139,7 +139,7 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getLabel() {
+	public Object getLabel() {
 		return label;
 	}
 
@@ -179,10 +179,10 @@ public final class Meta implements Shape {
 
 	private static final class MetaProbe extends Traverser<Object> {
 
-		private final String label;
+		private final Object label;
 
 
-		private MetaProbe(final String label) {
+		private MetaProbe(final Object label) {
 			this.label=label;
 		}
 

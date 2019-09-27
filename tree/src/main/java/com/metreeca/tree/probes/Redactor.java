@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.toList;
 public final class Redactor extends Traverser<Shape> {
 
 	private final String axis;
-	private final Set<String> values;
+	private final Set<Object> values;
 
 
 	/**
@@ -53,7 +53,7 @@ public final class Redactor extends Traverser<Shape> {
 	 * @throws NullPointerException if either {@code axis} or {@code values} is null or {@code values} contains a null
 	 *                              value
 	 */
-	public Redactor(final String axis, final String... values) { this(axis, asList(values)); }
+	public Redactor(final String axis, final Object... values) { this(axis, asList(values)); }
 
 	/**
 	 * Creates a new shape redactor.
@@ -65,7 +65,7 @@ public final class Redactor extends Traverser<Shape> {
 	 * @throws NullPointerException if either {@code axis} or {@code values} is null or {@code values} contains a null
 	 *                              value
 	 */
-	public Redactor(final String axis, final Collection<String> values) {
+	public Redactor(final String axis, final Collection<Object> values) {
 
 		if ( axis == null ) {
 			throw new NullPointerException("null axis");
@@ -87,7 +87,7 @@ public final class Redactor extends Traverser<Shape> {
 
 	@Override public Shape probe(final Guard guard) {
 
-		final Set<String> accepted=guard.getValues();
+		final Set<Object> accepted=guard.getValues();
 
 		return axis.equals(guard.getAxis())
 				? values.isEmpty() || !disjoint(accepted, values) ? and() : or()

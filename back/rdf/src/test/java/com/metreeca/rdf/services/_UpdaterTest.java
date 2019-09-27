@@ -18,7 +18,7 @@
 package com.metreeca.rdf.services;
 
 
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -195,7 +195,7 @@ final class _UpdaterTest {
 			@Test void testUnauthorized() {
 				exec(() -> new _Updater()
 
-						.handle(shaped().roles(Form.none))
+						.handle(shaped().roles(_Form.none))
 
 						.accept(response -> {
 
@@ -213,7 +213,7 @@ final class _UpdaterTest {
 			@Test void testForbidden() {
 				exec(() -> new _Updater()
 
-						.handle(shaped().user(RDF.NIL).roles(Form.none))
+						.handle(shaped().user(RDF.NIL).roles(_Form.none))
 
 						.accept(response -> {
 

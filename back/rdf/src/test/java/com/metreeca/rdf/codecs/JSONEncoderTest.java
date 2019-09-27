@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.codecs;
 
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
 
@@ -110,7 +110,7 @@ final class JSONEncoderTest {
 
 			assertThat(encoder().json(
 					list(statement(x, RDF.VALUE, y), statement(y, RDF.VALUE, x)),
-					field(RDF.VALUE, and(required(), field(RDF.VALUE, and(required(), datatype(Form.ResourceType))))),
+					field(RDF.VALUE, and(required(), field(RDF.VALUE, and(required(), datatype(_Form.ResourceType))))),
 					x
 			))
 					.isEqualTo(object(map(
@@ -129,7 +129,7 @@ final class JSONEncoderTest {
 
 		@Test void testProvedIRI() {
 
-			assertThat(actual(item("id"), datatype(Form.IRIType)))
+			assertThat(actual(item("id"), datatype(_Form.IRIType)))
 					.isEqualTo(expected("/id"));
 
 		}

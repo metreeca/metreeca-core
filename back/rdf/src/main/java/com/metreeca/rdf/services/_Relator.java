@@ -23,13 +23,12 @@ import com.metreeca.tree.queries.Edges;
 import com.metreeca.tree.queries.Items;
 import com.metreeca.tree.queries.Stats;
 import com.metreeca.tree.things.Shapes;
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.rest.*;
 import com.metreeca.rest.bodies.RDFBody;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.rest.wrappers.Throttler;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -65,7 +64,7 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
  * <ul>
  *
  * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
- * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#convey} mode and {@link Form#digest}
+ * user {@linkplain Request#roles() roles}, {@link _Form#relate} task, {@link _Form#convey} mode and {@link _Form#digest}
  * view;</li>
  *
  * <li>the response {@linkplain RDFBody RDF body} includes the RDF description of the container as matched by the
@@ -111,7 +110,7 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
  * <ul>
  *
  * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
- * user {@linkplain Request#roles() roles}, {@link Form#relate} task, {@link Form#detail} view and {@link Form#convey}
+ * user {@linkplain Request#roles() roles}, {@link _Form#relate} task, {@link _Form#detail} view and {@link _Form#convey}
  * mode;</li>
  *
  * <li>the response {@link RDFBody RDF body} contains the RDF description of the request focus, as matched by the

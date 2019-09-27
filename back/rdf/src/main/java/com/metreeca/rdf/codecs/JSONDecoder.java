@@ -39,9 +39,9 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.tree.shapes.Field.fields;
-import static com.metreeca.rdf.Form.BNodeType;
-import static com.metreeca.rdf.Form.IRIType;
-import static com.metreeca.rdf.Form.ResourceType;
+import static com.metreeca.rdf._Form.BNodeType;
+import static com.metreeca.rdf._Form.IRIType;
+import static com.metreeca.rdf._Form.ResourceType;
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.tree.Shape.Convey;

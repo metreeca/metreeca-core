@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.handlers;
 
-import com.metreeca.rdf.Form;
+import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rdf.services.GraphTest;
@@ -128,7 +128,7 @@ final class GraphsTest {
 	}
 
 	private Request authenticated(final Request request) {
-		return request.roles(Form.root);
+		return request.roles(_Form.root);
 	}
 
 
