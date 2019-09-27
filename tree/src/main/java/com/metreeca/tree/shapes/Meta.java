@@ -20,14 +20,12 @@ package com.metreeca.tree.shapes;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Traverser;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -65,54 +63,56 @@ public final class Meta implements Shape {
 		return new Meta(Shape.Group, value);
 	}
 
+	public static Meta index(final boolean value) {
+		return new Meta(Shape.Index, value);
+	}
+
+
+	public static Optional<String> alias(final Shape shape) {
+		return meta(Alias, shape, String.class);
+	}
+
+	public static Optional<String> label(final Shape shape) {
+		return meta(Label, shape, String.class);
+	}
+
+	public static Optional<String> notes(final Shape shape) {
+		return meta(Notes, shape, String.class);
+	}
+
+	public static Optional<String> placeholder(final Shape shape) {
+		return meta(Placeholder, shape, String.class);
+	}
+
+	public static Optional<String> dflt(final Shape shape) {
+		return meta(Default, shape, String.class);
+	}
+
+	public static Optional<String> hint(final Shape shape) {
+		return meta(Hint, shape, String.class);
+	}
+
+	public static Optional<String> group(final Shape shape) {
+		return meta(Group, shape, String.class);
+	}
+
+	public static Optional<Boolean> index(final Shape shape) {
+		return meta(Index, shape, Boolean.class);
+	}
+
 
 	public static Meta meta(final String label, final Object value) {
 		return new Meta(label, value);
 	}
 
-
-	public static Map<String, Object> metas(final Shape shape) {
-		return shape == null ? emptyMap() : shape.map(new MetaProbe()).collect(toMap(
-				Map.Entry::getKey,
-				Map.Entry::getValue,
-				(x, y) -> Objects.equals(x, y) ? x : null
-		));
+	public static Optional<Object> meta(final String label, final Shape shape) {
+		return Optional.ofNullable(shape.map(new MetaProbe(label)));
 	}
 
-
-	public static Optional<String> alias(final Shape shape) {
-		return meta(shape, Alias);
-	}
-
-	public static Optional<String> label(final Shape shape) {
-		return meta(shape, Label);
-	}
-
-	public static Optional<String> notes(final Shape shape) {
-		return meta(shape, Notes);
-	}
-
-	public static Optional<String> placeholder(final Shape shape) {
-		return meta(shape, Placeholder);
-	}
-
-	public static Optional<String> dflt(final Shape shape) {
-		return meta(shape, Default);
-	}
-
-	public static Optional<String> hint(final Shape shape) {
-		return meta(shape, Hint);
-	}
-
-	public static Optional<String> group(final Shape shape) {
-		return meta(shape, Group);
-	}
-
-
-	private static Optional<String> meta(final Shape shape, final String label) {
-		return Optional.ofNullable(metas(shape).get(label))
-				.filter(value -> value instanceof String)
-				.map(Object::toString);
+	private static <T> Optional<T> meta(final String label, final Shape shape, final Class<T> clazz) {
+		return meta(label, shape)
+				.filter(clazz::isInstance)
+				.map(clazz::cast);
 	}
 
 
@@ -177,33 +177,47 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class MetaProbe extends Traverser<Stream<Map.Entry<String, Object>>> {
+	private static final class MetaProbe extends Traverser<Object> {
 
-		@Override public Stream<Map.Entry<String, Object>> probe(final Shape shape) {
-			return Stream.empty();
+		private final String label;
+
+
+		private MetaProbe(final String label) {
+			this.label=label;
 		}
 
 
-		@Override public Stream<Map.Entry<String, Object>> probe(final Meta meta) {
-			return Stream.of(new SimpleImmutableEntry<>(meta.getLabel(), meta.getValue()));
+		@Override public Object probe(final Meta meta) {
+			return meta.getLabel().equals(label) ? meta.getValue() : null;
 		}
 
 
-		@Override public Stream<Map.Entry<String, Object>> probe(final Field field) {
-			return Stream.empty();
+		@Override public Object probe(final Field field) {
+			return null;
 		}
 
 
-		@Override public Stream<Map.Entry<String, Object>> probe(final And and) {
-			return and.getShapes().stream().flatMap(s -> s.map(this));
+		@Override public Object probe(final And and) {
+			return probe(and.getShapes().stream());
 		}
 
-		@Override public Stream<Map.Entry<String, Object>> probe(final Or or) {
-			return or.getShapes().stream().flatMap(s -> s.map(this));
+		@Override public Object probe(final Or or) {
+			return probe(or.getShapes().stream());
 		}
 
-		@Override public Stream<Map.Entry<String, Object>> probe(final When when) {
-			return Stream.of(when.getPass(), when.getFail()).flatMap(s -> s.map(this));
+		@Override public Object probe(final When when) {
+			return probe(Stream.of(when.getPass(), when.getFail()));
+		}
+
+
+		private Object probe(final Stream<Shape> shapes) {
+
+			final Set<Object> values=shapes
+					.map(s -> s.map(this))
+					.filter(Objects::nonNull)
+					.collect(toSet());
+
+			return values.size() == 1 ? values.iterator().next() : null;
 		}
 
 	}

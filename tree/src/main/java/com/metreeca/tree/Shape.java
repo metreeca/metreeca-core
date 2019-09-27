@@ -56,7 +56,7 @@ public interface Shape {
 	public static final String Label="label";
 
 	/**
-	 * Textual annotation.
+	 * Notes annotation.
 	 *
 	 * <p>The associated string value provides a human-readable textual description for the enclosing shape.</p>
 	 */
@@ -91,6 +91,13 @@ public interface Shape {
 	 * client-dependent suggested representation mode (list, form, tabbed panes, …).</p>
 	 */
 	public static final String Group="group"; // !!! define standard representations hints
+
+	/**
+	 * Indexing annotation.
+	 *
+	 * <p>The associated boolean value provides a storage indexing hint for the enclosing shape.</p>
+	 */
+	public static final String Index="index";
 
 
 	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////

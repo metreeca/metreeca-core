@@ -334,7 +334,7 @@
 								</group>
 								<group>
 									<title>Backend Adapters</title>
-									<packages>com.metreeca.gcloud*:com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*</packages>
+									<packages>com.metreeca.gcp*:com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*</packages>
 								</group>
 							</groups>
 
