@@ -18,7 +18,6 @@
 package com.metreeca.rdf.wrappers;
 
 import com.metreeca.rdf._Form;
-import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 
@@ -31,10 +30,7 @@ import java.util.Optional;
 
 import javax.json.Json;
 
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.things.JsonValues.object;
-import static com.metreeca.tree.things.Maps.entry;
-import static com.metreeca.tree.things.Values.*;
+import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
@@ -48,6 +44,7 @@ import static com.metreeca.rest.formats.MultipartFormat.multipart;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,11 +90,11 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					assertThat(request.user()).as("rewritten user").isEqualTo(internal("user"));
+					assertThat(request.user()).as("rewritten user").contains(internal("user"));
 					assertThat(request.roles()).as("rewritten roles").containsExactly(internal("role"));
 
 					assertThat(request.base()).as("rewritten base").isEqualTo(Internal);
-					assertThat(request.item()).as("rewritten item").isEqualTo(internal("path"));
+					assertThat(request.item()).as("rewritten item").isEqualTo(internal("path").stringValue());
 
 					assertThat(request.query()).as("rewritten query").isEqualTo(internal("request").toString());
 
@@ -203,9 +200,9 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					request.body(rdf()).use(
+					request.body(rdf()).fold(
 
-							model -> ModelAssert.assertThat(model)
+							model -> assertThat(model)
 									.as("request rdf rewritten")
 									.isIsomorphicTo(internal("s", "p", "o")),
 
@@ -226,7 +223,7 @@ final class RewriterTest {
 								external("s", "p", "o")
 						))))))
 
-				.accept(response -> response.body(output()).use(
+				.accept(response -> response.body(output()).fold(
 
 						consumer -> {
 
@@ -234,13 +231,15 @@ final class RewriterTest {
 
 								consumer.accept(() -> stream);
 
-								ModelAssert.assertThat(decode(new String(stream.toByteArray(), UTF_8)))
+								assertThat(decode(new String(stream.toByteArray(), UTF_8)))
 										.as("response rdf rewritten")
 										.isIsomorphicTo(singleton(external("s", "p", "o")));
 
 							} catch ( final IOException e ) {
 								throw new UncheckedIOException(e);
 							}
+
+							return this;
 
 						},
 
@@ -257,7 +256,7 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					RequestAssert.assertThat(request).hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
+					RequestAssert.assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 							.as("request json rewritten")
 							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
@@ -277,14 +276,15 @@ final class RewriterTest {
 
 						.shape(TestShape)
 
-						.body(input(), () -> new ByteArrayInputStream(
-								object(entry("p", "o"))
-										.toString()
-										.getBytes(UTF_8)
+						.body(input(), () -> new ByteArrayInputStream(Json.createObjectBuilder()
+								.add("p", "o")
+								.build()
+								.toString()
+								.getBytes(UTF_8)
 						))
 				)
 
-				.accept(response -> response.body(output()).use(
+				.accept(response -> response.body(output()).fold(
 
 						value -> {
 
@@ -294,14 +294,17 @@ final class RewriterTest {
 
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
 										.as("rewritten response json")
-										.isEqualTo(object(
-												entry("_this", "/s"),
-												entry("p", "/o")
-										));
+										.isEqualTo(Json.createObjectBuilder()
+												.add("_this", "/s")
+												.add("p", "/o")
+												.build()
+										);
 
 							} catch ( final IOException e ) {
 								throw new UncheckedIOException(e);
 							}
+
+							return this;
 
 						},
 
@@ -340,7 +343,7 @@ final class RewriterTest {
 
 						.wrap((Handler)request -> {
 
-							RequestAssert.assertThat(request).hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
+							RequestAssert.assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 									.isIsomorphicTo(internal("s", "p", "o"))
 							);
 

@@ -44,7 +44,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
 
-abstract class JSONCodec {
+public abstract class JSONCodec {
 
 	/**
 	 * The plain <a href="http://www.json.org/">JSON</a> file format.

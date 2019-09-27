@@ -68,7 +68,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	}
 
 
-	protected boolean queryable(final Collection<IRI> roles) {
+	protected boolean queryable(final Collection<Object> roles) {
 		return query.isEmpty() || !disjoint(query, roles);
 	}
 
@@ -112,7 +112,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	/**
 	 * Configures the roles for query operations.
 	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform query operations on this
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform query operations on this
 	 *              endpoint; empty for public access
 	 *
 	 * @return this endpoint
@@ -126,7 +126,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	/**
 	 * Configures the roles for query operations.
 	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform query operations on this
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform query operations on this
 	 *              endpoint; empty for public access
 	 *
 	 * @return this endpoint
@@ -147,7 +147,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	/**
 	 * Configures the roles for update operations.
 	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform update operations on this
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform update operations on this
 	 *              endpoint; empty for public access
 	 *
 	 * @return this endpoint
@@ -161,7 +161,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	/**
 	 * Configures the roles for update operations.
 	 *
-	 * @param roles the user {@linkplain Request#roles(IRI...) roles} enabled to perform update operations on this
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform update operations on this
 	 *              endpoint; empty for public access
 	 *
 	 * @return this endpoint

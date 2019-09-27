@@ -17,7 +17,6 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.tree.things.Formats;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.codecs.JSONCodec;
 import com.metreeca.rdf.wrappers.Rewriter;
@@ -42,13 +41,13 @@ import java.util.List;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import static com.metreeca.tree.probes.Evaluator.pass;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.tree.shapes.And.and;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
@@ -96,7 +95,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 				supplier -> {
 
-					final IRI focus=message.item();
+					final IRI focus=iri(message.item());
 					final Shape shape=message.shape();
 
 					final String base=focus.stringValue();
@@ -106,7 +105,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 							.service(RDFParserRegistry.getInstance(), TURTLE, type)
 							.getParser();
 
-					parser.set(JSONCodec.RioShape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+					parser.set(JSONCodec.RioShape, shape.equals(and()) ? null : shape); // !!! handle empty shape directly in JSONParser
 					parser.set(JSONCodec.RioFocus, focus);
 
 					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
@@ -211,7 +210,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 				.body(output(), target -> {
 
-					final IRI focus=message.item();
+					final IRI focus=iri(message.item());
 					final Shape shape=message.shape();
 
 					final String base=focus.stringValue();
@@ -223,7 +222,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 						final RDFWriter writer=factory.getWriter(output, base); // relativize IRIs wrt the response focus
 
-						writer.set(JSONCodec.RioShape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
+						writer.set(JSONCodec.RioShape, shape.equals(and()) ? null : shape); // !!! handle empty shape directly in JSONParser
 						writer.set(JSONCodec.RioFocus, focus);
 
 						Rio.write(external.equals(internal) ? value : rewrite(internal, external, value), writer);

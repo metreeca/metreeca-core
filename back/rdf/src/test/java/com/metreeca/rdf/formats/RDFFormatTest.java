@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rdf._Form;
 import com.metreeca.rest.*;
 
 import org.assertj.core.api.Assertions;
@@ -28,15 +28,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.truths.ModelAssert.assertThat;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -57,7 +57,10 @@ final class RDFFormatTest {
 					.body(rdf())
 
 					.value(value -> fail("unexpected RDF body {"+value+"}"))
-					.error(error -> Assertions.assertThat(error).isEqualTo(Body.Missing));
+
+					.error(error -> assertThat(new Response(new Request()).map(error))
+							.hasStatus(Response.UnsupportedMediaType)
+					);
 		}
 
 		@Test void testHandleEmptyInput() {

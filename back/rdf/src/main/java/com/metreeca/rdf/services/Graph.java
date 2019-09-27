@@ -25,6 +25,7 @@ import com.metreeca.rest.Response;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.Operation;
 import org.eclipse.rdf4j.query.Update;
@@ -335,7 +336,7 @@ public abstract class Graph implements AutoCloseable {
 		operation.setBinding("task", literal(request.method()));
 		operation.setBinding("base", iri(request.base()));
 		operation.setBinding("item", iri(request.item()));
-		operation.setBinding("user", request.user());
+		operation.setBinding("user", request.user().map(Values::iri).orElse(RDF.NIL));
 
 		if ( message instanceof Response ) {
 			operation.setBinding("code", Values.literal(Values.integer(((Response)message).status())));
@@ -572,7 +573,8 @@ public abstract class Graph implements AutoCloseable {
 				// !!! client naming hints (http://www.w3.org/TR/ldp/ §5.2.3.10 -> https://tools.ietf.org/html/rfc5023#section-9.7)
 				// !!! normalize slug (https://tools.ietf.org/html/rfc5023#section-9.7)
 
-				final IRI stem=iri(request.stem());
+				final String item=request.item();
+				final IRI stem=iri(item.substring(0, item.lastIndexOf('/')+1));
 
 				long id=getStatement(connection, stem, Auto, null)
 						.map(Statement::getObject)

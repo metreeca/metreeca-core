@@ -23,7 +23,6 @@ import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
@@ -47,6 +46,8 @@ import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.services.Graph.auto;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Engine.engine;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -208,11 +209,14 @@ public final class GraphTest {
 			final String one=auto.apply(request, emptySet());
 			final String two=auto.apply(request, emptySet());
 
-			Assertions.assertThat(one).isNotEqualTo(two);
+			assertThat(one).isNotEqualTo(two);
+
+			final String item=request.item();
+			final String stem=item.substring(0, item.lastIndexOf('/')+1);
 
 			assertThat(model())
-					.doesNotHaveStatement(iri(request.stem(), one), null, null)
-					.doesNotHaveStatement(iri(request.stem(), two), null, null);
+					.doesNotHaveStatement(iri(stem, one), null, null)
+					.doesNotHaveStatement(iri(stem, two), null, null);
 
 		});
 	}
