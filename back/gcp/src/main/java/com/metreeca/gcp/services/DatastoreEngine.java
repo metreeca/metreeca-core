@@ -17,6 +17,7 @@
 
 package com.metreeca.gcp.services;
 
+import com.metreeca.gcp.GCP;
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
@@ -25,9 +26,58 @@ import java.util.function.Supplier;
 
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.tree.Shape.multiple;
+import static com.metreeca.tree.Shape.optional;
+import static com.metreeca.tree.Shape.required;
+import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Datatype.datatype;
+import static com.metreeca.tree.shapes.Field.field;
+
+import static com.google.cloud.datastore.ValueType.LONG;
+import static com.google.cloud.datastore.ValueType.STRING;
 
 
 public final class DatastoreEngine implements Engine {
+
+	static final String terms="terms";
+	static final String stats="stats";
+
+	static final String value="value";
+	static final String type="type";
+
+	static final String count="count";
+	static final String max="max";
+	static final String min="min";
+
+
+	private static final Shape TermShape=and(
+			field(GCP.label, and(optional(), datatype(STRING)))
+	);
+
+	static final Shape TermsShape=and(
+			field(terms, and(multiple(),
+					field(value, and(required(), TermShape)),
+					field(count, and(required(), datatype(LONG)))
+			))
+	);
+
+	static final Shape StatsShape=and(
+
+			field(count, and(required(), datatype(LONG))),
+			field(min, and(optional(), TermShape)),
+			field(max, and(optional(), TermShape)),
+
+			field(stats, and(multiple(),
+					field(type, and(required(), datatype(STRING))),
+					field(count, and(required(), datatype(LONG))),
+					field(min, and(required(), TermShape)),
+					field(max, and(required(), TermShape))
+			))
+
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Datastore datastore=service(datastore());
 

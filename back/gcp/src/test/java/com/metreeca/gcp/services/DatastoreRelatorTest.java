@@ -651,7 +651,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.collect(groupingBy(t -> t, counting()));
 
 
-				return singletonMap(GCP.terms, ListValue.of(terms.entrySet().stream()
+				return singletonMap(DatastoreEngine.terms, ListValue.of(terms.entrySet().stream()
 
 						.sorted(Comparator.<Map.Entry<Value<?>, Long>>
 								comparingLong(Map.Entry::getValue).reversed()
@@ -669,8 +669,8 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 						.map(entry -> EntityValue.of(FullEntity.newBuilder()
 
-								.set(GCP.value, entry.getKey())
-								.set(GCP.count, entry.getValue())
+								.set(DatastoreEngine.value, entry.getKey())
+								.set(DatastoreEngine.count, entry.getValue())
 
 								.build()
 						))
@@ -782,20 +782,20 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 				return FullEntity.newBuilder()
 
-						.set(GCP.count, count)
-						.set(GCP.min, min)
-						.set(GCP.max, max)
+						.set(DatastoreEngine.count, count)
+						.set(DatastoreEngine.min, min)
+						.set(DatastoreEngine.max, max)
 
-						.set(GCP.stats, ListValue.of(FullEntity.newBuilder()
+						.set(DatastoreEngine.stats, ListValue.of(FullEntity.newBuilder()
 
 								.set(GCP.type, Optional
 										.ofNullable(min.getType().toString())
 										.orElse(max.getType().toString())
 								)
 
-								.set(GCP.count, count)
-								.set(GCP.min, min)
-								.set(GCP.max, max)
+								.set(DatastoreEngine.count, count)
+								.set(DatastoreEngine.min, min)
+								.set(DatastoreEngine.max, max)
 
 								.build()
 						))
