@@ -28,7 +28,6 @@ import com.metreeca.tree.shapes.*;
 import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 import javax.json.*;
@@ -48,28 +47,33 @@ import static java.util.stream.Collectors.toMap;
 
 final class QueryParser {
 
-	private static final java.util.regex.Pattern StepPattern=
-			java.util.regex.Pattern.compile("(?:^|[./])\\s*(?:([:\\w]+)|'([^']*)')\\s*");
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private final Shape shape;
+
+	private final BiFunction<String, Shape, List<Object>> path;
 	private final BiFunction<JsonValue, Shape, Object> parser;
 
 
-	QueryParser(final Shape shape, final BiFunction<JsonValue, Shape, Object> parser) {
+	QueryParser(final Shape shape,
+			final BiFunction<String, Shape, List<Object>> path,
+			final BiFunction<JsonValue, Shape, Object> value
+	) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( parser == null ) {
-			throw new NullPointerException("null parser");
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
 		}
 
 		this.shape=shape;
-		this.parser=parser;
+
+		this.path=path;
+		this.parser=value;
 	}
 
 
@@ -115,8 +119,8 @@ final class QueryParser {
 
 		final Shape filter=filter(json);
 
-		final List<String> terms=terms(json);
-		final List<String> stats=stats(json);
+		final List<Object> terms=terms(json);
+		final List<Object> stats=stats(json);
 
 		final List<Order> order=order(json);
 
@@ -231,10 +235,10 @@ final class QueryParser {
 
 	private Shape filter(final String path,
 			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper) {
-		return filter(steps(path), value, shape, mapper);
+		return filter(steps(path, shape), value, shape, mapper);
 	}
 
-	private Shape filter(final List<String> path,
+	private Shape filter(final List<Object> path,
 			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper) {
 
 		return path.isEmpty() ? mapper.apply(value, shape)
@@ -242,7 +246,7 @@ final class QueryParser {
 	}
 
 
-	private List<String> terms(final JsonObject query) {
+	private List<Object> terms(final JsonObject query) {
 		return Optional.ofNullable(query.get("_terms"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -253,7 +257,7 @@ final class QueryParser {
 				.orElse(null);
 	}
 
-	private List<String> stats(final JsonObject query) {
+	private List<Object> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("_stats"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -265,11 +269,11 @@ final class QueryParser {
 	}
 
 
-	private List<String> path(final CharSequence path, final Shape shape) {
-		return path(steps(path), shape);
+	private List<Object> path(final String path, final Shape shape) {
+		return path(steps(path, shape), shape);
 	}
 
-	private List<String> path(final List<String> path, final Shape shape) {
+	private List<Object> path(final List<Object> path, final Shape shape) {
 
 		if ( !path.isEmpty() ) {
 
@@ -347,58 +351,37 @@ final class QueryParser {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<String> steps(final CharSequence path) {
+	private List<Object> steps(final String path, final Shape shape) {
+		try {
 
-		final List<String> steps=new ArrayList<>();
+			return this.path.apply(path.trim(), shape);
 
-		final Matcher matcher=StepPattern.matcher(path);
+		} catch ( final RuntimeException e ) {
 
-		final int length=path.length();
-
-		int last=0;
-
-		while ( matcher.lookingAt() ) {
-
-			final String naked=matcher.group(1);
-			final String quoted=matcher.group(2);
-
-			steps.add(naked != null ? naked : quoted);
-			matcher.region(last=matcher.end(), length);
+			throw new JsonException(e.getMessage(), e);
 
 		}
-
-		if ( last != length ) {
-			throw new JsonException("malformed path ["+path+"]");
-		}
-
-		return steps;
 	}
 
 
-	private String head(final List<String> path) {
+	private Object head(final List<Object> path) {
 		return path.get(0);
 	}
 
-	private List<String> tail(final List<String> path) {
+	private List<Object> tail(final List<Object> path) {
 		return path.subList(1, path.size());
 	}
 
 
-	private Shape field(final String label, final Shape shape) {
+	private Shape field(final Object name, final Shape shape) {
 
-		final Map<Object, Shape> fields=fields(shape);
-		final Map<Object, String> index=new HashMap<>();
+		final Shape nested=fields(shape).get(name);
 
-		fields.keySet().forEach(name -> index.put(name, name.toString()));
-		// !!! aliases(reference).forEach((alias, label) -> index.put(alias, label)
-
-		final String name=index.get(label);
-
-		if ( name == null ) {
-			throw new NoSuchElementException("unknown path step ["+label+"]");
+		if ( nested == null ) {
+			throw new NoSuchElementException("unknown path step ["+name+"]");
 		}
 
-		return fields.get(name);
+		return nested;
 	}
 
 

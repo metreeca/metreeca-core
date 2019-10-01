@@ -62,6 +62,7 @@ public final class Datastore {
 
 	static Value<?> value(final Object object) {
 		return object == null ? NullValue.of()
+				: object instanceof Value ? (Value<?>)object
 				: object instanceof String ? StringValue.of((String)object)
 				: object instanceof FullEntity ? EntityValue.of((FullEntity<?>)object)
 				: object instanceof Key ? KeyValue.of((Key)object)

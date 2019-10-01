@@ -377,27 +377,35 @@ public final class Request extends Message<Request> {
 	 * Retrieves the shape-based query of this request.
 	 *
 	 * @param shape  the base shape for the query
-	 * @param parser a shape-based function mapping from JSON to {@linkplain Engine engine} specific values
+	 * @param path  a shape-based parser mapping from a string to an {@linkplain Engine engine-specific} property path
+	 * @param value a shape-based parser mapping from a JSON value to an {@linkplain Engine engine-specific} value
 	 *
 	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
-	 * {@linkplain #query() query} string, if successfully parsed using the {@code parser}; an error providing access to
+	 * {@linkplain #query() query} string, if successfully parsed using the {@code value}; an error providing access to
 	 * the parsing failure, otherwise
 	 *
-	 * @throws NullPointerException if {@code shape} is null
+	 * @throws NullPointerException if any argument is null
 	 */
-	public Result<Query, Failure> query(final Shape shape, final BiFunction<JsonValue, Shape, Object> parser) {
+	public Result<Query, Failure> query(final Shape shape,
+			final BiFunction<String, Shape, List<Object>> path,
+			final BiFunction<JsonValue, Shape, Object> value
+	) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( parser == null ) {
-			throw new NullPointerException("null parser");
+		if ( path == null ) {
+			throw new NullPointerException("null path parser");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value parser");
 		}
 
 		try {
 
-			return Value(new QueryParser(shape, parser).parse(query()));
+			return Value(new QueryParser(shape, path, value).parse(query()));
 
 		} catch ( final JsonException e ) {
 

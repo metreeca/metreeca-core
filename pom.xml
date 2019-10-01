@@ -334,11 +334,15 @@
 								</group>
 								<group>
 									<title>Backend Adapters</title>
-									<packages>com.metreeca.gcp*:com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*</packages>
+									<packages>
+										com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*
+									</packages>
 								</group>
 							</groups>
 
-							<excludePackageNames/> <!-- colon-separated patterns -->
+							<excludePackageNames>
+								com.metreeca.gcp* <!-- colon-separated patterns -->
+							</excludePackageNames>
 
 						</configuration>
 
@@ -367,9 +371,15 @@
 
 						<configuration>
 							<filesets>
-								<fileset><directory>docs/_site</directory></fileset>
-								<fileset><directory>docs/javadocs</directory></fileset>
-								<fileset><directory>docs/reports</directory></fileset>
+								<fileset>
+									<directory>docs/_site</directory>
+								</fileset>
+								<fileset>
+									<directory>docs/javadocs</directory>
+								</fileset>
+								<fileset>
+									<directory>docs/reports</directory>
+								</fileset>
 							</filesets>
 						</configuration>
 

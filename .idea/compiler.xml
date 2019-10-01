@@ -17,14 +17,14 @@
         <outputRelativeToContentRoot value="true" />
         <module name="rest" />
         <module name="virtuoso" />
+        <module name="gcp" />
         <module name="rdf" />
         <module name="stardog" />
-        <module name="tree" />
+        <module name="gate" />
         <module name="rdf4j" />
         <module name="gae" />
         <module name="servlet" />
-        <module name="gate" />
-        <module name="gcloud" />
+        <module name="tree" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -46,6 +46,7 @@
       <module name="form" target="1.8" />
       <module name="gate" target="1.8" />
       <module name="gcloud" target="1.8" />
+      <module name="gcp" target="1.8" />
       <module name="head" target="1.8" />
       <module name="j2ee" target="1.8" />
       <module name="jeep" target="1.8" />

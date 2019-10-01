@@ -26,7 +26,11 @@ import com.metreeca.tree.probes.Redactor;
 
 import com.google.cloud.datastore.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.json.JsonValue;
 
@@ -36,6 +40,9 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 
 
 public final class EntityFormat implements Format<Entity> {
+
+	private static final Pattern StepPattern=Pattern.compile("(?:^|[./])([:\\w]+)");
+
 
 	/**
 	 * Creates an entity body format for the shared datastore.
@@ -85,7 +92,28 @@ public final class EntityFormat implements Format<Entity> {
 	}
 
 
-	public Object value(final JsonValue value, final Shape shape) {
+	public List<Object> path(final CharSequence path, final Shape shape) {
+
+		final List<Object> steps=new ArrayList<>();
+		final Matcher matcher=StepPattern.matcher(path);
+
+		int last=0;
+
+		while ( matcher.lookingAt() ) {
+
+			steps.add(matcher.group(1));
+			matcher.region(last=matcher.end(), path.length());
+
+		}
+
+		if ( last != path.length() ) {
+			throw new IllegalArgumentException("malformed path ["+path+"]");
+		}
+
+		return steps;
+	}
+
+	public Value<?> value(final JsonValue value, final Shape shape) {
 		return decoder.decode(value, shape);
 	}
 

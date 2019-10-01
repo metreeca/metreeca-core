@@ -50,8 +50,8 @@ final class EntityDecoder {
 	}
 
 
-	Object decode(final JsonValue value, final Shape shape) {
-		return value(value, shape).get();
+	Value<?> decode(final JsonValue value, final Shape shape) {
+		return value(value, shape);
 	}
 
 	FullEntity<?> decode(final JsonObject json, final Shape shape) {
