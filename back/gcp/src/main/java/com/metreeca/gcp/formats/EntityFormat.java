@@ -24,9 +24,7 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
-import com.google.cloud.datastore.BaseKey;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.FullEntity;
+import com.google.cloud.datastore.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +113,7 @@ public final class EntityFormat implements Format<Entity> {
 		return steps;
 	}
 
-	public Object value(final JsonValue value, final Shape shape) {
+	public Value<?> value(final JsonValue value, final Shape shape) {
 		return decoder.decode(value, shape);
 	}
 

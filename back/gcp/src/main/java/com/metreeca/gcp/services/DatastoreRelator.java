@@ -19,7 +19,9 @@ package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
 import com.metreeca.gcp.formats.EntityFormat;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query.Probe;
@@ -39,7 +41,6 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 import static com.metreeca.gcp.formats.EntityFormat.entity;
@@ -553,19 +554,19 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 
 		@Override public Stream<String> probe(final MinExclusive minExclusive) {
-			return Stream.of(minExclusive.getValue() instanceof FullEntity ? key(path) : path);
+			return Stream.of(value(minExclusive.getValue()).getType() == ValueType.ENTITY ? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MaxExclusive maxExclusive) {
-			return Stream.of(maxExclusive.getValue() instanceof FullEntity ? key(path) : path);
+			return Stream.of(value(maxExclusive.getValue()).getType() == ValueType.ENTITY ? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MinInclusive minInclusive) {
-			return Stream.of(minInclusive.getValue() instanceof FullEntity ? key(path) : path);
+			return Stream.of(value(minInclusive.getValue()).getType() == ValueType.ENTITY ? key(path) : path);
 		}
 
 		@Override public Stream<String> probe(final MaxInclusive maxInclusive) {
-			return Stream.of(maxInclusive.getValue() instanceof FullEntity ? key(path) : path);
+			return Stream.of(value(maxInclusive.getValue()).getType() == ValueType.ENTITY ? key(path) : path);
 		}
 
 
