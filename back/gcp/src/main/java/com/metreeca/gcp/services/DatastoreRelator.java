@@ -173,7 +173,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Future<Response> container(final Request request) {
 
-		return request.query(splitter.resource(expand(request.shape())), format::path, format::value)
+		return request.query(splitter.resource(expand(request.shape())), (path, shape) -> format.path(path), format::value)
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 

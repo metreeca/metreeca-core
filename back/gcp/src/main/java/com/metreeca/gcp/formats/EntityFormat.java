@@ -92,7 +92,7 @@ public final class EntityFormat implements Format<Entity> {
 	}
 
 
-	public List<Object> path(final CharSequence path, final Shape shape) {
+	public List<Object> path(final CharSequence path) {
 
 		final List<Object> steps=new ArrayList<>();
 		final Matcher matcher=StepPattern.matcher(path);
@@ -142,10 +142,6 @@ public final class EntityFormat implements Format<Entity> {
 		);
 	}
 
-
-	private boolean equals(final EntityFormat format) {
-		return false;
-	}
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof EntityFormat
