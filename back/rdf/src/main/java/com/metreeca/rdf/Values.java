@@ -106,7 +106,26 @@ public final class Values {
 	/**
 	 * Internal namespace for local references and predicates (<code>{@value}</code>).
 	 */
-	public static final String Internal="app://local/terms#";
+	public static final String Internal="app:/terms#";
+
+
+	/**
+	 * Anonymous user/role.
+	 */
+	public static final IRI none=iri(Internal, "none");
+	/**
+	 * Super user/role.
+	 */
+	public static final IRI root=iri(Internal, "root");
+
+
+	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final IRI IRIType=iri(Internal, "iri"); // datatype IRI for IRI references
+	public static final IRI BNodeType=iri(Internal, "bnode"); // datatype IRI for blank nodes
+	public static final IRI LiteralType=iri(Internal, "literal"); // abstract datatype IRI for literals
+	public static final IRI ResourceType=iri(Internal, "resource"); // abstract datatype IRI for resources
+	public static final IRI ValueType=iri(Internal, "value"); // abstract datatype IRI for values
 
 
 	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,9 +138,9 @@ public final class Values {
 
 	public static boolean is(final Value value, final IRI datatype) {
 		return value != null && (type(value).equals(datatype)
-				|| value instanceof Resource && _Form.ResourceType.equals(datatype)
-				|| value instanceof Literal && _Form.LiteralType.equals(datatype)
-				|| _Form.ValueType.equals(datatype)
+				|| value instanceof Resource && ResourceType.equals(datatype)
+				|| value instanceof Literal && LiteralType.equals(datatype)
+				|| ValueType.equals(datatype)
 		);
 	}
 
@@ -164,8 +183,8 @@ public final class Values {
 
 	public static IRI type(final Value value) {
 		return value == null ? null
-				: value instanceof BNode ? _Form.BNodeType
-				: value instanceof IRI ? _Form.IRIType
+				: value instanceof BNode ? BNodeType
+				: value instanceof IRI ? IRIType
 				: value instanceof Literal ? ((Literal)value).getDatatype()
 				: null; // unexpected
 	}

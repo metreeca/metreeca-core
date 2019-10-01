@@ -96,7 +96,7 @@ public final class ValuesTest {
 			convey().then(
 
 					server().then(
-							field(RDF.TYPE, and(required(), datatype(_Form.IRIType))),
+							field(RDF.TYPE, and(required(), datatype(IRIType))),
 							field(RDFS.LABEL, Textual),
 							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
 					),
@@ -114,12 +114,12 @@ public final class ValuesTest {
 									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
 
 							field(term("supervisor"), and(
-									optional(), datatype(_Form.IRIType), clazz(term("Employee")),
+									optional(), datatype(IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							)),
 
 							field(term("subordinate"), and(
-									optional(), datatype(_Form.IRIType), clazz(term("Employee")),
+									optional(), datatype(IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							))
 
@@ -153,7 +153,7 @@ public final class ValuesTest {
 			entry("xsd", XMLSchema.NAMESPACE),
 			entry("ldp", LDP.NAMESPACE),
 			entry("skos", SKOS.NAMESPACE),
-			entry("form", _Form.Namespace)
+			entry("form", Internal)
 	).collect(toMap(MapEntry::getKey, MapEntry::getValue)));
 
 	private static final String TurtlePrefixes=Prefixes.entrySet().stream()

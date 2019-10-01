@@ -19,7 +19,6 @@ package com.metreeca.rdf.handlers;
 
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
@@ -58,7 +57,7 @@ import static java.lang.String.format;
  * graph database}.</p>
  *
  * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
- * to users in the {@linkplain _Form#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
+ * to users in the {@linkplain Values#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
  *
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */

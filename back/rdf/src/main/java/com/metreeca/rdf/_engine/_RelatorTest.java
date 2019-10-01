@@ -18,7 +18,8 @@
 package com.metreeca.rdf._engine;
 
 import com.metreeca.rdf.ModelAssert;
-import com.metreeca.rdf._Form;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.services.GraphEngine;
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -239,7 +240,7 @@ final class _RelatorTest {
 			@Test void testUnauthorized() {
 				exec(() -> new _Relator()
 
-						.handle(shaped().shape(when(guard(Shape.Role, _Form.root), field(RDF.TYPE))))
+						.handle(shaped().shape(when(guard(Shape.Role, Values.root), field(RDF.TYPE))))
 
 						.accept(response -> ResponseAssert.assertThat(response).hasStatus(Response.Unauthorized))
 
@@ -447,7 +448,7 @@ final class _RelatorTest {
 			@Test void testUnauthorized() {
 				exec(() -> new _Relator()
 
-						.handle(shaped().roles(_Form.none))
+						.handle(shaped().roles(Values.none))
 
 						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.Unauthorized)
@@ -459,7 +460,7 @@ final class _RelatorTest {
 			@Test void testForbidden() {
 				exec(() -> new _Relator()
 
-						.handle(shaped().user(RDF.NIL).roles(_Form.none))
+						.handle(shaped().user(RDF.NIL).roles(Values.none))
 
 						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.Forbidden)

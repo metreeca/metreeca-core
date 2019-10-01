@@ -17,7 +17,6 @@
 
 package com.metreeca.rdf._engine;
 
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.tree.Order;
@@ -91,7 +90,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		return service(Graph.graph()).exec(connection -> {
 			return query
 
-					.map(new GraphRetriever(service(logger()), connection, _Form.root))
+					.map(new GraphRetriever(service(logger()), connection, root))
 
 					.stream()
 

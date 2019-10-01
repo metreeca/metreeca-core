@@ -18,7 +18,6 @@
 package com.metreeca.rdf.handlers;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rdf.services.GraphTest;
 import com.metreeca.rest.Context;
@@ -89,7 +88,7 @@ final class SPARQLTest {
 	}
 
 	private Request authenticated(final Request request) {
-		return request.roles(_Form.root);
+		return request.roles(Values.root);
 	}
 
 

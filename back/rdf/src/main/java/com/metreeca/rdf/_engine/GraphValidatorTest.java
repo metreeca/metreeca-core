@@ -17,11 +17,11 @@
 
 package com.metreeca.rdf._engine;
 
+import com.metreeca.rdf.Values;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.tree.*;
 import com.metreeca.tree.shapes.Field;
 import com.metreeca.tree.truths.ModelAssert;
-import com.metreeca.rdf._Form;
 import com.metreeca.tray.Trace;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -367,23 +367,23 @@ final class GraphValidatorTest extends GraphProcessorTest {
 	@Test void testValidateDatatype() {
 		exec(() -> {
 
-			FocusAssert.assertThat(validate(datatype(_Form.ValueType), "<x>")).isValid();
-			FocusAssert.assertThat(validate(datatype(_Form.ValueType), "_:x")).isValid();
-			FocusAssert.assertThat(validate(datatype(_Form.ValueType), "1")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.ValueType), "<x>")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.ValueType), "_:x")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.ValueType), "1")).isValid();
 
-			FocusAssert.assertThat(validate(datatype(_Form.ResourceType), "<x>")).isValid();
-			FocusAssert.assertThat(validate(datatype(_Form.ResourceType), "_:x")).isValid();
-			FocusAssert.assertThat(validate(datatype(_Form.ResourceType), "1")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(Values.ResourceType), "<x>")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.ResourceType), "_:x")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.ResourceType), "1")).isNotValid();
 
-			FocusAssert.assertThat(validate(datatype(_Form.BNodeType), "_:x")).isValid();
-			FocusAssert.assertThat(validate(datatype(_Form.BNodeType), "1")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(Values.BNodeType), "_:x")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.BNodeType), "1")).isNotValid();
 
-			FocusAssert.assertThat(validate(datatype(_Form.IRIType), "<x>")).isValid();
-			FocusAssert.assertThat(validate(datatype(_Form.IRIType), "_:x")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(Values.IRIType), "<x>")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.IRIType), "_:x")).isNotValid();
 
-			FocusAssert.assertThat(validate(datatype(_Form.LiteralType), "'x'")).isValid();
-			FocusAssert.assertThat(validate(datatype(_Form.LiteralType), "1")).isValid();
-			FocusAssert.assertThat(validate(datatype(_Form.LiteralType), "_:x")).isNotValid();
+			FocusAssert.assertThat(validate(datatype(Values.LiteralType), "'x'")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.LiteralType), "1")).isValid();
+			FocusAssert.assertThat(validate(datatype(Values.LiteralType), "_:x")).isNotValid();
 
 			FocusAssert.assertThat(validate(datatype(XMLSchema.STRING), "'text'")).isValid();
 			FocusAssert.assertThat(validate(datatype(XMLSchema.STRING), "_:x")).isNotValid();
@@ -394,7 +394,7 @@ final class GraphValidatorTest extends GraphProcessorTest {
 			FocusAssert.assertThat(validate(datatype(XMLSchema.BOOLEAN), "true")).isValid();
 			FocusAssert.assertThat(validate(datatype(XMLSchema.BOOLEAN), "_:x")).isNotValid();
 
-			FocusAssert.assertThat(validate(datatype(_Form.IRIType))).as("empty focus").isValid();
+			FocusAssert.assertThat(validate(datatype(Values.IRIType))).as("empty focus").isValid();
 
 		});
 	}

@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf._probes;
 
-import com.metreeca.rdf._Form;
+import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -64,29 +64,29 @@ final class _OptimizerTest {
 
 	@Test void testOptimizeDatatype() {
 
-		assertThat(optimize(and(datatype(_Form.IRIType), datatype(_Form.ResourceType))))
+		assertThat(optimize(and(datatype(Values.IRIType), datatype(Values.ResourceType))))
 				.as("conjunction / superclass")
-				.isEqualTo(datatype(_Form.IRIType));
+				.isEqualTo(datatype(Values.IRIType));
 
-		assertThat(optimize(and(datatype(_Form.LiteralType), datatype(XMLSchema.STRING))))
+		assertThat(optimize(and(datatype(Values.LiteralType), datatype(XMLSchema.STRING))))
 				.as("conjunction / literal")
 				.isEqualTo(datatype(XMLSchema.STRING));
 
-		assertThat(optimize(and(datatype(_Form.ResourceType), datatype(XMLSchema.STRING))))
+		assertThat(optimize(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING))))
 				.as("conjunction / unrelated")
-				.isEqualTo(and(datatype(_Form.ResourceType), datatype(XMLSchema.STRING)));
+				.isEqualTo(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING)));
 
-		assertThat(optimize(or(datatype(_Form.IRIType), datatype(_Form.ResourceType))))
+		assertThat(optimize(or(datatype(Values.IRIType), datatype(Values.ResourceType))))
 				.as("disjunction / superclass")
-				.isEqualTo(datatype(_Form.ResourceType));
+				.isEqualTo(datatype(Values.ResourceType));
 
-		assertThat(optimize(or(datatype(_Form.LiteralType), datatype(RDF.NIL))))
+		assertThat(optimize(or(datatype(Values.LiteralType), datatype(RDF.NIL))))
 				.as("disjunction / literal")
-				.isEqualTo(datatype(_Form.LiteralType));
+				.isEqualTo(datatype(Values.LiteralType));
 
-		assertThat(optimize(or(datatype(_Form.ResourceType), datatype(RDF.NIL))))
+		assertThat(optimize(or(datatype(Values.ResourceType), datatype(RDF.NIL))))
 				.as("disjunction / unrelated")
-				.isEqualTo(or(datatype(_Form.ResourceType), datatype(RDF.NIL)));
+				.isEqualTo(or(datatype(Values.ResourceType), datatype(RDF.NIL)));
 
 	}
 

@@ -18,8 +18,8 @@
 package com.metreeca.rdf._engine;
 
 
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf.services.GraphEngine;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query;
@@ -311,10 +311,10 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-				if ( type != null ) { model.add(resource, _Form.stats, type); }
-				if ( type != null && count != null ) { model.add(type, _Form.count, literal(count)); }
-				if ( type != null && min != null ) { model.add(type, _Form.min, min); }
-				if ( type != null && max != null ) { model.add(type, _Form.max, max); }
+				if ( type != null ) { model.add(resource, GraphEngine.stats, type); }
+				if ( type != null && count != null ) { model.add(type, GraphEngine.count, literal(count)); }
+				if ( type != null && min != null ) { model.add(type, GraphEngine.min, min); }
+				if ( type != null && max != null ) { model.add(type, GraphEngine.max, max); }
 
 				counts.add(count);
 				mins.add(min);
@@ -324,7 +324,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 		}));
 
-		model.add(resource, _Form.count, literal(counts.stream()
+		model.add(resource, GraphEngine.count, literal(counts.stream()
 				.filter(Objects::nonNull)
 				.reduce(BigInteger.ZERO, BigInteger::add)
 		));
@@ -332,12 +332,12 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 		mins.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y) < 0 ? x : y)
-				.ifPresent(min -> model.add(resource, _Form.min, min));
+				.ifPresent(min -> model.add(resource, GraphEngine.min, min));
 
 		maxs.stream()
 				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y) > 0 ? x : y)
-				.ifPresent(max -> model.add(resource, _Form.max, max));
+				.ifPresent(max -> model.add(resource, GraphEngine.max, max));
 
 		return model;
 	}
@@ -401,10 +401,10 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 				final BNode item=bnode();
 
-				if ( item != null ) { model.add(resource, _Form.items, item); }
-				if ( item != null && value != null ) { model.add(item, _Form.value, value); }
+				if ( item != null ) { model.add(resource, GraphEngine.items, item); }
+				if ( item != null && value != null ) { model.add(item, GraphEngine.value, value); }
 				if ( item != null && count != null ) {
-					model.add(item, _Form.count, literal(integer(count).orElse(BigInteger.ZERO)));
+					model.add(item, GraphEngine.count, literal(integer(count).orElse(BigInteger.ZERO)));
 				}
 
 				// !!! manage multiple languages
@@ -585,12 +585,12 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 			final IRI iri=iri(datatype.getName());
 
-			return iri.equals(_Form.ValueType) ? nothing() : snippet(
+			return iri.equals(ValueType) ? nothing() : snippet(
 
-					iri.equals(_Form.ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )"
-							: iri.equals(_Form.BNodeType) ? "filter isBlank({value})"
-							: iri.equals(_Form.IRIType) ? "filter isIRI({value})"
-							: iri.equals(_Form.LiteralType) ? "filter isLiteral({value})"
+					iri.equals(ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )"
+							: iri.equals(BNodeType) ? "filter isBlank({value})"
+							: iri.equals(IRIType) ? "filter isIRI({value})"
+							: iri.equals(LiteralType) ? "filter isLiteral({value})"
 							: "filter ( datatype({value}) = <{datatype}> )",
 
 					var(source),

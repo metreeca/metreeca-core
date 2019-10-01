@@ -18,7 +18,6 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._Form;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -262,7 +261,7 @@ public abstract class Graph implements AutoCloseable {
 	 * <tr>
 	 * <td>{@code ?user}</td>
 	 * <td>the IRI identifying the {@linkplain Request#user() user} submitting the original request or
-	 * {@linkplain _Form#none} if no user is authenticated</td>
+	 * {@linkplain Values#none} if no user is authenticated</td>
 	 * </tr>
 	 *
 	 * </tbody>
@@ -337,7 +336,7 @@ public abstract class Graph implements AutoCloseable {
 		operation.setBinding("task", literal(request.method()));
 		operation.setBinding("base", iri(request.base()));
 		operation.setBinding("item", iri(request.item()));
-		operation.setBinding("user", request.user().map(Values::iri).orElse(_Form.none));
+		operation.setBinding("user", request.user().map(Values::iri).orElse(Values.none));
 
 		if ( message instanceof Response ) {
 			operation.setBinding("code", Values.literal(Values.integer(((Response)message).status())));

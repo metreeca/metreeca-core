@@ -18,7 +18,6 @@
 package com.metreeca.rdf.codecs;
 
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rdf._Form;
 import com.metreeca.tree.Shape;
 
 import org.assertj.core.api.Assertions;
@@ -129,7 +128,7 @@ final class JSONParserTest {
 				.as("preserve bnode id")
 				.allMatch(statement -> statement.getObject().equals(bnode("x")));
 
-		Assertions.assertThat(rdf(map(entry("_this", "_:x"), entry(value, "_:x")), null, field(RDF.VALUE, datatype(_Form.BNodeType))))
+		Assertions.assertThat(rdf(map(entry("_this", "_:x"), entry(value, "_:x")), null, field(RDF.VALUE, datatype(BNodeType))))
 				.as("preserve bnode id / shorthand")
 				.allMatch(statement -> statement.getObject().equals(bnode("x")));
 
@@ -254,7 +253,7 @@ final class JSONParserTest {
 
 				null,
 
-				field(RDF.VALUE, and(required(), datatype(_Form.IRIType)))
+				field(RDF.VALUE, and(required(), datatype(IRIType)))
 
 		))
 				.as("inlined IRI back-reference")
@@ -271,7 +270,7 @@ final class JSONParserTest {
 
 				null,
 
-				field(RDF.VALUE, and(required(), datatype(_Form.BNodeType)))
+				field(RDF.VALUE, and(required(), datatype(BNodeType)))
 
 		))
 				.as("inlined IRI back-reference")
@@ -348,7 +347,7 @@ final class JSONParserTest {
 		final BiFunction<String, String, Collection<Statement>> statament=(s, o) -> rdf(
 				map(entry("_this", s), entry(this.value, o)),
 				null,
-				field(RDF.VALUE, datatype(_Form.IRIType)),
+				field(RDF.VALUE, datatype(IRIType)),
 				ValuesTest.Base+"relative/"
 		);
 
@@ -420,7 +419,7 @@ final class JSONParserTest {
 		assertThat(rdf(
 				map(entry("value", map())),
 				null,
-				and(datatype(_Form.BNodeType), field(RDF.VALUE, datatype(_Form.BNodeType)))
+				and(datatype(BNodeType), field(RDF.VALUE, datatype(BNodeType)))
 		))
 				.as("proved blanks")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -440,7 +439,7 @@ final class JSONParserTest {
 		assertThat(rdf(
 				map(entry("_this", ""), entry(value, "_:x")),
 				null,
-				field(RDF.VALUE, datatype(_Form.BNodeType))
+				field(RDF.VALUE, datatype(BNodeType))
 		))
 				.as("proved blank")
 				.isEqualTo(decode("[] rdf:value [] ."));
@@ -450,7 +449,7 @@ final class JSONParserTest {
 		assertThat(rdf(
 				map(entry("_this", ""), entry(value, "http://example.com/x")),
 				null,
-				field(RDF.VALUE, datatype(_Form.IRIType))
+				field(RDF.VALUE, datatype(IRIType))
 		))
 				.as("proved named")
 				.isEqualTo(decode("[] rdf:value <x> ."));
@@ -460,7 +459,7 @@ final class JSONParserTest {
 		assertThat(rdf(
 				map(entry("_this", ""), entry(value, list("_:x", "http://example.com/x"))),
 				null,
-				field(RDF.VALUE, datatype(_Form.ResourceType))
+				field(RDF.VALUE, datatype(ResourceType))
 		))
 				.as("proved resources")
 				.isEqualTo(decode("[] rdf:value [], <x> ."));

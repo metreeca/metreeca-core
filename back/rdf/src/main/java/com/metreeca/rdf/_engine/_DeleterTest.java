@@ -18,6 +18,7 @@
 package com.metreeca.rdf._engine;
 
 
+import com.metreeca.rdf.services.GraphEngine;
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -28,7 +29,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.rdf._Form.none;
+import static com.metreeca.rdf.Values.none;
 import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rdf.services.GraphTest.model;
 import static com.metreeca.rdf.ValuesTest.*;

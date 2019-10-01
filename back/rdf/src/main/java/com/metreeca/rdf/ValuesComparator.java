@@ -22,7 +22,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
- * !!! copied from query algebra evaluation mmodule to avoid dependencies on repository API !!!
+ * !!! copied from query algebra evaluation module to avoid dependencies on repository API !!!
  *
  * A comparator that compares values according the SPARQL value ordering as specified in
  * <A href="http://www.w3.org/TR/rdf-sparql-query/#modOrderBy">SPARQL Query Language for RDF</a>.

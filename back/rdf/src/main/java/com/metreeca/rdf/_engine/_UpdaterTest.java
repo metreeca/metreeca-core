@@ -18,7 +18,8 @@
 package com.metreeca.rdf._engine;
 
 
-import com.metreeca.rdf._Form;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.services.GraphEngine;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -198,7 +199,7 @@ final class _UpdaterTest {
 			@Test void testUnauthorized() {
 				exec(() -> new _Updater()
 
-						.handle(shaped().roles(_Form.none))
+						.handle(shaped().roles(Values.none))
 
 						.accept(response -> {
 
@@ -216,7 +217,7 @@ final class _UpdaterTest {
 			@Test void testForbidden() {
 				exec(() -> new _Updater()
 
-						.handle(shaped().user(RDF.NIL).roles(_Form.none))
+						.handle(shaped().user(RDF.NIL).roles(Values.none))
 
 						.accept(response -> {
 

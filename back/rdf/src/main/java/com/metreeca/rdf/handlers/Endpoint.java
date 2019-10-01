@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.handlers;
 
-import com.metreeca.rdf._Form;
+import com.metreeca.rdf.Values;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.handlers.Delegator;
@@ -41,7 +41,7 @@ import static java.util.Collections.singleton;
  * database}.</p>
  *
  * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
- * to users in the {@linkplain _Form#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
+ * to users in the {@linkplain Values#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
  *
  * @see <a href="https://www.w3.org/TR/2013/REC-sparql11-overview-20130321/">SPARQL 1.1 Overview</a>
  */
@@ -49,8 +49,8 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	private int timeout=60; // endpoint operations timeout [s]
 
-	private Set<IRI> query=singleton(_Form.root); // roles enabled for query operations
-	private Set<IRI> update=singleton(_Form.root); // roles enabled for update operations
+	private Set<IRI> query=singleton(Values.root); // roles enabled for query operations
+	private Set<IRI> update=singleton(Values.root); // roles enabled for update operations
 
 	private final Graph graph=service(Graph.graph());
 	private final Logger logger=service(Logger.logger());

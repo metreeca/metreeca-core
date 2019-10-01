@@ -18,7 +18,6 @@
 package com.metreeca.rdf._probes;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._Form;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.*;
@@ -55,7 +54,7 @@ public final class Inferencer extends Inspector<Shape> {
 
 
 	@Override public Shape probe(final Meta meta) {
-		return meta.getLabel().equals(Shape.Hint) ? and(meta, datatype(_Form.ResourceType)) : meta;
+		return meta.getLabel().equals(Shape.Hint) ? and(meta, datatype(ResourceType)) : meta;
 	}
 
 
@@ -66,7 +65,7 @@ public final class Inferencer extends Inspector<Shape> {
 	}
 
 	@Override public Shape probe(final Clazz clazz) {
-		return and(clazz, datatype(_Form.ResourceType));
+		return and(clazz, datatype(ResourceType));
 	}
 
 
@@ -95,9 +94,9 @@ public final class Inferencer extends Inspector<Shape> {
 		final IRI iri=iri(field.getName());
 		final Shape shape=field.getShape().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(_Form.ResourceType))), datatype(_Form.ResourceType))
-				: direct(iri) ? and(field(iri, shape), datatype(_Form.ResourceType))
-				: field(iri, and(shape, datatype(_Form.ResourceType)));
+		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(ResourceType))), datatype(ResourceType))
+				: direct(iri) ? and(field(iri, shape), datatype(ResourceType))
+				: field(iri, and(shape, datatype(ResourceType)));
 	}
 
 

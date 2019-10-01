@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf._probes;
 
-import com.metreeca.rdf._Form;
+import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.probes.Traverser;
@@ -148,17 +148,17 @@ public final class _Optimizer extends Traverser<Shape> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static boolean derives(final Object upper, final Object lower) {
-		return upper.equals(_Form.ValueType)
-				|| upper.equals(_Form.ResourceType) && resource(lower)
-				|| upper.equals(_Form.LiteralType) && literal(lower);
+		return upper.equals(Values.ValueType)
+				|| upper.equals(Values.ResourceType) && resource(lower)
+				|| upper.equals(Values.LiteralType) && literal(lower);
 	}
 
 	private static boolean resource(final Object type) {
-		return type.equals(_Form.ResourceType) || type.equals(_Form.BNodeType) || type.equals(_Form.IRIType);
+		return type.equals(Values.ResourceType) || type.equals(Values.BNodeType) || type.equals(Values.IRIType);
 	}
 
 	private static boolean literal(final Object type) {
-		return type.equals(_Form.LiteralType) || !type.equals(_Form.ValueType) && !resource(type);
+		return type.equals(Values.LiteralType) || !type.equals(Values.ValueType) && !resource(type);
 	}
 
 
