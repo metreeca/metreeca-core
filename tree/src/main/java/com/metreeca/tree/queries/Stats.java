@@ -22,6 +22,7 @@ import com.metreeca.tree.Shape;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -30,11 +31,11 @@ import static java.util.Collections.unmodifiableList;
 
 public final class Stats implements Query {
 
-	public static Stats stats(final Shape shape, final String... path) {
+	public static Stats stats(final Shape shape, final Object... path) {
 		return new Stats(shape, asList(path));
 	}
 
-	public static Stats stats(final Shape shape, final List<String> path) {
+	public static Stats stats(final Shape shape, final List<Object> path) {
 		return new Stats(shape, path);
 	}
 
@@ -43,21 +44,17 @@ public final class Stats implements Query {
 
 	private final Shape shape;
 
-	private final List<String> path;
+	private final List<Object> path;
 
 
-	private Stats(final Shape shape, final List<String> path) {
+	private Stats(final Shape shape, final List<Object> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		if ( path.contains(null) ) {
-			throw new IllegalArgumentException("illegal path step");
+		if ( path == null || path.stream().anyMatch(Objects::isNull)) {
+			throw new NullPointerException("null path or path step");
 		}
 
 		this.shape=shape;
@@ -71,7 +68,7 @@ public final class Stats implements Query {
 		return shape;
 	}
 
-	public List<String> getPath() {
+	public List<Object> getPath() {
 		return unmodifiableList(path);
 	}
 

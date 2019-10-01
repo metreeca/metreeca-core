@@ -28,6 +28,8 @@ import com.metreeca.tree.shapes.Field;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
@@ -54,6 +56,8 @@ import static com.metreeca.tree.shapes.MinLength.minLength;
 import static com.metreeca.tree.shapes.Pattern.pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import static java.util.Arrays.asList;
 
 
 final class QueryParserTest {
@@ -111,16 +115,21 @@ final class QueryParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new QueryParser(shape, (value, _shape) ->
+		return new QueryParser(shape, this::path, this::value)
+				.parse(query.replace('\'', '"'));
+	}
 
-				value.equals(JsonValue.TRUE) ? true
-						: value.equals(JsonValue.FALSE) ? false
-						: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
-						: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
-						: value instanceof JsonString ? ((JsonString)value).getString()+datatype(_shape).map(t -> "^"+t).orElse("")
-						: null
+	private List<Object> path(final String s, final Shape shape1) {
+		return s.isEmpty()? Collections.emptyList() : asList((Object[])s.split("\\."));
+	}
 
-		).parse(query.replace('\'', '"'));
+	private Object value(final JsonValue value, final Shape _shape) {
+		return value.equals(JsonValue.TRUE) ? true
+				: value.equals(JsonValue.FALSE) ? false
+				: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
+				: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
+				: value instanceof JsonString ? ((JsonString)value).getString()+datatype(_shape).map(t -> "^"+t).orElse("")
+				: null;
 	}
 
 	private Shape filter(final Shape shape, final Shape filter) {
@@ -179,7 +188,7 @@ final class QueryParserTest {
 
 	@Test void testRejectMalformedPaths() {
 		Assertions.assertThatThrownBy(() -> parse("{ '_order': '---' }", and()))
-				.isInstanceOf(JsonException.class);
+				.isInstanceOf(RuntimeException.class);
 	}
 
 	@Test void testParseSortingCriteria() {

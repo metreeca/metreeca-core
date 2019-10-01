@@ -78,8 +78,6 @@
 <li><a href="com/metreeca/gate/policies/package-tree.html">com.metreeca.gate.policies</a>, </li>
 <li><a href="com/metreeca/gate/wrappers/package-tree.html">com.metreeca.gate.wrappers</a>, </li>
 <li><a href="com/metreeca/gcp/package-tree.html">com.metreeca.gcp</a>, </li>
-<li><a href="com/metreeca/gcp/formats/package-tree.html">com.metreeca.gcp.formats</a>, </li>
-<li><a href="com/metreeca/gcp/services/package-tree.html">com.metreeca.gcp.services</a>, </li>
 <li><a href="com/metreeca/rest/package-tree.html">com.metreeca.rest</a>, </li>
 <li><a href="com/metreeca/rest/formats/package-tree.html">com.metreeca.rest.formats</a>, </li>
 <li><a href="com/metreeca/rest/handlers/package-tree.html">com.metreeca.rest.handlers</a>, </li>
@@ -108,8 +106,6 @@
 <li type="circle">com.metreeca.rest.<a href="com/metreeca/rest/Context.html" title="class in com.metreeca.rest"><span class="typeNameLink">Context</span></a></li>
 <li type="circle">com.metreeca.rest.wrappers.<a href="com/metreeca/rest/wrappers/Controller.html" title="class in com.metreeca.rest.wrappers"><span class="typeNameLink">Controller</span></a> (implements com.metreeca.rest.<a href="com/metreeca/rest/Wrapper.html" title="interface in com.metreeca.rest">Wrapper</a>)</li>
 <li type="circle">com.metreeca.rest.formats.<a href="com/metreeca/rest/formats/DataFormat.html" title="class in com.metreeca.rest.formats"><span class="typeNameLink">DataFormat</span></a> (implements com.metreeca.rest.<a href="com/metreeca/rest/Format.html" title="interface in com.metreeca.rest">Format</a>&lt;V&gt;)</li>
-<li type="circle">com.metreeca.gcp.services.<a href="com/metreeca/gcp/services/Datastore.html" title="class in com.metreeca.gcp.services"><span class="typeNameLink">Datastore</span></a></li>
-<li type="circle">com.metreeca.gcp.services.<a href="com/metreeca/gcp/services/DatastoreEngine.html" title="class in com.metreeca.gcp.services"><span class="typeNameLink">DatastoreEngine</span></a> (implements com.metreeca.rest.services.<a href="com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">Engine</a>)</li>
 <li type="circle">com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Datatype.html" title="class in com.metreeca.tree.shapes"><span class="typeNameLink">Datatype</span></a> (implements com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>)</li>
 <li type="circle">com.metreeca.rest.handlers.<a href="com/metreeca/rest/handlers/Delegator.html" title="class in com.metreeca.rest.handlers"><span class="typeNameLink">Delegator</span></a> (implements com.metreeca.rest.<a href="com/metreeca/rest/Handler.html" title="interface in com.metreeca.rest">Handler</a>)
 <ul>
@@ -124,7 +120,6 @@
 </ul>
 </li>
 <li type="circle">com.metreeca.rest.wrappers.<a href="com/metreeca/rest/wrappers/Driver.html" title="class in com.metreeca.rest.wrappers"><span class="typeNameLink">Driver</span></a> (implements com.metreeca.rest.<a href="com/metreeca/rest/Wrapper.html" title="interface in com.metreeca.rest">Wrapper</a>)</li>
-<li type="circle">com.metreeca.gcp.formats.<a href="com/metreeca/gcp/formats/EntityFormat.html" title="class in com.metreeca.gcp.formats"><span class="typeNameLink">EntityFormat</span></a> (implements com.metreeca.rest.<a href="com/metreeca/rest/Format.html" title="interface in com.metreeca.rest">Format</a>&lt;V&gt;)</li>
 <li type="circle">com.metreeca.rest.<a href="com/metreeca/rest/Failure.html" title="class in com.metreeca.rest"><span class="typeNameLink">Failure</span></a> (implements java.util.function.<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;T,R&gt;)</li>
 <li type="circle">com.metreeca.tree.shapes.<a href="com/metreeca/tree/shapes/Field.html" title="class in com.metreeca.tree.shapes"><span class="typeNameLink">Field</span></a> (implements com.metreeca.tree.<a href="com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>)</li>
 <li type="circle">com.metreeca.servlet.<a href="com/metreeca/servlet/Gateway.html" title="class in com.metreeca.servlet"><span class="typeNameLink">Gateway</span></a> (implements javax.servlet.Filter)</li>
@@ -174,11 +169,7 @@
 <li type="circle">com.metreeca.tree.<a href="com/metreeca/tree/Trace.html" title="class in com.metreeca.tree"><span class="typeNameLink">Trace</span></a></li>
 <li type="circle">com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Traverser.html" title="class in com.metreeca.tree.probes"><span class="typeNameLink">Traverser</span></a>&lt;V&gt; (implements com.metreeca.tree.<a href="com/metreeca/tree/Shape.Probe.html" title="interface in com.metreeca.tree">Shape.Probe</a>&lt;V&gt;)
 <ul>
-<li type="circle">com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Inspector.html" title="class in com.metreeca.tree.probes"><span class="typeNameLink">Inspector</span></a>&lt;V&gt;
-<ul>
-<li type="circle">com.metreeca.gcp.services.<a href="com/metreeca/gcp/services/DatastoreInferencer.html" title="class in com.metreeca.gcp.services"><span class="typeNameLink">DatastoreInferencer</span></a></li>
-</ul>
-</li>
+<li type="circle">com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Inspector.html" title="class in com.metreeca.tree.probes"><span class="typeNameLink">Inspector</span></a>&lt;V&gt;</li>
 <li type="circle">com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Optimizer.html" title="class in com.metreeca.tree.probes"><span class="typeNameLink">Optimizer</span></a></li>
 <li type="circle">com.metreeca.tree.probes.<a href="com/metreeca/tree/probes/Redactor.html" title="class in com.metreeca.tree.probes"><span class="typeNameLink">Redactor</span></a></li>
 </ul>

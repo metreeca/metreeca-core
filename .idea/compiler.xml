@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="rest" />
+        <module name="gcp" />
+        <module name="gate" />
         <module name="servlet" />
         <module name="tree" />
-        <module name="rest" />
-        <module name="gate" />
-        <module name="gcp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

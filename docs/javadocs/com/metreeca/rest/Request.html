@@ -304,8 +304,9 @@ extends <a href="../../../com/metreeca/rest/Message.html" title="class in com.me
 </tr>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code><a href="../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;<a href="../../../com/metreeca/tree/Query.html" title="interface in com.metreeca.tree">Query</a>,<a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Request.html#query-com.metreeca.tree.Shape-java.util.function.BiFunction-">query</a></span>(<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;shape,
-     <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;javax.json.JsonValue,<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;parser)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/metreeca/rest/Request.html#query-com.metreeca.tree.Shape-java.util.function.BiFunction-java.util.function.BiFunction-">query</a></span>(<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;shape,
+     <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&gt;&nbsp;path,
+     <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;javax.json.JsonValue,<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;value)</code>
 <div class="block">Retrieves the shape-based query of this request.</div>
 </td>
 </tr>
@@ -883,25 +884,27 @@ extends <a href="../../../com/metreeca/rest/Message.html" title="class in com.me
 </dl>
 </li>
 </ul>
-<a name="query-com.metreeca.tree.Shape-java.util.function.BiFunction-">
+<a name="query-com.metreeca.tree.Shape-java.util.function.BiFunction-java.util.function.BiFunction-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>query</h4>
 <pre>public&nbsp;<a href="../../../com/metreeca/rest/Result.html" title="class in com.metreeca.rest">Result</a>&lt;<a href="../../../com/metreeca/tree/Query.html" title="interface in com.metreeca.tree">Query</a>,<a href="../../../com/metreeca/rest/Failure.html" title="class in com.metreeca.rest">Failure</a>&gt;&nbsp;query(<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>&nbsp;shape,
-                                   <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;javax.json.JsonValue,<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;parser)</pre>
+                                   <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&gt;&nbsp;path,
+                                   <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;javax.json.JsonValue,<a href="../../../com/metreeca/tree/Shape.html" title="interface in com.metreeca.tree">Shape</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;value)</pre>
 <div class="block">Retrieves the shape-based query of this request.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>shape</code> - the base shape for the query</dd>
-<dd><code>parser</code> - a shape-based function mapping from JSON to <a href="../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">engine</a> specific values</dd>
+<dd><code>path</code> - a shape-based parser mapping from a string to an <a href="../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">engine-specific</a> property path</dd>
+<dd><code>value</code> - a shape-based parser mapping from a JSON value to an <a href="../../../com/metreeca/rest/services/Engine.html" title="interface in com.metreeca.rest.services">engine-specific</a> value</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a value providing access to the combined query merging constraints from <code>shape</code> and the request
- <a href="../../../com/metreeca/rest/Request.html#query--">query</a> string, if successfully parsed using the <code>parser</code>; an error
- providing access to the parsing failure, otherwise</dd>
+ <a href="../../../com/metreeca/rest/Request.html#query--">query</a> string, if successfully parsed using the <code>value</code>; an error providing access to
+ the parsing failure, otherwise</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if <code>shape</code> is null</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - if any argument is null</dd>
 </dl>
 </li>
 </ul>

@@ -19,6 +19,7 @@ package com.metreeca.tree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -29,38 +30,34 @@ import static java.util.Collections.unmodifiableList;
  */
 public final class Order {
 
-	public static Order increasing(final String... path) {
+	public static Order increasing(final Object... path) {
 		return new Order(asList(path), false);
 	}
 
-	public static Order increasing(final List<String> path) {
+	public static Order increasing(final List<Object> path) {
 		return new Order(path, false);
 	}
 
 
-	public static Order decreasing(final String... path) {
+	public static Order decreasing(final Object... path) {
 		return new Order(asList(path), true);
 	}
 
-	public static Order decreasing(final List<String> path) {
+	public static Order decreasing(final List<Object> path) {
 		return new Order(path, true);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final List<String> path;
+	private final List<Object> path;
 	private final boolean inverse;
 
 
-	private Order(final List<String> path, final boolean inverse) {
+	private Order(final List<Object> path, final boolean inverse) {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		if ( path.contains(null) ) {
-			throw new IllegalArgumentException("illegal path element");
+		if ( path == null || path.stream().anyMatch(Objects::isNull)) {
+			throw new NullPointerException("null path or path step");
 		}
 
 		this.path=new ArrayList<>(path);
@@ -70,7 +67,7 @@ public final class Order {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public List<String> getPath() {
+	public List<Object> getPath() {
 		return unmodifiableList(path);
 	}
 
@@ -95,7 +92,7 @@ public final class Order {
 
 		final StringBuilder builder=new StringBuilder(20*path.size());
 
-		for (final String step : path) {
+		for (final Object step : path) {
 
 			if ( builder.length() > 0 ) {
 				builder.append('/');

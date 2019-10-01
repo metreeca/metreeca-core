@@ -18,9 +18,8 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.gcp.formats.EntityFormat;
+import com.metreeca.rest.*;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query.Probe;
@@ -40,6 +39,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 import static com.metreeca.gcp.formats.EntityFormat.entity;
@@ -105,13 +105,14 @@ final class DatastoreRelator extends DatastoreProcessor {
 	);
 
 
+
 	private static String key(final String path) {
 		return path+"."+KeyProperty;
 	}
 
 
-	private static String property(final Iterable<String> path) {
-		return String.join(".", path);  // !!! handle/reject path steps containing dots
+	private static String property(final Collection<Object> path) {
+		return path.stream().map(Object::toString).collect(joining("."));  // !!! handle/reject path steps containing dots
 	}
 
 	private static String property(final String head, final String tail) {
@@ -128,14 +129,19 @@ final class DatastoreRelator extends DatastoreProcessor {
 				.orElse("");
 	}
 
-	private static Value<?> get(final Value<?> entity, final Iterable<String> steps) {
+	private static Value<?> get(final Value<?> entity, final Iterable<Object> steps) {
 
 		Value<?> value=entity;
 
-		for (final String step : steps) {
+		for (final Object step : steps) {
 			if ( value.getType() == ValueType.ENTITY ) {
-				value=((EntityValue)value).get().contains(step) ?
-						((EntityValue)value).get().getValue(step) : NullValue.of();
+
+				final FullEntity<?> nested=((EntityValue)value).get();
+				final String property=step.toString();
+
+				value=nested.contains(property) ?
+						nested.getValue(property)
+						: NullValue.of();
 			}
 		}
 
@@ -151,9 +157,10 @@ final class DatastoreRelator extends DatastoreProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Datastore datastore=service(datastore());
-	private final DatastoreSplitter splitter=new DatastoreSplitter();
-
 	private final Logger logger=service(logger());
+
+	private final EntityFormat format=entity(datastore);
+	private final DatastoreSplitter splitter=new DatastoreSplitter();
 
 
 	Future<Response> handle(final Request request) {
@@ -164,7 +171,8 @@ final class DatastoreRelator extends DatastoreProcessor {
 	//// Container /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> container(final Request request) {
-		return request.query(splitter.resource(expand(request.shape())), entity(datastore)::value)
+
+		return request.query(splitter.resource(expand(request.shape())), format::path, format::value)
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 
@@ -207,7 +215,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK) // containers are virtual and respond always with 200 OK
 				.shape(field(GCP.contains, convey(shape)))
-				.body(entity(datastore), container);
+				.body(format, container);
 
 	}
 
@@ -243,7 +251,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK)
 				.shape(TermsShape)
-				.body(entity(datastore), container);
+				.body(format, container);
 
 	}
 
@@ -335,7 +343,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK)
 				.shape(StatsShape)
-				.body(entity(datastore), container.build());
+				.body(format, container.build());
 
 	}
 
@@ -361,7 +369,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 					.map(entity -> response
 							.status(OK)
 							.shape(shape)
-							.body(entity(datastore), entity)
+							.body(format, entity)
 					)
 
 					.orElseGet(() -> response
@@ -376,7 +384,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private <R> R values(
 			final Shape shape,
-			final Iterable<String> steps,
+			final Iterable<Object> steps,
 			final Function<Stream<? extends Value<?>>, R> task
 	) {
 
@@ -479,7 +487,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 				.map(order -> {
 
-					final List<String> path=order.getPath();
+					final List<Object> path=order.getPath();
 					final boolean inverse=order.isInverse();
 
 					final Comparator<EntityValue> comparator=comparing(e -> get(e, path), Datastore::compare);
