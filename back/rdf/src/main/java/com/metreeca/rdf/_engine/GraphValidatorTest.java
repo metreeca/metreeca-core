@@ -15,8 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
+import com.metreeca.rdf.services.Graph;
 import com.metreeca.tree.*;
 import com.metreeca.tree.shapes.Field;
 import com.metreeca.tree.truths.ModelAssert;
@@ -109,13 +110,13 @@ final class GraphValidatorTest extends GraphProcessorTest {
 					.flatMap(frame -> frame.getFields().get(RDF.VALUE).getFrames().stream())
 					.collect(toList());
 
-			assertThat(frames.stream()
+			Assertions.assertThat(frames.stream()
 					.flatMap(frame -> frame.getIssues().stream())
 					.anyMatch(issue -> issue.getShape().equals(shape)))
 					.as("reference failed shape")
 					.isTrue();
 
-			assertThat(frames.stream()
+			Assertions.assertThat(frames.stream()
 					.map(Frame::getValue)
 					.anyMatch(value -> value.equals(literal(integer(100)))))
 					.as("reference offending values")

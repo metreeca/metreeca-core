@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
 
 import com.metreeca.rest.Context;
@@ -40,14 +40,14 @@ import static com.metreeca.rest.services.Engine.engine;
 
 final class _DeleterTest {
 
-	private static final Model Dataset=small();
+	private static final Model Dataset=ValuesTest.small();
 
 
 	private void exec(final Runnable ...tasks) {
 		new Context()
 				.set(engine(), GraphEngine::new)
 				.set(graph(), GraphTest::graph)
-				.exec(model(small()))
+				.exec(GraphTest.model(ValuesTest.small()))
 				.exec(tasks)
 				.clear();
 	}
@@ -57,9 +57,9 @@ final class _DeleterTest {
 
 		private Request simple() {
 			return new Request()
-					.roles(Manager)
+					.roles(ValuesTest.Manager)
 					.method(Request.DELETE)
-					.base(Base)
+					.base(ValuesTest.Base)
 					.path("/employees/1370");
 		}
 
@@ -73,19 +73,19 @@ final class _DeleterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							assertThat(model("construct where { <employees/1370> ?p ?o }"))
+							ModelAssert.assertThat(GraphTest.model("construct where { <employees/1370> ?p ?o }"))
 									.as("cell deleted")
 									.isEmpty();
 
-							assertThat(model("construct where { ?s ?p <employees/1370> }"))
+							ModelAssert.assertThat(GraphTest.model("construct where { ?s ?p <employees/1370> }"))
 									.as("inbound links removed")
 									.isEmpty();
 
-							assertThat(model("construct where { <employees/1102> rdfs:label ?o }"))
+							ModelAssert.assertThat(GraphTest.model("construct where { <employees/1102> rdfs:label ?o }"))
 									.as("connected resources preserved")
 									.isNotEmpty();
 
@@ -100,11 +100,11 @@ final class _DeleterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.NotFound)
 									.doesNotHaveBody();
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
 									.isIsomorphicTo(Dataset);
 
@@ -115,7 +115,7 @@ final class _DeleterTest {
 		@Nested final class Shaped {
 
 			private Request shaped() {
-				return simple().shape(Employee);
+				return simple().shape(ValuesTest.Employee);
 			}
 
 
@@ -126,11 +126,11 @@ final class _DeleterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							assertThat(model("construct where { <employees/1370> ?p ?o }"))
+							ModelAssert.assertThat(GraphTest.model("construct where { <employees/1370> ?p ?o }"))
 									.isEmpty();
 
 						}));
@@ -144,11 +144,11 @@ final class _DeleterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Unauthorized)
 									.doesNotHaveBody();
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
 									.isIsomorphicTo(Dataset);
 
@@ -162,11 +162,11 @@ final class _DeleterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Forbidden)
 									.doesNotHaveBody();
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
 									.isIsomorphicTo(Dataset);
 
@@ -180,11 +180,11 @@ final class _DeleterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.NotFound)
 									.doesNotHaveBody();
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
 									.isIsomorphicTo(Dataset);
 
@@ -199,9 +199,9 @@ final class _DeleterTest {
 
 		private Request simple() {
 			return new Request()
-					.roles(Manager)
+					.roles(ValuesTest.Manager)
 					.method(Request.DELETE)
-					.base(Base)
+					.base(ValuesTest.Base)
 					.path("/employees/");
 		}
 
@@ -213,7 +213,7 @@ final class _DeleterTest {
 
 						.handle(simple())
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.NotImplemented)
 								.hasBody(json(), json -> JSONAssert.assertThat(json)
 										.hasField("cause")
@@ -227,7 +227,7 @@ final class _DeleterTest {
 		@Nested final class Shaped {
 
 			private Request shaped() {
-				return simple().shape(Employees);
+				return simple().shape(ValuesTest.Employees);
 			}
 
 
@@ -236,7 +236,7 @@ final class _DeleterTest {
 
 						.handle(shaped())
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.NotImplemented)
 								.hasBody(json(), json -> JSONAssert.assertThat(json)
 										.hasField("cause")

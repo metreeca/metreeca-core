@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
 
 import com.metreeca.rdf._Form;
@@ -45,14 +45,14 @@ final class _UpdaterTest {
 		new Context()
 				.set(engine(), GraphEngine::new)
 				.set(graph(), GraphTest::graph)
-				.exec(model(small()))
+				.exec(GraphTest.model(ValuesTest.small()))
 				.exec(tasks)
 				.clear();
 	}
 
 
 	private Function<Request, Request> body(final String rdf) {
-		return request -> request.body(input(), () -> Codecs.input(new StringReader(turtle(rdf))));
+		return request -> request.body(input(), () -> Codecs.input(new StringReader(ValuesTest.turtle(rdf))));
 	}
 
 
@@ -60,9 +60,9 @@ final class _UpdaterTest {
 
 		private Request simple() {
 			return new Request()
-					.roles(Manager)
+					.roles(ValuesTest.Manager)
 					.method(Request.POST)
-					.base(Base)
+					.base(ValuesTest.Base)
 					.path("/employees/1370") // Gerard Hernandez
 					.map(body("<>"
 							+":forename 'Tino';"
@@ -83,14 +83,14 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 
 									.as("updated values inserted")
-									.hasSubset(decode("</employees/1370>"
+									.hasSubset(ValuesTest.decode("</employees/1370>"
 											+":forename 'Tino';"
 											+":surname 'Faussone';"
 											+":email 'tfaussone@example.com';"
@@ -99,7 +99,7 @@ final class _UpdaterTest {
 									))
 
 									.as("previous values removed")
-									.doesNotHaveSubset(decode("</employees/1370>"
+									.doesNotHaveSubset(ValuesTest.decode("</employees/1370>"
 											+":forename 'Gerard';"
 											+":surname 'Hernandez'."
 									));
@@ -115,15 +115,15 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.BadRequest)
-									.hasBody(json(), json -> assertThat(json)
+									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error")
 									);
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
-									.isIsomorphicTo(small());
+									.isIsomorphicTo(ValuesTest.small());
 
 						}));
 			}
@@ -139,16 +139,16 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.doesNotHaveHeader("Location")
-									.hasBody(json(), json -> assertThat(json)
+									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error")
 									);
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
-									.isIsomorphicTo(small());
+									.isIsomorphicTo(ValuesTest.small());
 
 						}));
 			}
@@ -158,7 +158,7 @@ final class _UpdaterTest {
 		@Nested final class Shaped {
 
 			private Request shaped() {
-				return simple().shape(Employees);
+				return simple().shape(ValuesTest.Employees);
 			}
 
 
@@ -169,14 +169,14 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 
 									.as("updated values inserted")
-									.hasSubset(decode("</employees/1370>"
+									.hasSubset(ValuesTest.decode("</employees/1370>"
 											+":forename 'Tino';"
 											+":surname 'Faussone';"
 											+":email 'tfaussone@example.com';"
@@ -186,7 +186,7 @@ final class _UpdaterTest {
 
 
 									.as("previous values removed")
-									.doesNotHaveSubset(decode("</employees/1370>"
+									.doesNotHaveSubset(ValuesTest.decode("</employees/1370>"
 											+":forename 'Gerard';"
 											+":surname 'Hernandez'."
 									));
@@ -202,13 +202,13 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Unauthorized)
 									.doesNotHaveBody();
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
-									.isIsomorphicTo(small());
+									.isIsomorphicTo(ValuesTest.small());
 
 						}));
 			}
@@ -220,13 +220,13 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Forbidden)
 									.doesNotHaveBody();
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
-									.isIsomorphicTo(small());
+									.isIsomorphicTo(ValuesTest.small());
 
 						}));
 			}
@@ -238,14 +238,14 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.BadRequest)
-									.hasBody(json(), json -> assertThat(json)
+									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error"));
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
-									.isIsomorphicTo(small());
+									.isIsomorphicTo(ValuesTest.small());
 
 						}));
 			}
@@ -262,14 +262,14 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
-									.hasBody(json(), json -> assertThat(json)
+									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error"));
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
-									.isIsomorphicTo(small());
+									.isIsomorphicTo(ValuesTest.small());
 
 						}));
 			}
@@ -277,19 +277,19 @@ final class _UpdaterTest {
 			@Test void testRestrictedData() {
 				exec(() -> new _Updater()
 
-						.handle(shaped().roles(Salesman))
+						.handle(shaped().roles(ValuesTest.Salesman))
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
-									.hasBody(json(), json -> assertThat(json)
+									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error")
 									);
 
-							assertThat(model())
+							ModelAssert.assertThat(GraphTest.model())
 									.as("graph unchanged")
-									.isIsomorphicTo(small());
+									.isIsomorphicTo(ValuesTest.small());
 
 						}));
 			}
@@ -302,9 +302,9 @@ final class _UpdaterTest {
 
 		private Request simple() {
 			return new Request()
-					.roles(Manager)
+					.roles(ValuesTest.Manager)
 					.method(Request.POST)
-					.base(Base)
+					.base(ValuesTest.Base)
 					.path("/employees/")
 					.map(body("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>. <> rdfs:label 'Updated!'."));
 		}
@@ -317,9 +317,9 @@ final class _UpdaterTest {
 
 						.handle(simple())
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> assertThat(json)
+								.hasBody(json(), json -> JSONAssert.assertThat(json)
 										.hasField("cause")
 								)
 						)
@@ -331,7 +331,7 @@ final class _UpdaterTest {
 		@Nested final class Shaped {
 
 			private Request shaped() {
-				return simple().shape(Employees);
+				return simple().shape(ValuesTest.Employees);
 			}
 
 
@@ -340,9 +340,9 @@ final class _UpdaterTest {
 
 						.handle(shaped())
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> assertThat(json)
+								.hasBody(json(), json -> JSONAssert.assertThat(json)
 										.hasField("cause")
 								)
 						)

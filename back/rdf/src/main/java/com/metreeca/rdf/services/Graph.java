@@ -18,6 +18,7 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf._Form;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -25,7 +26,6 @@ import com.metreeca.rest.Response;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.Operation;
 import org.eclipse.rdf4j.query.Update;
@@ -261,7 +261,8 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * <tr>
 	 * <td>{@code ?user}</td>
-	 * <td>the IRI identifying the {@linkplain Request#user() user} submitting the original request</td>
+	 * <td>the IRI identifying the {@linkplain Request#user() user} submitting the original request or
+	 * {@linkplain _Form#none} if no user is authenticated</td>
 	 * </tr>
 	 *
 	 * </tbody>
@@ -336,7 +337,7 @@ public abstract class Graph implements AutoCloseable {
 		operation.setBinding("task", literal(request.method()));
 		operation.setBinding("base", iri(request.base()));
 		operation.setBinding("item", iri(request.item()));
-		operation.setBinding("user", request.user().map(Values::iri).orElse(RDF.NIL));
+		operation.setBinding("user", request.user().map(Values::iri).orElse(_Form.none));
 
 		if ( message instanceof Response ) {
 			operation.setBinding("code", Values.literal(Values.integer(((Response)message).status())));

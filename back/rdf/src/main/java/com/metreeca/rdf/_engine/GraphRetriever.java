@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
 
 import com.metreeca.rdf._Form;
@@ -42,11 +42,10 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.services.Snippets.*;
+import static com.metreeca.rdf._engine.Snippets.*;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;

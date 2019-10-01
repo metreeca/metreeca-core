@@ -15,10 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
+import com.metreeca.rdf._engine.GraphProcessor;
+import com.metreeca.rdf._engine.GraphRetriever;
+import com.metreeca.rdf._engine.GraphValidator;
+import com.metreeca.rdf.services.Graph;
 import com.metreeca.rest.services.Logger;
-import com.metreeca.tree.*;
 import com.metreeca.tree.probes.Outliner;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.services.Engine;

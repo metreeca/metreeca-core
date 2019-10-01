@@ -15,8 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
+import com.metreeca.rdf.Values;
 import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -43,8 +44,8 @@ abstract class GraphProcessorTest {
 
 				.exec(() -> service(graph()).exec(connection -> {
 
-					if ( !connection.hasStatement(iri(Base), RDF.TYPE, VOID.DATASET, false) ) {
-						connection.add(small()); // load test dataset
+					if ( !connection.hasStatement(Values.iri(ValuesTest.Base), RDF.TYPE, VOID.DATASET, false) ) {
+						connection.add(ValuesTest.small()); // load test dataset
 					}
 
 				}))

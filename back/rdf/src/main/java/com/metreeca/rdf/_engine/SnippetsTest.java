@@ -15,13 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.services.Snippets.*;
+import static com.metreeca.rdf._engine.Snippets.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,11 +36,11 @@ final class SnippetsTest {
 		final Object x=new Object();
 		final Object y=new Object();
 
-		assertThat(source(nothing(id(x, y))))
+		Assertions.assertThat(source(nothing(id(x, y))))
 				.as("no code generated")
 				.isEmpty();
 
-		assertThat(source(nothing(id(x, y)), id(x), "=", id(y)))
+		Assertions.assertThat(source(nothing(id(x, y)), id(x), "=", id(y)))
 				.as("snippets evaluated with side effects")
 				.matches("(\\d+)=\\1");
 
@@ -48,27 +48,27 @@ final class SnippetsTest {
 
 	@Test void testSnippet() {
 
-		assertThat(source(snippet((Object)null))).isEqualTo("");
-		assertThat(source(snippet(1, 2, 3))).isEqualTo("123");
+		Assertions.assertThat(source(snippet((Object)null))).isEqualTo("");
+		Assertions.assertThat(source(snippet(1, 2, 3))).isEqualTo("123");
 
-		assertThat(source(snippet(asList("an", " ", "iterable")))).isEqualTo("an iterable");
-		assertThat(source(snippet(Stream.of("a", " ", "stream")))).isEqualTo("a stream");
+		Assertions.assertThat(source(snippet(asList("an", " ", "iterable")))).isEqualTo("an iterable");
+		Assertions.assertThat(source(snippet(Stream.of("a", " ", "stream")))).isEqualTo("a stream");
 
-		assertThat(source(snippet(123))).isEqualTo("123");
-		assertThat(source(snippet("string"))).isEqualTo("string");
+		Assertions.assertThat(source(snippet(123))).isEqualTo("123");
+		Assertions.assertThat(source(snippet("string"))).isEqualTo("string");
 
 	}
 
 	@Test void testTemplate() {
 
-		assertThat(source(snippet(null, "text"))).isEqualTo("text");
-		assertThat(source(snippet("verbatim", " ", "text"))).isEqualTo("verbatim text");
+		Assertions.assertThat(source(snippet(null, "text"))).isEqualTo("text");
+		Assertions.assertThat(source(snippet("verbatim", " ", "text"))).isEqualTo("verbatim text");
 
-		assertThat(source(snippet(
+		Assertions.assertThat(source(snippet(
 				"<< {article} {object} >>", "a", snippet("string")
 		))).isEqualTo("<< a string >>");
 
-		assertThat(source(snippet(
+		Assertions.assertThat(source(snippet(
 				"<< {reused} {missing} {reused} >>", "text"
 		))).isEqualTo("<< text text >>");
 
@@ -83,23 +83,23 @@ final class SnippetsTest {
 		final Object y=new Object();
 		final Object z=new Object();
 
-		assertThat(source(id(x)))
+		Assertions.assertThat(source(id(x)))
 				.as("formatted")
 				.matches("\\d+");
 
-		assertThat(source(id(x), "=", id(x)))
+		Assertions.assertThat(source(id(x), "=", id(x)))
 				.as("idempotent")
 				.matches("(\\d+)=\\1");
 
-		assertThat(source(id(x), "!=", id(y)))
+		Assertions.assertThat(source(id(x), "!=", id(y)))
 				.as("unique")
 				.doesNotMatch("(\\d+)!=\\1");
 
-		assertThat(source(id(x, y, z), "=", id(y), "=", id(z)))
+		Assertions.assertThat(source(id(x, y, z), "=", id(y), "=", id(z)))
 				.as("aliased")
 				.matches("(\\d+)=\\1=\\1");
 
-		assertThatThrownBy(() -> source(id(x, z), id(y, z)))
+		Assertions.assertThatThrownBy(() -> source(id(x, z), id(y, z)))
 				.as("clashes trapped")
 				.isInstanceOf(IllegalStateException.class);
 
@@ -110,11 +110,11 @@ final class SnippetsTest {
 
 	@Test void testIndentBraceBlocks() {
 
-		assertThat(source("{\nuno\n}\ndue"))
+		Assertions.assertThat(source("{\nuno\n}\ndue"))
 				.as("indented block")
 				.isEqualTo("{\n    uno\n}\ndue");
 
-		assertThat(source("{ {\nuno\n} }\ndue"))
+		Assertions.assertThat(source("{ {\nuno\n} }\ndue"))
 				.as("inline block")
 				.isEqualTo("{ {\n    uno\n} }\ndue");
 
@@ -122,7 +122,7 @@ final class SnippetsTest {
 
 	@Test void testIgnoreLeadingSpaces() {
 
-		assertThat(source("  {\n\tuno\n  due\n }"))
+		Assertions.assertThat(source("  {\n\tuno\n  due\n }"))
 				.as("single")
 				.isEqualTo("{\n    uno\n    due\n}");
 
@@ -130,11 +130,11 @@ final class SnippetsTest {
 
 	@Test void testCollapseSpaces() {
 
-		assertThat(source(" text"))
+		Assertions.assertThat(source(" text"))
 				.as("leading")
 				.isEqualTo("text");
 
-		assertThat(source("uno  due"))
+		Assertions.assertThat(source("uno  due"))
 				.as("inside")
 				.isEqualTo("uno due");
 
@@ -142,11 +142,11 @@ final class SnippetsTest {
 
 	@Test void testCollapseNewlines() {
 
-		assertThat(source("uno\ndue"))
+		Assertions.assertThat(source("uno\ndue"))
 				.as("single")
 				.isEqualTo("uno\ndue");
 
-		assertThat(source("uno\n\n\n\ndue"))
+		Assertions.assertThat(source("uno\n\n\n\ndue"))
 				.as("multiple")
 				.isEqualTo("uno\n\ndue");
 

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
 
 import com.metreeca.rdf.ValueAssert;
@@ -60,7 +60,7 @@ final class _CreatorTest {
 
 
 	private Function<Request, Request> body(final String rdf) {
-		return request -> request.body(input(), () -> Codecs.input(new StringReader(turtle(rdf))));
+		return request -> request.body(input(), () -> Codecs.input(new StringReader(ValuesTest.turtle(rdf))));
 	}
 
 
@@ -68,9 +68,9 @@ final class _CreatorTest {
 
 		private Request simple() {
 			return new Request()
-					.roles(Manager)
+					.roles(ValuesTest.Manager)
 					.method(Request.POST)
-					.base(Base)
+					.base(ValuesTest.Base)
 					.path("/employees/9999");
 		}
 
@@ -84,7 +84,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.NotImplemented)
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("cause")
@@ -103,7 +103,7 @@ final class _CreatorTest {
 		@Nested final class Shaped {
 
 			private Request shaped() {
-				return simple().shape(Employee);
+				return simple().shape(ValuesTest.Employee);
 			}
 
 
@@ -114,7 +114,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.NotImplemented)
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("cause")
@@ -136,9 +136,9 @@ final class _CreatorTest {
 
 		private Request simple() {
 			return new Request()
-					.roles(Manager)
+					.roles(ValuesTest.Manager)
 					.method(Request.POST)
-					.base(Base)
+					.base(ValuesTest.Base)
 					.path("/employees/")
 					.map(body("<>"
 							+" :forename 'Tino' ;"
@@ -169,7 +169,7 @@ final class _CreatorTest {
 									.map(Values::iri)
 									.orElse(null);
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
@@ -180,11 +180,11 @@ final class _CreatorTest {
 							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("resource description stored into the graph")
 									.hasSubset(
-											statement(resource, term("forename"), literal("Tino")),
-											statement(resource, term("surname"), literal("Faussone"))
+											statement(resource, ValuesTest.term("forename"), literal("Tino")),
+											statement(resource, ValuesTest.term("surname"), literal("Faussone"))
 									);
 
-							assertThat(model())
+							assertThat(GraphTest.model())
 									.as("basic container connected to resource description")
 									.hasSubset(
 											statement(container, LDP.CONTAINS, resource)
@@ -200,7 +200,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
@@ -208,12 +208,12 @@ final class _CreatorTest {
 
 							ValueAssert.assertThat(item)
 									.as("resource created with computed IRI")
-									.isEqualTo(item("employees/slug"));
+									.isEqualTo(ValuesTest.item("employees/slug"));
 
-							assertThat(model())
+							assertThat(GraphTest.model())
 									.hasSubset(
-											statement(item, term("forename"), literal("Tino")),
-											statement(item, term("surname"), literal("Faussone"))
+											statement(item, ValuesTest.term("forename"), literal("Tino")),
+											statement(item, ValuesTest.term("surname"), literal("Faussone"))
 									);
 
 						}));
@@ -227,7 +227,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.BadRequest)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
@@ -252,7 +252,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
@@ -273,14 +273,14 @@ final class _CreatorTest {
 
 					creator.handle(simple()).accept(response -> {});
 
-					final Model snapshot=model();
+					final Model snapshot=GraphTest.model();
 
 					creator.handle(simple()).accept(response -> {
 
-						assertThat(response)
+						ResponseAssert.assertThat(response)
 								.hasStatus(Response.InternalServerError);
 
-						assertThat(model())
+						assertThat(GraphTest.model())
 								.as("graph unchanged")
 								.isIsomorphicTo(snapshot);
 
@@ -294,7 +294,7 @@ final class _CreatorTest {
 		@Nested final class Shaped { // containers are virtual => no unknown error
 
 			private Request shaped() {
-				return simple().shape(Employees);
+				return simple().shape(ValuesTest.Employees);
 			}
 
 
@@ -310,7 +310,7 @@ final class _CreatorTest {
 									.map(Values::iri)
 									.orElse(null);
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
@@ -321,9 +321,9 @@ final class _CreatorTest {
 							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("resource description stored into the graph")
 									.hasSubset(
-											statement(location, RDF.TYPE, term("Employee")),
-											statement(location, term("forename"), literal("Tino")),
-											statement(location, term("surname"), literal("Faussone"))
+											statement(location, RDF.TYPE, ValuesTest.term("Employee")),
+											statement(location, ValuesTest.term("forename"), literal("Tino")),
+											statement(location, ValuesTest.term("surname"), literal("Faussone"))
 									);
 
 						}));
@@ -340,20 +340,20 @@ final class _CreatorTest {
 									.map(Values::iri)
 									.orElse(null);
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
 							ValueAssert.assertThat(location)
 									.as("resource created with computed IRI")
-									.isEqualTo(item("employees/slug"));
+									.isEqualTo(ValuesTest.item("employees/slug"));
 
 							assertThat(service(engine()).relate(response.item(), items(and())))
 									.as("resource description stored into the graph")
 									.hasSubset(
-											statement(location, RDF.TYPE, term("Employee")),
-											statement(location, term("forename"), literal("Tino")),
-											statement(location, term("surname"), literal("Faussone"))
+											statement(location, RDF.TYPE, ValuesTest.term("Employee")),
+											statement(location, ValuesTest.term("forename"), literal("Tino")),
+											statement(location, ValuesTest.term("surname"), literal("Faussone"))
 									);
 
 						}));
@@ -367,7 +367,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Unauthorized)
 									.doesNotHaveHeader("Location")
 									.doesNotHaveBody();
@@ -386,7 +386,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.Forbidden)
 									.doesNotHaveHeader("Location")
 									.doesNotHaveBody();
@@ -405,7 +405,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.BadRequest)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
@@ -427,7 +427,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
@@ -443,11 +443,11 @@ final class _CreatorTest {
 				exec(() -> new _Creator()
 
 						.handle(shaped()
-								.roles(Salesman))
+								.roles(ValuesTest.Salesman))
 
 						.accept(response -> {
 
-							assertThat(response)
+							ResponseAssert.assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
@@ -466,14 +466,14 @@ final class _CreatorTest {
 
 					creator.handle(shaped()).accept(response -> {});
 
-					final Model snapshot=model();
+					final Model snapshot=GraphTest.model();
 
 					creator.handle(shaped()).accept(response -> {
 
-						assertThat(response)
+						ResponseAssert.assertThat(response)
 								.hasStatus(Response.InternalServerError);
 
-						assertThat(model())
+						assertThat(GraphTest.model())
 								.as("graph unchanged")
 								.isIsomorphicTo(snapshot);
 

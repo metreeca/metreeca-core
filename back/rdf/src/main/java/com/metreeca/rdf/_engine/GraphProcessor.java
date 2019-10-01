@@ -15,11 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf._probes._Optimizer;
-import com.metreeca.rdf.services.Snippets.Snippet;
+import com.metreeca.rdf._engine.Snippets.Snippet;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
@@ -32,9 +32,9 @@ import java.util.function.Supplier;
 
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.services.Snippets.list;
-import static com.metreeca.rdf.services.Snippets.nothing;
-import static com.metreeca.rdf.services.Snippets.snippet;
+import static com.metreeca.rdf._engine.Snippets.list;
+import static com.metreeca.rdf._engine.Snippets.nothing;
+import static com.metreeca.rdf._engine.Snippets.snippet;
 
 import static java.lang.Math.max;
 import static java.lang.String.format;

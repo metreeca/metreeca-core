@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf._engine;
 
 import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf._Form;
@@ -62,7 +62,7 @@ final class _RelatorTest {
 		new Context()
 				.set(engine(), GraphEngine::new)
 				.set(graph(), GraphTest::graph)
-				.exec(model(small()))
+				.exec(GraphTest.model(ValuesTest.small()))
 				.exec(tasks)
 				.clear();
 	}
@@ -73,11 +73,11 @@ final class _RelatorTest {
 	}
 
 	private Map.Entry<String, String> path(final String path) {
-		return entry("path", path);
+		return MapEntry.entry("path", path);
 	}
 
 	private Map.Entry<String, Map<String, Object>> filter(final String path, final Object value) {
-		return entry("filter", singletonMap(path, value));
+		return MapEntry.entry("filter", singletonMap(path, value));
 	}
 
 
@@ -88,7 +88,7 @@ final class _RelatorTest {
 		private Request simple() {
 			return new Request()
 					.method(Request.GET)
-					.base(Base)
+					.base(ValuesTest.Base)
 					.path("/employees/1102");
 		}
 
@@ -100,7 +100,7 @@ final class _RelatorTest {
 
 						.handle(simple())
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.OK)
 								.doesNotHaveShape()
@@ -116,9 +116,9 @@ final class _RelatorTest {
 			@Test void testRelateFiltered() {
 				exec(() -> new _Relator()
 
-						.handle(simple().query(query(entry("offset", 100))))
+						.handle(simple().query(query(MapEntry.entry("offset", 100))))
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.NotImplemented)
 								.hasBody(json(), json -> JSONAssert.assertThat(json)
 										.hasField("cause")
@@ -133,7 +133,7 @@ final class _RelatorTest {
 
 						.handle(simple().path("/employees/9999"))
 
-						.accept(response -> assertThat(response).hasStatus(Response.NotFound))
+						.accept(response -> ResponseAssert.assertThat(response).hasStatus(Response.NotFound))
 				);
 			}
 
@@ -143,8 +143,8 @@ final class _RelatorTest {
 
 			private Request shaped() {
 				return simple()
-						.roles(Manager)
-						.shape(Employee);
+						.roles(ValuesTest.Manager)
+						.shape(ValuesTest.Employee);
 			}
 
 
@@ -153,15 +153,15 @@ final class _RelatorTest {
 
 						.handle(shaped())
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.OK)
 
 								.hasShape()
 
-								.hasBody(rdf(), rdf -> assertThat(rdf)
+								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 										.as("items retrieved")
-										.hasSubset(model(
+										.hasSubset(GraphTest.model(
 												"construct where { <employees/1102> a :Employee; :code ?c; :seniority ?s }"
 										))
 								)
@@ -172,21 +172,21 @@ final class _RelatorTest {
 			@Test void testRelateThrottled() {
 				exec(() -> new _Relator()
 
-						.handle(shaped().roles(Salesman))
+						.handle(shaped().roles(ValuesTest.Salesman))
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.OK)
 
-								.hasBody(rdf(), rdf -> assertThat(rdf)
+								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
 										.as("items retrieved")
-										.hasSubset(model(
+										.hasSubset(GraphTest.model(
 												"construct where { <employees/1102> a :Employee; :code ?c }"
 										))
 
 										.as("properties restricted to manager role not included")
-										.doesNotHaveStatement(null, term("seniority"), null)
+										.doesNotHaveStatement(null, ValuesTest.term("seniority"), null)
 								)
 						)
 				);
@@ -200,7 +200,7 @@ final class _RelatorTest {
 								filter("seniority", singletonMap(">=", 2))
 						)))
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.NotImplemented)
 
@@ -213,7 +213,7 @@ final class _RelatorTest {
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
 										.as("items retrieved")
-										.hasSubset(model(
+										.hasSubset(GraphTest.model(
 												"construct {\n"
 														+"\n"
 														+"\t<employees/1102> ldp:contains ?employee.\n"
@@ -241,7 +241,7 @@ final class _RelatorTest {
 
 						.handle(shaped().shape(when(guard(Shape.Role, _Form.root), field(RDF.TYPE))))
 
-						.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
+						.accept(response -> ResponseAssert.assertThat(response).hasStatus(Response.Unauthorized))
 
 				);
 			}
@@ -251,7 +251,7 @@ final class _RelatorTest {
 
 						.handle(shaped().shape(or()))
 
-						.accept(response -> assertThat(response).hasStatus(Response.Forbidden))
+						.accept(response -> ResponseAssert.assertThat(response).hasStatus(Response.Forbidden))
 
 				);
 			}
@@ -261,7 +261,7 @@ final class _RelatorTest {
 
 						.handle(shaped().path("/employees/9999"))
 
-						.accept(response -> assertThat(response).hasStatus(Response.NotFound))
+						.accept(response -> ResponseAssert.assertThat(response).hasStatus(Response.NotFound))
 
 				);
 			}
@@ -274,9 +274,9 @@ final class _RelatorTest {
 
 		private Request simple() {
 			return new Request()
-					.roles(Manager)
+					.roles(ValuesTest.Manager)
 					.method(Request.GET)
-					.base(Base)
+					.base(ValuesTest.Base)
 					.path("/employees-basic/");
 		}
 
@@ -288,16 +288,16 @@ final class _RelatorTest {
 
 						.handle(simple())
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.OK)
 
 								.doesNotHaveShape()
 
-								.hasBody(rdf(), rdf -> assertThat(rdf)
+								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
 										.as("labelled descriptions included")
-										.hasSubset(model("construct {\n"
+										.hasSubset(GraphTest.model("construct {\n"
 												+"\n"
 												+"\t<employees-basic/> ldp:contains ?employee.\n"
 												+"\n"
@@ -313,7 +313,7 @@ final class _RelatorTest {
 										))
 
 										.as("connected resources not described")
-										.doesNotHaveSubset(model("construct {\n"
+										.doesNotHaveSubset(GraphTest.model("construct {\n"
 												+"\n"
 												+"\t?office :code ?code.\n"
 												+"\n"
@@ -335,7 +335,7 @@ final class _RelatorTest {
 
 						.handle(simple().query(query(filter("seniority", singletonMap(">=", 2)))))
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.UnprocessableEntity)
 								.hasBody(json())
 						)
@@ -348,7 +348,7 @@ final class _RelatorTest {
 
 			private Request shaped() {
 				return simple()
-						.shape(Employees)
+						.shape(ValuesTest.Employees)
 						.path("/employees/");
 			}
 
@@ -358,7 +358,7 @@ final class _RelatorTest {
 
 						.handle(shaped())
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.OK)
 
@@ -366,7 +366,7 @@ final class _RelatorTest {
 
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 										.hasStatement(iri(response.item()), LDP.CONTAINS, null)
-										.hasSubset(model("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
+										.hasSubset(GraphTest.model("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
 								)
 						)
 				);
@@ -375,19 +375,19 @@ final class _RelatorTest {
 			@Test void testBrowseThrottled() {
 				exec(() -> new _Relator()
 
-						.handle(shaped().roles(Salesman))
+						.handle(shaped().roles(ValuesTest.Salesman))
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.OK)
 
 								.hasShape()
 
-								.hasBody(rdf(), rdf -> assertThat(rdf)
-										.hasSubset(model("construct where { ?e a :Employee; rdfs:label ?label }"))
+								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
+										.hasSubset(GraphTest.model("construct where { ?e a :Employee; rdfs:label ?label }"))
 
 										.as("properties restricted to manager role not included")
-										.doesNotHaveStatement(null, term("seniority"), null)
+										.doesNotHaveStatement(null, ValuesTest.term("seniority"), null)
 								)
 						)
 				);
@@ -397,25 +397,25 @@ final class _RelatorTest {
 				exec(() -> new _Relator()
 
 						.handle(shaped()
-								.roles(Salesman)
+								.roles(ValuesTest.Salesman)
 								.query(query(filter("title", "Sales Rep")))
 						)
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.OK)
 
 								.hasShape()
 
-								.hasBody(rdf(), rdf -> assertThat(rdf)
+								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
-										.hasSubset(model(""
+										.hasSubset(GraphTest.model(""
 												+"construct { ?e a :Employee; :title ?t }\n"
 												+"where { ?e a :Employee; :title ?t, 'Sales Rep' }"
 										))
 
 										.as("only resources matching filter included")
-										.doesNotHaveStatement(null, term("title"), literal("President"))
+										.doesNotHaveStatement(null, ValuesTest.term("title"), literal("President"))
 								)
 						)
 				);
@@ -429,14 +429,14 @@ final class _RelatorTest {
 								"return=representation; include=\"%s\"", LDP.PREFER_MINIMAL_CONTAINER
 						)))
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 
 								.hasStatus(Response.OK)
 								.hasHeader("Preference-Applied", response.request().header("Prefer").orElse(""))
 
 								.hasShape()
 
-								.hasBody(rdf(), rdf -> assertThat(rdf)
+								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 										.doesNotHaveStatement(null, LDP.CONTAINS, null)
 								)
 						)
@@ -449,7 +449,7 @@ final class _RelatorTest {
 
 						.handle(shaped().roles(_Form.none))
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.Unauthorized)
 								.doesNotHaveBody()
 						)
@@ -461,7 +461,7 @@ final class _RelatorTest {
 
 						.handle(shaped().user(RDF.NIL).roles(_Form.none))
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.Forbidden)
 								.doesNotHaveBody()
 						)
@@ -473,13 +473,13 @@ final class _RelatorTest {
 
 						.handle(shaped()
 								.user(RDF.NIL)
-								.roles(Salesman)
+								.roles(ValuesTest.Salesman)
 								.query(createObjectBuilder()
 										.add("items", "seniority")
 										.build().toString())
 						)
 
-						.accept(response -> assertThat(response)
+						.accept(response -> ResponseAssert.assertThat(response)
 								.hasStatus(Response.UnprocessableEntity)
 								.hasBody(json(), json -> JSONAssert.assertThat(json)
 										.hasField("error")

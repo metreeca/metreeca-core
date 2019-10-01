@@ -6,9 +6,8 @@
       <directory url="file://$PROJECT_DIR$/back/stardog" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/back/virtuoso" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/handlers" includeSubdirectories="true" />
-      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/services" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/back/rdf/src/test/java/com/metreeca/rdf/handlers" includeSubdirectories="true" />
-      <directory url="file://$PROJECT_DIR$/back/rdf/src/test/java/com/metreeca/rdf/services" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/_engine" includeSubdirectories="true" />
     </excludeFromCompile>
     <annotationProcessing>
       <profile name="Maven default annotation processors profile" enabled="true">
@@ -17,14 +16,14 @@
         <outputRelativeToContentRoot value="true" />
         <module name="rest" />
         <module name="virtuoso" />
-        <module name="gcp" />
         <module name="rdf" />
-        <module name="stardog" />
-        <module name="gate" />
-        <module name="rdf4j" />
-        <module name="gae" />
-        <module name="servlet" />
+        <module name="gcp" />
         <module name="tree" />
+        <module name="rdf4j" />
+        <module name="stardog" />
+        <module name="servlet" />
+        <module name="gate" />
+        <module name="gae" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

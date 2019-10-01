@@ -45,7 +45,6 @@ import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.services.Graph.auto;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Engine.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -72,7 +71,7 @@ public final class GraphTest {
 
 	private void exec(final Runnable... tasks) {
 		new Context()
-				.set(engine(), GraphEngine::new)
+				//.set(engine(), GraphEngine::new)
 				.set(Graph.graph(), GraphTest::graph)
 				.exec(tasks)
 				.clear();
