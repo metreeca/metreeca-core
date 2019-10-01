@@ -50,9 +50,6 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.services.Logger.logger;
-import static com.metreeca.tree.Shape.multiple;
-import static com.metreeca.tree.Shape.optional;
-import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
@@ -61,8 +58,6 @@ import static com.metreeca.tree.shapes.Field.field;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.Direction.ASCENDING;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.Direction.DESCENDING;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
-import static com.google.cloud.datastore.ValueType.LONG;
-import static com.google.cloud.datastore.ValueType.STRING;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingLong;
@@ -77,34 +72,6 @@ import static java.util.stream.StreamSupport.stream;
 final class DatastoreRelator extends DatastoreProcessor {
 
 	private static final String KeyProperty="__key__";
-
-
-	private static final Shape TermShape=and(
-			field(GCP.label, and(optional(), datatype(STRING)))
-	);
-
-	private static final Shape TermsShape=and(
-			field(GCP.terms, and(multiple(),
-					field(GCP.value, and(required(), TermShape)),
-					field(GCP.count, and(required(), datatype(LONG)))
-			))
-	);
-
-	private static final Shape StatsShape=and(
-
-			field(GCP.count, and(required(), datatype(LONG))),
-			field(GCP.min, and(optional(), TermShape)),
-			field(GCP.max, and(optional(), TermShape)),
-
-			field(GCP.stats, and(multiple(),
-					field(GCP.type, and(required(), datatype(STRING))),
-					field(GCP.count, and(required(), datatype(LONG))),
-					field(GCP.min, and(required(), TermShape)),
-					field(GCP.max, and(required(), TermShape))
-			))
-
-	);
-
 
 
 	private static String key(final String path) {
@@ -228,7 +195,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		final Entity container=Entity.newBuilder(datastore.newKeyFactory().setKind(GCP.Resource).newKey(path))
 
-				.set(GCP.terms, this.<List<EntityValue>>values(terms.getShape(), terms.getPath(), values -> values
+				.set(DatastoreEngine.terms, this.<List<EntityValue>>values(terms.getShape(), terms.getPath(), values -> values
 
 						.collect(groupingBy(v -> v, counting()))
 						.entrySet()
@@ -238,8 +205,8 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 						.map(entry -> FullEntity.newBuilder()
 
-								.set(GCP.value, entry.getKey())
-								.set(GCP.count, entry.getValue())
+								.set(DatastoreEngine.value, entry.getKey())
+								.set(DatastoreEngine.count, entry.getValue())
 
 								.build())
 
@@ -251,7 +218,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		return response -> response
 				.status(OK)
-				.shape(TermsShape)
+				.shape(DatastoreEngine.TermsShape)
 				.body(format, container);
 
 	}
@@ -288,9 +255,9 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 			private void set(final BaseEntity.Builder<?, ?> container) {
 
-				container.set(GCP.count, count);
-				container.set(GCP.min, min);
-				container.set(GCP.max, max);
+				container.set(DatastoreEngine.count, count);
+				container.set(DatastoreEngine.min, min);
+				container.set(DatastoreEngine.max, max);
 
 			}
 
@@ -309,7 +276,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		if ( ranges.isEmpty() ) {
 
-			container.set(GCP.count, 0L);
+			container.set(DatastoreEngine.count, 0L);
 
 		} else {
 
@@ -318,7 +285,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 					.orElse(new Range(0, null, null)) // unexpected
 					.set(container);
 
-			container.set(GCP.stats, ranges.entrySet().stream() // type-specific stats
+			container.set(DatastoreEngine.stats, ranges.entrySet().stream() // type-specific stats
 
 					.sorted(Map.Entry
 							.<String, Range>comparingByValue(Range::order) // decreasing count
@@ -343,7 +310,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		return response -> response
 				.status(OK)
-				.shape(StatsShape)
+				.shape(DatastoreEngine.StatsShape)
 				.body(format, container.build());
 
 	}

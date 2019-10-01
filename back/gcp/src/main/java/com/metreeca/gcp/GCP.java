@@ -38,15 +38,9 @@ public final class GCP {
 	public static final String label="label";
 	public static final String contains="contains";
 
-	public static final String terms="terms";
-	public static final String stats="stats";
-
-	public static final String count="count";
-	public static final String min="min";
-	public static final String max="max";
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private GCP() {} // utility
 
 }
