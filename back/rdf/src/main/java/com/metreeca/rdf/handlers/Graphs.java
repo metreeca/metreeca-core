@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf.handlers;
 
+import com.metreeca.rdf.Formats;
+import com.metreeca.rdf.Values;
 import com.metreeca.rdf._Form;
 import com.metreeca.rdf.services.Graph;
-import com.metreeca.rdf.Values;
-import com.metreeca.rdf.Formats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tree.Shape;
@@ -105,7 +105,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			} else if ( !queryable(request.roles()) ) {
 
-				Handler.refused(request).accept(consumer);
+				request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
 
 			} else if ( catalog ) { // graph catalog
 
@@ -180,7 +180,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			} else if ( !updatable(request.roles()) ) {
 
-				Handler.refused(request).accept(consumer);
+				request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
 
 			} else {
 
@@ -266,7 +266,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			} else if ( !updatable(request.roles()) ) {
 
-				Handler.refused(request).accept(consumer);
+				request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
 
 			} else {
 
@@ -321,7 +321,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			} else if ( !updatable(request.roles()) ) {
 
-				Handler.refused(request).accept(consumer);
+				request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
 
 			} else {
 

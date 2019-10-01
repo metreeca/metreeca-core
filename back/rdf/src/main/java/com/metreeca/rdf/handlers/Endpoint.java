@@ -72,7 +72,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 		return query.isEmpty() || !disjoint(query, roles);
 	}
 
-	protected boolean updatable(final Collection<IRI> roles) {
+	protected boolean updatable(final Collection<Object> roles) {
 		return update.isEmpty() || !disjoint(update, roles);
 	}
 

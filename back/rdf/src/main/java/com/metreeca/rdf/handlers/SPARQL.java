@@ -81,7 +81,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 						|| operation instanceof Update && !updatable(request.roles())
 				) {
 
-					Handler.refused(request).accept(consumer);
+					request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
 
 				} else if ( operation instanceof BooleanQuery ) {
 

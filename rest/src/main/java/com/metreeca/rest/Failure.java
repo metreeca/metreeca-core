@@ -63,6 +63,16 @@ public final class Failure implements Function<Response, Response> {
 
 
 	/**
+	 * Creates a failure for a request authorization issue.
+	 *
+	 * @return a new failure reporting {@code cause} with a {@value Response#Unauthorized} status code
+	 */
+	public static Failure unauthorized() {
+		return new Failure()
+				.status(Response.Unauthorized);
+	}
+
+	/**
 	 * Creates a failure for a payload parsing issue.
 	 *
 	 * @param cause the parsing error
@@ -177,7 +187,8 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error notes.
 	 *
-	 * @param notes a human readable description of the error condition defined by this failure; ignored if null or empty
+	 * @param notes a human readable description of the error condition defined by this failure; ignored if null or
+	 *              empty
 	 *
 	 * @return this failure
 	 */
@@ -191,14 +202,15 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures error trace.
 	 *
-	 * @param trace a shape validation trace describing the error condition defined by this failure; ignored if null or empty
+	 * @param trace a shape validation trace describing the error condition defined by this failure; ignored if null or
+	 *              empty
 	 *
 	 * @return this failure
 	 *
 	 * @throws NullPointerException if {@code trace} is null
 	 */
 	public Failure trace(final Trace trace) {
-		return trace(trace == null || trace.isEmpty()? null : format(trace));
+		return trace(trace == null || trace.isEmpty() ? null : format(trace));
 	}
 
 	/**
@@ -226,12 +238,13 @@ public final class Failure implements Function<Response, Response> {
 	/**
 	 * Configures the error cause.
 	 *
-	 * @param cause a human readable description of cause of the error condition defined by this failure; ignored if null or empty
+	 * @param cause a human readable description of cause of the error condition defined by this failure; ignored if
+	 *              null or empty
 	 *
 	 * @return this failure
 	 */
 	public Failure cause(final String cause) {
-		return cause(cause == null || cause.isEmpty()? null : new RuntimeException(cause));
+		return cause(cause == null || cause.isEmpty() ? null : new RuntimeException(cause));
 	}
 
 	/**

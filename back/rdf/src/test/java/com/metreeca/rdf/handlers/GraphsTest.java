@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.handlers;
 
-import com.metreeca.rdf._Form;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rdf._Form;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rdf.services.GraphTest;
 import com.metreeca.rest.Context;
@@ -35,8 +35,8 @@ import org.eclipse.rdf4j.model.vocabulary.VOID;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
-import java.util.Set;
 
+import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.encode;
@@ -44,18 +44,16 @@ import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf.services.GraphTest.export;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rdf.ModelAssert.assertThat;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toCollection;
 
 
 final class GraphsTest {
 
-	private static final Set<Statement> First=singleton(statement(RDF.NIL, RDF.VALUE, RDF.FIRST));
-	private static final Set<Statement> Rest=singleton(statement(RDF.NIL, RDF.VALUE, RDF.REST));
+	private static final Statement First=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
+	private static final Statement Rest=statement(RDF.NIL, RDF.VALUE, RDF.REST);
 
 
 	private Context with(final Runnable... datasets) {
@@ -96,12 +94,16 @@ final class GraphsTest {
 	}
 
 
-	private Runnable named(final Iterable<Statement> model) {
-		return GraphTest.model(model, RDF.NIL);
+	private Model model(final Statement... model) {
+		return new LinkedHashModel(asList(model));
 	}
 
-	private Runnable dflt(final Iterable<Statement> model) {
-		return GraphTest.model(model, (Resource)null);
+	private Runnable named(final Statement... model) {
+		return GraphTest.model(asList(model), RDF.NIL);
+	}
+
+	private Runnable dflt(final Statement... model) {
+		return GraphTest.model(asList(model), (Resource)null);
 	}
 
 
@@ -142,7 +144,7 @@ final class GraphsTest {
 
 	private Request put(final Request request) {
 		return request.method(Request.PUT).body(InputFormat.input(), () ->
-				new ByteArrayInputStream(encode(Rest).getBytes(UTF_8))
+				new ByteArrayInputStream(encode(model(Rest)).getBytes(UTF_8))
 		);
 	}
 
@@ -152,7 +154,7 @@ final class GraphsTest {
 
 	private Request post(final Request request) {
 		return request.method(Request.POST).body(InputFormat.input(), () ->
-				new ByteArrayInputStream(encode(Rest).getBytes(UTF_8))
+				new ByteArrayInputStream(encode(model(Rest)).getBytes(UTF_8))
 		);
 	}
 
@@ -622,7 +624,7 @@ final class GraphsTest {
 					assertThat(response)
 							.isSuccess()
 							.doesNotHaveBody();
-					assertThat(dflt()).isIsomorphicTo(union(First, Rest));
+					assertThat(dflt()).isIsomorphicTo(model(First, Rest));
 
 				}));
 	}
@@ -656,7 +658,7 @@ final class GraphsTest {
 							.doesNotHaveBody();
 
 					assertThat(dflt())
-							.isIsomorphicTo(union(First, Rest));
+							.isIsomorphicTo(model(First, Rest));
 
 				}));
 	}
@@ -691,7 +693,7 @@ final class GraphsTest {
 							.doesNotHaveBody();
 
 					assertThat(named())
-							.isIsomorphicTo(union(First, Rest));
+							.isIsomorphicTo(model(First, Rest));
 
 				}));
 	}
@@ -723,7 +725,7 @@ final class GraphsTest {
 					assertThat(response)
 							.isSuccess()
 							.doesNotHaveBody();
-					assertThat(named()).isIsomorphicTo(union(First, Rest));
+					assertThat(named()).isIsomorphicTo(model(First, Rest));
 
 				}));
 	}
