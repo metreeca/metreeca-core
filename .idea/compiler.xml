@@ -2,9 +2,6 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <excludeFromCompile>
-      <directory url="file://$PROJECT_DIR$/back/rdf4j" includeSubdirectories="true" />
-      <directory url="file://$PROJECT_DIR$/back/stardog" includeSubdirectories="true" />
-      <directory url="file://$PROJECT_DIR$/back/virtuoso" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/_engine" includeSubdirectories="true" />
     </excludeFromCompile>
     <annotationProcessing>
