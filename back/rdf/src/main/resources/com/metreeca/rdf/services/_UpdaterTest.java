@@ -15,11 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.services.GraphEngine;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -30,12 +29,10 @@ import java.io.StringReader;
 import java.util.function.Function;
 
 import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rdf.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.services.Engine.engine;
 
@@ -84,11 +81,11 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 
 									.as("updated values inserted")
 									.hasSubset(ValuesTest.decode("</employees/1370>"
@@ -116,13 +113,13 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.BadRequest)
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error")
 									);
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(ValuesTest.small());
 
@@ -140,14 +137,14 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error")
 									);
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(ValuesTest.small());
 
@@ -170,11 +167,11 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.NoContent)
 									.doesNotHaveBody();
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 
 									.as("updated values inserted")
 									.hasSubset(ValuesTest.decode("</employees/1370>"
@@ -203,11 +200,11 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.Unauthorized)
 									.doesNotHaveBody();
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(ValuesTest.small());
 
@@ -221,11 +218,11 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.Forbidden)
 									.doesNotHaveBody();
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(ValuesTest.small());
 
@@ -239,12 +236,12 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.BadRequest)
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error"));
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(ValuesTest.small());
 
@@ -263,12 +260,12 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error"));
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(ValuesTest.small());
 
@@ -282,13 +279,13 @@ final class _UpdaterTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("error")
 									);
 
-							ModelAssert.assertThat(GraphTest.model())
+							ModelAssert.assertThat(model())
 									.as("graph unchanged")
 									.isIsomorphicTo(ValuesTest.small());
 
@@ -318,7 +315,7 @@ final class _UpdaterTest {
 
 						.handle(simple())
 
-						.accept(response -> ResponseAssert.assertThat(response)
+						.accept(response -> assertThat(response)
 								.hasStatus(Response.NotImplemented)
 								.hasBody(json(), json -> JSONAssert.assertThat(json)
 										.hasField("cause")
@@ -341,7 +338,7 @@ final class _UpdaterTest {
 
 						.handle(shaped())
 
-						.accept(response -> ResponseAssert.assertThat(response)
+						.accept(response -> assertThat(response)
 								.hasStatus(Response.NotImplemented)
 								.hasBody(json(), json -> JSONAssert.assertThat(json)
 										.hasField("cause")

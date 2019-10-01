@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <excludeFromCompile>
-      <directory url="file://$PROJECT_DIR$/back/rdf/src/main/java/com/metreeca/rdf/_engine" includeSubdirectories="true" />
-    </excludeFromCompile>
     <annotationProcessing>
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="rest" />
-        <module name="virtuoso" />
-        <module name="rdf" />
-        <module name="gcp" />
-        <module name="tree" />
         <module name="rdf4j" />
+        <module name="tree" />
+        <module name="rdf" />
+        <module name="rest" />
+        <module name="gae" />
+        <module name="gcp" />
         <module name="stardog" />
+        <module name="virtuoso" />
         <module name="servlet" />
         <module name="gate" />
-        <module name="gae" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

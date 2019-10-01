@@ -15,11 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.services.GraphEngine;
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -37,7 +36,6 @@ import java.util.stream.Stream;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
-import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rdf.services.GraphTest.model;
@@ -48,8 +46,6 @@ import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Guard.guard;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
-import static org.assertj.core.data.MapEntry.entry;
 
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
@@ -162,7 +158,7 @@ final class _RelatorTest {
 
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 										.as("items retrieved")
-										.hasSubset(GraphTest.model(
+										.hasSubset(model(
 												"construct where { <employees/1102> a :Employee; :code ?c; :seniority ?s }"
 										))
 								)
@@ -182,7 +178,7 @@ final class _RelatorTest {
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
 										.as("items retrieved")
-										.hasSubset(GraphTest.model(
+										.hasSubset(model(
 												"construct where { <employees/1102> a :Employee; :code ?c }"
 										))
 
@@ -214,7 +210,7 @@ final class _RelatorTest {
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
 										.as("items retrieved")
-										.hasSubset(GraphTest.model(
+										.hasSubset(model(
 												"construct {\n"
 														+"\n"
 														+"\t<employees/1102> ldp:contains ?employee.\n"
@@ -298,7 +294,7 @@ final class _RelatorTest {
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
 										.as("labelled descriptions included")
-										.hasSubset(GraphTest.model("construct {\n"
+										.hasSubset(model("construct {\n"
 												+"\n"
 												+"\t<employees-basic/> ldp:contains ?employee.\n"
 												+"\n"
@@ -314,7 +310,7 @@ final class _RelatorTest {
 										))
 
 										.as("connected resources not described")
-										.doesNotHaveSubset(GraphTest.model("construct {\n"
+										.doesNotHaveSubset(model("construct {\n"
 												+"\n"
 												+"\t?office :code ?code.\n"
 												+"\n"
@@ -367,7 +363,7 @@ final class _RelatorTest {
 
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 										.hasStatement(iri(response.item()), LDP.CONTAINS, null)
-										.hasSubset(GraphTest.model("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
+										.hasSubset(model("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
 								)
 						)
 				);
@@ -385,7 +381,7 @@ final class _RelatorTest {
 								.hasShape()
 
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
-										.hasSubset(GraphTest.model("construct where { ?e a :Employee; rdfs:label ?label }"))
+										.hasSubset(model("construct where { ?e a :Employee; rdfs:label ?label }"))
 
 										.as("properties restricted to manager role not included")
 										.doesNotHaveStatement(null, ValuesTest.term("seniority"), null)
@@ -410,7 +406,7 @@ final class _RelatorTest {
 
 								.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
 
-										.hasSubset(GraphTest.model(""
+										.hasSubset(model(""
 												+"construct { ?e a :Employee; :title ?t }\n"
 												+"where { ?e a :Employee; :title ?t, 'Sales Rep' }"
 										))

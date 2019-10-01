@@ -15,11 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.services.GraphEngine;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query;
@@ -45,7 +44,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf._engine.Snippets.*;
+import static com.metreeca.rdf.services.Snippets.*;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
@@ -342,10 +341,10 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 		return model;
 	}
 
-	@Override public Collection<Statement> probe(final Terms items) {
+	@Override public Collection<Statement> probe(final Terms terms) {
 
-		final Shape shape=items.getShape();
-		final List<IRI> path=items.getPath().stream().map(Values::iri).collect(toList());
+		final Shape shape=terms.getShape();
+		final List<IRI> path=terms.getPath().stream().map(Values::iri).collect(toList());
 
 		final Model model=new LinkedHashModel();
 
@@ -399,12 +398,12 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-				final BNode item=bnode();
+				final BNode term=bnode();
 
-				if ( item != null ) { model.add(resource, GraphEngine.items, item); }
-				if ( item != null && value != null ) { model.add(item, GraphEngine.value, value); }
-				if ( item != null && count != null ) {
-					model.add(item, GraphEngine.count, literal(integer(count).orElse(BigInteger.ZERO)));
+				if ( term != null ) { model.add(resource, GraphEngine.terms, term); }
+				if ( term != null && value != null ) { model.add(term, GraphEngine.value, value); }
+				if ( term != null && count != null ) {
+					model.add(term, GraphEngine.count, literal(integer(count).orElse(BigInteger.ZERO)));
 				}
 
 				// !!! manage multiple languages

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;

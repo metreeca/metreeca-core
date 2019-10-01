@@ -15,17 +15,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
 
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.ValuesTest.Base;
-import static com.metreeca.rdf.ValuesTest.small;
 import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
 

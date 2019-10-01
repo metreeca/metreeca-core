@@ -15,17 +15,19 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
-import com.metreeca.rdf._probes._Optimizer;
-import com.metreeca.tree.Form;
 import com.metreeca.rdf.ModelAssert;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rdf._probes.Outliner;
+import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
 import com.metreeca.tree.shapes.All;
 import com.metreeca.tree.shapes.Meta;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -33,24 +35,21 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.tree.probes.Evaluator.pass;
-import static com.metreeca.tree.things.ValuesTest.*;
-import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.ValuesTest.*;
-import static com.metreeca.rdf._engine.Shapes.container;
-import static com.metreeca.rdf._engine.Shapes.entity;
-import static com.metreeca.rdf._engine.Shapes.resource;
+import static com.metreeca.rdf.services.Shapes.container;
+import static com.metreeca.rdf.services.Shapes.entity;
+import static com.metreeca.rdf.services.Shapes.resource;
 import static com.metreeca.tree.Shape.relate;
 import static com.metreeca.tree.Shape.required;
+import static com.metreeca.tree.probes.Evaluator.pass;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.Meta.meta;
 import static com.metreeca.tree.shapes.Meta.metas;
+import static com.metreeca.tree.things.ValuesTest.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -77,9 +76,9 @@ import static java.util.stream.Collectors.toSet;
 		@Nested final class Entity {
 
 			@Test void testForwardAndAnnotateComboShape() {
-				Assertions.assertThat(entity(ValuesTest.Employees))
+				assertThat(entity(ValuesTest.Employees))
 
-						.satisfies(shape -> Assertions.assertThat(fields(shape).keySet())
+						.satisfies(shape -> assertThat(fields(shape).keySet())
 								.as("all fields retained")
 								.isEqualTo(fields(ValuesTest.Employees.map(new _Optimizer())).keySet())
 						)
@@ -93,16 +92,16 @@ import static java.util.stream.Collectors.toSet;
 								)
 						)
 
-						.satisfies(shape -> assertThat(pass(shape.map(new Redactor(Form.role, Form.none))))
+						.satisfies(shape -> assertThat(pass(shape.map(new Redactor(Shape.Role, Values.none))))
 								.as("role-based authorization preserved")
 								.isTrue()
 						);
 			}
 
 			@Test void testForwardAndAnnotateContainerShape() {
-				Assertions.assertThat(entity(Container))
+				assertThat(entity(Container))
 
-						.satisfies(shape -> Assertions.assertThat(fields(shape))
+						.satisfies(shape -> assertThat(fields(shape))
 								.as("only container fields retained")
 								.isEqualTo(fields(Container.map(new _Optimizer())))
 						)
@@ -118,7 +117,7 @@ import static java.util.stream.Collectors.toSet;
 			}
 
 			@Test void testForwardResourceShape() {
-				Assertions.assertThat(entity(ValuesTest.Employee))
+				assertThat(entity(ValuesTest.Employee))
 						.as("only resource shape found")
 						.isEqualTo(ValuesTest.Employee.map(new _Optimizer()));
 			}
@@ -128,9 +127,9 @@ import static java.util.stream.Collectors.toSet;
 		@Nested final class Resource {
 
 			@Test void testExtractAndAnnotateResourceShapeFromComboShape() {
-				Assertions.assertThat(resource(ValuesTest.Employees))
+				assertThat(resource(ValuesTest.Employees))
 
-						.satisfies(shape -> Assertions.assertThat(fields(shape))
+						.satisfies(shape -> assertThat(fields(shape))
 								.as("only resource fields retained")
 								.isEqualTo(fields(ValuesTest.Employee.map(new _Optimizer())))
 						)
@@ -146,9 +145,9 @@ import static java.util.stream.Collectors.toSet;
 			}
 
 			@Test void testForwardAndAnnotateContainerShape() {
-				Assertions.assertThat(resource(Container))
+				assertThat(resource(Container))
 
-						.satisfies(shape -> Assertions.assertThat(fields(shape))
+						.satisfies(shape -> assertThat(fields(shape))
 								.as("only container fields retained")
 								.isEqualTo(fields(Container.map(new _Optimizer())))
 						)
@@ -164,7 +163,7 @@ import static java.util.stream.Collectors.toSet;
 			}
 
 			@Test void testForwardResourceShape() {
-				Assertions.assertThat(resource(ValuesTest.Employee))
+				assertThat(resource(ValuesTest.Employee))
 						.as("only resource shape found")
 						.isEqualTo(ValuesTest.Employee.map(new _Optimizer()));
 			}
@@ -173,7 +172,7 @@ import static java.util.stream.Collectors.toSet;
 
 				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
-				Assertions.assertThat(resource(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
+				assertThat(resource(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
 			}
 
@@ -182,9 +181,9 @@ import static java.util.stream.Collectors.toSet;
 		@Nested final class Container {
 
 			@Test void testExtractAndAnnotateContainerShapeFromComboShape() {
-				Assertions.assertThat(container(ValuesTest.Employees))
+				assertThat(container(ValuesTest.Employees))
 
-						.satisfies(shape -> Assertions.assertThat(fields(shape).keySet())
+						.satisfies(shape -> assertThat(fields(shape).keySet())
 								.as("only container fields retained")
 								.isEqualTo(fields(ValuesTest.Employees)
 										.keySet().stream()
@@ -204,7 +203,7 @@ import static java.util.stream.Collectors.toSet;
 			}
 
 			@Test void testIgnoreResourceShape() {
-				Assertions.assertThat(container(ValuesTest.Employee))
+				assertThat(container(ValuesTest.Employee))
 						.as("no container shape found")
 						.isEqualTo(pass());
 
@@ -214,7 +213,7 @@ import static java.util.stream.Collectors.toSet;
 
 				final Shape shape=and(meta(RDF.TYPE, LDP.BASIC_CONTAINER), field(LDP.CONTAINS, required()));
 
-				Assertions.assertThat(container(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
+				assertThat(container(shape)).isEqualTo(meta(RDF.TYPE, LDP.BASIC_CONTAINER));
 
 			}
 
@@ -237,9 +236,9 @@ import static java.util.stream.Collectors.toSet;
 		@Nested final class Resource {
 
 			@Test void testAnchorToResource() {
-				Assertions.assertThat(all(redact(resource(resource, ValuesTest.Employee))))
+				assertThat(all(redact(resource(resource, ValuesTest.Employee))))
 						.isPresent()
-						.hasValueSatisfying(values -> Assertions.assertThat(values)
+						.hasValueSatisfying(values -> assertThat(values)
 								.containsOnly(resource)
 						);
 			}

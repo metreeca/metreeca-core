@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 
 import com.metreeca.tree.Form;
@@ -29,7 +29,7 @@ import com.metreeca.tree.Shape;
 import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.tree.things.Shapes.resource;
-import static com.metreeca.rdf._engine.Shapes.resource;
+import static com.metreeca.rdf.services.Shapes.resource;
 import static com.metreeca.rest.Engine.engine;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.tray.Tray.tool;

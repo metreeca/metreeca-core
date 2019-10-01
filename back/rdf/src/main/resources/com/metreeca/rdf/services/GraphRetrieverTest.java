@@ -15,10 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.services.Graph;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
@@ -64,8 +63,6 @@ import static com.metreeca.tree.things.Values.*;
 import static com.metreeca.tree.things.ValuesTest.decode;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.ValuesTest.item;
-import static com.metreeca.rdf.ValuesTest.term;
 import static com.metreeca.rdf.services.GraphTest.tuples;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
@@ -208,7 +205,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 						.distinct()
 						.collect(toList());
 
-				final Function<String, List<Value>> expected=sparql -> GraphTest.tuples(sparql)
+				final Function<String, List<Value>> expected=sparql -> tuples(sparql)
 						.stream()
 						.map(map -> map.get("employee"))
 						.distinct()
@@ -389,7 +386,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		}
 
 		@Test void testGuard() {
-			exec(() -> Assertions.assertThatThrownBy(() ->
+			exec(() -> assertThatThrownBy(() ->
 					query(items(guard(RDF.VALUE, RDF.NIL)))
 
 			).as("reject partially redacted shapes")
@@ -629,7 +626,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 	@Nested final class SetConstraints {
 
 		@Test void testMinCount() {
-			exec(() -> Assertions.assertThatThrownBy(() -> query(
+			exec(() -> assertThatThrownBy(() -> query(
 
 					items(field(ValuesTest.term("employee"), minCount(3)))
 
@@ -637,7 +634,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		}
 
 		@Test void testMaxCount() {
-			exec(() -> Assertions.assertThatThrownBy(() -> query(
+			exec(() -> assertThatThrownBy(() -> query(
 
 					items(field(ValuesTest.term("employee"), maxCount(3)))
 
@@ -646,7 +643,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 
 
 		@Test void testIn() {
-			exec(() -> Assertions.assertThatThrownBy(() -> query(
+			exec(() -> assertThatThrownBy(() -> query(
 
 					items(field(ValuesTest.term("office"), in(ValuesTest.item("employees/1621"), ValuesTest.item("employees/1625"))))
 
@@ -909,7 +906,7 @@ final class GraphRetrieverTest extends GraphProcessorTest {
 		}
 
 		@Test void testWhen() {
-			exec(() -> Assertions.assertThatThrownBy(() -> query(
+			exec(() -> assertThatThrownBy(() -> query(
 
 					items(when(guard(RDF.VALUE, RDF.NIL), clazz(RDFS.LITERAL)))
 

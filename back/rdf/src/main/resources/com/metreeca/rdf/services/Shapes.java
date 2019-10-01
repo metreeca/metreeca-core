@@ -15,12 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
-import com.metreeca.tree.shapes.*;
+import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Traverser;
+import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -35,23 +36,20 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.tree.Shape.filter;
 import static com.metreeca.tree.probes.Evaluator.pass;
+import static com.metreeca.tree.shapes.All.all;
+import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.Memoizing.*;
+import static com.metreeca.tree.shapes.Meta.metas;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
 import static com.metreeca.tree.things.Maps.entry;
 import static com.metreeca.tree.things.Sets.set;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.tree.shapes.All.all;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Meta.meta;
-import static com.metreeca.tree.shapes.Meta.metas;
-import static com.metreeca.tree.shapes.Or.or;
-import static com.metreeca.tree.shapes.When.when;
 
 import static java.util.stream.Collectors.toList;
 

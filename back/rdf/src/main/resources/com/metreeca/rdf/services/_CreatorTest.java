@@ -15,11 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 
 import com.metreeca.rdf.ValueAssert;
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONAssert;
 
@@ -37,7 +38,6 @@ import java.util.function.Function;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.services.GraphTest.model;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -84,7 +84,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.NotImplemented)
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("cause")
@@ -114,7 +114,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.NotImplemented)
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
 											.hasField("cause")
@@ -169,7 +169,7 @@ final class _CreatorTest {
 									.map(Values::iri)
 									.orElse(null);
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
@@ -184,7 +184,7 @@ final class _CreatorTest {
 											statement(resource, ValuesTest.term("surname"), literal("Faussone"))
 									);
 
-							assertThat(GraphTest.model())
+							assertThat(model())
 									.as("basic container connected to resource description")
 									.hasSubset(
 											statement(container, LDP.CONTAINS, resource)
@@ -200,7 +200,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
@@ -210,7 +210,7 @@ final class _CreatorTest {
 									.as("resource created with computed IRI")
 									.isEqualTo(ValuesTest.item("employees/slug"));
 
-							assertThat(GraphTest.model())
+							assertThat(model())
 									.hasSubset(
 											statement(item, ValuesTest.term("forename"), literal("Tino")),
 											statement(item, ValuesTest.term("surname"), literal("Faussone"))
@@ -227,7 +227,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.BadRequest)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
@@ -252,7 +252,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json)
@@ -273,14 +273,14 @@ final class _CreatorTest {
 
 					creator.handle(simple()).accept(response -> {});
 
-					final Model snapshot=GraphTest.model();
+					final Model snapshot=model();
 
 					creator.handle(simple()).accept(response -> {
 
-						ResponseAssert.assertThat(response)
+						assertThat(response)
 								.hasStatus(Response.InternalServerError);
 
-						assertThat(GraphTest.model())
+						assertThat(model())
 								.as("graph unchanged")
 								.isIsomorphicTo(snapshot);
 
@@ -310,7 +310,7 @@ final class _CreatorTest {
 									.map(Values::iri)
 									.orElse(null);
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
@@ -340,7 +340,7 @@ final class _CreatorTest {
 									.map(Values::iri)
 									.orElse(null);
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.Created)
 									.doesNotHaveBody();
 
@@ -367,7 +367,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.Unauthorized)
 									.doesNotHaveHeader("Location")
 									.doesNotHaveBody();
@@ -386,7 +386,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.Forbidden)
 									.doesNotHaveHeader("Location")
 									.doesNotHaveBody();
@@ -405,7 +405,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.BadRequest)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
@@ -427,7 +427,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
@@ -447,7 +447,7 @@ final class _CreatorTest {
 
 						.accept(response -> {
 
-							ResponseAssert.assertThat(response)
+							assertThat(response)
 									.hasStatus(Response.UnprocessableEntity)
 									.doesNotHaveHeader("Location")
 									.hasBody(json(), json -> JSONAssert.assertThat(json).hasField("error"));
@@ -466,14 +466,14 @@ final class _CreatorTest {
 
 					creator.handle(shaped()).accept(response -> {});
 
-					final Model snapshot=GraphTest.model();
+					final Model snapshot=model();
 
 					creator.handle(shaped()).accept(response -> {
 
-						ResponseAssert.assertThat(response)
+						assertThat(response)
 								.hasStatus(Response.InternalServerError);
 
-						assertThat(GraphTest.model())
+						assertThat(model())
 								.as("graph unchanged")
 								.isIsomorphicTo(snapshot);
 

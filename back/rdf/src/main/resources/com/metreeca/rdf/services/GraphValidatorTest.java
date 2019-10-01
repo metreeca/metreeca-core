@@ -15,10 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._engine;
+package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.services.Graph;
 import com.metreeca.tree.*;
 import com.metreeca.tree.shapes.Field;
 import com.metreeca.tree.truths.ModelAssert;
