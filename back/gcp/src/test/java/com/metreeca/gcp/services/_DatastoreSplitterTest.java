@@ -35,12 +35,12 @@ import static com.metreeca.tree.shapes.Or.or;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class DatastoreSplitterTest extends DatastoreTestBase {
+final class _DatastoreSplitterTest extends DatastoreTestBase {
 
 	@Nested final class Container {
 
 		private Shape container(final Shape shape) {
-			return new DatastoreSplitter().container(shape);
+			return new _DatastoreSplitter().container(shape);
 		}
 
 
@@ -86,7 +86,7 @@ final class DatastoreSplitterTest extends DatastoreTestBase {
 	@Nested final class Resource {
 
 		private Shape resource(final Shape shape) {
-			return new DatastoreSplitter().resource(shape);
+			return new _DatastoreSplitter().resource(shape);
 		}
 
 

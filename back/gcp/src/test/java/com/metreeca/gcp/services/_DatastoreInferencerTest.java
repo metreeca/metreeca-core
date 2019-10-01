@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.Collectors.toList;
 
 
-final class DatastoreInferencerTest {
+final class _DatastoreInferencerTest {
 
 	@Test void testHint() {
 
@@ -134,7 +134,7 @@ final class DatastoreInferencerTest {
 	}
 
 	private Shape expand(final Shape shape) {
-		return optimize(shape.map(new DatastoreInferencer()));
+		return optimize(shape.map(new _DatastoreInferencer()));
 	}
 
 }

@@ -27,7 +27,7 @@ abstract class DatastoreProcessor {
 	Shape expand(final Shape shape) { // !!! caching
 		return shape
 
-				.map(new DatastoreInferencer())
+				.map(new _DatastoreInferencer())
 				.map(new Optimizer());
 	}
 

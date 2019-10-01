@@ -81,7 +81,7 @@ public final class DatastoreEngine implements Engine {
 
 	private final Datastore datastore=service(datastore());
 
-	private final DatastoreSplitter splitter=new DatastoreSplitter();
+	private final _DatastoreSplitter splitter=new _DatastoreSplitter();
 	private final DatastoreTrimmer trimmer=new DatastoreTrimmer(datastore);
 	private final DatastoreValidator validator=new DatastoreValidator(datastore);
 

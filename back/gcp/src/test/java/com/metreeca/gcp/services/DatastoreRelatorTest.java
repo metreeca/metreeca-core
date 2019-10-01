@@ -49,7 +49,6 @@ import static com.metreeca.tree.shapes.Or.or;
 import static com.google.cloud.datastore.ValueType.LONG;
 import static com.google.cloud.datastore.ValueType.STRING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -432,11 +431,11 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 						.accept(response -> assertThat(response)
 								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
-										.isEqualTo(items(e ->  e.contains("subordinates") && singleton("Yoshimi Kato").containsAll(
+										.isEqualTo(items(e -> e.contains("subordinates") && singleton("Yoshimi Kato").containsAll(
 
 												e.getList("subordinates").stream()
-												.map(v -> ((EntityValue)v).get().getString("label"))
-												.collect(Collectors.<String>toList())
+														.map(v -> ((EntityValue)v).get().getString("label"))
+														.collect(Collectors.<String>toList())
 
 										)))
 								)
@@ -592,17 +591,26 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 
 			@Test void testOrInequalities() {
-				exec(load(birt()), () -> assertThatThrownBy(() -> new DatastoreRelator()
+				exec(load(birt()), () -> new DatastoreRelator()
 
 						.handle(new Request()
 								.path("/employees/")
 								.shape(and(employee(), or(
 										field("seniority", minInclusive(3)),
-										field("code", maxInclusive("1500"))
+										field("code", maxInclusive("1200"))
 								)))
 						)
 
-				).isInstanceOf(UnsupportedOperationException.class));
+						.accept(response -> assertThat(response)
+								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+										.isEqualTo(items(e
+												-> e.getLong("seniority") >= 3
+												|| e.getString("code").compareTo("1200") <= 0
+										))
+								)
+						)
+
+				);
 			}
 
 
