@@ -85,7 +85,10 @@ final class EntityDecoder {
 
 	private Value<?> string(final JsonString string, final Shape shape) {
 
-		final Object datatype=datatype(shape).orElse("");
+		final Object datatype=datatype(shape)
+				.orElseGet(() -> clazz(shape).map(c -> ValueType.ENTITY)
+						.orElse(ValueType.NULL)
+				);
 
 		// !!! blob
 		// !!! latlng
