@@ -38,7 +38,7 @@
  *
  *     <dependency>
  *         <groupId>com.metreeca</groupId>
- *         <artifactId>servlet</artifactId>
+ *         <artifactId>metreeca-servlet</artifactId>
  *         <version>${project.version}</version>
  *     </dependency>
  *

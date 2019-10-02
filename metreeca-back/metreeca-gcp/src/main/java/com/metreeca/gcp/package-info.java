@@ -23,7 +23,7 @@
  * <pre>{@code
  * <dependency>
  *      <groupId>com.metreeca</groupId>
- *      <artifactId>gcp</artifactId>
+ *      <artifactId>metreeca-gcp</artifactId>
  *      <version>${project.version}</version>
  * </dependency>}</pre>
  */

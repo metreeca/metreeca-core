@@ -89,12 +89,12 @@
 
 	<modules>
 
-		<module>tree</module>
-		<module>rest</module>
-		<module>gate</module>
+		<module>metreeca-tree</module>
+		<module>metreeca-rest</module>
+		<module>metreeca-gate</module>
 
-		<module>head</module>
-		<module>back</module>
+		<module>metreeca-head</module>
+		<module>metreeca-back</module>
 
 	</modules>
 
