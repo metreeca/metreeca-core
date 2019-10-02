@@ -2,17 +2,17 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/back" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/back/gcp" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/back/rdf" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/back/rdf4j" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/back/stardog" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/back/virtuoso" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/gate" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/head" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/head/servlet" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/rest" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/tree" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-gcp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-rdf" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-rdf4j" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-stardog" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-virtuoso" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-gate" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-head" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-head/metreeca-servlet" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-rest" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-tree" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
