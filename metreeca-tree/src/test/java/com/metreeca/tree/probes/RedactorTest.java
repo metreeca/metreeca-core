@@ -37,7 +37,7 @@ final class RedactorTest {
 
 	private static final UnaryOperator<Shape> first=s -> s.map(new Redactor("value", "first")).map(new Optimizer());
 	private static final UnaryOperator<Shape> rest=s -> s.map(new Redactor("value", "rest")).map(new Optimizer());
-	private static final UnaryOperator<Shape> any=s -> s.map(new Redactor("value")).map(new Optimizer());
+	private static final UnaryOperator<Shape> any=s -> s.map(new Redactor("value", values -> true)).map(new Optimizer());
 
 
 	@Test void testIgnoreUnrelatedConditions() {

@@ -156,9 +156,9 @@ public final class EntityFormat implements Format<Entity> {
 	private Shape shape(final Message<?> message) {
 		return message.shape()
 
-				.map(new Redactor(Shape.Role))
-				.map(new Redactor(Shape.Task))
-				.map(new Redactor(Shape.Detail))
+				.map(new Redactor(Shape.Role, values2 -> true))
+				.map(new Redactor(Shape.Task, values1 -> true))
+				.map(new Redactor(Shape.Detail, values -> true))
 				.map(new Redactor(Shape.Mode, Shape.Convey))
 
 				.map(new Optimizer());

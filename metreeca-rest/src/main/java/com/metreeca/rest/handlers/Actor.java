@@ -67,7 +67,7 @@ public abstract class Actor extends Delegator { // !!! tbd
 
 			final Shape baseline=shape // visible to anyone taking into account task/view
 
-					.map(new Redactor(Shape.Role))
+					.map(new Redactor(Shape.Role, values -> true))
 					.map(new Redactor(Shape.Task, task))
 					.map(new Redactor(Shape.View, view))
 					.map(new Redactor(Shape.Mode, Shape.Convey));
