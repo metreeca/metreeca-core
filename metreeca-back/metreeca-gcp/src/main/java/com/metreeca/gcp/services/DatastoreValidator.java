@@ -99,7 +99,9 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 
 		private Collection<? extends Value<?>> focus() {
-			return value.getType() == ValueType.LIST ? ((ListValue)value).get() : singleton(value);
+			return value.getType() == ValueType.NULL ? emptySet()
+					: value.getType() == ValueType.LIST ? ((ListValue)value).get()
+					: singleton(value);
 		}
 
 		private <T> Predicate<T> negate(final Predicate<T> predicate) {
@@ -257,7 +259,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 			final int limit=maxCount.getLimit();
 
 			return limit > 1 ? count <= limit ? trace() : trace(issue(maxCount))
-					: value .getType() == ValueType.LIST ? trace(issue(maxCount)) : trace(); // limit == 1 => not list
+					: value.getType() == ValueType.LIST ? trace(issue(maxCount)) : trace(); // limit == 1 => not list
 
 		}
 
@@ -282,7 +284,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 							final String name=field.getName().toString();
 							final FullEntity<?> entity=((EntityValue)v).get();
-							final Value<?> value=entity.contains(name) ? entity.getValue(name) : ListValue.of(emptyList());
+							final Value<?> value=entity.contains(name) ? entity.getValue(name) : NullValue.of();
 
 							return trace(emptyMap(), singletonMap(name, validate(field.getShape(), value)));
 

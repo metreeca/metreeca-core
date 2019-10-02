@@ -342,16 +342,17 @@ final class DatastoreValidatorTest extends DatastoreTestBase {
 	@Test void testValidateField() {
 		exec(() -> {
 
-			final Shape shape=field("field", maxCount(2));
+			final Shape shape=field("field", maxCount(1));
 
+			assertThat(validate(shape, EntityValue.of(entity(entity -> {})))).isTrue();
 			assertThat(validate(shape, EntityValue.of(entity(entity -> entity.set("field", 1))))).isTrue();
-			assertThat(validate(shape, EntityValue.of(entity(entity -> entity.set("field", 1, 2))))).isTrue();
-			assertThat(validate(shape, EntityValue.of(entity(entity -> entity.set("field", 1, 2, 3))))).isFalse();
+			assertThat(validate(shape, EntityValue.of(entity(entity -> entity.set("field", 1, 2))))).isFalse();
 
 			assertThat(validate(shape)).as("empty focus").isTrue();
 
 		});
 	}
+
 
 	@Test void testValidateFieldImpliedEntity() {
 		exec(() -> {
