@@ -20,7 +20,10 @@ package com.metreeca.tree.probes;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.*;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
@@ -40,15 +43,15 @@ import static java.util.stream.Collectors.toList;
 public final class Redactor extends Traverser<Shape> {
 
 	private final String axis;
-	private final Set<Object> values;
 
+	private final Predicate<Set<Object>> condition;
 
 	/**
 	 * Creates a new shape redactor.
 	 *
 	 * @param axis   the identifier of the parametric axis to be redacted
-	 * @param values the driving values for the parametric {@code axis}; empty to unconditionally remove guards on
-	 *               {@code axis}
+	 * @param values the accepted values for the parametric {@code axis}; successfully evaluates guards on {@code axis}
+	 *               if the guard accepts at least one of the values in the collection
 	 *
 	 * @throws NullPointerException if either {@code axis} or {@code values} is null or {@code values} contains a null
 	 *                              value
@@ -59,24 +62,43 @@ public final class Redactor extends Traverser<Shape> {
 	 * Creates a new shape redactor.
 	 *
 	 * @param axis   the identifier of the parametric axis to be redacted
-	 * @param values the driving values for the parametric {@code axis}; empty to unconditionally remove guards on
-	 *               {@code axis}
+	 * @param values the accepted values for the parametric {@code axis}; successfully evaluates guards on {@code axis}
+	 *               if the guard accepts at least one of the values in the collection
 	 *
 	 * @throws NullPointerException if either {@code axis} or {@code values} is null or {@code values} contains a null
 	 *                              value
 	 */
 	public Redactor(final String axis, final Collection<Object> values) {
 
-		if ( axis == null ) {
-			throw new NullPointerException("null axis");
-		}
+		this(axis, accepted -> !disjoint(accepted, values));
 
 		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
 		}
 
+	}
+
+	/**
+	 * Creates a new shape redactor.
+	 *
+	 * @param axis      the identifier of the parametric axis to be redacted
+	 * @param condition the condition for the parametric {@code axis}; successfully evaluates guards on {@code axis} if
+	 *                  evaluating to {@code true} on the guard target values
+	 *
+	 * @throws NullPointerException if either {@code axis} or {@code condition} is null
+	 */
+	public Redactor(final String axis, final Predicate<Set<Object>> condition) {
+
+		if ( axis == null ) {
+			throw new NullPointerException("null axis");
+		}
+
+		if ( condition == null ) {
+			throw new NullPointerException("null condition");
+		}
+
 		this.axis=axis;
-		this.values=new HashSet<>(values);
+		this.condition=condition;
 	}
 
 
@@ -86,11 +108,8 @@ public final class Redactor extends Traverser<Shape> {
 
 
 	@Override public Shape probe(final Guard guard) {
-
-		final Set<Object> accepted=guard.getValues();
-
 		return axis.equals(guard.getAxis())
-				? values.isEmpty() || !disjoint(accepted, values) ? and() : or()
+				? condition.test(guard.getValues()) ? and() : or()
 				: guard; // ignore unrelated variables
 	}
 

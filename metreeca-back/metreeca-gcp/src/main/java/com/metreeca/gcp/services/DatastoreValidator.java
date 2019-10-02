@@ -38,6 +38,7 @@ import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 
 import static java.util.Collections.*;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 
@@ -99,7 +100,9 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 
 		private Collection<? extends Value<?>> focus() {
-			return value.getType() == ValueType.LIST ? ((ListValue)value).get() : singleton(value);
+			return value.getType() == ValueType.NULL ? emptySet()
+					: value.getType() == ValueType.LIST ? ((ListValue)value).get()
+					: singleton(value);
 		}
 
 		private <T> Predicate<T> negate(final Predicate<T> predicate) {
@@ -248,7 +251,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 			final int count=focus().size();
 			final int limit=minCount.getLimit();
 
-			return count >= limit ? trace() : trace(issue(minCount));
+			return count >= limit ? trace() : trace(issue(minCount), count);
 		}
 
 		@Override public Trace probe(final MaxCount maxCount) {
@@ -256,17 +259,34 @@ final class DatastoreValidator extends DatastoreProcessor {
 			final int count=focus().size();
 			final int limit=maxCount.getLimit();
 
-			return limit > 1 ? count <= limit ? trace() : trace(issue(maxCount))
-					: value .getType() == ValueType.LIST ? trace(issue(maxCount)) : trace(); // limit == 1 => not list
+			return limit > 1 ? count <= limit ? trace() : trace(issue(maxCount), count)
+					: value.getType() == ValueType.LIST ? trace(issue(maxCount), count) : trace(); // limit == 1 => not list
 
 		}
 
 		@Override public Trace probe(final In in) {
-			return values(in.getValues()).containsAll(focus()) ? trace() : trace(issue(in));
+
+			final Set<Value<?>> range=values(in.getValues());
+
+			final List<Value<?>> unexpected=focus()
+					.stream()
+					.filter(negate(range::contains))
+					.collect(toList());
+
+			return unexpected.isEmpty() ? trace() : trace(issue(in), unexpected);
 		}
 
 		@Override public Trace probe(final All all) {
-			return focus().containsAll(values(all.getValues())) ? trace() : trace(issue(all));
+
+			final Collection<? extends Value<?>> focus=focus();
+			final Set<Value<?>> range=values(all.getValues());
+
+			final List<Value<?>> missing=range
+					.stream()
+					.filter(negate(focus::contains))
+					.collect(toList());
+
+			return missing.isEmpty() ? trace() : trace(issue(all), missing);
 		}
 
 		@Override public Trace probe(final Any any) {
@@ -282,7 +302,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 							final String name=field.getName().toString();
 							final FullEntity<?> entity=((EntityValue)v).get();
-							final Value<?> value=entity.contains(name) ? entity.getValue(name) : ListValue.of(emptyList());
+							final Value<?> value=entity.contains(name) ? entity.getValue(name) : NullValue.of();
 
 							return trace(emptyMap(), singletonMap(name, validate(field.getShape(), value)));
 

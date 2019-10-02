@@ -225,10 +225,10 @@ import static java.util.stream.Collectors.toSet;
 
 		private Shape redact(final Shape shape) {
 			return shape
-					.map(new Redactor(Shape.Task))
-					.map(new Redactor(Shape.View))
-					.map(new Redactor(Shape.Mode))
-					.map(new Redactor(Shape.Role))
+					.map(new Redactor(Shape.Task, values3 -> true))
+					.map(new Redactor(Shape.View, values2 -> true))
+					.map(new Redactor(Shape.Mode, values1 -> true))
+					.map(new Redactor(Shape.Role, values -> true))
 					.map(new _Optimizer());
 		}
 

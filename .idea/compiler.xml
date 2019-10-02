@@ -15,6 +15,7 @@
         <module name="metreeca-rdf4j" />
         <module name="metreeca-tree" />
         <module name="virtuoso" />
+        <module name="metreeca-tree" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

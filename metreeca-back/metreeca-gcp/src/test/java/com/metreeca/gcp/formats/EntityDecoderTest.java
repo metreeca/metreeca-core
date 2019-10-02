@@ -115,8 +115,10 @@ final class EntityDecoderTest extends DatastoreTestBase {
 	}
 
 	@Test void testDecodeStringFieldsAsExpectedEntity() {
-		exec(() -> assertThat(decode("{ 'field': '/path' }", field("field", and(datatype(ValueType.ENTITY), clazz("Class")))).getEntity("field"))
-				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path")))
+		exec(() -> assertThat(decode("{ 'field': '/path' }", field("field", and(clazz("Class")))).getEntity("field"))
+				.satisfies(entity -> assertThat(entity.getKey())
+						.isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path"))
+				)
 		);
 	}
 
