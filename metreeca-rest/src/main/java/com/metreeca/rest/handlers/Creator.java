@@ -18,10 +18,13 @@
 package com.metreeca.rest.handlers;
 
 
+import com.metreeca.rest.Format;
 import com.metreeca.rest.Request;
+import com.metreeca.rest.Wrapper;
 import com.metreeca.tree.Shape;
 
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.UUID.randomUUID;
@@ -53,24 +56,41 @@ public final class Creator extends Actor { // !!! tbd
 			throw new NullPointerException("null slug");
 		}
 
-		delegate(creator()
+		delegate(wrapper(slug).wrap(creator()) // chain slug immediately before handler after custom wrappers
 
 				.with(connector())
 				.with(splitter(true))
 				.with(throttler(Shape.Create, Shape.Detail))
 				.with(validator())
 
-				.with(handler -> request -> consumer -> {
-					synchronized ( creator() ) { // attempt to serialize slug operations from multiple snapshot txns
-						handler.handle(request.header("Slug",
-
-								Objects.requireNonNull(slug.apply(request), "null resource name")
-
-						)).accept(consumer);
-					}
-				})
-
 		);
+	}
+
+	/**
+	 * Creates a resource creator.
+	 *
+	 * @param <T>    the type of the message body to be inspected during slug generation
+	 * @param format the format of the message body to be inspected during slug generation
+	 * @param slug   a function mapping from the creation request and its payload to the identifier to be assigned to
+	 *               the newly created resource; must return a non-null non-clashing value
+	 *
+	 * @throws NullPointerException if either {@code format} or {@code slug} is null
+	 */
+	public <T> Creator(final Format<T> format, final BiFunction<Request, T, String> slug) {
+		this(request -> request.body(format).fold(value -> slug.apply(request, value), failure -> ""));
+	}
+
+
+	private Wrapper wrapper(final Function<Request, String> slug) {
+		return handler -> request -> consumer -> {
+			synchronized ( creator() ) { // attempt to serialize slug operations from multiple snapshot txns
+				handler.handle(request.header("Slug",
+
+						Objects.requireNonNull(slug.apply(request), "null resource name")
+
+				)).accept(consumer);
+			}
+		};
 	}
 
 }
