@@ -383,7 +383,7 @@ final class ManagerTest {
 			@Test void testGranted() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.isPresent() ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isPresent() ? Response.OK : Response.Unauthorized))
 
 				).accept((handler, cookie) -> handler
 
@@ -574,7 +574,7 @@ final class ManagerTest {
 			@Test void testExtension() {
 				exec(() -> authenticate(manager()
 
-						.wrap(handler(user -> user.isPresent() ? Response.Unauthorized : Response.OK))
+						.wrap(handler(user -> user.isPresent() ? Response.OK : Response.Unauthorized))
 
 				).accept((handler, cookie) -> {
 
