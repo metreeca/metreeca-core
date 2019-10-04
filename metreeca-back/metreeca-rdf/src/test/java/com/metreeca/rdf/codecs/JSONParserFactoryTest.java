@@ -25,25 +25,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class JSONParserFactoryTest {
 
+	private final RDFParserRegistry instance=RDFParserRegistry.getInstance();
+
+
 	@Test void testFormatRegisteredWithRegistry() {
 
-		assertThat(RDFParserRegistry.getInstance()
-				.getFileFormatForMIMEType(JSONCodec.JSONFormat.getDefaultMIMEType())
-				.filter(format -> format.equals(JSONCodec.JSONFormat))
-				.isPresent()).as("by mime type").isTrue();
+		assertThat(instance.getFileFormatForMIMEType(JSONCodec.JSONFormat.getDefaultMIMEType()))
+				.as("by mime type")
+				.contains(JSONCodec.JSONFormat);
 
-		assertThat(RDFParserRegistry.getInstance()
-				.getFileFormatForFileName("test."+JSONCodec.JSONFormat.getDefaultFileExtension())
-				.filter(format -> format.equals(JSONCodec.JSONFormat))
-				.isPresent()).as("by extension").isTrue();
+		assertThat(instance.getFileFormatForFileName("test."+JSONCodec.JSONFormat.getDefaultFileExtension()))
+				.as("by extension")
+				.contains(JSONCodec.JSONFormat);
 
 	}
 
 	@Test void testFactoryRegisteredWithRegistry() {
-		assertThat(RDFParserRegistry.getInstance()
-				.get(JSONCodec.JSONFormat)
-				.filter(factory -> factory instanceof JSONParserFactory)
-				.isPresent()).as("factory registered").isTrue();
+		assertThat(instance.get(JSONCodec.JSONFormat))
+				.as("factory registered")
+				.containsInstanceOf(JSONParserFactory.class);
 
 	}
 
