@@ -32,7 +32,7 @@ public final class Updater extends Actor {
 		delegate(updater()
 
 				.with(connector())
-				.with(wrapper(Request::container, splitter(false), splitter(true)))
+				.with(wrapper(Request::container, splitter(container()), splitter(resource())))
 				.with(throttler(Shape.Update, Shape.Detail))
 				.with(validator())
 

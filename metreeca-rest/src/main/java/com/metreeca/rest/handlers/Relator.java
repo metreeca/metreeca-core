@@ -36,7 +36,7 @@ public final class Relator extends Actor { // !!! tbd
 
 				.with(connector())
 				.with(trimmer())
-				.with(wrapper(Request::container, wrapper(), splitter(true)))
+				.with(wrapper(Request::container, wrapper(), splitter(resource())))
 				.with(wrapper(Request::container, throttler(Relate, Digest), throttler(Relate, Detail)))
 
 				.with(success(response -> response.headers("+Vary", "Accept", "Prefer")))

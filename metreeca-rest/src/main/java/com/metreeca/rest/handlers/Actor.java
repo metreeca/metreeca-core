@@ -48,6 +48,15 @@ public abstract class Actor extends Delegator { // !!! tbd
 	private final Engine engine=service(engine());
 
 
+	protected Function<Shape, Shape> container() {
+		return engine::container;
+	}
+
+	protected Function<Shape, Shape> resource() {
+		return engine::resource;
+	}
+
+
 	protected Wrapper connector() { // inside a single txn
 		return handler -> request -> consumer -> engine.exec(() ->
 				handler.handle(request).accept(consumer)
@@ -55,10 +64,8 @@ public abstract class Actor extends Delegator { // !!! tbd
 	}
 
 
-	protected Wrapper splitter(final boolean traverse) {
-		return handler -> request -> handler.handle(request.shape(
-				traverse ? engine.resource(request.shape()) : engine.container(request.shape())
-		));
+	protected Wrapper splitter(final Function<Shape, Shape> splitter) {
+		return handler -> request -> handler.handle(request.shape(splitter.apply(request.shape())));
 	}
 
 	protected Wrapper throttler(final String task, final String view) { // !!! optimize/cache

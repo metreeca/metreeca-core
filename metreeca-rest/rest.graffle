@@ -5,7 +5,7 @@
 	<key>ApplicationVersion</key>
 	<array>
 		<string>com.omnigroup.OmniGraffle7</string>
-		<string>196.10.0.336887</string>
+		<string>196.14.0.337361</string>
 	</array>
 	<key>ColorProfiles</key>
 	<array>
@@ -117,7 +117,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-08-19 14:25:09 +0000</string>
+	<string>2019-10-04 07:14:36 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro</string>
 	<key>MovementHandleVisible</key>
@@ -3204,13 +3204,13 @@ resource()}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{165.82677315811472, 449.16634265916548}</string>
+								<string>{163.7007888868568, 449.16634265916548}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{165.82677315811472, 290.88256685094757}</string>
+								<string>{163.7007888868568, 290.88256685094757}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -3228,7 +3228,7 @@ resource()}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{165.82677315811472, 449.16634265916548}</string>
+						<string>{163.7007888868568, 449.16634265916548}</string>
 						<string>{190.81291058046213, 290.88256685094757}</string>
 					</array>
 					<key>Style</key>
@@ -3292,13 +3292,13 @@ resource()}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{165.82677315811472, 449.16634265916548}</string>
+								<string>{163.7007888868568, 449.16634265916548}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{165.82677315811472, 248.49120603015078}</string>
+								<string>{163.7007888868568, 248.49120603015078}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -3316,7 +3316,7 @@ resource()}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{165.82677315811472, 449.16634265916548}</string>
+						<string>{163.7007888868568, 449.16634265916548}</string>
 						<string>{190.81291058046213, 248.49120603015078}</string>
 					</array>
 					<key>Style</key>
@@ -3515,7 +3515,7 @@ resource()}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{613.78083601966932, 379.86758282510129}, {42.17699999999968, 19.261062622070312}}</string>
+					<string>{{613.11483601967007, 362.97598889199583}, {43.508999999998196, 53.04425048828125}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3573,7 +3573,10 @@ resource()}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs18 \cf0 handle()}</string>
+\f0\fs18 \cf0 create()\
+relate()\
+update()\
+delete()}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 						<key>VerticalPad</key>
@@ -3835,7 +3838,7 @@ resource()}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{25.511811255094557, 449.29134265916548}, {280.62992380604032, 73.511993408203125}}</string>
+					<string>{{25.511811255094528, 449.29134265916548}, {276.37795526352454, 73.511993408203125}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -4139,13 +4142,13 @@ resource()}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{165.82677315811472, 449.16634265916548}</string>
+								<string>{163.7007888868568, 449.16634265916548}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{165.82677315811472, 207.24703882962106}</string>
+								<string>{163.7007888868568, 207.24703882962106}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -4163,7 +4166,7 @@ resource()}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{165.82677315811472, 449.16634265916548}</string>
+						<string>{163.7007888868568, 449.16634265916548}</string>
 						<string>{190.81291058046213, 207.24703882962106}</string>
 					</array>
 					<key>Style</key>
@@ -7669,7 +7672,7 @@ ldp:BasicContainer}</string>
 		<key>CurrentSheet</key>
 		<integer>1</integer>
 		<key>Frame</key>
-		<string>{{0, 0}, {1440, 828}}</string>
+		<string>{{0, 0}, {1440, 853}}</string>
 		<key>ShowInfo</key>
 		<false/>
 		<key>Sidebar</key>
@@ -7679,10 +7682,10 @@ ldp:BasicContainer}</string>
 		<key>Sidebar_Tab</key>
 		<integer>2</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, 0}, {805.5, 537}}</string>
+		<string>{{0, -7.4192468619246865}, {806, 553.74560669456071}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
-			<string>com.omnigroup.OmniGraffle.inspectorGroup.document</string>
+			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
 		</array>
 		<key>ZoomValues</key>
 		<array>
