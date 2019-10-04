@@ -6,15 +6,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="stardog" />
         <module name="metreeca-rdf" />
         <module name="metreeca-gcp" />
         <module name="metreeca-gate" />
+        <module name="metreeca-stardog" />
+        <module name="metreeca-virtuoso" />
         <module name="metreeca-servlet" />
         <module name="metreeca-rest" />
         <module name="metreeca-rdf4j" />
-        <module name="metreeca-tree" />
-        <module name="virtuoso" />
         <module name="metreeca-tree" />
       </profile>
     </annotationProcessing>
@@ -53,7 +52,9 @@
       <module name="metreeca-rdf4j" target="1.8" />
       <module name="metreeca-rest" target="1.8" />
       <module name="metreeca-servlet" target="1.8" />
+      <module name="metreeca-stardog" target="1.8" />
       <module name="metreeca-tree" target="1.8" />
+      <module name="metreeca-virtuoso" target="1.8" />
       <module name="mill" target="1.8" />
       <module name="mill (1)" target="1.8" />
       <module name="node" target="1.8" />
@@ -64,12 +65,10 @@
       <module name="servlet" target="1.8" />
       <module name="spec" target="1.8" />
       <module name="spec (1)" target="1.8" />
-      <module name="stardog" target="1.8" />
       <module name="tool" target="1.8" />
       <module name="tray" target="1.8" />
       <module name="tray (1)" target="1.8" />
       <module name="tree" target="1.8" />
-      <module name="virtuoso" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -28,7 +28,7 @@
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>stardog</artifactId>
+	<artifactId>metreeca-stardog</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
 	<name>Metreeca Stardog Adapter</name>
