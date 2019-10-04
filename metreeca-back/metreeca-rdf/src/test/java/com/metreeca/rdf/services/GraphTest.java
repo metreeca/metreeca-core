@@ -44,6 +44,7 @@ import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.services.Graph.auto;
+import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,11 +56,6 @@ import static java.util.stream.Collectors.joining;
 
 public final class GraphTest {
 
-	public static Graph graph() {
-		return new Graph() {{ repository(new SailRepository(new MemoryStore())); }};
-	}
-
-
 	private static final Logger logger=Logger.getLogger(GraphTest.class.getName());
 
 	private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
@@ -69,10 +65,9 @@ public final class GraphTest {
 	private final Statement data=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 
 
-	private void exec(final Runnable... tasks) {
+	public static void exec(final Runnable... tasks) {
 		new Context()
-				//.set(engine(), GraphEngine::new)
-				.set(Graph.graph(), GraphTest::graph)
+				.set(graph(), () -> new Graph() {{ repository(new SailRepository(new MemoryStore())); }})
 				.exec(tasks)
 				.clear();
 	}
@@ -222,20 +217,20 @@ public final class GraphTest {
 
 
 	public static Model model(final Resource... contexts) {
-		return service(Graph.graph()).exec(connection -> { return export(connection, contexts); });
+		return service(graph()).exec(connection -> { return export(connection, contexts); });
 	}
 
 	public static Model model(final String sparql) {
-		return service(Graph.graph()).exec(connection -> { return construct(connection, sparql); });
+		return service(graph()).exec(connection -> { return construct(connection, sparql); });
 	}
 
 	public static List<Map<String, Value>> tuples(final String sparql) {
-		return service(Graph.graph()).exec(connection -> { return select(connection, sparql); });
+		return service(graph()).exec(connection -> { return select(connection, sparql); });
 	}
 
 
 	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> service(Graph.graph()).exec(connection -> { connection.add(model, contexts); });
+		return () -> service(graph()).exec(connection -> { connection.add(model, contexts); });
 	}
 
 

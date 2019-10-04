@@ -18,6 +18,7 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf._probes.Outliner;
 import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.rdf.services.Snippets.Snippet;
 import com.metreeca.rest.services.Logger;
@@ -25,6 +26,8 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -38,6 +41,7 @@ import static com.metreeca.rdf.services.Snippets.snippet;
 
 import static java.lang.Math.max;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 
 abstract class GraphProcessor {
@@ -49,6 +53,11 @@ abstract class GraphProcessor {
 	static final Function<Shape, Shape> filter=shape -> shape
 			.map(new Redactor(Shape.Mode, Shape.Filter))
 			.map(new _Optimizer());
+
+
+	 static Iterable<Statement> anchor(final Resource resource, final Shape shape) {
+		return shape.map(filter).map(new Outliner(resource)).collect(toList());
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

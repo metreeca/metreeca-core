@@ -100,6 +100,7 @@ public final class ValuesTest {
 							field(RDFS.LABEL, Textual),
 							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
 					),
+
 					and(
 
 							field(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),

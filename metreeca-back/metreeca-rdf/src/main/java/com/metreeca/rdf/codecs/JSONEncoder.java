@@ -18,7 +18,7 @@
 package com.metreeca.rdf.codecs;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._probes.Inferencer;
+import com.metreeca.rdf._probes._Inferencer;
 import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
@@ -57,7 +57,7 @@ abstract class JSONEncoder extends JSONCodec {
 	private static final Function<Shape, Shape> ShapeCompiler=s -> s
 			.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
 			.map(new _Optimizer())
-			.map(new Inferencer()) // infer implicit constraints to drive json shorthands
+			.map(new _Inferencer()) // infer implicit constraints to drive json shorthands
 			.map(new _Optimizer());
 
 

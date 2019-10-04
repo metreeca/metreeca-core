@@ -33,7 +33,7 @@ abstract class GraphProcessorTest {
 	protected void exec(final Runnable... tasks) {
 		new Context()
 
-				.set(graph(), GraphTest::graph)
+				//.set(graph(), GraphTest::graph)
 
 				//.set(graph(), this::graphdb)
 				//.set(graph(), this::virtuoso)

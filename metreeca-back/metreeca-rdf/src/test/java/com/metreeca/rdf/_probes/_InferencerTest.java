@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.Collectors.toList;
 
 
-final class InferencerTest {
+final class _InferencerTest {
 
 	@Test void testHint() {
 
@@ -160,7 +160,7 @@ final class InferencerTest {
 	}
 
 	private Shape expand(final Shape shape) {
-		return optimize(shape.map(new Inferencer()));
+		return optimize(shape.map(new _Inferencer()));
 	}
 
 }

@@ -83,7 +83,7 @@ public final class Creator extends Actor { // !!! tbd
 
 	private Wrapper wrapper(final Function<Request, String> slug) {
 		return handler -> request -> consumer -> {
-			synchronized ( creator() ) { // attempt to serialize slug operations from multiple snapshot txns
+			synchronized ( delegate() ) { // attempt to serialize slug operations from multiple snapshot txns
 				handler.handle(request.header("Slug",
 
 						Objects.requireNonNull(slug.apply(request), "null resource name")

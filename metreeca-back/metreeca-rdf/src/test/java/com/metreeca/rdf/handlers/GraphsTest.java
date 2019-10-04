@@ -21,7 +21,6 @@ import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rdf.services.GraphTest;
-import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.InputFormat;
@@ -41,6 +40,7 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.encode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.services.GraphTest.exec;
 import static com.metreeca.rdf.services.GraphTest.export;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -54,18 +54,6 @@ final class GraphsTest {
 
 	private static final Statement First=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 	private static final Statement Rest=statement(RDF.NIL, RDF.VALUE, RDF.REST);
-
-
-	private Context with(final Runnable... datasets) {
-
-		final Context tray=new Context().set(Graph.graph(), GraphTest::graph);
-
-		for (final Runnable dataset : datasets) {
-			tray.exec(dataset);
-		}
-
-		return tray;
-	}
 
 
 	private Model catalog() {
@@ -97,6 +85,7 @@ final class GraphsTest {
 	private Model model(final Statement... model) {
 		return new LinkedHashModel(asList(model));
 	}
+
 
 	private Runnable named(final Statement... model) {
 		return GraphTest.model(asList(model), RDF.NIL);
@@ -171,7 +160,7 @@ final class GraphsTest {
 	//// Catalog ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testGETCatalogPrivateAnonymous() {
-		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+		exec(dflt(First), named(Rest), () -> _private(endpoint())
 
 				.handle(anonymous(catalog(request())))
 
@@ -181,11 +170,12 @@ final class GraphsTest {
 							.hasStatus(Response.Unauthorized)
 							.doesNotHaveBody();
 
-				}));
+				})
+		);
 	}
 
 	@Test void testGETCatalogPrivateAuthorized() {
-		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+		exec(dflt(First), named(Rest), () -> _private(endpoint())
 
 				.handle(authenticated(catalog(request())))
 
@@ -197,7 +187,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETCatalogPublicAnonymous() {
-		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+		exec(dflt(First), named(Rest), () -> _public(endpoint())
 
 				.handle(anonymous(catalog(request())))
 
@@ -208,8 +198,9 @@ final class GraphsTest {
 						)));
 	}
 
+
 	@Test void testGETCatalogPublicAuthorized() {
-		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+		exec(dflt(First), named(Rest), () -> _public(endpoint())
 
 				.handle(authenticated(catalog(request())))
 
@@ -224,7 +215,7 @@ final class GraphsTest {
 	//// GET ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testGETDefaultPrivateAnonymous() {
-		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+		exec(dflt(First), named(Rest), () -> _private(endpoint())
 
 				.handle(anonymous(dflt(get(request()))))
 
@@ -238,7 +229,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETDefaultPrivateAuthenticated() {
-		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+		exec(dflt(First), named(Rest), () -> _private(endpoint())
 
 				.handle(authenticated(dflt(get(request()))))
 
@@ -252,7 +243,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETDefaultPublicAnonymous() {
-		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+		exec(dflt(First), named(Rest), () -> _public(endpoint())
 
 				.handle(anonymous(dflt(get(request()))))
 
@@ -264,7 +255,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETDefaultPublicAuthenticated() {
-		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+		exec(dflt(First), named(Rest), () -> _public(endpoint())
 
 				.handle(authenticated(dflt(get(request()))))
 
@@ -279,7 +270,7 @@ final class GraphsTest {
 
 
 	@Test void testGETNamedPrivateAnonymous() {
-		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+		exec(dflt(First), named(Rest), () -> _private(endpoint())
 
 				.handle(anonymous(named(get(request()))))
 
@@ -289,7 +280,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETNamedPrivateAuthenticated() {
-		with(dflt(First), named(Rest)).exec(() -> _private(endpoint())
+		exec(dflt(First), named(Rest), () -> _private(endpoint())
 
 				.handle(authenticated(named(get(request()))))
 
@@ -301,7 +292,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETNamedPublicAnonymous() {
-		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+		exec(dflt(First), named(Rest), () -> _public(endpoint())
 
 				.handle(anonymous(named(get(request()))))
 
@@ -313,7 +304,7 @@ final class GraphsTest {
 	}
 
 	@Test void testGETNamedPublicAuthenticated() {
-		with(dflt(First), named(Rest)).exec(() -> _public(endpoint())
+		exec(dflt(First), named(Rest), () -> _public(endpoint())
 
 				.handle(authenticated(named(get(request()))))
 
@@ -328,7 +319,7 @@ final class GraphsTest {
 	//// PUT ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testPUTDefaultPrivateAnonymous() {
-		with(dflt(First)).exec(() -> _private(endpoint())
+		exec(dflt(First), () -> _private(endpoint())
 
 				.handle(anonymous(dflt(put(request()))))
 
@@ -345,7 +336,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPUTDefaultPrivateAuthenticated() {
-		with(dflt(First)).exec(() -> _private(endpoint())
+		exec(dflt(First), () -> _private(endpoint())
 
 				.handle(authenticated(dflt(put(request()))))
 
@@ -360,7 +351,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPUTDefaultPublicAnonymous() {
-		with(dflt(First)).exec(() -> _public(endpoint())
+		exec(dflt(First), () -> _public(endpoint())
 
 				.handle(anonymous(dflt(put(request()))))
 
@@ -377,7 +368,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPUTDefaultPublicAuthenticated() {
-		with(dflt(First)).exec(() -> _public(endpoint())
+		exec(dflt(First), () -> _public(endpoint())
 
 				.handle(authenticated(dflt(put(request()))))
 
@@ -393,7 +384,7 @@ final class GraphsTest {
 
 
 	@Test void testPUTNamedPrivateAnonymous() {
-		with(named(First)).exec(() -> _private(endpoint())
+		exec(named(First), () -> _private(endpoint())
 
 				.handle(anonymous(named(put(request()))))
 
@@ -410,7 +401,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPUTNamedPrivateAuthenticated() {
-		with(named(First)).exec(() -> _private(endpoint())
+		exec(named(First), () -> _private(endpoint())
 
 				.handle(authenticated(named(put(request()))))
 
@@ -425,7 +416,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPUTNamedPublicAnonymous() {
-		with(named(First)).exec(() -> _public(endpoint())
+		exec(named(First), () -> _public(endpoint())
 
 				.handle(anonymous(named(put(request()))))
 
@@ -442,7 +433,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPUTNamedPublicAuthenticated() {
-		with(named(First)).exec(() -> _public(endpoint())
+		exec(named(First), () -> _public(endpoint())
 
 				.handle(authenticated(named(put(request()))))
 
@@ -462,7 +453,7 @@ final class GraphsTest {
 	//// DELETE ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testDELETEDefaultPrivateAnonymous() {
-		with(dflt(First)).exec(() -> _private(endpoint())
+		exec(dflt(First), () -> _private(endpoint())
 
 				.handle(anonymous(dflt(delete(request()))))
 
@@ -479,7 +470,7 @@ final class GraphsTest {
 	}
 
 	@Test void testDELETEDefaultPrivateAuthenticated() {
-		with(dflt(First)).exec(() -> _private(endpoint())
+		exec(dflt(First), () -> _private(endpoint())
 
 				.handle(authenticated(dflt(delete(request()))))
 
@@ -496,7 +487,7 @@ final class GraphsTest {
 	}
 
 	@Test void testDELETEDefaultPublicAnonymous() {
-		with(dflt(First)).exec(() -> _public(endpoint())
+		exec(dflt(First), () -> _public(endpoint())
 
 				.handle(anonymous(dflt(delete(request()))))
 
@@ -513,7 +504,7 @@ final class GraphsTest {
 	}
 
 	@Test void testDELETEDefaultPublicAuthenticated() {
-		with(dflt(First)).exec(() -> _public(endpoint())
+		exec(dflt(First), () -> _public(endpoint())
 
 				.handle(authenticated(dflt(delete(request()))))
 
@@ -531,7 +522,7 @@ final class GraphsTest {
 
 
 	@Test void testDELETENamedPrivateAnonymous() {
-		with(named(First)).exec(() -> _private(endpoint())
+		exec(named(First), () -> _private(endpoint())
 
 				.handle(anonymous(named(delete(request()))))
 
@@ -548,7 +539,7 @@ final class GraphsTest {
 	}
 
 	@Test void testDELETENamedPrivateAuthenticated() {
-		with(named(First)).exec(() -> _private(endpoint())
+		exec(named(First), () -> _private(endpoint())
 
 				.handle(authenticated(named(delete(request()))))
 
@@ -563,7 +554,7 @@ final class GraphsTest {
 	}
 
 	@Test void testDELETENamedPublicAnonymous() {
-		with(named(First)).exec(() -> _public(endpoint())
+		exec(named(First), () -> _public(endpoint())
 
 				.handle(anonymous(named(delete(request()))))
 
@@ -580,7 +571,7 @@ final class GraphsTest {
 	}
 
 	@Test void testDELETENamedPublicAuthenticated() {
-		with(named(First)).exec(() -> _public(endpoint())
+		exec(named(First), () -> _public(endpoint())
 
 				.handle(authenticated(named(delete(request()))))
 
@@ -598,7 +589,7 @@ final class GraphsTest {
 	//// POST ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testPOSTDefaultPrivateAnonymous() {
-		with(dflt(First)).exec(() -> _private(endpoint())
+		exec(dflt(First), () -> _private(endpoint())
 
 				.handle(anonymous(dflt(post(request()))))
 
@@ -615,7 +606,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPOSTDefaultPrivateAuthenticated() {
-		with(dflt(First)).exec(() -> _private(endpoint())
+		exec(dflt(First), () -> _private(endpoint())
 
 				.handle(authenticated(dflt(post(request()))))
 
@@ -630,7 +621,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPOSTDefaultPublicAnonymous() {
-		with(dflt(First)).exec(() -> _public(endpoint())
+		exec(dflt(First), () -> _public(endpoint())
 
 				.handle(anonymous(dflt(post(request()))))
 
@@ -647,7 +638,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPOSTDefaultPublicAuthenticated() {
-		with(dflt(First)).exec(() -> _public(endpoint())
+		exec(dflt(First), () -> _public(endpoint())
 
 				.handle(authenticated(dflt(post(request()))))
 
@@ -665,7 +656,7 @@ final class GraphsTest {
 
 
 	@Test void testPOSTNamedPrivateAnonymous() {
-		with(named(First)).exec(() -> _private(endpoint())
+		exec(named(First), () -> _private(endpoint())
 
 				.handle(anonymous(named(post(request()))))
 
@@ -682,7 +673,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPOSTNamedPrivateAuthenticated() {
-		with(named(First)).exec(() -> _private(endpoint())
+		exec(named(First), () -> _private(endpoint())
 
 				.handle(authenticated(named(post(request()))))
 
@@ -699,7 +690,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPOSTNamedPublicAnonymous() {
-		with(named(First)).exec(() -> _public(endpoint())
+		exec(named(First), () -> _public(endpoint())
 
 				.handle(anonymous(named(post(request()))))
 
@@ -716,7 +707,7 @@ final class GraphsTest {
 	}
 
 	@Test void testPOSTNamedPublicAuthenticated() {
-		with(named(First)).exec(() -> _public(endpoint())
+		exec(named(First), () -> _public(endpoint())
 
 				.handle(authenticated(named(post(request()))))
 
