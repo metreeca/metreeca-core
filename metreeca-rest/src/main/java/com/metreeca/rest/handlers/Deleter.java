@@ -32,7 +32,7 @@ public final class Deleter extends Actor { // !! tbd
 		delegate(deleter()
 
 				.with(connector())
-				.with(wrapper(Request::container, wrapper(), splitter(true)))
+				.with(wrapper(Request::container, wrapper(), splitter(resource())))
 				.with(throttler(Shape.Relate, Shape.Detail))
 
 		);
