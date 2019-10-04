@@ -36,6 +36,8 @@ public final class GCP {
 	public static final String language="language";
 
 	public static final String label="label";
+	public static final String comment="comment";
+
 	public static final String contains="contains";
 
 

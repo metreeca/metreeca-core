@@ -30,6 +30,7 @@ import java.util.function.Function;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.Forbidden;
 import static com.metreeca.rest.Response.Unauthorized;
+import static com.metreeca.rest.Wrapper.success;
 import static com.metreeca.rest.services.Engine.engine;
 
 import static java.lang.Boolean.FALSE;
@@ -114,9 +115,7 @@ public abstract class Actor extends Delegator { // !!! tbd
 	}
 
 	protected Wrapper trimmer() {
-		return handler -> request -> handler.handle(request).map(response ->
-				response.success()? engine.trim(response).fold(identity(), response::map) : response
-		);
+		return success(response -> engine.trim(response).fold(identity(), response::map));
 	}
 
 

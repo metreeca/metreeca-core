@@ -18,6 +18,8 @@
 package com.metreeca.rest;
 
 
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.metreeca.rest.Handler.handler;
@@ -49,7 +51,7 @@ import static com.metreeca.rest.Handler.handler;
 	 * @param pass the wrapper requests and responses are to be routed through when {@code test} evaluates to {@code
 	 *             true} on the request
 	 *
-	 * @return a conditional handler that routes requests and responses through the {@code pass} handler if the {@code
+	 * @return a conditional wrapper that routes requests and responses through the {@code pass} handler if the {@code
 	 * test} predicate evaluates to {@code true} on the request or to a {@linkplain #wrapper() dummy wrapper} otherwise
 	 *
 	 * @throws NullPointerException if either {@code test} or {@code pass} is null
@@ -96,6 +98,49 @@ import static com.metreeca.rest.Handler.handler;
 		}
 
 		return handler -> handler(test, pass.wrap(handler), fail.wrap(handler));
+	}
+
+
+	/**
+	 * Creates a {@linkplain Response#success() successful response} wrapper.
+	 *
+	 * @param mapper a successful response mapping function; must return a non-null value
+	 *
+	 * @return a conditional wrapper that post-process successful responses using {@code mapper}
+	 *
+	 * @throws NullPointerException if {@code mapper} is null or returns a null value
+	 */
+	public static Wrapper success(final Function<Response, Response> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request -> handler.handle(request).map(response -> response.success()
+				? Objects.requireNonNull(mapper.apply(response), "null mapper return values")
+				: response
+		);
+	}
+
+	/**
+	 * Creates an {@linkplain Response#error() error response} wrapper.
+	 *
+	 * @param mapper an error response mapping function; must return a non-null value
+	 *
+	 * @return a conditional wrapper that post-process error responses using {@code mapper}
+	 *
+	 * @throws NullPointerException if {@code mapper} is null or returns a null value
+	 */
+	public static Wrapper error(final Function<Response, Response> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request -> handler.handle(request).map(response -> response.error()
+				? Objects.requireNonNull(mapper.apply(response), "null mapper return values")
+				: response
+		);
 	}
 
 

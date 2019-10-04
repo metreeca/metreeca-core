@@ -72,10 +72,14 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 			final Map<Object, Shape> fields=fields(shape);
 
-			final Map<String, Collection<Object>> issues=((EntityValue)value).get().getProperties().keySet().stream()
-					.filter(name -> !fields.containsKey(name))
-					.map(name -> "unexpected entity property {"+name+"}")
-					.collect(toMap(details -> details, details -> emptySet()));
+			final Map<String, Collection<Object>> issues=((EntityValue)value).get().getProperties().entrySet().stream()
+					.filter(entry -> !fields.containsKey(entry.getKey()))
+					.collect(toMap(
+							entry -> "unexpected entity property {"+entry.getKey()+"}",
+							entry -> entry.getValue() instanceof ListValue
+									? ((ListValue)entry.getValue()).get().stream().map(Value::get).collect(toList())
+									: singleton(entry.getValue().get())
+					));
 
 			return trace(trace(issues), shape.map(new ValidatorProbe(value)));
 

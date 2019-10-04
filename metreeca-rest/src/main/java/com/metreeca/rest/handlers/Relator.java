@@ -19,6 +19,7 @@ package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.Request;
 
+import static com.metreeca.rest.Wrapper.success;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.tree.Shape.Detail;
 import static com.metreeca.tree.Shape.Digest;
@@ -38,9 +39,7 @@ public final class Relator extends Actor { // !!! tbd
 				.with(wrapper(Request::container, wrapper(), splitter(true)))
 				.with(wrapper(Request::container, throttler(Relate, Digest), throttler(Relate, Detail)))
 
-				.with(handler -> request -> handler.handle(request).map(response ->
-						response.success()? response.headers("+Vary", "Accept", "Prefer") : response
-				))
+				.with(success(response -> response.headers("+Vary", "Accept", "Prefer")))
 
 		);
 	}

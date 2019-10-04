@@ -18,7 +18,6 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
-import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
@@ -33,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.metreeca.gcp.formats.EntityFormat.entity;
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.OK;
@@ -140,7 +140,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> true))
 								)
 						)
@@ -156,7 +156,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getLong("seniority") > 3
 												&& e.getEntity("office").getKey().equals(key("/offices/1", "Office"))
 										))
@@ -173,7 +173,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '_order': ['-office.label', 'seniority' ], '_offset': 10, '_limit': 5 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> true, 10, 5, Comparator.<Entity, String>
 
 												comparing(e -> e.getEntity("office").getString("label")).reversed()
@@ -192,7 +192,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '_order': '' }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> true))
 								)
 						)
@@ -209,7 +209,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getLong("seniority") >= 2
 												&& e.getString("code").compareTo("1370") >= 0
 										))
@@ -227,7 +227,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getLong("seniority") >= 2, 0, 0,
 
 												comparing(e -> e.getString("code"))
@@ -246,7 +246,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '^seniority': 'LONG' }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getValue("seniority").getType() == LONG))
 								)
 						)
@@ -260,7 +260,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '@': 'Employee' }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getKey().getKind().equals("Employee")))
 								)
 						)
@@ -275,7 +275,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '> seniority': 3 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getLong("seniority") > 3))
 								)
 						)
@@ -289,7 +289,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '< seniority': 3 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getLong("seniority") < 3))
 								)
 						)
@@ -303,7 +303,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '>= seniority': 3 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getLong("seniority") >= 3))
 								)
 						)
@@ -317,7 +317,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '<= seniority': 3 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getLong("seniority") <= 3))
 								)
 						)
@@ -332,7 +332,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '$> forename': 5 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getString("forename").length() >= 5))
 								)
 						)
@@ -346,7 +346,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '$< forename': 5 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getString("forename").length() <= 5))
 								)
 						)
@@ -360,7 +360,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '*label': 'M??y' }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getString(GCP.label).equals("Mary"))))
 						)
 
@@ -373,7 +373,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '~label': 'ger' }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.getString(GCP.label).contains("Ger"))))
 						)
 
@@ -387,7 +387,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '#> subordinates': 2 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.contains("subordinates") && e.getList("subordinates").size() >= 2))
 								)
 						)
@@ -401,7 +401,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '#< subordinates': 2 }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.contains("subordinates") && e.getList("subordinates").size() <= 2))
 								)
 						)
@@ -416,7 +416,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '%subordinates.label': [] }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> true))
 								)
 						)
@@ -430,7 +430,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '%subordinates.label': 'Yoshimi Kato' }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.contains("subordinates") && singleton("Yoshimi Kato").containsAll(
 
 												e.getList("subordinates").stream()
@@ -450,7 +450,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '%subordinates.label': ['Jeff Firrelli', 'Mary Patterson'] }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.contains("subordinates") && asList("Jeff Firrelli", "Mary Patterson").containsAll(
 
 												e.getList("subordinates").stream()
@@ -471,7 +471,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '!subordinates': [] }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> true))
 								)
 						)
@@ -485,7 +485,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '!subordinates': '/employees/1076' }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.contains("subordinates") && e.getList("subordinates")
 												.stream()
 												.map(v -> ((EntityValue)v).get().getKey())
@@ -504,7 +504,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ '!subordinates': ['/employees/1076', '/employees/1056'] }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> e.contains("subordinates") && e.getList("subordinates")
 												.stream()
 												.map(v -> ((EntityValue)v).get().getKey())
@@ -527,7 +527,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ 'title': [] }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> true))
 								)
 						)
@@ -541,7 +541,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ 'title': 'President' }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> "President".equals(
 												e.getString("title")
 										)))
@@ -557,7 +557,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("{ 'title': ['President', 'VP Sales'] }"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> asList("President", "VP Sales").contains(
 												e.getString("title")
 										)))
@@ -573,7 +573,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request("office=/offices/1&office=/offices/2"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> {
 
 											final IncompleteKey office=e.getEntity("office").getKey();
@@ -602,7 +602,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						)
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e
 												-> e.getLong("seniority") >= 3
 												|| e.getString("code").compareTo("1200") <= 0
@@ -620,7 +620,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.handle(request(">office=/offices/1&<supervisor=/employees/1500"))
 
 						.accept(response -> assertThat(response)
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(items(e -> {
 
 											final FullEntity<IncompleteKey> office=e.getEntity("office");
@@ -698,7 +698,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(terms(
 												e -> e.getValue("title"),
 												e -> true
@@ -717,7 +717,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(terms(
 												e -> e.getValue("title"),
 												e -> e.getLong("seniority") >= 3
@@ -736,7 +736,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(terms(
 												e -> e.getEntity("office").getValue("label"),
 												e -> true
@@ -755,12 +755,35 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(terms(
 												e -> e.contains("supervisor") ? e.getValue("supervisor") : NullValue.of(),
 												e -> true
 										))
 								)
+						)
+
+				);
+			}
+
+
+			@Test void testRetainOnlyCoreEntityProperties() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("_terms&~label=ger"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(entity.getList("terms")).allSatisfy(term -> {
+
+									final FullEntity<IncompleteKey> value=((EntityValue)term).get().getEntity("value");
+									final Set<String> properties=value.getProperties().keySet();
+
+									assertThat(properties)
+											.as("only core properties retained")
+											.isSubsetOf(GCP.id, GCP.type, GCP.label, GCP.comment);
+								}))
 						)
 
 				);
@@ -821,7 +844,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
 												e -> e.getValue("seniority"),
 												e -> true
@@ -840,7 +863,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
 												e -> e.getValue("seniority"),
 												e -> e.getEntity("office").getKey().equals(key("/offices/1", "Office"))
@@ -859,7 +882,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
 												e -> e.getEntity("office").getValue("label"),
 												e -> true
@@ -878,12 +901,36 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 						.accept(response -> assertThat(response)
 								.hasStatus(OK)
 								.hasShape()
-								.hasBody(EntityFormat.entity(), entity -> assertThat(entity.getProperties())
+								.hasBody(entity(), entity -> assertThat(entity.getProperties())
 										.isEqualTo(stats(
 												e -> e.contains("supervisor") ? e.getValue("supervisor") : NullValue.of(),
 												e -> true
 										))
 								)
+						)
+
+				);
+			}
+
+			@Test void testRetainOnlyCoreEntityProperties() {
+				exec(load(birt()), () -> new DatastoreRelator()
+
+						.handle(request("_stats&~label=ger"))
+
+						.accept(response -> assertThat(response)
+								.hasStatus(OK)
+								.hasShape()
+								.hasBody(entity(), entity -> assertThat(asList(
+										entity.getEntity("min"),
+										entity.getEntity("max")
+								)).allSatisfy(term -> {
+
+									final Set<String> properties=term.getProperties().keySet();
+
+									assertThat(properties)
+											.as("only core properties retained")
+											.isSubsetOf(GCP.id, GCP.type, GCP.label, GCP.comment);
+								}))
 						)
 
 				);
@@ -906,7 +953,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 					.accept(response -> assertThat(response)
 							.hasStatus(OK)
 							.hasShape()
-							.hasBody(EntityFormat.entity(), entity -> assertThat(entity)
+							.hasBody(entity(), entity -> assertThat(entity)
 									.isEqualTo(birt().get().stream()
 											.filter(e -> e.getKey().getName().equals(response.request().path()))
 											.findFirst()
@@ -928,7 +975,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 					.accept(response -> assertThat(response)
 							.hasStatus(Response.NotFound)
 							.doesNotHaveShape()
-							.doesNotHaveBody(EntityFormat.entity())
+							.doesNotHaveBody(entity())
 					)
 
 			);
