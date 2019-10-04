@@ -363,6 +363,31 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 				.filter(v -> v.getType() != ValueType.NULL)
 
+				.map(v -> { // retain only entity core properties
+
+					if ( v instanceof EntityValue ) {
+
+						final FullEntity<?> entity=((EntityValue)v).get();
+						final FullEntity.Builder<?> builder=FullEntity.newBuilder(entity.getKey());
+
+						Stream.of(GCP.id, GCP.type, GCP.label, GCP.comment).forEach(property -> {
+
+							if (entity.contains(property)) {
+								builder.set(property, (Value<?>)entity.getValue(property));
+							}
+
+						});
+
+						return EntityValue.of(builder.build());
+
+					} else {
+
+						return v;
+
+					}
+
+				})
+
 		));
 	}
 
