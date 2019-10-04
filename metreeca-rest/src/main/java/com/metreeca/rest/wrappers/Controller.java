@@ -32,32 +32,32 @@ import static java.util.Arrays.asList;
  */
 public final class Controller implements Wrapper {
 
-	private final Set<String> roles;
+	private final Set<Object> roles;
 
 
 	/**
 	 * Creates a controller.
 	 *
-	 * @param roles the user {@linkplain Request#roles(String...) roles} enabled to perform the action managed by the
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
 	 *              {@linkplain Request#shape() request shape}, if one is present
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Controller(final String... roles) {
+	public Controller(final Object... roles) {
 		this(asList(roles));
 	}
 
 	/**
 	 * Creates a controller.
 	 *
-	 * @param roles the user {@linkplain Request#roles(String...) roles} enabled to perform the action managed by the
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
 	 *              {@linkplain Request#shape() request shape}, if one is present
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Controller(final Collection<String> roles) {
+	public Controller(final Collection<Object> roles) {
 
 		if ( roles == null || roles.stream().anyMatch(Objects::isNull)) {
 			throw new NullPointerException("null roles");
@@ -77,7 +77,7 @@ public final class Controller implements Wrapper {
 
 			} else {
 
-				final Collection<String> roles=new HashSet<>(this.roles);
+				final Collection<Object> roles=new HashSet<>(this.roles);
 
 				roles.retainAll(request.roles());
 

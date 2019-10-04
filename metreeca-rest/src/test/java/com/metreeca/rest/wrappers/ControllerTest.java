@@ -75,11 +75,11 @@ final class ControllerTest {
 	}
 
 	@Test void testUnauthorized() {
-		exec(() -> new Controller("x")
+		exec(() -> new Controller("x", "y")
 
 				.wrap(handler())
 
-				.handle(request().roles("y"))
+				.handle(request().roles("z"))
 
 				.accept(response -> assertThat(response).hasStatus(Response.Unauthorized))
 		);
