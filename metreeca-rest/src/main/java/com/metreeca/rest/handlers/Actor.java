@@ -48,15 +48,6 @@ public abstract class Actor extends Delegator { // !!! tbd
 	private final Engine engine=service(engine());
 
 
-	protected Function<Shape, Shape> container() {
-		return engine::container;
-	}
-
-	protected Function<Shape, Shape> resource() {
-		return engine::resource;
-	}
-
-
 	protected Wrapper connector() { // inside a single txn
 		return handler -> request -> consumer -> engine.exec(() ->
 				handler.handle(request).accept(consumer)
@@ -64,27 +55,23 @@ public abstract class Actor extends Delegator { // !!! tbd
 	}
 
 
-	protected Wrapper splitter(final Function<Shape, Shape> splitter) {
-		return handler -> request -> handler.handle(request.shape(splitter.apply(request.shape())));
-	}
-
-	protected Wrapper throttler(final String task, final String view) { // !!! optimize/cache
+	protected Wrapper throttler(final String task, final String... area) { // !!! optimize/cache
 		return handler -> request -> {
 
 			final Shape shape=request.shape();
 
-			final Shape baseline=shape // visible to anyone taking into account task/view
+			final Shape baseline=shape // visible to anyone taking into account task/area
 
 					.map(new Redactor(Shape.Role, values -> true))
 					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.View, view))
+					.map(new Redactor(Shape.Area, area))
 					.map(new Redactor(Shape.Mode, Shape.Convey));
 
-			final Shape authorized=shape // visible to user taking into account task/view
+			final Shape authorized=shape // visible to user taking into account task/area
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.View, view))
+					.map(new Redactor(Shape.Area, area))
 					.map(new Redactor(Shape.Mode, Shape.Convey));
 
 
@@ -92,7 +79,7 @@ public abstract class Actor extends Delegator { // !!! tbd
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.View, view))
+					.map(new Redactor(Shape.Area, area))
 
 					// mode (convey/filter) redaction performed by action handlers
 
@@ -103,7 +90,7 @@ public abstract class Actor extends Delegator { // !!! tbd
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.View, view))
+					.map(new Redactor(Shape.Area, area))
 					.map(new Redactor(Shape.Mode, Shape.Convey))
 
 					.map(new Optimizer())

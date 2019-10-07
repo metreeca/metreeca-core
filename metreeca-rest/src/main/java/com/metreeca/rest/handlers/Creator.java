@@ -59,7 +59,6 @@ public final class Creator extends Actor { // !!! tbd
 		delegate(wrapper(slug).wrap(creator()) // chain slug immediately before handler after custom wrappers
 
 				.with(connector())
-				.with(splitter(resource()))
 				.with(throttler(Shape.Create, Shape.Detail))
 				.with(validator())
 

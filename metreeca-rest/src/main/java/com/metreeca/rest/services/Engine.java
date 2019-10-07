@@ -18,7 +18,6 @@
 package com.metreeca.rest.services;
 
 import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
 import com.metreeca.tree.Trace;
 
 import java.util.function.Supplier;
@@ -89,31 +88,6 @@ public interface Engine {
 	 * @throws NullPointerException if {@code task} is null or returns a null value
 	 */
 	public <R> R exec(final Supplier<R> task);
-
-
-	//// Shape Splitting ///////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Extract the container shape from a combo container/resource shape.
-	 *
-	 * @param shape the (possibly) combined container/resource shape to be processed
-	 *
-	 * @return the container section extracted from {@code shape}, if one is presente, or {@code shape}, otherwise
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public Shape container(final Shape shape);
-
-	/**
-	 * Extract the resource shape from a combo container/resource shape.
-	 *
-	 * @param shape the (possibly) combined container/resource shape to be processed
-	 *
-	 * @return the resource section extracted from {@code shape}, if one is present, or {@code shape}, otherwise
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public Shape resource(final Shape shape);
 
 
 	//// Payload Management ////////////////////////////////////////////////////////////////////////////////////////////

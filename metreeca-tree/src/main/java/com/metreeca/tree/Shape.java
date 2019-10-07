@@ -104,7 +104,7 @@ public interface Shape {
 
 	public static final String Role="role";
 	public static final String Task="task";
-	public static final String View="view";
+	public static final String Area="area";
 	public static final String Mode="mode";
 
 	public static final String Create="create";
@@ -112,6 +112,7 @@ public interface Shape {
 	public static final String Update="update";
 	public static final String Delete="delete";
 
+	public static final String Holder="holder";
 	public static final String Digest="digest";
 	public static final String Detail="detail";
 
@@ -139,7 +140,7 @@ public interface Shape {
 
 	public static Guard task(final String... tasks) { return guard(Task, tasks); }
 
-	public static Guard view(final String... views) { return guard(View, views); }
+	public static Guard area(final String... areas) { return guard(Area, areas); }
 
 	public static Guard mode(final String... modes) { return guard(Mode, modes); }
 
@@ -169,9 +170,13 @@ public interface Shape {
 	public static Guard client() { return task(Create, Relate, Delete); }
 
 
-	public static Guard digest() { return view(Digest); }
+	public static Guard holder() { return area(Holder); }
 
-	public static Guard detail() { return view(Detail); }
+	public static Guard member() { return area(Digest, Detail); }
+
+	public static Guard digest() { return area(Digest); }
+
+	public static Guard detail() { return area(Detail); }
 
 
 	public static Guard convey() { return mode(Convey); }

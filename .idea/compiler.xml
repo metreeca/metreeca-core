@@ -13,5 +13,13 @@
         <module name="metreeca-rest" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Link" target="1.8" />
+      <module name="metreeca-gate" target="1.8" />
+      <module name="metreeca-gcp" target="1.8" />
+      <module name="metreeca-rest" target="1.8" />
+      <module name="metreeca-servlet" target="1.8" />
+      <module name="metreeca-tree" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
