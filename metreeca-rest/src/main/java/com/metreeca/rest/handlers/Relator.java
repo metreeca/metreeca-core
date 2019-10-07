@@ -21,9 +21,7 @@ import com.metreeca.rest.Request;
 
 import static com.metreeca.rest.Wrapper.success;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.tree.Shape.Detail;
-import static com.metreeca.tree.Shape.Digest;
-import static com.metreeca.tree.Shape.Relate;
+import static com.metreeca.tree.Shape.*;
 
 
 /**
@@ -36,8 +34,10 @@ public final class Relator extends Actor { // !!! tbd
 
 				.with(connector())
 				.with(trimmer())
-				.with(wrapper(Request::container, wrapper(), splitter(resource())))
-				.with(wrapper(Request::container, throttler(Relate, Digest), throttler(Relate, Detail)))
+				.with(wrapper(Request::collection,
+						throttler(Relate, Holder, Digest),
+						throttler(Relate, Detail)
+				))
 
 				.with(success(response -> response.headers("+Vary", "Accept", "Prefer")))
 

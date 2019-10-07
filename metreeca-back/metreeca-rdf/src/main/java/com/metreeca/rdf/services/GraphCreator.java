@@ -46,13 +46,13 @@ final class GraphCreator {
 
 
 	Future<Response> handle(final Request request) {
-		return request.container() ? container(request) : resource(request);
+		return request.collection() ? holder(request) : member(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> container(final Request request) {
+	private Future<Response> holder(final Request request) {
 		return request
 
 				.body(rdf())
@@ -89,7 +89,7 @@ final class GraphCreator {
 				.fold(future -> future, request::reply);
 	}
 
-	private Future<Response> resource(final Request request) {
+	private Future<Response> member(final Request request) {
 		return request.reply(internal(new UnsupportedOperationException("resource POST method")));
 	}
 

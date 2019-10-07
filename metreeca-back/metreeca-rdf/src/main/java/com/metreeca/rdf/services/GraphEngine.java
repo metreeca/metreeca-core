@@ -18,15 +18,12 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._probes.Outliner;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
@@ -41,8 +38,6 @@ import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
-
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -108,17 +103,6 @@ public final class GraphEngine implements Engine {
 		}
 
 		return graph.exec(connection -> { return task.get(); });
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Shape container(final Shape shape) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
-
-	@Override public Shape resource(final Shape shape) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
 
 

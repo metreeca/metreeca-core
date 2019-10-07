@@ -31,6 +31,22 @@ abstract class DatastoreProcessor {
 				.map(new Optimizer());
 	}
 
+
+	Shape digest(final Shape shape) { // !!! caching
+		return shape
+
+				.map(new Redactor(Shape.Area, Shape.Digest))
+				.map(new Optimizer());
+	}
+
+	Shape detail(final Shape shape) { // !!! caching
+		return shape
+
+				.map(new Redactor(Shape.Area, Shape.Detail))
+				.map(new Optimizer());
+	}
+
+
 	Shape convey(final Shape shape) { // !!! caching
 		return shape
 

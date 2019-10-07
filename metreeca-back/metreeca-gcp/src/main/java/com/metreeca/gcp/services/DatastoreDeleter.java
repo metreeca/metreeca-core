@@ -40,17 +40,17 @@ final class DatastoreDeleter extends DatastoreProcessor {
 
 
 	Future<Response> handle(final Request request) {
-		return request.container() ? container(request) : resource(request);
+		return request.collection() ? holder(request) : member(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> container(final Request request) {
-		return request.reply(internal(new UnsupportedOperationException("container DELETE method")));
+	private Future<Response> holder(final Request request) {
+		return request.reply(internal(new UnsupportedOperationException("holder DELETE method")));
 	}
 
-	private Future<Response> resource(final Request request) {
+	private Future<Response> member(final Request request) {
 		return request.reply(response -> datastore.exec(service -> {
 
 			final Key key=service.newKeyFactory()

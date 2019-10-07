@@ -81,7 +81,6 @@ public final class DatastoreEngine implements Engine {
 
 	private final Datastore datastore=service(datastore());
 
-	private final _DatastoreSplitter splitter=new _DatastoreSplitter();
 	private final DatastoreTrimmer trimmer=new DatastoreTrimmer(datastore);
 	private final DatastoreValidator validator=new DatastoreValidator(datastore);
 
@@ -98,25 +97,6 @@ public final class DatastoreEngine implements Engine {
 		}
 
 		return datastore.exec(service -> task.get());
-	}
-
-
-	@Override public Shape container(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return splitter.container(shape);
-	}
-
-	@Override public Shape resource(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return splitter.resource(shape);
 	}
 
 

@@ -144,14 +144,14 @@ public final class Request extends Message<Request> {
 	}
 
 	/**
-	 * Checks if this request targets a container.
+	 * Checks if this request targets a collection.
 	 *
 	 * @return {@code true} if the {@link #path()} of this request includes a trailing slash; {@code false} otherwise
 	 *
 	 * @see <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
 	 * Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
 	 */
-	public boolean container() {
+	public boolean collection() {
 		return path.endsWith("/");
 	}
 

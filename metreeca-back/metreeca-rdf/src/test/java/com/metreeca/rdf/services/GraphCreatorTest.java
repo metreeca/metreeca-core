@@ -62,12 +62,12 @@ final class GraphCreatorTest {
 			ValuesTest.Employee
 					.map(new Redactor(Shape.Role, v -> true))
 					.map(new Redactor(Shape.Task, v -> true))
-					.map(new Redactor(Shape.View, Shape.Detail))
+					.map(new Redactor(Shape.Area, Shape.Detail))
 					.map(new _Optimizer())
 	);
 
 
-	@Nested final class Container {
+	@Nested final class Holder {
 
 		private Request request() {
 			return new Request()
@@ -140,7 +140,7 @@ final class GraphCreatorTest {
 
 	}
 
-	@Nested final class Resource {
+	@Nested final class Member {
 
 		@Test void testNotImplemented() {
 			exec(() -> new GraphCreator()

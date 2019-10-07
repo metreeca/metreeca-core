@@ -127,19 +127,18 @@ final class DatastoreRelator extends DatastoreProcessor {
 	private final Logger logger=service(logger());
 
 	private final EntityFormat format=entity(datastore);
-	private final _DatastoreSplitter splitter=new _DatastoreSplitter();
 
 
 	Future<Response> handle(final Request request) {
-		return request.container() ? container(request) : resource(request);
+		return request.collection() ? holder(request) : member(request);
 	}
 
 
-	//// Container /////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> container(final Request request) {
+	private Future<Response> holder(final Request request) {
 
-		return request.query(splitter.resource(expand(request.shape())), (path, shape) -> format.path(path), format::value)
+		return request.query(expand(digest(request.shape())), (path, shape) -> format.path(path), format::value)
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 
@@ -315,12 +314,12 @@ final class DatastoreRelator extends DatastoreProcessor {
 	}
 
 
-	//// Resource //////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> resource(final Request request) {
+	private Future<Response> member(final Request request) {
 		return request.reply(response -> datastore.exec(service -> {
 
-			final Shape shape=convey(request.shape());
+			final Shape shape=convey(detail(request.shape()));
 
 			final Key key=service.newKeyFactory()
 					.setKind(clazz(shape).map(Object::toString).orElse(GCP.Resource))
