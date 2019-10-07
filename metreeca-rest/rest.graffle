@@ -117,7 +117,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-10-07 09:31:54 +0000</string>
+	<string>2019-10-07 10:19:31 +0000</string>
 	<key>Modifier</key>
 	<string>Alessandro</string>
 	<key>MovementHandleVisible</key>
@@ -3037,13 +3037,13 @@ body(:Format&lt;V&gt;, V)}</string>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{165.11811173436209, 263.88256685094757}</string>
+								<string>{165.11811173436209, 263.20794373536967}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{190.81291058046213, 263.88256685094757}</string>
+								<string>{190.81291058046213, 263.20794373536967}</string>
 							</dict>
 						</array>
 					</dict>
@@ -3056,7 +3056,7 @@ body(:Format&lt;V&gt;, V)}</string>
 					<key>Points</key>
 					<array>
 						<string>{165.11811173436209, 432.15846848910246}</string>
-						<string>{190.81291058046213, 263.88256685094757}</string>
+						<string>{190.81291058046213, 263.20794373536967}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3132,13 +3132,13 @@ body(:Format&lt;V&gt;, V)}</string>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{165.11811173436209, 216.35377462335731}</string>
+								<string>{165.11811173436209, 217.03118701998596}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{190.8129105804621, 216.35377462335731}</string>
+								<string>{190.8129105804621, 217.03118701998596}</string>
 							</dict>
 						</array>
 					</dict>
@@ -3151,7 +3151,7 @@ body(:Format&lt;V&gt;, V)}</string>
 					<key>Points</key>
 					<array>
 						<string>{165.11811173436209, 432.15846848910246}</string>
-						<string>{190.8129105804621, 216.35377462335731}</string>
+						<string>{190.8129105804621, 217.03118701998596}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3512,7 +3512,7 @@ delete()}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{612.03033601966922, 254.25203553991241}, {45.677999999999884, 19.261062622070312}}</string>
+					<string>{{612.03033601966922, 253.57741242433451}, {45.677999999999884, 19.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3611,13 +3611,13 @@ delete()}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{569.23811086436513, 263.88256685094757}</string>
+								<string>{569.23811086436513, 263.20794373536967}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{612.03033601966922, 263.88256685094757}</string>
+								<string>{612.03033601966922, 263.20794373536967}</string>
 							</dict>
 						</array>
 					</dict>
@@ -3629,8 +3629,8 @@ delete()}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{569.23811086436513, 263.88256685094757}</string>
-						<string>{612.03033601966922, 263.88256685094757}</string>
+						<string>{569.23811086436513, 263.20794373536967}</string>
+						<string>{612.03033601966922, 263.20794373536967}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3733,7 +3733,7 @@ delete()}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{454.8090396767343, 207.25197099226665}, {74.18999999999869, 19.261062622070312}}</string>
+					<string>{{454.80903967673441, 207.40065570895081}, {74.18999999999869, 19.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -4108,7 +4108,7 @@ delete()}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{262.88298672101007, 252.21345856640897}, {134.68799999999828, 19.261062622070312}}</string>
+					<string>{{262.88298672101007, 251.53883545083107}, {134.68799999999828, 19.261062622070312}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -4641,7 +4641,7 @@ delete()}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{190.81291058046213, 248.62150422887726}, {378.425200283903, 30.522125244140625}}</string>
+					<string>{{190.81291058046213, 247.94688111329936}, {378.425200283903, 30.522125244140625}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -4713,7 +4713,7 @@ delete()}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{190.81291058046213, 192.07849486408588}, {378.425200283903, 48.550559518542826}}</string>
+					<string>{{190.81291058046213, 192.75590726071454}, {378.425200283903, 48.550559518542826}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -4783,7 +4783,7 @@ delete()}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{272.63898672100947, 195.99090837019634}, {115.17599999999948, 41.783187866210938}}</string>
+					<string>{{272.63898672100959, 196.1395930868805}, {115.17599999999948, 41.783187866210938}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>

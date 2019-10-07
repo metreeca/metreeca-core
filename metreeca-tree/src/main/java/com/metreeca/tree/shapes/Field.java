@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 
 import static java.util.Collections.emptyMap;
@@ -40,12 +41,12 @@ import static java.util.stream.Collectors.*;
  */
 public final class Field implements Shape {
 
-	public static Field field(final Object name) {
-		return new Field(name, and());
+	public static Field field(final Object name, final Object... values) {
+		return new Field(name, all(values));
 	}
 
-	public static Field field(final Object name, final Shape shape) {
-		return new Field(name, shape);
+	public static Field field(final Object name, final Shape... shapes) {
+		return new Field(name, shapes.length == 1 ? shapes[0] : and(shapes));
 	}
 
 
