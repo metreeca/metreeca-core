@@ -35,6 +35,7 @@ import static com.metreeca.rest.services.Engine.engine;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 
 
@@ -64,14 +65,14 @@ public abstract class Actor extends Delegator { // !!! tbd
 
 					.map(new Redactor(Shape.Role, values -> true))
 					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
+					.map(new Redactor(Shape.Area, asList(area)))
 					.map(new Redactor(Shape.Mode, Shape.Convey));
 
 			final Shape authorized=shape // visible to user taking into account task/area
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
+					.map(new Redactor(Shape.Area, asList(area)))
 					.map(new Redactor(Shape.Mode, Shape.Convey));
 
 
@@ -79,7 +80,7 @@ public abstract class Actor extends Delegator { // !!! tbd
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
+					.map(new Redactor(Shape.Area, asList(area)))
 
 					// mode (convey/filter) redaction performed by action handlers
 
@@ -90,7 +91,7 @@ public abstract class Actor extends Delegator { // !!! tbd
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
+					.map(new Redactor(Shape.Area, asList(area)))
 					.map(new Redactor(Shape.Mode, Shape.Convey))
 
 					.map(new Optimizer())

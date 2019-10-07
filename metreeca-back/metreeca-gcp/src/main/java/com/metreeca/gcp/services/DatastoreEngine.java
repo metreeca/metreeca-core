@@ -81,8 +81,8 @@ public final class DatastoreEngine implements Engine {
 
 	private final Datastore datastore=service(datastore());
 
-	private final DatastoreTrimmer trimmer=new DatastoreTrimmer(datastore);
-	private final DatastoreValidator validator=new DatastoreValidator(datastore);
+	private final DatastoreValidator validator=new DatastoreValidator();
+	private final DatastoreTrimmer trimmer=new DatastoreTrimmer();
 
 	private final DatastoreCreator creator=new DatastoreCreator();
 	private final DatastoreRelator relator=new DatastoreRelator();
@@ -100,15 +100,6 @@ public final class DatastoreEngine implements Engine {
 	}
 
 
-	@Override public <M extends Message<M>> Result<M, Failure> trim(final M message) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		return trimmer.trim(message);
-	}
-
 	@Override public <M extends Message<M>> Result<M, Failure> validate(final M message) {
 
 		if ( message == null ) {
@@ -116,6 +107,15 @@ public final class DatastoreEngine implements Engine {
 		}
 
 		return validator.validate(message);
+	}
+
+	@Override public <M extends Message<M>> Result<M, Failure> trim(final M message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		return trimmer.trim(message);
 	}
 
 

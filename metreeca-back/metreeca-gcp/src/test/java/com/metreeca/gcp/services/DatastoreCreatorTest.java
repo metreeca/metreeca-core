@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class DatastoreCreatorTest extends DatastoreTestBase {
 
-	@Nested final class Container {
+	@Nested final class Holder {
 
 		@Test void testCreateResource() {
 			exec(() -> new DatastoreCreator()
@@ -115,7 +115,7 @@ final class DatastoreCreatorTest extends DatastoreTestBase {
 
 	}
 
-	@Nested final class Resource {
+	@Nested final class Member {
 
 		@Test void testReject() {
 			exec(() -> new DatastoreCreator()

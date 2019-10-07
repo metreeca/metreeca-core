@@ -31,7 +31,6 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf.services.Graph.graph;
-import static com.metreeca.rdf.services.GraphProcessor.anchor;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;
 import static com.metreeca.rest.Result.Error;
@@ -40,7 +39,7 @@ import static com.metreeca.rest.Result.Value;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphCreator {
+final class GraphCreator extends GraphProcessor {
 
 	private final Graph graph=service(graph());
 
@@ -90,7 +89,7 @@ final class GraphCreator {
 	}
 
 	private Future<Response> member(final Request request) {
-		return request.reply(internal(new UnsupportedOperationException("resource POST method")));
+		return request.reply(internal(new UnsupportedOperationException("member POST method")));
 	}
 
 

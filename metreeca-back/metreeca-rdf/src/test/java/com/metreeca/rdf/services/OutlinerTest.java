@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._probes;
+package com.metreeca.rdf.services;
 
 import com.metreeca.tree.Shape;
 

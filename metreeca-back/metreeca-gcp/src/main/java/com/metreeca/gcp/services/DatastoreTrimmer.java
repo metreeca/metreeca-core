@@ -28,16 +28,13 @@ import com.metreeca.tree.shapes.*;
 import com.google.cloud.datastore.*;
 
 import static com.metreeca.gcp.formats.EntityFormat.entity;
+import static com.metreeca.gcp.services.Datastore.datastore;
+import static com.metreeca.rest.Context.service;
 
 
 final class DatastoreTrimmer extends DatastoreProcessor {
 
-	private final Datastore datastore;
-
-
-	DatastoreTrimmer(final Datastore datastore) {
-		this.datastore=datastore;
-	}
+	private final Datastore datastore=service(datastore());
 
 
 	<M extends Message<M>> Result<M, Failure> trim(final M message) {

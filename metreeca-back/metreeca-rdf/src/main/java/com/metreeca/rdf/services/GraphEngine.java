@@ -91,7 +91,13 @@ public final class GraphEngine implements Engine {
 
 	private final Graph graph=service(graph());
 
+	private final GraphValidator validator=new GraphValidator();
+	//private final GraphTrimmer trimmer=new GraphTrimmer();
+
 	private final GraphCreator creator=new GraphCreator();
+	//private final GraphRelator relator=new GrapRelator();
+	//private final GraphUpdater updater=new GrapUpdater();
+	//private final GraphDeleter deleter=new GraphDeleter();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +119,12 @@ public final class GraphEngine implements Engine {
 	}
 
 	@Override public <M extends Message<M>> Result<M, Failure> validate(final M message) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		return validator.validate(message);
 	}
 
 
@@ -242,48 +253,5 @@ public final class GraphEngine implements Engine {
 		//
 		//});
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//private Optional<Collection<Statement>> retrieve(
-	//		final RepositoryConnection connection, final IRI resource, final Shape shape
-	//) {
-	//	return Optional.of(edges(shape))
-	//
-	//			.map(query -> query.map(new GraphRetriever(trace, connection, resource)))
-	//
-	//			.filter(current -> !current.isEmpty());
-	//}
-
-	//private Focus validate(final RepositoryConnection connection,
-	//		final Resource resource, final Shape shape, final Collection<Statement> model
-	//) {
-	//
-	//	final Shape target=shape.map(GraphProcessor.convey);
-	//
-	//	final Focus focus=target // validate against shape
-	//			.map(new GraphValidator(trace, connection, set(resource), model));
-	//
-	//	final Collection<Statement> envelope=pass(target)
-	//			? description(resource, false, model) // collect resource cbd
-	//			: focus.outline().collect(toSet()); // collect shape envelope
-	//
-	//	return focus( // extend validation report with errors for statements outside shape envelope
-	//
-	//			Stream.concat(
-	//
-	//					focus.getIssues().stream(),
-	//
-	//					model.stream().filter(statement -> !envelope.contains(statement)).map(outlier ->
-	//							issue(Issue.Level.Error, "statement outside shape envelope "+outlier)
-	//					)
-	//
-	//			).collect(toList()),
-	//
-	//			focus.getFrames()
-	//
-	//	);
-	//}
 
 }

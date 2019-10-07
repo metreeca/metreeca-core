@@ -30,7 +30,9 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static com.metreeca.gcp.formats.EntityFormat.entity;
+import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.gcp.services.Datastore.values;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.invalid;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tree.Trace.trace;
@@ -44,12 +46,7 @@ import static java.util.stream.Collectors.toMap;
 
 final class DatastoreValidator extends DatastoreProcessor {
 
-	private final Datastore datastore;
-
-
-	DatastoreValidator(final Datastore datastore) {
-		this.datastore=datastore;
-	}
+	private final Datastore datastore=service(datastore());
 
 
 	<M extends Message<M>> Result<M, Failure> validate(final M message) {
@@ -123,7 +120,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 		}
 
 		@Override public Trace probe(final Guard guard) {
-			throw new UnsupportedOperationException("guard shape");
+			throw new UnsupportedOperationException(guard.toString());
 		}
 
 
@@ -250,6 +247,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 			);
 		}
 
+
 		@Override public Trace probe(final MinCount minCount) {
 
 			final int count=focus().size();
@@ -297,28 +295,25 @@ final class DatastoreValidator extends DatastoreProcessor {
 			return !disjoint(focus(), values(any.getValues())) ? trace() : trace(issue(any));
 		}
 
+
 		@Override public Trace probe(final Field field) {
-			return focus().stream()
+			return focus().stream().map(v -> {
 
-					.map(v -> {
+				if ( v.getType() == ValueType.ENTITY ) {
 
-						if ( v.getType() == ValueType.ENTITY ) {
+					final String name=field.getName().toString();
+					final FullEntity<?> entity=((EntityValue)v).get();
+					final Value<?> value=entity.contains(name) ? entity.getValue(name) : NullValue.of();
 
-							final String name=field.getName().toString();
-							final FullEntity<?> entity=((EntityValue)v).get();
-							final Value<?> value=entity.contains(name) ? entity.getValue(name) : NullValue.of();
+					return trace(emptyMap(), singletonMap(name, validate(field.getShape(), value)));
 
-							return trace(emptyMap(), singletonMap(name, validate(field.getShape(), value)));
+				} else {
 
-						} else {
+					return trace(issue(datatype(ValueType.ENTITY)));
 
-							return trace(issue(datatype(ValueType.ENTITY)));
+				}
 
-						}
-
-					})
-
-					.reduce(trace(), Trace::trace);
+			}).reduce(trace(), Trace::trace);
 		}
 
 		@Override public Trace probe(final And and) {
@@ -332,7 +327,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 		}
 
 		@Override public Trace probe(final When when) {
-			throw new UnsupportedOperationException("conditional shape");
+			throw new UnsupportedOperationException(when.toString());
 		}
 
 	}

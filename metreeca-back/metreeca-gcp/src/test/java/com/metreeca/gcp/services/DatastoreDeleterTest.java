@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toList;
 
 final class DatastoreDeleterTest extends DatastoreTestBase {
 
-	@Nested final class Container {
+	@Nested final class Holder {
 
 		@Test void testReject() {
 			exec(() -> new DatastoreDeleter()
@@ -59,7 +59,7 @@ final class DatastoreDeleterTest extends DatastoreTestBase {
 
 	}
 
-	@Nested final class Resource {
+	@Nested final class Member {
 
 		private List<Entity> entities(final String... codes) {
 			return Arrays.stream(codes).map(code -> Entity

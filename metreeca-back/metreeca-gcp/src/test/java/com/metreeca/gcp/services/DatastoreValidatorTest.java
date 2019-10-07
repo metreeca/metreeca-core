@@ -73,7 +73,7 @@ final class DatastoreValidatorTest extends DatastoreTestBase {
 	}
 
 	private boolean validate(final Shape shape, final Entity entity) {
-		return new DatastoreValidator(service(datastore()))
+		return new DatastoreValidator()
 				.validate(new Request()
 						.shape(field("value", shape))
 						.body(EntityFormat.entity(), entity)

@@ -45,7 +45,7 @@ final class DatastoreTrimmerTest extends DatastoreTestBase {
 
 		builder.accept(entity);
 
-		return new DatastoreTrimmer(service(datastore()))
+		return new DatastoreTrimmer()
 				.trim(new Request()
 						.shape(shape)
 						.body(EntityFormat.entity(), entity.build())

@@ -56,6 +56,18 @@ import static java.util.stream.Collectors.toList;
 
 final class GraphRetriever extends GraphProcessor implements Query.Probe<Collection<Statement>> {
 
+
+	//private Optional<Collection<Statement>> retrieve(
+	//		final RepositoryConnection connection, final IRI resource, final Shape shape
+	//) {
+	//	return Optional.of(edges(shape))
+	//
+	//			.map(query -> query.map(new GraphRetriever(trace, connection, resource)))
+	//
+	//			.filter(current -> !current.isEmpty());
+	//}
+
+
 	private final RepositoryConnection connection;
 
 	private final Resource resource;

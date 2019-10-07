@@ -20,8 +20,9 @@ package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rest.*;
-import com.metreeca.rest.formats.JSONAssert;
+import com.metreeca.rest.Context;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -40,7 +41,7 @@ final class _DeleterTest {
 	private static final Model Dataset=ValuesTest.small();
 
 
-	private void exec(final Runnable ...tasks) {
+	private void exec(final Runnable... tasks) {
 		new Context()
 				.set(engine(), GraphEngine::new)
 				.set(graph(), GraphTest::graph)
@@ -50,198 +51,111 @@ final class _DeleterTest {
 	}
 
 
-	@Nested final class Resource {
+	@Nested final class Holder {
 
-		private Request simple() {
+		private Request request() {
 			return new Request()
-					.roles(ValuesTest.Manager)
-					.method(Request.DELETE)
 					.base(ValuesTest.Base)
-					.path("/employees/1370");
+					.path("/employees/")
+					.shape(ValuesTest.Employees);
 		}
 
 
-		@Nested final class Simple {
+		@Test void testNotImplemented() {
+			exec(() -> new _Deleter()
 
-			@Test void testDelete() {
-				exec(() -> new _Deleter()
+					.handle(request())
 
-						.handle(simple())
-
-						.accept(response -> {
-
-							ResponseAssert.assertThat(response)
-									.hasStatus(Response.NoContent)
-									.doesNotHaveBody();
-
-							ModelAssert.assertThat(model("construct where { <employees/1370> ?p ?o }"))
-									.as("cell deleted")
-									.isEmpty();
-
-							ModelAssert.assertThat(model("construct where { ?s ?p <employees/1370> }"))
-									.as("inbound links removed")
-									.isEmpty();
-
-							ModelAssert.assertThat(model("construct where { <employees/1102> rdfs:label ?o }"))
-									.as("connected resources preserved")
-									.isNotEmpty();
-
-						}));
-			}
-
-
-			@Test void testUnknown() {
-				exec(() -> new _Deleter()
-
-						.handle(simple().path("/unknown"))
-
-						.accept(response -> {
-
-							ResponseAssert.assertThat(response)
-									.hasStatus(Response.NotFound)
-									.doesNotHaveBody();
-
-							ModelAssert.assertThat(model())
-									.as("graph unchanged")
-									.isIsomorphicTo(Dataset);
-
-						}));
-			}
-		}
-
-		@Nested final class Shaped {
-
-			private Request shaped() {
-				return simple().shape(ValuesTest.Employee);
-			}
-
-
-			@Test void testDelete() {
-				exec(() -> new _Deleter()
-
-						.handle(shaped())
-
-						.accept(response -> {
-
-							ResponseAssert.assertThat(response)
-									.hasStatus(Response.NoContent)
-									.doesNotHaveBody();
-
-							ModelAssert.assertThat(model("construct where { <employees/1370> ?p ?o }"))
-									.isEmpty();
-
-						}));
-			}
-
-
-			@Test void testUnauthorized() {
-				exec(() -> new _Deleter()
-
-						.handle(shaped().roles(none))
-
-						.accept(response -> {
-
-							ResponseAssert.assertThat(response)
-									.hasStatus(Response.Unauthorized)
-									.doesNotHaveBody();
-
-							ModelAssert.assertThat(model())
-									.as("graph unchanged")
-									.isIsomorphicTo(Dataset);
-
-						}));
-			}
-
-			@Test void testForbidden() {
-				exec(() -> new _Deleter()
-
-						.handle(shaped().user(RDF.NIL).roles(none))
-
-						.accept(response -> {
-
-							ResponseAssert.assertThat(response)
-									.hasStatus(Response.Forbidden)
-									.doesNotHaveBody();
-
-							ModelAssert.assertThat(model())
-									.as("graph unchanged")
-									.isIsomorphicTo(Dataset);
-
-						}));
-			}
-
-			@Test void testUnknown() {
-				exec(() -> new _Deleter()
-
-						.handle(shaped().path("/unknown"))
-
-						.accept(response -> {
-
-							ResponseAssert.assertThat(response)
-									.hasStatus(Response.NotFound)
-									.doesNotHaveBody();
-
-							ModelAssert.assertThat(model())
-									.as("graph unchanged")
-									.isIsomorphicTo(Dataset);
-
-						}));
-			}
-
+					.accept(response -> ResponseAssert.assertThat(response)
+							.hasStatus(Response.NotImplemented)
+							.hasBody(json())
+					)
+			);
 		}
 
 	}
 
-	@Nested final class Container {
+	@Nested final class Member {
 
-		private Request simple() {
+		private Request shaped() {
 			return new Request()
 					.roles(ValuesTest.Manager)
 					.method(Request.DELETE)
 					.base(ValuesTest.Base)
-					.path("/employees/");
+					.path("/employees/1370").shape(ValuesTest.Employee);
 		}
 
 
-		@Nested final class Simple {
+		@Test void testDelete() {
+			exec(() -> new _Deleter()
 
-			@Test void testNotImplemented() {
-				exec(() -> new _Deleter()
+					.handle(shaped())
 
-						.handle(simple())
+					.accept(response -> {
 
-						.accept(response -> ResponseAssert.assertThat(response)
-								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> JSONAssert.assertThat(json)
-										.hasField("cause")
-								)
-						)
-				);
-			}
+						ResponseAssert.assertThat(response)
+								.hasStatus(Response.NoContent)
+								.doesNotHaveBody();
 
+						ModelAssert.assertThat(model("construct where { <employees/1370> ?p ?o }"))
+								.isEmpty();
+
+					}));
 		}
 
-		@Nested final class Shaped {
 
-			private Request shaped() {
-				return simple().shape(ValuesTest.Employees);
-			}
+		@Test void testUnauthorized() {
+			exec(() -> new _Deleter()
 
+					.handle(shaped().roles(none))
 
-			@Test void testNotImplemented() {
-				exec(() -> new _Deleter()
+					.accept(response -> {
 
-						.handle(shaped())
+						ResponseAssert.assertThat(response)
+								.hasStatus(Response.Unauthorized)
+								.doesNotHaveBody();
 
-						.accept(response -> ResponseAssert.assertThat(response)
-								.hasStatus(Response.NotImplemented)
-								.hasBody(json(), json -> JSONAssert.assertThat(json)
-										.hasField("cause")
-								)
-						)
-				);
-			}
+						ModelAssert.assertThat(model())
+								.as("graph unchanged")
+								.isIsomorphicTo(Dataset);
 
+					}));
+		}
+
+		@Test void testForbidden() {
+			exec(() -> new _Deleter()
+
+					.handle(shaped().user(RDF.NIL).roles(none))
+
+					.accept(response -> {
+
+						ResponseAssert.assertThat(response)
+								.hasStatus(Response.Forbidden)
+								.doesNotHaveBody();
+
+						ModelAssert.assertThat(model())
+								.as("graph unchanged")
+								.isIsomorphicTo(Dataset);
+
+					}));
+		}
+
+		@Test void testUnknown() {
+			exec(() -> new _Deleter()
+
+					.handle(shaped().path("/unknown"))
+
+					.accept(response -> {
+
+						ResponseAssert.assertThat(response)
+								.hasStatus(Response.NotFound)
+								.doesNotHaveBody();
+
+						ModelAssert.assertThat(model())
+								.as("graph unchanged")
+								.isIsomorphicTo(Dataset);
+
+					}));
 		}
 
 	}
