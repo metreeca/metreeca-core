@@ -94,7 +94,7 @@ public final class GraphEngine implements Engine {
 	private final Graph graph=service(graph());
 
 	private final GraphValidator validator=new GraphValidator();
-	//private final GraphTrimmer trimmer=new GraphTrimmer();
+	private final GraphTrimmer trimmer=new GraphTrimmer();
 
 	private final GraphCreator creator=new GraphCreator();
 	//private final GraphRelator relator=new GraphRelator();
@@ -117,7 +117,12 @@ public final class GraphEngine implements Engine {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <M extends Message<M>> Result<M, Failure> trim(final M message) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		return trimmer.trim(message);
 	}
 
 	@Override public <M extends Message<M>> Result<M, Failure> validate(final M message) {

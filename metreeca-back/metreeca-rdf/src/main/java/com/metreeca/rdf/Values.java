@@ -90,7 +90,9 @@ public final class Values {
 		private Inverse(final String value) { super(value); }
 
 
-		@Override public boolean equals(final Object object) { return object instanceof Inverse && super.equals(object); }
+		@Override public boolean equals(final Object object) {
+			return object == this || object instanceof Inverse && super.equals(object);
+		}
 
 		@Override public int hashCode() { return -super.hashCode(); }
 
