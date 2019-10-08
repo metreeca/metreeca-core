@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 
 import com.metreeca.rdf.Values;
@@ -40,7 +40,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
 
 
-public final class JSONParser extends AbstractRDFParser {
+public final class RDFJSONParser extends AbstractRDFParser {
 
 	private static final JsonReaderFactory readers=Json.createReaderFactory(null);
 
@@ -48,15 +48,15 @@ public final class JSONParser extends AbstractRDFParser {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public RDFFormat getRDFFormat() {
-		return JSONCodec.JSONFormat;
+		return com.metreeca.rdf.formats.RDFFormat.RDFJSONFormat;
 	}
 
 	@Override public Collection<RioSetting<?>> getSupportedSettings() {
 
 		final Collection<RioSetting<?>> settings=super.getSupportedSettings();
 
-		settings.add(JSONCodec.RioFocus);
-		settings.add(JSONCodec.RioShape);
+		settings.add(com.metreeca.rdf.formats.RDFFormat.RioFocus);
+		settings.add(com.metreeca.rdf.formats.RDFFormat.RioShape);
 
 		return settings;
 	}
@@ -87,8 +87,8 @@ public final class JSONParser extends AbstractRDFParser {
 			throw new NullPointerException("null base URI");
 		}
 
-		final Resource focus=getParserConfig().get(JSONCodec.RioFocus);
-		final Shape shape=getParserConfig().get(JSONCodec.RioShape);
+		final Resource focus=getParserConfig().get(com.metreeca.rdf.formats.RDFFormat.RioFocus);
+		final Shape shape=getParserConfig().get(com.metreeca.rdf.formats.RDFFormat.RioShape);
 
 		if ( rdfHandler != null ) {
 
@@ -124,7 +124,7 @@ public final class JSONParser extends AbstractRDFParser {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class Decoder extends JSONDecoder {
+	private final class Decoder extends RDFJSONDecoder {
 
 		private Decoder(final String baseURI) {
 			super(baseURI);

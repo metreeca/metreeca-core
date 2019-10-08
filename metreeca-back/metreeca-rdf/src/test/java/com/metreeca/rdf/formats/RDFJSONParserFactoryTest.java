@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import org.junit.jupiter.api.Test;
@@ -23,27 +23,27 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class JSONParserFactoryTest {
+final class RDFJSONParserFactoryTest {
 
 	private final RDFParserRegistry instance=RDFParserRegistry.getInstance();
 
 
 	@Test void testFormatRegisteredWithRegistry() {
 
-		assertThat(instance.getFileFormatForMIMEType(JSONCodec.JSONFormat.getDefaultMIMEType()))
+		assertThat(instance.getFileFormatForMIMEType(RDFFormat.RDFJSONFormat.getDefaultMIMEType()))
 				.as("by mime type")
-				.contains(JSONCodec.JSONFormat);
+				.contains(RDFFormat.RDFJSONFormat);
 
-		assertThat(instance.getFileFormatForFileName("test."+JSONCodec.JSONFormat.getDefaultFileExtension()))
+		assertThat(instance.getFileFormatForFileName("test."+RDFFormat.RDFJSONFormat.getDefaultFileExtension()))
 				.as("by extension")
-				.contains(JSONCodec.JSONFormat);
+				.contains(RDFFormat.RDFJSONFormat);
 
 	}
 
 	@Test void testFactoryRegisteredWithRegistry() {
-		assertThat(instance.get(JSONCodec.JSONFormat))
+		assertThat(instance.get(RDFFormat.RDFJSONFormat))
 				.as("factory registered")
-				.containsInstanceOf(JSONParserFactory.class);
+				.containsInstanceOf(RDFJSONParserFactory.class);
 
 	}
 

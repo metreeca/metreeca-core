@@ -15,4 +15,4 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
-com.metreeca.rdf.codecs.JSONWriterFactory
+com.metreeca.rdf.formats.RDFJSONWriterFactory

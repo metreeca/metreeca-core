@@ -49,13 +49,13 @@ final class QueryParser {
 
 	private final Shape shape;
 
-	private final BiFunction<String, Shape, List<Object>> path;
-	private final BiFunction<JsonValue, Shape, Object> parser;
+	private final BiFunction<String, Shape, List<?>> path;
+	private final BiFunction<JsonValue, Shape, ?> parser;
 
 
 	QueryParser(final Shape shape,
-			final BiFunction<String, Shape, List<Object>> path,
-			final BiFunction<JsonValue, Shape, Object> value
+			final BiFunction<String, Shape, List<?>> path,
+			final BiFunction<JsonValue, Shape, ?> value
 	) {
 
 		if ( shape == null ) {
@@ -119,8 +119,8 @@ final class QueryParser {
 
 		final Shape filter=filter(json);
 
-		final List<Object> terms=terms(json);
-		final List<Object> stats=stats(json);
+		final List<?> terms=terms(json);
+		final List<?> stats=stats(json);
 
 		final List<Order> order=order(json);
 
@@ -238,7 +238,7 @@ final class QueryParser {
 		return filter(steps(path, shape), value, shape, mapper);
 	}
 
-	private Shape filter(final List<Object> path,
+	private Shape filter(final List<?> path,
 			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper) {
 
 		return path.isEmpty() ? mapper.apply(value, shape)
@@ -246,7 +246,7 @@ final class QueryParser {
 	}
 
 
-	private List<Object> terms(final JsonObject query) {
+	private List<?> terms(final JsonObject query) {
 		return Optional.ofNullable(query.get("_terms"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -257,7 +257,7 @@ final class QueryParser {
 				.orElse(null);
 	}
 
-	private List<Object> stats(final JsonObject query) {
+	private List<?> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("_stats"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -269,11 +269,11 @@ final class QueryParser {
 	}
 
 
-	private List<Object> path(final String path, final Shape shape) {
+	private List<?> path(final String path, final Shape shape) {
 		return path(steps(path, shape), shape);
 	}
 
-	private List<Object> path(final List<Object> path, final Shape shape) {
+	private List<?> path(final List<?> path, final Shape shape) {
 
 		if ( !path.isEmpty() ) {
 
@@ -351,7 +351,7 @@ final class QueryParser {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<Object> steps(final String path, final Shape shape) {
+	private List<?> steps(final String path, final Shape shape) {
 		try {
 
 			return this.path.apply(path.trim(), shape);
@@ -364,11 +364,11 @@ final class QueryParser {
 	}
 
 
-	private Object head(final List<Object> path) {
+	private Object head(final List<?> path) {
 		return path.get(0);
 	}
 
-	private List<Object> tail(final List<Object> path) {
+	private List<?> tail(final List<?> path) {
 		return path.subList(1, path.size());
 	}
 

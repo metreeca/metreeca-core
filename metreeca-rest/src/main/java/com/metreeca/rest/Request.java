@@ -387,8 +387,8 @@ public final class Request extends Message<Request> {
 	 * @throws NullPointerException if any argument is null
 	 */
 	public Result<Query, Failure> query(final Shape shape,
-			final BiFunction<String, Shape, List<Object>> path,
-			final BiFunction<JsonValue, Shape, Object> value
+			final BiFunction<String, Shape, List<?>> path,
+			final BiFunction<JsonValue, Shape, ?> value
 	) {
 
 		if ( shape == null ) {

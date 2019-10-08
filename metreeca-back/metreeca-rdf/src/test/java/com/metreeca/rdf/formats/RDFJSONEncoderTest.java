@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
@@ -42,20 +42,20 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 
-final class JSONEncoderTest {
+final class RDFJSONEncoderTest {
 
 	private final IRI focus=iri("app:/");
 
 
-	private JSONEncoder encoder() {
-		return new JSONEncoder(ValuesTest.Base) {};
+	private RDFJSONEncoder encoder() {
+		return new RDFJSONEncoder(ValuesTest.Base) {};
 	}
 
 
 	private JsonValue expected(final Object value) {
-		return JSONCodecTest.object(JSONCodecTest.map(
-				JSONCodecTest.entry("_this", ((Value)focus).toString()),
-				JSONCodecTest.entry("value", asList(value))
+		return RDFJSONTest.object(RDFJSONTest.map(
+				RDFJSONTest.entry("_this", ((Value)focus).toString()),
+				RDFJSONTest.entry("value", asList(value))
 		));
 	}
 
@@ -79,7 +79,7 @@ final class JSONEncoderTest {
 
 		@Test void testBNode() {
 			assertThat(actual(bnode()))
-					.isEqualTo(expected(JSONCodecTest.map()));
+					.isEqualTo(expected(RDFJSONTest.map()));
 		}
 
 		@Test void testBNodeWithBackLink() {
@@ -92,11 +92,11 @@ final class JSONEncoderTest {
 					field(RDF.VALUE, and(required(), field(RDF.VALUE, required()))),
 					x
 			))
-					.isEqualTo(JSONCodecTest.object(JSONCodecTest.map(
-							JSONCodecTest.entry("_this", "_:x"),
-							JSONCodecTest.entry("value", JSONCodecTest.map(
-									JSONCodecTest.entry("value", JSONCodecTest.map(
-											JSONCodecTest.entry("_this","_:x")
+					.isEqualTo(RDFJSONTest.object(RDFJSONTest.map(
+							RDFJSONTest.entry("_this", "_:x"),
+							RDFJSONTest.entry("value", RDFJSONTest.map(
+									RDFJSONTest.entry("value", RDFJSONTest.map(
+											RDFJSONTest.entry("_this","_:x")
 									))
 							))
 					)));
@@ -112,10 +112,10 @@ final class JSONEncoderTest {
 					field(RDF.VALUE, and(required(), field(RDF.VALUE, and(required(), datatype(ResourceType))))),
 					x
 			))
-					.isEqualTo(JSONCodecTest.object(JSONCodecTest.map(
-							JSONCodecTest.entry("_this", "_:x"),
-							JSONCodecTest.entry("value", JSONCodecTest.map(
-									JSONCodecTest.entry("value", "_:x")
+					.isEqualTo(RDFJSONTest.object(RDFJSONTest.map(
+							RDFJSONTest.entry("_this", "_:x"),
+							RDFJSONTest.entry("value", RDFJSONTest.map(
+									RDFJSONTest.entry("value", "_:x")
 							))
 					)));
 		}
@@ -123,7 +123,7 @@ final class JSONEncoderTest {
 
 		@Test void testIRI() {
 			assertThat(actual(item("id")))
-					.isEqualTo(expected(JSONCodecTest.map(JSONCodecTest.entry("_this", "/id"))));
+					.isEqualTo(expected(RDFJSONTest.map(RDFJSONTest.entry("_this", "/id"))));
 		}
 
 		@Test void testProvedIRI() {
@@ -140,17 +140,17 @@ final class JSONEncoderTest {
 
 		@Test void testTypedString() {
 			assertThat(actual(literal("2019-04-03", XMLSchema.DATE)))
-					.isEqualTo(expected(JSONCodecTest.map(
-							JSONCodecTest.entry("_this", "2019-04-03"),
-							JSONCodecTest.entry("_type", XMLSchema.DATE.stringValue())
+					.isEqualTo(expected(RDFJSONTest.map(
+							RDFJSONTest.entry("_this", "2019-04-03"),
+							RDFJSONTest.entry("_type", XMLSchema.DATE.stringValue())
 					)));
 		}
 
 		@Test void testTaggedString() {
 			assertThat(actual(literal("string", "en")))
-					.isEqualTo(expected(JSONCodecTest.map(
-							JSONCodecTest.entry("_this", "string"),
-							JSONCodecTest.entry("_type", "@en")
+					.isEqualTo(expected(RDFJSONTest.map(
+							RDFJSONTest.entry("_this", "string"),
+							RDFJSONTest.entry("_type", "@en")
 					)));
 		}
 
@@ -171,9 +171,9 @@ final class JSONEncoderTest {
 
 		@Test void testDouble() {
 			assertThat(actual(literal(123.0)))
-					.isEqualTo(expected(JSONCodecTest.map(
-							JSONCodecTest.entry("_this", "123.0"),
-							JSONCodecTest.entry("_type", XMLSchema.DOUBLE.stringValue())
+					.isEqualTo(expected(RDFJSONTest.map(
+							RDFJSONTest.entry("_this", "123.0"),
+							RDFJSONTest.entry("_type", XMLSchema.DOUBLE.stringValue())
 					)));
 		}
 

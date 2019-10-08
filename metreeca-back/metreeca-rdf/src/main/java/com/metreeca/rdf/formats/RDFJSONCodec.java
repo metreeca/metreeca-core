@@ -15,19 +15,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Traverser;
 import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RioSetting;
-import org.eclipse.rdf4j.rio.helpers.RioSettingImpl;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,57 +33,22 @@ import static com.metreeca.tree.shapes.Meta.alias;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
 
-public abstract class JSONCodec {
+abstract class RDFJSONCodec {
 
-	/**
-	 * The plain <a href="http://www.json.org/">JSON</a> file format.
-	 *
-	 * The file extension {@code .json} is recommend for JSON documents. The media type is {@code application/json}. The
-	 * character encoding is {@code UTF-8}.
-	 */
-	public static final RDFFormat JSONFormat=new RDFFormat("JSON",
-			asList("application/json", "text/json"),
-			StandardCharsets.UTF_8,
-			singletonList("json"),
-			iri("http://www.json.org/"),
-			RDFFormat.NO_NAMESPACES,
-			RDFFormat.NO_CONTEXTS
-	);
+	static final String This="_this";
+	static final String Type="_type";
 
-	/**
-	 * Sets the focus resource for codecs.
-	 *
-	 * <p>Defaults to {@code null}.</p>
-	 */
-	public static final RioSetting<Resource> RioFocus=new RioSettingImpl<>(
-			JSONCodec.class.getName()+"#Focus", "Resource focus", null
-	);
-
-	/**
-	 * Sets the expected shape for the resources handled by codecs.
-	 *
-	 * <p>Defaults to {@code null}.</p>
-	 */
-	public static final RioSetting<Shape> RioShape=new RioSettingImpl<>(
-			JSONCodec.class.getName()+"#Shape", "Resource shape", null
-	);
-
-
-	protected static final String This="_this";
-	protected static final String Type="_type";
-
-	protected static final Collection<String> Reserved=asList(This, Type);
+	static final Collection<String> Reserved=asList(This, Type);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected Map<IRI, String> aliases(final Shape shape) {
+	static Map<IRI, String> aliases(final Shape shape) {
 
 		if ( shape == null ) { return emptyMap(); } else {
 

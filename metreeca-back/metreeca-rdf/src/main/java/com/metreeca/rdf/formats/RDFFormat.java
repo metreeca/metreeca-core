@@ -18,7 +18,6 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Formats;
-import com.metreeca.rdf.codecs.JSONCodec;
 import com.metreeca.rdf.wrappers.Rewriter;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
@@ -28,12 +27,11 @@ import com.metreeca.tree.Shape;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.*;
-import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
-import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
+import org.eclipse.rdf4j.rio.helpers.*;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -52,11 +50,50 @@ import static com.metreeca.tree.shapes.And.and;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+
 
 /**
  * RDF body format.
  */
 public final class RDFFormat implements Format<Collection<Statement>> {
+
+	/**
+	 * The plain <a href="http://www.json.org/">JSON</a> file format.
+	 *
+	 * The file extension {@code .json} is recommend for JSON documents. The media type is {@code application/json}. The
+	 * character encoding is {@code UTF-8}.
+	 */
+	public static final org.eclipse.rdf4j.rio.RDFFormat RDFJSONFormat=new org.eclipse.rdf4j.rio.RDFFormat("JSON",
+			asList("application/json", "text/json"),
+			StandardCharsets.UTF_8,
+			singletonList("json"),
+			iri("http://www.json.org/"),
+			org.eclipse.rdf4j.rio.RDFFormat.NO_NAMESPACES,
+			org.eclipse.rdf4j.rio.RDFFormat.NO_CONTEXTS
+	);
+
+	/**
+	 * Sets the focus resource for codecs.
+	 *
+	 * <p>Defaults to {@code null}.</p>
+	 */
+	public static final RioSetting<Resource> RioFocus=new RioSettingImpl<>(
+			RDFFormat.class.getName()+"#Focus", "Resource focus", null
+	);
+
+	/**
+	 * Sets the expected shape for the resources handled by codecs.
+	 *
+	 * <p>Defaults to {@code null}.</p>
+	 */
+	public static final RioSetting<Shape> RioShape=new RioSettingImpl<>(
+			RDFFormat.class.getName()+"#Shape", "Resource shape", null
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final RDFFormat Instance=new RDFFormat();
 
@@ -84,12 +121,12 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	private RDFFormat() {}
 
 
-	public List<Object> path(final CharSequence path, final Shape shape) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	public List<IRI> path(final String path, final Shape shape) {
+		return RDFJSONDecoder.path(path, shape);
 	}
 
 	public Value value(final JsonValue value, final Shape shape) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		return RDFJSONDecoder.value(value, shape);
 	}
 
 
@@ -113,8 +150,8 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 							.service(RDFParserRegistry.getInstance(), TURTLE, type)
 							.getParser();
 
-					parser.set(JSONCodec.RioShape, shape.equals(and()) ? null : shape); // !!! handle empty shape directly in JSONParser
-					parser.set(JSONCodec.RioFocus, focus);
+					parser.set(RioShape, shape.equals(and()) ? null : shape); // !!! handle empty shape directly in JSONParser
+					parser.set(RioFocus, focus);
 
 					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
 					parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
@@ -230,8 +267,8 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 						final RDFWriter writer=factory.getWriter(output, base); // relativize IRIs wrt the response focus
 
-						writer.set(JSONCodec.RioShape, shape.equals(and()) ? null : shape); // !!! handle empty shape directly in JSONParser
-						writer.set(JSONCodec.RioFocus, focus);
+						writer.set(RioShape, shape.equals(and()) ? null : shape); // !!! handle empty shape directly in JSONParser
+						writer.set(RioFocus, focus);
 
 						Rio.write(external.equals(internal) ? value : rewrite(internal, external, value), writer);
 

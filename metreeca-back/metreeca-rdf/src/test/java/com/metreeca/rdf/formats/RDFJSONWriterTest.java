@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
@@ -42,7 +42,7 @@ import javax.json.*;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.item;
-import static com.metreeca.rdf.codecs.JSONCodecTest.*;
+import static com.metreeca.rdf.formats.RDFJSONTest.*;
 import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.tree.Shape.multiple;
 import static com.metreeca.tree.Shape.required;
@@ -53,7 +53,7 @@ import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static com.metreeca.tree.shapes.Meta.alias;
 
 
-final class JSONWriterTest  {
+final class RDFJSONWriterTest {
 
 	private final String value=RDF.VALUE.stringValue();
 
@@ -433,10 +433,10 @@ final class JSONWriterTest  {
 	private JsonStructure write(final Iterable<Statement> model, final Resource focus, final Shape shape, final String base) {
 		try (final StringWriter buffer=new StringWriter(1000)) {
 
-			final RDFWriter writer=new JSONWriter(buffer, base);
+			final RDFWriter writer=new RDFJSONWriter(buffer, base);
 
-			writer.set(JSONCodec.RioFocus, focus);
-			writer.set(JSONCodec.RioShape, shape);
+			writer.set(RDFFormat.RioFocus, focus);
+			writer.set(RDFFormat.RioShape, shape);
 
 			Rio.write(model, writer);
 

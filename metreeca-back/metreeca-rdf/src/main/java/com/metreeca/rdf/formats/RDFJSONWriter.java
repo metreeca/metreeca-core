@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 
 import com.metreeca.tree.Shape;
@@ -45,7 +45,7 @@ import static java.util.Collections.singletonMap;
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 
-public final class JSONWriter extends AbstractRDFWriter {
+public final class RDFJSONWriter extends AbstractRDFWriter {
 
 	private static final JsonWriterFactory writers=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));
 
@@ -58,20 +58,20 @@ public final class JSONWriter extends AbstractRDFWriter {
 	private final Model model=new LinkedHashModel();
 
 
-	public JSONWriter(final OutputStream stream) {
+	public RDFJSONWriter(final OutputStream stream) {
 		this(stream, null);
 	}
 
-	public JSONWriter(final OutputStream stream, final String base) {
+	public RDFJSONWriter(final OutputStream stream, final String base) {
 		this(writer(stream), base);
 	}
 
 
-	public JSONWriter(final Writer writer) {
+	public RDFJSONWriter(final Writer writer) {
 		this(writer, null);
 	}
 
-	public JSONWriter(final Writer writer, final String base) {
+	public RDFJSONWriter(final Writer writer, final String base) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
@@ -85,15 +85,15 @@ public final class JSONWriter extends AbstractRDFWriter {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public RDFFormat getRDFFormat() {
-		return JSONCodec.JSONFormat;
+		return com.metreeca.rdf.formats.RDFFormat.RDFJSONFormat;
 	}
 
 	@Override public Collection<RioSetting<?>> getSupportedSettings() {
 
 		final Collection<RioSetting<?>> settings=super.getSupportedSettings();
 
-		settings.add(JSONCodec.RioFocus);
-		settings.add(JSONCodec.RioShape);
+		settings.add(com.metreeca.rdf.formats.RDFFormat.RioFocus);
+		settings.add(com.metreeca.rdf.formats.RDFFormat.RioShape);
 
 		return settings;
 	}
@@ -104,10 +104,10 @@ public final class JSONWriter extends AbstractRDFWriter {
 	@Override public void endRDF() throws RDFHandlerException {
 		try {
 
-			final Resource focus=getWriterConfig().get(JSONCodec.RioFocus);
-			final Shape shape=getWriterConfig().get(JSONCodec.RioShape);
+			final Resource focus=getWriterConfig().get(com.metreeca.rdf.formats.RDFFormat.RioFocus);
+			final Shape shape=getWriterConfig().get(com.metreeca.rdf.formats.RDFFormat.RioShape);
 
-			final JsonValue json=new JSONEncoder(base) {}.json(model, shape, focus);
+			final JsonValue json=new RDFJSONEncoder(base) {}.json(model, shape, focus);
 
 			try {
 

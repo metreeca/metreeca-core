@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
@@ -50,9 +50,9 @@ import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.term;
-import static com.metreeca.rdf.codecs.JSONCodecTest.entry;
-import static com.metreeca.rdf.codecs.JSONCodecTest.list;
-import static com.metreeca.rdf.codecs.JSONCodecTest.map;
+import static com.metreeca.rdf.formats.RDFJSONTest.entry;
+import static com.metreeca.rdf.formats.RDFJSONTest.list;
+import static com.metreeca.rdf.formats.RDFJSONTest.map;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static java.util.stream.Collectors.toMap;
 
 
-final class JSONParserTest {
+final class RDFJSONParserTest {
 
 	private final String value=RDF.VALUE.stringValue();
 
@@ -90,7 +90,7 @@ final class JSONParserTest {
 	@Test void testReportRDFParseException() {
 		assertThatExceptionOfType(RDFParseException.class).isThrownBy(() -> {
 
-			final JSONParser parser=new JSONParser();
+			final RDFJSONParser parser=new RDFJSONParser();
 
 			parser.setRDFHandler(new StatementCollector());
 
@@ -108,7 +108,7 @@ final class JSONParserTest {
 				.as("empty object")
 				.isEqualTo(decode(""));
 
-		assertThat(rdf(JSONCodecTest.array(), RDF.NIL))
+		assertThat(rdf(RDFJSONTest.array(), RDF.NIL))
 				.as("empty array")
 				.isEqualTo(decode(""));
 
@@ -520,10 +520,10 @@ final class JSONParserTest {
 
 			final StatementCollector collector=new StatementCollector();
 
-			final RDFParser parser=new JSONParser();
+			final RDFParser parser=new RDFJSONParser();
 
-			parser.set(JSONCodec.RioFocus, focus);
-			parser.set(JSONCodec.RioShape, shape);
+			parser.set(RDFFormat.RioFocus, focus);
+			parser.set(RDFFormat.RioShape, shape);
 
 			parser.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
 

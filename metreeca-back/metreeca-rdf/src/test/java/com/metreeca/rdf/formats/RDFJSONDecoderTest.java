@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
@@ -56,7 +56,7 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createValue;
 
 
-final class JSONDecoderTest {
+final class RDFJSONDecoderTest {
 
 	private Map<Value, Collection<Statement>> values(final JsonValue value) {
 		return values(value, null);
@@ -64,7 +64,7 @@ final class JSONDecoderTest {
 
 	private Map<Value, Collection<Statement>> values(final JsonValue value, final Shape shape) {
 
-		return new JSONDecoder(ValuesTest.Base) {}
+		return new RDFJSONDecoder(ValuesTest.Base) {}
 				.values(value, shape, null)
 				.entrySet()
 				.stream()
@@ -80,7 +80,7 @@ final class JSONDecoderTest {
 
 	private Map.Entry<Value, Collection<Statement>> value(final JsonValue value, final Shape shape) {
 
-		final Map.Entry<Value, Stream<Statement>> entry=new JSONDecoder(ValuesTest.Base) {}.value(value, shape, null);
+		final Map.Entry<Value, Stream<Statement>> entry=new RDFJSONDecoder(ValuesTest.Base) {}.value(value, shape, null);
 
 		return entry(entry.getKey(), entry.getValue().collect(toList()));
 	}

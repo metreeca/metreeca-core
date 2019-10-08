@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
@@ -26,10 +26,10 @@ import java.io.Writer;
 import java.net.URISyntaxException;
 
 
-public final class JSONWriterFactory implements RDFWriterFactory {
+public final class RDFJSONWriterFactory implements RDFWriterFactory {
 
 	@Override public RDFFormat getRDFFormat() {
-		return JSONCodec.JSONFormat;
+		return com.metreeca.rdf.formats.RDFFormat.RDFJSONFormat;
 	}
 
 
@@ -39,7 +39,7 @@ public final class JSONWriterFactory implements RDFWriterFactory {
 			throw new NullPointerException("null output");
 		}
 
-		return new JSONWriter(output);
+		return new RDFJSONWriter(output);
 	}
 
 	@Override public RDFWriter getWriter(final OutputStream output, final String baseURI) throws URISyntaxException {
@@ -48,7 +48,7 @@ public final class JSONWriterFactory implements RDFWriterFactory {
 			throw new NullPointerException("null output");
 		}
 
-		return new JSONWriter(output, baseURI);
+		return new RDFJSONWriter(output, baseURI);
 	}
 
 
@@ -58,7 +58,7 @@ public final class JSONWriterFactory implements RDFWriterFactory {
 			throw new NullPointerException("null writer");
 		}
 
-		return new JSONWriter(writer);
+		return new RDFJSONWriter(writer);
 	}
 
 	@Override public RDFWriter getWriter(final Writer writer, final String baseURI) throws URISyntaxException {
@@ -67,7 +67,7 @@ public final class JSONWriterFactory implements RDFWriterFactory {
 			throw new NullPointerException("null writer");
 		}
 
-		return new JSONWriter(writer, baseURI);
+		return new RDFJSONWriter(writer, baseURI);
 	}
 
 }

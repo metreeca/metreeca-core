@@ -20,24 +20,32 @@ package com.metreeca.rdf.formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.*;
+import com.metreeca.tree.Shape;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
+import javax.json.JsonException;
+
 import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -48,6 +56,62 @@ final class RDFFormatTest {
 	private static final String external="http://example.com/";
 	private static final String internal="app://local/";
 
+
+	@Nested final class Path {
+
+		private final Shape shape=and(
+				field(RDF.FIRST, field(RDF.REST)),
+				field(inverse(RDF.FIRST), field(RDF.REST))
+		);
+
+		@Test void testParsePaths() {
+
+			assertThat(rdf().path("", shape))
+					.as("empty")
+					.isEmpty();
+
+			assertThat(rdf().path("<"+RDF.FIRST+">", shape))
+					.as("direct iri")
+					.containsExactly(RDF.FIRST);
+
+			assertThat(rdf().path("^<"+RDF.FIRST+">", shape))
+					.as("inverse iri")
+					.containsExactly(inverse(RDF.FIRST));
+
+			assertThat(rdf().path("<"+RDF.FIRST+">/<"+RDF.REST+">", shape))
+					.as("iri slash path")
+					.containsExactly(RDF.FIRST, RDF.REST);
+
+			assertThat(rdf().path("first", shape))
+					.as("direct alias")
+					.containsExactly(RDF.FIRST);
+
+			assertThat(rdf().path("firstOf", shape))
+					.as("inverse alias")
+					.containsExactly(inverse(RDF.FIRST));
+
+			assertThat(rdf().path("first/rest", shape))
+					.as("alias slash path")
+					.containsExactly(RDF.FIRST, RDF.REST);
+
+			assertThat(rdf().path("firstOf.rest", shape))
+					.as("alias dot path")
+					.containsExactly(inverse(RDF.FIRST), RDF.REST);
+
+		}
+
+
+		@Test void testRejectUnknownPathSteps() {
+			assertThatExceptionOfType(JsonException.class)
+					.isThrownBy(() -> rdf().path("first/unknown", shape));
+		}
+
+		@Test void testRejectMalformedPaths() {
+			assertThatExceptionOfType(JsonException.class)
+					.isThrownBy(() -> rdf().path("---", shape));
+		}
+
+	}
 
 	@Nested final class Getter {
 

@@ -15,21 +15,21 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.RDFParserFactory;
 
 
-public final class JSONParserFactory implements RDFParserFactory {
+public final class RDFJSONParserFactory implements RDFParserFactory {
 
 	@Override public RDFFormat getRDFFormat() {
-		return JSONCodec.JSONFormat;
+		return com.metreeca.rdf.formats.RDFFormat.RDFJSONFormat;
 	}
 
 	@Override public RDFParser getParser() {
-		return new JSONParser();
+		return new RDFJSONParser();
 	}
 
 }

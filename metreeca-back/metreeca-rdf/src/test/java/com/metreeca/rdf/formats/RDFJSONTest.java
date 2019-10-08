@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
@@ -44,7 +44,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 
 
-final class JSONCodecTest {
+final class RDFJSONTest {
 
 	//// !!! ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -78,7 +78,7 @@ final class JSONCodecTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Map<IRI, String> aliases(final Shape shape) {
-		return new JSONCodec() {}.aliases(shape);
+		return RDFJSONCodec.aliases(shape);
 	}
 
 

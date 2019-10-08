@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf._probes._Inferencer;
@@ -51,8 +51,7 @@ import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static java.util.stream.Collectors.toCollection;
 
 
-abstract class JSONEncoder extends JSONCodec {
-
+abstract class RDFJSONEncoder extends RDFJSONCodec {
 
 	private static final Function<Shape, Shape> ShapeCompiler=s -> s
 			.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
@@ -66,7 +65,7 @@ abstract class JSONEncoder extends JSONCodec {
 	private final String base;
 
 
-	protected JSONEncoder(final CharSequence base) {
+	RDFJSONEncoder(final CharSequence base) {
 		this.base=root(base);
 	}
 

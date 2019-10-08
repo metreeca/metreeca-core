@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.codecs;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf._probes._Inferencer;
@@ -28,9 +28,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,11 +36,7 @@ import java.util.stream.Stream;
 
 import javax.json.*;
 
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.BNodeType;
-import static com.metreeca.rdf.Values.IRIType;
-import static com.metreeca.rdf.Values.ResourceType;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.tree.Shape.Convey;
 import static com.metreeca.tree.Shape.Mode;
 import static com.metreeca.tree.shapes.Datatype.datatype;
@@ -51,12 +45,13 @@ import static com.metreeca.tree.shapes.Field.fields;
 import static java.util.stream.Collectors.toMap;
 
 
-abstract class JSONDecoder extends JSONCodec {
+abstract class RDFJSONDecoder extends RDFJSONCodec {
 
 	private static final JsonString Default=Json.createValue("");
 
-	private static final Pattern EdgePattern
-			=Pattern.compile("(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:.*)>)");
+	private static final Pattern StepPattern=Pattern.compile(
+			"(?:^|[./])(?<step>(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:[^>]*)>))"
+	);
 
 
 	private static final Function<Shape, Shape> ShapeCompiler=s -> s
@@ -71,19 +66,70 @@ abstract class JSONDecoder extends JSONCodec {
 	}
 
 
+	static List<IRI> path(final String path, final Shape shape) {
+
+		final List<IRI> steps=new ArrayList<>();
+		final Matcher matcher=StepPattern.matcher(path);
+
+		int last=0;
+		Shape reference=shape;
+
+		while ( matcher.lookingAt() ) {
+
+			final Map<Object, Shape> fields=fields(reference);
+			final Map<IRI, String> aliases=aliases(reference);
+
+			final Map<String, IRI> index=new HashMap<>();
+
+			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
+
+			fields.keySet().stream().map(Values::iri).forEach(edge -> {
+				index.put(format(edge), edge); // inside angle brackets
+				index.put(edge.toString(), edge); // naked IRI
+			});
+
+			aliases.forEach((iri, alias) ->
+					index.put(alias, iri)
+			);
+
+			final String step=matcher.group("step");
+			final IRI iri=index.get(step);
+
+			if ( iri == null ) {
+				throw new JsonException("unknown path step ["+step+"]");
+			}
+
+			steps.add(iri);
+			reference=fields.get(iri);
+
+			matcher.region(last=matcher.end(), path.length());
+		}
+
+		if ( last != path.length() ) {
+			throw new JsonException("malformed path ["+path+"]");
+		}
+
+		return steps;
+	}
+
+	static Value value(final JsonValue value, final Shape shape) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final URI base;
 
 
-	protected JSONDecoder(final String base) {
+	RDFJSONDecoder(final String base) {
 		this.base=(base == null) ? null : URI.create(base);
 	}
 
 
 	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected String resolve(final String iri) {
+	String resolve(final String iri) {
 		try {
 			return base == null ? iri : base.resolve(new URI(iri)).toString();
 		} catch ( final URISyntaxException e ) {
@@ -252,7 +298,7 @@ abstract class JSONDecoder extends JSONCodec {
 
 	private IRI property(final String label, final Shape shape) {
 
-		final Matcher matcher=EdgePattern.matcher(label);
+		final Matcher matcher=StepPattern.matcher(label);
 
 		if ( matcher.matches() ) {
 
@@ -295,7 +341,7 @@ abstract class JSONDecoder extends JSONCodec {
 
 		} else {
 
-			return error(String.format("malformed object relation [%s]", label));
+			return error(String.format("malformed object property [%s]", label));
 
 		}
 	}
