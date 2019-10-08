@@ -99,7 +99,7 @@ public final class GraphEngine implements Engine {
 	private final GraphCreator creator=new GraphCreator();
 	//private final GraphRelator relator=new GraphRelator();
 	private final GraphUpdater updater=new GraphUpdater();
-	//private final GraphDeleter deleter=new GraphDeleter();
+	private final GraphDeleter deleter=new GraphDeleter();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -398,23 +398,11 @@ public final class GraphEngine implements Engine {
 	 */
 	@Override public Future<Response> delete(final Request request) {
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
 
-		//return graph.exec(connection -> {
-		//
-		//	// !!! merge retrieve/remove operations into a single SPARQL update txn
-		//	// !!! must check resource existence anyway and wouldn't work for CBD shapes
-		//
-		//	return retrieve(connection, resource, shape).map(current -> {
-		//
-		//		connection.remove(anchor(resource, shape));
-		//		connection.remove(current);
-		//
-		//		return focus(set(), set(frame(resource)));
-		//
-		//	});
-		//
-		//});
+		return deleter.handle(request);
 	}
 
 }

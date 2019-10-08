@@ -28,14 +28,13 @@ import org.eclipse.rdf4j.model.IRI;
 import java.util.Optional;
 
 import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;
 import static com.metreeca.tree.queries.Items.items;
 
 
-final class GraphUpdater extends GraphProcessor {
+final class GraphDeleter extends GraphProcessor {
 
 	private final Graph graph=service(graph());
 
@@ -48,44 +47,38 @@ final class GraphUpdater extends GraphProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> holder(final Request request) {
-		return request.reply(internal(new UnsupportedOperationException("holder PUT method")));
+		return request.reply(internal(new UnsupportedOperationException("holder DELETE method")));
 	}
 
 	private Future<Response> member(final Request request) {
-		return request.body(rdf()).fold(
+		return request.reply(response -> graph.exec(connection -> {
 
-				model -> request.reply(response -> graph.exec(connection -> {
 
-					final IRI item=iri(request.item());
-					final Shape shape=request.shape();
+			final IRI item=iri(request.item());
+			final Shape shape=request.shape();
 
-					return Optional
+			return Optional
 
-							.of(items(shape).map(new GraphFetcher(connection, item)))
+					.of(items(shape).map(new GraphFetcher(connection, item)))
 
-							.filter(current -> !current.isEmpty())
+					.filter(current -> !current.isEmpty())
 
-							.map(current -> {
+					.map(current -> {
 
-								connection.remove(current);
-								connection.add(model);
+						connection.remove(anchor(item, shape));
+						connection.remove(current);
 
-								return response.status(Response.NoContent);
+						return response.status(Response.NoContent);
 
-							})
+					})
 
-							.orElseGet(() ->
+					.orElseGet(() ->
 
-									response.status(Response.NotFound) // !!! 410 Gone if previously known
+							response.status(Response.NotFound) // !!! 410 Gone if previously known
 
-							);
+					);
 
-				})),
-
-				request::reply
-
-		);
+		}));
 	}
 
 }
-
