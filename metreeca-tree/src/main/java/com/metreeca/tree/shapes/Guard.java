@@ -37,22 +37,22 @@ import static java.util.stream.Collectors.joining;
  */
 public final class Guard implements Shape {
 
-	public static Guard guard(final String axis, final Object... values) {
+	public static Guard guard(final Object axis, final Object... values) {
 		return guard(axis, asList(values));
 	}
 
-	public static Guard guard(final String axis, final Collection<Object> values) {
+	public static Guard guard(final Object axis, final Collection<Object> values) {
 		return new Guard(axis, values);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String axis;
+	private final Object axis;
 	private final Set<Object> values;
 
 
-	private Guard(final String axis, final Collection<Object> values) {
+	private Guard(final Object axis, final Collection<Object> values) {
 
 		if ( axis == null ) {
 			throw new NullPointerException("null axis");
@@ -69,7 +69,7 @@ public final class Guard implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getAxis() {
+	public Object getAxis() {
 		return axis;
 	}
 
