@@ -97,7 +97,7 @@ public final class GraphEngine implements Engine {
 	private final GraphTrimmer trimmer=new GraphTrimmer();
 
 	private final GraphCreator creator=new GraphCreator();
-	//private final GraphRelator relator=new GraphRelator();
+	private final GraphRelator relator=new GraphRelator();
 	private final GraphUpdater updater=new GraphUpdater();
 	private final GraphDeleter deleter=new GraphDeleter();
 
@@ -295,11 +295,11 @@ public final class GraphEngine implements Engine {
 	 */
 	@Override public Future<Response> relate(final Request request) {
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
 
-		//return graph.exec(connection -> {
-		//	return query.map(new GraphFetcher(trace, connection, resource));
-		//});
+		return relator.handle(request);
 	}
 
 	/*

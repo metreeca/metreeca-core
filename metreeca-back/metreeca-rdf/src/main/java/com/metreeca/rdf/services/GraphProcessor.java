@@ -55,6 +55,13 @@ abstract class GraphProcessor {
 	}
 
 
+	Shape holder(final Shape shape) { // !!! caching
+		return shape
+
+				.map(new Redactor(Shape.Area, Shape.Holder))
+				.map(new _Optimizer());
+	}
+
 	Shape digest(final Shape shape) { // !!! caching
 		return shape
 

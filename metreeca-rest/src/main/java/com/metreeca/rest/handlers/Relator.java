@@ -19,7 +19,6 @@ package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.Request;
 
-import static com.metreeca.rest.Wrapper.success;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.tree.Shape.*;
 
@@ -38,8 +37,6 @@ public final class Relator extends Actor { // !!! tbd
 						throttler(Relate, Holder, Digest),
 						throttler(Relate, Detail)
 				))
-
-				.with(success(response -> response.headers("+Vary", "Accept", "Prefer")))
 
 		);
 	}

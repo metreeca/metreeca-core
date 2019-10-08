@@ -17,17 +17,12 @@
 
 package com.metreeca.rdf.services;
 
+import com.metreeca.rest.*;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.queries.Edges;
 import com.metreeca.tree.queries.Items;
 import com.metreeca.tree.queries.Stats;
-import com.metreeca.tree.things.Shapes;
-import com.metreeca.rest.*;
-import com.metreeca.rest.bodies.RDFBody;
-import com.metreeca.rest.handlers.Delegator;
-import com.metreeca.rest.services.Engine;
-import com.metreeca.rest.wrappers.Throttler;
+import com.metreeca.tree.queries.Terms;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -37,21 +32,18 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.tree.queries.Edges.edges;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.things.Lists.concat;
-import static com.metreeca.tree.things.Shapes.container;
-import static com.metreeca.tree.things.Shapes.resource;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Engine.engine;
-import static com.metreeca.rest.Message.link;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.bodies.RDFBody.rdf;
+import static com.metreeca.tree.queries.Items.items;
+import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.shapes.Field.field;
 
 
- final class _Relator extends Delegator {
+final class GraphRelator extends GraphProcessor {
 
 	private static final Pattern RepresentationPattern=Pattern
 			.compile("\\s*return\\s*=\\s*representation\\s*;\\s*include\\s*=\\s*\"(?<representation>[^\"]*)\"\\s*");
@@ -59,64 +51,31 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Engine engine=service(engine());
+	private final Graph graph=service(graph());
 
 
-	public _Relator() {
-		delegate(relator()
-				.with(annotator())
-				.with(throttler())
-				.with(connector())
-		);
-	}
+	Future<Response> handle(final Request request) {
+		return request.reply(response -> {
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Wrapper annotator() {
-		return handler -> request -> handler.handle(request).map(response -> response
-				.headers("+Vary", "Accept", "Prefer")
-				.headers("+Link",
-						link(LDP.RESOURCE, "type"),
-						link(LDP.RDF_SOURCE, "type"),
-						request.container() ? link(LDP.CONTAINER, "type") : ""
-				)
-		);
-	}
-
-	private Wrapper throttler() {
-		return wrapper(Request::container,
-				new Throttler(Shape.Relate, Shape.Digest, Shapes::entity),
-				new Throttler(Shape.Relate, Shape.Detail, Shapes::resource)
-		);
-	}
-
-	private Wrapper connector() {
-		return handler -> request -> engine.exec(() -> handler.handle(request));
-	}
-
-	private Handler relator() {
-		return request -> request.reply(response -> {
-
-			final IRI item=request.item();
-			final Shape shape=request.shape();
-
-			final boolean resource=!request.container();
+			final boolean resource=!request.collection();
 			final boolean minimal=include(request, LDP.PREFER_MINIMAL_CONTAINER);
 			final boolean filtered=!request.query().isEmpty();
 
 			if ( resource || minimal ) {
+
+				final IRI item=iri(request.item());
+				final Shape shape=resource ? detail(request.shape()) : holder(request.shape());
 
 				return filtered ? response.map(new Failure()
 
 						.status(Response.NotImplemented)
 						.cause("resource filtered retrieval not supported")
 
-				) : request.query(resource(item, shape)).fold(
+				) : request.query(shape, rdf()::path, rdf()::value).fold(
 
-						query -> {
+						query -> graph.exec(connection -> {
 
-							final Collection<Statement> model=engine.relate(item, query);
+							final Collection<Statement> model=query.map(new GraphFetcher(connection, item));
 
 							return response
 
@@ -128,23 +87,23 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 									.shape(query.map(new Query.Probe<Shape>() {
 
-										@Override public Shape probe(final Edges edges) {
-											return edges.getShape(); // !!! add ldp:contains if edges.path is not empty
+										@Override public Shape probe(final Items items) {
+											return items.getShape(); // !!! add ldp:contains if items.path is not empty
 										}
 
 										@Override public Shape probe(final Stats stats) {
-											return Stats.Shape;
+											return GraphEngine.StatsShape;
 										}
 
-										@Override public Shape probe(final Items items) {
-											return Items.Shape;
+										@Override public Shape probe(final Terms terms) {
+											return GraphEngine.TermsShape;
 										}
 
 									}))
 
 									.body(rdf(), model);
 
-						},
+						}),
 
 						response::map
 
@@ -152,13 +111,18 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 			} else {
 
+				final IRI item=iri(request.item());
+
+				final Shape holder=holder(request.shape());
+				final Shape digest=digest(request.shape());
+
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return request.query(container(item, resource(shape))).fold(
+				return request.query(digest, rdf()::path, rdf()::value).fold(
 
-						query -> {
+						query -> graph.exec(connection -> {
 
-							final Collection<Statement> matches=engine.relate(item, query);
+							final Collection<Statement> matches=query.map(new GraphFetcher(connection, item));
 
 							if ( filtered ) { // matches only
 
@@ -166,16 +130,17 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 										.status(OK)
 										.shape(query.map(new Query.Probe<Shape>() {
 
-											@Override public Shape probe(final Edges edges) {
-												return field(LDP.CONTAINS, edges.getShape());
+											@Override public Shape probe(final Items items) {
+												return field(LDP.CONTAINS, items.getShape());
 											}
 
 											@Override public Shape probe(final Stats stats) {
-												return Stats.Shape;
+
+												return GraphEngine.StatsShape;
 											}
 
-											@Override public Shape probe(final Items items) {
-												return Items.Shape;
+											@Override public Shape probe(final Terms terms) {
+												return GraphEngine.TermsShape;
 											}
 
 										}))
@@ -185,17 +150,16 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 								// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
+								matches.addAll(items(holder).map(new GraphFetcher(connection, item)));
+
 								return response
 										.status(OK)
-										.shape(shape)
-										.body(rdf(), concat(
-												matches,
-												engine.relate(item, edges(resource(item, container(shape))))
-										));
+										.shape(and(holder, field(LDP.CONTAINS, digest)))
+										.body(rdf(), matches);
 
 							}
 
-						},
+						}),
 
 						response::map
 
@@ -203,11 +167,19 @@ import static com.metreeca.rest.bodies.RDFBody.rdf;
 
 			}
 
-		});
+		}).map(response -> response.success() ? response
+				.headers("+Vary", "Accept", "Prefer")
+				.headers("+Link",
+						"<"+LDP.RESOURCE+">; rel=\"type\"",
+						"<"+LDP.RDF_SOURCE+">; rel=\"type\"",
+						request.collection() ? "<"+LDP.CONTAINER+">; rel=\"type\"" : ""
+				) : response
+		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 	private String include(final IRI include) {
 		return "return=representation; include=\""+include+"\"";

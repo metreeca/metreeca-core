@@ -40,6 +40,7 @@ import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
@@ -83,7 +84,14 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	private RDFFormat() {}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public List<Object> path(final CharSequence path, final Shape shape) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
+
+	public Value value(final JsonValue value, final Shape shape) {
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+	}
+
 
 	/**
 	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
