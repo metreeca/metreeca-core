@@ -17,6 +17,10 @@
 
 package com.metreeca.rdf.services;
 
+import com.metreeca.rdf.Values;
+
+import org.eclipse.rdf4j.model.IRI;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.*;
@@ -25,6 +29,9 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.inverse;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyIterator;
@@ -86,18 +93,44 @@ final class Snippets {
 	}
 
 
+	//// SPARQL DSL ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static Snippet path(final Collection<IRI> path) {
+		return list(path.stream().map(Values::format), '/');
+	}
+
+	static Snippet path(final Object source, final Collection<IRI> path, final Object target) {
+		return source == null || path == null || path.isEmpty() || target == null ? nothing()
+				: snippet(source, " ", path(path), " ", target, " .\n");
+	}
+
+	static Snippet edge(final Object source, final IRI iri, final Object target) {
+		return source == null || iri == null || target == null ? nothing() : direct(iri)
+				? snippet(source, " ", Values.format(iri), " ", target, " .\n")
+				: snippet(target, " ", Values.format(inverse(iri)), " ", source, " .\n");
+	}
+
+	static Snippet var() {
+		return var(new Object());
+	}
+
+	static Snippet var(final Object object) {
+		return object == null ? nothing() : snippet((Object)"?", id(object));
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Snippet nothing() {
+	static Snippet nothing() {
 		return (source, identifiers) -> {};
 	}
 
-	public static Snippet nothing(final Object... snippets) {
+	static Snippet nothing(final Object... snippets) {
 		return (source, identifiers) -> generate(snippets, sequence -> {}, identifiers);
 	}
 
 
-	public static Snippet snippet(final String template, final Object... args) {
+	static Snippet snippet(final String template, final Object... args) {
 		return template == null || template.isEmpty() ? snippet(args) : (source, identifiers) -> {
 
 			final Matcher matcher=VariablePattern.matcher(template);
@@ -130,7 +163,7 @@ final class Snippets {
 		};
 	}
 
-	public static Snippet snippet(final Object... snippets) {
+	static Snippet snippet(final Object... snippets) {
 		return (source, identifiers) -> generate(snippets, source, identifiers);
 	}
 

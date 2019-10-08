@@ -76,7 +76,7 @@ final class GraphRelator extends GraphProcessor {
 
 						query -> graph.exec(connection -> {
 
-							final Collection<Statement> model=query.map(new GraphFetcher(connection, item));
+							final Collection<Statement> model=fetch(connection, item, query);
 
 							return response
 
@@ -123,7 +123,7 @@ final class GraphRelator extends GraphProcessor {
 
 						query -> graph.exec(connection -> {
 
-							final Collection<Statement> matches=query.map(new GraphFetcher(connection, item));
+							final Collection<Statement> matches=fetch(connection, item, query);
 
 							if ( filtered ) { // matches only
 
@@ -151,7 +151,7 @@ final class GraphRelator extends GraphProcessor {
 
 								// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
-								matches.addAll(items(holder).map(new GraphFetcher(connection, item)));
+								matches.addAll(fetch(connection, item, items(holder)));
 
 								return response
 										.status(OK)

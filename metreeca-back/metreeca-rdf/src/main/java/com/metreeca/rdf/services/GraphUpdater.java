@@ -21,10 +21,14 @@ package com.metreeca.rdf.services;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import static com.metreeca.rdf.Values.iri;
@@ -61,7 +65,7 @@ final class GraphUpdater extends GraphProcessor {
 
 					return Optional
 
-							.of(items(shape).map(new GraphFetcher(connection, item)))
+							.of(fetch(connection, item, items(shape)))
 
 							.filter(current -> !current.isEmpty())
 

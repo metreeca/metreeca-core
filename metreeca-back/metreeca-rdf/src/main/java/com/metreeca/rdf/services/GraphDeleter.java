@@ -59,7 +59,7 @@ final class GraphDeleter extends GraphProcessor {
 
 			return Optional
 
-					.of(items(shape).map(new GraphFetcher(connection, item)))
+					.of(fetch(connection, item, items(shape)))
 
 					.filter(current -> !current.isEmpty())
 
