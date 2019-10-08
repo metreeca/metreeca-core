@@ -115,7 +115,7 @@ public final class GraphTest {
 								+"\t:task 'POST';\n"
 								+"\t:base <>;\n"
 								+"\t:item <test/request>;\n"
-								+"\t:user form:none.\n"
+								+"\t:user rdf:nil.\n"
 						))
 
 						.as("timestamp configured")
@@ -176,7 +176,7 @@ public final class GraphTest {
 								+"\t:task 'POST';\n"
 								+"\t:base <>;\n"
 								+"\t:item <test/request>;\n"
-								+"\t:user form:none;\n"
+								+"\t:user rdf:nil;\n"
 								+"\t:code 200.\n"
 						))
 

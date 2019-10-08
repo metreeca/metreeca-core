@@ -17,41 +17,30 @@
 
 package com.metreeca.rdf.services;
 
-import com.metreeca.rdf.Values;
-import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rest.Context;
-
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.VOID;
-
-import static com.metreeca.rdf.services.Graph.graph;
-import static com.metreeca.rest.Context.service;
-
-
 abstract class GraphProcessorTest {
 
-	protected void exec(final Runnable... tasks) {
-		new Context()
-
-				//.set(graph(), GraphTest::graph)
-
-				//.set(graph(), this::graphdb)
-				//.set(graph(), this::virtuoso)
-				//.set(graph(), this::stardog)
-				//.set(graph(), this::dydra)
-
-				.exec(() -> service(graph()).exec(connection -> {
-
-					if ( !connection.hasStatement(Values.iri(ValuesTest.Base), RDF.TYPE, VOID.DATASET, false) ) {
-						connection.add(ValuesTest.small()); // load test dataset
-					}
-
-				}))
-
-				.exec(tasks)
-
-				.clear();
-	}
+	//protected void exec(final Runnable... tasks) {
+	//	new Context()
+	//
+	//			//.set(graph(), GraphTest::graph)
+	//
+	//			//.set(graph(), this::graphdb)
+	//			//.set(graph(), this::virtuoso)
+	//			//.set(graph(), this::stardog)
+	//			//.set(graph(), this::dydra)
+	//
+	//			.exec(() -> service(graph()).exec(connection -> {
+	//
+	//				if ( !connection.hasStatement(Values.iri(ValuesTest.Base), RDF.TYPE, VOID.DATASET, false) ) {
+	//					connection.add(ValuesTest.small()); // load test dataset
+	//				}
+	//
+	//			}))
+	//
+	//			.exec(tasks)
+	//
+	//			.clear();
+	//}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

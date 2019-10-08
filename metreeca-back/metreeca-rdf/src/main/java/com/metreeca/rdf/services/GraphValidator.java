@@ -21,7 +21,6 @@ import com.metreeca.rdf.Values;
 import com.metreeca.rest.Failure;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
-import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.Trace;
 import com.metreeca.tree.shapes.*;
@@ -43,7 +42,6 @@ import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rdf.services.Snippets.source;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.invalid;
-import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.tree.Trace.trace;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -57,7 +55,6 @@ import static java.util.stream.Collectors.*;
 final class GraphValidator extends GraphProcessor {
 
 	private final Graph graph=service(graph());
-	private final Logger logger=service(logger());
 
 
 	<M extends Message<M>> Result<M, Failure> validate(final M message) {

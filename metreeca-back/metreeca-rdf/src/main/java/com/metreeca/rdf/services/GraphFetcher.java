@@ -19,7 +19,6 @@ package com.metreeca.rdf.services;
 
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
@@ -54,7 +53,7 @@ import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphRetriever extends GraphProcessor implements Query.Probe<Collection<Statement>> {
+final class GraphFetcher extends GraphProcessor implements Query.Probe<Collection<Statement>> {
 
 
 	//private Optional<Collection<Statement>> retrieve(
@@ -62,7 +61,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 	//) {
 	//	return Optional.of(edges(shape))
 	//
-	//			.map(query -> query.map(new GraphRetriever(trace, connection, resource)))
+	//			.map(query -> query.map(new GraphFetcher(trace, connection, resource)))
 	//
 	//			.filter(current -> !current.isEmpty());
 	//}
@@ -73,14 +72,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 	private final Resource resource;
 
 
-	GraphRetriever(
-			final Logger logger,
-			final RepositoryConnection connection,
-			final Resource resource
-	) {
-
-		super(logger);
-
+	GraphFetcher(final RepositoryConnection connection, final Resource resource) {
 		this.connection=connection;
 		this.resource=resource;
 	}
@@ -102,8 +94,8 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
-		final Shape pattern=shape.map(convey);
-		final Shape selector=shape.map(filter);
+		final Shape pattern=convey(shape);
+		final Shape selector=filter(shape);
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
 
@@ -270,7 +262,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		final Shape selector=shape.map(filter);
+		final Shape selector=filter(shape);
 
 		final Object source=var(selector);
 		final Object target=path.isEmpty() ? source : var();
@@ -279,7 +271,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 				"# stats query\n"
 						+"\n"
-						+"prefix form: <app://form.metreeca.com/terms#>\n"
+						+"prefix : <{base}>\n"
 						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 						+"\n"
 						+"select ?type\t\n"
@@ -296,11 +288,12 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 						+"\n"
 						+"\t{path}\n"
 						+"\n"
-						+"\tbind (if(isBlank({target}), form:bnode, if(isIRI({target}), form:iri, datatype({target}))) as ?type)\n"
+						+"\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as ?type)\n"
 						+"\n"
 						+"} group by ?type having ( count({target}) > 0 ) order by desc(?count) ?type",
 
 
+				GraphEngine.Base,
 				target,
 
 				roots(selector),
@@ -360,14 +353,14 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 		final Model model=new LinkedHashModel();
 
-		final Shape selector=shape.map(filter);
+		final Shape selector=filter(shape);
 
 		final Object source=var(selector);
 		final Object target=path.isEmpty() ? source : var();
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
 
-				"# items query\n"
+				"# terms query\n"
 						+"\n"
 						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 						+"\n"
@@ -673,7 +666,7 @@ final class GraphRetriever extends GraphProcessor implements Query.Probe<Collect
 
 			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
 
-			return any.getValues().size() > 1 ? values(source, any.getValues()) : nothing();
+			return any.getValues().size() > 1 ? values(source, Values.values(any.getValues())) : nothing();
 
 		}
 

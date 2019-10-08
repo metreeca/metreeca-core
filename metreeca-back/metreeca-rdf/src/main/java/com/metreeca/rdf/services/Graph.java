@@ -25,6 +25,7 @@ import com.metreeca.rest.Response;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.Operation;
 import org.eclipse.rdf4j.query.Update;
@@ -261,7 +262,7 @@ public abstract class Graph implements AutoCloseable {
 	 * <tr>
 	 * <td>{@code ?user}</td>
 	 * <td>the IRI identifying the {@linkplain Request#user() user} submitting the original request or
-	 * {@linkplain Values#none} if no user is authenticated</td>
+	 * {@linkplain RDF#NIL} if no user is authenticated</td>
 	 * </tr>
 	 *
 	 * </tbody>
@@ -336,10 +337,10 @@ public abstract class Graph implements AutoCloseable {
 		operation.setBinding("task", literal(request.method()));
 		operation.setBinding("base", iri(request.base()));
 		operation.setBinding("item", iri(request.item()));
-		operation.setBinding("user", request.user().map(Values::iri).orElse(Values.none));
+		operation.setBinding("user", request.user().map(Values::iri).orElse(RDF.NIL));
 
 		if ( message instanceof Response ) {
-			operation.setBinding("code", Values.literal(Values.integer(((Response)message).status())));
+			operation.setBinding("code", literal(Values.integer(((Response)message).status())));
 		}
 
 		for (final BiConsumer<M, O> customizer : customizers) {

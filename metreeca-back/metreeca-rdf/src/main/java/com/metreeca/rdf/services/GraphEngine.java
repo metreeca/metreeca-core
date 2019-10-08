@@ -49,15 +49,17 @@ import static com.metreeca.tree.shapes.Field.field;
  */
 public final class GraphEngine implements Engine {
 
-	static final IRI terms=iri(Values.Internal, "terms");
-	static final IRI stats=iri(Values.Internal, "stats");
+	static final String Base=Values.Internal;
 
-	static final IRI value=iri(Values.Internal, "value");
-	static final IRI type=iri(Values.Internal, "value");
+	static final IRI terms=iri(Base, "terms");
+	static final IRI stats=iri(Base, "stats");
 
-	static final IRI count=iri(Values.Internal, "count");
-	static final IRI max=iri(Values.Internal, "max");
-	static final IRI min=iri(Values.Internal, "min");
+	static final IRI value=iri(Base, "value");
+	static final IRI type=iri(Base, "value");
+
+	static final IRI count=iri(Base, "count");
+	static final IRI max=iri(Base, "max");
+	static final IRI min=iri(Base, "min");
 
 
 	private static final Shape TermShape=and(
@@ -95,8 +97,8 @@ public final class GraphEngine implements Engine {
 	//private final GraphTrimmer trimmer=new GraphTrimmer();
 
 	private final GraphCreator creator=new GraphCreator();
-	//private final GraphRelator relator=new GrapRelator();
-	//private final GraphUpdater updater=new GrapUpdater();
+	//private final GraphRelator relator=new GraphRelator();
+	//private final GraphUpdater updater=new GraphUpdater();
 	//private final GraphDeleter deleter=new GraphDeleter();
 
 
@@ -207,7 +209,7 @@ public final class GraphEngine implements Engine {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 
 		//return graph.exec(connection -> {
-		//	return query.map(new GraphRetriever(trace, connection, resource));
+		//	return query.map(new GraphFetcher(trace, connection, resource));
 		//});
 	}
 

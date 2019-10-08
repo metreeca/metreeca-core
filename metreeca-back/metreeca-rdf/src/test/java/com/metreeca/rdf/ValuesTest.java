@@ -153,8 +153,7 @@ public final class ValuesTest {
 			entry("rdfs", RDFS.NAMESPACE),
 			entry("xsd", XMLSchema.NAMESPACE),
 			entry("ldp", LDP.NAMESPACE),
-			entry("skos", SKOS.NAMESPACE),
-			entry("form", Internal)
+			entry("skos", SKOS.NAMESPACE)
 	).collect(toMap(MapEntry::getKey, MapEntry::getValue)));
 
 	private static final String TurtlePrefixes=Prefixes.entrySet().stream()
