@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf.services;
 
-import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -40,11 +40,29 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.convey;
 import static com.metreeca.tree.Shape.filter;
-import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.Shape.member;
 import static com.metreeca.tree.shapes.Field.field;
 
 
 final class GraphRelatorTest {
+
+	private static final Shape EmployeeShape=member().then(
+			filter().then(
+					field(RDF.TYPE, term("Employee"))
+			),
+			convey().then(
+					field(RDFS.LABEL),
+					field(term("forename")),
+					field(term("surname")),
+					field(term("email")),
+					field(term("title")),
+					field(term("code")),
+					field(term("office")),
+					field(term("seniority")),
+					field(term("supervisor"))
+			)
+	);
+
 
 	@Nested final class Holder {
 
@@ -52,22 +70,7 @@ final class GraphRelatorTest {
 			return new Request()
 					.base(ValuesTest.Base)
 					.path("/employees/")
-					.shape(and(
-							filter().then(
-									field(RDF.TYPE, term("Employee"))
-							),
-							convey().then(
-									field(RDFS.LABEL),
-									field(term("forename")),
-									field(term("surname")),
-									field(term("email")),
-									field(term("title")),
-									field(term("code")),
-									field(term("office")),
-									field(term("seniority")),
-									field(term("supervisor"))
-							)
-					));
+					.shape(EmployeeShape);
 		}
 
 
@@ -84,7 +87,8 @@ final class GraphRelatorTest {
 
 							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.hasStatement(iri(response.item()), LDP.CONTAINS, null)
-									.hasSubset(model("construct where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
+									.hasSubset(model("construct { ?e rdfs:label ?label; :seniority ?seniority }\n"
+											+ "where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
 							)
 					)
 			);
@@ -103,11 +107,11 @@ final class GraphRelatorTest {
 
 							.hasShape()
 
-							.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
+							.hasBody(rdf(), rdf -> assertThat(rdf)
 
 									.hasSubset(model(""
-											+"construct { ?e a :Employee; :title ?t }\n"
-											+"where { ?e a :Employee; :title ?t, 'Sales Rep' }"
+											+"construct { ?e :title ?t; :seniority ?seniority }\n"
+											+"where { ?e a :Employee; :title ?t, 'Sales Rep'; :seniority ?seniority }"
 									))
 
 									.as("only resources matching filter included")
@@ -132,7 +136,7 @@ final class GraphRelatorTest {
 
 							.hasShape()
 
-							.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
+							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.doesNotHaveStatement(null, LDP.CONTAINS, null)
 							)
 					)
@@ -145,11 +149,9 @@ final class GraphRelatorTest {
 
 		private Request request() {
 			return new Request()
-					.method(Request.GET)
 					.base(ValuesTest.Base)
-					.path("/employees/1102")
-					.roles(ValuesTest.Manager)
-					.shape(ValuesTest.Employee);
+					.path("/employees/1370")
+					.shape(EmployeeShape);
 		}
 
 
@@ -164,10 +166,10 @@ final class GraphRelatorTest {
 
 							.hasShape()
 
-							.hasBody(rdf(), rdf -> ModelAssert.assertThat(rdf)
+							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.as("items retrieved")
-									.hasSubset(model(
-											"construct where { <employees/1102> a :Employee; :code ?c; :seniority ?s }"
+									.isSubsetOf(model(
+											"construct where { <employees/1370> ?p ?o }"
 									))
 							)
 					)

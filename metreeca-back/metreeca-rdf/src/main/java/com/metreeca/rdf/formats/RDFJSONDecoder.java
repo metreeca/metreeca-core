@@ -66,57 +66,6 @@ abstract class RDFJSONDecoder extends RDFJSONCodec {
 	}
 
 
-	static List<IRI> path(final String path, final Shape shape) {
-
-		final List<IRI> steps=new ArrayList<>();
-		final Matcher matcher=StepPattern.matcher(path);
-
-		int last=0;
-		Shape reference=shape;
-
-		while ( matcher.lookingAt() ) {
-
-			final Map<Object, Shape> fields=fields(reference);
-			final Map<IRI, String> aliases=aliases(reference);
-
-			final Map<String, IRI> index=new HashMap<>();
-
-			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
-
-			fields.keySet().stream().map(Values::iri).forEach(edge -> {
-				index.put(format(edge), edge); // inside angle brackets
-				index.put(edge.toString(), edge); // naked IRI
-			});
-
-			aliases.forEach((iri, alias) ->
-					index.put(alias, iri)
-			);
-
-			final String step=matcher.group("step");
-			final IRI iri=index.get(step);
-
-			if ( iri == null ) {
-				throw new JsonException("unknown path step ["+step+"]");
-			}
-
-			steps.add(iri);
-			reference=fields.get(iri);
-
-			matcher.region(last=matcher.end(), path.length());
-		}
-
-		if ( last != path.length() ) {
-			throw new JsonException("malformed path ["+path+"]");
-		}
-
-		return steps;
-	}
-
-	static Value value(final JsonValue value, final Shape shape) {
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final URI base;
@@ -171,7 +120,56 @@ abstract class RDFJSONDecoder extends RDFJSONCodec {
 	}
 
 
-	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	protected List<IRI> path(final String path, final Shape shape) {
+
+		final List<IRI> steps=new ArrayList<>();
+		final Matcher matcher=StepPattern.matcher(path);
+
+		int last=0;
+		Shape reference=shape;
+
+		while ( matcher.lookingAt() ) {
+
+			final Map<Object, Shape> fields=fields(reference);
+			final Map<IRI, String> aliases=aliases(reference);
+
+			final Map<String, IRI> index=new HashMap<>();
+
+			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
+
+			fields.keySet().stream().map(Values::iri).forEach(edge -> {
+				index.put(format(edge), edge); // inside angle brackets
+				index.put(edge.toString(), edge); // naked IRI
+			});
+
+			aliases.forEach((iri, alias) ->
+					index.put(alias, iri)
+			);
+
+			final String step=matcher.group("step");
+			final IRI iri=index.get(step);
+
+			if ( iri == null ) {
+				throw new JsonException("unknown path step ["+step+"]");
+			}
+
+			steps.add(iri);
+			reference=fields.get(iri);
+
+			matcher.region(last=matcher.end(), path.length());
+		}
+
+		if ( last != path.length() ) {
+			throw new JsonException("malformed path ["+path+"]");
+		}
+
+		return steps;
+	}
+
+
+	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected Map<Value, Stream<Statement>> values(final JsonValue value, final Shape shape, final Resource focus) {
 

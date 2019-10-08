@@ -39,6 +39,7 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.tree.queries.Items.items;
+import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
 
@@ -71,7 +72,7 @@ final class GraphRelator extends GraphProcessor {
 						.status(Response.NotImplemented)
 						.cause("resource filtered retrieval not supported")
 
-				) : request.query(shape, rdf()::path, rdf()::value).fold(
+				) : request.query(and(all(item), shape), rdf()::path, rdf()::value).fold(
 
 						query -> graph.exec(connection -> {
 
