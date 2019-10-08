@@ -34,7 +34,7 @@ public final class Order {
 		return new Order(asList(path), false);
 	}
 
-	public static Order increasing(final List<Object> path) {
+	public static Order increasing(final List<?> path) {
 		return new Order(path, false);
 	}
 
@@ -43,7 +43,7 @@ public final class Order {
 		return new Order(asList(path), true);
 	}
 
-	public static Order decreasing(final List<Object> path) {
+	public static Order decreasing(final List<?> path) {
 		return new Order(path, true);
 	}
 
@@ -54,7 +54,7 @@ public final class Order {
 	private final boolean inverse;
 
 
-	private Order(final List<Object> path, final boolean inverse) {
+	private Order(final List<?> path, final boolean inverse) {
 
 		if ( path == null || path.stream().anyMatch(Objects::isNull)) {
 			throw new NullPointerException("null path or path step");
