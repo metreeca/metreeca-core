@@ -155,8 +155,10 @@ public final class Response extends Message<Response> {
 	 */
 	public Response status(final int status) {
 
-		if ( status < 100 || status > 599 ) {
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		if ( status != 0 ) { // reserved for system use
+			if ( status < 100 || status > 599 ) {
+				throw new IllegalArgumentException("illegal status code ["+status+"]");
+			}
 		}
 
 		this.status=status;
