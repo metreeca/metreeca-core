@@ -100,7 +100,7 @@ public final class Terms implements Query {
 
 	@Override public String toString() {
 		return format(
-				"items {\n\tshape: %s\n\tpath: %s\n}",
+				"terms {\n\tshape: %s\n\tpath: %s\n}",
 				shape.toString().replace("\n", "\n\t"), path
 		);
 	}

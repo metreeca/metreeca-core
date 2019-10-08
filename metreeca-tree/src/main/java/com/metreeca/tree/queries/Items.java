@@ -131,7 +131,7 @@ public final class Items implements Query {
 
 	@Override public String toString() {
 		return format(
-				"edges {\n\tshape: %s\n\torder: %s\n\toffset: %d\n\tlimit: %d\n}",
+				"items {\n\tshape: %s\n\torder: %s\n\toffset: %d\n\tlimit: %d\n}",
 				shape.toString().replace("\n", "\n\t"), orders, offset, limit
 		);
 	}

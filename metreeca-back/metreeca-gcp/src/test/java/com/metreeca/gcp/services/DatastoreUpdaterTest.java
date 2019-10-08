@@ -104,7 +104,6 @@ final class DatastoreUpdaterTest extends DatastoreTestBase {
 			});
 		}
 
-
 		@Test void testRejectMissing() {
 			exec(() -> new DatastoreUpdater()
 

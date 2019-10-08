@@ -35,45 +35,7 @@ import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.tray.Tray.tool;
 
 
-/**
- * LDP resource deleter.
- *
- * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item() focus
- * item}, according to the following operating modes.</p>
- *
- * <p>If the request target is a {@linkplain Request#container() container}:</p>
- *
- * <ul>
- *
- * <li>the request is reported with a {@linkplain Response#NotImplemented} status code.</li>
- *
- * </ul>
- *
- * <p>If the request includes an expected {@linkplain Request#shape() resource shape}:</p>
- *
- * <ul>
- *
- * <li>the shape is redacted taking into account request user {@linkplain Request#roles() roles}, {@link Form#delete}
- * task, {@link Form#convey} mode and {@link Form#detail} view.</li>
- *
- * <li>the existing RDF description of the target resource matched by the redacted shape is deleted.</li>
- *
- * </ul>
- *
- * <p>Otherwise:</p>
- *
- * <ul>
- *
- * <li>the existing symmetric concise bounded description of the target resource is deleted.</li>
- *
- * </ul>
- *
- * <p>Regardless of the operating mode, RDF data is removed from the system storage {@linkplain Engine#engine()
- * engine}.</p>
- *
- * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
- */
-public final class _Deleter extends Delegator {
+ final class _Deleter extends Delegator {
 
 	private final Engine engine=tool(engine());
 

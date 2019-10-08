@@ -18,7 +18,6 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
@@ -44,8 +43,9 @@ import static com.metreeca.tree.shapes.Field.field;
  * Model-driven graph engine.
  *
  * <p>Manages graph transactions and handles model-driven CRUD actions on LDP resources stored in the shared
- * {@linkplain
- * Graph graph}.</p>
+ * {@linkplain Graph graph}.</p>
+ *
+ * @see <a href="https://www.w3.org/TR/ldp/">Linked Data Platform 1.0</a>
  */
 public final class GraphEngine implements Engine {
 
@@ -98,7 +98,7 @@ public final class GraphEngine implements Engine {
 
 	private final GraphCreator creator=new GraphCreator();
 	//private final GraphRelator relator=new GraphRelator();
-	//private final GraphUpdater updater=new GraphUpdater();
+	private final GraphUpdater updater=new GraphUpdater();
 	//private final GraphDeleter deleter=new GraphDeleter();
 
 
@@ -137,13 +137,13 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * LDP resource creator.
+	/*
+	 * Creates an LDP resource.
 	 *
-	 * <p>Handles creation requests on the linked data container identified by the request {@linkplain Request#item() focus
-	 * item}, according to the following operating modes.</p>
+	 * <p>Handles creation requests on the linked data container identified by the request {@linkplain Request#item()
+	 * focus item}, according to the following operating modes.</p>
 	 *
-	 * <p>If the request target is a {@linkplain Request#container() container} and the request includes a resource
+	 * <p>If the request target is a {@linkplain Request#collection() container} and the request includes a resource
 	 * {@linkplain Message#shape() shape}:</p>
 	 *
 	 * <ul>
@@ -157,7 +157,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * </ul>
 	 *
-	 * <p>Otherwise, If the request target is a {@linkplain Request#container() container}:</p>
+	 * <p>Otherwise, If the request target is a {@linkplain Request#collection() container}:</p>
 	 *
 	 * <ul>
 	 *
@@ -198,7 +198,11 @@ public final class GraphEngine implements Engine {
 	 * <p>On successful resource creation, the IRI of the newly created resource is advertised through the {@code Location}
 	 * HTTP response header.</p>
 	 *
-	 * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
+	 * @param request the request to be handled
+	 *
+	 * @return a lazy response generated for the managed linked data resource in reaction to {@code request}
+	 *
+	 * @throws NullPointerException if {@code request} is null
 	 */
 	@Override public Future<Response> create(final Request request) { // !!! tbd
 
@@ -209,6 +213,86 @@ public final class GraphEngine implements Engine {
 		return creator.handle(request);
 	}
 
+	/*
+	 * LDP resource relator.
+	 *
+	 * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * focus item}, according to the following operating modes.</p>
+	 *
+	 * <p>If the focus item is a {@linkplain Request#collection() container} and the request includes an expected
+	 * {@linkplain Request#shape() shape}:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
+	 * user {@linkplain Request#roles() roles}, {@link Shape#relate} task, {@link Shape#convey} mode and {@link Shape#digest}
+	 * view;</li>
+	 *
+	 * <li>the response {@linkplain RDFBody RDF body} includes the RDF description of the container as matched by the
+	 * {@linkplain Shapes#container(Shape) container section} of redacted shape, linked using the {@code ldp:contains}
+	 * property to the RDF description of the container items matched by the {@linkplain Shapes#resource(Shape) resource
+	 * section} of redacted shape;</li>
+	 *
+	 * <li>contained items are selected as required by the LDP container {@linkplain com.metreeca.tree.things.Shapes
+	 * profile} identified by {@code rdf:type} and LDP properties in the request shape;</li>
+	 *
+	 * <li>if the request contains a filtering {@linkplain Request#query(Shape) query}, only matching container item
+	 * descriptions are included.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Otherwise, if the focus item is a {@linkplain Request#collection() container}:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the response {@linkplain RDFBody RDF body} includes the symmetric concise bounded description of the
+	 * container, linked using the {@code ldp:contains} property to the symmetric concise bounded description of the
+	 * container items, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced
+	 * IRIs;</li>
+	 *
+	 * <li>contained items are selected handling the target resource as an LDP Basic Container, that is on the basis of the
+	 * {@code ldp:contains} property.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p><strong>Warning</strong> / Filtered browsing isn't yet supported on shape-less container.</p>
+	 *
+	 * <p>In both cases:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>if the request contains a {@code Prefer} header requesting the {@code ldp:preferMinimalContainer}
+	 * representation, item descriptions are omitted.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Otherwise, if the request includes an expected {@linkplain Request#shape() shape}:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the response includes the derived shape actually used in the retrieval process, redacted according to request
+	 * user {@linkplain Request#roles() roles}, {@link Shape#relate} task, {@link Shape#detail} view and {@link Shape#convey}
+	 * mode;</li>
+	 *
+	 * <li>the response {@link RDFBody RDF body} contains the RDF description of the request focus, as matched by the
+	 * redacted request shape.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Otherwise:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the response {@link RDFBody RDF body} contains the symmetric concise bounded description of the request focus
+	 * item, extended with {@code rdf:type} and {@code rdfs:label/comment} annotations for all referenced IRIs;</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Regardless of the operating mode, RDF data is retrieved from the system storage {@linkplain Engine#engine()
+	 * engine}.</p>
+	 *
+	 * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
+	 */
 	@Override public Future<Response> relate(final Request request) {
 
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
@@ -218,28 +302,100 @@ public final class GraphEngine implements Engine {
 		//});
 	}
 
+	/*
+	 * LDP resource updater.
+	 *
+	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * focus item}, according to the following operating modes.</p>
+	 *
+	 * <p>If the request target is a {@linkplain Request#collection() container}:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the request is reported with a {@linkplain Response#NotImplemented} status code.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Otherwise, if the request includes an expected {@linkplain Request#shape() resource shape}:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the resource shape is extracted and redacted taking into account request user {@linkplain Request#roles()
+	 * roles}, {@link Form#update} task, {@link Form#convey} mode and {@link Form#detail} view</li>
+	 *
+	 * <li>the request {@link RDFBody RDF body} is expected to contain an RDF description of the resource to be updated
+	 * matched by the redacted resource shape; statements outside this envelope are reported with a {@linkplain
+	 * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element.</li>
+	 *
+	 * <li>on successful body validation, the existing RDF description of the target resource matched by the redacted shape
+	 * is replaced with the request RDF body.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Otherwise:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the request {@link RDFBody RDF body} is expected to contain a symmetric concise bounded description of the
+	 * resource to be updated; statements outside this envelope are reported with a {@linkplain
+	 * Response#UnprocessableEntity} status code and a structured {@linkplain Failure#trace(JsonValue) trace} element;</li>
+	 *
+	 * <li>on successful body validation, the existing symmetric concise bounded description of the target resource is
+	 * replaced with the request RDF body.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Regardless of the operating mode, RDF data is updated in the system storage {@linkplain Engine#engine() engine}.</p>
+	 *
+	 * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
+	 */
 	@Override public Future<Response> update(final Request request) {
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
 
-		//return graph.exec(connection -> {
-		//	return retrieve(connection, resource, shape).map(current -> {
-		//
-		//		// validate against shape before updating graph to support snapshot transactions
-		//
-		//		final Focus focus=validate(connection, resource, shape, model);
-		//
-		//		if ( !focus.assess(Issue.Level.Error) ) {
-		//			connection.remove(current);
-		//			connection.add(model);
-		//		}
-		//
-		//		return focus;
-		//
-		//	});
-		//});
+		return updater.handle(request);
 	}
 
+	/*
+	 * LDP resource deleter.
+	 *
+	 * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * focus item}, according to the following operating modes.</p>
+	 *
+	 * <p>If the request target is a {@linkplain Request#collection() container}:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the request is reported with a {@linkplain Response#NotImplemented} status code.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>If the request includes an expected {@linkplain Request#shape() resource shape}:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the shape is redacted taking into account request user {@linkplain Request#roles() roles}, {@link Form#delete}
+	 * task, {@link Form#convey} mode and {@link Form#detail} view.</li>
+	 *
+	 * <li>the existing RDF description of the target resource matched by the redacted shape is deleted.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Otherwise:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the existing symmetric concise bounded description of the target resource is deleted.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Regardless of the operating mode, RDF data is removed from the system storage {@linkplain Engine#engine()
+	 * engine}.</p>
+	 *
+	 * @see <a href="https://www.w3.org/Submission/CBD/">CBD - Concise Bounded Description</a>
+	 */
 	@Override public Future<Response> delete(final Request request) {
 
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
