@@ -358,7 +358,7 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * @return a slug generator returning an auto-incrementing numeric id unique to the focus item of the request
 	 */
-	public static BiFunction<Request, Collection<Statement>, String> auto() {
+	public static Function<Request, String> auto() {
 		return new AutoGenerator();
 	}
 
@@ -553,7 +553,7 @@ public abstract class Graph implements AutoCloseable {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class AutoGenerator implements BiFunction<Request, Collection<Statement>, String> {
+	private static final class AutoGenerator implements Function<Request, String> {
 
 		private static final IRI Auto=iri("app://rest.metreeca.com/terms#", "auto");
 
@@ -561,7 +561,7 @@ public abstract class Graph implements AutoCloseable {
 		private final Graph graph=service(graph());
 
 
-		@Override public String apply(final Request request, final Collection<Statement> model) {
+		@Override public String apply(final Request request) {
 			return graph.exec(connection -> {
 
 				// !!! custom name pattern
