@@ -16,7 +16,7 @@
  */
 
 /**
- * Google Cloud Platform adapter.
+ * Google Cloud Platform tools.
  *
  * <p>Requires the following Maven dependency in your project:</p>
  *

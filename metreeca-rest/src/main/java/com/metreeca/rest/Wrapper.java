@@ -128,12 +128,13 @@ import static java.util.Objects.requireNonNull;
 	/**
 	 * Creates a request body wrapper.
 	 *
+	 * @param <V>    the type of the body representation to be pre-processed
 	 * @param format the format of the request body representation to be pre-processed
 	 * @param mapper the request body representation mapper; takes as argument a request and its body representation for
 	 *               {@code format} and must return a non-null updated value
 	 *
 	 * @return a wrapper that pre-process the {@code format} body representation of requests using {@code mapper}
-
+	 *
 	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
 	 */
 	public static <V> Wrapper preprocessor(final Format<V> format, final BiFunction<Request, V, V> mapper) {
@@ -179,6 +180,7 @@ import static java.util.Objects.requireNonNull;
 	/**
 	 * Creates a {@linkplain Response#success() successful} response body wrapper.
 	 *
+	 * @param <V>    the type of the body representation to be post-processed
 	 * @param format the format of the response body representation to be post-processed
 	 * @param mapper the response body representation mapper; takes as argument a response and its body representation
 	 *               for {@code format} and must return a non-null updated value

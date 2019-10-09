@@ -17,15 +17,6 @@
 
 /**
  * Google Cloud Platform shared services.
- *
- * <p>Requires the following Maven dependency in your project:</p>
- *
- * <pre>{@code
- * <dependency>
- *      <groupId>com.metreeca</groupId>
- *      <artifactId>gcp</artifactId>
- *      <version>${project.version}</version>
- * </dependency>}</pre>
  */
 
 package com.metreeca.gcp.services;

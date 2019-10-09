@@ -41,7 +41,7 @@ import static java.util.Arrays.asList;
  *
  * <p>Recursively extracts implied RDF statements from a shape.</p>
  */
-public final class Outliner extends Inspector<Stream<Statement>> {
+final class Outliner extends Inspector<Stream<Statement>> {
 
 	private final Collection<Value> sources;
 

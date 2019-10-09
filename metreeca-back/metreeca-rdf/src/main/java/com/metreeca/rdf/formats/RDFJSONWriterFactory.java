@@ -25,7 +25,9 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URISyntaxException;
 
-
+/**
+ * Idiomatic RDF/JSON {@linkplain RDFWriterFactory writer factory}.
+ */
 public final class RDFJSONWriterFactory implements RDFWriterFactory {
 
 	@Override public RDFFormat getRDFFormat() {

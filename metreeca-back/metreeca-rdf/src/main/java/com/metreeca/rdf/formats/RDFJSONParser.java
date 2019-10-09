@@ -40,6 +40,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
 
 
+/**
+ * Idiomatic RDF/JSON {@linkplain RDFParser parser}.
+ */
 public final class RDFJSONParser extends AbstractRDFParser {
 
 	private static final JsonReaderFactory readers=Json.createReaderFactory(null);

@@ -24,9 +24,8 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RioSetting;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFWriter;
 
 import java.io.IOException;
@@ -45,6 +44,9 @@ import static java.util.Collections.singletonMap;
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 
+/**
+ * Idiomatic RDF/JSON {@linkplain RDFWriter writer}.
+ */
 public final class RDFJSONWriter extends AbstractRDFWriter {
 
 	private static final JsonWriterFactory writers=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));

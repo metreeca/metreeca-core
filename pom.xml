@@ -333,15 +333,21 @@
 									<packages>com.metreeca.servlet*</packages>
 								</group>
 								<group>
-									<title>Backend Adapters</title>
+									<title>RDF/SPARQL Adapters</title>
 									<packages>
 										com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*
 									</packages>
 								</group>
+								<!--<group>
+									<title>Google Cloud Platform Adapters</title>
+									<packages>
+										com.metreeca.gcp*
+									</packages>
+								</group>-->
 							</groups>
 
 							<excludePackageNames>
-								com.metreeca.gcp* <!-- colon-separated patterns -->
+								com.metreeca.gcp;com.metreeca.gcp* <!-- colon-separated patterns -->
 							</excludePackageNames>
 
 						</configuration>
