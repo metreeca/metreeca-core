@@ -18,11 +18,13 @@
 package com.metreeca.rest;
 
 
-import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.metreeca.rest.Handler.handler;
+
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -101,8 +103,111 @@ import static com.metreeca.rest.Handler.handler;
 	}
 
 
+	//// Pre-Processing ////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
-	 * Creates a {@linkplain Response#success() successful response} wrapper.
+	 * Creates a request wrapper.
+	 *
+	 * @param mapper a request mapping function; must return a non-null value
+	 *
+	 * @return a wrapper that pre-process requests using {@code mapper}
+	 *
+	 * @throws NullPointerException if {@code mapper} is null or returns a null value
+	 */
+	public static Wrapper preprocessor(final Function<Request, Request> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request -> handler.handle(
+				requireNonNull(mapper.apply(request), "null mapper return value")
+		);
+	}
+
+	/**
+	 * Creates a request body wrapper.
+	 *
+	 * @param format the format of the request body representation to be pre-processed
+	 * @param mapper the request body representation mapper; takes as argument a request and its body representation for
+	 *               {@code format} and must return a non-null updated value
+	 *
+	 * @return a wrapper that pre-process the {@code format} body representation of requests using {@code mapper}
+
+	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
+	 */
+	public static <V> Wrapper preprocessor(final Format<V> format, final BiFunction<Request, V, V> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request -> request.body(format).fold(
+
+				value -> handler.handle(request.body(format,
+						requireNonNull(mapper.apply(request, value), "null mapper return value")
+				)),
+
+				request::reply
+
+		);
+	}
+
+
+	//// Post-Processing ///////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creates a response wrapper.
+	 *
+	 * @param mapper a response mapping function; must return a non-null value
+	 *
+	 * @return a wrapper that post-process responses using {@code mapper}
+	 *
+	 * @throws NullPointerException if {@code mapper} is null or returns a null value
+	 */
+	public static Wrapper postprocessor(final Function<Response, Response> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request -> handler.handle(request).map(response ->
+				requireNonNull(mapper.apply(response), "null mapper return values")
+		);
+	}
+
+	/**
+	 * Creates a {@linkplain Response#success() successful} response body wrapper.
+	 *
+	 * @param format the format of the response body representation to be post-processed
+	 * @param mapper the response body representation mapper; takes as argument a response and its body representation
+	 *               for {@code format} and must return a non-null updated value
+	 *
+	 * @return a conditional wrapper that post-process the {@code format} body representation of successful responses
+	 * using {@code mapper}
+	 *
+	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
+	 */
+	public static <V> Wrapper postprocessor(final Format<V> format, final BiFunction<Response, V, V> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request -> handler.handle(request).map(response -> response.success() ? response.body(format).fold(
+
+				value -> response.body(format,
+						requireNonNull(mapper.apply(response, value), "null mapper return value")
+				),
+
+				error -> new Response(request).map(error)
+
+		) : response);
+	}
+
+
+	/**
+	 * Creates a {@linkplain Response#success() successful} response wrapper.
 	 *
 	 * @param mapper a successful response mapping function; must return a non-null value
 	 *
@@ -117,13 +222,13 @@ import static com.metreeca.rest.Handler.handler;
 		}
 
 		return handler -> request -> handler.handle(request).map(response -> response.success()
-				? Objects.requireNonNull(mapper.apply(response), "null mapper return values")
+				? requireNonNull(mapper.apply(response), "null mapper return values")
 				: response
 		);
 	}
 
 	/**
-	 * Creates an {@linkplain Response#error() error response} wrapper.
+	 * Creates an {@linkplain Response#error() error} response wrapper.
 	 *
 	 * @param mapper an error response mapping function; must return a non-null value
 	 *
@@ -138,7 +243,7 @@ import static com.metreeca.rest.Handler.handler;
 		}
 
 		return handler -> request -> handler.handle(request).map(response -> response.error()
-				? Objects.requireNonNull(mapper.apply(response), "null mapper return values")
+				? requireNonNull(mapper.apply(response), "null mapper return values")
 				: response
 		);
 	}

@@ -24,7 +24,9 @@ import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.Operation;
@@ -134,7 +136,7 @@ public abstract class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
-	@SafeVarargs public static <M extends Message<M>> BiFunction<M, Model, Model> query(
+	@SafeVarargs public static <M extends Message<M>> BiFunction<M, Collection<Statement>, Collection<Statement>> query(
 			final String query, final BiConsumer<M, GraphQuery>... customizers
 	) {
 
@@ -142,12 +144,8 @@ public abstract class Graph implements AutoCloseable {
 			throw new NullPointerException("null query");
 		}
 
-		if ( customizers == null ) {
+		if ( customizers == null || Arrays.stream(customizers).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null customizers");
-		}
-
-		if ( Arrays.stream(customizers).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null customizer");
 		}
 
 		final Graph graph=service(graph());
@@ -166,20 +164,20 @@ public abstract class Graph implements AutoCloseable {
 	}
 
 	/**
-	 * Creates a SPARQL update housekeeping filter.
+	 * Creates a SPARQL update housekeeping task.
 	 *
 	 * @param update      the SPARQL update script to be executed by the new housekeeping filter on target messages;
 	 *                    empty scripts are ignored
 	 * @param customizers optional custom configuration setters for the SPARQL update operation
 	 * @param <M>         the type of the target message for the new filter
 	 *
-	 * @return a housekeeping filter executing the SPARQL {@code update} script on target messages with {@linkplain
+	 * @return a housekeeping task executing the SPARQL {@code update} script on target messages with {@linkplain
 	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom configurations; returns the
-	 * input model without altering it
+	 * input message without altering it
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
-	@SafeVarargs public static <M extends Message<M>> BiFunction<M, Model, Model> update(
+	@SafeVarargs public static <M extends Message<M>> Function<M, M> update(
 			final String update, final BiConsumer<M, Update>... customizers
 	) {
 
@@ -187,21 +185,17 @@ public abstract class Graph implements AutoCloseable {
 			throw new NullPointerException("null update");
 		}
 
-		if ( customizers == null ) {
+		if ( customizers == null || Arrays.stream(customizers).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null customizers");
-		}
-
-		if ( Arrays.stream(customizers).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null customizer");
 		}
 
 		final Graph graph=service(graph());
 
-		return update.isEmpty() ? (message, model) -> model : (message, model) -> graph.exec(connection -> {
+		return update.isEmpty() ? message -> message : message -> graph.exec(connection -> {
 
 			configure(message, connection.prepareUpdate(SPARQL, update, message.request().base()), customizers).execute();
 
-			return model;
+			return message;
 
 		});
 	}
