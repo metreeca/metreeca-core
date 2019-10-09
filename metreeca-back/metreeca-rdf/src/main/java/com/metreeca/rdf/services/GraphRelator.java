@@ -72,7 +72,7 @@ final class GraphRelator extends GraphProcessor {
 						.status(Response.NotImplemented)
 						.cause("resource filtered retrieval not supported")
 
-				) : request.query(and(all(item), shape), rdf()::path, rdf()::value).fold(
+				) : request.query(rdf(), and(all(item), shape)).fold(
 
 						query -> graph.exec(connection -> {
 
@@ -119,7 +119,7 @@ final class GraphRelator extends GraphProcessor {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return request.query(digest, rdf()::path, rdf()::value).fold(
+				return request.query(rdf(), digest).fold(
 
 						query -> graph.exec(connection -> {
 

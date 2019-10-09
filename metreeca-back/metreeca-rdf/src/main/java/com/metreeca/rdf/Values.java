@@ -115,6 +115,7 @@ public final class Values {
 	 * Anonymous user/role.
 	 */
 	public static final IRI none=iri(Internal, "none");
+
 	/**
 	 * Super user/role.
 	 */

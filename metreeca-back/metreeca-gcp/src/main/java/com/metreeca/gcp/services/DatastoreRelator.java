@@ -51,7 +51,6 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.services.Logger.logger;
-import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.field;
 
@@ -138,7 +137,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Future<Response> holder(final Request request) {
 
-		return request.query(expand(digest(request.shape())), (path, shape) -> format.path(path), format::value)
+		return request.query(format, expand(digest(request.shape())))
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 

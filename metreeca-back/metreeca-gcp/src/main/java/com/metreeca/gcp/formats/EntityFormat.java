@@ -92,9 +92,9 @@ public final class EntityFormat implements Format<Entity> {
 	}
 
 
-	public List<Object> path(final CharSequence path) {
+	@Override public List<String> path(final String base, final Shape shape, final String path) {
 
-		final List<Object> steps=new ArrayList<>();
+		final List<String> steps=new ArrayList<>();
 		final Matcher matcher=StepPattern.matcher(path);
 
 		int last=0;
@@ -113,7 +113,7 @@ public final class EntityFormat implements Format<Entity> {
 		return steps;
 	}
 
-	public Value<?> value(final JsonValue value, final Shape shape) {
+	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
 		return decoder.decode(value, shape);
 	}
 

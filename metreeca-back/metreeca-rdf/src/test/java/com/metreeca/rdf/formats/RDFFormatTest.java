@@ -66,35 +66,35 @@ final class RDFFormatTest {
 
 		@Test void testParsePaths() {
 
-			assertThat(rdf().path("", shape))
+			assertThat(rdf().path("app:/", shape, ""))
 					.as("empty")
 					.isEmpty();
 
-			assertThat(rdf().path("<"+RDF.FIRST+">", shape))
+			assertThat(rdf().path("app:/", shape, "<"+RDF.FIRST+">"))
 					.as("direct iri")
 					.containsExactly(RDF.FIRST);
 
-			assertThat(rdf().path("^<"+RDF.FIRST+">", shape))
+			assertThat(rdf().path("app:/", shape, "^<"+RDF.FIRST+">"))
 					.as("inverse iri")
 					.containsExactly(inverse(RDF.FIRST));
 
-			assertThat(rdf().path("<"+RDF.FIRST+">/<"+RDF.REST+">", shape))
+			assertThat(rdf().path("app:/", shape, "<"+RDF.FIRST+">/<"+RDF.REST+">"))
 					.as("iri slash path")
 					.containsExactly(RDF.FIRST, RDF.REST);
 
-			assertThat(rdf().path("first", shape))
+			assertThat(rdf().path("app:/", shape, "first"))
 					.as("direct alias")
 					.containsExactly(RDF.FIRST);
 
-			assertThat(rdf().path("firstOf", shape))
+			assertThat(rdf().path("app:/", shape, "firstOf"))
 					.as("inverse alias")
 					.containsExactly(inverse(RDF.FIRST));
 
-			assertThat(rdf().path("first/rest", shape))
+			assertThat(rdf().path("app:/", shape, "first/rest"))
 					.as("alias slash path")
 					.containsExactly(RDF.FIRST, RDF.REST);
 
-			assertThat(rdf().path("firstOf.rest", shape))
+			assertThat(rdf().path("app:/", shape, "firstOf.rest"))
 					.as("alias dot path")
 					.containsExactly(inverse(RDF.FIRST), RDF.REST);
 
@@ -103,12 +103,12 @@ final class RDFFormatTest {
 
 		@Test void testRejectUnknownPathSteps() {
 			assertThatExceptionOfType(JsonException.class)
-					.isThrownBy(() -> rdf().path("first/unknown", shape));
+					.isThrownBy(() -> rdf().path("app:/", shape, "first/unknown"));
 		}
 
 		@Test void testRejectMalformedPaths() {
 			assertThatExceptionOfType(JsonException.class)
-					.isThrownBy(() -> rdf().path("---", shape));
+					.isThrownBy(() -> rdf().path("app:/", shape, "---"));
 		}
 
 	}

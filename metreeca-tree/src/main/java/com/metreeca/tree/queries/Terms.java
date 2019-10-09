@@ -35,7 +35,7 @@ public final class Terms implements Query {
 		return new Terms(shape, asList(path));
 	}
 
-	public static Terms terms(final Shape shape, final List<Object> path) {
+	public static Terms terms(final Shape shape, final List<?> path) {
 		return new Terms(shape, path);
 	}
 
@@ -47,7 +47,7 @@ public final class Terms implements Query {
 	private final List<Object> path;
 
 
-	private Terms(final Shape shape, final List<Object> path) {
+	private Terms(final Shape shape, final List<?> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

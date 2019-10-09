@@ -105,8 +105,6 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 */
 	public static final String ExternalBase="-External-Base";
 
-	private static final RDFJSONDecoder decoder=new RDFJSONDecoder(null) {};
-
 
 	/**
 	 * Retrieves the RDF body format.
@@ -123,12 +121,12 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	private RDFFormat() {}
 
 
-	public List<IRI> path(final String path, final Shape shape) {
-		return decoder.path(path, shape);
+	@Override public List<IRI> path(final String base, final Shape shape, final String path) {
+		return new RDFJSONDecoder(base) {}.path(path, shape); // !!! pass base as argument and factor decoder instance
 	}
 
-	public Value value(final JsonValue value, final Shape shape) {
-		return decoder.value(value, shape, null).getKey();
+	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
+		return new RDFJSONDecoder(base) {}.value(value, shape, null).getKey(); // !!! pass base as argument and factor decoder instance
 	}
 
 

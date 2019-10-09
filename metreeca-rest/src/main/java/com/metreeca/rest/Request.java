@@ -17,13 +17,11 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 
 import java.net.URI;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import javax.json.JsonException;
@@ -376,36 +374,29 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the shape-based query of this request.
 	 *
+	 * @param format the format supporting {@linkplain Format#path(String, Shape, String) path}/{@linkplain
+	 *               Format#value(String, Shape, JsonValue)  value} parsing
 	 * @param shape  the base shape for the query
-	 * @param path  a shape-based parser mapping from a string to an {@linkplain Engine engine-specific} property path
-	 * @param value a shape-based parser mapping from a JSON value to an {@linkplain Engine engine-specific} value
 	 *
 	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
-	 * {@linkplain #query() query} string, if successfully parsed using the {@code value}; an error providing access to
-	 * the parsing failure, otherwise
+	 * {@linkplain #query() query} string, if successfully parsed using {@code format} parsing methods; an error
+	 * providing access to the parsing failure, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	public Result<Query, Failure> query(final Shape shape,
-			final BiFunction<String, Shape, List<?>> path,
-			final BiFunction<JsonValue, Shape, ?> value
-	) {
+	public Result<Query, Failure> query(final Format<?> format, final Shape shape) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( path == null ) {
-			throw new NullPointerException("null path parser");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value parser");
-		}
-
 		try {
 
-			return Value(new QueryParser(shape, path, value).parse(query()));
+			return Value(new QueryParser(base, shape, format).parse(query()));
 
 		} catch ( final JsonException e ) {
 

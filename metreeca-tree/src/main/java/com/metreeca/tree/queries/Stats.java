@@ -35,7 +35,7 @@ public final class Stats implements Query {
 		return new Stats(shape, asList(path));
 	}
 
-	public static Stats stats(final Shape shape, final List<Object> path) {
+	public static Stats stats(final Shape shape, final List<?> path) {
 		return new Stats(shape, path);
 	}
 
@@ -47,7 +47,7 @@ public final class Stats implements Query {
 	private final List<Object> path;
 
 
-	private Stats(final Shape shape, final List<Object> path) {
+	private Stats(final Shape shape, final List<?> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");

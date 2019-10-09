@@ -47,33 +47,15 @@ import static java.util.stream.Collectors.toMap;
 
 final class QueryParser {
 
+	private final String base;
 	private final Shape shape;
-
-	private final BiFunction<String, Shape, List<?>> path;
-	private final BiFunction<JsonValue, Shape, ?> parser;
+	private final Format<?> format;
 
 
-	QueryParser(final Shape shape,
-			final BiFunction<String, Shape, List<?>> path,
-			final BiFunction<JsonValue, Shape, ?> value
-	) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
+	QueryParser(final String base, final Shape shape, final Format<?> format) {
+		this.base=base;
 		this.shape=shape;
-
-		this.path=path;
-		this.parser=value;
+		this.format=format;
 	}
 
 
@@ -89,7 +71,7 @@ final class QueryParser {
 	 *
 	 * @throws NullPointerException   if {@code query} is null
 	 * @throws JsonException          if {@code query} is malformed
-	 * @throws NoSuchElementException if the query encoded by {@code query} referes to data outside the parser shape
+	 * @throws NoSuchElementException if {@code query} refers to data outside the parser shape envelope
 	 */
 	public Query parse(final String query) throws JsonException, NoSuchElementException {
 
@@ -263,7 +245,7 @@ final class QueryParser {
 				.filter(v -> !v.equals(JsonValue.NULL))
 
 				.map(v -> v instanceof JsonString ? (JsonString)v : error("_stats is not a string"))
-				.map((path) -> path(path.getString(), shape))
+				.map(path -> path(path.getString(), shape))
 
 				.orElse(null);
 	}
@@ -354,7 +336,11 @@ final class QueryParser {
 	private List<?> steps(final String path, final Shape shape) {
 		try {
 
-			return this.path.apply(path.trim(), shape);
+			return format.path(base, shape, path.trim());
+
+		} catch ( final JsonException e ) {
+
+			throw e;
 
 		} catch ( final RuntimeException e ) {
 
@@ -394,7 +380,7 @@ final class QueryParser {
 	}
 
 	private Object value(final JsonValue value, final Shape shape) {
-		return parser.apply(value, shape);
+		return format.value(base, shape, value);
 	}
 
 

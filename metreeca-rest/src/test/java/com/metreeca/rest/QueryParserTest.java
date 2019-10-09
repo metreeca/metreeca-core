@@ -56,6 +56,7 @@ import static com.metreeca.tree.shapes.MinLength.minLength;
 import static com.metreeca.tree.shapes.Pattern.pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import static java.util.Arrays.asList;
 
@@ -115,22 +116,10 @@ final class QueryParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new QueryParser(shape, this::path, this::value)
+		return new QueryParser("app:/", shape, new TestFormat())
 				.parse(query.replace('\'', '"'));
 	}
 
-	private List<Object> path(final String s, final Shape shape1) {
-		return s.isEmpty()? Collections.emptyList() : asList((Object[])s.split("\\."));
-	}
-
-	private Object value(final JsonValue value, final Shape _shape) {
-		return value.equals(JsonValue.TRUE) ? true
-				: value.equals(JsonValue.FALSE) ? false
-				: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
-				: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
-				: value instanceof JsonString ? ((JsonString)value).getString()+datatype(_shape).map(t -> "^"+t).orElse("")
-				: null;
-	}
 
 	private Shape filter(final Shape shape, final Shape filter) {
 		return and(shape, Shape.filter().then(filter)).map(new Optimizer());
@@ -390,23 +379,23 @@ final class QueryParserTest {
 
 	@Test void testRejectReferencesOutsideShapeEnvelope() {
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				terms("{ '_terms': 'nil' }", shape, items -> {})
 		);
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				stats("{ '_stats': 'nil' }", shape, stats -> {})
 		);
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				items("{ '_order': 'nil' }", shape, items -> {})
 		);
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				items("{ '>= nil': 1 }", shape, items -> {})
 		);
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				items("{ 'head.nil': 1 }", shape, items -> {})
 		);
 
@@ -414,23 +403,23 @@ final class QueryParserTest {
 
 	@Test void testRejectReferencesForEmptyShape() {
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				terms("{ '_terms': 'head' }", and(), items -> {})
 		);
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				stats("{ '_stats': 'head' }", and(), stats -> {})
 		);
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				items("{ '_order': 'nil' }", and(), items -> {})
 		);
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				items("{ '>= nil': 1 }", and(), items -> {})
 		);
 
-		Assertions.assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
 				items("{ 'head.nil': 1 }", and(), items -> {})
 		);
 
@@ -548,6 +537,22 @@ final class QueryParserTest {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class TestFormat implements Format<Object> {
+
+		@Override public List<Object> path(final String base, final Shape shape, final String path) {
+			return path.isEmpty() ? Collections.emptyList() : asList((Object[])path.split("\\."));
+		}
+
+		@Override public Object value(final String base, final Shape shape, final JsonValue value) {
+			return value.equals(JsonValue.TRUE) ? true
+					: value.equals(JsonValue.FALSE) ? false
+					: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
+					: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
+					: value instanceof JsonString ? ((JsonString)value).getString()+datatype(shape).map(t -> "^"+t).orElse("")
+					: null;			}
+	}
+
 
 	private abstract static class TestQueryProbe implements Query.Probe<Boolean> {
 
