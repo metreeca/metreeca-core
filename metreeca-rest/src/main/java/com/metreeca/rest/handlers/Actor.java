@@ -22,8 +22,6 @@ import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
-import com.metreeca.tree.probes.Traverser;
-import com.metreeca.tree.shapes.*;
 
 import java.util.function.Function;
 
@@ -32,9 +30,8 @@ import static com.metreeca.rest.Response.Forbidden;
 import static com.metreeca.rest.Response.Unauthorized;
 import static com.metreeca.rest.Wrapper.success;
 import static com.metreeca.rest.services.Engine.engine;
+import static com.metreeca.tree.Shape.empty;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static java.util.function.Function.identity;
 
 
@@ -53,7 +50,6 @@ public abstract class Actor extends Delegator { // !!! tbd
 				handler.handle(request).accept(consumer)
 		);
 	}
-
 
 	protected Wrapper throttler(final Object task, final Object... area) { // !!! optimize/cache
 		return handler -> request -> {
@@ -96,8 +92,8 @@ public abstract class Actor extends Delegator { // !!! tbd
 					.map(new Optimizer())
 			);
 
-			return baseline.map(new Evaluator()) != null ? request.reply(response -> response.status(Forbidden))
-					: authorized.map(new Evaluator()) != null ? request.reply(response -> response.status(Unauthorized))
+			return empty(baseline) ? request.reply(response -> response.status(Forbidden))
+					: empty(authorized) ? request.reply(response -> response.status(Unauthorized))
 					: handler.handle(request.map(pre)).map(post);
 
 		};
@@ -129,47 +125,5 @@ public abstract class Actor extends Delegator { // !!! tbd
 		return engine::delete;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class Evaluator extends Traverser<Boolean> {
-
-		@Override public Boolean probe(final Meta meta) {
-			return true;
-		}
-
-
-		@Override public Boolean probe(final Field field) {
-			return null;
-		}
-
-		@Override public Boolean probe(final And and) {
-			return and.getShapes().stream()
-					.filter(shape -> !(shape instanceof Meta))
-					.map(shape -> shape.map(this))
-					.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
-		}
-
-		@Override public Boolean probe(final Or or) {
-			return or.getShapes().stream()
-					.filter(shape -> !(shape instanceof Meta))
-					.map(shape -> shape.map(this))
-					.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
-		}
-
-		@Override public Boolean probe(final When when) {
-
-			final Boolean test=when.getTest().map(this);
-			final Boolean pass=when.getPass().map(this);
-			final Boolean fail=when.getFail().map(this);
-
-			return TRUE.equals(test) ? pass
-					: FALSE.equals(test) ? fail
-					: TRUE.equals(pass) && TRUE.equals(fail) ? TRUE
-					: FALSE.equals(pass) && FALSE.equals(fail) ? FALSE
-					: null;
-		}
-
-	}
 
 }

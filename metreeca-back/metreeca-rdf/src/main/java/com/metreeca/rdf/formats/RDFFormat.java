@@ -46,7 +46,7 @@ import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.tree.shapes.And.and;
+import static com.metreeca.tree.Shape.pass;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
@@ -150,7 +150,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 							.service(RDFParserRegistry.getInstance(), TURTLE, type)
 							.getParser();
 
-					parser.set(RioShape, shape.equals(and()) ? null : shape); // !!! handle empty shape directly in JSONParser
+					parser.set(RioShape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
 					parser.set(RioFocus, focus);
 
 					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
@@ -267,7 +267,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 						final RDFWriter writer=factory.getWriter(output, base); // relativize IRIs wrt the response focus
 
-						writer.set(RioShape, shape.equals(and()) ? null : shape); // !!! handle empty shape directly in JSONParser
+						writer.set(RioShape, pass(shape) ? null : shape); // !!! handle empty shape directly in JSONParser
 						writer.set(RioFocus, focus);
 
 						Rio.write(external.equals(internal) ? value : rewrite(internal, external, value), writer);

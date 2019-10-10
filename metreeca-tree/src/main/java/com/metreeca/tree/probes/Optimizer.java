@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.*;
 /**
  * Shape optimizer.
  *
- * <p>Recursively removes redundant and non-validating constructs from a shape.</p>
+ * <p>Recursively removes redundant constructs from a shape.</p>
  */
 public final class Optimizer extends Traverser<Shape> {
 

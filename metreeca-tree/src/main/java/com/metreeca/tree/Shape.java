@@ -192,6 +192,66 @@ public interface Shape {
 	public static Guard filter() { return mode(Filter); }
 
 
+	//// Evaluation ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Tests if a shape is always matched.
+	 *
+	 * @param shape the shape to be tested
+	 *
+	 * @return {@code true} if {@code shape} is equal to an {@linkplain And#and() empty conjunction}, ignoring
+	 * {@linkplain Meta annotations}; {@code false} otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public static boolean pass(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return Boolean.TRUE.equals(shape.map(Evaluator.Instance));
+	}
+
+	/**
+	 * Tests if a shape is never matched.
+	 *
+	 * @param shape the shape to be tested
+	 *
+	 * @return {@code true} if {@code shape} is equal to an {@linkplain Or#or() empty disjunction}, ignoring {@linkplain
+	 * Meta annotations}; {@code false} otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public static boolean fail(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return Boolean.FALSE.equals(shape.map(Evaluator.Instance));
+	}
+
+	/**
+	 * Tests if a shape is empty.
+	 *
+	 * @param shape the shape to be tested
+	 *
+	 * @return {@code true} if {@code shape} is equal either to an {@linkplain And#and() empty conjunction} or to an
+	 * {@linkplain Or#or() empty disjunction}, ignoring {@linkplain Meta annotations}; {@code false} otherwise
+	 *
+	 * @throws NullPointerException if {@code shape} is null
+	 */
+	public static boolean empty(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shape.map(Evaluator.Instance) != null;
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public <V> V map(final Probe<V> probe);
