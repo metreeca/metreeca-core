@@ -23,8 +23,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.metreeca</groupId>
-	<artifactId>link</artifactId>
-	<version>0.52.0-SNAPSHOT</version>
+	<artifactId>metreeca-link</artifactId>
+	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Metreeca Linked Data Framework</name>
@@ -89,14 +89,12 @@
 
 	<modules>
 
-		<module>j2ee</module>
+		<module>metreeca-tree</module>
+		<module>metreeca-rest</module>
+		<module>metreeca-gate</module>
 
-		<module>rest</module>
-		<module>gate</module>
-		<module>form</module>
-		<module>tray</module>
-
-		<module>kits</module>
+		<module>metreeca-head</module>
+		<module>metreeca-back</module>
 
 	</modules>
 
@@ -104,8 +102,6 @@
 
 		<java.version>1.8</java.version>
 		<maven.version>3.3</maven.version>
-
-		<rdf4j.version>2.5.0</rdf4j.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -121,28 +117,21 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.3.1</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency> <!-- !!! to be removed once tempdir is migrated to core -->
-			<groupId>org.junit-pioneer</groupId>
-			<artifactId>junit-pioneer</artifactId>
-			<version>0.3.0</version>
+			<version>5.5.2</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency> <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.12.2</version>
+			<version>3.13.2</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency> <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.25</version>
+			<version>1.7.26</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -150,18 +139,10 @@
 
 	<build>
 
-		<finalName>metreeca-${project.artifactId}-${project.version}</finalName>
-
 		<resources>
 
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-
-			<resource>
-				<directory>${basedir}/docs/_resources</directory>
-				<targetPath>${basedir}/docs</targetPath>
 				<filtering>true</filtering>
 			</resource>
 
@@ -230,7 +211,7 @@
 						<manifestEntries>
 							<Built-By>${project.organization.name}</Built-By>
 							<Built-On>${maven.build.timestamp}</Built-On>
-							<Implementation-Version>${project.version}+${maven.build.timestamp}</Implementation-Version>
+							<Implementation-Version>${project.version}</Implementation-Version>
 						</manifestEntries>
 
 					</archive>
@@ -257,6 +238,42 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.0</version>
+
+			</plugin>
+
+			<plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+
+				<executions>
+					<execution>
+
+						<id>copy-jekyll-configuration</id>
+						<inherited>false</inherited>
+						<phase>site</phase>
+
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+
+						<configuration>
+
+							<outputDirectory>${basedir}/docs</outputDirectory>
+							<overwrite>true</overwrite>
+
+							<resources>
+								<resource>
+									<directory>${basedir}/docs/_resources</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+
+						</configuration>
+
+					</execution>
+				</executions>
 
 			</plugin>
 
@@ -300,8 +317,8 @@
 
 							<groups>
 								<group>
-									<title>Server Adapters</title>
-									<packages>com.metreeca.j2ee*</packages>
+									<title>Modelling Framework</title>
+									<packages>com.metreeca.tree*</packages>
 								</group>
 								<group>
 									<title>REST API Framework</title>
@@ -312,20 +329,26 @@
 									<packages>com.metreeca.gate*</packages>
 								</group>
 								<group>
-									<title>Shapes Framework</title>
-									<packages>com.metreeca.form*</packages>
+									<title>Server Adapters</title>
+									<packages>com.metreeca.servlet*</packages>
 								</group>
 								<group>
-									<title>Tooling Framework</title>
-									<packages>com.metreeca.tray*</packages>
+									<title>RDF/SPARQL Adapters</title>
+									<packages>
+										com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*
+									</packages>
 								</group>
-								<group>
-									<title>Tooling Kits</title>
-									<packages>com.metreeca.kits*</packages>
-								</group>
+								<!--<group>
+									<title>Google Cloud Platform Adapters</title>
+									<packages>
+										com.metreeca.gcp*
+									</packages>
+								</group>-->
 							</groups>
 
-							<excludePackageNames/> <!-- colon-separated patterns -->
+							<excludePackageNames>
+								com.metreeca.gcp;com.metreeca.gcp* <!-- colon-separated patterns -->
+							</excludePackageNames>
 
 						</configuration>
 
@@ -335,6 +358,41 @@
 
 			</plugin>
 
+			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+
+				<executions>
+					<execution>
+
+						<id>clean-docs-folder</id>
+						<phase>clean</phase>
+						<inherited>false</inherited>
+
+						<goals>
+							<goal>clean</goal>
+						</goals>
+
+						<configuration>
+							<filesets>
+								<fileset>
+									<directory>docs/_site</directory>
+								</fileset>
+								<fileset>
+									<directory>docs/javadocs</directory>
+								</fileset>
+								<fileset>
+									<directory>docs/reports</directory>
+								</fileset>
+							</filesets>
+						</configuration>
+
+					</execution>
+				</executions>
+
+			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-site-plugin -->
 
@@ -344,7 +402,7 @@
 
 				<configuration>
 
-					<skipDeploy>true</skipDeploy> <!-- ;( manual deployment -->
+					<skipDeploy>true</skipDeploy> <!-- github deployment -->
 
 					<stagingDirectory>${maven.multiModuleProjectDirectory}/docs/reports</stagingDirectory>
 

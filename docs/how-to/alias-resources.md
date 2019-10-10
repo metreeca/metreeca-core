@@ -7,8 +7,8 @@ Sometimes you need to access resources using alternate identifiers or to set up 
 The following samples present typical setups built on the same data used in the [tutorials](../tutorials/publishing-ldp-apis) and a custom name-based product resolver.
 
 ```java
-import static com.metreeca.form.things.Values.literal;
-import static com.metreeca.rest.wrappers.Connector.connect;
+import static com.metreeca.tree.things.Values.literal;
+import static com.metreeca._sparql.wrappers.Connector.connect;
 
 private Optional<IRI> byname(final RepositoryConnection connection, final String name) {
   return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Blueprints" pattern="file:*.graffle" />
+</component>

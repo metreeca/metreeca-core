@@ -6,54 +6,28 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="form" />
-        <module name="gate" />
-        <module name="j2ee" />
-        <module name="rdf4j" />
-        <module name="rest" />
-        <module name="stardog" />
-        <module name="tray" />
-        <module name="virtuoso" />
+        <module name="metreeca-tree" />
+        <module name="metreeca-rdf" />
+        <module name="metreeca-gcp" />
+        <module name="metreeca-gate" />
+        <module name="metreeca-stardog" />
+        <module name="metreeca-servlet" />
+        <module name="metreeca-rest" />
+        <module name="metreeca-rdf4j" />
+        <module name="metreeca-virtuoso" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="_bean" target="1.8" />
-      <module name="_gate" target="1.8" />
-      <module name="_info" target="1.8" />
-      <module name="_jeep" target="1.8" />
-      <module name="_tile" target="1.8" />
-      <module name="_tool" target="1.8" />
-      <module name="_utow" target="1.8" />
-      <module name="apps" target="1.8" />
-      <module name="back" target="1.8" />
-      <module name="Core" target="1.8" />
-      <module name="core (1)" target="1.8" />
-      <module name="data" target="1.8" />
-      <module name="deck" target="1.8" />
-      <module name="demo" target="1.8" />
-      <module name="fore" target="1.8" />
-      <module name="form" target="1.8" />
-      <module name="gate" target="1.8" />
-      <module name="j2ee" target="1.8" />
-      <module name="jeep" target="1.8" />
-      <module name="kits" target="1.8" />
-      <module name="link" target="1.8" />
       <module name="Link" target="1.8" />
-      <module name="link (1)" target="1.8" />
-      <module name="mesh" target="1.8" />
-      <module name="mill" target="1.8" />
-      <module name="mill (1)" target="1.8" />
-      <module name="node" target="1.8" />
-      <module name="rdf4j" target="1.8" />
-      <module name="rest" target="1.8" />
-      <module name="self" target="1.8" />
-      <module name="spec" target="1.8" />
-      <module name="spec (1)" target="1.8" />
-      <module name="stardog" target="1.8" />
-      <module name="tool" target="1.8" />
-      <module name="tray" target="1.8" />
-      <module name="tray (1)" target="1.8" />
-      <module name="virtuoso" target="1.8" />
+      <module name="metreeca-gate" target="1.8" />
+      <module name="metreeca-gcp" target="1.8" />
+      <module name="metreeca-rdf" target="1.8" />
+      <module name="metreeca-rdf4j" target="1.8" />
+      <module name="metreeca-rest" target="1.8" />
+      <module name="metreeca-servlet" target="1.8" />
+      <module name="metreeca-stardog" target="1.8" />
+      <module name="metreeca-tree" target="1.8" />
+      <module name="metreeca-virtuoso" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
