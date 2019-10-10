@@ -43,8 +43,8 @@ import static java.util.stream.Collectors.toList;
 public final class Redactor extends Traverser<Shape> {
 
 	private final String axis;
-
 	private final Predicate<Set<Object>> condition;
+
 
 	/**
 	 * Creates a new shape redactor.

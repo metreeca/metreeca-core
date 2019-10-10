@@ -21,7 +21,6 @@ import com.metreeca.rdf.Values;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -68,6 +67,7 @@ import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.Pattern.pattern;
 import static com.metreeca.tree.shapes.When.when;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static java.util.stream.Collectors.toList;
@@ -102,8 +102,8 @@ final class GraphProcessorTest {
 		});
 	}
 
-	private List<Statement> graph(final String sparql) {
-		return model(sparql)
+	private Collection<Statement> graph(final String sparql) {
+		return model("prefix app: <app:/terms#>\n\n"+sparql)
 
 				.stream()
 
@@ -144,13 +144,11 @@ final class GraphProcessorTest {
 
 					items(any(item("employees/1002"), item("employees/1056")))
 
-			)).isIsomorphicTo(graph( // empty template => symmetric+labelled concise bounded description
+			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					"construct {\n"
 							+"\n"
-							+"construct {\n"
-							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t\n"
 							+"\t?employee ?d ?r.\n"
 							+"\t?r ?i ?employee.\n"
@@ -184,9 +182,9 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
-							+"construct { meta:root ldp:contains ?employee. ?employee a :Employee }"
+							+"construct { app:root ldp:contains ?employee. ?employee a :Employee }"
 							+" where { ?employee a :Employee }"
 
 			)));
@@ -214,23 +212,23 @@ final class GraphProcessorTest {
 						.collect(toList());
 
 
-				Assertions.assertThat(actual.apply(items(shape)))
+				assertThat(actual.apply(items(shape)))
 						.as("default (on value)")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?employee"));
 
-				Assertions.assertThat(actual.apply(items(shape, increasing(RDFS.LABEL))))
+				assertThat(actual.apply(items(shape, increasing(RDFS.LABEL))))
 						.as("custom increasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?label"));
 
-				Assertions.assertThat(actual.apply(items(shape, decreasing(RDFS.LABEL))))
+				assertThat(actual.apply(items(shape, decreasing(RDFS.LABEL))))
 						.as("custom decreasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?label)"));
 
-				Assertions.assertThat(actual.apply(items(shape, increasing(term("office")), increasing(RDFS.LABEL))))
+				assertThat(actual.apply(items(shape, increasing(term("office")), increasing(RDFS.LABEL))))
 						.as("custom combined")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?office ?label"));
 
-				Assertions.assertThat(actual.apply(items(shape, decreasing())))
+				assertThat(actual.apply(items(shape, decreasing())))
 						.as("custom on root")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?employee)"));
 
@@ -248,7 +246,7 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(decode(
 
-					"@prefix meta: <app:/terms#> . meta:root meta:count 0 ."
+					"@prefix app: <app:/terms#> . app:root app:count 0 ."
 
 			)));
 		}
@@ -260,15 +258,15 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root meta:count ?count; meta:min ?min; meta:max ?max;\n"
+							+"\tapp:root app:count ?count; app:min ?min; app:max ?max;\n"
 							+"\n"
-							+"\t\t\tmeta:stats meta:iri.\n"
+							+"\t\t\tapp:stats app:iri.\n"
 							+"\t\t\t\n"
-							+"\tmeta:iri meta:count ?count; meta:min ?min; meta:max ?max.\n"
+							+"\tapp:iri app:count ?count; app:min ?min; app:max ?max.\n"
 							+"\n"
 							+"} where {\n"
 							+"\n"
@@ -290,12 +288,12 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root \n"
-							+"\t\tmeta:count ?count; meta:min ?min; meta:max ?max.\n"
+							+"\tapp:root \n"
+							+"\t\tapp:count ?count; app:min ?min; app:max ?max.\n"
 							+"\n"
 							+"} where {\n"
 							+"\n"
@@ -329,13 +327,13 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root meta:terms [\n"
-							+"\t\tmeta:value ?employee;\n"
-							+"\t\tmeta:count 1\n"
+							+"\tapp:root app:terms [\n"
+							+"\t\tapp:value ?employee;\n"
+							+"\t\tapp:count 1\n"
 							+"\t].\n"
 							+"\n"
 							+"\t?employee rdfs:label ?label.\n"
@@ -357,13 +355,13 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root meta:items [\n"
-							+"\t\tmeta:value ?account;\n"
-							+"\t\tmeta:count 1\n"
+							+"\tapp:root app:items [\n"
+							+"\t\tapp:value ?account;\n"
+							+"\t\tapp:count 1\n"
 							+"\t].\n"
 							+"\n"
 							+"\t?account rdfs:label ?label.\n"
@@ -422,11 +420,11 @@ final class GraphProcessorTest {
 
 				)).isIsomorphicTo(graph(
 
-						"prefix meta: <app:/terms#>\n"
+						""
 								+"\n"
 								+"construct {\n"
 								+"\n"
-								+"\tmeta:root ldp:contains ?item.\n"
+								+"\tapp:root ldp:contains ?item.\n"
 								+"\t?item :code ?code.\n"
 								+"\n"
 								+"} where {\n"
@@ -447,11 +445,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee a ?type\n"
 							+"\n"
 							+"} where {\n"
@@ -473,11 +471,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee :seniority ?seniority.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -496,11 +494,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee :seniority ?seniority.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -519,11 +517,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee :seniority ?seniority.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -542,11 +540,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee :seniority ?seniority.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -566,11 +564,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee :forename ?forename.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -589,11 +587,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee :forename ?forename.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -612,11 +610,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?item.\n"
+							+"\tapp:root ldp:contains ?item.\n"
 							+"\t?item rdfs:label ?label.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -635,11 +633,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?item.\n"
+							+"\tapp:root ldp:contains ?item.\n"
 							+"\t?item rdfs:label ?label.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -690,11 +688,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct { \n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?item.\n"
+							+"\tapp:root ldp:contains ?item.\n"
 							+"\t?item :employee ?employee.\n"
 							+"\n"
 							+"} where {\n"
@@ -715,11 +713,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?office.\n"
+							+"\tapp:root ldp:contains ?office.\n"
 							+"\t?employee :office ?office.\n"
 							+"\n"
 							+"} where {\n"
@@ -741,11 +739,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee a ?type\n"
 							+"\n"
 							+"} where {\n"
@@ -766,11 +764,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?office.\n"
+							+"\tapp:root ldp:contains ?office.\n"
 							+"\t?office :employee ?employee.\n"
 							+"\n"
 							+"} where {\n"
@@ -792,11 +790,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?office.\n"
+							+"\tapp:root ldp:contains ?office.\n"
 							+"\t?office :employee ?employee.\n"
 							+"\n"
 							+"} where {\n"
@@ -817,11 +815,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?office.\n"
+							+"\tapp:root ldp:contains ?office.\n"
 							+"\t?office :employee ?employee.\n"
 							+"\n"
 							+"} where {\n"
@@ -843,11 +841,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?employee.\n"
+							+"\tapp:root ldp:contains ?employee.\n"
 							+"\t?employee rdfs:label ?label.\n"
 							+"\n"
 							+"} where {\n"
@@ -875,11 +873,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?item.\n"
+							+"\tapp:root ldp:contains ?item.\n"
 							+"\t?item :country ?country.\n"
 							+"\n"
 							+"} where {\n"
@@ -905,11 +903,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?item.\n"
+							+"\tapp:root ldp:contains ?item.\n"
 							+"\t?item :country ?country; :city ?city.\n"
 							+"\n"
 							+"} where {\n"
@@ -934,11 +932,11 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"prefix meta: <app:/terms#>\n"
+					""
 							+"\n"
 							+"construct {\n"
 							+"\n"
-							+"\tmeta:root ldp:contains ?item.\n"
+							+"\tapp:root ldp:contains ?item.\n"
 							+"\t?item a ?type.\n"
 							+"\n"
 							+"} where {\n"
@@ -978,11 +976,11 @@ final class GraphProcessorTest {
 
 		)).isIsomorphicTo(graph(
 
-				"prefix meta: <app:/terms#>\n"
+				""
 						+"\n"
 						+"construct {\n"
 						+"\n"
-						+"\tmeta:root ldp:contains ?office.\n"
+						+"\tapp:root ldp:contains ?office.\n"
 						+"\t?office :employee ?employee\n"
 						+"\n"
 						+"} where {\n"

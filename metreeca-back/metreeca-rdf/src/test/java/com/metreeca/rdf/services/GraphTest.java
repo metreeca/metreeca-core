@@ -35,7 +35,7 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import static com.metreeca.rdf.ModelAssert.assertThat;
@@ -49,7 +49,6 @@ import static com.metreeca.rest.Context.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 
@@ -196,12 +195,12 @@ public final class GraphTest {
 	@Test void testGenerateAutoIncrementingIds() {
 		exec(() -> {
 
-			final BiFunction<Request, Collection<Statement>, String> auto=auto();
+			final Function<Request, String> auto=auto();
 
 			final Request request=new Request().base(Base).path("/target/");
 
-			final String one=auto.apply(request, emptySet());
-			final String two=auto.apply(request, emptySet());
+			final String one=auto.apply(request);
+			final String two=auto.apply(request);
 
 			assertThat(one).isNotEqualTo(two);
 
