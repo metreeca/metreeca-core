@@ -113,7 +113,7 @@ public final class EntityFormat implements Format<Entity> {
 		this.datastore=datastore;
 
 		this.decoder=new EntityDecoder(this.datastore);
-		this.encoder=new EntityEncoder(this.datastore);
+		this.encoder=new EntityEncoder();
 	}
 
 
@@ -146,7 +146,7 @@ public final class EntityFormat implements Format<Entity> {
 	@Override public Result<Entity, Failure> get(final Message<?> message) {
 		return message.body(json()).value(json -> {
 
-			final FullEntity<?> entity=decoder.decode(json, shape(message));
+			final FullEntity<?> entity=decoder.decode(json, driver(message.shape()));
 
 			return entity instanceof Entity ? (Entity)entity : Entity.newBuilder(
 
@@ -163,7 +163,7 @@ public final class EntityFormat implements Format<Entity> {
 
 	@Override public <M extends Message<M>> M set(final M message, final Entity value) {
 		return message.body(json(),
-				encoder.encode(value, shape(message))
+				encoder.encode(value, driver(message.shape()))
 		);
 	}
 
@@ -178,15 +178,19 @@ public final class EntityFormat implements Format<Entity> {
 	}
 
 
-	private Shape shape(final Message<?> message) {
-		return message.shape()
+	private Shape driver(final Shape shape) { // !!! caching
+		return shape
 
-				.map(new Redactor(Shape.Role, values2 -> true))
-				.map(new Redactor(Shape.Task, values1 -> true))
-				.map(new Redactor(Shape.Detail, values -> true))
-				.map(new Redactor(Shape.Mode, Shape.Convey))
+				.map(new Redactor(Shape.Role, values -> true))
+				.map(new Redactor(Shape.Task, values -> true))
+				.map(new Redactor(Shape.Area, values -> true))
+				.map(new Redactor(Shape.Mode, Shape.Convey)) // remove internal filtering shapes
 
+				.map(new Optimizer())
+
+				.map(new _EntityInferencer()) // infer implicit constraints to drive json shorthands
 				.map(new Optimizer());
+
 	}
 
 }

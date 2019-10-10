@@ -18,9 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Redactor;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -29,21 +27,14 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
 import javax.json.*;
 
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.pattern;
-import static com.metreeca.rdf.Values.BNodeType;
-import static com.metreeca.rdf.Values.IRIType;
-import static com.metreeca.rdf.Values.ResourceType;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
-import static com.metreeca.tree.Shape.Convey;
-import static com.metreeca.tree.Shape.Mode;
+import static com.metreeca.rdf.formats.RDFJSONCodec.*;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
@@ -51,16 +42,7 @@ import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static java.util.stream.Collectors.toCollection;
 
 
-abstract class RDFJSONEncoder extends RDFJSONCodec {
-
-	private static final Function<Shape, Shape> ShapeCompiler=s -> s
-			.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
-			.map(new _Optimizer())
-			.map(new _RDFInferencer()) // infer implicit constraints to drive json shorthands
-			.map(new _Optimizer());
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+abstract class RDFJSONEncoder {
 
 	private final String base;
 
@@ -73,12 +55,9 @@ abstract class RDFJSONEncoder extends RDFJSONCodec {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected JsonValue json(final Collection<Statement> model, final Shape shape, final Resource focus) {
-
-		final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
-
 		return (focus != null)
-				? json(model, driver, focus, resource -> false)
-				: json(model, driver, subjects(model), resource -> false);
+				? json(model, shape, focus, resource -> false)
+				: json(model, shape, subjects(model), resource -> false);
 	}
 
 

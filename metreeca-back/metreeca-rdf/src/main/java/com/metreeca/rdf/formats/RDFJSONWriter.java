@@ -37,7 +37,9 @@ import javax.json.Json;
 import javax.json.JsonValue;
 import javax.json.JsonWriterFactory;
 
+import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
 import static com.metreeca.rest.Codecs.writer;
+import static com.metreeca.tree.Shape.pass;
 
 import static java.util.Collections.singletonMap;
 
@@ -109,7 +111,9 @@ public final class RDFJSONWriter extends AbstractRDFWriter {
 			final Resource focus=getWriterConfig().get(com.metreeca.rdf.formats.RDFFormat.RioFocus);
 			final Shape shape=getWriterConfig().get(com.metreeca.rdf.formats.RDFFormat.RioShape);
 
-			final JsonValue json=new RDFJSONEncoder(base) {}.json(model, shape, focus);
+			final Shape driver=shape == null || pass(shape)? null : driver(shape);
+
+			final JsonValue json=new RDFJSONEncoder(base) {}.json(model, driver, focus);
 
 			try {
 

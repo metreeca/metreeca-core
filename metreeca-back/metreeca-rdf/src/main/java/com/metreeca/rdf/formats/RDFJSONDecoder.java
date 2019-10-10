@@ -18,9 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Redactor;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -28,7 +26,6 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -36,28 +33,20 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.tree.Shape.Convey;
-import static com.metreeca.tree.Shape.Mode;
+import static com.metreeca.rdf.formats.RDFJSONCodec.*;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 
 import static java.util.stream.Collectors.toMap;
 
 
-abstract class RDFJSONDecoder extends RDFJSONCodec {
+abstract class RDFJSONDecoder {
 
 	private static final JsonString Default=Json.createValue("");
 
 	private static final Pattern StepPattern=Pattern.compile(
 			"(?:^|[./])(?<step>(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:[^>]*)>))"
 	);
-
-
-	private static final Function<Shape, Shape> ShapeCompiler=s -> s
-			.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
-			.map(new _Optimizer())
-			.map(new _RDFInferencer()) // infer implicit constraints to drive json shorthands
-			.map(new _Optimizer());
 
 
 	private static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
@@ -171,25 +160,19 @@ abstract class RDFJSONDecoder extends RDFJSONCodec {
 	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected Map<Value, Stream<Statement>> values(final JsonValue value, final Shape shape, final Resource focus) {
-
-		final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
-
 		return (value instanceof JsonArray
 
-				? value.asJsonArray().stream().map(v -> value(v, driver, focus))
-				: Stream.of(value(value, driver, focus))
+				? value.asJsonArray().stream().map(v -> value(v, shape, focus))
+				: Stream.of(value(value, shape, focus))
 
 		).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, Stream::concat));
 	}
 
 	protected Map.Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape, final Resource focus) {
-
-		final Shape driver=(shape == null) ? null : shape.map(ShapeCompiler);
-
-		return value instanceof JsonArray ? value(value.asJsonArray(), driver, focus)
-				: value instanceof JsonObject ? value(value.asJsonObject(), driver, focus)
-				: value instanceof JsonString ? value((JsonString)value, driver)
-				: value instanceof JsonNumber ? value((JsonNumber)value, driver)
+		return value instanceof JsonArray ? value(value.asJsonArray(), shape, focus)
+				: value instanceof JsonObject ? value(value.asJsonObject(), shape, focus)
+				: value instanceof JsonString ? value((JsonString)value, shape)
+				: value instanceof JsonNumber ? value((JsonNumber)value, shape)
 				: value.equals(JsonValue.TRUE) ? entry(Values.True, Stream.empty())
 				: value.equals(JsonValue.FALSE) ? entry(Values.False, Stream.empty())
 				: error("unsupported JSON value <"+value+">");

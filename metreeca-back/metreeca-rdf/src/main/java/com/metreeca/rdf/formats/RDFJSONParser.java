@@ -36,6 +36,9 @@ import javax.json.JsonException;
 import javax.json.JsonReaderFactory;
 import javax.json.stream.JsonParsingException;
 
+import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
+import static com.metreeca.tree.Shape.pass;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
 
@@ -93,6 +96,8 @@ public final class RDFJSONParser extends AbstractRDFParser {
 		final Resource focus=getParserConfig().get(com.metreeca.rdf.formats.RDFFormat.RioFocus);
 		final Shape shape=getParserConfig().get(com.metreeca.rdf.formats.RDFFormat.RioShape);
 
+		final Shape driver=shape == null || pass(shape)? null : driver(shape);
+
 		if ( rdfHandler != null ) {
 
 			rdfHandler.startRDF();
@@ -101,7 +106,7 @@ public final class RDFJSONParser extends AbstractRDFParser {
 
 				new Decoder(baseURI)
 
-						.values(readers.createReader(reader).readValue(), shape, focus)
+						.values(readers.createReader(reader).readValue(), driver, focus)
 						.values()
 						.stream()
 						.flatMap(identity())

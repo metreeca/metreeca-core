@@ -17,7 +17,10 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
+import com.metreeca.tree.probes.Optimizer;
+import com.metreeca.tree.probes.Redactor;
 import com.metreeca.tree.probes.Traverser;
 import com.metreeca.tree.shapes.*;
 
@@ -38,7 +41,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
 
-abstract class RDFJSONCodec {
+final class RDFJSONCodec {
 
 	static final String This="_this";
 	static final String Type="_type";
@@ -47,6 +50,21 @@ abstract class RDFJSONCodec {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static Shape driver(final Shape shape) { // !!! caching
+		return shape
+
+				.map(new Redactor(Shape.Role, values -> true))
+				.map(new Redactor(Shape.Task, values -> true))
+				.map(new Redactor(Shape.Area, values -> true))
+				.map(new Redactor(Shape.Mode, Shape.Convey)) // remove internal filtering shapes
+
+				.map(new Optimizer())
+
+				.map(new _RDFInferencer()) // infer implicit constraints to drive json shorthands
+				.map(new _Optimizer());
+
+	}
 
 	static Map<IRI, String> aliases(final Shape shape) {
 
@@ -162,5 +180,10 @@ abstract class RDFJSONCodec {
 		}
 
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private RDFJSONCodec() {}
 
 }

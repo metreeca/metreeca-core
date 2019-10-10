@@ -50,7 +50,7 @@ final class EntityEncoderTest extends DatastoreTestBase {
 
 		task.accept(entity);
 
-		return new EntityEncoder(datastore).encode(entity.build(), and());
+		return new EntityEncoder().encode(entity.build(), and());
 	}
 
 
