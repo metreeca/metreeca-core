@@ -58,27 +58,27 @@ final class GraphCreator extends GraphProcessor {
 
 				.process(rdf -> graph.exec(connection -> {
 
-					final IRI container=iri(request.item());
-					final IRI resource=iri(request.item()+request.header("Slug") // assign entity a slug-based id
+					final IRI holder=iri(request.item());
+					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
 							.map(Codecs::encode) // encode slug as IRI path component
 							.orElseGet(() -> UUID.randomUUID().toString()) // !! sequential generator
 					);
 
-					final boolean clashing=connection.hasStatement(resource, null, null, true)
-							|| connection.hasStatement(null, null, resource, true);
+					final boolean clashing=connection.hasStatement(member, null, null, true)
+							|| connection.hasStatement(null, null, member, true);
 
 					if ( clashing ) { // report clashing slug
 
-						return Error(internal(new IllegalStateException("clashing entity slug {"+resource+"}")));
+						return Error(internal(new IllegalStateException("clashing entity slug {"+member+"}")));
 
 					} else { // store model
 
-						connection.add(anchor(resource, request.shape()));
-						connection.add(rewrite(resource, container, rdf));
+						connection.add(outline(member, filter(request.shape())));
+						connection.add(rewrite(member, holder, rdf));
 
 						return Value(request.reply(response -> response
 								.status(Response.Created)
-								.header("Location", resource.stringValue()))
+								.header("Location", member.stringValue()))
 						);
 
 					}

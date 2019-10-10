@@ -17,7 +17,6 @@
 
 package com.metreeca.rdf.services;
 
-import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.And;
@@ -34,6 +33,7 @@ import static com.metreeca.rdf.Values.*;
 import static com.metreeca.tree.shapes.All.all;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -82,7 +82,7 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 		return Stream.concat(
 
-				all(shape).map(targets -> targets.stream().map(Values::value).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
+				all(shape).map(targets -> values(targets.stream()).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
 
 						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
 						: target instanceof Resource ? Stream.of(statement((Resource)target, inverse(iri), source)) : Stream.empty()
@@ -94,7 +94,6 @@ final class Outliner extends Inspector<Stream<Statement>> {
 		);
 	}
 
-
 	@Override public Stream<Statement> probe(final And and) {
 		return Stream.concat(
 
@@ -105,11 +104,16 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 				all(and).map(values -> and.getShapes().stream()
 
-						.flatMap(shape -> shape.map(new Outliner(values(values))))
+						.flatMap(shape -> shape.map(new Outliner(values(values.stream()).collect(toSet()))))
 
 				).orElseGet(Stream::empty)
 
 		);
+	}
+
+
+	private Stream<Value> values(final Stream<Object> objects) {
+		return objects.flatMap(o -> o.equals(Shape.Target) ? sources.stream() : Stream.of(value(o)));
 	}
 
 }

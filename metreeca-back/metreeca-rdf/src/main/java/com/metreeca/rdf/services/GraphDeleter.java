@@ -53,7 +53,6 @@ final class GraphDeleter extends GraphProcessor {
 	private Future<Response> member(final Request request) {
 		return request.reply(response -> graph.exec(connection -> {
 
-
 			final IRI item=iri(request.item());
 			final Shape shape=request.shape();
 
@@ -65,7 +64,7 @@ final class GraphDeleter extends GraphProcessor {
 
 					.map(current -> {
 
-						connection.remove(anchor(item, shape));
+						connection.remove(outline(item, filter(shape)));
 						connection.remove(current);
 
 						return response.status(Response.NoContent);

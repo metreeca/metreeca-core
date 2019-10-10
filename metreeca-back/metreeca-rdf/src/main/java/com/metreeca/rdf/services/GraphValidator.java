@@ -72,11 +72,11 @@ final class GraphValidator extends GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Trace validate(final Value resource, final Shape shape, final Collection<Statement> model) {
+	private Trace validate(final IRI resource, final Shape shape, final Collection<Statement> model) {
 		return graph.exec(connection -> {
 
 			final Collection<Statement> envelope=new HashSet<>();
-			final Trace trace=shape.map(new ValidatorProbe(connection, singleton(resource), model, envelope));
+			final Trace trace=shape.map(new ValidatorProbe(connection, resource, singleton(resource), model, envelope));
 
 			final Map<String, Collection<Object>> issues=model.stream()
 
@@ -107,17 +107,36 @@ final class GraphValidator extends GraphProcessor {
 
 		private final RepositoryConnection connection;
 
+		private final IRI resource;
 		private final Collection<Value> focus;
+
 		private final Collection<Statement> source;
 		private final Collection<Statement> target;
 
 
-		private ValidatorProbe(final RepositoryConnection connection,
-				final Collection<Value> focus, final Collection<Statement> source, final Collection<Statement> target) {
+		private ValidatorProbe(
+				final RepositoryConnection connection,
+				final IRI resource, final Collection<Value> focus,
+				final Collection<Statement> source, final Collection<Statement> target
+		) {
+
 			this.connection=connection;
+
+			this.resource=resource;
 			this.focus=focus;
+
 			this.source=source;
 			this.target=target;
+
+		}
+
+
+		private Value value(final Object value) {
+			return value.equals(Shape.Target)? resource : Values.value(value);
+		}
+
+		private Set<Value> values(final Set<Object> values) {
+			return values.stream().map(this::value).collect(toSet());
 		}
 
 
@@ -326,7 +345,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final In in) {
 
-			final Set<Value> range=in.getValues().stream().map(Values::value).collect(toSet());
+			final Set<Value> range=values(in.getValues());
 
 			final List<Value> unexpected=focus
 					.stream()
@@ -338,7 +357,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final All all) {
 
-			final Set<Value> range=all.getValues().stream().map(Values::value).collect(toSet());
+			final Set<Value> range=values(all.getValues());
 
 			final List<Value> missing=range
 					.stream()
@@ -349,7 +368,7 @@ final class GraphValidator extends GraphProcessor {
 		}
 
 		@Override public Trace probe(final Any any) {
-			return !disjoint(focus, any.getValues().stream().map(Values::value).collect(toSet()))
+			return !disjoint(focus, values(any.getValues()))
 					? trace() : trace(issue(any));
 		}
 
@@ -385,7 +404,7 @@ final class GraphValidator extends GraphProcessor {
 
 				// validate the field shape on the new focus set
 
-				return shape.map(new ValidatorProbe(connection, focus, source, target));
+				return shape.map(new ValidatorProbe(connection, resource, focus, source, target));
 
 			}).reduce(trace(), Trace::trace);
 		}

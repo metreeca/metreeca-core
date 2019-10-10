@@ -38,6 +38,14 @@ import static java.util.Arrays.asList;
  */
 public interface Shape {
 
+	/**
+	 * Standard value for referring to the target of a shape-based operation.
+	 */
+	public static Object Target=new Object() {
+		@Override public String toString() { return "{target}"; }
+	};
+
+
 	//// Shape Metadata ////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**

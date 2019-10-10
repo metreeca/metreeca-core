@@ -45,19 +45,34 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.Values.BNodeType;
+import static com.metreeca.rdf.Values.IRIType;
+import static com.metreeca.rdf.Values.LiteralType;
+import static com.metreeca.rdf.Values.ResourceType;
+import static com.metreeca.rdf.Values.ValueType;
+import static com.metreeca.rdf.Values.bnode;
+import static com.metreeca.rdf.Values.compare;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.format;
+import static com.metreeca.rdf.Values.integer;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.literal;
+import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.services.Snippets.*;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
+import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Or.or;
 
 import static java.lang.Math.max;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 
 abstract class GraphProcessor {
@@ -99,8 +114,17 @@ abstract class GraphProcessor {
 	}
 
 
-	Iterable<Statement> anchor(final Resource resource, final Shape shape) {
-		return filter(shape).map(new Outliner(resource)).collect(toList());
+	Iterable<Statement> outline(final IRI resource, final Shape shape) {
+		return anchor(resource, shape).map(new Outliner(resource)).collect(toList());
+	}
+
+
+	private Shape anchor(final IRI resource, final Shape shape) {
+		return shape.equals(and())
+				? resource.stringValue().endsWith("/")
+				? field(inverse(LDP.CONTAINS), Shape.Target) // holders default to ldp:BasicContainer
+				: all(Shape.Target) // members default to self
+				: shape;
 	}
 
 
@@ -149,12 +173,21 @@ abstract class GraphProcessor {
 
 		private final RepositoryConnection connection;
 
-		private final Resource resource;
+		private final IRI resource;
 
 
-		private FetcherProbe(final RepositoryConnection connection, final Resource resource) {
+		private FetcherProbe(final RepositoryConnection connection, final IRI resource) {
 			this.connection=connection;
 			this.resource=resource;
+		}
+
+
+		private Value value(final Object value) {
+			return value.equals(Shape.Target) ? resource : Values.value(value);
+		}
+
+		private Set<Value> values(final Collection<Object> values) {
+			return values.stream().map(this::value).collect(toSet());
 		}
 
 
@@ -175,7 +208,7 @@ abstract class GraphProcessor {
 			// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
 
 			final Shape pattern=convey(shape);
-			final Shape selector=filter(shape);
+			final Shape selector=anchor(resource, filter(shape));
 
 			evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
 
@@ -342,7 +375,7 @@ abstract class GraphProcessor {
 			final Collection<Value> mins=new ArrayList<>();
 			final Collection<Value> maxs=new ArrayList<>();
 
-			final Shape selector=filter(shape);
+			final Shape selector=anchor(resource, filter(shape));
 
 			final Object source=var(selector);
 			final Object target=path.isEmpty() ? source : var();
@@ -433,7 +466,7 @@ abstract class GraphProcessor {
 
 			final Model model=new LinkedHashModel();
 
-			final Shape selector=filter(shape);
+			final Shape selector=anchor(resource, filter(shape));
 
 			final Object source=var(selector);
 			final Object target=path.isEmpty() ? source : var();
@@ -535,20 +568,20 @@ abstract class GraphProcessor {
 
 		private Snippet roots(final Shape shape) { // root universal constraints
 			return all(shape)
-					.map(Values::values)
+					.map(values1 -> values(values1))
 					.map(values -> values(shape, values))
 					.orElse(null);
 		}
 
-		private  Snippet filters(final Shape shape) {
+		private Snippet filters(final Shape shape) {
 			return shape.map(new FilterProbe(shape));
 		}
 
-		private  Snippet pattern(final Shape shape) {
+		private Snippet pattern(final Shape shape) {
 			return shape.map(new PatternProbe(shape));
 		}
 
-		private  Snippet sorters(final Object root, final Collection<Order> orders) {
+		private Snippet sorters(final Object root, final Collection<Order> orders) {
 			return snippet(orders.stream()
 					.filter(order -> !order.getPath().isEmpty()) // root already retrieved
 					.map(order -> snippet(
@@ -557,7 +590,7 @@ abstract class GraphProcessor {
 			);
 		}
 
-		private  Snippet criteria(final Object root, final Collection<Order> orders) {
+		private Snippet criteria(final Object root, final Collection<Order> orders) {
 			return list(Stream.concat(
 
 					orders.stream().map(order -> snippet(
@@ -575,7 +608,7 @@ abstract class GraphProcessor {
 			), " ");
 		}
 
-		private  Snippet values(final Shape source, final Collection<Value> values) {
+		private Snippet values(final Shape source, final Collection<Value> values) {
 			return snippet("\n\nvalues {source} {\n{values}\n}\n\n",
 
 					var(source), list(values.stream().map(Values::format), "\n")
@@ -586,7 +619,7 @@ abstract class GraphProcessor {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		private  final class TemplateProbe extends Traverser<Stream<Integer>> {
+		private final class TemplateProbe extends Traverser<Stream<Integer>> {
 
 			private final Shape focus;
 
@@ -646,7 +679,7 @@ abstract class GraphProcessor {
 
 		}
 
-		private  final class FilterProbe implements Shape.Probe<Snippet> {
+		private final class FilterProbe implements Shape.Probe<Snippet> {
 
 			private final Shape source;
 
@@ -685,23 +718,23 @@ abstract class GraphProcessor {
 			}
 
 			@Override public Snippet probe(final Clazz clazz) {
-				return snippet(var(source), " a/rdfs:subClassOf* ", Values.format(iri(clazz.getName())), " .");
+				return snippet(var(source), " a/rdfs:subClassOf* ", format(iri(clazz.getName())), " .");
 			}
 
 			@Override public Snippet probe(final MinExclusive minExclusive) {
-				return snippet("filter ( {source} > {value} )", var(source), Values.format(value(minExclusive.getValue())));
+				return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.getValue())));
 			}
 
 			@Override public Snippet probe(final MaxExclusive maxExclusive) {
-				return snippet("filter ( {source} < {value} )", var(source), Values.format(value(maxExclusive.getValue())));
+				return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.getValue())));
 			}
 
 			@Override public Snippet probe(final MinInclusive minInclusive) {
-				return snippet("filter ( {source} >= {value} )", var(source), Values.format(value(minInclusive.getValue())));
+				return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.getValue())));
 			}
 
 			@Override public Snippet probe(final MaxInclusive maxInclusive) {
-				return snippet("filter ( {source} <= {value} )", var(source), Values.format(value(maxInclusive.getValue())));
+				return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.getValue())));
 			}
 
 			@Override public Snippet probe(final Pattern pattern) {
@@ -746,7 +779,7 @@ abstract class GraphProcessor {
 
 				// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
 
-				return any.getValues().size() > 1 ? values(source, Values.values(any.getValues())) : nothing();
+				return any.getValues().size() > 1 ? values(source, values(any.getValues())) : nothing();
 
 			}
 
@@ -756,8 +789,8 @@ abstract class GraphProcessor {
 				final IRI iri=iri(field.getName());
 				final Shape shape=field.getShape();
 
-				final Optional<Set<Value>> all=all(shape).map(Values::values);
-				final Optional<Set<Value>> any=any(shape).map(Values::values);
+				final Optional<Set<Value>> all=all(shape).map(values1 -> values(values1));
+				final Optional<Set<Value>> any=any(shape).map(values1 -> values(values1));
 
 				final Optional<Value> singleton=any
 						.filter(values -> values.size() == 1)
@@ -770,11 +803,11 @@ abstract class GraphProcessor {
 								: edge(var(source), iri, var(shape)),
 
 						all // target universal constraints
-								.map(values -> values.stream().map(value -> edge(var(source), iri, Values.format(value))))
+								.map(values -> values.stream().map(value -> edge(var(source), iri, format(value))))
 								.orElse(null),
 
 						singleton // target singleton existential constraints
-								.map(value -> edge(var(source), iri, Values.format(value)))
+								.map(value -> edge(var(source), iri, format(value)))
 								.orElse(null),
 
 						"\n\n",

@@ -43,7 +43,6 @@ import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -496,7 +495,7 @@ public final class Values {
 	}
 
 
-	///// Converters ///////////////////////////////////////////////////////////////////////////////////////////////////
+	///// Casts ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static IRI iri(final Object object) {
 		return as(object, IRI.class);
@@ -504,10 +503,6 @@ public final class Values {
 
 	public static Value value(final Object object) {
 		return as(object, Value.class);
-	}
-
-	public static Set<Value> values(final Collection<Object> values) {
-		return values.stream().map(Values::value).collect(toSet());
 	}
 
 
@@ -525,6 +520,8 @@ public final class Values {
 		}
 	}
 
+
+	///// Converters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Optional<String> iri(final Value value) {
 		return value instanceof IRI ? Optional.of(value.stringValue()) : Optional.empty();

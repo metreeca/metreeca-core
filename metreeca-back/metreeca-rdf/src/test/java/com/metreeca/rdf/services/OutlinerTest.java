@@ -83,6 +83,13 @@ final class OutlinerTest {
 	}
 
 
+	@Test void testResolveReferencesToTarget() {
+		assertThat(outline(field(RDF.VALUE, all(Shape.Target)), RDF.FIRST))
+				.as("value union")
+				.isEqualTo(decode("rdf:first rdf:value rdf:first."));
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Collection<Statement> outline(final Shape shape, final Value... sources) {

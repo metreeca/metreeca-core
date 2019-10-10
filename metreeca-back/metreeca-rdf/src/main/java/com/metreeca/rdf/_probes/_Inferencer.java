@@ -79,7 +79,7 @@ public final class _Inferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final In in) {
 
-		final Set<Value> values=values(in.getValues());
+		final Set<Value> values=in.getValues().stream().map(Values::value).collect(toSet());
 		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
