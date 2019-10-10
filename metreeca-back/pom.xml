@@ -37,7 +37,7 @@
 
 	<properties>
 
-		<rdf4j.version>2.5.2</rdf4j.version> <!-- shared among rdf-based modules -->
+		<rdf4j.version>3.0.0</rdf4j.version> <!-- shared among rdf-based modules ;(BOM clashes with GCP)-->
 
 	</properties>
 
