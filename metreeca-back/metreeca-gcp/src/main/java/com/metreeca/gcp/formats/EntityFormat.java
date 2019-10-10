@@ -24,11 +24,10 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,6 +71,32 @@ public final class EntityFormat implements Format<Entity> {
 		}
 
 		return new EntityFormat(datastore);
+	}
+
+
+	//// Casts /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Value<?> value(final Object object) {
+		return object == null ? NullValue.of()
+				: object instanceof Value ? (Value<?>)object
+				: object instanceof String ? StringValue.of((String)object)
+				: object instanceof FullEntity ? EntityValue.of((FullEntity<?>)object)
+				: object instanceof Key ? KeyValue.of((Key)object)
+				: object instanceof Double ? DoubleValue.of((Double)object)
+				: object instanceof Float ? DoubleValue.of((Float)object)
+				: object instanceof Number ? LongValue.of(((Number)object).longValue())
+				: object instanceof Boolean ? BooleanValue.of((Boolean)object)
+				: object instanceof Timestamp ? TimestampValue.of((Timestamp)object)
+				: object instanceof Date ? TimestampValue.of(Timestamp.ofTimeMicroseconds(((Date)object).getTime()*1000))
+				: object instanceof Blob ? BlobValue.of((Blob)object)
+				: object instanceof byte[] ? BlobValue.of(Blob.copyFrom((byte[])object))
+				: object instanceof LatLng ? LatLngValue.of((LatLng)object)
+				: unsupported("unsupported object type {"+object.getClass().getName()+"}");
+	}
+
+
+	private static <T> T unsupported(final String message) {
+		throw new UnsupportedOperationException(message);
 	}
 
 

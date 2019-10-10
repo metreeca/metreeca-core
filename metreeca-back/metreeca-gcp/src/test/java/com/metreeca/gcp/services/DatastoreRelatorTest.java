@@ -18,6 +18,7 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
@@ -128,7 +129,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 				final Stream<Entity> b=(offset > 0) ? a.skip(offset) : a;
 				final Stream<Entity> c=(limit > 0) ? b.limit(limit) : b;
 
-				return singletonMap(GCP.contains, ListValue.of(c.map(Datastore::value).collect(toList())));
+				return singletonMap(GCP.contains, ListValue.of(c.map(EntityFormat::value).collect(toList())));
 			}
 
 

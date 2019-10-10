@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gcp.services;
+package com.metreeca.gcp.formats;
 
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.Collectors.toList;
 
 
-final class _DatastoreInferencerTest {
+final class _EntityInferencerTest {
 
 	@Test void testHint() {
 
@@ -134,7 +134,7 @@ final class _DatastoreInferencerTest {
 	}
 
 	private Shape expand(final Shape shape) {
-		return optimize(shape.map(new _DatastoreInferencer()));
+		return optimize(shape.map(new _EntityInferencer()));
 	}
 
 }

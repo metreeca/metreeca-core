@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 import static com.metreeca.gcp.formats.EntityFormat.entity;
 import static com.metreeca.gcp.services.Datastore.compare;
 import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.gcp.services.Datastore.value;
+import static com.metreeca.gcp.formats.EntityFormat.value;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
@@ -137,7 +137,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Future<Response> holder(final Request request) {
 
-		return request.query(format, expand(digest(request.shape())))
+		return request.query(format, digest(request.shape()))
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 
@@ -705,7 +705,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		@Override public Filter probe(final All all) {
 			return target ? and(all.getValues().stream()
-					.map(Datastore::value)
+					.map(EntityFormat::value)
 					.map(value -> filter(value, PropertyFilter::eq))
 					.filter(Objects::nonNull)
 					.collect(toList())
@@ -824,28 +824,28 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 		@Override public Predicate<Value<?>> probe(final MinExclusive minExclusive) {
 
-			final Value<?> limit=Datastore.value(minExclusive.getValue());
+			final Value<?> limit=EntityFormat.value(minExclusive.getValue());
 
 			return target ? values -> stream(values).allMatch(value -> compare(value, limit) > 0) : null;
 		}
 
 		@Override public Predicate<Value<?>> probe(final MaxExclusive maxExclusive) {
 
-			final Value<?> limit=Datastore.value(maxExclusive.getValue());
+			final Value<?> limit=EntityFormat.value(maxExclusive.getValue());
 
 			return target ? values -> stream(values).allMatch(value -> compare(value, limit) < 0) : null;
 		}
 
 		@Override public Predicate<Value<?>> probe(final MinInclusive minInclusive) {
 
-			final Value<?> limit=Datastore.value(minInclusive.getValue());
+			final Value<?> limit=EntityFormat.value(minInclusive.getValue());
 
 			return target ? values -> stream(values).allMatch(value -> compare(value, limit) >= 0) : null;
 		}
 
 		@Override public Predicate<Value<?>> probe(final MaxInclusive maxInclusive) {
 
-			final Value<?> limit=Datastore.value(maxInclusive.getValue());
+			final Value<?> limit=EntityFormat.value(maxInclusive.getValue());
 
 			return target ? values -> stream(values).allMatch(value -> compare(value, limit) <= 0) : null;
 		}
@@ -899,7 +899,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		@Override public Predicate<Value<?>> probe(final In in) {
 
 			final Set<Value<?>> range=in.getValues().stream()
-					.map(Datastore::value)
+					.map(EntityFormat::value)
 					.map(this::value)
 					.collect(toSet());
 
@@ -909,7 +909,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		@Override public Predicate<Value<?>> probe(final All all) {
 
 			final Set<Value<?>> range=all.getValues().stream()
-					.map(Datastore::value)
+					.map(EntityFormat::value)
 					.map(this::value)
 					.collect(toSet());
 
@@ -919,7 +919,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		@Override public Predicate<Value<?>> probe(final Any any) {
 
 			final Set<Value<?>> range=any.getValues().stream()
-					.map(Datastore::value)
+					.map(EntityFormat::value)
 					.map(this::value)
 					.collect(toSet());
 

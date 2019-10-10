@@ -24,14 +24,6 @@ import com.metreeca.tree.probes.Redactor;
 
 abstract class DatastoreProcessor {
 
-	Shape expand(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new _DatastoreInferencer())
-				.map(new Optimizer());
-	}
-
-
 	Shape digest(final Shape shape) { // !!! caching
 		return shape
 

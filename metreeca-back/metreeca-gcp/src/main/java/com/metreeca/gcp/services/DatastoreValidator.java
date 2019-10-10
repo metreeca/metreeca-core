@@ -17,6 +17,7 @@
 
 package com.metreeca.gcp.services;
 
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Failure;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
@@ -30,8 +31,8 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static com.metreeca.gcp.formats.EntityFormat.entity;
+import static com.metreeca.gcp.formats.EntityFormat.value;
 import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.gcp.services.Datastore.values;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.invalid;
 import static com.metreeca.rest.Result.Value;
@@ -42,6 +43,7 @@ import static com.metreeca.tree.shapes.Field.fields;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 
 final class DatastoreValidator extends DatastoreProcessor {
@@ -100,6 +102,11 @@ final class DatastoreValidator extends DatastoreProcessor {
 		}
 
 
+		private Set<Value<?>> values(final Set<Object> values) {
+			return values.stream().map(EntityFormat::value).collect(toSet());
+		}
+
+
 		private Collection<? extends Value<?>> focus() {
 			return value.getType() == ValueType.NULL ? emptySet()
 					: value.getType() == ValueType.LIST ? ((ListValue)value).get()
@@ -155,7 +162,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 			final Object value=minExclusive.getValue();
 
 			return trace(focus().stream()
-					.filter(negate(v -> Datastore.compare(v, Datastore.value(value)) > 0))
+					.filter(negate(v -> Datastore.compare(v, value(value)) > 0))
 					.collect(toMap(v -> issue(minExclusive), Collections::singleton))
 			);
 		}
@@ -165,7 +172,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 			final Object value=maxExclusive.getValue();
 
 			return trace(focus().stream()
-					.filter(negate(v -> Datastore.compare(v, Datastore.value(value)) < 0))
+					.filter(negate(v -> Datastore.compare(v, value(value)) < 0))
 					.collect(toMap(v -> issue(maxExclusive), Collections::singleton))
 			);
 		}
@@ -175,7 +182,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 			final Object value=minInclusive.getValue();
 
 			return trace(focus().stream()
-					.filter(negate(v -> Datastore.compare(v, Datastore.value(value)) >= 0))
+					.filter(negate(v -> Datastore.compare(v, value(value)) >= 0))
 					.collect(toMap(v -> issue(minInclusive), Collections::singleton))
 			);
 		}
@@ -185,7 +192,7 @@ final class DatastoreValidator extends DatastoreProcessor {
 			final Object value=maxInclusive.getValue();
 
 			return trace(focus().stream()
-					.filter(negate(v -> Datastore.compare(v, Datastore.value(value)) <= 0))
+					.filter(negate(v -> Datastore.compare(v, value(value)) <= 0))
 					.collect(toMap(v -> issue(maxInclusive), Collections::singleton))
 			);
 		}

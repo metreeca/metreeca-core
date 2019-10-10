@@ -15,8 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gcp.services;
+package com.metreeca.gcp.formats;
 
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.*;
@@ -39,7 +40,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-public final class _DatastoreInferencer extends Inspector<Shape> {
+public final class _EntityInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 
@@ -69,7 +70,7 @@ public final class _DatastoreInferencer extends Inspector<Shape> {
 	@Override public Shape probe(final In in) {
 
 		final Set<Object> values=in.getValues();
-		final Set<Object> types=values.stream().map(Datastore::value).map(Value::getType).collect(toSet());
+		final Set<Object> types=values.stream().map(EntityFormat::value).map(Value::getType).collect(toSet());
 
 		final Shape count=maxCount(values.size());
 		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();
