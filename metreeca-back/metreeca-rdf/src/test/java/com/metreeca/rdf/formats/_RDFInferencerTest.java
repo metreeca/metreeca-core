@@ -15,9 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._probes;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -47,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.Collectors.toList;
 
 
-final class _InferencerTest {
+final class _RDFInferencerTest {
 
 	@Test void testHint() {
 
@@ -160,7 +161,7 @@ final class _InferencerTest {
 	}
 
 	private Shape expand(final Shape shape) {
-		return optimize(shape.map(new _Inferencer()));
+		return optimize(shape.map(new _RDFInferencer()));
 	}
 
 }

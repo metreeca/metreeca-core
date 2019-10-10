@@ -18,7 +18,6 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._probes._Inferencer;
 import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
@@ -42,6 +41,7 @@ import static com.metreeca.rdf.Values.pattern;
 import static com.metreeca.rdf.Values.BNodeType;
 import static com.metreeca.rdf.Values.IRIType;
 import static com.metreeca.rdf.Values.ResourceType;
+import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.tree.Shape.Convey;
 import static com.metreeca.tree.Shape.Mode;
 import static com.metreeca.tree.shapes.Datatype.datatype;
@@ -56,7 +56,7 @@ abstract class RDFJSONEncoder extends RDFJSONCodec {
 	private static final Function<Shape, Shape> ShapeCompiler=s -> s
 			.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
 			.map(new _Optimizer())
-			.map(new _Inferencer()) // infer implicit constraints to drive json shorthands
+			.map(new _RDFInferencer()) // infer implicit constraints to drive json shorthands
 			.map(new _Optimizer());
 
 
@@ -159,7 +159,7 @@ abstract class RDFJSONEncoder extends RDFJSONCodec {
 
 				for (final Map.Entry<Object, Shape> entry : fields.entrySet()) {
 
-					final IRI predicate=Values.iri(entry.getKey());
+					final IRI predicate=iri(entry.getKey());
 					final boolean direct=direct(predicate);
 
 					final Shape nestedShape=entry.getValue();

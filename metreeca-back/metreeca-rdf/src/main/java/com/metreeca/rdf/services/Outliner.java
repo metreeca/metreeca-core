@@ -17,6 +17,7 @@
 
 package com.metreeca.rdf.services;
 
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.And;
@@ -29,7 +30,10 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.tree.shapes.All.all;
 
 import static java.util.Arrays.asList;
@@ -113,7 +117,7 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 
 	private Stream<Value> values(final Stream<Object> objects) {
-		return objects.flatMap(o -> o.equals(Shape.Target) ? sources.stream() : Stream.of(value(o)));
+		return objects.flatMap(o -> o.equals(Shape.Target) ? sources.stream() : Stream.of(RDFFormat.value(o)));
 	}
 
 }

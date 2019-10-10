@@ -19,6 +19,7 @@ package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf._probes._Optimizer;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query;
@@ -56,9 +57,9 @@ import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.format;
 import static com.metreeca.rdf.Values.integer;
 import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.services.Snippets.*;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
@@ -184,7 +185,7 @@ abstract class GraphProcessor {
 
 
 		private Value value(final Object value) {
-			return value.equals(Shape.Target) ? resource : Values.value(value);
+			return value.equals(Shape.Target) ? resource : RDFFormat.value(value);
 		}
 
 		private Set<Value> values(final Collection<Object> values) {
@@ -368,7 +369,7 @@ abstract class GraphProcessor {
 		@Override public Collection<Statement> probe(final Stats stats) {
 
 			final Shape shape=stats.getShape();
-			final List<IRI> path=stats.getPath().stream().map(Values::iri).collect(toList());
+			final List<IRI> path=stats.getPath().stream().map(RDFFormat::iri).collect(toList());
 
 			final Model model=new LinkedHashModel();
 
@@ -463,7 +464,7 @@ abstract class GraphProcessor {
 		@Override public Collection<Statement> probe(final Terms terms) {
 
 			final Shape shape=terms.getShape();
-			final List<IRI> path=terms.getPath().stream().map(Values::iri).collect(toList());
+			final List<IRI> path=terms.getPath().stream().map(RDFFormat::iri).collect(toList());
 
 			final Model model=new LinkedHashModel();
 
@@ -586,7 +587,7 @@ abstract class GraphProcessor {
 			return snippet(orders.stream()
 					.filter(order -> !order.getPath().isEmpty()) // root already retrieved
 					.map(order -> snippet(
-							"optional { {root} {path} {order} }\n", var(root), path(order.getPath().stream().map(Values::iri).collect(toList())), var(order))
+							"optional { {root} {path} {order} }\n", var(root), path(order.getPath().stream().map(RDFFormat::iri).collect(toList())), var(order))
 					)
 			);
 		}

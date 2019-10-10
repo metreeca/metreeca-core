@@ -495,32 +495,6 @@ public final class Values {
 	}
 
 
-	///// Casts ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static IRI iri(final Object object) {
-		return as(object, IRI.class);
-	}
-
-	public static Value value(final Object object) {
-		return as(object, Value.class);
-	}
-
-
-	private static <T> T as(final Object object, final Class<T> type) {
-		if ( object == null || type.isInstance(object) ) {
-
-			return type.cast(object);
-
-		} else {
-
-			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
-					object.getClass().getName(), type.getName()
-			));
-
-		}
-	}
-
-
 	///// Converters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Optional<String> iri(final Value value) {

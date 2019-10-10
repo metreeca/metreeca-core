@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.tree.shapes.Meta.alias;
 
 import static java.util.Arrays.asList;

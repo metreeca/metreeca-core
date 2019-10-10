@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf._probes;
+package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
@@ -29,7 +29,10 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.Set;
 
-import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.Values.ResourceType;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.literal;
+import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
@@ -48,7 +51,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Recursively expands shapes with additional implied constraints.</p>
  */
-public final class _Inferencer extends Inspector<Shape> {
+public final class _RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 
@@ -79,7 +82,7 @@ public final class _Inferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final In in) {
 
-		final Set<Value> values=in.getValues().stream().map(Values::value).collect(toSet());
+		final Set<Value> values=in.getValues().stream().map(RDFFormat::value).collect(toSet());
 		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());

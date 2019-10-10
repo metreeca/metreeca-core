@@ -18,7 +18,6 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._probes._Inferencer;
 import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
@@ -57,7 +56,7 @@ abstract class RDFJSONDecoder extends RDFJSONCodec {
 	private static final Function<Shape, Shape> ShapeCompiler=s -> s
 			.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
 			.map(new _Optimizer())
-			.map(new _Inferencer()) // infer implicit constraints to drive json shorthands
+			.map(new _RDFInferencer()) // infer implicit constraints to drive json shorthands
 			.map(new _Optimizer());
 
 
@@ -139,7 +138,7 @@ abstract class RDFJSONDecoder extends RDFJSONCodec {
 
 			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
 
-			fields.keySet().stream().map(Values::iri).forEach(edge -> {
+			fields.keySet().stream().map(RDFFormat::iri).forEach(edge -> {
 				index.put(format(edge), edge); // inside angle brackets
 				index.put(edge.toString(), edge); // naked IRI
 			});
@@ -207,7 +206,7 @@ abstract class RDFJSONDecoder extends RDFJSONCodec {
 		final String type=type(object);
 
 		final String datatype=type.isEmpty()
-				? datatype(shape).map(Values::iri).map(Value::stringValue).orElse("")
+				? datatype(shape).map(RDFFormat::iri).map(Value::stringValue).orElse("")
 				: type;
 
 		final Value value=(thiz.isEmpty() && type.isEmpty() && focus != null) ? focus
@@ -243,7 +242,7 @@ abstract class RDFJSONDecoder extends RDFJSONCodec {
 
 	private Map.Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).map(Values::iri).orElse(null);
+		final IRI datatype=datatype(shape).map(RDFFormat::iri).orElse(null);
 
 		final Literal value
 

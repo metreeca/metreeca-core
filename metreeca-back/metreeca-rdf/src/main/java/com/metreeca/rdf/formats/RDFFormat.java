@@ -18,6 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Formats;
+import com.metreeca.rdf.Values;
 import com.metreeca.rdf.wrappers.Rewriter;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
@@ -40,7 +41,6 @@ import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
-import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
@@ -69,7 +69,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 			asList("application/json", "text/json"),
 			StandardCharsets.UTF_8,
 			singletonList("json"),
-			iri("http://www.json.org/"),
+			Values.iri("http://www.json.org/"),
 			org.eclipse.rdf4j.rio.RDFFormat.NO_NAMESPACES,
 			org.eclipse.rdf4j.rio.RDFFormat.NO_CONTEXTS
 	);
@@ -116,6 +116,32 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	}
 
 
+	///// Casts ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static IRI iri(final Object object) {
+		return as(object, IRI.class);
+	}
+
+	public static Value value(final Object object) {
+		return as(object, Value.class);
+	}
+
+
+	private static <T> T as(final Object object, final Class<T> type) {
+		if ( object == null || type.isInstance(object) ) {
+
+			return type.cast(object);
+
+		} else {
+
+			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
+					object.getClass().getName(), type.getName()
+			));
+
+		}
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private RDFFormat() {}
@@ -140,7 +166,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 				supplier -> {
 
-					final IRI focus=iri(message.item());
+					final IRI focus=Values.iri(message.item());
 					final Shape shape=message.shape();
 
 					final String base=focus.stringValue();
@@ -255,7 +281,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 				.body(output(), target -> {
 
-					final IRI focus=iri(message.item());
+					final IRI focus=Values.iri(message.item());
 					final Shape shape=message.shape();
 
 					final String base=focus.stringValue();
@@ -319,7 +345,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	}
 
 	private IRI rewrite(final String source, final String target, final IRI iri) {
-		return iri == null ? null : iri(rewrite(source, target, iri.stringValue()));
+		return iri == null ? null : Values.iri(rewrite(source, target, iri.stringValue()));
 	}
 
 	private String rewrite(final String source, final String target, final String string) {

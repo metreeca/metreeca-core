@@ -18,6 +18,7 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -331,7 +332,7 @@ public abstract class Graph implements AutoCloseable {
 		operation.setBinding("task", literal(request.method()));
 		operation.setBinding("base", iri(request.base()));
 		operation.setBinding("item", iri(request.item()));
-		operation.setBinding("user", request.user().map(Values::iri).orElse(RDF.NIL));
+		operation.setBinding("user", request.user().map(RDFFormat::iri).orElse(RDF.NIL));
 
 		if ( message instanceof Response ) {
 			operation.setBinding("code", literal(Values.integer(((Response)message).status())));

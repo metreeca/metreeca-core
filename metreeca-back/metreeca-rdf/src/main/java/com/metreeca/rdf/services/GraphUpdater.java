@@ -21,14 +21,10 @@ package com.metreeca.rdf.services;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.util.Collection;
 import java.util.Optional;
 
 import static com.metreeca.rdf.Values.iri;

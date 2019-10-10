@@ -146,7 +146,7 @@ public final class Rewriter implements Wrapper {
 
 		return new Request().lift(request)
 
-				.user(request.user().map(Values::iri).map(engine::rewrite).orElse(null))
+				.user(request.user().map(RDFFormat::iri).map(engine::rewrite).orElse(null))
 				.roles(engine.rewrite(request.roles(), engine::rewrite))
 
 				.method(request.method())

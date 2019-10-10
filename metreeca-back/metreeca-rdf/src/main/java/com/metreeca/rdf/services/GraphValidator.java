@@ -18,6 +18,7 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.Failure;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
@@ -37,6 +38,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf.services.Graph.graph;
 import static com.metreeca.rdf.services.Snippets.source;
@@ -132,7 +135,7 @@ final class GraphValidator extends GraphProcessor {
 
 
 		private Value value(final Object value) {
-			return value.equals(Shape.Target)? resource : Values.value(value);
+			return value.equals(Shape.Target) ? resource : RDFFormat.value(value);
 		}
 
 		private Set<Value> values(final Set<Object> values) {
