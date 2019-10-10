@@ -18,39 +18,26 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
 
 abstract class DatastoreProcessor {
 
 	Shape digest(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Area, Shape.Digest))
-				.map(new Optimizer());
+		return shape.map(new Redactor(Shape.Area, Shape.Digest));
 	}
 
 	Shape detail(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Area, Shape.Detail))
-				.map(new Optimizer());
+		return shape.map(new Redactor(Shape.Area, Shape.Detail));
 	}
 
 
 	Shape convey(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Mode, Shape.Convey))
-				.map(new Optimizer());
+		return shape.map(new Redactor(Shape.Mode, Shape.Convey));
 	}
 
 	Shape filter(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Mode, Shape.Filter))
-				.map(new Optimizer());
+		return shape.map(new Redactor(Shape.Mode, Shape.Filter));
 	}
 
 }

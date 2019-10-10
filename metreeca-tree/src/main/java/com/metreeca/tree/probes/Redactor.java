@@ -20,9 +20,7 @@ package com.metreeca.tree.probes;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.*;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 import static com.metreeca.tree.shapes.And.and;
@@ -115,24 +113,47 @@ public final class Redactor extends Traverser<Shape> {
 
 
 	@Override public Shape probe(final Field field) {
-		return field(field.getName(), field.getShape().map(this));
+
+		final Object name=field.getName();
+		final Shape shape=field.getShape().map(this);
+
+		return shape.equals(or()) ? and() : field(name, shape);
 	}
 
 
 	@Override public Shape probe(final And and) {
-		return and(and.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
+
+		final List<Shape> shapes=and.getShapes().stream()
+				.map(shape -> shape.map(this))
+				.filter(s -> !s.equals(and()))
+				.collect(toList());
+
+		return shapes.stream().anyMatch(s -> s.equals(or())) ? or()
+				: shapes.size() == 1 ? shapes.iterator().next()
+				: and(shapes);
 	}
 
 	@Override public Shape probe(final Or or) {
-		return or(or.getShapes().stream().map(shape -> shape.map(this)).collect(toList()));
+
+		final List<Shape> shapes=or.getShapes().stream()
+				.map(shape -> shape.map(this))
+				.filter(s -> !s.equals(or()))
+				.collect(toList());
+
+		return shapes.stream().anyMatch(s -> s.equals(and())) ? and()
+				: shapes.size() == 1 ? shapes.iterator().next()
+				: or(shapes);
 	}
 
 	@Override public Shape probe(final When when) {
-		return when(
-				when.getTest().map(this),
-				when.getPass().map(this),
-				when.getFail().map(this)
-		);
+
+		final Shape test=when.getTest().map(this);
+		final Shape pass=when.getPass().map(this);
+		final Shape fail=when.getFail().map(this);
+
+		return test.equals(and()) ? pass
+				: test.equals(or()) ? fail
+				: when(test, pass, fail);
 	}
 
 }

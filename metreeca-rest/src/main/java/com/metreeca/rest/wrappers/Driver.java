@@ -118,7 +118,6 @@ public final class Driver implements Wrapper {
 				.body(text(), shape
 						.map(new Redactor(Shape.Role, request.roles()))
 						.map(new Redactor(Shape.Mode, Shape.Convey))
-						.map(new Optimizer())
 						.toString()
 				)
 		))

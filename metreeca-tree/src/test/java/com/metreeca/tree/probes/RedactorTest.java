@@ -35,14 +35,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class RedactorTest {
 
-	private static final UnaryOperator<Shape> first=s -> s.map(new Redactor("value", "first")).map(new Optimizer());
-	private static final UnaryOperator<Shape> rest=s -> s.map(new Redactor("value", "rest")).map(new Optimizer());
-	private static final UnaryOperator<Shape> any=s -> s.map(new Redactor("value", values -> true)).map(new Optimizer());
+	private static final UnaryOperator<Shape> first=s -> s.map(new Redactor("value", "first"));
+	private static final UnaryOperator<Shape> rest=s -> s.map(new Redactor("value", "rest"));
+	private static final UnaryOperator<Shape> any=s -> s.map(new Redactor("value", values -> true));
+
+
+	private Guard value(final Object... values) {
+		return guard("value", values);
+	}
 
 
 	@Test void testIgnoreUnrelatedConditions() {
 
-		final Guard guard=guard("value", "first");
+		final Guard guard=value("first");
 
 		assertThat(guard.map(new Redactor("nil", "nil"))).as("undefined variable").isEqualTo(guard);
 
@@ -51,7 +56,7 @@ final class RedactorTest {
 	@Test void testReplaceTargetedConditions() {
 
 		final Shape shape=field("type", and());
-		final Shape guard=guard("value", "first").then(shape);
+		final Shape guard=value("first").then(shape);
 
 		assertThat(guard.map(first)).as("included value").isEqualTo(shape);
 		assertThat(guard.map(rest)).as("excluded value").isEqualTo(and());
@@ -65,7 +70,7 @@ final class RedactorTest {
 		final Shape y=field("y", and());
 		final Shape z=field("z", and());
 
-		final Shape guard=guard("value", "first");
+		final Shape guard=value("first");
 
 		assertThat(field("value", guard.then(x)).map(first))
 				.as("field")
@@ -90,9 +95,20 @@ final class RedactorTest {
 		final Shape x=field("x", and());
 		final Shape y=field("y", and());
 
-		assertThat(and(guard("value", "first").then(x), guard("value", "rest").then(y)).map(any))
+		assertThat(and(value("first").then(x), value("rest").then(y)).map(any))
 				.as("wildcard")
 				.isEqualTo(and(x, y));
+	}
+
+
+	@Test void testOptimizeFields() {
+		assertThat(and(field("one", value("first")), field("two", value("rest"))).map(first))
+				.isEqualTo(field("one"));
+	}
+
+	@Test void testOptimizeAnds() {
+		assertThat(and(and(value("first"))).map(first))
+				.isEqualTo(and());
 	}
 
 }

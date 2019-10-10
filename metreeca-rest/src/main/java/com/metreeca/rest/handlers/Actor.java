@@ -20,7 +20,6 @@ package com.metreeca.rest.handlers;
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
 
 import java.util.function.Function;
@@ -79,7 +78,6 @@ public abstract class Actor extends Delegator { // !!! tbd
 
 					// mode (convey/filter) redaction performed by action handlers
 
-					.map(new Optimizer())
 			);
 
 			final Function<Response, Response> post=message -> message.shape(message.shape() // response shape redactor
@@ -89,7 +87,6 @@ public abstract class Actor extends Delegator { // !!! tbd
 					.map(new Redactor(Shape.Area, area))
 					.map(new Redactor(Shape.Mode, Shape.Convey))
 
-					.map(new Optimizer())
 			);
 
 			return empty(baseline) ? request.reply(response -> response.status(Forbidden))

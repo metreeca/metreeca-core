@@ -23,7 +23,6 @@ import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
@@ -82,8 +81,8 @@ public final class _RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final In in) {
 
-		final Set<Value> values=in.getValues().stream().map(RDFFormat::value).collect(toSet());
-		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
+		final Set<Object> values=in.getValues();
+		final Set<Object> types=values.stream().map(RDFFormat::value).map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
 		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();

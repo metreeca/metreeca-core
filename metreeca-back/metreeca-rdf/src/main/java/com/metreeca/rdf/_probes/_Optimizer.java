@@ -23,14 +23,11 @@ import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.probes.Traverser;
 import com.metreeca.tree.shapes.*;
 
-import org.eclipse.rdf4j.model.IRI;
-
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Or.or;
@@ -44,7 +41,7 @@ import static java.util.stream.Collectors.*;
 /**
  * Shape optimizer.
  *
- * <p>Recursively removes redundant and non-validating constructs from a shape.</p>
+ * <p>Recursively removes redundant constructs from a shape.</p>
  */
 public final class _Optimizer extends Traverser<Shape> {
 
@@ -166,12 +163,14 @@ public final class _Optimizer extends Traverser<Shape> {
 			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter
 	) {
 
+		final class Id {}
+
 		final Shape.Probe<Map.Entry<Object, Shape>> splitter=new Inspector<Map.Entry<Object, Shape>>() {
 
 			private int id;
 
 			@Override public Map.Entry<Object, Shape> probe(final Shape shape) {
-				return new SimpleImmutableEntry<>(iri("_:", "id"+id++), shape); // assign non-fields a unique step
+				return new SimpleImmutableEntry<>(new Id(), shape); // assign non-fields a unique step
 			}
 
 			@Override public Map.Entry<Object, Shape> probe(final Field field) {
@@ -185,7 +184,7 @@ public final class _Optimizer extends Traverser<Shape> {
 				.map(shape -> shape.map(this)) // optimize nested shapes
 				.flatMap(shape -> shape.map(lifter)) // merge nested collections
 
-				.map(shape -> shape.map(splitter)) // split fields into Map.Entry<IRI, Shape>
+				.map(shape -> shape.map(splitter)) // split fields into Map.Entry<Object, Shape>
 
 				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<IRI, List<Shape>>
 						LinkedHashMap::new, mapping(Map.Entry::getValue, toList())))
@@ -195,7 +194,7 @@ public final class _Optimizer extends Traverser<Shape> {
 					final Object name=e.getKey();
 					final List<Shape> values=e.getValue();
 
-					return name instanceof IRI && ((IRI)name).getNamespace().equals("_:") ? values.stream()
+					return name instanceof Id ? values.stream()
 							: Stream.of(field(name, packer.apply(values).map(this)));
 
 				})
