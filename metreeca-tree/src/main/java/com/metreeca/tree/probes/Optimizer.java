@@ -45,25 +45,17 @@ public class Optimizer extends Traverser<Shape> {
 
 	private static final Shape.Probe<Stream<Shape>> AndFlattener=new Inspector<Stream<Shape>>() {
 
-		@Override public Stream<Shape> probe(final Shape shape) {
-			return Stream.of(shape);
-		}
+		@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
-		@Override public Stream<Shape> probe(final And and) {
-			return and.getShapes().stream();
-		}
+		@Override public Stream<Shape> probe(final And and) { return and.getShapes().stream(); }
 
 	};
 
 	private static final Shape.Probe<Stream<Shape>> OrFlattener=new Inspector<Stream<Shape>>() {
 
-		@Override public Stream<Shape> probe(final Shape shape) {
-			return Stream.of(shape);
-		}
+		@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
-		@Override public Stream<Shape> probe(final Or or) {
-			return or.getShapes().stream();
-		}
+		@Override public Stream<Shape> probe(final Or or) { return or.getShapes().stream(); }
 
 	};
 
@@ -175,6 +167,7 @@ public class Optimizer extends Traverser<Shape> {
 		return packer.apply(shapes
 
 				.map(s -> s.map(this))
+
 				.flatMap(s -> s.map(flattener))
 
 				.collect(groupingBy(

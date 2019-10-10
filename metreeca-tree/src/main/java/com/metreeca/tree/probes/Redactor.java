@@ -18,19 +18,18 @@
 package com.metreeca.tree.probes;
 
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.shapes.*;
+import com.metreeca.tree.shapes.Guard;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Or.or;
-import static com.metreeca.tree.shapes.When.when;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.disjoint;
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -38,7 +37,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Recursively evaluates {@linkplain Guard parametric} constraints in a shape.</p>
  */
-public final class Redactor extends Traverser<Shape> {
+public final class Redactor extends Optimizer {
 
 	private final String axis;
 	private final Predicate<Set<Object>> condition;
@@ -102,58 +101,11 @@ public final class Redactor extends Traverser<Shape> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Shape probe(final Shape shape) { return shape; }
-
 
 	@Override public Shape probe(final Guard guard) {
 		return axis.equals(guard.getAxis())
 				? condition.test(guard.getValues()) ? and() : or()
 				: guard; // ignore unrelated variables
-	}
-
-
-	@Override public Shape probe(final Field field) {
-
-		final Object name=field.getName();
-		final Shape shape=field.getShape().map(this);
-
-		return shape.equals(or()) ? and() : field(name, shape);
-	}
-
-
-	@Override public Shape probe(final And and) {
-
-		final List<Shape> shapes=and.getShapes().stream()
-				.map(shape -> shape.map(this))
-				.filter(s -> !s.equals(and()))
-				.collect(toList());
-
-		return shapes.stream().anyMatch(s -> s.equals(or())) ? or()
-				: shapes.size() == 1 ? shapes.iterator().next()
-				: and(shapes);
-	}
-
-	@Override public Shape probe(final Or or) {
-
-		final List<Shape> shapes=or.getShapes().stream()
-				.map(shape -> shape.map(this))
-				.filter(s -> !s.equals(or()))
-				.collect(toList());
-
-		return shapes.stream().anyMatch(s -> s.equals(and())) ? and()
-				: shapes.size() == 1 ? shapes.iterator().next()
-				: or(shapes);
-	}
-
-	@Override public Shape probe(final When when) {
-
-		final Shape test=when.getTest().map(this);
-		final Shape pass=when.getPass().map(this);
-		final Shape fail=when.getFail().map(this);
-
-		return test.equals(and()) ? pass
-				: test.equals(or()) ? fail
-				: when(test, pass, fail);
 	}
 
 }
