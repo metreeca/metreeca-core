@@ -18,7 +18,6 @@
 package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
@@ -80,39 +79,24 @@ import static java.util.stream.Collectors.toSet;
 abstract class GraphProcessor {
 
 	Shape holder(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Area, Shape.Holder))
-				.map(new _Optimizer());
+		return shape.map(new Redactor(Shape.Area, Shape.Holder));
 	}
 
 	Shape digest(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Area, Shape.Digest))
-				.map(new _Optimizer());
+		return shape.map(new Redactor(Shape.Area, Shape.Digest));
 	}
 
 	Shape detail(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Area, Shape.Detail))
-				.map(new _Optimizer());
+		return shape.map(new Redactor(Shape.Area, Shape.Detail));
 	}
 
 
 	Shape convey(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Mode, Shape.Convey))
-				.map(new _Optimizer());
+		return shape.map(new Redactor(Shape.Mode, Shape.Convey));
 	}
 
 	Shape filter(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Mode, Shape.Filter))
-				.map(new _Optimizer());
+		return shape.map(new Redactor(Shape.Mode, Shape.Filter));
 	}
 
 

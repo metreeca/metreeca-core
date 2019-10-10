@@ -20,7 +20,7 @@ package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rdf._probes._Optimizer;
+import com.metreeca.rdf.formats._Optimizer;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;

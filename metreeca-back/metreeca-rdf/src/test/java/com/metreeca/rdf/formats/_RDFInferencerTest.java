@@ -18,7 +18,6 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;

@@ -17,7 +17,6 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rdf._probes._Optimizer;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
 import com.metreeca.tree.probes.Traverser;
