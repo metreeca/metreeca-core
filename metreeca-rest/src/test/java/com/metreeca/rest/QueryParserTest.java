@@ -142,7 +142,7 @@ final class QueryParserTest {
 	@Test void testParseEmptyObject() {
 		items("{}", shape, items -> {
 
-			assertThat(shape).as("base shape").isEqualTo(items.getShape());
+			assertThat(items.getShape()).as("base shape").isEqualTo(shape);
 			assertThat(items.getOrders()).as("no orders").isEmpty();
 			assertThat(items.getOffset()).as("no offset").isEqualTo(0);
 			assertThat(items.getLimit()).as("no limit").isEqualTo(0);

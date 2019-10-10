@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.Collectors.toList;
 
 
-final class _RDFInferencerTest {
+final class RDFInferencerTest {
 
 	@Test void testHint() {
 
@@ -156,11 +156,11 @@ final class _RDFInferencerTest {
 
 
 	private <S extends Shape, I extends Shape> Shape optimize(final Shape shape) {
-		return shape.map(new _Optimizer());
+		return shape.map(new RDFOptimizer());
 	}
 
 	private Shape expand(final Shape shape) {
-		return optimize(shape.map(new _RDFInferencer()));
+		return optimize(shape.map(new RDFInferencer()));
 	}
 
 }

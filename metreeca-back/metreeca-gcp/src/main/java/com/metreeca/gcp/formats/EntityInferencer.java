@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-public final class _EntityInferencer extends Inspector<Shape> {
+public final class EntityInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 

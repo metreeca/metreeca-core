@@ -20,18 +20,19 @@ package com.metreeca.tree.probes;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.*;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
+import static com.metreeca.tree.shapes.MaxCount.maxCount;
+import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static java.util.stream.Collectors.*;
 
 
@@ -40,7 +41,45 @@ import static java.util.stream.Collectors.*;
  *
  * <p>Recursively removes redundant constructs from a shape.</p>
  */
-public final class Optimizer extends Traverser<Shape> {
+public class Optimizer extends Traverser<Shape> {
+
+	private static final Shape.Probe<Stream<Shape>> AndFlattener=new Inspector<Stream<Shape>>() {
+
+		@Override public Stream<Shape> probe(final Shape shape) {
+			return Stream.of(shape);
+		}
+
+		@Override public Stream<Shape> probe(final And and) {
+			return and.getShapes().stream();
+		}
+
+	};
+
+	private static final Shape.Probe<Stream<Shape>> OrFlattener=new Inspector<Stream<Shape>>() {
+
+		@Override public Stream<Shape> probe(final Shape shape) {
+			return Stream.of(shape);
+		}
+
+		@Override public Stream<Shape> probe(final Or or) {
+			return or.getShapes().stream();
+		}
+
+	};
+
+
+	private static final Function<Collection<Shape>, Shape> AndPacker=shapes
+			-> shapes.contains(or()) ? or() // always fail
+			: shapes.size() == 1 ? shapes.iterator().next()
+			: and(shapes);
+
+	private static final Function<Collection<Shape>, Shape> OrPacker=shapes
+			->  shapes.contains(and()) ? and() // always pass
+			: shapes.size() == 1 ? shapes.iterator().next()
+			: or(shapes);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Shape probe(final Shape shape) {
 		return shape;
@@ -48,11 +87,11 @@ public final class Optimizer extends Traverser<Shape> {
 
 
 	@Override public Shape probe(final All all) {
-		return all.getValues().isEmpty()? and() : all;
+		return all.getValues().isEmpty() ? and() : all;
 	}
 
 	@Override public Shape probe(final Any any) {
-		return any.getValues().isEmpty()? or() : any;
+		return any.getValues().isEmpty() ? or() : any;
 	}
 
 
@@ -66,57 +105,21 @@ public final class Optimizer extends Traverser<Shape> {
 
 
 	@Override public Shape probe(final And and) {
-
-		final class AndMerger extends Merger {
-
-			@Override protected int minCount(final int x, final int y) { return max(x, y); }
-
-			@Override protected int maxCount(final int x, final int y) { return min(x, y); }
-
-		}
-
-		final class AndInspector extends Inspector<Stream<Shape>> {
-
-			@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
-
-			@Override public Stream<Shape> probe(final And and) { return and.getShapes().stream(); }
-
-		}
-
-		final Collection<Shape> shapes=new AndMerger().merge(flatten(and.getShapes(), And::and, new AndInspector()));
-
-		return shapes.contains(or()) ? or() // always fail
-				: shapes.size() == 1 ? shapes.iterator().next()
-				: and(shapes);
+		return optimize(and.getShapes().stream(), AndFlattener, AndPacker, (clazz, constraints)
+				-> clazz.equals(MinCount.class) ? Stream.of(minCount(max(constraints, s -> ((MinCount)s).getLimit())))
+				: clazz.equals(MaxCount.class) ? Stream.of(maxCount(min(constraints, s -> ((MaxCount)s).getLimit())))
+				: clazz.equals(Datatype.class) ? datatypes(constraints, (x, y) -> derives(x, y)) // ignore super-types
+				: constraints.distinct()
+		);
 	}
 
 	@Override public Shape probe(final Or or) {
-
-		final class OrMerger extends Merger {
-
-			@Override protected int minCount(final int x, final int y) { return min(x, y); }
-
-			@Override protected int maxCount(final int x, final int y) { return max(x, y); }
-
-		}
-
-		final class OrInspector extends Inspector<Stream<Shape>> {
-
-			@Override public Stream<Shape> probe(final Shape shape) {
-				return Stream.of(shape);
-			}
-
-			@Override public Stream<Shape> probe(final Or or) {
-				return or.getShapes().stream();
-			}
-
-		}
-
-		final Collection<Shape> shapes=new OrMerger().merge(flatten(or.getShapes(), Or::or, new OrInspector()));
-
-		return shapes.contains(and()) ? and() // always pass
-				: shapes.size() == 1 ? shapes.iterator().next()
-				: or(shapes);
+		return optimize(or.getShapes().stream(), OrFlattener, OrPacker, (clazz, constraints)
+				-> clazz.equals(MinCount.class) ? Stream.of(minCount(min(constraints, s -> ((MinCount)s).getLimit())))
+				: clazz.equals(MaxCount.class) ? Stream.of(maxCount(max(constraints, s -> ((MaxCount)s).getLimit())))
+				: clazz.equals(Datatype.class) ? datatypes(constraints, (x, y) -> derives(y, x)) // ignore sub-types
+				: constraints.distinct()
+		);
 	}
 
 	@Override public Shape probe(final When when) {
@@ -134,103 +137,88 @@ public final class Optimizer extends Traverser<Shape> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Set<Shape> flatten(final Collection<Shape> collection,
-			final Function<Collection<Shape>, Shape> packer, final Shape.Probe<Stream<Shape>> lifter
-	) {
+	private int min(final Stream<Shape> constraints, final ToIntFunction<Shape> mapper) {
+		return constraints.mapToInt(mapper).min().orElse(Integer.MAX_VALUE);
+	}
 
-		final class Id {}
-
-		final Shape.Probe<Map.Entry<Object, Shape>> splitter=new Inspector<Map.Entry<Object, Shape>>() {
-
-			private int id;
-
-			@Override public Map.Entry<Object, Shape> probe(final Shape shape) {
-				return new SimpleImmutableEntry<>(new Id(), shape); // assign non-fields a unique step
-			}
-
-			@Override public Map.Entry<Object, Shape> probe(final Field field) {
-				return new SimpleImmutableEntry<>(field.getName(), field.getShape());
-			}
-
-		};
-
-		return collection.stream()
-
-				.map(shape -> shape.map(this)) // optimize nested shapes
-				.flatMap(shape -> shape.map(lifter)) // merge nested collections
-
-				.map(shape -> shape.map(splitter)) // split fields into Map.Entry<Object, Shape>
-
-				.collect(groupingBy(Map.Entry::getKey, // merge entries as Entry<IRI, List<Shape>>
-						LinkedHashMap::new, mapping(Map.Entry::getValue, toList())))
-
-				.entrySet().stream().flatMap(e -> { // reassemble fields merging and optimizing multiple definitions
-
-					final Object name=e.getKey();
-					final List<Shape> values=e.getValue();
-
-					return name instanceof Id ? values.stream()
-							: Stream.of(field(name, packer.apply(values).map(this)));
-
-				})
-
-				.collect(toCollection(LinkedHashSet::new)); // remove duplicates preserving order
+	private int max(final Stream<Shape> constraints, final ToIntFunction<Shape> mapper) {
+		return constraints.mapToInt(mapper).max().orElse(Integer.MIN_VALUE);
 	}
 
 
-	private abstract static class Merger extends Inspector<Merger> {
+	private Stream<Datatype> datatypes(final Stream<Shape> shapes, final BiPredicate<Object, Object> ignore) {
 
-		private int minCount=-1;
-		private int maxCount=-1;
+		final Set<Datatype> datatypes=shapes.map(s -> (Datatype)s).collect(toSet());
 
-
-		private final Collection<Shape> shapes=new ArrayList<>();
-
-
-
-		@Override public Merger probe(final Shape shape) {
-
-			shapes.add(shape);
-
-			return this;
-		}
+		return datatypes.stream().filter(datatype -> datatypes.stream()
+				.filter(reference -> !datatype.equals(reference))
+				.noneMatch(reference -> ignore.test(datatype.getName(), reference.getName()))
+		);
+	}
 
 
-		@Override public Merger probe(final MinCount minCount) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			final int limit=minCount.getLimit();
-
-			this.minCount=(this.minCount < 0) ? limit : minCount(this.minCount, limit);
-
-			return this;
-		}
-
-		@Override public Merger probe(final MaxCount maxCount) {
-
-			final int limit=maxCount.getLimit();
-
-			this.maxCount=(this.maxCount < 0) ? limit : maxCount(this.maxCount, limit);
-
-			return this;
-		}
+	protected boolean derives(final Object upper, final Object lower) {
+		return false;
+	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		protected abstract int minCount(final int x, final int y);
+	private Shape optimize(
+			final Stream<Shape> shapes,
+			final Shape.Probe<Stream<Shape>> flattener,
+			final Function<Collection<Shape>, Shape> packer,
+			final BiFunction<Class<?>, Stream<Shape>, Stream<? extends Shape>> merger
+	) {
+		return packer.apply(shapes
 
-		protected abstract int maxCount(final int x, final int y);
+				.map(s -> s.map(this))
+				.flatMap(s -> s.map(flattener))
 
+				.collect(groupingBy(
 
-		protected Collection<Shape> merge(final Iterable<Shape> shapes) {
+						s -> s.map(new Inspector<Object>() {
 
-			shapes.forEach(shape -> shape.map(this));
+							@Override public Object probe(final Shape shape) { return shape.getClass(); }
 
-			if ( minCount >= 0 ) { this.shapes.add(MinCount.minCount(minCount)); }
-			if ( maxCount >= 0 ) { this.shapes.add(MaxCount.maxCount(maxCount)); }
+							@Override public Object probe(final Field field) { return field.getName(); }
 
-			return this.shapes;
-		}
+						}),
 
+						LinkedHashMap::new, // preserve ordering
+
+						mapping(s -> s.map(new Inspector<Stream<Shape>>() {
+
+							@Override public Stream<Shape> probe(final Shape shape) {
+								return Stream.of(shape);
+							}
+
+							@Override public Stream<Shape> probe(final Field field) {
+								return Stream.of(field.getShape().map(Optimizer.this));
+							}
+
+						}), reducing(Stream::concat))
+
+				))
+
+				.entrySet()
+				.stream()
+
+				.flatMap(entry -> {
+
+					final Object name=entry.getKey();
+					final Stream<Shape> nested=entry.getValue().orElseGet(Stream::empty);
+
+					return name instanceof Class ? merger.apply((Class<?>)name, nested)
+							: Stream.of(field(name, packer.apply(nested.collect(toList())).map(this)));
+
+				})
+
+				.collect(toList())
+
+		);
 	}
 
 }

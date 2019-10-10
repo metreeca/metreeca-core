@@ -186,7 +186,7 @@ public final class EntityFormat implements Format<Entity> {
 				.map(new Redactor(Shape.Area, values -> true))
 				.map(new Redactor(Shape.Mode, Shape.Convey)) // remove internal filtering shapes
 
-				.map(new _EntityInferencer()) // infer implicit constraints to drive json shorthands
+				.map(new EntityInferencer()) // infer implicit constraints to drive json shorthands
 				.map(new Optimizer());
 
 	}

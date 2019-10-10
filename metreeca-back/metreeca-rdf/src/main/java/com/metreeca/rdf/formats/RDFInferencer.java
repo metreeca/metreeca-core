@@ -50,7 +50,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Recursively expands shapes with additional implied constraints.</p>
  */
-public final class _RDFInferencer extends Inspector<Shape> {
+public final class RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 
