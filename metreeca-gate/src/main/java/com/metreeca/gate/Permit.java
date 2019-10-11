@@ -35,7 +35,7 @@ public final class Permit {
 	private final String id;
 
 	private final String user;
-	private final Set<String> roles;
+	private final Set<Object> roles;
 
 	private final Map<String, Object> profile;
 
@@ -55,7 +55,7 @@ public final class Permit {
 	 *
 	 * @throws NullPointerException if any of the arguments is null or contains null values
 	 */
-	public Permit(final String id, final String user, final Collection<String> roles, final Map<String, Object> profile) {
+	public Permit(final String id, final String user, final Collection<Object> roles, final Map<String, Object> profile) {
 
 		if ( id == null ) {
 			throw new NullPointerException("null hash");
@@ -108,7 +108,7 @@ public final class Permit {
 	 *
 	 * @return a set of ids uniquely identifying the roles attributed to the permit user
 	 */
-	public Set<String> roles() {
+	public Set<Object> roles() {
 		return unmodifiableSet(roles);
 	}
 
