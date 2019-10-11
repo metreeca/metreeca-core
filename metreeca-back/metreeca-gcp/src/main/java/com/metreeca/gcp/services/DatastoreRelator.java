@@ -22,6 +22,7 @@ import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query.Probe;
@@ -293,7 +294,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 						final FullEntity.Builder<?> item=FullEntity.newBuilder();
 
-						item.set(GCP.type, entry.getKey());
+						item.set(JSONFormat.type, entry.getKey());
 						entry.getValue().set(item);
 
 						return item.build();
@@ -369,7 +370,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 						final FullEntity<?> entity=((EntityValue)v).get();
 						final FullEntity.Builder<?> builder=FullEntity.newBuilder(entity.getKey());
 
-						Stream.of(GCP.id, GCP.type, GCP.label, GCP.comment).forEach(property -> {
+						Stream.of(JSONFormat.id, JSONFormat.type, GCP.label, GCP.comment).forEach(property -> {
 
 							if (entity.contains(property)) {
 								builder.set(property, (Value<?>)entity.getValue(property));

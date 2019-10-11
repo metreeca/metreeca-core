@@ -19,6 +19,7 @@ package com.metreeca.gcp.formats;
 
 import com.metreeca.gcp.GCP;
 import com.metreeca.gcp.services.Datastore;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.Timestamp;
@@ -28,9 +29,13 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.json.*;
 
+import static com.metreeca.rest.formats.JSONFormat.context;
+import static com.metreeca.rest.formats.JSONFormat.resolver;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
@@ -44,6 +49,8 @@ final class EntityDecoder {
 
 	private final Datastore datastore;
 
+	private final Function<String, String> resolver=resolver(service(context()));
+
 
 	EntityDecoder(final Datastore datastore) {
 		this.datastore=datastore;
@@ -51,17 +58,17 @@ final class EntityDecoder {
 
 
 	Value<?> decode(final JsonValue value, final Shape shape) {
-		return value(value, shape);
+		return value(resolver, value, shape);
 	}
 
 	FullEntity<?> decode(final JsonObject json, final Shape shape) {
-		return entity(json, shape).get();
+		return entity(resolver, json, shape).get();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Value<?> value(final JsonValue value, final Shape shape) {
+	private Value<?> value(final Function<String, String> resolver, final JsonValue value, final Shape shape) {
 		switch ( value.getValueType() ) {
 
 			case NULL: return NullValue.of();
@@ -69,8 +76,9 @@ final class EntityDecoder {
 			case FALSE: return BooleanValue.of(false);
 			case NUMBER: return number((JsonNumber)value, shape);
 			case STRING: return string((JsonString)value, shape);
-			case ARRAY: return collection(value.asJsonArray(), shape);
-			case OBJECT: return entity(value.asJsonObject(), shape);
+
+			case ARRAY: return collection(resolver, value.asJsonArray(), shape);
+			case OBJECT: return entity(resolver, value.asJsonObject(), shape);
 
 			default: throw new UnsupportedOperationException("unsupported JSON value {"+value+"}");
 
@@ -145,33 +153,42 @@ final class EntityDecoder {
 	}
 
 
-	private ListValue collection(final JsonArray values, final Shape shape) {
-		return ListValue.of(values.stream().map(v -> value(v, shape)).collect(toList()));
+	private ListValue collection(final Function<String, String> resolver, final JsonArray values, final Shape shape) {
+		return ListValue.of(values.stream().map(v -> value(resolver, v, shape)).collect(toList()));
 	}
 
-	private EntityValue entity(final JsonObject object, final Shape shape) {
+	private EntityValue entity(final Function<String, String> resolver, final JsonObject object, final Shape shape) {
 
-		final String id=Optional.ofNullable(object.get(GCP.id))
-				.filter(value -> value instanceof JsonString)
-				.map(value -> ((JsonString)value).getString())
-				.orElse("");
-
-		final String type=Optional.ofNullable(object.get(GCP.type))
-				.filter(value -> value instanceof JsonString)
-				.map(value -> ((JsonString)value).getString())
-				.orElseGet(() -> clazz(shape).map(Object::toString).orElse(""));
-
-		final FullEntity.Builder<?> builder=id.isEmpty()
-				? type.isEmpty() ? FullEntity.newBuilder() : FullEntity.newBuilder(datastore.newKeyFactory().setKind(type).newKey())
-				: FullEntity.newBuilder(datastore.newKeyFactory().setKind(type.isEmpty() ? GCP.Resource : type).newKey(id));
+		String id="";
+		String type="";
 
 		final Map<Object, Shape> fields=fields(shape);
 
-		object.forEach((name, json) -> {
-			if ( !name.equals(GCP.id) && !name.equals(GCP.type) ) {
+		final FullEntity.Builder<IncompleteKey> builder=FullEntity.newBuilder();
+
+		for (final Map.Entry<String, JsonValue> entry : object.entrySet()) {
+
+			final String name=resolver.apply(entry.getKey());
+			final JsonValue json=entry.getValue();
+
+			if ( name.equals(JSONFormat.id) ) {
+
+				id=Optional.of(json)
+						.filter(value -> value instanceof JsonString)
+						.map(value -> ((JsonString)value).getString())
+						.orElse("");
+
+			} else if ( name.equals(JSONFormat.type) ) {
+
+				type=Optional.of(json)
+						.filter(value -> value instanceof JsonString)
+						.map(value -> ((JsonString)value).getString())
+						.orElse("");
+
+			} else if ( !name.startsWith("@") ) {
 
 				final Shape nested=fields.getOrDefault(name, and());
-				final Value<?> value=value(json, nested);
+				final Value<?> value=value(resolver, json, nested);
 
 				if ( value.getType() != ValueType.NULL ) {
 					builder.set(name, value.toBuilder()
@@ -181,7 +198,14 @@ final class EntityDecoder {
 				}
 
 			}
-		});
+		}
+
+		if ( !id.isEmpty() ) {
+			builder.setKey(datastore.newKeyFactory()
+					.setKind(type.isEmpty() ? clazz(shape).map(Object::toString).orElse(GCP.Resource) : type)
+					.newKey(id)
+			);
+		}
 
 		return EntityValue.of(builder.build());
 	}

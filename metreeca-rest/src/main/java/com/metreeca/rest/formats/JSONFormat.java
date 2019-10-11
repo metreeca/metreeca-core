@@ -20,6 +20,10 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.*;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import javax.json.*;
@@ -42,9 +46,6 @@ import static java.util.Collections.singletonMap;
  */
 public final class JSONFormat implements Format<JsonObject> {
 
-	private static final JSONFormat Instance=new JSONFormat();
-
-
 	/**
 	 * The default MIME type for JSON message bodies.
 	 */
@@ -55,6 +56,8 @@ public final class JSONFormat implements Format<JsonObject> {
 	 */
 	public static final Pattern MIMEPattern=Pattern.compile("^application/(.*\\+)?json$");
 
+
+	private static final JSONFormat Instance=new JSONFormat();
 
 	private static final JsonWriterFactory JsonWriters=Json
 			.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true));
@@ -67,6 +70,87 @@ public final class JSONFormat implements Format<JsonObject> {
 	 */
 	public static JSONFormat json() {
 		return Instance;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	/**
+	 * The JSON-LD {@value} keyword.
+	 */
+	public static final String id="@id";
+
+	/**
+	 * The JSON-LD {@value} keyword.
+	 */
+	public static final String value="@value";
+
+	/**
+	 * The JSON-LD {@value} keyword.
+	 */
+	public static final String type="@type";
+
+	/**
+	 * The JSON-LD {@value} keyword.
+	 */
+	public static final String language="@language";
+
+
+	/**
+	 * Retrieves the default JSON-LD context factory.
+	 *
+	 * @return the default JSON-LD context factory, which returns an amepty context
+	 */
+	public static Supplier<JsonObject> context() {
+		return () -> JsonValue.EMPTY_JSON_OBJECT;
+	}
+
+
+	/**
+	 * Aliases JSON-LD property names.
+	 *
+	 * @param context the JSON-LD context property names are to be aliased against
+	 *
+	 * @return a function mapping from a property name to its alias as defined in {@code context}, defaulting to the
+	 * property name if no alias is found
+	 *
+	 * @throws NullPointerException if {@code context} is null
+	 */
+	public static Function<String, String> aliaser(final JsonObject context) {
+
+		if ( context == null ) {
+			throw new NullPointerException("null context");
+		}
+
+		final Map<String, String> aliases=new HashMap<>();
+
+		context.forEach((alias, name) -> {
+			if ( !alias.startsWith("@") && name instanceof JsonString ) {
+				aliases.put(((JsonString)name).getString(), alias);
+			}
+		});
+
+		return name -> aliases.getOrDefault(name, name);
+	}
+
+	/**
+	 * Resolves JSON-LD property names.
+	 *
+	 * @param context the JSON-LD context property names are to be resolved against
+	 *
+	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m defaulting
+	 * to the alias if no property name is found
+	 *
+	 * @throws NullPointerException if {@code context} is null
+	 */
+	public static Function<String, String> resolver(final JsonObject context) {
+
+		if ( context == null ) {
+			throw new NullPointerException("null context");
+		}
+
+		return alias -> context.getString(alias, alias);
 	}
 
 

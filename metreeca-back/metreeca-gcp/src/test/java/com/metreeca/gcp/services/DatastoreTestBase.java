@@ -19,6 +19,7 @@ package com.metreeca.gcp.services;
 
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Context;
+import com.metreeca.rest.formats.JSONFormat;
 
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.testing.LocalDatastoreHelper;
@@ -37,6 +38,7 @@ import javax.json.JsonValue;
 
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.formats.JSONFormat.context;
 
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableCollection;
@@ -64,6 +66,11 @@ public abstract class DatastoreTestBase {
 	protected void exec(final Runnable... tasks) {
 		new Context()
 				.set(datastore(), () -> new Datastore(helper.getOptions()))
+				.set(context(), () -> Json.createObjectBuilder()
+						.add("id", JSONFormat.id)
+						.add("type", JSONFormat.type)
+						.build()
+				)
 				.exec(tasks)
 				.clear();
 	}

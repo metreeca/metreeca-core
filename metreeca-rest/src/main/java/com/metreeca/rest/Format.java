@@ -72,11 +72,8 @@ public interface Format<V> {
 		return asList((Object[])path.split("\\."));
 	}
 
-
-	// @param value a shape-based parser mapping from a JSON value to an {@linkplain Engine engine-specific} value
-
 	/**
-	 * Parses a JSON {@linkplain Request#query(Format, Shape) query}  field value.
+	 * Parses a JSON {@linkplain Request#query(Format, Shape) query} field value.
 	 *
 	 * <p>The default implementation converts JSON values to their native Java representation, using lists of objects
 	 * for arrays and maps from strings to objects for objects.</p>

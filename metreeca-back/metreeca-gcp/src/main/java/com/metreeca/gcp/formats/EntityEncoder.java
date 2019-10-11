@@ -17,37 +17,47 @@
 
 package com.metreeca.gcp.formats;
 
-import com.metreeca.gcp.GCP;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.datastore.*;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.json.*;
 
+import static com.metreeca.rest.formats.JSONFormat.aliaser;
+import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.fields;
 
 
 final class EntityEncoder {
 
+
+	private final Function<String, String> aliaser=aliaser(service(context()));
+
+
 	JsonObject encode(final Entity entity, final Shape shape) {
-		return value(EntityValue.of(entity), shape);
+		return value(aliaser, EntityValue.of(entity), shape);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonValue value(final Value value, final Shape shape) {
+	private JsonValue value(final Function<String, String> aliaser, final Value<?> value, final Shape shape) {
 
 		switch ( value.getType() ) {
 
 			case NULL: return JsonValue.NULL;
+
+			case ENTITY: return value(aliaser, (EntityValue)value, shape);
+			case LIST: return value(aliaser, (ListValue)value, shape);
+
 			case STRING: return value((StringValue)value);
-			case ENTITY: return value((EntityValue)value, shape);
-			case LIST: return value((ListValue)value, shape);
 			case LONG: return value((LongValue)value);
 			case DOUBLE: return value((DoubleValue)value);
 			case BOOLEAN: return value((BooleanValue)value);
@@ -81,30 +91,30 @@ final class EntityEncoder {
 		return Json.createValue(Instant.ofEpochMilli(timestamp.get().toDate().getTime()).toString());
 	}
 
-	private JsonValue value(final ListValue list, final Shape shape) {
+	private JsonValue value(final Function<String, String> aliaser, final ListValue list, final Shape shape) {
 
 		final JsonArrayBuilder builder=Json.createArrayBuilder();
 
-		list.get().forEach(item -> builder.add(value(item, shape)));
+		list.get().forEach(item -> builder.add(value(aliaser, item, shape)));
 
 		return builder.build();
 	}
 
-	private JsonObject value(final EntityValue entity, final Shape shape) {
+	private JsonObject value(final Function<String, String> aliaser, final EntityValue entity, final Shape shape) {
 
 		final JsonObjectBuilder builder=Json.createObjectBuilder();
 
 		final IncompleteKey key=entity.get().getKey();
 
-		if ( key instanceof Key ) { builder.add(GCP.id, ((Key)key).getName()); }
-		// if ( key != null ) { builder.add(GCloud.type, key.getKind()); }
+		if ( key instanceof Key ) { builder.add(aliaser.apply(JSONFormat.id), ((Key)key).getName()); }
+		// if ( key != null ) { builder.add(aliaser.apply(GCP.type), key.getKind()); }
 
 		final Map<Object, Shape> fields=fields(shape);
 
 		entity.get().getProperties().forEach((name, value) -> {
 
 			if ( value.getType() != ValueType.NULL ) {
-				builder.add(name, value(value, fields.getOrDefault(name, and())));
+				builder.add(aliaser.apply(name), value(aliaser, value, fields.getOrDefault(name, and())));
 			}
 
 		});

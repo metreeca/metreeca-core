@@ -21,6 +21,7 @@ import com.metreeca.gcp.GCP;
 import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.datastore.*;
@@ -783,7 +784,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 									assertThat(properties)
 											.as("only core properties retained")
-											.isSubsetOf(GCP.id, GCP.type, GCP.label, GCP.comment);
+											.isSubsetOf(JSONFormat.id, JSONFormat.type, GCP.label, GCP.comment);
 								}))
 						)
 
@@ -820,7 +821,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 						.set(DatastoreEngine.stats, ListValue.of(FullEntity.newBuilder()
 
-								.set(GCP.type, Optional
+								.set(JSONFormat.type, Optional
 										.ofNullable(min.getType().toString())
 										.orElse(max.getType().toString())
 								)
@@ -930,7 +931,7 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 									assertThat(properties)
 											.as("only core properties retained")
-											.isSubsetOf(GCP.id, GCP.type, GCP.label, GCP.comment);
+											.isSubsetOf(JSONFormat.id, JSONFormat.type, GCP.label, GCP.comment);
 								}))
 						)
 
