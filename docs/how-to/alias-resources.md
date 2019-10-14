@@ -7,16 +7,14 @@ Sometimes you need to access resources using alternate identifiers or to set up 
 The following samples present typical setups built on the same data used in the [tutorials](../tutorials/publishing-ldp-apis) and a custom name-based product resolver.
 
 ```java
-import static com.metreeca.tree.things.Values.literal;
-import static com.metreeca._sparql.wrappers.Connector.connect;
-
-private Optional<IRI> byname(final RepositoryConnection connection, final String name) {
+private Optional<String> byname(final RepositoryConnection connection, final String name) {
   return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))
-      .map(Statement::getSubject)
-      .filter(resource -> connection.hasStatement(resource, RDF.TYPE, BIRT.Product, true))
-      .map(resource -> (IRI)resource)
-      .findFirst();
+    .map(Statement::getSubject)
+    .filter(resource -> connection.hasStatement(resource, RDF.TYPE, BIRT.Product, true))
+    .map(Value::stringValue)
+    .findFirst();
 }
+
 ```
 
 # Alternate Identifiers
@@ -93,10 +91,10 @@ GET http://localhost:8080/products/
 200 OK
 
 {
-  "_this": "/products/",
+  "@id": "/products/",
   "contains": [
     {
-      "_this": "/products/S10_1678",
+      "@d": "/products/S10_1678",
       "type": "/terms#Product",
       "label": "1969 Harley Davidson Ultimate Chopper",
       
