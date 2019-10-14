@@ -11,14 +11,14 @@ Codecs for this serialization make heavy use of reasoning over linked data shape
 
 # RDF4J Codecs
 
-The [shapes library](../javadocs/com/metreeca/form/package-summary.html) automatically [registers](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/common/lang/service/ServiceRegistry.html)  idiomatic JSON codecs with the RDF4J framework, using the `application/json` MIME type and the [JSON](../javadocs/com/metreeca/form/codecs/JSONCodec.html) RDF4J [RDF format](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFFormat.html).
+The [shapes library](../javadocs/com/metreeca/tree/package-summary.html) automatically [registers](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/common/lang/service/ServiceRegistry.html)  idiomatic JSON codecs with the RDF4J framework, using the `application/json` MIME type and the [JSON](../javadocs/com/metreeca/tree/codecs/JSONCodec.html) RDF4J [RDF format](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFFormat.html).
 
 Codec behaviour is controlled through the following  RDF4J [RioSetting](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RioSetting.html) [parser](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFParser.html#set-org.eclipse.rdf4j.rio.RioSetting-T-)/[writer](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFWriter.html#set-org.eclipse.rdf4j.rio.RioSetting-T-) configuration properties.
 
 | setting                                  | type                                     | value                                    | default                             |
 | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------- |
-| [Shape](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Shape) | [Shape](../javadocs/com/metreeca/form/Shape.html) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
-| [Focus](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Focus) | [Resource](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Resource.html) | the entry point for the de/serializaton process | `null` (will be inferred from data) |
+| [Shape](../javadocs/com/metreeca/tree/codecs/JSONCodec.html#Shape) | [Shape](../javadocs/com/metreeca/tree/Shape.html) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
+| [Focus](../javadocs/com/metreeca/tree/codecs/JSONCodec.html#Focus) | [Resource](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Resource.html) | the entry point for the de/serializaton process | `null` (will be inferred from data) |
 
 # JSON Serialization
 
@@ -107,11 +107,11 @@ If the term may be proved to be  a back-reference to an enclosing resource, the 
 
 ### Parsing
 
-When parsing, relative `<iri>` references are resolved against the base URI provided to the [parser](../javadocs/com/metreeca/form/codecs/JSONParser.html), which for HTTP REST operations equals the IRI of the request [item](../javadocs/com/metreeca/rest/Request.html#item--).
+When parsing, relative `<iri>` references are resolved against the base URI provided to the [parser](../javadocs/com/metreeca/tree/codecs/JSONParser.html), which for HTTP REST operations equals the IRI of the request [item](../javadocs/com/metreeca/rest/Request.html#item--).
 
 ### Writing
 
-When writing, local `<iri>` references are relativized as root-relative IRIs against the base URI provided to the [writer](../javadocs/com/metreeca/form/codecs/JSONWRiter.html), which for HTTP REST operations equals the root IRI of the response [item](../javadocs/com/metreeca/rest/Response.html#item--).
+When writing, local `<iri>` references are relativized as root-relative IRIs against the base URI provided to the [writer](../javadocs/com/metreeca/tree/codecs/JSONWRiter.html), which for HTTP REST operations equals the root IRI of the response [item](../javadocs/com/metreeca/rest/Response.html#item--).
 
 ## Term Properties
 
