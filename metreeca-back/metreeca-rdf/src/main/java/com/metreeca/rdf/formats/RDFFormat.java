@@ -37,14 +37,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
+import javax.json.*;
 
 import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
@@ -89,6 +89,15 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 */
 	public static final RioSetting<Shape> RioShape=new RioSettingImpl<>(
 			RDFFormat.class.getName()+"#Shape", "Resource shape", null
+	);
+
+	/**
+	 * Sets the expected JSON-LD context for codecs.
+	 *
+	 * <p>Defaults to an empty object.</p>
+	 */
+	public static final RioSetting<JsonObject> RioContext=new RioSettingImpl<>(
+			RDFFormat.class.getName()+"#Context", "JSON-LD context", JsonValue.EMPTY_JSON_OBJECT
 	);
 
 
@@ -144,6 +153,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	private final InputFormat input=input();
 	private final OutputFormat output=output();
 
+	private final JsonObject context=service(context());
+
 
 	private RDFFormat() {}
 
@@ -151,11 +162,11 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public List<IRI> path(final String base, final Shape shape, final String path) {
-		return new RDFJSONDecoder(base) {}.path(path, shape); // !!! pass base as argument and factor decoder instance
+		return new RDFJSONDecoder(base, context) {}.path(path, shape); // !!! pass base as argument and factor decoder instance
 	}
 
 	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
-		return new RDFJSONDecoder(base) {}.value(value, shape, null).getKey(); // !!! pass base as argument and factor decoder instance
+		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey(); // !!! pass base as argument and factor decoder instance
 	}
 
 
@@ -181,6 +192,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 					parser.set(RioShape, shape);
 					parser.set(RioFocus, focus);
+					parser.set(RioContext, context);
 
 					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
 					parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
@@ -298,6 +310,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 						writer.set(RioShape, shape);
 						writer.set(RioFocus, focus);
+						writer.set(RioContext, context);
 
 						Rio.write(external.equals(internal) ? value : rewrite(internal, external, value), writer);
 

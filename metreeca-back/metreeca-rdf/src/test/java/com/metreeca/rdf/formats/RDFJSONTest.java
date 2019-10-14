@@ -172,11 +172,11 @@ final class RDFJSONTest {
 
 	@Test void testIgnoreReservedAliases() {
 
-		assertThat(aliases(field(iri(ValuesTest.Base, "_this"))))
+		assertThat(aliases(field(iri(ValuesTest.Base, "@id"))))
 				.as("ignore reserved system-guessed aliases")
 				.isEmpty();
 
-		assertThat(aliases(field(RDF.VALUE, alias("_this"))))
+		assertThat(aliases(field(RDF.VALUE, alias("@id"))))
 				.as("ignore reserved user-defined aliases")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 

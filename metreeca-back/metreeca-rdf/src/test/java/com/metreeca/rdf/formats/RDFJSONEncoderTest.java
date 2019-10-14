@@ -32,6 +32,9 @@ import javax.json.JsonValue;
 
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
+import static com.metreeca.rdf.formats.RDFJSONTest.entry;
+import static com.metreeca.rdf.formats.RDFJSONTest.map;
+import static com.metreeca.rdf.formats.RDFJSONTest.object;
 import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
@@ -48,14 +51,14 @@ final class RDFJSONEncoderTest {
 
 
 	private RDFJSONEncoder encoder() {
-		return new RDFJSONEncoder(ValuesTest.Base) {};
+		return new RDFJSONEncoder(ValuesTest.Base, RDFJSONCodecTest.Context) {};
 	}
 
 
 	private JsonValue expected(final Object value) {
-		return RDFJSONTest.object(RDFJSONTest.map(
-				RDFJSONTest.entry("_this", ((Value)focus).toString()),
-				RDFJSONTest.entry("value", asList(value))
+		return object(map(
+				entry("id", ((Value)focus).toString()),
+				entry("value", asList(value))
 		));
 	}
 
@@ -79,7 +82,7 @@ final class RDFJSONEncoderTest {
 
 		@Test void testBNode() {
 			assertThat(actual(bnode()))
-					.isEqualTo(expected(RDFJSONTest.map()));
+					.isEqualTo(expected(map()));
 		}
 
 		@Test void testBNodeWithBackLink() {
@@ -92,11 +95,11 @@ final class RDFJSONEncoderTest {
 					field(RDF.VALUE, and(required(), field(RDF.VALUE, required()))),
 					x
 			))
-					.isEqualTo(RDFJSONTest.object(RDFJSONTest.map(
-							RDFJSONTest.entry("_this", "_:x"),
-							RDFJSONTest.entry("value", RDFJSONTest.map(
-									RDFJSONTest.entry("value", RDFJSONTest.map(
-											RDFJSONTest.entry("_this","_:x")
+					.isEqualTo(object(map(
+							entry("id", "_:x"),
+							entry("value", map(
+									entry("value", map(
+											entry("id","_:x")
 									))
 							))
 					)));
@@ -112,10 +115,10 @@ final class RDFJSONEncoderTest {
 					field(RDF.VALUE, and(required(), field(RDF.VALUE, and(required(), datatype(ResourceType))))),
 					x
 			))
-					.isEqualTo(RDFJSONTest.object(RDFJSONTest.map(
-							RDFJSONTest.entry("_this", "_:x"),
-							RDFJSONTest.entry("value", RDFJSONTest.map(
-									RDFJSONTest.entry("value", "_:x")
+					.isEqualTo(object(map(
+							entry("id", "_:x"),
+							entry("value", map(
+									entry("value", "_:x")
 							))
 					)));
 		}
@@ -123,7 +126,7 @@ final class RDFJSONEncoderTest {
 
 		@Test void testIRI() {
 			assertThat(actual(item("id")))
-					.isEqualTo(expected(RDFJSONTest.map(RDFJSONTest.entry("_this", "/id"))));
+					.isEqualTo(expected(map(entry("id", "/id"))));
 		}
 
 		@Test void testProvedIRI() {
@@ -140,17 +143,17 @@ final class RDFJSONEncoderTest {
 
 		@Test void testTypedString() {
 			assertThat(actual(literal("2019-04-03", XMLSchema.DATE)))
-					.isEqualTo(expected(RDFJSONTest.map(
-							RDFJSONTest.entry("_this", "2019-04-03"),
-							RDFJSONTest.entry("_type", XMLSchema.DATE.stringValue())
+					.isEqualTo(expected(map(
+							entry("value", "2019-04-03"),
+							entry("type", XMLSchema.DATE.stringValue())
 					)));
 		}
 
 		@Test void testTaggedString() {
 			assertThat(actual(literal("string", "en")))
-					.isEqualTo(expected(RDFJSONTest.map(
-							RDFJSONTest.entry("_this", "string"),
-							RDFJSONTest.entry("_type", "@en")
+					.isEqualTo(expected(map(
+							entry("value", "string"),
+							entry("language", "en")
 					)));
 		}
 
@@ -171,9 +174,9 @@ final class RDFJSONEncoderTest {
 
 		@Test void testDouble() {
 			assertThat(actual(literal(123.0)))
-					.isEqualTo(expected(RDFJSONTest.map(
-							RDFJSONTest.entry("_this", "123.0"),
-							RDFJSONTest.entry("_type", XMLSchema.DOUBLE.stringValue())
+					.isEqualTo(expected(map(
+							entry("value", "123.0"),
+							entry("type", XMLSchema.DOUBLE.stringValue())
 					)));
 		}
 

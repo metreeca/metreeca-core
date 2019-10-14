@@ -63,8 +63,7 @@ final class RDFJSONDecoderTest {
 	}
 
 	private Map<Value, Collection<Statement>> values(final JsonValue value, final Shape shape) {
-
-		return new RDFJSONDecoder(ValuesTest.Base) {}
+		return new RDFJSONDecoder(ValuesTest.Base, RDFJSONCodecTest.Context) {}
 				.values(value, shape, null)
 				.entrySet()
 				.stream()
@@ -80,7 +79,8 @@ final class RDFJSONDecoderTest {
 
 	private Map.Entry<Value, Collection<Statement>> value(final JsonValue value, final Shape shape) {
 
-		final Map.Entry<Value, Stream<Statement>> entry=new RDFJSONDecoder(ValuesTest.Base) {}.value(value, shape, null);
+		final Map.Entry<Value, Stream<Statement>> entry=new RDFJSONDecoder(ValuesTest.Base, RDFJSONCodecTest.Context) {}
+				.value(value, shape, null);
 
 		return entry(entry.getKey(), entry.getValue().collect(toList()));
 	}
@@ -117,26 +117,12 @@ final class RDFJSONDecoderTest {
 
 		@Test void testResource() {
 
-			assertThat(value(createObjectBuilder().add("_this", "_:id").build()))
+			assertThat(value(createObjectBuilder().add("id", "_:id").build()))
 					.isEqualTo(value(bnode("id")));
 
-			assertThat(value(createObjectBuilder().add("_this", "id").build()))
+			assertThat(value(createObjectBuilder().add("id", "id").build()))
 					.isEqualTo(value(item("id")));
 
-		}
-
-		@Test void test() {
-
-			final IRI id=iri(ValuesTest.Base, "id");
-
-			final Function<String, JsonObject> object=path -> createObjectBuilder()
-					.add("_this", "id")
-					.add(String.format(path, RDF.VALUE), RDF.NIL.stringValue())
-					.build();
-
-			assertThat(value(object.apply("^<%s>"), field(inverse(RDF.VALUE), datatype(IRIType))))
-					.as("bracketed inverse field")
-					.isEqualTo(value(id, singletonList(statement(RDF.NIL, RDF.VALUE, id))));
 		}
 
 		@Test void testIRI() {
@@ -144,37 +130,37 @@ final class RDFJSONDecoderTest {
 			final IRI id=iri(ValuesTest.Base, "id");
 
 			final Function<String, JsonObject> object=path -> createObjectBuilder()
-					.add("_this", "id")
-					.add(String.format(path, RDF.VALUE), RDF.NIL.stringValue())
+					.add("id", "id")
+					.add(String.format(path, RDF.FIRST), RDF.NIL.stringValue())
 					.build();
 
-			assertThat(value(object.apply("<%s>"), field(RDF.VALUE, datatype(IRIType))))
+			assertThat(value(object.apply("<%s>"), field(RDF.FIRST, datatype(IRIType))))
 					.as("bracketed direct field")
-					.isEqualTo(value(id, singletonList(statement(id, RDF.VALUE, RDF.NIL))));
+					.isEqualTo(value(id, singletonList(statement(id, RDF.FIRST, RDF.NIL))));
 
-			assertThat(value(object.apply("^<%s>"), field(inverse(RDF.VALUE), datatype(IRIType))))
+			assertThat(value(object.apply("^<%s>"), field(inverse(RDF.FIRST), datatype(IRIType))))
 					.as("bracketed inverse field")
-					.isEqualTo(value(id, singletonList(statement(RDF.NIL, RDF.VALUE, id))));
+					.isEqualTo(value(id, singletonList(statement(RDF.NIL, RDF.FIRST, id))));
 
-			assertThat(value(object.apply("%s"), field(RDF.VALUE, datatype(IRIType))))
+			assertThat(value(object.apply("%s"), field(RDF.FIRST, datatype(IRIType))))
 					.as("naked direct field")
-					.isEqualTo(value(id, singletonList(statement(id, RDF.VALUE, RDF.NIL))));
+					.isEqualTo(value(id, singletonList(statement(id, RDF.FIRST, RDF.NIL))));
 
-			assertThat(value(object.apply("^%s"), field(inverse(RDF.VALUE), datatype(IRIType))))
+			assertThat(value(object.apply("^%s"), field(inverse(RDF.FIRST), datatype(IRIType))))
 					.as("naked inverse field")
-					.isEqualTo(value(id, singletonList(statement(RDF.NIL, RDF.VALUE, id))));
+					.isEqualTo(value(id, singletonList(statement(RDF.NIL, RDF.FIRST, id))));
 
-			assertThat(value(object.apply("value"), field(RDF.VALUE, datatype(IRIType))))
+			assertThat(value(object.apply("first"), field(RDF.FIRST, datatype(IRIType))))
 					.as("aliased field")
-					.isEqualTo(value(id, singletonList(statement(id, RDF.VALUE, RDF.NIL))));
+					.isEqualTo(value(id, singletonList(statement(id, RDF.FIRST, RDF.NIL))));
 
 		}
 
 
 		@Test void testTypedLiteral() {
 			assertThat(value(createObjectBuilder()
-					.add("_this", "2019-04-02")
-					.add("_type", XMLSchema.DATE.stringValue())
+					.add("value", "2019-04-02")
+					.add("type", XMLSchema.DATE.stringValue())
 					.build()
 			))
 					.isEqualTo(value(literal("2019-04-02", XMLSchema.DATE)));
@@ -182,8 +168,8 @@ final class RDFJSONDecoderTest {
 
 		@Test void testTaggedLiteral() {
 			assertThat(value(createObjectBuilder()
-					.add("_this", "string")
-					.add("_type", "@en")
+					.add("value", "string")
+					.add("type", "@en")
 					.build()
 			))
 					.isEqualTo(value(literal("string", "en")));
@@ -194,7 +180,7 @@ final class RDFJSONDecoderTest {
 	@Nested final class Strings {
 
 		@Test void testString() {
-			assertThat(value(createValue("_this"))).isEqualTo(value(literal("_this")));
+			assertThat(value(createValue("id"))).isEqualTo(value(literal("id")));
 		}
 
 		@Test void testTypedString() {

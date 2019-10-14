@@ -57,6 +57,11 @@ final class RDFFormatTest {
 	private static final String internal="app://local/";
 
 
+	private void exec(final Runnable... tasks) {
+		new Context().exec(tasks).clear();
+	}
+
+
 	@Nested final class Path {
 
 		private final Shape shape=and(
@@ -64,51 +69,54 @@ final class RDFFormatTest {
 				field(inverse(RDF.FIRST), field(RDF.REST))
 		);
 
+
 		@Test void testParsePaths() {
+			exec(() -> {
 
-			assertThat(rdf().path("app:/", shape, ""))
-					.as("empty")
-					.isEmpty();
+				assertThat(rdf().path("app:/", shape, ""))
+						.as("empty")
+						.isEmpty();
 
-			assertThat(rdf().path("app:/", shape, "<"+RDF.FIRST+">"))
-					.as("direct iri")
-					.containsExactly(RDF.FIRST);
+				assertThat(rdf().path("app:/", shape, "<"+RDF.FIRST+">"))
+						.as("direct iri")
+						.containsExactly(RDF.FIRST);
 
-			assertThat(rdf().path("app:/", shape, "^<"+RDF.FIRST+">"))
-					.as("inverse iri")
-					.containsExactly(inverse(RDF.FIRST));
+				assertThat(rdf().path("app:/", shape, "^<"+RDF.FIRST+">"))
+						.as("inverse iri")
+						.containsExactly(inverse(RDF.FIRST));
 
-			assertThat(rdf().path("app:/", shape, "<"+RDF.FIRST+">/<"+RDF.REST+">"))
-					.as("iri slash path")
-					.containsExactly(RDF.FIRST, RDF.REST);
+				assertThat(rdf().path("app:/", shape, "<"+RDF.FIRST+">/<"+RDF.REST+">"))
+						.as("iri slash path")
+						.containsExactly(RDF.FIRST, RDF.REST);
 
-			assertThat(rdf().path("app:/", shape, "first"))
-					.as("direct alias")
-					.containsExactly(RDF.FIRST);
+				assertThat(rdf().path("app:/", shape, "first"))
+						.as("direct alias")
+						.containsExactly(RDF.FIRST);
 
-			assertThat(rdf().path("app:/", shape, "firstOf"))
-					.as("inverse alias")
-					.containsExactly(inverse(RDF.FIRST));
+				assertThat(rdf().path("app:/", shape, "firstOf"))
+						.as("inverse alias")
+						.containsExactly(inverse(RDF.FIRST));
 
-			assertThat(rdf().path("app:/", shape, "first/rest"))
-					.as("alias slash path")
-					.containsExactly(RDF.FIRST, RDF.REST);
+				assertThat(rdf().path("app:/", shape, "first/rest"))
+						.as("alias slash path")
+						.containsExactly(RDF.FIRST, RDF.REST);
 
-			assertThat(rdf().path("app:/", shape, "firstOf.rest"))
-					.as("alias dot path")
-					.containsExactly(inverse(RDF.FIRST), RDF.REST);
+				assertThat(rdf().path("app:/", shape, "firstOf.rest"))
+						.as("alias dot path")
+						.containsExactly(inverse(RDF.FIRST), RDF.REST);
 
+			});
 		}
 
 
 		@Test void testRejectUnknownPathSteps() {
-			assertThatExceptionOfType(JsonException.class)
-					.isThrownBy(() -> rdf().path("app:/", shape, "first/unknown"));
+			exec(() -> assertThatExceptionOfType(JsonException.class)
+					.isThrownBy(() -> rdf().path("app:/", shape, "first/unknown")));
 		}
 
 		@Test void testRejectMalformedPaths() {
-			assertThatExceptionOfType(JsonException.class)
-					.isThrownBy(() -> rdf().path("app:/", shape, "---"));
+			exec(() -> assertThatExceptionOfType(JsonException.class)
+					.isThrownBy(() -> rdf().path("app:/", shape, "---")));
 		}
 
 	}
@@ -116,7 +124,7 @@ final class RDFFormatTest {
 	@Nested final class Getter {
 
 		@Test void testHandleMissingInput() {
-			new Request()
+			exec(() -> new Request()
 
 					.body(rdf())
 
@@ -124,22 +132,24 @@ final class RDFFormatTest {
 
 					.error(error -> assertThat(new Response(new Request()).map(error))
 							.hasStatus(Response.UnsupportedMediaType)
-					);
+					)
+			);
 		}
 
 		@Test void testHandleEmptyInput() {
-			new Request()
+			exec(() -> new Request()
 
 					.body(input(), Codecs::input)
 
 					.body(rdf())
 
 					.value(value -> assertThat(value).isEmpty())
-					.error(error -> fail("unexpected error {"+error+"}"));
+					.error(error -> fail("unexpected error {"+error+"}"))
+			);
 		}
 
 		@Test void testRewriteRequestBody() {
-			new Request()
+			exec(() -> new Request()
 
 					.base(internal)
 					.path("/")
@@ -154,7 +164,8 @@ final class RDFFormatTest {
 							.isIsomorphicTo(decode("<app://local/container> ldp:contains <app://local/resource> ."))
 					)
 
-					.error(error -> fail("unexpected error {"+error+"}"));
+					.error(error -> fail("unexpected error {"+error+"}"))
+			);
 		}
 
 	}
@@ -162,7 +173,7 @@ final class RDFFormatTest {
 	@Nested final class Setter {
 
 		@Test void testConfigureWriterBaseIRI() {
-			new Request()
+			exec(() -> new Request()
 
 					.base(ValuesTest.Base+"context/")
 					.path("/container/")
@@ -177,12 +188,13 @@ final class RDFFormatTest {
 							.hasBody(text(), text -> Assertions.assertThat(text)
 									.contains("@base <"+ValuesTest.Base+"context/container/"+">")
 							)
-					);
+					)
+			);
 		}
 
 
 		@Test void testRewriteResponseBody() {
-			new Response(new Request().base(internal))
+			exec(() -> new Response(new Request().base(internal))
 
 					.header(RDFFormat.ExternalBase, external)
 					.body(rdf(), decode("<app://local/container> ldp:contains <app://local/resource> ."))
@@ -206,7 +218,8 @@ final class RDFFormatTest {
 
 					})
 
-					.error(error -> fail("unexpected error {"+error+"}"));
+					.error(error -> fail("unexpected error {"+error+"}"))
+			);
 		}
 
 	}

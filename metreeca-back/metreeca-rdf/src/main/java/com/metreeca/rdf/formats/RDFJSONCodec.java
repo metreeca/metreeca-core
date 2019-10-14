@@ -41,14 +41,6 @@ import static java.util.stream.Collectors.toMap;
 
 final class RDFJSONCodec {
 
-	static final String This="_this";
-	static final String Type="_type";
-
-	static final Collection<String> Reserved=asList(This, Type);
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	static Shape driver(final Shape shape) { // !!! caching
 		return shape
 
@@ -68,8 +60,8 @@ final class RDFJSONCodec {
 
 			final Map<IRI, String> aliases=new LinkedHashMap<>();
 
-			aliases.putAll(shape.map(new SystemAliasesProbe(Reserved)));
-			aliases.putAll(shape.map(new UserAliasesProbe(Reserved)));
+			aliases.putAll(shape.map(new SystemAliasesProbe()));
+			aliases.putAll(shape.map(new UserAliasesProbe()));
 
 			return aliases;
 		}
@@ -131,14 +123,6 @@ final class RDFJSONCodec {
 		private static final Pattern NamedIRIPattern=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
 
 
-		private final Collection<String> reserved;
-
-
-		private SystemAliasesProbe(final Collection<String> reserved) {
-			this.reserved=reserved;
-		}
-
-
 		@Override public Map<IRI, String> probe(final Field field) {
 
 			final IRI name=iri(field.getName());
@@ -147,7 +131,7 @@ final class RDFJSONCodec {
 					.of(NamedIRIPattern.matcher(name.stringValue()))
 					.filter(Matcher::find)
 					.map(matcher -> matcher.group("name"))
-					.filter(alias -> !reserved.contains(alias))
+					.filter(alias -> !alias.startsWith("@"))
 					.map(alias -> singletonMap(name, direct(name) ? alias : alias+"Of"))
 					.orElse(emptyMap());
 		}
@@ -156,21 +140,13 @@ final class RDFJSONCodec {
 
 	private static final class UserAliasesProbe extends AliasesProbe {
 
-		private final Collection<String> reserved;
-
-
-		private UserAliasesProbe(final Collection<String> reserved) {
-			this.reserved=reserved;
-		}
-
-
 		@Override public Map<IRI, String> probe(final Field field) {
 
 			final IRI name=iri(field.getName());
 			final Shape shape=field.getShape();
 
 			return alias(shape)
-					.filter(alias -> !reserved.contains(alias))
+					.filter(alias -> !alias.startsWith("@"))
 					.map(alias -> singletonMap(name, alias))
 					.orElse(emptyMap());
 		}
