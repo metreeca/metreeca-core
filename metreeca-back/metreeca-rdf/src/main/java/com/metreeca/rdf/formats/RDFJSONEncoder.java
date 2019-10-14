@@ -18,6 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
@@ -27,6 +28,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
@@ -34,7 +36,8 @@ import javax.json.*;
 
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
-import static com.metreeca.rdf.formats.RDFJSONCodec.*;
+import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
+import static com.metreeca.rest.formats.JSONFormat.aliaser;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
@@ -45,10 +48,12 @@ import static java.util.stream.Collectors.toCollection;
 abstract class RDFJSONEncoder {
 
 	private final String base;
+	private final Function<String, String> aliaser;
 
 
-	RDFJSONEncoder(final CharSequence base) {
+	RDFJSONEncoder(final CharSequence base, final JsonObject context) {
 		this.base=root(base);
+		aliaser=aliaser(context);
 	}
 
 
@@ -98,19 +103,21 @@ abstract class RDFJSONEncoder {
 		final boolean inlineable=IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype);
 
 
+		final String id=id(resource);
+
 		if ( trail.test(resource) ) { // a back-reference to an enclosing copy of self -> omit fields
 
 			return inlineable
-					? Json.createValue(id(resource))
-					: Json.createObjectBuilder().add(This, id(resource)).build();
+					? Json.createValue(id)
+					: Json.createObjectBuilder().add(aliaser.apply(JSONFormat.id), id).build();
 
 		} else if ( inlineable && resource instanceof IRI && fields.isEmpty() ) { // inline proved leaf IRI
 
-			return Json.createValue(id(resource));
+			return Json.createValue(id);
 
 		} else {
 
-			final JsonObjectBuilder object=Json.createObjectBuilder().add(This, id(resource));
+			final JsonObjectBuilder object=Json.createObjectBuilder().add(aliaser.apply(JSONFormat.id), id);
 
 			final Collection<Resource> references=new ArrayList<>();
 
@@ -161,7 +168,7 @@ abstract class RDFJSONEncoder {
 			}
 
 			if ( resource instanceof BNode && references.isEmpty() ) {
-				object.remove(This); // drop id field for blank nodes without back-references
+				object.remove(aliaser.apply(JSONFormat.id)); // drop id field for blank nodes without back-references
 			}
 
 			return object.build();
@@ -209,15 +216,15 @@ abstract class RDFJSONEncoder {
 
 	private JsonValue json(final Value literal, final String lang) {
 		return Json.createObjectBuilder()
-				.add(This, literal.stringValue())
-				.add(Type, "@"+lang)
+				.add(aliaser.apply(JSONFormat.value), literal.stringValue())
+				.add(aliaser.apply(JSONFormat.language), lang)
 				.build();
 	}
 
 	private JsonValue json(final Value literal, final Value datatype) {
 		return Json.createObjectBuilder()
-				.add(This, literal.stringValue())
-				.add(Type, datatype.stringValue())
+				.add(aliaser.apply(JSONFormat.value), literal.stringValue())
+				.add(aliaser.apply(JSONFormat.type), datatype.stringValue())
 				.build();
 	}
 

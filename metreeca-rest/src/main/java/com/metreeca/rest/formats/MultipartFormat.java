@@ -46,7 +46,7 @@ import static java.util.stream.Collectors.toList;
  * @see <a href="https://tools.ietf.org/html/rfc2046#section-5.1">RFC 2046 - Multipurpose Internet Mail Extensions
  * (MIME) Part Two: Media Types - § 5.1.  Multipart Media Type</a>
  */
-public final class MultipartFormat implements Format<Map<String, Message<?>>> {
+public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 	private static final byte[] Dashes="--".getBytes(UTF_8);
 	private static final byte[] CRLF="\r\n".getBytes(UTF_8);
@@ -70,8 +70,6 @@ public final class MultipartFormat implements Format<Map<String, Message<?>>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final MultipartFormat Instance=new MultipartFormat(0, 0); // write-only instance
-
 
 	/**
 	 * Retrieves a write-only multipart body format.
@@ -80,7 +78,7 @@ public final class MultipartFormat implements Format<Map<String, Message<?>>> {
 	 * response bodies
 	 */
 	public static MultipartFormat multipart() {
-		return Instance;
+		return new MultipartFormat(0, 0);
 	}
 
 	/**
@@ -119,6 +117,9 @@ public final class MultipartFormat implements Format<Map<String, Message<?>>> {
 	private final int part;
 	private final int body;
 
+	private final InputFormat input=input();
+	private final OutputFormat output=output();
+
 
 	private MultipartFormat(final int part, final int body) {
 		this.part=part;
@@ -133,7 +134,7 @@ public final class MultipartFormat implements Format<Map<String, Message<?>>> {
 
 				.filter(type -> type.startsWith("multipart/"))
 
-				.map(type -> message.body(input()).process(source -> {
+				.map(type -> message.body(input).process(source -> {
 
 					final String boundary=message
 							.header("Content-Type")
@@ -178,7 +179,7 @@ public final class MultipartFormat implements Format<Map<String, Message<?>>> {
 											mapping(Map.Entry::getValue, toList())
 									)))
 
-									.body(input(), () -> content)
+									.body(input, () -> content)
 
 							);
 
@@ -231,7 +232,7 @@ public final class MultipartFormat implements Format<Map<String, Message<?>>> {
 
 		}
 
-		return message.body(output(), target -> {
+		return message.body(output, target -> {
 			try (final OutputStream out=target.get()) {
 
 				for (final Message<?> part : value.values()) {
@@ -254,7 +255,7 @@ public final class MultipartFormat implements Format<Map<String, Message<?>>> {
 
 					out.write(CRLF);
 
-					part.body(output()).value().ifPresent(output -> output.accept(() -> out)); // !!! handle errors
+					part.body(output).value().ifPresent(output -> output.accept(() -> out)); // !!! handle errors
 
 					out.write(CRLF);
 				}
@@ -268,17 +269,6 @@ public final class MultipartFormat implements Format<Map<String, Message<?>>> {
 				throw new UncheckedIOException(e);
 			}
 		});
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public boolean equals(final Object object) {
-		return object instanceof MultipartFormat;
-	}
-
-	@Override public int hashCode() {
-		return MultipartFormat.class.hashCode();
 	}
 
 }

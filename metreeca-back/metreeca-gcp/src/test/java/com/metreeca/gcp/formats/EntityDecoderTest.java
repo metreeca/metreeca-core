@@ -49,7 +49,7 @@ final class EntityDecoderTest extends DatastoreTestBase {
 	}
 
 	private FullEntity<?> decode(final String json, final Shape shape) {
-		return new EntityDecoder(service(datastore())).decode(
+		return new EntityDecoder().decode(
 				Json.createReader(new StringReader(json.replace('\'', '"'))).readObject(), shape
 		);
 	}
@@ -131,9 +131,9 @@ final class EntityDecoderTest extends DatastoreTestBase {
 
 
 	@Test void testDecodeObjectFieldsEmpty() {
-		exec(() -> assertThat(decode("{ 'field': {} }").getEntity("field"))
+		exec(() -> assertThat(decode("{ 'field': {} }"))
 
-				.satisfies(entity -> assertThat(entity.hasKey()).isFalse())
+				.satisfies(entity -> assertThat(entity.getEntity("field").hasKey()).isFalse())
 		);
 	}
 
@@ -147,9 +147,11 @@ final class EntityDecoderTest extends DatastoreTestBase {
 	}
 
 	@Test void testDecodeObjectFieldsWithExpectedType() {
-		exec(() -> assertThat(decode("{ 'field': { 'id': '/path' } }", field("field", clazz("Class"))).getEntity("field"))
+		exec(() -> assertThat(decode("{ 'field': { 'id': '/path' } }", field("field", clazz("Class"))))
 
-				.satisfies(entity -> assertThat(entity.getKey()).isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path")))
+				.satisfies(entity -> assertThat(entity.getEntity("field").getKey())
+						.isEqualTo(service(datastore()).newKeyFactory().setKind("Class").newKey("/path"))
+				)
 		);
 	}
 

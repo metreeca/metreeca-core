@@ -31,11 +31,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
 
-import javax.json.Json;
-import javax.json.JsonException;
-import javax.json.JsonReaderFactory;
+import javax.json.*;
 import javax.json.stream.JsonParsingException;
 
+import static com.metreeca.rdf.formats.RDFFormat.*;
 import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
 import static com.metreeca.tree.Shape.pass;
 
@@ -54,15 +53,15 @@ public final class RDFJSONParser extends AbstractRDFParser {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public RDFFormat getRDFFormat() {
-		return com.metreeca.rdf.formats.RDFFormat.RDFJSONFormat;
+		return RDFJSONFormat;
 	}
 
 	@Override public Collection<RioSetting<?>> getSupportedSettings() {
 
 		final Collection<RioSetting<?>> settings=super.getSupportedSettings();
 
-		settings.add(com.metreeca.rdf.formats.RDFFormat.RioFocus);
-		settings.add(com.metreeca.rdf.formats.RDFFormat.RioShape);
+		settings.add(RioFocus);
+		settings.add(RioShape);
 
 		return settings;
 	}
@@ -93,8 +92,11 @@ public final class RDFJSONParser extends AbstractRDFParser {
 			throw new NullPointerException("null base URI");
 		}
 
-		final Resource focus=getParserConfig().get(com.metreeca.rdf.formats.RDFFormat.RioFocus);
-		final Shape shape=getParserConfig().get(com.metreeca.rdf.formats.RDFFormat.RioShape);
+		final ParserConfig config=getParserConfig();
+
+		final Resource focus=config.get(RioFocus);
+		final Shape shape=config.get(RioShape);
+		final JsonObject context=config.get(RioContext);
 
 		final Shape driver=shape == null || pass(shape)? null : driver(shape);
 
@@ -104,7 +106,7 @@ public final class RDFJSONParser extends AbstractRDFParser {
 
 			try {
 
-				new Decoder(baseURI)
+				new Decoder(baseURI, context)
 
 						.values(readers.createReader(reader).readValue(), driver, focus)
 						.values()
@@ -134,8 +136,8 @@ public final class RDFJSONParser extends AbstractRDFParser {
 
 	private final class Decoder extends RDFJSONDecoder {
 
-		private Decoder(final String baseURI) {
-			super(baseURI);
+		private Decoder(final String baseURI, final JsonObject context) {
+			super(baseURI, context);
 		}
 
 		@Override protected Resource bnode() {

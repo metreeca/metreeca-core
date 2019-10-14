@@ -29,24 +29,23 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 /**
  * Binary body format.
  */
-public final class DataFormat implements Format<byte[]> {
-
-	private static final byte[] empty=new byte[0];
-
-	private static final DataFormat Instance=new DataFormat();
-
+public final class DataFormat extends Format<byte[]> {
 
 	/**
-	 * Retrieves the binary body format.
+	 * Creates a binary body format.
 	 *
-	 * @return the singleton binary body format instance
+	 * @return a new binary body format
 	 */
 	public static DataFormat data() {
-		return Instance;
+		return new DataFormat();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final InputFormat input=input();
+	private final OutputFormat output=output();
+
 
 	private DataFormat() {}
 
@@ -59,7 +58,7 @@ public final class DataFormat implements Format<byte[]> {
 	 * otherwise
 	 */
 	@Override public Result<byte[], Failure> get(final Message<?> message) {
-		return message.body(input()).value(
+		return message.body(input).value(
 
 				source -> {
 					try (final InputStream input=source.get()) {
@@ -79,7 +78,7 @@ public final class DataFormat implements Format<byte[]> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final byte[] value) {
-		return message.body(output(), target -> {
+		return message.body(output, target -> {
 			try (final OutputStream output=target.get()) {
 
 				output.write(value);

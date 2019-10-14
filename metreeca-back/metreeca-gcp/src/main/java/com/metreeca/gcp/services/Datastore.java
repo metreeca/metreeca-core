@@ -17,18 +17,14 @@
 
 package com.metreeca.gcp.services;
 
-import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 
-import java.util.Date;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.cloud.datastore.ValueType.*;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -38,6 +34,8 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Nested task executions on the datastore from the same thread will share the same transaction through a {@link
  * ThreadLocal} context variable.</p>
+ *
+ * @see <a href="https://cloud.google.com/datastore/docs/how-to">Google Cloud Datastore</a>
  */
 public final class Datastore {
 

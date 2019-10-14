@@ -32,22 +32,22 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * Textual input body format.
  */
-public final class ReaderFormat implements Format<Supplier<Reader>> {
-
-	private static final ReaderFormat Instance=new ReaderFormat();
-
+public final class ReaderFormat extends Format<Supplier<Reader>> {
 
 	/**
-	 * Retrieves the textual input body format.
+	 * Creates a textual input body format.
 	 *
-	 * @return the singleton textual input body format instance
+	 * @return a new textual input body format
 	 */
 	public static ReaderFormat reader() {
-		return Instance;
+		return new ReaderFormat();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final InputFormat input=input();
+
 
 	private ReaderFormat() {}
 
@@ -61,7 +61,7 @@ public final class ReaderFormat implements Format<Supplier<Reader>> {
 	 * processing failure, otherwise
 	 */
 	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
-		return message.body(input()).value(input -> () ->
+		return message.body(input).value(input -> () ->
 				Codecs.reader(input.get(), message.charset().orElse(UTF_8.name()))
 		);
 	}

@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf.handlers;
 
+import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.services.Graph;
-import com.metreeca.rdf.Formats;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.rest.handlers.Worker;
@@ -43,8 +43,7 @@ import static java.lang.Boolean.parseBoolean;
 /**
  * SPARQL 1.1 Query/Update endpoint handler.
  *
- * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the system {@linkplain
- * Graph#graph() graph database}.</p>
+ * <p>Provides a standard SPARQL 1.1 Query/Update endpoint exposing the contents of the shared {@linkplain Graph graph}.</p>
  *
  * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
  * to users in the {@linkplain Values#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>

@@ -19,6 +19,7 @@ package com.metreeca.gate.wrappers;
 
 import com.metreeca.gate.*;
 import com.metreeca.rest.*;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.rest.services.Clock;
 import com.metreeca.rest.services.Logger;
@@ -229,6 +230,8 @@ public final class Manager implements Wrapper {
 	private final Clock clock=service(clock());
 	private final Logger logger=service(logger());
 
+	private final JSONFormat json=json();
+
 
 	/**
 	 * Creates a session manager.
@@ -368,7 +371,7 @@ public final class Manager implements Wrapper {
 	}
 
 	private Handler create() { // !!! refactor
-		return request -> request.reply(request.body(json()).fold(
+		return request -> request.reply(request.body(json).fold(
 
 				ticket -> {
 
@@ -405,7 +408,7 @@ public final class Manager implements Wrapper {
 				.header("Cache-Control", "no-store, timeout="+expiry)
 				.header("Pragma", "no-cache")
 
-				.body(json(), Json.createObjectBuilder(permit.profile()).build());
+				.body(json, Json.createObjectBuilder(permit.profile()).build());
 	}
 
 
@@ -416,7 +419,7 @@ public final class Manager implements Wrapper {
 				.header("Cache-Control", "no-store, timeout=0")
 				.header("Pragma", "no-cache")
 
-				.body(json(), JsonValue.EMPTY_JSON_OBJECT);
+				.body(json, JsonValue.EMPTY_JSON_OBJECT);
 	}
 
 

@@ -15,31 +15,27 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.formats;
-
-import com.metreeca.rest.Format;
-
-import java.io.InputStream;
-import java.util.function.Supplier;
+package com.metreeca.rdf.formats;
 
 
-/**
- * Raw binary input body format.
- */
-public final class InputFormat extends Format<Supplier<InputStream>> {
+import com.metreeca.rest.formats.JSONFormat;
 
-	/**
-	 * Creates a raw binary input body format.
-	 *
-	 * @return a new raw binary input body format
-	 */
-	public static InputFormat input() {
-		return new InputFormat();
-	}
+import javax.json.Json;
+import javax.json.JsonObject;
+
+
+final class RDFJSONCodecTest {
+
+	static final JsonObject Context=Json.createObjectBuilder()
+			.add("id", JSONFormat.id)
+			.add("value", JSONFormat.value)
+			.add("type", JSONFormat.type)
+			.add("language", JSONFormat.language)
+			.build();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private InputFormat() {}
+	private RDFJSONCodecTest() {}
 
 }

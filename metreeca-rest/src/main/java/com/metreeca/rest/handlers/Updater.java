@@ -17,7 +17,9 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
+import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
 
 import static com.metreeca.rest.Wrapper.wrapper;
@@ -25,6 +27,18 @@ import static com.metreeca.rest.Wrapper.wrapper;
 
 /**
  * Model-driven resource updater.
+ *
+ * <p>Performs:</p>
+ *
+ * <ul>
+ * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based {@linkplain Actor#throttler(Object, Object...)
+ * authorization}, considering shapes enabled by the {@linkplain Shape#Update} task and the {@linkplain Shape#Holder} area, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other resources;</li>
+ * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
+ * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
+ * </ul>
+ *
+ * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
 public final class Updater extends Actor {
 

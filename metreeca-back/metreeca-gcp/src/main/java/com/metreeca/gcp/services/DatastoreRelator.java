@@ -22,6 +22,7 @@ import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query.Probe;
@@ -125,7 +126,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 	private final Datastore datastore=service(datastore());
 	private final Logger logger=service(logger());
 
-	private final EntityFormat format=entity(datastore);
+	private final EntityFormat entity=entity();
 
 
 	Future<Response> handle(final Request request) {
@@ -137,7 +138,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Future<Response> holder(final Request request) {
 
-		return request.query(format, digest(request.shape()))
+		return request.query(entity, digest(request.shape()))
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 
@@ -180,7 +181,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK) // containers are virtual and respond always with 200 OK
 				.shape(field(GCP.contains, convey(shape)))
-				.body(format, container);
+				.body(entity, container);
 
 	}
 
@@ -216,7 +217,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK)
 				.shape(DatastoreEngine.TermsShape)
-				.body(format, container);
+				.body(entity, container);
 
 	}
 
@@ -293,7 +294,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 						final FullEntity.Builder<?> item=FullEntity.newBuilder();
 
-						item.set(GCP.type, entry.getKey());
+						item.set(JSONFormat.type, entry.getKey());
 						entry.getValue().set(item);
 
 						return item.build();
@@ -308,7 +309,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK)
 				.shape(DatastoreEngine.StatsShape)
-				.body(format, container.build());
+				.body(entity, container.build());
 
 	}
 
@@ -334,7 +335,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 					.map(entity -> response
 							.status(OK)
 							.shape(shape)
-							.body(format, entity)
+							.body(this.entity, entity)
 					)
 
 					.orElseGet(() -> response
@@ -369,7 +370,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 						final FullEntity<?> entity=((EntityValue)v).get();
 						final FullEntity.Builder<?> builder=FullEntity.newBuilder(entity.getKey());
 
-						Stream.of(GCP.id, GCP.type, GCP.label, GCP.comment).forEach(property -> {
+						Stream.of(JSONFormat.id, JSONFormat.type, GCP.label, GCP.comment).forEach(property -> {
 
 							if (entity.contains(property)) {
 								builder.set(property, (Value<?>)entity.getValue(property));

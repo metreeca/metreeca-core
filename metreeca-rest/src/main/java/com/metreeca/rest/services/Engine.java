@@ -93,7 +93,7 @@ public interface Engine {
 	//// Payload Management ////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Trims the message payload.
+	 * Trims message payloads.
 	 *
 	 * <p>Rewrites the engine-specific message {@linkplain Message#body(Format) payload} retaining only the subset
 	 * compatible with the envelope of the message {@linkplain Message#shape() shape}.</p>
@@ -111,7 +111,7 @@ public interface Engine {
 	public <M extends Message<M>> Result<M, Failure> trim(final M message);
 
 	/**
-	 * Validates the message payload.
+	 * Validates message payloads.
 	 *
 	 * <p>Validates the engine-specific message {@linkplain Message#body(Format) payload} against the message
 	 * {@linkplain Message#shape() shape}.</p>
@@ -130,12 +130,66 @@ public interface Engine {
 
 	//// CRUD Actions //////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Future<Response> create(final Request request); // !!! tbd
+	/**
+	 * Handles creation requests.
+	 *
+	 * <p>Handles creation requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
+	 * {@linkplain Message#shape() shape}.</p>
+	 *
+	 * @param request a creation request for the managed linked data resource
+	 *
+	 * @return a lazy response generated for the managed linked data resource in reaction to the creation {@code
+	 * request}
+	 *
+	 * @throws NullPointerException if {@code request} is null
+	 */
+	public Future<Response> create(final Request request);
 
-	public Future<Response> relate(final Request request); // !!! tbd
+	/**
+	 * Handles retrieval requests.
+	 *
+	 * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * item} possibly using the message {@linkplain Message#shape() shape}.</p>
+	 *
+	 * @param request a retrieval request for the managed linked data resource
+	 *
+	 * @return a lazy response generated for the managed linked data resource in reaction to the retrieval {@code
+	 * request}
+	 *
+	 * @throws NullPointerException if {@code request} is null
+	 */
+	public Future<Response> relate(final Request request);
 
-	public Future<Response> update(final Request request); // !!! tbd
+	/**
+	 * Handles updating requests.
+	 *
+	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
+	 * {@linkplain Message#shape() shape}.</p>
+	 *
+	 * @param request an updating request for the managed linked data resource
+	 *
+	 * @return a lazy response generated for the managed linked data resource in reaction to the updating {@code
+	 * request}
+	 *
+	 * @throws NullPointerException if {@code request} is null
+	 */
+	public Future<Response> update(final Request request);
 
-	public Future<Response> delete(final Request request); // !!! tbd
+	/**
+	 * Handles deletion requests.
+	 *
+	 * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * item} possibly using  the message {@linkplain Message#shape() shape}.</p>
+	 *
+	 * @param request a deletion request for the managed linked data resource
+	 *
+	 * @return a lazy response generated for the managed linked data resource in reaction to the deletion {@code
+	 * request}
+	 *
+	 * @throws NullPointerException if {@code request} is null
+	 */
+	public Future<Response> delete(final Request request);
 
 }

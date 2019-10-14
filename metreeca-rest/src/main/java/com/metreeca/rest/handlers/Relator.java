@@ -17,7 +17,10 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
+import com.metreeca.rest.services.Engine;
+import com.metreeca.tree.Shape;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.tree.Shape.*;
@@ -25,8 +28,20 @@ import static com.metreeca.tree.Shape.*;
 
 /**
  * Model-driven resource relator.
+ *
+ * <p>Performs:</p>
+ *
+ * <ul>
+ * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Shape#Relate} task and {@linkplain Shape#Holder}/{@linkplain Shape#Digest} areas, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other resources;</li>
+ * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
+ * <li>engine-assisted response shape/payload {@linkplain Engine#trim(Message) trimming}, considering shapes as above.</li>
+ * </ul>
+ *
+ * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Relator extends Actor { // !!! tbd
+public final class Relator extends Actor {
 
 	public Relator() {
 		delegate(relator()

@@ -37,14 +37,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
+import javax.json.*;
 
 import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
@@ -56,7 +56,7 @@ import static java.util.Collections.singletonList;
 /**
  * RDF body format.
  */
-public final class RDFFormat implements Format<Collection<Statement>> {
+public final class RDFFormat extends Format<Collection<Statement>> {
 
 	/**
 	 * The plain <a href="http://www.json.org/">JSON</a> file format.
@@ -91,10 +91,17 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 			RDFFormat.class.getName()+"#Shape", "Resource shape", null
 	);
 
+	/**
+	 * Sets the expected JSON-LD context for codecs.
+	 *
+	 * <p>Defaults to an empty object.</p>
+	 */
+	public static final RioSetting<JsonObject> RioContext=new RioSettingImpl<>(
+			RDFFormat.class.getName()+"#Context", "JSON-LD context", JsonValue.EMPTY_JSON_OBJECT
+	);
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final RDFFormat Instance=new RDFFormat();
 
 
 	/**
@@ -102,25 +109,43 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 *
 	 * @see Rewriter
 	 */
-	public static final String ExternalBase="-External-Base";
+	public static final String ExternalBase="-External-Base"; // !!! review/remove/hide
 
 
 	/**
-	 * Retrieves the RDF body format.
+	 * Creates an RDF body format.
 	 *
-	 * @return the singleton RDF body format instance
+	 * @return a new RDF body format
 	 */
 	public static RDFFormat rdf() {
-		return Instance;
+		return new RDFFormat();
 	}
 
 
 	///// Casts ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Converts an object to an IRI.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
+	 */
 	public static IRI iri(final Object object) {
 		return as(object, IRI.class);
 	}
 
+	/**
+	 * Converts an object to a value.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
+	 */
 	public static Value value(final Object object) {
 		return as(object, Value.class);
 	}
@@ -143,15 +168,23 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private final InputFormat input=input();
+	private final OutputFormat output=output();
+
+	private final JsonObject context=service(context());
+
+
 	private RDFFormat() {}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public List<IRI> path(final String base, final Shape shape, final String path) {
-		return new RDFJSONDecoder(base) {}.path(path, shape); // !!! pass base as argument and factor decoder instance
+		return new RDFJSONDecoder(base, context) {}.path(path, shape); // !!! pass base as argument and factor decoder instance
 	}
 
 	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
-		return new RDFJSONDecoder(base) {}.value(value, shape, null).getKey(); // !!! pass base as argument and factor decoder instance
+		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey(); // !!! pass base as argument and factor decoder instance
 	}
 
 
@@ -161,7 +194,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 * status, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(input()).fold(
+		return message.body(input).fold(
 
 				supplier -> {
 
@@ -177,6 +210,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 					parser.set(RioShape, shape);
 					parser.set(RioFocus, focus);
+					parser.set(RioContext, context);
 
 					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
 					parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
@@ -278,7 +312,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
 				)
 
-				.body(output(), target -> {
+				.body(output, target -> {
 
 					final IRI focus=Values.iri(message.item());
 					final Shape shape=message.shape();
@@ -294,6 +328,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 						writer.set(RioShape, shape);
 						writer.set(RioFocus, focus);
+						writer.set(RioContext, context);
 
 						Rio.write(external.equals(internal) ? value : rewrite(internal, external, value), writer);
 

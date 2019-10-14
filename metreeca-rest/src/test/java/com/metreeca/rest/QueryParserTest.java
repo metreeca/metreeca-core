@@ -538,7 +538,7 @@ final class QueryParserTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TestFormat implements Format<Object> {
+	private static final class TestFormat extends Format<Object> {
 
 		@Override public List<Object> path(final String base, final Shape shape, final String path) {
 			return path.isEmpty() ? Collections.emptyList() : asList((Object[])path.split("\\."));

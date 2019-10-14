@@ -18,6 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
@@ -26,6 +27,8 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -33,7 +36,8 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.formats.RDFJSONCodec.*;
+import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
+import static com.metreeca.rest.formats.JSONFormat.resolver;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 
@@ -58,9 +62,12 @@ abstract class RDFJSONDecoder {
 
 	private final URI base;
 
+	private final Function<String, String> resolver;
 
-	RDFJSONDecoder(final String base) {
+
+	RDFJSONDecoder(final String base, final JsonObject context) {
 		this.base=(base == null) ? null : URI.create(base);
+		this.resolver=resolver(context);
 	}
 
 
@@ -85,6 +92,10 @@ abstract class RDFJSONDecoder {
 
 	protected Resource bnode(final String id) {
 		return id.isEmpty() ? Values.bnode() : id.startsWith("_:") ? Values.bnode(id.substring(2)) : Values.bnode(id);
+	}
+
+	protected IRI iri() {
+		return Values.iri();
 	}
 
 	protected IRI iri(final String iri) {
@@ -185,28 +196,52 @@ abstract class RDFJSONDecoder {
 
 	private Map.Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape, final Resource focus) {
 
-		final String thiz=thiz(object);
-		final String type=type(object);
+		String id="";
+		String value="";
+		String type="";
+		String language="";
+
+		for (final Map.Entry<String, JsonValue> entry : object.entrySet()) {
+
+			final String label=resolver.apply(entry.getKey());
+
+			final Supplier<String> string=() -> entry.getValue() instanceof JsonString
+					? ((JsonString)entry.getValue()).getString()
+					: error("literal '"+entry.getKey()+"' field is not a string");
+
+			if ( label.equals(JSONFormat.id) ) {
+				id=string.get();
+			} else if ( label.equals(JSONFormat.value) ) {
+				value=string.get();
+			} else if ( label.equals(JSONFormat.type) ) {
+				type=string.get();
+			} else if ( label.equals(JSONFormat.language) ) {
+				language=string.get();
+			}
+
+		}
+
 
 		final String datatype=type.isEmpty()
 				? datatype(shape).map(RDFFormat::iri).map(Value::stringValue).orElse("")
 				: type;
 
-		final Value value=(thiz.isEmpty() && type.isEmpty() && focus != null) ? focus
+		final Value _value=(id.isEmpty() && value.isEmpty() && type.isEmpty() && focus != null) ? focus
 
-				: datatype.isEmpty() ? resource(thiz)
+				: datatype.isEmpty() ? resource(id)
 
-				: datatype.equals(IRIType.stringValue()) ? iri(thiz)
-				: datatype.equals(BNodeType.stringValue()) ? bnode(thiz)
-				: datatype.equals(ResourceType.stringValue()) ? resource(thiz)
+				: datatype.equals(IRIType.stringValue()) ? iri(id)
+				: datatype.equals(BNodeType.stringValue()) ? bnode(id)
+				: datatype.equals(ResourceType.stringValue()) ? resource(id)
 
-				: datatype.startsWith("@") ? literal(thiz, type.substring(1))
+				: !language.isEmpty() ? literal(value, language)
+				: datatype.startsWith("@") ? literal(value, type.substring(1))
 
-				: literal(thiz, iri(datatype));
+				: literal(value, iri(datatype));
 
-		return focus != null && !focus.equals(value) ? entry(focus, Stream.empty())
-				: value instanceof Resource ? properties(object, shape, (Resource)value)
-				: entry(value, Stream.empty());
+		return focus != null && !focus.equals(_value) ? entry(focus, Stream.empty())
+				: _value instanceof Resource ? properties(object, shape, (Resource)_value)
+				: entry(_value, Stream.empty());
 
 	}
 
@@ -252,10 +287,10 @@ abstract class RDFJSONDecoder {
 		final Map<Object, Shape> fields=fields(shape);
 
 		return entry(source, object.entrySet().stream()
-				.filter(field -> !Reserved.contains(field.getKey()))
+				.filter(field -> !resolver.apply(field.getKey()).startsWith("@"))
 				.flatMap(field -> {
 
-					final String label=field.getKey();
+					final String label=resolver.apply(field.getKey());
 					final JsonValue value=field.getValue();
 
 					final IRI property=property(label, shape);
@@ -317,6 +352,7 @@ abstract class RDFJSONDecoder {
 			} else {
 
 				return error(String.format("no shape available to resolve property alias [%s]", alias));
+
 			}
 
 		} else {
@@ -324,23 +360,6 @@ abstract class RDFJSONDecoder {
 			return error(String.format("malformed object property [%s]", label));
 
 		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private String thiz(final JsonObject object) {
-		return Optional.of(object.getOrDefault(This, Default))
-				.filter(value -> value instanceof JsonString)
-				.map(value -> ((JsonString)value).getString())
-				.orElseGet(() -> error("literal '_this' field is not a string"));
-	}
-
-	private String type(final JsonObject object) {
-		return Optional.of(object.getOrDefault(Type, Default))
-				.filter(value -> value instanceof JsonString)
-				.map(value -> ((JsonString)value).getString())
-				.orElseGet(() -> error("literal '_type' field is not a string"));
 	}
 
 }

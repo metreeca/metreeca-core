@@ -18,9 +18,8 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
+import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
 
 import java.util.Objects;
@@ -32,8 +31,20 @@ import static java.util.UUID.randomUUID;
 
 /**
  * Model-driven resource creator.
+ *
+ * <p>Performs:</p>
+ *
+ * <ul>
+ * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based {@linkplain Actor#throttler(Object, Object...)
+ * authorization}, considering shapes enabled by the {@linkplain Shape#Create} task and the {@linkplain Shape#Detail} area;</li>
+ * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
+ * <li>resource {@linkplain #Creator(Function) slug} generation;</li>
+ * <li>engine assisted resource {@linkplain Engine#create(Request) creation}.</li>
+ * </ul>
+ *
+ * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Creator extends Actor { // !!! tbd
+public final class Creator extends Actor {
 
 	/**
 	 * Creates a resource creator with a UUID-based slug generator.

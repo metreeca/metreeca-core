@@ -37,6 +37,7 @@ import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.encode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -196,7 +197,9 @@ final class RewriterTest {
 	}
 
 	@Test void testRDFRewriting() {
-		new Context()
+		final Context context=new Context();
+
+		context.exec(() -> context
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
@@ -245,18 +248,21 @@ final class RewriterTest {
 
 						error -> fail("missing RDF payload")
 
-				));
+				))
+		);
 	}
 
 	@Test void testJSONRewriting() {
 
 		final Shape TestShape=field(internal("p"), and(required(), datatype(Values.IRIType)));
 
-		new Context()
+		final Context context=new Context();
+
+		context.exec(() -> context
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					RequestAssert.assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
+					assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 							.as("request json rewritten")
 							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
@@ -295,7 +301,7 @@ final class RewriterTest {
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
 										.as("rewritten response json")
 										.isEqualTo(Json.createObjectBuilder()
-												.add("_this", "/s")
+												.add("@id", "/s")
 												.add("p", "/o")
 												.build()
 										);
@@ -310,12 +316,16 @@ final class RewriterTest {
 
 						error -> fail("missing output body")
 
-				));
+				))
+		);
+
 	}
 
 
 	@Test void testMergedMainPartRewriting() {
-		new Context()
+		final Context context=new Context();
+
+		context.exec(() -> context
 
 				.get(() -> new Rewriter(Internal)
 
@@ -343,7 +353,7 @@ final class RewriterTest {
 
 						.wrap((Handler)request -> {
 
-							RequestAssert.assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
+							assertThat(request).hasBody(rdf(), rdf -> assertThat(rdf)
 									.isIsomorphicTo(internal("s", "p", "o"))
 							);
 
@@ -372,7 +382,8 @@ final class RewriterTest {
 								+"--boundary--\n"
 						).replace("\n", "\r\n").getBytes(UTF_8))))
 
-				.accept(response -> ResponseAssert.assertThat(response).hasStatus(OK));
+				.accept(response -> ResponseAssert.assertThat(response).hasStatus(OK))
+		);
 	}
 
 }

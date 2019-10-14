@@ -29,10 +29,7 @@ import static com.metreeca.rest.Result.Value;
 /**
  * Raw binary output body format.
  */
-public final class OutputFormat implements Format<Consumer<Supplier<OutputStream>>> {
-
-	private static final OutputFormat Instance=new OutputFormat();
-
+public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>> {
 
 	/**
 	 * The default MIME type for binary outbound raw message bodies.
@@ -41,12 +38,12 @@ public final class OutputFormat implements Format<Consumer<Supplier<OutputStream
 
 
 	/**
-	 * Retrieves the raw binary output body format.
+	 * Creates a raw binary output body format.
 	 *
-	 * @return the singleton raw binary output body format instance
+	 * @return the new raw binary output body format
 	 */
 	public static OutputFormat output() {
-		return Instance;
+		return new OutputFormat();
 	}
 
 

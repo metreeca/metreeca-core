@@ -37,6 +37,12 @@ import static com.google.cloud.datastore.ValueType.LONG;
 import static com.google.cloud.datastore.ValueType.STRING;
 
 
+/**
+ * Model-driven Google Cloud Datastore engine.
+ *
+ * <p>Manages datastore transactions and handles model-driven CRUD actions on LDP resources stored in the shared
+ * {@linkplain Datastore datastore}.</p>
+ */
 public final class DatastoreEngine implements Engine {
 
 	static final String terms="terms";
