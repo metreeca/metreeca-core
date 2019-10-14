@@ -43,9 +43,9 @@ public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 
 
 	/**
-	 * Retrieves the textual output body format.
+	 * Creates a textual output body format.
 	 *
-	 * @return the singleton textual output body format instance
+	 * @return the new textual output body format
 	 */
 	public static WriterFormat writer() {
 		return new WriterFormat();

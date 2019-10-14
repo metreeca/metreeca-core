@@ -35,9 +35,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class ReaderFormat extends Format<Supplier<Reader>> {
 
 	/**
-	 * Retrieves the textual input body format.
+	 * Creates a textual input body format.
 	 *
-	 * @return the singleton textual input body format instance
+	 * @return a new textual input body format
 	 */
 	public static ReaderFormat reader() {
 		return new ReaderFormat();

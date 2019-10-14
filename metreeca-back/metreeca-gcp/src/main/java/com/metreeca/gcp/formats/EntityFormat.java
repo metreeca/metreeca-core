@@ -39,15 +39,18 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
+/**
+ * Datastore entity body format.
+ */
 public final class EntityFormat extends Format<Entity> {
 
 	private static final Pattern StepPattern=Pattern.compile("(?:^|[./])([:\\w]+)");
 
 
 	/**
-	 * Creates an entity body format for the shared datastore.
+	 * Creates a datastore entity body format.
 	 *
-	 * @return a new entity body format instance for the {@linkplain Datastore#datastore() shared datastore}
+	 * @return a new datastore entity body format
 	 */
 	public static EntityFormat entity() {
 		return new EntityFormat();
@@ -56,6 +59,15 @@ public final class EntityFormat extends Format<Entity> {
 
 	//// Casts /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Converts an object to a datastore value.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return a datastore value obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a datastore value
+	 */
 	public static Value<?> value(final Object object) {
 		return object == null ? NullValue.of()
 				: object instanceof Value ? (Value<?>)object
@@ -145,6 +157,8 @@ public final class EntityFormat extends Format<Entity> {
 		);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape driver(final Shape shape) { // !!! caching
 		return shape

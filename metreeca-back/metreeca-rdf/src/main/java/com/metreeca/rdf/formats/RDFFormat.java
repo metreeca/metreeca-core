@@ -113,9 +113,9 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 
 	/**
-	 * Retrieves the RDF body format.
+	 * Creates an RDF body format.
 	 *
-	 * @return the singleton RDF body format instance
+	 * @return a new RDF body format
 	 */
 	public static RDFFormat rdf() {
 		return new RDFFormat();
@@ -124,10 +124,28 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	///// Casts ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Converts an object to an IRI.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
+	 */
 	public static IRI iri(final Object object) {
 		return as(object, IRI.class);
 	}
 
+	/**
+	 * Converts an object to a value.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
+	 */
 	public static Value value(final Object object) {
 		return as(object, Value.class);
 	}

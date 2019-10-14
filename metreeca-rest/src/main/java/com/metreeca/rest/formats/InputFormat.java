@@ -29,9 +29,9 @@ import java.util.function.Supplier;
 public final class InputFormat extends Format<Supplier<InputStream>> {
 
 	/**
-	 * Retrieves the raw binary input body format.
+	 * Creates a raw binary input body format.
 	 *
-	 * @return the singleton raw binary input body format instance
+	 * @return a new raw binary input body format
 	 */
 	public static InputFormat input() {
 		return new InputFormat();

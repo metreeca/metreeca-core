@@ -32,9 +32,9 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 public final class DataFormat extends Format<byte[]> {
 
 	/**
-	 * Retrieves the binary body format.
+	 * Creates a binary body format.
 	 *
-	 * @return the singleton binary body format instance
+	 * @return a new binary body format
 	 */
 	public static DataFormat data() {
 		return new DataFormat();

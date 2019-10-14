@@ -39,17 +39,31 @@ import static java.util.function.Function.identity;
  *
  * <p>Provides shared building blocks for assembling model-driven resource action handlers.</p>
  */
-public abstract class Actor extends Delegator { // !!! tbd
+public abstract class Actor extends Delegator {
 
 	private final Engine engine=service(engine());
 
 
-	protected Wrapper connector() { // inside a single txn
+	/**
+	 * Creates a connector wrapper.
+	 *
+	 * @return returns a wrapper processing request inside a single {@linkplain Engine#exec(Runnable) engine
+	 * transaction}
+	 */
+	protected Wrapper connector() {
 		return handler -> request -> consumer -> engine.exec(() ->
 				handler.handle(request).accept(consumer)
 		);
 	}
 
+	/**
+	 * Creates a throttler wrapper.
+	 *
+	 * @param task the accepted value for the {@linkplain Shape#Task task} parametric axis
+	 * @param area the accepted values for the {@linkplain Shape#Area task} parametric axis
+	 *
+	 * @return returns a wrapper performing role-based shape redaction and shape-based authorization
+	 */
 	protected Wrapper throttler(final Object task, final Object... area) { // !!! optimize/cache
 		return handler -> request -> {
 
@@ -72,9 +86,9 @@ public abstract class Actor extends Delegator { // !!! tbd
 
 			final Function<Request, Request> pre=message -> message.shape(message.shape() // request shape redactor
 
-					.map(new Redactor(Shape.Role, request.roles()))
-					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
+							.map(new Redactor(Shape.Role, request.roles()))
+							.map(new Redactor(Shape.Task, task))
+							.map(new Redactor(Shape.Area, area))
 
 					// mode (convey/filter) redaction performed by action handlers
 
@@ -97,30 +111,65 @@ public abstract class Actor extends Delegator { // !!! tbd
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creates a validator wrapper.
+	 *
+	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#validate(Message) validation} of request
+	 * payloads
+	 */
 	protected Wrapper validator() {
 		return handler -> request -> engine.validate(request).fold(handler::handle, request::reply);
 	}
 
+	/**
+	 * Creates a trimmer wrapper.
+	 *
+	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#trim(Message) validation} of {@linkplain
+	 * Response#success() successful} response payloads
+	 */
 	protected Wrapper trimmer() {
 		return success(response -> engine.trim(response).fold(identity(), response::map));
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creates a creator handler.
+	 *
+	 * @return returns a handler performing engine-assisted resource {@linkplain Engine#create(Request) creation}
+	 */
 	protected Handler creator() {
 		return engine::create;
 	}
 
+	/**
+	 * Creates a relator handler.
+	 *
+	 * @return returns a handler performing engine-assisted resource {@linkplain Engine#create(Request) retrieval}
+	 */
 	protected Handler relator() {
 		return engine::relate;
 	}
 
+	/**
+	 * Creates an updater handler.
+	 *
+	 * @return returns a handler performing engine-assisted resource {@linkplain Engine#update(Request) updating}
+	 */
 	protected Handler updater() {
 		return engine::update;
 	}
 
+	/**
+	 * Creates a deleter handler.
+	 *
+	 * @return returns a handler performing engine-assisted resource {@linkplain Engine#delete(Request) deletion}
+	 */
 	protected Handler deleter() {
 		return engine::delete;
 	}
-
 
 }

@@ -62,9 +62,9 @@ public final class JSONFormat extends Format<JsonObject> {
 
 
 	/**
-	 * Retrieves the JSON body format.
+	 * Creates a JSON body format.
 	 *
-	 * @return the singleton JSON body format instance
+	 * @return the new JSON body format
 	 */
 	public static JSONFormat json() {
 		return new JSONFormat();

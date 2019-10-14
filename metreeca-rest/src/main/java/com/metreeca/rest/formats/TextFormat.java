@@ -32,9 +32,9 @@ import static com.metreeca.rest.formats.WriterFormat.writer;
 public final class TextFormat extends Format<String> {
 
 	/**
-	 * Retrieves the textual format.
+	 * Creates a textual format.
 	 *
-	 * @return the singleton textual format instance
+	 * @return the new textual format
 	 */
 	public static TextFormat text() {
 		return new TextFormat();

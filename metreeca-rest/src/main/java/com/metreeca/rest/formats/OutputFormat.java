@@ -38,9 +38,9 @@ public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>>
 
 
 	/**
-	 * Retrieves the raw binary output body format.
+	 * Creates a raw binary output body format.
 	 *
-	 * @return the singleton raw binary output body format instance
+	 * @return the new raw binary output body format
 	 */
 	public static OutputFormat output() {
 		return new OutputFormat();

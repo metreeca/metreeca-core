@@ -18,6 +18,7 @@
 package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.Request;
+import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
 
 import static com.metreeca.rest.Wrapper.wrapper;
@@ -25,6 +26,17 @@ import static com.metreeca.rest.Wrapper.wrapper;
 
 /**
  * Model-driven resource deleter.
+ *
+ * <p>Performs:</p>
+ *
+ * <ul>
+ * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Shape#Delete} task and the {@linkplain Shape#Holder} area, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other resources;</li>
+ * <li>engine assisted resource {@linkplain Engine#delete(Request) deletion}.</li>
+ * </ul>
+ *
+ * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
 public final class Deleter extends Actor { // !! tbd
 

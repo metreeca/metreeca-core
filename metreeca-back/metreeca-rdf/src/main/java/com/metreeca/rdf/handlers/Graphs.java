@@ -55,8 +55,7 @@ import static java.lang.String.format;
 /**
  * SPARQL 1.1 Graph Store endpoint handler.
  *
- * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the system {@linkplain Graph#graph()
- * graph database}.</p>
+ * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the shared {@linkplain Graph graph}.</p>
  *
  * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
  * to users in the {@linkplain Values#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
