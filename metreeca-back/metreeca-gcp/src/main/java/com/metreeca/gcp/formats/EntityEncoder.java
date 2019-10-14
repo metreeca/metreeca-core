@@ -28,15 +28,14 @@ import java.util.function.Function;
 
 import javax.json.*;
 
-import static com.metreeca.rest.formats.JSONFormat.aliaser;
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.formats.JSONFormat.aliaser;
 import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.fields;
 
 
 final class EntityEncoder {
-
 
 	private final Function<String, String> aliaser=aliaser(service(context()));
 

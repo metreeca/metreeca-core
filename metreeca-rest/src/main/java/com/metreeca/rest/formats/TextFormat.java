@@ -29,10 +29,7 @@ import static com.metreeca.rest.formats.WriterFormat.writer;
 /**
  * Textual body format.
  */
-public final class TextFormat implements Format<String> {
-
-	private static final TextFormat Instance=new TextFormat();
-
+public final class TextFormat extends Format<String> {
 
 	/**
 	 * Retrieves the textual format.
@@ -40,11 +37,15 @@ public final class TextFormat implements Format<String> {
 	 * @return the singleton textual format instance
 	 */
 	public static TextFormat text() {
-		return Instance;
+		return new TextFormat();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final ReaderFormat reader=reader();
+	private final WriterFormat writer=writer();
+
 
 	private TextFormat() {}
 
@@ -57,7 +58,7 @@ public final class TextFormat implements Format<String> {
 	 * otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
-		return message.body(reader()).value(source -> {
+		return message.body(reader).value(source -> {
 			try (final Reader reader=source.get()) {
 
 				return Codecs.text(reader);
@@ -73,7 +74,7 @@ public final class TextFormat implements Format<String> {
 	 * stream supplied by the accepted output stream supplier.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final String value) {
-		return message.body(writer(), target -> {
+		return message.body(writer, target -> {
 			try (final Writer output=target.get()) {
 
 				output.write(value);

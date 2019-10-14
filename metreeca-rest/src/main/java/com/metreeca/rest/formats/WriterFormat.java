@@ -34,10 +34,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * Textual output body format.
  */
-public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
-
-	private static final WriterFormat Instance=new WriterFormat();
-
+public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 
 	/**
 	 * The default MIME type for outbound textual message bodies.
@@ -51,11 +48,13 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 	 * @return the singleton textual output body format instance
 	 */
 	public static WriterFormat writer() {
-		return Instance;
+		return new WriterFormat();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final OutputFormat output=output();
 
 	private WriterFormat() {}
 
@@ -76,7 +75,7 @@ public final class WriterFormat implements Format<Consumer<Supplier<Writer>>> {
 
 				.header("~Content-Type", MIME)
 
-				.body(output(), source -> {
+				.body(output, source -> {
 
 					try (final OutputStream output=source.get()) {
 

@@ -33,9 +33,10 @@ import java.util.function.Function;
 
 import javax.json.*;
 
+import static com.metreeca.gcp.services.Datastore.datastore;
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.rest.formats.JSONFormat.resolver;
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;
@@ -47,14 +48,8 @@ import static java.util.stream.Collectors.toList;
 
 final class EntityDecoder {
 
-	private final Datastore datastore;
-
+	private final Datastore datastore=service(datastore());;
 	private final Function<String, String> resolver=resolver(service(context()));
-
-
-	EntityDecoder(final Datastore datastore) {
-		this.datastore=datastore;
-	}
 
 
 	Value<?> decode(final JsonValue value, final Shape shape) {
@@ -200,12 +195,10 @@ final class EntityDecoder {
 			}
 		}
 
-		if ( !id.isEmpty() ) {
-			builder.setKey(datastore.newKeyFactory()
-					.setKind(type.isEmpty() ? clazz(shape).map(Object::toString).orElse(GCP.Resource) : type)
-					.newKey(id)
-			);
-		}
+		final KeyFactory factory=datastore.newKeyFactory()
+				.setKind(type.isEmpty() ? clazz(shape).map(Object::toString).orElse(GCP.Resource) : type);
+
+		builder.setKey(id.isEmpty() ? factory.newKey() : factory.newKey(id));
 
 		return EntityValue.of(builder.build());
 	}

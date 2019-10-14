@@ -18,6 +18,7 @@
 package com.metreeca.rdf.services;
 
 
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -43,6 +44,8 @@ final class GraphCreator extends GraphProcessor {
 
 	private final Graph graph=service(graph());
 
+	private final RDFFormat rdf=rdf();
+
 
 	Future<Response> handle(final Request request) {
 		return request.collection() ? holder(request) : member(request);
@@ -54,7 +57,7 @@ final class GraphCreator extends GraphProcessor {
 	private Future<Response> holder(final Request request) {
 		return request
 
-				.body(rdf())
+				.body(rdf)
 
 				.process(rdf -> graph.exec(connection -> {
 

@@ -18,6 +18,7 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -37,6 +38,8 @@ final class DatastoreUpdater extends DatastoreProcessor {
 
 	private final Datastore datastore=service(datastore());
 
+	private final EntityFormat entity=entity();
+
 
 	Future<Response> handle(final Request request) {
 		return request.collection() ? holder(request) : member(request);
@@ -52,7 +55,7 @@ final class DatastoreUpdater extends DatastoreProcessor {
 	private Future<Response> member(final Request request) {
 		return request
 
-				.body(entity(datastore))
+				.body(entity)
 
 				.value(entity -> request.reply(response -> datastore.exec(datastore -> {
 

@@ -50,11 +50,13 @@ final class DatastoreValidator extends DatastoreProcessor {
 
 	private final Datastore datastore=service(datastore());
 
+	private final EntityFormat entity=entity();
+
 
 	<M extends Message<M>> Result<M, Failure> validate(final M message) {
 		return message
 
-				.body(entity(datastore))
+				.body(entity)
 
 				.process(entity -> Optional.of(validate(convey(message.shape()), EntityValue.of(entity)))
 						.filter(trace -> !trace.isEmpty())

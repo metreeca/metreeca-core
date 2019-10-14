@@ -18,7 +18,6 @@
 package com.metreeca.gcp.formats;
 
 import com.metreeca.gcp.services.DatastoreTestBase;
-import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.datastore.*;
@@ -50,7 +49,7 @@ final class EntityDecoderTest extends DatastoreTestBase {
 	}
 
 	private FullEntity<?> decode(final String json, final Shape shape) {
-		return new EntityDecoder(service(datastore())).decode(
+		return new EntityDecoder().decode(
 				Json.createReader(new StringReader(json.replace('\'', '"'))).readObject(), shape
 		);
 	}

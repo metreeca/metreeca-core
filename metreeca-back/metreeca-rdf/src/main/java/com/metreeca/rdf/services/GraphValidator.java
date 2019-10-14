@@ -59,11 +59,13 @@ final class GraphValidator extends GraphProcessor {
 
 	private final Graph graph=service(graph());
 
+	private final RDFFormat rdf=rdf();
+
 
 	<M extends Message<M>> Result<M, Failure> validate(final M message) {
 		return message
 
-				.body(rdf())
+				.body(rdf)
 
 				.process(rdf -> Optional.of(validate(iri(message.item()), convey(message.shape()), rdf))
 						.filter(trace -> !trace.isEmpty())

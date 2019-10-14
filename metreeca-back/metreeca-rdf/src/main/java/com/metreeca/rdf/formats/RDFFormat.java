@@ -56,7 +56,7 @@ import static java.util.Collections.singletonList;
 /**
  * RDF body format.
  */
-public final class RDFFormat implements Format<Collection<Statement>> {
+public final class RDFFormat extends Format<Collection<Statement>> {
 
 	/**
 	 * The plain <a href="http://www.json.org/">JSON</a> file format.
@@ -94,15 +94,13 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final RDFFormat Instance=new RDFFormat();
-
 
 	/**
 	 * Custom header providing the external base for on-demand RDF body rewriting.
 	 *
 	 * @see Rewriter
 	 */
-	public static final String ExternalBase="-External-Base";
+	public static final String ExternalBase="-External-Base"; // !!! review/remove/hide
 
 
 	/**
@@ -111,7 +109,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 * @return the singleton RDF body format instance
 	 */
 	public static RDFFormat rdf() {
-		return Instance;
+		return new RDFFormat();
 	}
 
 
@@ -143,8 +141,14 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private final InputFormat input=input();
+	private final OutputFormat output=output();
+
+
 	private RDFFormat() {}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public List<IRI> path(final String base, final Shape shape, final String path) {
 		return new RDFJSONDecoder(base) {}.path(path, shape); // !!! pass base as argument and factor decoder instance
@@ -161,7 +165,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 	 * status, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(input()).fold(
+		return message.body(input).fold(
 
 				supplier -> {
 
@@ -278,7 +282,7 @@ public final class RDFFormat implements Format<Collection<Statement>> {
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
 				)
 
-				.body(output(), target -> {
+				.body(output, target -> {
 
 					final IRI focus=Values.iri(message.item());
 					final Shape shape=message.shape();

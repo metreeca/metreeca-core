@@ -26,10 +26,7 @@ import java.util.function.Supplier;
 /**
  * Raw binary input body format.
  */
-public final class InputFormat implements Format<Supplier<InputStream>> {
-
-	private static final InputFormat Instance=new InputFormat();
-
+public final class InputFormat extends Format<Supplier<InputStream>> {
 
 	/**
 	 * Retrieves the raw binary input body format.
@@ -37,7 +34,7 @@ public final class InputFormat implements Format<Supplier<InputStream>> {
 	 * @return the singleton raw binary input body format instance
 	 */
 	public static InputFormat input() {
-		return Instance;
+		return new InputFormat();
 	}
 
 

@@ -18,6 +18,7 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.gcp.GCP;
+import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.*;
 
 import com.google.cloud.datastore.*;
@@ -37,6 +38,8 @@ final class DatastoreCreator extends DatastoreProcessor {
 
 	private final Datastore datastore=service(datastore());
 
+	private final EntityFormat entity=entity();
+
 
 	Future<Response> handle(final Request request) {
 		return request.collection() ? holder(request) : member(request);
@@ -48,7 +51,7 @@ final class DatastoreCreator extends DatastoreProcessor {
 	private Future<Response> holder(final Request request) {
 		return request
 
-				.body(entity(datastore))
+				.body(entity)
 
 				.process(entity -> datastore.exec(service -> { // assign entity a slug-based id
 

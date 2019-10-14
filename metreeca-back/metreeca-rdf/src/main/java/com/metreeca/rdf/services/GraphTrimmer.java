@@ -17,6 +17,7 @@
 
 package com.metreeca.rdf.services;
 
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.Failure;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
@@ -46,8 +47,11 @@ import static java.util.stream.Collectors.toSet;
 
 final class GraphTrimmer extends GraphProcessor {
 
+	private final RDFFormat rdf=rdf();
+
+
 	<M extends Message<M>> Result<M, Failure> trim(final M message) {
-		return message.body(rdf()).value(rdf -> message.body(rdf(),
+		return message.body(rdf).value(rdf -> message.body(this.rdf,
 				trim(iri(message.item()), convey(message.shape()), rdf)
 		));
 	}

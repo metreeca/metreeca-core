@@ -21,6 +21,7 @@ import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rest.*;
+import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tree.Shape;
 
@@ -41,6 +42,7 @@ import java.util.List;
 
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tree.Shape.only;
@@ -69,6 +71,9 @@ public final class Graphs extends Endpoint<Graphs> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final InputFormat input=input();
+
 
 	public Graphs() {
 		delegate(new Worker()
@@ -126,7 +131,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 				request.reply(response -> response.status(Response.OK)
 						.shape(GraphsShape)
-						.body(com.metreeca.rdf.formats.RDFFormat.rdf(), model)
+						.body(rdf(), model)
 				).accept(consumer);
 
 			} else {
@@ -194,7 +199,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				);
 
 				graph().exec(connection -> {
-					try (final InputStream input=request.body(input()).value() // binary format >> no rewriting
+					try (final InputStream input=request.body(this.input).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
 
@@ -334,7 +339,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
 				graph().exec(connection -> {
-					try (final InputStream input=request.body(input()).value() // binary format >> no rewriting
+					try (final InputStream input=request.body(this.input).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get()) {
 

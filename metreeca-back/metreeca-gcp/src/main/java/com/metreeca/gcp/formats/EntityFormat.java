@@ -20,6 +20,7 @@ package com.metreeca.gcp.formats;
 import com.metreeca.gcp.GCP;
 import com.metreeca.gcp.services.Datastore;
 import com.metreeca.rest.*;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
@@ -38,7 +39,7 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
-public final class EntityFormat implements Format<Entity> {
+public final class EntityFormat extends Format<Entity> {
 
 	private static final Pattern StepPattern=Pattern.compile("(?:^|[./])([:\\w]+)");
 
@@ -46,31 +47,10 @@ public final class EntityFormat implements Format<Entity> {
 	/**
 	 * Creates an entity body format for the shared datastore.
 	 *
-	 * <p><strong>Warning</strong> / Must be invoked only by tasks {@linkplain Context#exec(Runnable...) running inside}
-	 * a service context</p>
-	 *
 	 * @return a new entity body format instance for the {@linkplain Datastore#datastore() shared datastore}
 	 */
 	public static EntityFormat entity() {
-		return entity(service(datastore()));
-	}
-
-	/**
-	 * Creates an entity body format for a target datastore.
-	 *
-	 * @param datastore the datastore where entities are expected to be stored
-	 *
-	 * @return a new entity body format instance for the target {@code datastore}
-	 *
-	 * @throws NullPointerException if {@code datastore} is nulll
-	 */
-	public static EntityFormat entity(final Datastore datastore) {
-
-		if ( datastore == null ) {
-			throw new NullPointerException("null datastore");
-		}
-
-		return new EntityFormat(datastore);
+		return new EntityFormat();
 	}
 
 
@@ -102,20 +82,18 @@ public final class EntityFormat implements Format<Entity> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Datastore datastore;
+	private final Datastore datastore=service(datastore());
 
-	private final EntityDecoder decoder;
-	private final EntityEncoder encoder;
+	private final EntityDecoder decoder=new EntityDecoder();
+	private final EntityEncoder encoder=new EntityEncoder();
+
+	private final JSONFormat json=json();
 
 
-	private EntityFormat(final Datastore datastore) {
+	private EntityFormat() {}
 
-		this.datastore=datastore;
 
-		this.decoder=new EntityDecoder(this.datastore);
-		this.encoder=new EntityEncoder();
-	}
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public List<String> path(final String base, final Shape shape, final String path) {
 
@@ -144,7 +122,7 @@ public final class EntityFormat implements Format<Entity> {
 
 
 	@Override public Result<Entity, Failure> get(final Message<?> message) {
-		return message.body(json()).value(json -> {
+		return message.body(json).value(json -> {
 
 			final FullEntity<?> entity=decoder.decode(json, driver(message.shape()));
 
@@ -162,19 +140,9 @@ public final class EntityFormat implements Format<Entity> {
 	}
 
 	@Override public <M extends Message<M>> M set(final M message, final Entity value) {
-		return message.body(json(),
+		return message.body(json,
 				encoder.encode(value, driver(message.shape()))
 		);
-	}
-
-
-	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof EntityFormat
-				&& datastore.equals(((EntityFormat)object).datastore);
-	}
-
-	@Override public int hashCode() {
-		return datastore.hashCode();
 	}
 
 

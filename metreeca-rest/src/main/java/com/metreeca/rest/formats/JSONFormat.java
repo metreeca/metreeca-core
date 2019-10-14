@@ -44,7 +44,7 @@ import static java.util.Collections.singletonMap;
  *
  * @see "https://javaee.github.io/jsonp/"
  */
-public final class JSONFormat implements Format<JsonObject> {
+public final class JSONFormat extends Format<JsonObject> {
 
 	/**
 	 * The default MIME type for JSON message bodies.
@@ -57,8 +57,6 @@ public final class JSONFormat implements Format<JsonObject> {
 	public static final Pattern MIMEPattern=Pattern.compile("^application/(.*\\+)?json$");
 
 
-	private static final JSONFormat Instance=new JSONFormat();
-
 	private static final JsonWriterFactory JsonWriters=Json
 			.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true));
 
@@ -69,7 +67,7 @@ public final class JSONFormat implements Format<JsonObject> {
 	 * @return the singleton JSON body format instance
 	 */
 	public static JSONFormat json() {
-		return Instance;
+		return new JSONFormat();
 	}
 
 
@@ -156,6 +154,10 @@ public final class JSONFormat implements Format<JsonObject> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private final ReaderFormat reader=reader();
+	private final WriterFormat writer=writer();
+
+
 	private JSONFormat() {}
 
 
@@ -169,7 +171,7 @@ public final class JSONFormat implements Format<JsonObject> {
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
 		return message.headers("Content-Type").stream().anyMatch(type -> MIMEPattern.matcher(type).matches())
 
-				? message.body(reader()).process(source -> {
+				? message.body(reader).process(source -> {
 
 			try (
 					final Reader reader=source.get();
@@ -201,7 +203,7 @@ public final class JSONFormat implements Format<JsonObject> {
 	@Override public <M extends Message<M>> M set(final M message, final JsonObject value) {
 		return message
 				.header("Content-Type", MIME)
-				.body(writer(), target -> {
+				.body(writer, target -> {
 					try (
 							final Writer writer=target.get();
 							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)

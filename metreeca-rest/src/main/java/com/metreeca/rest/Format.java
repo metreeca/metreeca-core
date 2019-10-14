@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.toMap;
  *
  * @param <V> the type of the message body representation managed by the body format
  */
-public interface Format<V> {
+public abstract class Format<V> {
 
 	/**
 	 * Parses a JSON {@linkplain Request#query(Format, Shape) query} field path.
@@ -55,7 +55,7 @@ public interface Format<V> {
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	public default List<?> path(final String base, final Shape shape, final String path) {
+	public List<?> path(final String base, final Shape shape, final String path) {
 
 		if ( base == null ) {
 			throw new NullPointerException("null base");
@@ -86,7 +86,7 @@ public interface Format<V> {
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	public default Object value(final String base, final Shape shape, final JsonValue value) {
+	public Object value(final String base, final Shape shape, final JsonValue value) {
 
 		if ( base == null ) {
 			throw new NullPointerException("null base");
@@ -115,6 +115,8 @@ public interface Format<V> {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Retrieves a body representation from a message.
 	 *
@@ -135,7 +137,7 @@ public interface Format<V> {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public default Result<V, Failure> get(final Message<?> message) {
+	public Result<V, Failure> get(final Message<?> message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
@@ -157,7 +159,7 @@ public interface Format<V> {
 	 *
 	 * @throws NullPointerException if either {@code message} or {@code value} is null
 	 */
-	public default <M extends Message<M>> M set(final M message, final V value) {
+	public <M extends Message<M>> M set(final M message, final V value) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
@@ -168,6 +170,23 @@ public interface Format<V> {
 		}
 
 		return message;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 *
+	 * {@inheritDoc}
+	 *
+	 * <p>By all formats in the same class are equal to each other.</p>
+	 */
+	@Override public boolean equals(final Object object) {
+		return this == object || object != null && getClass().equals(object.getClass());
+	}
+
+	@Override public int hashCode() {
+		return getClass().hashCode();
 	}
 
 }

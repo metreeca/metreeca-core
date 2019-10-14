@@ -126,7 +126,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 	private final Datastore datastore=service(datastore());
 	private final Logger logger=service(logger());
 
-	private final EntityFormat format=entity(datastore);
+	private final EntityFormat entity=entity();
 
 
 	Future<Response> handle(final Request request) {
@@ -138,7 +138,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 	private Future<Response> holder(final Request request) {
 
-		return request.query(format, digest(request.shape()))
+		return request.query(entity, digest(request.shape()))
 
 				.value(query -> query.map(new Probe<Function<Response, Response>>() {
 
@@ -181,7 +181,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK) // containers are virtual and respond always with 200 OK
 				.shape(field(GCP.contains, convey(shape)))
-				.body(format, container);
+				.body(entity, container);
 
 	}
 
@@ -217,7 +217,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK)
 				.shape(DatastoreEngine.TermsShape)
-				.body(format, container);
+				.body(entity, container);
 
 	}
 
@@ -309,7 +309,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 		return response -> response
 				.status(OK)
 				.shape(DatastoreEngine.StatsShape)
-				.body(format, container.build());
+				.body(entity, container.build());
 
 	}
 
@@ -335,7 +335,7 @@ final class DatastoreRelator extends DatastoreProcessor {
 					.map(entity -> response
 							.status(OK)
 							.shape(shape)
-							.body(format, entity)
+							.body(this.entity, entity)
 					)
 
 					.orElseGet(() -> response
