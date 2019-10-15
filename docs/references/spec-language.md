@@ -24,7 +24,7 @@ Linked data [shapes](../javadocs/com/metreeca/tree/Shape.html) define the expect
 
 **Primitive** shapes specify declarative constraints to be meet by the focus set and its member terms. **Composite** shapes recursively assemble other shapes into tree-structured complex constraints.
 
-Linked data selection tasks identify the set of subjects in an RDF graph whose RDF descriptions are consistent with a possibly composite shape. Selection results are reported either as an RDF graph or a structured report according to the choosen [query](#queries) type.
+Linked data selection tasks identify the set of subjects in an RDF graph whose RDF descriptions are consistent with a possibly composite shape. Selection results are reported either as an RDF graph or a structured report according to the choosen [query](faceted-search#queries) type.
 
 Linked data validation tasks verify that the RDF description of an initial focus set is consistent with the constraints specified by a possibly composite shape. During the process, derived focus sets connected by [structural constraints](#structural-constraints) may be recursively validated. Validation results are reported as a structured [focus validation trace](../javadocs/com/metreeca/tree/Trace.html).
 

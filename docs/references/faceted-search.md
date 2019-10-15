@@ -16,24 +16,68 @@ Linked data [queries](../javadocs/com/metreeca/tree/Query.html) define what kind
 JSON query serialization extends the [idiomatic JSON](idiomatic-json) format with  query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all RDF terms appearing in filters, including [shorthands](idiomatic-json#literals) for numeric values and literals with provable datatypes.
 
 <p class="warning">Work in progress… specs to be improved and detailed.</p>
+JSON-based queries are appended to container IRIs using one of the following encodings:
 
-## Edges Query
+- [URLEncoded](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI) (e.g. `"http://example.com/container/?"+encodeURI({ <query> })`)
+- [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams) (e.g. `"http://example.com/container/?"+new URLSearchParams({ <query> })`)
 
-[Edges](../javadocs/com/metreeca/tree/queries/Edges.html) queries return the RDF description of container items matching a set of facet filters.
+The second form supports idiomatic collection filtering (e.g. `http://example.com/container/?<property>=<value>&…`, but requires:
 
-    <edges query> ::= { // all fields are optional and nullable
-        "filter": <filter>,        
-        "order": <criterion> | [<criterion>,(<criterion>)*],
-        "offset": <integer>,
-        "limit": <integer>
+- values to contain no comma;
+- boolean, numeric and other literal properties to be specified as such in the driving shape.
+
+## Items Query
+
+[Items](../javadocs/com/metreeca/tree/queries/Items.html) queries return the RDF description of container items matching a set of facet filters.
+
+    <items query> ::= { // all fields are optional and nullable
+    
+        "<filter>": <term> | [<term>, …],
+        
+        ⋮
+        
+        "_order": <criterion> | [<criterion>,(<criterion>)*],
+        "_offset": <integer>,
+        "_limit": <integer>
+        
     }
     
     <criterion> :;= "[-+]?<path>"
+
+```
+<items response> ::= {
+    "@id": "<target-iri>"
+    "contains": [<term>(, <term>)*]
+}
+```
+
+## Terms Query
+
+[Terms](../javadocs/com/metreeca/tree/queries/Terms.html) queries return an RDF report detailing option values and counts for a facet specified by a target property path, taking into account applied filters.
+
+    <terms query> ::= {
+            
+        "<filter>": <term> | [<term>, …],  // optional and nullable
+        
+        ⋮
     
-    <edges response> ::= {
-        "this": "<target-iri>"
-        "contains": [<term>(, <term>)*]
+        "_terms": "<path>"
+    
     }
+
+```
+<terms response> ::= {
+
+    "@id": "<target-iri>"
+        
+    "terms": [ // sorted by descending count
+        {
+            "value": { "@id": <iri>[, "label": "<label>"]} | <literal>,
+            "count": <number>
+        }
+    ]
+}
+```
 
 ## Stats Query
 
@@ -41,15 +85,20 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json) format wit
 
 ```
 <stats query> ::= {
-    "stats": "<path>",
-    "filter": <filter> // optional and nullable
+    
+    "<filter>": <term> | [<term>, …],  // optional and nullable
+    
+    ⋮
+
+    "_stats": "<path>"
+    
 }
 ```
 
 ```
 <stats response> ::= {
 
-    "this": "<target-iri>"
+    "@id": "<target-iri>"
     
     // global stats 
     
@@ -61,7 +110,7 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json) format wit
     
     "stats": [
         {
-            "this": "<datatype-iri>",
+            "@id": "<datatype-iri>",
             "count": <number>,
             "min": <term>,
             "max": <term>
@@ -70,69 +119,45 @@ JSON query serialization extends the [idiomatic JSON](idiomatic-json) format wit
 }
 ```
 
-## Items Query
-
-[Items](../javadocs/com/metreeca/tree/queries/Items.html) queries return an RDF report detailing option values and counts for a facet specified by a target property path, taking into account applied filters.
-
-    <items query> ::= {
-        "items": "<path>",
-        "filter": <filter> // optional and nullable
-    }
-    
-    <items response> ::= {
-    
-        "this": "<target-iri>"
-            
-        // items sorted by descending count
-        
-        "items": [
-            {
-                "value": <term>, // resources are labelled
-                "count": <number>
-            }
-        ]
-    }
-
 # Extended JSON
 
 ## Facet Filters
 
+```
+<filter> ::= {
 
-    <filter> ::= {
+    "^ <path>": "<datatype>", // datatype
+    "@ <path>": "<class>", // class
     
-        "^": <datatype>, // datatype
-        "@": <class>, // class
-        
-        ">": <term>, // minExclusive
-        "<": <term>, // maxExclusive
-        ">=": <term>, // minInclusive
-        "<=": <term>, // maxInclusive
-        
-        ">#": <object>, // minLength
-        "#<": <object>, // maxLength
-        
-        "*": "pattern", // pattern (regular expression matching)
-        "~": "keywords", // like (stemmed word search)
+    "> <path>": <term>, // minExclusive
+    "< <path>: <term>, // maxExclusive
+    ">= <path>": <term>, // minInclusive
+    "<= <path>": <term>, // maxInclusive
     
-        ">>": <term>, // minCount
-        "<<": <term>, // maxCount
-        
-        "!": <term> | [<term>(, <term>)*], // all
-        "?": <term> | [<term>(, <term>)*], // any
+    "$> <path>": <term>, // minLength
+    "$< <path>": <term>, // maxLength
     
-        "<path>": <filter>, // nested property filter
+    "* <path>": "pattern", // pattern (regular expression matching)
+    "~ <path>": "keywords", // like (stemmed word search)
+    
+    "#> <path>": <integer>, // minCount
+    "#< <path>": <integer>, // maxCount
+    
+    "% <path>": <term> | [<term>(, <term>)*], // in
+    "! <path>": <term> | [<term>(, <term>)*], // all
+    "? <path>": <term> | [<term>(, <term>)*], // any
         
-        "<path>": <term>, // nested filter shorthand for { "?": <term> }
-        "<path>": [<term>(, <term>)*] // nested filter shorthand for { "?": [<term>(, <term>)*] }
-        
-    }
+    "<path>": <term>, //  shorthand for "? <path": <term>
+    "<path>": [<term>(, <term>)*] // shorthand for "? <path>": [<term>(, <term>)*]
+    
+}
+```
 
 ## Property Paths
 
 ```
-<path> ::= (<iri> | ^<iri>)?
-         | (<step> ('/' <step>)*)?
-         | (<alias> ('.' <alias>)*)?
+<path> ::= (<step> ('/' <step>)*)?
+         | (<step> ('.' <step>)*)?
          
-<step> ::= <<iri>> | ^<<iri>> | <alias>
+<step> ::= <<iri>> | ^<<iri>> | "<alias>" # whitespace around steps ignored
 ```
