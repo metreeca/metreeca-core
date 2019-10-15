@@ -151,9 +151,10 @@ public abstract class Gateway implements Filter {
 			final ServletRequest request, final ServletResponse response, final FilterChain chain
 	) throws ServletException, IOException {
 
-		context.get(handler)
+		context.exec(() -> context.get(handler)
 				.handle(request((HttpServletRequest)request))
-				.accept(_response -> response((HttpServletResponse)response, _response));
+				.accept(_response -> response((HttpServletResponse)response, _response))
+		);
 
 		if ( !response.isCommitted() ) {
 			chain.doFilter(request, response);
