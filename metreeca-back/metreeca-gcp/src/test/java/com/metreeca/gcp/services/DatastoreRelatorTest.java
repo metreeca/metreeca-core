@@ -821,9 +821,12 @@ final class DatastoreRelatorTest extends DatastoreTestBase {
 
 						.set(DatastoreEngine.stats, ListValue.of(FullEntity.newBuilder()
 
-								.set(JSONFormat.type, Optional
-										.ofNullable(min.getType().toString())
-										.orElse(max.getType().toString())
+								.setKey(service(datastore()).newKeyFactory()
+										.setKind(GCP.Resource)
+										.newKey(Optional
+												.ofNullable(min.getType().toString())
+												.orElse(max.getType().toString())
+										)
 								)
 
 								.set(DatastoreEngine.count, count)

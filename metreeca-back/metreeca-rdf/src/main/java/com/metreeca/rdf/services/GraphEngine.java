@@ -56,8 +56,6 @@ public final class GraphEngine implements Engine {
 	static final IRI stats=iri(Base, "stats");
 
 	static final IRI value=iri(Base, "value");
-	static final IRI type=iri(Base, "value");
-
 	static final IRI count=iri(Base, "count");
 	static final IRI max=iri(Base, "max");
 	static final IRI min=iri(Base, "min");
@@ -81,7 +79,6 @@ public final class GraphEngine implements Engine {
 			field(max, and(optional(), TermShape)),
 
 			field(stats, and(multiple(),
-					field(type, and(required(), datatype(XMLSchema.STRING))),
 					field(count, and(required(), datatype(XMLSchema.INTEGER))),
 					field(min, and(required(), TermShape)),
 					field(max, and(required(), TermShape))

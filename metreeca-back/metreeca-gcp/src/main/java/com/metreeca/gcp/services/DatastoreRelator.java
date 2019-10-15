@@ -292,9 +292,10 @@ final class DatastoreRelator extends DatastoreProcessor {
 
 					.map(entry -> {
 
-						final FullEntity.Builder<?> item=FullEntity.newBuilder();
+						final FullEntity.Builder<?> item=FullEntity.newBuilder(
+								datastore.newKeyFactory().setKind(GCP.Resource).newKey(entry.getKey())
+						);
 
-						item.set(JSONFormat.type, entry.getKey());
 						entry.getValue().set(item);
 
 						return item.build();

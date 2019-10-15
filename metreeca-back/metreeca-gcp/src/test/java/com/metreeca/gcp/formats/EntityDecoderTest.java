@@ -129,14 +129,6 @@ final class EntityDecoderTest extends DatastoreTestBase {
 		);
 	}
 
-
-	@Test void testDecodeObjectFieldsEmpty() {
-		exec(() -> assertThat(decode("{ 'field': {} }"))
-
-				.satisfies(entity -> assertThat(entity.getEntity("field").hasKey()).isFalse())
-		);
-	}
-
 	@Test void testDecodeObjectFields() {
 		exec(() -> assertThat(decode("{ 'field': { 'id': '/path', 'type': 'Class', 'value' : 123 } }").getEntity("field"))
 

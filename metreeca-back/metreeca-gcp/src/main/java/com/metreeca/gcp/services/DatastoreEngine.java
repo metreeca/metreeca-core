@@ -49,8 +49,6 @@ public final class DatastoreEngine implements Engine {
 	static final String stats="stats";
 
 	static final String value="value";
-	static final String type="type";
-
 	static final String count="count";
 	static final String max="max";
 	static final String min="min";
@@ -74,7 +72,6 @@ public final class DatastoreEngine implements Engine {
 			field(max, and(optional(), TermShape)),
 
 			field(stats, and(multiple(),
-					field(type, and(required(), datatype(STRING))),
 					field(count, and(required(), datatype(LONG))),
 					field(min, and(required(), TermShape)),
 					field(max, and(required(), TermShape))
