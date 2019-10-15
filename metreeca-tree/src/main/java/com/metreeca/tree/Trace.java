@@ -62,7 +62,7 @@ public final class Trace {
 		return new Trace(issues.entrySet().stream(), Stream.empty());
 	}
 
-	public static Trace trace(final Map<String, Collection<Object>> issues, final Map<String, Trace> fields) {
+	public static Trace trace(final Map<String, Collection<Object>> issues, final Map<Object, Trace> fields) {
 		return new Trace(issues.entrySet().stream(), fields.entrySet().stream());
 	}
 
@@ -70,12 +70,12 @@ public final class Trace {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Map<String, Collection<Object>> issues;
-	private final Map<String, Trace> fields;
+	private final Map<Object, Trace> fields;
 
 
 	private Trace(
 			final Stream<Map.Entry<String, Collection<Object>>> issues,
-			final Stream<Map.Entry<String, Trace>> fields
+			final Stream<Map.Entry<Object, Trace>> fields
 	) {
 
 		this.issues=issues
@@ -87,7 +87,6 @@ public final class Trace {
 				));
 
 		this.fields=fields
-				.filter(field -> !field.getKey().isEmpty())
 				.filter(field -> !field.getValue().isEmpty())
 				.collect(toMap(
 						Map.Entry::getKey, Map.Entry::getValue,
@@ -106,7 +105,7 @@ public final class Trace {
 		return unmodifiableMap(issues);
 	}
 
-	public Map<String, Trace> getFields() {
+	public Map<Object, Trace> getFields() {
 		return unmodifiableMap(fields);
 	}
 

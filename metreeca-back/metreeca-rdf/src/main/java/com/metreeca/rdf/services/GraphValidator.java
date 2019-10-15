@@ -49,9 +49,7 @@ import static com.metreeca.tree.Trace.trace;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
-import static java.util.Collections.disjoint;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 
 
@@ -409,7 +407,9 @@ final class GraphValidator extends GraphProcessor {
 
 				// validate the field shape on the new focus set
 
-				return shape.map(new ValidatorProbe(connection, resource, focus, source, target));
+				return trace(emptyMap(), singletonMap(iri,
+						shape.map(new ValidatorProbe(connection, resource, focus, source, target))
+				));
 
 			}).reduce(trace(), Trace::trace);
 		}

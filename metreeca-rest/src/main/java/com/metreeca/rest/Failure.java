@@ -388,7 +388,7 @@ public final class Failure implements Function<Response, Response> {
 		trace.getFields().forEach((name, nested) -> {
 
 			if ( !nested.isEmpty() ) {
-				builder.add(name, format(nested));
+				builder.add(name.toString(), format(nested));
 			}
 
 		});

@@ -363,6 +363,20 @@ final class GraphValidatorTest {
 	}
 
 
+	@Test void testValidateField() {
+		exec(() -> {
+
+			final Shape shape=minCount(1);
+
+			assertThat(validate(shape, "<x>, <z>")).hasValue();
+
+			assertThat(validate(shape)).as("empty focus").hasError();
+
+		});
+
+	}
+
+
 	@Test void testValidateConjunction() {
 		exec(() -> {
 
