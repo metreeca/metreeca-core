@@ -38,15 +38,15 @@ import static com.metreeca.rest.Wrapper.wrapper;
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Deleter extends Actor { // !! tbd
+public final class Deleter extends Actor {
 
 	public Deleter() {
 		delegate(deleter()
 
 				.with(connector())
 				.with(wrapper(Request::collection,
-						throttler(Shape.Relate, Shape.Holder),
-						throttler(Shape.Relate, Shape.Detail)
+						throttler(Shape.Delete, Shape.Holder),
+						throttler(Shape.Delete, Shape.Detail)
 				))
 
 		);
