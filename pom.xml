@@ -503,7 +503,7 @@
 						<version>1.6</version>
 
 						<configuration>
-							<executable>gpg2</executable>
+							<executable>gpg</executable>
 							<passphraseServerId>gpg.metreeca</passphraseServerId>
 						</configuration>
 
