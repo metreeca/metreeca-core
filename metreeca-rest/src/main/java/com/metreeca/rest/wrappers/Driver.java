@@ -131,7 +131,7 @@ public final class Driver implements Wrapper {
 	}
 
 	private Response after(final Response response) {
-		return response.success() ? response.header("+Link", format(
+		return response.request().safe() && response.success() ? response.header("+Link", format(
 				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, SpecsLink
 		)) : response;
 	}
