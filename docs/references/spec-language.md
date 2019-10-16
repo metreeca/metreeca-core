@@ -48,7 +48,7 @@ Common metadata annotations are directly available as shorthand shapes.
 | [dflt](../javadocs/com/metreeca/tree/shapes/Meta.html#dflt-java.lang.Object-)(value) | the default for the expected values of the enclosing shape   |
 | [hint](../javadocs/com/metreeca/tree/shapes/Meta.html#hint-java.lang.String-)("IRI") | the IRI of a resource hinting at possible values for the enclosing shape (e.g. an LDP container) |
 | [group](../javadocs/com/metreeca/tree/shapes/Meta.html#group-java.lang.String-)("value") | a client-specific group visualization mode for the enclosing shape |
-| [index](com/metreeca/tree/shapes/Meta.html#index-boolean-)(true\|false) | an indexing hint: `true` if the value of the enclosing shape should be indexed in the storage backed, `false` otherwise |
+| [index](../javadocs/com/metreeca/tree/shapes/Meta.html#index-boolean-)(true\|false) | an indexing hint: `true` if the value of the enclosing shape should be indexed in the storage backed, `false` otherwise |
 
 ## Term Constraints
 
@@ -59,7 +59,7 @@ Primitive shapes specifying constraints to be individually met by each RDF term 
 | [datatype](../javadocs/com/metreeca/tree/shapes/Datatype.html)(IRI) | each term in the focus set has a given extended RDF datatype IRI; IRI references and blank nodes are considered to be respectively of `app:/terms#iri` ([Values.IRI](../javadocs/com/metreeca/rdf/Values.html#IRIType)) and `app:/terms#bnode` ([Values.BNode](../javadocs/com/metreeca/rdf/Values.html#BNodeType)) datatype |
 | [class](../javadocs/com/metreeca/tree/shapes/Clazz.html)(IRI) | each term in the focus set is an instance of a given RDF class or one of its superclasses |
 | [minExclusive](../javadocs/com/metreeca/tree/shapes/MinExclusive.html)(value) | each term in the focus set is strictly greater than a given minum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
-| [maxExclusive](../javadocs/com/metreeca/tree/shapes/MaxExclusive.html)(value) | each term in the focus set is strictly less than a given maximum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11- ̰query-20130321/#modOrderBy">SPARQL ordering</a> rules |
+| [maxExclusive](../javadocs/com/metreeca/tree/shapes/MaxExclusive.html)(value) | each term in the focus set is strictly less than a given maximum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
 | [minInclusive](../javadocs/com/metreeca/tree/shapes/MinInclusive.html)(value) | each term in the focus set is greater than or equal to a given minimum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
 | [maxInclusive](../javadocs/com/metreeca/tree/shapes/MaxInclusive.html)(value) | each term in the focus set is less than or equal to a given maximum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
 | [minLength](../javadocs/com/metreeca/tree/shapes/MinLength.html)(length) | the length of the lexical representation of each term in the focus set is greater than or equal to the given minimum value |
