@@ -28,13 +28,12 @@ import org.eclipse.rdf4j.model.IRI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rest.Codecs.decode;
-import static com.metreeca.rest.Codecs.encode;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
@@ -79,6 +78,11 @@ import static java.util.stream.Collectors.toMap;
  * #Rewriter(String) base} to the expected public server base effectively disables rewriting in production.</p>
  */
 public final class Rewriter implements Wrapper {
+
+	private static final Pattern QueryWordPattern=Pattern.compile("[^=&]+");
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final String base;
 
@@ -136,25 +140,15 @@ public final class Rewriter implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Request rewrite(final Request request, final Engine engine) {
-
-		final String base=request.base();
-
-		final String encoded=request.query();
-		final String decoded=decode(encoded);
-
-		// clone the external request to preserve it for linking to the external response
-
-		return new Request().lift(request)
+		return new Request().lift(request) // preserve the external request it for linking to the external response
 
 				.user(request.user().map(RDFFormat::iri).map(engine::rewrite).orElse(null))
 				.roles(engine.rewrite(request.roles(), engine::rewrite))
 
 				.method(request.method())
-				.base(engine.rewrite(base))
+				.base(engine.rewrite(request.base()))
 				.path(request.path())
-				.query(encoded.equals(decoded) ? // re-encode the rewritten query only if it was originally encoded
-						engine.rewrite(encoded) : encode(engine.rewrite(decoded))
-				)
+				.query(rewrite(request.query(), engine))
 
 				.parameters(engine.rewrite(request.parameters()))
 
@@ -162,9 +156,32 @@ public final class Rewriter implements Wrapper {
 
 				.shape(engine.rewrite(request.shape()))
 
-				.header(RDFFormat.ExternalBase, base); // make the external base available to rewriting in RDFBody
+				.header(RDFFormat.ExternalBase, request.base()); // make the external base available to rewriting in RDFBody
 
 	}
+
+	private String rewrite(final CharSequence query, final Engine engine) {
+
+		final StringBuffer buffer=new StringBuffer(query.length());
+		final Matcher matcher=QueryWordPattern.matcher(query);
+
+		while ( matcher.find() ) {
+
+			final String encoded=matcher.group();
+			final String decoded=Codecs.decode(encoded);
+
+			final String rewritten=engine.rewrite(decoded);
+
+			matcher.appendReplacement(buffer,
+					encoded.equals(decoded)? rewritten : Codecs.encode(rewritten) // re-encode only if actually encoded
+			);
+		}
+
+		matcher.appendTail(buffer);
+
+		return buffer.toString();
+	}
+
 
 	private Response rewrite(final Request request, final Response response, final Engine engine) {
 

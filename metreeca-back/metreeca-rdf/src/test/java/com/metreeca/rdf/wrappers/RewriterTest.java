@@ -18,6 +18,7 @@
 package com.metreeca.rdf.wrappers;
 
 import com.metreeca.rdf.Values;
+import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 
@@ -35,7 +36,6 @@ import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.decode;
-import static com.metreeca.rdf.ValuesTest.encode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.BadRequest;
@@ -77,6 +77,11 @@ final class RewriterTest {
 
 	private static Statement external(final String subject, final String predicate, final String object) {
 		return statement(external(subject), external(predicate), external(object));
+	}
+
+
+	private String encode(final IRI iri) {
+		return Codecs.encode(iri.toString());
 	}
 
 
@@ -144,7 +149,7 @@ final class RewriterTest {
 
 					assertThat(request.query())
 							.as("rewritten encoded query")
-							.isEqualTo(Codecs.encode(internal("request").toString()));
+							.isEqualTo(encode(internal("one"))+"&"+encode(internal("two")));
 
 					return request.reply(response -> response.status(OK));
 
@@ -153,7 +158,7 @@ final class RewriterTest {
 				.handle(new Request()
 
 						.base(External)
-						.query(Codecs.encode(external("request").toString()))
+						.query(encode(external("one"))+"&"+encode(external("two")))
 
 				)
 
@@ -222,7 +227,7 @@ final class RewriterTest {
 						.base(External)
 						.path("/s")
 
-						.body(input(), () -> Codecs.input(new StringReader(encode(singleton(
+						.body(input(), () -> Codecs.input(new StringReader(ValuesTest.encode(singleton(
 								external("s", "p", "o")
 						))))))
 
