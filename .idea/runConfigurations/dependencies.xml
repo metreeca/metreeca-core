@@ -10,9 +10,7 @@
           </option>
           <option name="goals">
             <list>
-              <option value="-X" />
               <option value="dependency:tree" />
-              <option value="-Dverbose" />
             </list>
           </option>
           <option name="pomFileName" />
