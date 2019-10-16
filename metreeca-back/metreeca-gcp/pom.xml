@@ -40,7 +40,7 @@
             <dependency> <!-- https://search.maven.org/search?q=a:google-cloud-bom -->
                 <groupId>com.google.cloud</groupId>
                 <artifactId>google-cloud-bom</artifactId>
-                <version>0.110.0-alpha</version>
+                <version>0.115.0-alpha</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
