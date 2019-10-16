@@ -81,9 +81,13 @@ final class GraphRelator extends GraphProcessor {
 
 							final Collection<Statement> model=fetch(connection, item, query);
 
-							return response
+							// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-									.status(resource && model.isEmpty() ? NotFound : OK) // !!! 410 Gone if previously known
+							return resource && model.isEmpty()? response.status(NotFound) : response
+
+									// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+
+									.status(OK)
 
 									.header("+Preference-Applied",
 											minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
