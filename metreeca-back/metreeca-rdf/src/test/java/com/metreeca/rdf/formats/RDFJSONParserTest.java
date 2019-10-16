@@ -180,7 +180,7 @@ final class RDFJSONParserTest {
 				.as("custom")
 				.isEqualTo(decode("[] rdf:first 'text'^^:type ."));
 
-		assertThat(rdf(map(entry("id", ""), entry(first, map(entry("value", "text"), entry("type", "@en"))))))
+		assertThat(rdf(map(entry("id", ""), entry(first, map(entry("value", "text"), entry("language", "en"))))))
 				.as("tagged")
 				.isEqualTo(decode("[] rdf:first 'text'@en ."));
 

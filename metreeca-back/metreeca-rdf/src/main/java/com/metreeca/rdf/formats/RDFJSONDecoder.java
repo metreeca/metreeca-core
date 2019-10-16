@@ -22,6 +22,7 @@ import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.net.URI;
@@ -196,10 +197,10 @@ abstract class RDFJSONDecoder {
 
 	private Map.Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape, final Resource focus) {
 
-		String id="";
-		String value="";
-		String type="";
-		String language="";
+		String id=null;
+		String value=null;
+		String type=null;
+		String language=null;
 
 		for (final Map.Entry<String, JsonValue> entry : object.entrySet()) {
 
@@ -207,7 +208,7 @@ abstract class RDFJSONDecoder {
 
 			final Supplier<String> string=() -> entry.getValue() instanceof JsonString
 					? ((JsonString)entry.getValue()).getString()
-					: error("literal '"+entry.getKey()+"' field is not a string");
+					: error("'"+entry.getKey()+"' field is not a string");
 
 			if ( label.equals(JSONFormat.id) ) {
 				id=string.get();
@@ -221,23 +222,15 @@ abstract class RDFJSONDecoder {
 
 		}
 
+		final Value _value
 
-		final String datatype=type.isEmpty()
-				? datatype(shape).map(RDFFormat::iri).map(Value::stringValue).orElse("")
-				: type;
+				=(id != null) ? resource(id)
 
-		final Value _value=(id.isEmpty() && value.isEmpty() && type.isEmpty() && focus != null) ? focus
+				: (value != null) ? (type != null) ? literal(value, iri(type))
+				: (language != null) ? literal(value, language)
+				: literal(value, datatype(shape).map(RDFFormat::iri).orElse(XMLSchema.STRING))
 
-				: datatype.isEmpty() ? resource(id)
-
-				: datatype.equals(IRIType.stringValue()) ? iri(id)
-				: datatype.equals(BNodeType.stringValue()) ? bnode(id)
-				: datatype.equals(ResourceType.stringValue()) ? resource(id)
-
-				: !language.isEmpty() ? literal(value, language)
-				: datatype.startsWith("@") ? literal(value, type.substring(1))
-
-				: literal(value, iri(datatype));
+				: focus != null ? focus : bnode();
 
 		return focus != null && !focus.equals(_value) ? entry(focus, Stream.empty())
 				: _value instanceof Resource ? properties(object, shape, (Resource)_value)
@@ -286,29 +279,39 @@ abstract class RDFJSONDecoder {
 
 		final Map<Object, Shape> fields=fields(shape);
 
-		return entry(source, object.entrySet().stream()
-				.filter(field -> !resolver.apply(field.getKey()).startsWith("@"))
-				.flatMap(field -> {
+		return entry(source, object.entrySet().stream().flatMap(field -> {
 
-					final String label=resolver.apply(field.getKey());
-					final JsonValue value=field.getValue();
+			final String label=resolver.apply(field.getKey());
+			final JsonValue value=field.getValue();
 
-					final IRI property=property(label, shape);
+			if ( label.equals(JSONFormat.type) && value instanceof JsonString ) {
 
-					return values(value, fields.get(property), null).entrySet().stream().flatMap(entry -> {
+				return Stream.of(statement(source, RDF.TYPE, iri(((JsonString)value).getString())));
 
-						final Value target=entry.getKey();
-						final Stream<Statement> model=entry.getValue();
+			} else if ( !label.startsWith("@") ) {
 
-						final Statement edge=direct(property) ? statement(source, property, target)
-								: target instanceof Resource ? statement((Resource)target, inverse(property), source)
-								: error(String.format("target for inverse property is not a resource [%s: %s]", label, entry));
+				final IRI property=property(label, shape);
 
-						return Stream.concat(Stream.of(edge), model);
+				return values(value, fields.get(property), null).entrySet().stream().flatMap(entry -> {
 
-					});
+					final Value target=entry.getKey();
+					final Stream<Statement> model=entry.getValue();
 
-				}));
+					final Statement edge=direct(property) ? statement(source, property, target)
+							: target instanceof Resource ? statement((Resource)target, inverse(property), source)
+							: error(String.format("target for inverse property is not a resource [%s: %s]", label, entry));
+
+					return Stream.concat(Stream.of(edge), model);
+
+				});
+
+			} else {
+
+				return Stream.empty();
+
+			}
+
+		}));
 	}
 
 	private IRI property(final String label, final Shape shape) {
@@ -325,13 +328,13 @@ abstract class RDFJSONDecoder {
 
 			if ( naked != null ) {
 
-				final IRI iri=iri(resolve(naked));
+				final IRI iri=iri(naked);
 
 				return inverse ? inverse(iri) : iri;
 
 			} else if ( bracketed != null ) {
 
-				final IRI iri=iri(resolve(bracketed));
+				final IRI iri=iri(bracketed);
 
 				return inverse ? inverse(iri) : iri;
 

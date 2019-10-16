@@ -17,12 +17,11 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.jupiter.api.Nested;
@@ -169,10 +168,57 @@ final class RDFJSONDecoderTest {
 		@Test void testTaggedLiteral() {
 			assertThat(value(createObjectBuilder()
 					.add("value", "string")
-					.add("type", "@en")
+					.add("language", "en")
 					.build()
 			))
 					.isEqualTo(value(literal("string", "en")));
+		}
+
+
+		@Test void testPartialInfo() {
+
+			assertThat(value(createObjectBuilder()
+					.add("id", "/resource")
+					.add("type", "/type")
+					.build()
+			).getValue())
+					.as("typed resource")
+					.contains(statement(item("/resource"), RDF.TYPE, item("/type")));
+
+			assertThat(value(createObjectBuilder()
+					.add("id", "/resource")
+					.build()
+			).getKey())
+					.as("plain resource")
+					.isEqualTo(item("/resource"));
+
+			assertThat(value(createObjectBuilder()
+					.add("value", "text")
+					.add("type", "/datatype")
+					.build()
+			).getKey())
+					.as("typed literal")
+					.isEqualTo(literal("text", item("/datatype")));
+
+			assertThat(value(createObjectBuilder()
+					.add("value", "text")
+					.build()
+			).getKey())
+					.as("plain literal")
+					.isEqualTo(literal("text"));
+
+
+			ModelAssert.assertThat(value(createObjectBuilder()
+					.add("type", "/type")
+					.build()
+			).getValue())
+					.as("typed bnode")
+					.isIsomorphicTo(statement(bnode(), RDF.TYPE, item("/type")));
+
+			assertThat(value(createObjectBuilder().build()).getKey())
+					.as("plain bnode")
+					.isInstanceOf(BNode.class);
+
 		}
 
 	}
