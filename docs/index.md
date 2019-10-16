@@ -1,7 +1,8 @@
 ---
 ---
 
-Metreeca/Link is an open source [RDF4J](http://rdf4j.org)-based Java framework enabling rapid development of RESTful linked data services.
+Metreeca/Link is an open source Java framework enabling rapid model-driven development of RESTful linked data services.
+
 
 Its engine automatically converts declarative high-level domain models defined with [SHACL](https://www.w3.org/TR/shacl/) and [SPARQL](https://www.w3.org/TR/sparql11-overview/) into extended linked data APIs supporting faceted search, data validation and fine‑grained role‑based read/write access control rules.
 
@@ -27,4 +28,10 @@ References
 - [REST Faceted Search API](references/faceted-search)
 - [Idiomatic RDF/JSON Serialization](references/idiomatic-json)
 <!-- - [Known Issues](references/known-issues) -->
+
+---
+
+home / [www.metreeca.com](https://www.metreeca.com/)  
+code / [github.com/metreeca/link](https://github.com/metreeca/link)  
+forum / [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca)
 

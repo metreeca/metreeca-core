@@ -8,17 +8,17 @@ Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serializa
 Codecs for this serialization make heavy use of reasoning over linked data shapes to **prove** useful features of the RDF payload, like the expected value for a property being a IRI reference or a required non-repeatable string.
 
 <p class="note">This serialization format is intended to simplify front-end development by converting RDF descriptions to/from idiomatic JSON objects structured according to the conventions a JavaScript developer would expect from a typical REST/JSON API. Unlike JSON-LD,  it doesn't cater to roundtrip de/serialization of RDF payloads without access to the target shape.</p>
-
 # RDF4J Codecs
 
-The [shapes library](../javadocs/com/metreeca/form/package-summary.html) automatically [registers](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/common/lang/service/ServiceRegistry.html)  idiomatic JSON codecs with the RDF4J framework, using the `application/json` MIME type and the [JSON](../javadocs/com/metreeca/form/codecs/JSONCodec.html) RDF4J [RDF format](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFFormat.html).
+The RDF/SPARQL [adapter](../javadocs/com/metreeca/rdf/package-summary.html) automatically [registers](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/common/lang/service/ServiceRegistry.html)  idiomatic JSON codecs with the RDF4J framework, using the `application/json` MIME type and the [RDFJSONFormat](../javadocs/com/metreeca/rdf/formats/RDFFormat.html#RDFJSONFormat) RDF4J [RDF format](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFFormat.html).
 
-Codec behaviour is controlled through the following  RDF4J [RioSetting](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RioSetting.html) [parser](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFParser.html#set-org.eclipse.rdf4j.rio.RioSetting-T-)/[writer](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RDFWriter.html#set-org.eclipse.rdf4j.rio.RioSetting-T-) configuration properties.
+Codec behaviour is controlled through the following  RDF4J [RioSetting](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/rio/RioSetting.html) configuration properties.
 
-| setting                                  | type                                     | value                                    | default                             |
-| ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------- |
-| [Shape](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Shape) | [Shape](../javadocs/com/metreeca/form/Shape.html) | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
-| [Focus](../javadocs/com/metreeca/form/codecs/JSONCodec.html#Focus) | [Resource](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Resource.html) | the entry point for the de/serializaton process | `null` (will be inferred from data) |
+| setting                                                      | type                                                         | value                                                  | default                             |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------- |
+| [RioShape](../javadocs/com/metreeca/rdf/formats/RDFFormat.html#RioShape) | [Shape](../javadocs/com/metreeca/tree/Shape.html)            | the target shape for the resources to be de/serialized | `null` (will be inferred from data) |
+| [RioFocus](../javadocs/com/metreeca/rdf/formats/RDFFormat.html#RioFocus) | [Resource](http://docs.rdf4j.org/javadoc/latest/org/eclipse/rdf4j/model/Resource.html) | the entry point for the de/serializaton process        | `null` (will be inferred from data) |
+| [RioContext](../javadocs/com/metreeca/rdf/formats/RDFFormat.html#RioContext) | JsonObject                                                   | a custom JSON-LD context for serialisation             | an empty object                     |
 
 # JSON Serialization
 
@@ -46,24 +46,24 @@ RDF terms are serialized to different JSON value patterns according to their kin
 
 ## Blank Nodes
 
-	<blank> ::= {  "_this" : "_:<id>" (, <property>)* }
+	<blank> ::= {  "@id" : "_:<id>" (, <property>)* }
 
 Blank nodes descriptions are serialized as JSON objects including a JSON field for the node identifier and a JSON field for each exposed node property.
 
 ```
-<blank> ::= {  "_this" : "" (, <property>)* }
+<blank> ::= {  "@id" : "" (, <property>)* }
 <blank> ::= { [<property> (, <property>)*] }
 ```
 
-If there is no back-reference from a nested object, the `_this` id field may be left empty or omitted.
+If there is no back-reference from a nested object, the `@id` id field may be left empty or omitted.
 
 ### Back-Links
 
 ```
-<blank> ::= { "_this": "_:<id>" }
+<blank> ::= { "@id": "_:<id>" }
 ```
 
-If the term is a back-link to an enclosing blank node, only the `_this` id field is included.
+If the term is a back-link to an enclosing blank node, only the `@id` id field is included.
 
 ```
 <blank> ::= "_:<id>"
@@ -74,7 +74,7 @@ If the term may be proved to be  a back-reference to an enclosing resource, the 
 ## IRI References
 
 ```
-<iri> ::= { "_this" : "<iri>" (, <property>)* }
+<iri> ::= { "@id" : "<iri>" (, <property>)* }
 ```
 
 IRI reference descriptions are serialized as JSON objects including a JSON field for the term IRI and a JSON field for each exposed term property.
@@ -83,7 +83,7 @@ IRI reference descriptions are serialized as JSON objects including a JSON field
 <iri> ::= { [<property> (, <property>)*] }
 ```
 
-If the term may be proved to be a constant known IRI reference, the `_this` id field may be omitted.
+If the term may be proved to be a constant known IRI reference, the `@id` id field may be omitted.
 
 ```
 <iri> ::= "<iri>"
@@ -94,10 +94,10 @@ If the term may be proved to be an IRI reference without properties, the IRI may
 ### Back-Links
 
 ```
-<iri> ::= { "_this": "<iri>" }
+<iri> ::= { "@id": "<iri>" }
 ```
 
-If the term is a back-reference to an enclosing object, only the `_this` id field is included.
+If the term is a back-reference to an enclosing object, only the `@id` id field is included.
 
 ```
 <iri> ::= "<iri>"
@@ -107,11 +107,11 @@ If the term may be proved to be  a back-reference to an enclosing resource, the 
 
 ### Parsing
 
-When parsing, relative `<iri>` references are resolved against the base URI provided to the [parser](../javadocs/com/metreeca/form/codecs/JSONParser.html), which for HTTP REST operations equals the IRI of the request [item](../javadocs/com/metreeca/rest/Request.html#item--).
+When parsing, relative `<iri>` references are resolved against the base URI provided to the [parser](../javadocs/com/metreeca/rdf/formats/RDFJSONParser.html), which for HTTP REST operations equals the IRI of the request [item](../javadocs/com/metreeca/rest/Request.html#item--).
 
 ### Writing
 
-When writing, local `<iri>` references are relativized as root-relative IRIs against the base URI provided to the [writer](../javadocs/com/metreeca/form/codecs/JSONWRiter.html), which for HTTP REST operations equals the root IRI of the response [item](../javadocs/com/metreeca/rest/Response.html#item--).
+When writing, local `<iri>` references are relativized as root-relative IRIs against the base URI provided to the [writer](../javadocs/com/metreeca/rdf/formats/RDFJSONWRiter.html), which for HTTP REST operations equals the root IRI of the response [item](../javadocs/com/metreeca/rest/Response.html#item--).
 
 ## Term Properties
 
@@ -136,13 +136,12 @@ Predicate IRIs are represented as strings, in either plain or angle bracket nota
 
 If a shape is provided to the codec, predicate IRIs are reported in a shortened form using user-defined or system-inferred  [aliases](spec-language#annotations). Predicate IRIs with clashing aliases are written in full using the angle bracket notation.
 
-<p class="warning"><code>_this</code> and <code>_type</code> properties are reserved for system use.</p>
-
+<p class="warning"><code>@id</code> and <code>_type</code> properties are reserved for system use.</p>
 ## Literals
 
 ```
-"<text>"^^<type> ::= { "_this": "<text>", "_type": "<type>" }
-"<text>"@<lang>  ::= { "_this": "<text>", "_type": "@<lang>" }
+"<text>"^^<type> ::= { "@value": "<text>", "@type": "<type>" }
+"<text>"@<lang>  ::= { "@value": "<text>", "@language": "<lang>" }
 ```
 
 In the more general form, literals are serialized as JSON objects including the literal lexical representation and either the literal datatype IRI or the literal language tag.
@@ -158,7 +157,7 @@ Simple literals and typed `xsd:string` literals are serialized as JSON string va
 "<integer>"^^xsd:integer ::= <integer> # no decimal part
 "<decimal>"^^xsd:decimal ::= <decimal> # decimal part
 
-"<number>"^^<type> ::= { "_this": "<number>", "_type": "<type>" } # explicit type
+"<number>"^^<type> ::= { "@value": "<number>", "@type": "<type>" } # explicit type
 ```
 
 Typed `xsd:integer` and `xsd:decimal` literals are serialized as JSON numeric values using type-specific number formats. Other typed numeric literals are serialized in the extended form.

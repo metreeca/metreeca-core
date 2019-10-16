@@ -10,8 +10,8 @@
           </option>
           <option name="goals">
             <list>
-              <option value="resources:resources" />
               <option value="site" />
+              <option value="site:stage" />
             </list>
           </option>
           <option name="pomFileName" />

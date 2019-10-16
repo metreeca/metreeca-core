@@ -21,7 +21,6 @@ A Maven project with the code for the complete demo app is available on [GitHub]
 The demo linked data server is pre-configured with a small collection of read/write REST APIs able to drive a typical web-based interface like a user-facing [product catalog](https://demo.metreeca.com/apps/shop/).
 
 <p class="warning">The product catalog demo is hosted on a cloud service: it is not expected to provide production-level performance and may experience some delays during workspace initialization.</p>
-
 | REST API                                 | Contents                     |
 | :--------------------------------------- | :--------------------------- |
 | [/product-lines/](https://demo.metreeca.com/product-lines/) | Product line faceted catalog |
@@ -132,13 +131,13 @@ Link: <http://localhost:8080/products/S18_3140?specs>;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "_this": "/products/S18_3140",
+    "id": "/products/S18_3140",
     "type": "/terms#Product",
     "label": "1903 Ford Model A",
     "comment": "Features opening trunk,  working steering system",
     "code": "S18_3140",
     "line": {
-        "_this": "/product-lines/vintage-cars",
+        "id": "/product-lines/vintage-cars",
         "label": "Vintage Cars"
     },
     "scale": "1:18",
@@ -161,7 +160,7 @@ HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 
 {
-    "_this": "/products/S18_3140",
+    "id": "/products/S18_3140",
     
     ⋮
     
@@ -192,16 +191,16 @@ Link: <http://localhost:8080/products/?specs>;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "_this": "/products/",
+    "id": "/products/",
     "contains": [
         {
-            "_this": "/products/S10_1678",
+            "id": "/products/S10_1678",
             "type": "/terms#Product",
             "label": "1969 Harley Davidson Ultimate Chopper",
             "comment": "This replica features working kickstand, front suspension,…",
             "code": "S10_1678",
             "line": {
-                "_this": "/product-lines/motorcycles",
+                "id": "/product-lines/motorcycles",
                 "label": "Motorcycles"
             },
             "scale": "1:10",
@@ -236,7 +235,7 @@ Preference-Applied: return=representation;
 Content-Type: application/json;charset=UTF-8
 
 {
-    "_this": "/products/",
+    "id": "/products/",
 }
 ```
 
@@ -259,7 +258,7 @@ Note that property values that may be inferred from the associated linked data m
 ```sh
 % curl --include --request POST \
     --header 'Authorization: Bearer secret' \
-	--header 'Content-Type: text/turtle' \
+		--header 'Content-Type: text/turtle' \
     "http://localhost:8080/products/" \
     --data @- <<EOF
     
@@ -267,13 +266,14 @@ Note that property values that may be inferred from the associated linked data m
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 
 <>
+		rdf:type </terms#Product>;
     rdfs:label "Piaggio Vespa";
     rdfs:comment "The iconic Piaggio's scooter…";
     demo:scale "1:10";
     demo:vendor "Autoart Studio Design";
     demo:buy 101.0;
     demo:sell 123.0;
-    demo:line <http://localhost:8080/product-lines/motorcycles>.
+    demo:line </product-lines/motorcycles>.
 EOF
 
 HTTP/2 201 Created
@@ -293,6 +293,7 @@ Note that the `line` property is included in a shorthand form, as it is inferred
     "http://localhost:8080/products/" \
     --data @- <<EOF
 {
+		"type": "/terms#Product",
     "label": "Piaggio Ciao",
     "comment" : "The sturdy Piaggio's velo bike…",
     "scale": "1:10",
@@ -320,7 +321,8 @@ Submitted data is automatically validated against the constraints specified in t
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 
 <>
-    rdfs:label "Piaggio Vespa";
+  	rdf:type </terms#Product>;
+		rdfs:label "Piaggio Vespa";
     rdfs:comment "The iconic Piaggio's scooter…";
     demo:scale "1:10";
     demo:vendor "Autoart Studio Design";
@@ -337,20 +339,18 @@ Content-Type: application/json;charset=UTF-8
 {
     "error": "data-invalid",
     "trace": {
-        "<https://demo.metreeca.com/products/S10_8>": {
-            "<https://demo.metreeca.com/terms#sell>": {
-                "9999.0": {
-                    "errors": [
-                        "invalid value : maxExclusive(1000.0)"
-                    ]
-                }
-            },
-            "<https://demo.metreeca.com/terms#buy>": {
-                "-101.0": {
-                    "errors": [
-                        "invalid value : minInclusive(0.0)"
-                    ]
-                }
+        "https://demo.metreeca.com/terms#buy": {
+            "": {
+                "minInclusive(\"0.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>)": [
+                    "\"-101.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>"
+                ]
+            }
+        },
+        "https://demo.metreeca.com/terms#sell": {
+            "": {
+                "maxExclusive(\"1000.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>)": [
+                    "\"9999.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>"
+                ]
             }
         }
     }
@@ -393,6 +393,7 @@ Note that  server-managed properties like `demo:code` and `demo:stock` are omitt
     "http://localhost:8080/products/S18_3140" \
     --data @- <<EOF
 {
+   	"type": "/terms#Product",
     "label": "1903 Ford Model A",
     "comment": "Features opening trunk,  working steering system",
     "line": "/product-lines/vintage-cars",
@@ -432,31 +433,29 @@ To retrieve a digest description of collection items matching a set of facet fil
 
 ```json
 {	
-  "filter": { 
-    "price" : { ">=": 100 }, 
-    "vendor": "Classic Metal Creations"
-  }
+  ">= price" : 100, 
+  "vendor": "Classic Metal Creations"
 }
 ```
 
 ```sh
 % curl --include --header 'Accept: application/json' \
-    'http://localhost:8080/products/?%7B%22filter%22%3A%7B%22price%22%3A%7B%22%3E%3D%22%3A100%7D%2C%22vendor%22%3A%22Classic%20Metal%20Creations%22%7D%7D'
+    'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations'
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
 
 {
-    "_this": "/products/",
+    "id": "/products/",
     "contains": [
         {
-            "_this": "/products/S10_1949",
+            "id": "/products/S10_1949",
             "type": "/terms#Product",
             "label": "1952 Alpine Renault 1300",
             "comment": "Turnable front wheels; steering function; detailed interior; …",
             "code": "S10_1949",
             "line": {
-                "_this": "/product-lines/classic-cars",
+                "id": "/product-lines/classic-cars",
                 "label": "Classic Cars"
             },
             "scale": "1:10",
@@ -479,13 +478,14 @@ Faceted search results may be sorted and paginated including [sorting criteria](
 
 ```json
 {
-  "filter": { 
-    "price" : { ">=": 100 }, 
-    "vendor": "Classic Metal Creations"
-  },
-  "order":"-price",
-  "offset":0,
-  "limit":10
+  
+  ">= price" : 100, 
+  "vendor": "Classic Metal Creations",
+
+  "_order":"-price",
+  "_offset":0,
+  "_limit":10
+  
 }
 ```
 
@@ -497,28 +497,30 @@ To retrieve datatype, count and range stats for a facet, taking into account app
 
 ```json
 {
-    "stats": "price",    
-    "filter": { 
-        "vendor": "Classic Metal Creations"
-    }
+  
+  ">= price" : 100, 
+  "vendor": "Classic Metal Creations",
+
+	"_stats": "price"
+  
 }
 ```
 
 ```sh
 % curl --include --header 'Accept: application/json' \
-    'http://localhost:8080/products/?%7B%0A%09%22stats%22%3A%20%22price%22%2C%09%0A%20%20%20%20%22filter%22%3A%20%7B%20%0A%20%20%20%20%20%20%20%20%22vendor%22%3A%20%22Classic%20Metal%20Creations%22%0A%20%20%20%20%7D%0A%7D'
+    'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_stats=price'
 
 HTTP/2 200 OK
 Content-Type: application/json
 
 {
-    "_this": "/products",
+    "id": "/products",
     "count": 10,
     "min": 44.8,
     "max": 214.3,
     "stats": [
         {
-            "_this": "http://www.w3.org/2001/XMLSchema#decimal",
+            "id": "http://www.w3.org/2001/XMLSchema#decimal",
             "count": 10,
             "min": 44.8,
             "max": 214.3
@@ -527,98 +529,45 @@ Content-Type: application/json
 }
 ```
 
-To list available item options and counts for a facet, taking into account applied filters, specify the target property path in the faceted search query object.
+To list available options and counts for a facet, taking into account applied filters, specify the target property path in the faceted search query object.
 
 ```json
 {
-    "items": "line",    
-    "filter": { 
-        "vendor": "Classic Metal Creations"
-    }
+  
+  ">= price" : 100, 
+  "vendor": "Classic Metal Creations",
+
+	"_terms": "line"
+  
 }
 ```
 
 ```sh
 % curl --include --header 'Accept: application/json' \
-    'http://localhost:8080/products/?%7B%0A%09%22items%22%3A%20%22line%22%2C%09%0A%20%20%20%20%22filter%22%3A%20%7B%20%0A%20%20%20%20%20%20%20%20%22vendor%22%3A%20%22Classic%20Metal%20Creations%22%0A%20%20%20%20%7D%0A%7D'
+    'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_terms=line'
 
 HTTP/2 200 OK
 Content-Type: application/json
 
 {
-    "_this": "http://localhost:8080/products",
-    "items": [
+    "id": "/products/",
+    "terms": [
         {
-            "count": 6,
             "value": {
-                "_this": "/product-lines/classic-cars",
-                "label": "Classic Cars",
-                "comment": "Unique, diecast airplane and helicopter replicas…"
-            }
+                "id": "/product-lines/classic-cars",
+                "label": "Classic Cars"
+            },
+            "count": 4
         },
         {
-            "count": 1,
             "value": {
-                "_this": "/product-lines/planes",
-                "label": "Planes",
-                "comment": "Model trains are a rewarding hobby for enthusiasts of all ages…"
-            }
-        },
-        
-        ⋮
-      
+                "id": "/product-lines/planes",
+                "label": "Planes"
+            },
+            "count": 1
+        }
     ]
 }
 ```
 
 Labels and comments for the selected options are also retrieved to support facet visualization.
-
-## Form-Based Queries
-
-Edge queries including only (possibly alternative) facet values and sorting/pagination hints without other constraints may be submitted in a simplified format as query parameters.
-
-```json
-{	
-  "filter": { 
-    "line": "/product-lines/planes",
-    "scale": ["1:24", "1:72"]
-  },
-  "order":"-scale",
-  "offset":10,
-  "limit":10
-}
-```
-
-```sh
-% curl --include --header 'Accept: application/json' \
-    'http://localhost:8080/products/?'`
-    `'line=/product-lines/planes&scale=1:24&scale=1:72'`
-    `'&_order=-scale&_offset=3&_limit=10'
-    
-HTTP/1.1 200 
-Content-Type: application/json;charset=UTF-8
-
-{
-    "_this": "/products/",
-    "contains": [
-        {
-            "_this": "/products/S24_1785",
-            "type": "/terms#Product",
-            "label": "1928 British Royal Navy Airplane",
-            "comment": "Official logos and insignias",
-            "code": "S24_1785",
-            "line": {
-                "_this": "/product-lines/planes",
-                "label": "Planes"
-            },
-            "scale": "1:24",
-            "vendor": "Classic Metal Creations",
-            "stock": 3627,
-            "price": 109.42
-        },
-      
-      ⋮
-      
-    ]
-}
-```
