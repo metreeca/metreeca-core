@@ -202,9 +202,9 @@ public final class Codecs {
 	//// Input Utilities ///////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Creates an empty reader.
+	 * Creates an empty input stream.
 	 *
-	 * @return an emtpy input stream
+	 * @return an empty input stream
 	 */
 	public static InputStream input() {
 		return new ByteArrayInputStream(EmptyData);

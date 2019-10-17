@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 				throw new NullPointerException("null name");
 			}
 
-			return new File(System.getProperty("user.dir"));
+			return new File(System.getProperty("user.dir"), name);
 		};
 	}
 
