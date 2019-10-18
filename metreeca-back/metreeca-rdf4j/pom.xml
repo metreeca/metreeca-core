@@ -72,6 +72,12 @@
             <version>${rdf4j.version}</version>
         </dependency>
 
+        <dependency> <!-- ;( https://github.com/eclipse/rdf4j/issues/1617 -->
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+
     </dependencies>
 
 </project>
