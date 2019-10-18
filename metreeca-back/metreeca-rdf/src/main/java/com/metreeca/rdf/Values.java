@@ -22,6 +22,7 @@ import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -73,7 +74,7 @@ public final class Values {
 
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
 
-	private static final Comparator<Value> comparator=new ValuesComparator();
+	private static final Comparator<Value> comparator=new ValueComparator();
 
 
 	private static DecimalFormat exponential() { // ;( DecimalFormat is not thread-safe
